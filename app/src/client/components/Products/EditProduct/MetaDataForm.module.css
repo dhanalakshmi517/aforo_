@@ -1,0 +1,98 @@
+.formGroupLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--color-neutral-1200);
+}
+
+.labelInputWrapper {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 12px;
+}
+
+.labelKeyInput,
+.labelValueInput {
+  flex: 1;
+  padding: 0.5rem;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-100);
+  width: 210px;
+}
+
+.labelAddButton {
+  padding: 8px 16px;
+  background-color: var(--color-primary-600);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.labelList {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-300);
+  width: 420px;
+  margin-left: 250px;
+}
+
+.labelItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 250px;
+}
+
+.labelKey,
+.labelValue {
+  font-weight: 500;
+  color: var(--color-neutral-1200);
+  margin-left: 250px;
+}
+
+.labelKeyInput,
+.labelValueInput {
+  flex: 1;
+  padding: 0.5rem;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-100);
+  width: 210px;
+}
+
+.labelKeyInput:focus,
+.labelValueInput:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-primary-600);
+  box-shadow: none;
+}
+
+.labelRemoveButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}

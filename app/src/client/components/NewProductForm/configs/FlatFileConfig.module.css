@@ -1,0 +1,214 @@
+@import "./Variables.css";
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  width: 100%;
+}
+
+
+.errorMessage {
+  color: var(--color-error-400);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  /* margin-left: 250px; */
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+}
+.formGroupLabel {
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.5;
+  display: block;
+  margin-left: 0;
+  letter-spacing: 0.2px;
+  /* margin-left: 250px; */
+}
+
+.form-group:hover .form-group-label {
+  opacity: 1;
+}
+
+.formGroupInput,
+.formGroupSelect {
+  width: 430px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  margin-top: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  /* margin-left: 250px; */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-neutral-300);
+  box-shadow: 0 0 0 2px var(--color-neutral-100);
+}
+
+.form-group input::placeholder {
+  color: var(--color-neutral-400);
+  font-size: var(--font-size-sm);
+}
+
+
+.labelInputWrapper {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 420px;
+  /* margin-left: 250px; */
+}
+
+.labelKeyInput,
+.labelValueInput {
+  flex: 1;
+  padding: 0.5rem;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-100);
+  width: 210px;
+}
+
+.tempLabelList {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-300);
+}
+
+.tempLabelItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.tempLabelItem span {
+  font-weight: 500;
+  color: var(--color-neutral-1200);
+}
+
+.labelList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.labelItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #e8f0fe;
+  border-radius: 4px;
+}
+
+.labelItem span {
+  font-weight: 500;
+}
+
+.labelAddButton {
+  padding: 8px 16px;
+  background-color: var(--color-primary-600);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.labelAddButton:hover {
+  background-color: var(--color-primary-700);
+}
+
+.labelDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.labelItem {
+  display: flex;
+  align-items: center;
+  gap: 70px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-neutral-300);
+  background-color: var(--color-neutral-white);
+
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  width: 420px;
+  /* margin-left: 250px; */
+
+}
+
+.labelRemoveButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+
+
+.labelButton {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-primary-800);
+  transition: all 0.3s ease;
+}
+
+.labelButton:hover {
+  background-color: #f0f8ff;
+}
+
+.labelButton.active {
+  background-color: var(--color-primary-800);
+  color: white;
+}
+
+.labelList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}

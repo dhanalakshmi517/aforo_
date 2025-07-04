@@ -1,0 +1,190 @@
+.customers-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  flex: 1;
+}
+
+.customers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-left: 250px;
+}
+
+.customers-header h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.customers-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.customers-search {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 280px;
+}
+
+.new-customer-btn {
+  background-color: rgba(109, 136, 54, 1);
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.new-customer-btn:hover {
+  background-color: rgba(89, 116, 34, 1);
+}
+
+.customers-table {
+  width: calc(100% - 250px);
+  max-width: 1200px;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-left: 250px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.customers-table th,
+.customers-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.customers-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.customer-name .email {
+  font-size: 12px;
+  color: #777;
+  display: block;
+  margin-top: 4px;
+}
+
+.customer-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-icon {
+  font-size: 14px;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.copy-icon:hover {
+  color: #333;
+}
+
+.status {
+  background-color: #e6f0fd;
+  color: #2678d6;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 6px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.edit-btn {
+  background-color: #e6f4ea;
+  color: #267d3e;
+}
+
+.edit-btn:hover {
+  background-color: #d4e8d9;
+}
+
+.delete-btn {
+  background-color: #ffe5e5;
+  color: #c0392b;
+}
+
+.delete-btn:hover {
+  background-color: #ffd2d2;
+}
+
+.breadcrumb {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 14px;
+  font-weight: 500;
+  padding: 6px 0;
+  margin-left: 230px;
+  margin-top: -30px;
+}
+
+.breadcrumb-item {
+  color: #666;
+}
+
+.breadcrumb-item.active {
+  font-weight: 600;
+  color: rgba(109, 136, 54, 1);
+}
+
+.separator {
+  margin: 0 6px;
+  color: #999;
+}
+
+/* Add Customer Panel */
+.add-customer-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 90%;
+  max-width: 500px;
+}
+
+.add-customer-panel h3 {
+  margin-top: 0;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .customers-table,
+  .customers-header,
+  .breadcrumb {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .customers-container {
+    padding: 10px;
+  }
+}

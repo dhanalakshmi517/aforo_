@@ -1,0 +1,23 @@
+/* Your CSS Variables go here */
+
+/* Colors */
+:root {
+  /* Add your color variables here */
+}
+
+/* Typography */
+:root {
+  /* Add your typography variables here */
+}
+
+/* Spacing */
+:root {
+  /* Add your spacing variables here */
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Add your dark mode variables here */
+  }
+}

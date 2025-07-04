@@ -1,0 +1,39 @@
+.newProductForm {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.formContainer {
+  display: flex;
+  background: var(--color-neutral-white);
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  box-shadow: 0px 18px 54px 0px rgba(0, 0, 0, 0.07), 0px 2.254px 43.336px 0px rgba(0, 0, 0, 0.00);
+  justify-content: flex-start;
+  align-items: flex-start;
+  border: 1.5px solid var(--color-neutral-300);
+}
+
+.tabsContainer {
+  width: 250px;
+  min-width: 250px;
+  margin-right: 1rem;
+}
+
+.contentContainer {
+  flex: 1;
+  min-width: 0;
+  width: calc(100% - 260px); /* 250px width + 10px margin */
+}

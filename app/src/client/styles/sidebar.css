@@ -1,0 +1,48 @@
+/* Import variables */
+@import url('./variables.css');
+
+/* Sidebar Styles */
+.sidebar {
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 5rem;
+}
+
+.sidebar.expanded {
+  width: 16rem;
+}
+
+/* Navigation Items */
+.nav-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-gray);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background-color: var(--primary-color);
+  color: var(--text-white);
+}
+
+/* Icons */
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: var(--spacing-md);
+}
+
+/* Text */
+.nav-text {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}

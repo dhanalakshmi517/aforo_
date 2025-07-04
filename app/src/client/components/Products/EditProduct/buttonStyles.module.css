@@ -1,0 +1,60 @@
+.editButtonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  margin-left: 250px;
+  padding: 1rem;
+}
+
+.cancelButton {
+  width: 206px;
+  height: 40px;
+  color: var(--color-neutral-white);
+  background-color: var(--color-primary-600);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 12px 24px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: var(--color-neutral-300);
+}
+
+.cancelButton:disabled {
+  background-color: var(--color-neutral-100);
+  cursor: not-allowed;
+}
+
+.saveButton {
+  width: 206px;
+  height: 40px;
+  background-color: var(--color-primary-000);
+  color: var(--color-primary-800);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+  background-color: var(--color-primary-700);
+}
+
+.saveButton:disabled {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-600);
+  cursor: not-allowed;
+}

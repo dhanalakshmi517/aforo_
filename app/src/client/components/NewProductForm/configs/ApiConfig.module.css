@@ -1,0 +1,93 @@
+@import "./Variables.css";
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+
+
+.errorMessage {
+  color: var(--color-error-400);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+  
+}
+.formGroupLabel {
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  line-height: var(--line-height-body-md);
+  font-weight: 600;
+  /* letter-spacing: -0.24px; */
+  /* margin-left: 250px; */
+}
+
+.formGroupInput,
+.formGroupSelect {
+  width: 434px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  /* margin-left: 250px; */
+}
+
+.formGroupInput:focus,
+.formGroupSelect:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.formGroupInput::placeholder {
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-md);
+}
+
+.checkbox {
+  /* margin-left: 250px; */
+  margin-top: 8px;
+}
+
+.checkboxLabel {
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  margin-left: 8px;
+}
+
+.formGroupHelperText {
+  color: var(--color-neutral-500);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm);
+  /* margin-left: 250px; */
+  margin-top: 4px;
+}

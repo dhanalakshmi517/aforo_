@@ -1,0 +1,404 @@
+@import "../Variables/Variables.css";
+
+.buttonSecondary {
+  width: 140px;
+  height: 40px;
+  background-color: var(--color-primary-000);
+  color: var(--color-primary-800);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+ 
+}
+
+
+.buttonPrimary {
+  width: 140px;
+  height: 40px;
+  color: var(--color-neutral-white);
+  background-color: var(--color-primary-600);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 12px 24px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+ 
+}
+
+
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-right: 20px;
+}
+
+.sectionHeading {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+  margin-bottom: 24px;
+}
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  color: var(--color-neutral-1700);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+}
+
+.label {
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-md);
+  margin-bottom: 0.1rem;
+  margin-top: 0.25rem;
+  letter-spacing: -0.24px;
+  display: block;
+}
+
+
+
+.formSection {
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 1020px;
+  position: relative;
+}
+
+
+
+.formGrid {
+  gap: 0.1rem;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.formInput,
+.formTextarea,
+.formSelect,
+.productNameInput {
+  margin-top: 8px;
+}
+
+.formInput {
+  width: 434px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+.formInput:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.formTextarea {
+  width: 430px;
+  padding: 1rem;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  resize: vertical;
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  background-color: var(--color-neutral-100);
+}
+
+.formTextarea:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.formSelect {
+  width: 434px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+.formSelect:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 434px;
+  width: 422px;
+  /* margin-left: 250px; */
+}
+
+.inputField {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  margin-top: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+.loadingIndicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-neutral-600);
+  font-size: var(--font-size-xs);
+}
+
+.error {
+  color: var(--color-error-400);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  /* margin-left: 250px; */
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+}
+
+.productNameInput:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.visibilityLabel {
+  /* margin-left: 250px; */
+  margin-top: 8px;
+  font-size: 16px;
+  color: var(--color-neutral-900);
+}
+.visibilityCheckbox {
+  margin-top: 8px;
+}
+
+.tagContainer {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.tagInputWrapper {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 420px;
+  /* margin-left: 250px; */
+}
+
+.tagKeyInput,
+.tagValueInput {
+  flex: 1;
+  padding: 0.5rem;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-100);
+  width: 210px;
+}
+.tagKeyInput:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+.tagValueInput:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.tempTagList {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-300);
+}
+
+.tempTagItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.tempTagItem span {
+  font-weight: 500;
+  color: var(--color-neutral-1200);
+}
+
+.tagList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tagItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #e8f0fe;
+  border-radius: 4px;
+}
+
+.tagItem span {
+  font-weight: 500;
+}
+
+.tagAddButton {
+  padding: 8px 16px;
+  background-color: var(--color-primary-600);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+
+
+.tagDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tagItem {
+  display: flex;
+  align-items: center;
+  gap: 70px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-neutral-300);
+  background-color: var(--color-neutral-white);
+
+  border-radius:var(--border-radius-sm);
+  font-size: 14px;
+  width: 420px;
+  /* margin-left: 250px; */
+
+}
+
+.tagRemoveButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+
+
+.tagButton {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-primary-800);
+  transition: all 0.3s ease;
+}
+
+.tagButton:hover {
+  background-color: #f0f8ff;
+}
+
+.tagButton.active {
+  background-color: var(--color-primary-800);
+  color: white;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+
+

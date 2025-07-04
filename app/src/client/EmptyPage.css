@@ -1,0 +1,27 @@
+@import '../Variables/Variables.css';
+
+.empty-page {
+  min-height: 100vh;
+  background-color: rgba(234, 234, 233, 1);
+  margin: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.empty-content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 101;
+  flex: 1;
+}
+

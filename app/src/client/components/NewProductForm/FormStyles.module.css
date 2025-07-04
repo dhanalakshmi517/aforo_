@@ -1,0 +1,56 @@
+/* .formContainer {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+} */
+
+.formSection {
+  margin-bottom: 24px;
+}
+
+.formGrid {
+  width: 100%;
+}
+
+.formField {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.formFieldHalf {
+  width: 100%;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.formInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-height: 100px;
+  resize: vertical;
+}

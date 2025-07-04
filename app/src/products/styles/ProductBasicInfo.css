@@ -1,0 +1,103 @@
+.basic-info-container {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 0.25rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.select-field {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+}
+
+.select-field:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.textarea-field {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 150px;
+}
+
+.textarea-field:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.char-count {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Dark mode support */
+.dark .basic-info-container {
+  background-color: #1e293b;
+}
+
+.dark .form-group label {
+  color: #e5e7eb;
+}
+
+.dark .input-field,
+.dark .select-field,
+.dark .textarea-field {
+  background-color: #1e293b;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.dark .input-field:focus,
+.dark .select-field:focus,
+.dark .textarea-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.dark .char-count {
+  color: #9ca3af;
+}

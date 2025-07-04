@@ -1,0 +1,212 @@
+@import "../Variables/Variables.css";
+
+.sectionHeading {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+  margin-bottom: 24px;
+}
+
+.container {
+  padding: 24px;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.tagInputWrapper {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 420px;
+  /* margin-left: 250px; */
+}
+.formGroupLabel {
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-md);
+  margin-bottom: 8px;
+  display: block;
+  /* margin-left: 250px;  */
+  width: 210px;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  background-color: var(--color-neutral-100);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkbox:checked {
+  border-color: var(--color-primary-600);
+  background-color: var(--color-primary-600);
+  opacity: 1;
+}
+
+.checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  color: var(--color-neutral-white);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Metadata specific labels */
+.formGroupLabelKey {
+  color: var(--color-neutral-1400);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-md);
+  margin-bottom: 8px;
+  display: block;
+  /* margin-left: 250px;  */
+  width:100px;
+}
+
+.formGroupLabelValue {
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm);
+  margin-bottom: 4px;
+  display: block;
+  width:100px;
+  margin-top:30px ;
+}
+
+
+
+.formGrid {
+  gap: 0.2rem;
+}
+
+.formGroup {
+  /* margin-left: 250px; */
+  gap: 6px;
+
+}
+
+.inputField {
+  width: 430px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  margin-top: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  /* margin-left: 150px; */
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  /* margin-left: 250px; */
+}
+.inputField:focus{
+  outline: none;
+  border-color: var(--color-neutral-300);
+  box-shadow: 0 0 0 2px var(--color-neutral-100);
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.checkbox {
+  margin-right: 8px;
+}
+
+.addButton {
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #191919;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-right: 20px;
+}
+
+.backButton {
+  width: 140px;
+  height: 40px;
+  background-color: var(--color-primary-000);
+  color: var(--color-primary-800);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* margin-left: 250px; */
+}
+
+.buttonPrimary {
+  width: 140px;
+  height: 40px;
+  color: var(--color-neutral-white);
+  background-color: var(--color-primary-600);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 12px 24px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+ 
+}
+
+.error {
+  color: var(--color-error-400);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+}
+.plusIcon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: white;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

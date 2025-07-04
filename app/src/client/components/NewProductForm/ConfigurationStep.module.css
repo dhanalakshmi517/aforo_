@@ -1,0 +1,158 @@
+@import "../Variables/Variables.css";
+
+.sectionHeading {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+  margin-bottom: 24px;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.formGroupLabel {
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  line-height: var(--line-height-body-md);
+  font-weight: 600;
+  letter-spacing: -0.24px;
+}
+
+.formGroupInput,
+.formGroupSelect {
+  width: 434px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  margin-top: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+.formGroupInput:focus,
+.formGroupSelect:focus {
+  outline: none;
+  outline-offset: 0;
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: none;
+}
+
+.formGroupInput::placeholder {
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-md);
+}
+
+.checkbox {
+  /* margin-left: 250px; */
+  margin-top: 8px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--color-neutral-100);
+  border: 2px solid var(--color-neutral-300);
+  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkbox:checked {
+  background-color: #4CAF50; /* Your special color */
+  border-color: #4CAF50;
+}
+
+.checkbox:checked::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: 4px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+.checkboxLabel {
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  margin-left: 8px;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-right: 20px;
+}
+.backButton {
+  width: 140px;
+  height: 40px;
+  background-color: var(--color-primary-000);
+  color: var(--color-primary-800);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* margin-left: 250px; */
+}
+
+.nextButton {
+  width: 140px;
+  height: 40px;
+  color: var(--color-neutral-white);
+  background-color: var(--color-primary-600);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 12px 24px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+ 
+}
+
+.errorMessage {
+  color: var(--color-error-400);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  /* margin-left: 250px; */
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+}
+
+

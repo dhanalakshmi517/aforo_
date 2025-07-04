@@ -1,0 +1,277 @@
+app OpenSaaS {
+  wasp: {
+    version: "^0.16.0"
+  },
+  title: "Aforo.ai",
+
+  head: [
+    "<meta charset='utf-8' />",
+    "<meta name='description' content='Your apps main description and features.' />",
+    "<meta name='author' content='Your (App) Name' />",
+    "<meta name='keywords' content='saas, solution, product, app, service' />",
+    "<meta property='og:type' content='website' />",
+    "<meta property='og:title' content='Your Open SaaS App' />",
+    "<meta property='og:site_name' content='Your Open SaaS App' />",
+    "<meta property='og:url' content='https://your-saas-app.com' />",
+    "<meta property='og:description' content='Your apps main description and features.' />",
+    "<meta property='og:image' content='https://your-saas-app.com/public-banner.webp' />",
+    "<meta name='twitter:image' content='https://your-saas-app.com/public-banner.webp' />",
+    "<meta name='twitter:image:width' content='800' />",
+    "<meta name='twitter:image:height' content='400' />",
+    "<meta name='twitter:card' content='summary_large_image' />",
+    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.js'></script>",
+    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.local.js'></script>"
+  ],
+
+  auth: {
+    userEntity: User,
+    methods: {
+      email: {
+        fromField: {
+          name: "Open SaaS App",
+          email: "eswarprasad@aforo.ai"
+        },
+        emailVerification: {
+          clientRoute: EmailVerificationRoute,
+          getEmailContentFn: import { getVerificationEmailContent } from "@src/auth/email-and-pass/emails",
+        },
+        passwordReset: {
+          clientRoute: PasswordResetRoute,
+          getEmailContentFn: import { getPasswordResetEmailContent } from "@src/auth/email-and-pass/emails",
+        },
+        userSignupFields: import { getEmailUserFields } from "@src/auth/userSignupFields",
+      },
+      google: {
+        userSignupFields: import { getGoogleUserFields } from "@src/auth/userSignupFields",
+        configFn: import { getGoogleAuthConfig } from "@src/auth/userSignupFields",
+      }
+    },
+    onAfterSignup: import { onAfterSignup } from "@src/auth/hooks",
+    onAuthFailedRedirectTo: "/login"
+  },
+
+  db: {
+    seeds: [
+      import { seedMockUsers } from "@src/server/scripts/dbSeeds",
+    ]
+  },
+
+  client: {
+    rootComponent: import App from "@src/client/App",
+  },
+
+    server: {
+    setupFn: import { serverSetup } from "@src/server/middleware"
+  },
+
+  emailSender: {
+    provider: SMTP,
+
+    defaultFrom: {
+      name: "Aforo.ai",
+      email: "eswarprasad@aforo.ai"
+    },
+  },
+}
+
+route LandingPageRoute { path: "/", to: LandingPage }
+page LandingPage {
+  component: import LandingPage from "@src/landing-page/LandingPage"
+}
+
+route ProductsRoute { path: "/products", to: ProductsPage }
+page ProductsPage {
+  component: import ProductsPage from "@src/client/pages/ProductsPage"
+}
+
+route LoginRoute { path: "/login", to: LoginPage }
+page LoginPage {
+  component: import Login from "@src/auth/LoginPage"
+}
+
+route RequestPasswordResetRoute { path: "/request-password-reset", to: RequestPasswordResetPage }
+page RequestPasswordResetPage {
+  component: import { RequestPasswordResetPage } from "@src/auth/email-and-pass/RequestPasswordResetPage"
+}
+
+route PasswordResetRoute { path: "/password-reset", to: PasswordResetPage }
+page PasswordResetPage {
+  component: import { PasswordResetPage } from "@src/auth/email-and-pass/PasswordResetPage"
+}
+
+route EmailVerificationRoute { path: "/email-verification", to: EmailVerificationPage }
+page EmailVerificationPage {
+  component: import { EmailVerificationPage } from "@src/auth/email-and-pass/EmailVerificationPage"
+}
+//#endregion
+
+//#region User
+route GetStartedRoute { path: "/get-started", to: GetStartedPage }
+
+page GetStartedPage {
+  component: import GetStarted from "@src/client/components/GetStarted/GetStarted"
+}
+
+route AccountRoute { path: "/account", to: AccountPage }
+page AccountPage {
+  component: import Account from "@src/user/AccountPage"
+}
+
+route NewProductRoute { path: "/new-product", to: NewProductPage }
+page NewProductPage {
+  component: import NewProductForm from "@src/client/components/NewProductForm/NewProductForm.fixed"
+}
+
+route SideNavbarRoute { path: "/side", to: SideNavbarPage }
+page SideNavbarPage {
+  component: import SideNavbar from "@src/client/components/SideNavbar/SideNavbar"
+}
+
+query getPaginatedUsers {
+  fn: import { getPaginatedUsers } from "@src/user/operations",
+  entities: [User]
+}
+
+action updateCurrentUserLastActiveTimestamp {
+  fn: import { updateCurrentUserLastActiveTimestamp } from "@src/user/operations",
+  entities: [User]
+}
+
+action updateIsUserAdminById {
+  fn: import { updateIsUserAdminById } from "@src/user/operations",
+  entities: [User]
+}
+//#endregion
+
+//#region Payment
+route PricingPageRoute { path: "/pricing", to: PricingPage }
+page PricingPage {
+  component: import PricingPage from "@src/payment/PricingPage"
+}
+
+route CheckoutRoute { path: "/checkout", to: CheckoutPage }
+page CheckoutPage {
+  component: import Checkout from "@src/payment/CheckoutPage"
+}
+
+query getCustomerPortalUrl {
+  fn: import { getCustomerPortalUrl } from "@src/payment/operations",
+  entities: [User]
+}
+
+action generateCheckoutSession {
+  fn: import { generateCheckoutSession } from "@src/payment/operations",
+  entities: [User]
+}
+
+api paymentsWebhook {
+  fn: import { paymentsWebhook } from "@src/payment/webhook",
+  entities: [User],
+  middlewareConfigFn: import { paymentsMiddlewareConfigFn } from "@src/payment/webhook",
+  httpRoute: (POST, "/payments-webhook")
+}
+//#endregion
+
+//#region File Upload
+route FileUploadRoute { path: "/file-upload", to: FileUploadPage }
+page FileUploadPage {
+  component: import FileUpload from "@src/file-upload/FileUploadPage"
+}
+
+action createFile {
+  fn: import { createFile } from "@src/file-upload/operations",
+  entities: [User, File]
+}
+
+query getAllFilesByUser {
+  fn: import { getAllFilesByUser } from "@src/file-upload/operations",
+  entities: [User, File]
+}
+
+query getDownloadFileSignedURL {
+  fn: import { getDownloadFileSignedURL } from "@src/file-upload/operations",
+  entities: [User, File]
+}
+//#endregion
+
+//#region Admin Dashboard
+route AdminRoute { path: "/admin", to: AdminDashboardPage }
+page AdminDashboardPage {
+   component: import AdminUsers from "@src/admin/dashboards/users/UsersDashboardPage"
+}
+
+route AdminUsersRoute { path: "/admin/users", to: AdminUsersPage }
+page AdminUsersPage {
+  authRequired: true,
+  component: import AdminUsers from "@src/admin/dashboards/users/UsersDashboardPage"
+}
+
+route AdminSettingsRoute { path: "/admin/settings", to: AdminSettingsPage }
+page AdminSettingsPage {
+  authRequired: true,
+  component: import AdminSettings from "@src/admin/elements/settings/SettingsPage"
+}
+
+route AdminChartsRoute { path: "/admin/chart", to: AdminChartsPage }
+page AdminChartsPage {
+  authRequired: true,
+  component: import AdminCharts from "@src/admin/elements/charts/ChartsPage"
+}
+
+route AdminFormElementsRoute { path: "/admin/forms/form-elements", to: AdminFormElementsPage }
+page AdminFormElementsPage {
+  authRequired: true,
+  component: import AdminForms from "@src/admin/elements/forms/FormElementsPage"
+}
+
+route AdminFormLayoutsRoute { path: "/admin/forms/form-layouts", to: AdminFormLayoutsPage }
+page AdminFormLayoutsPage {
+  authRequired: true,
+  component: import AdminForms from "@src/admin/elements/forms/FormLayoutsPage"
+}
+
+route AdminCalendarRoute { path: "/admin/calendar", to: AdminCalendarPage }
+page AdminCalendarPage {
+  authRequired: true,
+  component: import AdminCalendar from "@src/admin/elements/calendar/CalendarPage"
+}
+
+route AdminUIAlertsRoute { path: "/admin/ui/alerts", to: AdminUIAlertsPage }
+page AdminUIAlertsPage {
+  authRequired: true,
+  component: import AdminUI from "@src/admin/elements/ui-elements/AlertsPage"
+}
+
+route AdminUIButtonsRoute { path: "/admin/ui/buttons", to: AdminUIButtonsPage }
+page AdminUIButtonsPage {
+  authRequired: true,
+  component: import AdminUI from "@src/admin/elements/ui-elements/ButtonsPage"
+}
+//#endregion
+
+route AdminMessagesRoute { path: "/admin/messages", to: AdminMessagesPage }
+page AdminMessagesPage {
+  authRequired: true,
+  component: import AdminMessages from "@src/messages/MessagesPage"
+}
+
+page ProductEditPage {
+  authRequired: true,
+  component: import EditProductForm from "@src/products/components/EditProductForm"
+}
+
+route NotFoundRoute { path: "*", to: NotFoundPage }
+page NotFoundPage {
+  component: import { NotFoundPage } from "@src/client/components/NotFoundPage"
+}
+
+job sendNewsletter {
+  executor: PgBoss,
+  perform: {
+    fn: import { checkAndQueueNewsletterEmails } from "@src/newsletter/sendNewsletter"
+  },
+  schedule: {
+    cron: "0 7 * * 1"
+  },
+  entities: [User]
+}
