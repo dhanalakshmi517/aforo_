@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Setup Node.js (use Node 20+ for Wasp compatibility)
         uses: actions/setup-node@v3
         with:
           node-version: 20
@@ -23,7 +23,7 @@ jobs:
           echo "$HOME/.wasp/bin" >> $GITHUB_PATH
           export PATH="$HOME/.wasp/bin:$PATH"
 
-      - name: Run wasp build from app folder
+      - name: Run wasp build inside app/
         run: |
           cd app
           wasp build
@@ -34,7 +34,10 @@ jobs:
           npm install
           npm run build
 
-      - name: Copy UI build to EC2
+      - name: List build output (debug)
+        run: ls -la app/.wasp/build/web-app/build
+
+      - name: Copy build to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -43,7 +46,7 @@ jobs:
           source: "app/.wasp/build/web-app/build/*"
           target: "/home/ubuntu/frontend-temp"
 
-      - name: SSH and deploy UI to Nginx
+      - name: SSH and move build to nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
