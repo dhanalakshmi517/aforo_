@@ -15,7 +15,7 @@ export class RatePlanService {
     try {
       const response = await axios.post(`${this.BASE_URL}/rateplans`, data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to create rate plan: ' + error.message);
     }
   }
@@ -24,7 +24,7 @@ export class RatePlanService {
     try {
       const response = await axios.get(`${this.BASE_URL}/products`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to fetch products: ' + error.message);
     }
   }
