@@ -1,5 +1,3 @@
-# GitHub Actions workflow
-# TODO: paste the full workflow YAML here as discussed.
 name: Deploy UI to EC2
 
 on:
@@ -19,7 +17,17 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install deps and build
+      - name: Setup Wasp CLI
+        run: |
+          curl -sSL https://get.wasp-lang.dev/installer.sh | bash
+          echo "$HOME/.wasp/bin" >> $GITHUB_PATH
+          source ~/.bashrc
+
+      - name: Run wasp build
+        run: |
+          wasp build
+
+      - name: Install frontend deps and build UI
         run: |
           cd .wasp/build/web-app
           npm install
