@@ -1,4 +1,4 @@
-name: Deploy UI to EC2
+name: Deploy UI to EC2 
 
 on:
   push:
