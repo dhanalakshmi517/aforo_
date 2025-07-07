@@ -1,4 +1,4 @@
-name: Deploy UI to EC2
+name: Deploy UI to EC2 
 
 on:
   push:
@@ -28,10 +28,12 @@ jobs:
           cd app
           wasp build
 
-      - name: Install frontend deps and build UI
+      - name: Install frontend deps and build UI 🛠️
         run: |
           cd app/.wasp/build/web-app
           npm install
+          # Patch vite config to use correct index.html path
+          sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
 
       - name: List build output (debug)
