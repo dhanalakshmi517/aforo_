@@ -28,12 +28,6 @@ jobs:
           cd app
           wasp build
 
-      - name: Install frontend deps and build UI
-        run: |
-          cd app/.wasp/build/web-app
-          npm install
-          npm run build
-
       - name: Install frontend deps and build UI 🛠️
         run: |
           cd app/.wasp/build/web-app
