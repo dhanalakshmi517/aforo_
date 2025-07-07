@@ -29,12 +29,7 @@ const FormActions: React.FC<FormActionsProps> = ({
     if (isLastTab) {
       try {
         await onSubmit();
-        onSaveSuccess();
-        Swal.fire({
-          title: 'Success!',
-          text: 'Product updated successfully',
-          icon: 'success'
-        });
+        onSaveSuccess(); // Success popup removed as per requirement
       } catch (error) {
         onSaveError(error instanceof Error ? error.message : 'Failed to update product');
         Swal.fire({
@@ -49,7 +44,7 @@ const FormActions: React.FC<FormActionsProps> = ({
   };
 
   return (
-    <div className="editButtonGroup">
+    <div className="form-actions-container">
       <button
         type="button"
         onClick={() => {
@@ -70,7 +65,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         disabled={loading}
         className="saveButton"
       >
-        {isLastTab ? 'Submit' : 'Next'}
+        {isLastTab ? 'Save Changes' : 'Save & Next'}
       </button>
     </div>
   );

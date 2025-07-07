@@ -55,7 +55,7 @@ const ApiConfig: React.FC<Props> = ({ formData, setFormData, errors }) => {
           className={`${styles.formGroupSelect} ${errors.authType ? styles.error : ''}`}
         >
           <option value="">--Select--</option>
-          <option value="None">None</option>
+          <option value="NONE">NONE</option>
           <option value="API_KEY">API_KEY</option>
           <option value="OAUTH2">OAUTH2</option>
           <option value="BASIC_AUTH">BASIC_AUTH</option>

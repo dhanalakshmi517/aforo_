@@ -3,10 +3,10 @@ import GeneralDetails from './GeneralDetails';
 import ProductMetadata from './ProductMetadata';
 import ConfigurationStep from './ConfigurationStep';
 import ReviewStep from './ReviewStep';
-import SuccessStep from './SuccessStep';
-import Swal from 'sweetalert2';
+
 import { ProductFormData } from '../../../types/productTypes';
 import styles from './StepIndicator.module.css';
+
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
@@ -29,10 +29,6 @@ const stepDescriptions = [
   {
     title: 'Review',
     description: 'Check and Finalize details.',
-  },
-  {
-    title: 'Success',
-    description: 'Product Created Successfully.',
   }
 ];
 
@@ -205,11 +201,10 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
         }
 
         setProductId(responseJson.productId);
-        Swal.fire('Success', 'Base Product Created', 'success');
       } catch (err: any) {
         console.error('Error details:', err);
         setError(err.message);
-        Swal.fire('Error', err.message, 'error');
+        console.error('Backend error:', err.message);
         return;
       }
     }
@@ -311,10 +306,9 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
         throw new Error(`Configuration failed: ${errorText}`);
       }
 
-      Swal.fire('Success', 'Product Configuration Saved', 'success');
       nextStep();
     } catch (err: any) {
-      Swal.fire('Error', err.message, 'error');
+      console.error('Backend error:', err.message);
     }
   };
 
@@ -324,7 +318,6 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
         <div
           key={index}
           className={`${styles.step} ${step > index ? styles.completed : ''} ${step === index ? styles.active : ''}`}
-          onClick={() => setStep(index as Step)}
         >
           <div className={styles.stepTitle}>
             <div className={styles.stepIcon}>
@@ -450,9 +443,9 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
               formData={formData}
               onBack={prevStep}
               onSubmit={handleSubmit}
+              onClose={onClose}
             />
           )}
-          {step === 4 && <SuccessStep />}
         </div>
       </div>
     </div>

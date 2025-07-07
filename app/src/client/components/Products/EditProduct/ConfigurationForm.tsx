@@ -21,13 +21,13 @@ const configurationFields: Record<ProductType, Record<string, FieldConfig>> = {
     cachingFlag: { label: 'Enable Caching', type: 'checkbox' }
   },
   [ProductType.FLATFILE]: {
+    format: { label: 'File Format', type: 'select', options: ['CSV', 'JSON', 'XML', 'PARQUET'] },
     size: { label: 'File Size', type: 'text' },
-    format: { label: 'File Format', type: 'select', options: ['CSV', 'JSON', 'XML','PARQUET'] },
     deliveryFrequency: { label: 'Delivery Frequency', type: 'select', options: ['DAILY', 'WEEKLY', 'MONTHLY'] },
-    accessMethod: { label: 'Access Method', type: 'select', options: ['FTP', 'S3', 'EMAIL','API'] },
-    compressionFormat: { label: 'Compression Format', type: 'select', options: ['ZIP', 'GZIP', 'NONE'] },
+    accessMethod: { label: 'Access Method', type: 'select', options: ['FTP', 'S3', 'EMAIL', 'API'] },
+    retentionPolicy: { label: 'Retention Policy', type: 'text' },
     fileNamingConvention: { label: 'File Naming Convention', type: 'text' },
-    retentionPolicy: { label: 'Retention Policy', type: 'text' }
+    compressionFormat: { label: 'Compression Format', type: 'select', options: ['ZIP', 'GZIP', 'NONE'] }
   },
   [ProductType.SQLRESULT]: {
     queryTemplate: { label: 'Query Template', type: 'text' },
@@ -43,7 +43,7 @@ const configurationFields: Record<ProductType, Record<string, FieldConfig>> = {
     tokenProvider: { label: 'Token Provider', type: 'select', options: ['OPENAI', 'ANTHROPIC', 'MISTRAL','CUSTOM'] },
     modelName: { label: 'Model Name', type: 'text' },
     tokenUnitCost: { label: 'Token Unit Cost', type: 'text' },
-    calculationMethod: { label: 'Calculation Method', type: 'select', options: ['FIXED', 'DYAMIC','HYBRID'] },
+    calculationMethod: { label: 'Calculation Method', type: 'select', options: ['FIXED', 'DYNAMIC','HYBRID'] },
     quota: { label: 'Quota', type: 'text' },
     inferencePriority: { label: 'Inference Priority', type: 'select', options: ['LOW', 'MEDIUM', 'HIGH'] },
     computeTier: { label: 'Compute Tier', type: 'select', options: ['STANDARD', 'PREMIUM','GPU_OPTIMIZED'] },
