@@ -1,20 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GeneralFormData, Category, Status, ProductType, normalizeProductType } from './types';
 import './EditProductForm.css';
 
 interface GeneralFormProps {
   data: GeneralFormData;
-  onChange: (newData: GeneralFormData) => void;
+  onChange: (data: GeneralFormData, isNameEdited?: boolean) => void;
   loading: boolean;
+  productId: string;
 }
 
 const GeneralForm: React.FC<GeneralFormProps> = ({
   data,
   onChange,
-  loading
+  loading,
+  productId
 }) => {
-  const [tagKey, setTagKey] = React.useState('');
-  const [tagValue, setTagValue] = React.useState('');
+  const [tagKey, setTagKey] = useState('');
+  const [tagValue, setTagValue] = useState('');
+  const [nameError, setNameError] = useState<string | undefined>(undefined);
+  const [isCheckingName, setIsCheckingName] = useState(false);
+  const [isNameEdited, setIsNameEdited] = useState(false);
+
+  useEffect(() => {
+    if (!isNameEdited) {
+      setNameError(undefined);
+    }
+  }, [isNameEdited]);
+
+  // Only validate when the product name input changes
+  const handleProductNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    setIsNameEdited(true);
+    onChange({ ...data, productName: newName }, true);
+    await validateProductName(newName);
+  };
 
   const handleAddTag = () => {
     if (tagKey && tagValue) {
@@ -31,6 +50,31 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
     onChange({ ...data, tags: newTags });
   };
 
+  const validateProductName = async (productName: string) => {
+    if (!isNameEdited) {
+      setNameError(undefined);
+      return;
+    }
+
+    if (productName.trim() === '') {
+      setNameError('Product name is required');
+      return;
+    }
+    try {
+      const response = await fetch('http://13.230.194.245:8080/api/products');
+      const products = await response.json();
+      const isDuplicate = products.some((p: any) => p.productName?.toLowerCase() === productName.toLowerCase() && p.id !== productId);
+      if (isDuplicate) {
+        setNameError('Product name must be unique');
+      } else {
+        setNameError(undefined);
+      }
+    } catch (error) {
+      console.error('Error checking product name:', error);
+      setNameError('Error checking product name uniqueness');
+    }
+  };
+
   return (
     <div className="general-form">
       <div className="edit-form-group">
@@ -38,9 +82,12 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
         <input
           type="text"
           value={data.productName}
-          onChange={(e) => onChange({ ...data, productName: e.target.value })}
+          onChange={handleProductNameChange}
           disabled={loading}
         />
+        {nameError && (
+          <div className="error-message">{nameError}</div>
+        )}
       </div>
 
       <div className="edit-form-group">
@@ -117,49 +164,6 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
           <span className="slider round"></span>
         </label>
       </div>
-
-      {/* <div className="edit-form-group">
-        <label>Tags</label>
-        <div className="tag-list">
-          {Object.entries(data.tags || {}).map(([key, value]) => (
-            <div key={key} className="tag-item">
-              <span>{key}: {value}</span>
-              <button
-                onClick={() => handleRemoveTag(key)}
-                disabled={loading}
-                className="remove-tag-btn"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="tag-input-container">
-  <input
-    type="text"
-    className="key-input"
-    placeholder="Key"
-    value={tagKey}
-    onChange={(e) => setTagKey(e.target.value)}
-    disabled={loading}
-  />
-  <input
-    type="text"
-    className="value-input"
-    placeholder="Value"
-    value={tagValue}
-    onChange={(e) => setTagValue(e.target.value)}
-    disabled={loading}
-  />
-  <button
-    onClick={handleAddTag}
-    disabled={!tagKey || !tagValue || loading}
-  >
-    Add Tag
-  </button>
-</div>
-
-      </div> */}
     </div>
   );
 };

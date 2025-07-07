@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FormData, ProductType, ConfigurationData, GeneralFormData, MetadataForm } from './types';
+import {
+  FormData,
+  ProductType,
+  ConfigurationData,
+  GeneralFormData,
+  MetadataForm
+} from './types';
 import { getInitialConfig } from './utils';
 import { updateProduct } from './api';
 import GeneralForm from './GeneralForm';
@@ -10,14 +16,14 @@ import './EditProductForm.css';
 
 interface FormTabsProps {
   formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  setFormData: (data: FormData) => void;
   productType: ProductType;
   loading: boolean;
-  error: string | null;
+  error: string;
   activeTab: 'general' | 'metadata' | 'configuration';
   onTabChange: (tab: 'general' | 'metadata' | 'configuration') => void;
   onNextClick: () => void;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
   onClose: () => void;
   productId: string;
   setLoading: (loading: boolean) => void;
@@ -40,6 +46,8 @@ const FormTabs: React.FC<FormTabsProps> = ({
   setError
 }) => {
   const [currentFormData, setCurrentFormData] = useState<FormData>(formData);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isNameEdited, setIsNameEdited] = useState(false);
 
   useEffect(() => {
     setCurrentFormData(formData);
@@ -54,32 +62,35 @@ const FormTabs: React.FC<FormTabsProps> = ({
     switch (activeTab) {
       case 'general':
         return (
-          <GeneralForm
-            data={{
-              productName: currentFormData.productName || '',
-              productType: currentFormData.productType || ProductType.API,
-              description: currentFormData.description || '',
-              status: currentFormData.status || 'DRAFT',
-              category: currentFormData.category || 'INTERNAL',
-              version: currentFormData.version || '1.0',
-              visibility: currentFormData.visibility ?? true,
-              tags: currentFormData.tags || {}
-            }}
-            onChange={(newData: GeneralFormData) => {
-              handleDataChange({
-                ...currentFormData,
-                productName: newData.productName,
-                productType: newData.productType,
-                description: newData.description,
-                status: newData.status,
-                category: newData.category,
-                version: newData.version,
-                visibility: newData.visibility,
-                tags: newData.tags
-              });
-            }}
-            loading={loading}
-          />
+          <div className="tab-content">
+            <GeneralForm
+              data={{
+                productName: currentFormData.productName || '',
+                productType: currentFormData.productType || ProductType.API,
+                description: currentFormData.description || '',
+                status: currentFormData.status || 'DRAFT',
+                category: currentFormData.category || 'INTERNAL',
+                version: currentFormData.version || '1.0',
+                visibility: currentFormData.visibility ?? true,
+                tags: currentFormData.tags || {}
+              }}
+              onChange={(newData: GeneralFormData) => {
+                handleDataChange({
+                  ...currentFormData,
+                  productName: newData.productName,
+                  productType: newData.productType,
+                  description: newData.description,
+                  status: newData.status,
+                  category: newData.category,
+                  version: newData.version,
+                  visibility: newData.visibility,
+                  tags: newData.tags
+                });
+              }}
+              loading={loading}
+              productId={productId}
+            />
+          </div>
         );
       case 'metadata':
         return (
@@ -116,19 +127,16 @@ const FormTabs: React.FC<FormTabsProps> = ({
             data={currentFormData.configuration || getInitialConfig(productType)}
             productType={productType}
             onChange={(newConfig: Partial<ConfigurationData>) => {
-              // Create a new configuration object
               const updatedConfig = {
                 ...currentFormData.configuration,
                 ...newConfig
               };
-              
-              // Update form data immediately
+
               handleDataChange({
                 ...currentFormData,
                 configuration: updatedConfig
               });
-              
-              // Save the configuration data immediately
+
               updateProduct(productId, {
                 ...currentFormData,
                 configuration: updatedConfig
@@ -144,67 +152,144 @@ const FormTabs: React.FC<FormTabsProps> = ({
     }
   };
 
+  const handleNext = async () => {
+    if (activeTab === 'configuration') {
+      try {
+        await onSubmit();
+        onClose();
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to update product');
+      }
+    } else if (activeTab === 'general') {
+      // Check if there are any validation errors in GeneralForm
+      const generalForm = document.querySelector('.general-form');
+      const errorMessages = generalForm?.querySelectorAll('.error-message');
+      
+      // Only show error if name has been edited
+      if (errorMessages && errorMessages.length > 0) {
+        setError('');
+        return;
+      }
+      
+      // Clear error messages before moving to next tab
+      setError('');
+      onNextClick();
+    } else {
+      onNextClick();
+    }
+  };
+
   return (
-    <div className="form-tabs">
-      <div className="tab-buttons">
-        <button
-          onClick={() => onTabChange('general')}
-          className={`tab-button ${activeTab === 'general' ? 'active' : ''}`}
-          disabled={loading}
-        >
-          General details
-        </button>
-        <button
-          onClick={() => onTabChange('metadata')}
-          className={`tab-button ${activeTab === 'metadata' ? 'active' : ''}`}
-          disabled={loading}
-        >
-          Product Metadata
-        </button>
-        <button
-          onClick={() => onTabChange('configuration')}
-          className={`tab-button ${activeTab === 'configuration' ? 'active' : ''}`}
-          disabled={loading}
-        >
-          Configuration
-        </button>
-      </div>
-      <div className="tab-content">
-        {error && (
-          <div className="error-message">
-            {error}
+    <>
+      {showCancelModal && (
+        <div className="delete-modal-overlay">
+          <div className="delete-modal-content">
+            <div className="delete-modal-body">
+              <h5>
+                Are you sure you want to cancel?                 <br />
+                <strong>"{formData.productName || 'New Product'}"</strong>
+              </h5>
+              <p>All unsaved changes will be lost.</p>
+            </div>
+            <div className="delete-modal-footer">
+              <button
+                className="delete-modal-cancel"
+                onClick={() => setShowCancelModal(false)}
+              >
+                Stay
+              </button>
+              <button
+                className="delete-modal-confirm"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  onClose();
+                }}
+              >
+                Confirm Cancel
+              </button>
+            </div>
           </div>
-        )}
-        {renderTabContent()}
-        <FormActions
-          onClose={() => {
-            if (activeTab === 'general') {
-              onClose(); // Close the form if we're on the general tab
-            } else {
-              onTabChange('general'); // Go back to general tab if we're not on it
-            }
-          }}
-          onSubmit={onSubmit}
-          onNext={onNextClick}
-          onBack={() => {
-            if (activeTab === 'metadata') {
-              onTabChange('general');
-            } else if (activeTab === 'configuration') {
-              onTabChange('metadata');
-            }
-          }}
-          activeTab={activeTab}
-          loading={loading}
-          isLastTab={activeTab === 'configuration'}
-          onSaveSuccess={() => {
-            // No specific action needed here as the success message is shown by FormActions
-          }}
-          onSaveError={(error) => {
-            setError(error);
-          }}
-        />
+        </div>
+      )}
+      <div className="form-heading">
+        <div className="heading-content">
+          <h2>Edit "{formData.productName || 'New Product'}"</h2>
+        </div>
+        <div className="heading-buttons">
+          <button
+            type="button"
+            onClick={() => setShowCancelModal(true)}
+            className="heading-cancel-button"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              // Handle save as draft
+            }}
+            className="heading-save-button"
+          >
+            Save as Draft
+          </button>
+        </div>
       </div>
-    </div>
+      <div className="form-tabs">
+        <div className="tab-buttons">
+        <button
+  className={`tab-button ${activeTab === 'general' ? 'active' : ''}`}
+  disabled
+>
+  General details
+</button>
+<button
+  className={`tab-button ${activeTab === 'metadata' ? 'active' : ''}`}
+  disabled
+>
+  Product Metadata
+</button>
+<button
+  className={`tab-button ${activeTab === 'configuration' ? 'active' : ''}`}
+  disabled
+>
+  Configuration
+</button>
+
+         
+        </div>
+        <div className="tab-content">
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+          {renderTabContent()}
+          <FormActions
+            onClose={() => {
+              if (activeTab === 'general') {
+                onClose();
+              } else {
+                onTabChange('general');
+              }
+            }}
+            onSubmit={onSubmit}
+            onNext={handleNext}
+            onBack={() => {
+              if (activeTab === 'metadata') {
+                onTabChange('general');
+              } else if (activeTab === 'configuration') {
+                onTabChange('metadata');
+              }
+            }}
+            activeTab={activeTab}
+            loading={loading}
+            isLastTab={activeTab === 'configuration'}
+            onSaveSuccess={() => {}}
+            onSaveError={error => setError(error)}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

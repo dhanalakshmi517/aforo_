@@ -6,9 +6,10 @@ interface ReviewStepProps {
   formData: ProductFormData;
   onBack: () => void;
   onSubmit: () => void;
+  onClose: () => void;
 }
 
-const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onBack, onSubmit }) => {
+const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onBack, onSubmit, onClose }) => {
   const renderItem = (label: string, value?: any) => {
     const displayValue = () => {
       if (!value) return 'N/A';
@@ -130,7 +131,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onBack, onSubmit }) =
       {/* Action Buttons */}
       <div className={styles.buttonRow}>
         <button className={styles.backButton} onClick={onBack}>Back</button>
-        <button className={styles.nextButton} onClick={onSubmit}>Create Product</button>
+        <button className={styles.nextButton} onClick={() => {
+          onSubmit();
+          onClose();
+        }}>Create Product</button>
       </div>
     </div>
   );

@@ -80,8 +80,8 @@ const FlatFileConfig: React.FC<FlatFileConfigProps> = ({ formData, setFormData, 
           }}
           className={styles.formGroupSelect}
         >
-          <option value="">Select compression format</option>
-          <option value="NONE">None</option>
+          <option value="">--Select--</option>
+          <option value="NONE">NONE</option>
           <option value="GZIP">GZIP</option>
           <option value="ZIP">ZIP</option>
         </select>

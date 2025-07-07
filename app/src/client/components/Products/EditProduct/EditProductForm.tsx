@@ -169,8 +169,49 @@ const EditProductForm = ({
       }
     };
 
-    const handleSubmit = () => {
-      onSave();
+    const handleSubmit = async (): Promise<void> => {
+      setLoading(true);
+      setError('');
+      try {
+        // Save general details
+        await updateProduct(productId, formData);
+        
+        // Save metadata
+        // await api.updateProductMetadata(formData);
+        
+        // Save configuration
+        try {
+          const config = await fetch(`http://13.230.194.245:8080/api/products/${productId}/${formData.productType.toLowerCase()}`);
+          if (config.ok) {
+            const configData = await config.json();
+            await updateProduct(productId, {
+              ...formData,
+              configuration: configData
+            });
+          } else {
+            await updateProduct(productId, formData);
+          }
+        } catch (error) {
+          setError(error instanceof Error ? error.message : 'Failed to fetch configuration details');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error instanceof Error ? error.message : 'Failed to fetch configuration details',
+            confirmButtonText: 'OK'
+          });
+        }
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to save details');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error instanceof Error ? error.message : 'Failed to save details',
+          confirmButtonText: 'OK'
+        });
+      } finally {
+        setLoading(false);
+        onSave();
+      }
     };
 
     const handleCancel = () => {
