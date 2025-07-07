@@ -1,0 +1,46 @@
+# GitHub Actions workflow
+# TODO: paste the full workflow YAML here as discussed.
+name: Deploy UI to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install deps and build
+        run: |
+          cd .wasp/build/web-app
+          npm install
+          npm run build
+
+      - name: Copy build to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ".wasp/build/web-app/build/*"
+          target: "/home/ubuntu/frontend-temp"
+
+      - name: SSH and move build to nginx
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo rm -rf /var/www/html/*
+            sudo cp -r ~/frontend-temp/* /var/www/html/
+            sudo systemctl restart nginx
