@@ -23,7 +23,7 @@ jobs:
           echo "$HOME/.wasp/bin" >> $GITHUB_PATH
           export PATH="$HOME/.wasp/bin:$PATH"
 
-      - name: Run wasp build from app folder
+      - name: Run Wasp build (from app folder)
         run: |
           cd app
           wasp build
@@ -32,46 +32,44 @@ jobs:
         run: |
           cd app/.wasp/build/web-app
           npm install
-          # Patch vite.config.ts to point to correct index.html path
+          # Patch vite.config.ts if needed
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
 
-      - name: Verify build files
+      - name: Verify UI build output
         run: |
           ls -la app/.wasp/build/web-app/build/
-          
+
       - name: Copy UI build to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "app/.wasp/build/web-app/build/"
+          source: "app/.wasp/build/web-app/build/*"
           target: "/home/ubuntu/frontend-temp"
-          strip_components: 4  # This will strip the app/.wasp/build/web-app/ part from the path
 
-      - name: SSH and deploy UI to Nginx
+      - name: SSH into EC2 and deploy to Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Contents of frontend-temp:"
+            echo "🔍 Checking contents of frontend-temp:"
             ls -la ~/frontend-temp
-            
-            # Clear existing files
+
+            echo "🧹 Cleaning /var/www/html/"
             sudo rm -rf /var/www/html/*
-            
-            # Copy new files
-            if [ -d "/home/ubuntu/frontend-temp" ]; then
-              echo "Copying files to /var/www/html/"
-              sudo cp -r /home/ubuntu/frontend-temp/* /var/www/html/
-              sudo chown -R www-data:www-data /var/www/html
-              sudo chmod -R 755 /var/www/html
-              sudo systemctl restart nginx
-              echo "Deployment completed successfully"
-            else
-              echo "Error: frontend-temp directory not found!"
-              exit 1
-            fi
+
+            echo "📁 Copying files to /var/www/html/"
+            sudo cp -r ~/frontend-temp/* /var/www/html/
+
+            echo "🔧 Setting permissions"
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
+
+            echo "🔄 Restarting Nginx"
+            sudo systemctl restart nginx
+
+            echo "✅ Deployment completed!"
