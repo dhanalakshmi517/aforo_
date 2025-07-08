@@ -9,66 +9,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout code
+      - name: ✅ Checkout code
         uses: actions/checkout@v3
 
-      - name: 🧰 Setup Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      - name: 🚀 Setup Wasp CLI
+      - name: ⚙️ Setup Wasp CLI
         run: |
           curl -sSL https://get.wasp-lang.dev/installer.sh | bash
           echo "$HOME/.wasp/bin" >> $GITHUB_PATH
           export PATH="$HOME/.wasp/bin:$PATH"
 
-      - name: 🏗️ Run wasp build
+      - name: 🛠 Run wasp build from app folder
         run: |
           cd app
           wasp build
 
-      - name: 🛠️ Build frontend UI
+      - name: 🎨 Install frontend deps and build UI
         run: |
           cd app/.wasp/build/web-app
           npm install
+          # Patch Vite config if needed
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
 
-      - name: 🧪 Verify built files
-        run: ls -la app/.wasp/build/web-app/build/
-
-      - name: 📤 Copy UI build to EC2 (flatten structure)
+      - name: 📤 Copy UI build to EC2 (flattened)
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "app/.wasp/build/web-app/build/*"
+          source: "app/.wasp/build/web-app/build/**"
           target: "/home/ubuntu/frontend-temp"
+          strip_components: 6
           rm: true
 
-      - name: 🚚 Deploy build to Nginx
+      - name: 🚀 SSH and deploy UI to Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "🔍 Verifying contents:"
-            ls -la /home/ubuntu/frontend-temp
-
-            echo "🧹 Cleaning existing Nginx content"
+            echo "✅ Cleaning up old files in /var/www/html"
             sudo rm -rf /var/www/html/*
 
-            echo "📁 Moving files to Nginx root"
-            sudo cp -r /home/ubuntu/frontend-temp/* /var/www/html/
-
-            echo "🔧 Fixing permissions"
+            echo "📦 Copying new build files to /var/www/html"
+            sudo cp -r ~/frontend-temp/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
-
-            echo "🔄 Restarting nginx"
             sudo systemctl restart nginx
 
-            echo "✅ UI Deployed Successfully!"
+            echo "🎉 UI Deployment complete!"
