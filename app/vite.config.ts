@@ -1,23 +1,23 @@
 import { defineConfig } from 'vite'
 import path from 'path'
 
-export default defineConfig({
-  server: {
-    open: true,
-    host: true,
-    port: 3000,
-    strictPort: true,
-  },
-  resolve: {
-    alias: {
-      '@src': path.resolve(__dirname, './src'),
-    },
-  },
+// Simple configuration for production build
+const config = {
   build: {
+    outDir: 'build',
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
+        main: 'index.html'
       },
     },
   },
-})
+  resolve: {
+    alias: {
+      '@src': path.resolve(__dirname, 'src')
+    }
+  }
+}
+
+export default defineConfig(config)
+// #endregion
+//#comment
