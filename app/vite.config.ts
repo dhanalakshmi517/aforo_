@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type UserConfigExport } from 'vite'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
   // Determine if we're in production build
   const isProduction = mode === 'production'
   
-  return {
+  const config: UserConfigExport = {
     server: {
       open: true,
       host: true,
@@ -27,7 +27,9 @@ export default defineConfig(({ mode }) => {
             ? path.resolve(__dirname, '.wasp/build/web-app/index.html')
             : path.resolve(__dirname, 'index.html')
         },
-      }
-    }
+      },
+    },
   }
+  
+  return config
 })
