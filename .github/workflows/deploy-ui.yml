@@ -1,4 +1,4 @@
-name: Deploy UI to EC2 
+name: Deploy UI to EC2
 
 on:
   push:
@@ -12,10 +12,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js (use Node 20+ for Wasp compatibility)
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Setup Wasp CLI
         run: |
@@ -23,23 +23,20 @@ jobs:
           echo "$HOME/.wasp/bin" >> $GITHUB_PATH
           export PATH="$HOME/.wasp/bin:$PATH"
 
-      - name: Run wasp build inside app/
+      - name: Run wasp build from app folder
         run: |
           cd app
           wasp build
 
-      - name: Install frontend deps and build UI 🛠️
+      - name: Install frontend deps and build UI
         run: |
           cd app/.wasp/build/web-app
           npm install
-          # Patch vite config to use correct index.html path
+          # Patch vite.config.ts to point to correct index.html path
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
 
-      - name: List build output (debug)
-        run: ls -la app/.wasp/build/web-app/build
-
-      - name: Copy build to EC2
+      - name: Copy UI build to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -48,7 +45,7 @@ jobs:
           source: "app/.wasp/build/web-app/build/*"
           target: "/home/ubuntu/frontend-temp"
 
-      - name: SSH and move build to nginx
+      - name: SSH and deploy UI to Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
