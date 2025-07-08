@@ -23,23 +23,22 @@ jobs:
           echo "$HOME/.wasp/bin" >> $GITHUB_PATH
           export PATH="$HOME/.wasp/bin:$PATH"
 
-      - name: 🏗️ Run wasp build from app folder
+      - name: 🏗️ Run wasp build
         run: |
           cd app
           wasp build
 
-      - name: 🛠️ Install frontend deps and build UI
+      - name: 🛠️ Build frontend UI
         run: |
           cd app/.wasp/build/web-app
           npm install
-          # Patch vite.config.ts if needed
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
 
-      - name: 🧪 Verify UI build output
+      - name: 🧪 Verify built files
         run: ls -la app/.wasp/build/web-app/build/
 
-      - name: 📤 Copy UI build to EC2
+      - name: 📤 Copy UI build to EC2 (flatten structure)
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -47,25 +46,29 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "app/.wasp/build/web-app/build/*"
           target: "/home/ubuntu/frontend-temp"
+          rm: true
 
-      - name: 🚚 SSH into EC2 and deploy to Nginx
+      - name: 🚚 Deploy build to Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "🧹 Cleaning /var/www/html/"
+            echo "🔍 Verifying contents:"
+            ls -la /home/ubuntu/frontend-temp
+
+            echo "🧹 Cleaning existing Nginx content"
             sudo rm -rf /var/www/html/*
 
-            echo "📁 Copying new UI build"
+            echo "📁 Moving files to Nginx root"
             sudo cp -r /home/ubuntu/frontend-temp/* /var/www/html/
 
-            echo "🔧 Setting permissions"
+            echo "🔧 Fixing permissions"
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
 
-            echo "🔄 Restarting Nginx"
+            echo "🔄 Restarting nginx"
             sudo systemctl restart nginx
 
-            echo "✅ UI deployment successful!"
+            echo "✅ UI Deployed Successfully!"
