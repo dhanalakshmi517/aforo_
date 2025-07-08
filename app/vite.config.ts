@@ -1,11 +1,10 @@
-import { defineConfig, type UserConfigExport } from 'vite'
+import { defineConfig } from 'vite'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
-  // Determine if we're in production build
   const isProduction = mode === 'production'
-  
-  const config: UserConfigExport = {
+
+  return {
     server: {
       open: true,
       host: true,
@@ -30,6 +29,4 @@ export default defineConfig(({ mode }) => {
       },
     },
   }
-  
-  return config
 })
