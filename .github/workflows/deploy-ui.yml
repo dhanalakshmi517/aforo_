@@ -32,17 +32,13 @@ jobs:
         run: |
           cd app/.wasp/build/web-app
           npm install
-          # Patch Vite config if needed
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
-          
-          # Verify build output
           echo "Build output files:"
           ls -la build/
-          echo "Looking for index.html..."
           find build/ -name "index.html" -type f -ls
 
-      - name: 📤 Copy UI build to EC2
+      - name: 📤 Copy UI build to EC2 (flattened)
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -65,25 +61,19 @@ jobs:
             sudo rm -rf /var/www/html/*
 
             echo "📦 Copying new build files to /var/www/html"
-            # First, ensure the target directory exists
             sudo mkdir -p /var/www/html
-            
-            # Copy all files while preserving directory structure
             sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
-            
-            # Set proper ownership and permissions
+
+            echo "🔐 Setting ownership and permissions"
             sudo chown -R www-data:www-data /var/www/html
             sudo find /var/www/html -type d -exec chmod 755 {} \;
             sudo find /var/www/html -type f -exec chmod 644 {} \;
-            
-            # Verify files were copied
-            echo "📋 Files in /var/www/html:"
+
+            echo "📋 Final file list in /var/www/html"
             ls -la /var/www/html
-            
-            # Restart Nginx
+
+            echo "🔄 Restarting Nginx"
             sudo systemctl restart nginx
-            
-            # Check Nginx status
             sudo systemctl status nginx --no-pager
-            
+
             echo "🎉 UI Deployment complete!"
