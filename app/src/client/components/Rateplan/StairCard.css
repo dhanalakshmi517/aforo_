@@ -1,0 +1,70 @@
+.stair-step-example {
+    background: #f5faff;
+    padding: 32px;
+    border-radius: 16px;
+    width: fit-content;
+    font-family: 'Segoe UI', sans-serif;
+    color: #004a75;
+  }
+  
+  .stair-step-example h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  .stair-table {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .stair-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .stair-label {
+    width: 80px;
+    font-weight: 500;
+  }
+  
+  .stair-tiles {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .tile {
+    background-color: white;
+    border-radius: 12px;
+    width: 60px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #0077b6;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  
+  .stair-price {
+    font-weight: 600;
+    font-size: 15px;
+    color: #004a75;
+  }
+  
+  .highlight {
+    margin-top: 24px;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .footnote {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #6a6a6a;
+    max-width: 380px;
+  }
+  

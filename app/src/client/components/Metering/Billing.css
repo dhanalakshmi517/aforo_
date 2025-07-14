@@ -1,0 +1,70 @@
+
+@import "../Variables/Variables.css";
+
+.billing-form-wrapper {
+    padding: 30px;
+
+  }
+  
+  .form-cardss {
+    border-radius: 12px;
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    margin-left: -55px;
+    margin-top: -60px;
+  } 
+  .form-groupss {
+    margin-bottom: 20px;
+  }
+  
+  .form-groupss label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-neutral-1400);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+  }
+  
+
+ .form-groupss select {
+    width: 90%;
+    height:40px;
+    padding: 8px 12px;
+    font-size: var(--font-size-md);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-200);
+    background-color: var(--color-neutral-100);
+    resize: none;
+    color: var(--color-neutral-1400);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+  }
+  
+
+ .form-groupss input[type='text'] {
+    width: 90%;
+    height:40px;
+    padding: 8px 12px;
+    font-size: var(--font-size-md);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-200);
+    background-color: var(--color-neutral-100);
+    resize: none;
+    color: var(--color-neutral-1400);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+  }
+  
