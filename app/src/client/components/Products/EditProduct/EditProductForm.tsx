@@ -92,24 +92,21 @@ const EditProductForm = ({
             setError('Product Type is required');
             return;
           }
-          // For general details, just update the basic product info
+
           const updatedData = await updateProduct(productId, {
             ...formData,
-            configuration: undefined // Don't send configuration data yet
+            configuration: undefined
           });
           setFormData(updatedData);
           handleTabChange('metadata');
           setSuccess('General details saved successfully');
         } else if (activeTab === 'metadata') {
           try {
-            // Save the current data
-            // For metadata, just update the basic product info
             const updatedData = await updateProduct(productId, {
               ...formData,
-              configuration: undefined // Don't send configuration data yet
+              configuration: undefined
             });
-            
-            // Fetch configuration data based on product type when transitioning to configuration tab
+
             const normalizedType = updatedData.productType.toLowerCase();
             const apiType = {
               [ProductType.API]: 'api',
@@ -117,27 +114,24 @@ const EditProductForm = ({
               [ProductType.SQLRESULT]: 'sql-result',
               [ProductType.LLMTOKEN]: 'llm-token'
             }[normalizedType];
-            
+
             if (!apiType) {
               throw new Error(`Invalid product type: ${updatedData.productType}`);
             }
 
             const configResponse = await fetch(`http://13.230.194.245:8080/api/products/${productId}/${apiType}`);
-            
             if (!configResponse.ok) {
               throw new Error('Failed to fetch configuration details');
             }
-            
+
             const configData = await configResponse.json();
-            
-            // Combine existing configuration with fetched data
+
             const completeConfig = {
               ...getInitialConfig(updatedData.productType),
               ...configData,
               ...(updatedData.configuration || {})
             };
 
-            // Update form data with complete configuration
             setFormData({
               ...updatedData,
               configuration: completeConfig
@@ -162,13 +156,8 @@ const EditProductForm = ({
       setLoading(true);
       setError('');
       try {
-        // Save general details
         await updateProduct(productId, formData);
-        
-        // Save metadata
-        // await api.updateProductMetadata(formData);
-        
-        // Save configuration
+
         try {
           const config = await fetch(`http://13.230.194.245:8080/api/products/${productId}/${formData.productType.toLowerCase()}`);
           if (config.ok) {
@@ -233,14 +222,12 @@ const EditProductForm = ({
           setLoading(false);
           return;
         }
-        
-        // Initialize form data with basic product info
+
         setFormData({
           ...data,
           configuration: getInitialConfig(data.productType)
         });
-        
-        // Save the initial data immediately
+
         updateProduct(productId, data).catch(error => {
           console.error('Error saving initial data:', error);
         });
@@ -251,6 +238,7 @@ const EditProductForm = ({
         setLoading(false);
         setIsInitialLoading(false);
       });
+
       setFormData({
         productName: productName || '',
         productType: productType || ProductType.API,
@@ -293,10 +281,8 @@ const EditProductForm = ({
         setLoading={setLoading}
         setError={setError}
       />
-      </div>
-      
+    </div>
   );
 };
 
 export default EditProductForm;
-

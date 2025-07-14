@@ -1,0 +1,79 @@
+name: Deploy UI to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: ⚙️ Setup Wasp CLI
+        run: |
+          curl -sSL https://get.wasp-lang.dev/installer.sh | bash
+          echo "$HOME/.wasp/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.wasp/bin:$PATH"
+
+      - name: 🛠 Run wasp build from app folder
+        run: |
+          cd app
+          wasp build
+
+      - name: 🎨 Install frontend deps and build UI
+        run: |
+          cd app/.wasp/build/web-app
+          npm install
+          sed -i 's|../../../index.html|index.html|' vite.config.ts || true
+          npm run build
+          echo "Build output files:"
+          ls -la build/
+          find build/ -name "index.html" -type f -ls
+
+      - name: 📤 Copy UI build to EC2 (flattened)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "app/.wasp/build/web-app/build/"
+          target: "/home/ubuntu/frontend-temp"
+          strip_components: 5
+          rm: true
+          overwrite: true
+
+      - name: 🚀 SSH and deploy UI to Nginx
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "✅ Cleaning up old files in /var/www/html"
+            sudo rm -rf /var/www/html/*
+
+            echo "📦 Copying new build files to /var/www/html"
+            sudo mkdir -p /var/www/html
+            sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
+
+            echo "🔐 Setting ownership and permissions"
+            sudo chown -R www-data:www-data /var/www/html
+            sudo find /var/www/html -type d -exec chmod 755 {} \;
+            sudo find /var/www/html -type f -exec chmod 644 {} \;
+
+            echo "📋 Final file list in /var/www/html"
+            ls -la /var/www/html
+
+            echo "🔄 Restarting Nginx"
+            sudo systemctl restart nginx
+            sudo systemctl status nginx --no-pager
+
+            echo "🎉 UI Deployment complete!"
