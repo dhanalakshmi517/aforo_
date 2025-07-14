@@ -17,7 +17,7 @@ interface Tab {
 function SideNavbar({ activeTab, onTabClick, hidden }: SidebarProps): JSX.Element {
   const tabs: Tab[] = [
     {
-      name: 'Started',
+      name: ' Get Started',
       icon: (
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
