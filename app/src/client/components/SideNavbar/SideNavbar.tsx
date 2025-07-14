@@ -45,7 +45,6 @@ function SideNavbar({ activeTab, onTabClick, hidden }: SidebarProps): JSX.Elemen
     },
     {
       name: 'Dashboards',
-      name: 'Dashboardss',
       icon: (
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
