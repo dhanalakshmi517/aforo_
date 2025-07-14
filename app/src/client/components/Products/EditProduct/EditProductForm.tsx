@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Swal from 'sweetalert2';
 import {
   ProductType,
   GeneralFormData,
@@ -148,22 +147,12 @@ const EditProductForm = ({
             setSuccess('General and Metadata details saved successfully');
           } catch (error) {
             setError(error instanceof Error ? error.message : 'Failed to fetch configuration details');
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error instanceof Error ? error.message : 'Failed to fetch configuration details',
-              confirmButtonText: 'OK'
-            });
+            console.error(error instanceof Error ? error.message : 'Failed to fetch configuration details');
           }
         }
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to save details');
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error instanceof Error ? error.message : 'Failed to save details',
-          confirmButtonText: 'OK'
-        });
+        console.error(error instanceof Error ? error.message : 'Failed to save details');
       } finally {
         setLoading(false);
       }
@@ -193,21 +182,11 @@ const EditProductForm = ({
           }
         } catch (error) {
           setError(error instanceof Error ? error.message : 'Failed to fetch configuration details');
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error instanceof Error ? error.message : 'Failed to fetch configuration details',
-            confirmButtonText: 'OK'
-          });
+          console.error(error instanceof Error ? error.message : 'Failed to fetch configuration details');
         }
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to save details');
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error instanceof Error ? error.message : 'Failed to save details',
-          confirmButtonText: 'OK'
-        });
+        console.error(error instanceof Error ? error.message : 'Failed to save details');
       } finally {
         setLoading(false);
         onSave();

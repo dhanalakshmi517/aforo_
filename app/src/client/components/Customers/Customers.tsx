@@ -1,163 +1,136 @@
-import React, { useState } from 'react';
-import './Customers.css';
-import { FaCopy } from 'react-icons/fa';
+import React, { useState } from "react";
+import "./Customers.css";
+import CustomerForm from "./CustomerForm";
 
-const customerData = [
+interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  customerId: string;
+  status: string;
+  createdOn: string;
+}
+
+const dummyCustomers: Customer[] = [
   {
     id: 1,
-    name: 'Aditya Inc',
-    email: 'customer-1@gmail.com',
-    customerId: 'GUJ23HBMKK',
-    status: 'In Progress',
-    createdOn: '06 Jan, 2025 08:58 IST',
+    name: "Aditya Inc",
+    email: "customer-1@gmail.com",
+    customerId: "GUJ23H8MXK",
+    status: "In Progress",
+    createdOn: "06 Jan, 2025 08:58 IST",
   },
   {
     id: 2,
-    name: 'Customer 2',
-    email: 'customer-2@gmail.com',
-    customerId: 'GUJ23HBMKL',
-    status: 'In Progress',
-    createdOn: '07 Jan, 2025 09:15 IST',
-  },
-  {
-    id: 3,
-    name: 'Customer 3',
-    email: 'customer-3@gmail.com',
-    customerId: 'GUJ23HBMKM',
-    status: 'In Progress',
-    createdOn: '08 Jan, 2025 10:30 IST',
-  },
-  {
-    id: 4,
-    name: 'Customer 4',
-    email: 'customer-4@gmail.com',
-    customerId: 'GUJ23HBMKN',
-    status: 'In Progress',
-    createdOn: '09 Jan, 2025 11:45 IST',
-  },
-  {
-    id: 5,
-    name: 'Customer 5',
-    email: 'customer-5@gmail.com',
-    customerId: 'GUJ23HBMKO',
-    status: 'In Progress',
-    createdOn: '10 Jan, 2025 12:00 IST',
+    name: "Customer 2",
+    email: "customer-2@gmail.com",
+    customerId: "GUJ23H8MXK",
+    status: "In Progress",
+    createdOn: "06 Jan, 2025 08:58 IST",
   },
 ];
 
-const Customers = () => {
-  const [showAddPanel, setShowAddPanel] = useState(false);
-  const [breadcrumb, setBreadcrumb] = useState(['Customers']);
-  const [searchTerm, setSearchTerm] = useState('');
+interface CustomersProps {
+  showNewCustomerForm: boolean;
+  setShowNewCustomerForm: (show: boolean) => void;
+}
 
-  const handleOpenAddCustomer = () => {
-    setShowAddPanel(true);
-    setBreadcrumb(['Customers', 'New Customer']);
+const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCustomerForm }) => {
+
+  const handleNewCustomer = () => {
+    setShowNewCustomerForm(true);
   };
 
-  const handleCloseAddCustomer = () => {
-    setShowAddPanel(false);
-    setBreadcrumb(['Customers']);
+  const handleCloseForm = () => {
+    setShowNewCustomerForm(false);
   };
-
-  const filteredCustomers = customerData.filter(customer => 
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.customerId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="customers-container">
-      {/* Breadcrumb */}
-      <div className="breadcrumb">
-        {breadcrumb.map((item, index) => (
-          <span
-            key={index}
-            className={`breadcrumb-item ${
-              index === breadcrumb.length - 1 ? 'active' : ''
-            }`}
-          >
-            {item}
-            {index < breadcrumb.length - 1 && (
-              <span className="separator"> &gt; </span>
-            )}
-          </span>
-        ))}
-      </div>
-
-      {/* Header */}
-      <div className="customers-header">
-        <h2>Customers</h2>
-        <div className="customers-actions">
-          <input
-            type="text"
-            placeholder="Search among customers"
-            className="customers-search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button className="new-customer-btn" onClick={handleOpenAddCustomer}>
-            + New Customer
-          </button>
-        </div>
-      </div>
-
-      {/* Add Customer Panel - Will be implemented later */}
-      {showAddPanel && (
-        <div className="add-customer-panel">
-          <h3>Add New Customer</h3>
-          <button onClick={handleCloseAddCustomer}>Close</button>
-          {/* Add customer form will go here */}
-        </div>
-      )}
-
-      {/* Customer Table */}
-      <table className="customers-table">
-        <thead>
-          <tr>
-            <th>S.No</th>
-            <th>Name</th>
-            <th>Customer ID</th>
-            <th>Status</th>
-            <th>Actions</th>
-            <th>Created On</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredCustomers.map((customer, index) => (
-            <tr key={customer.id}>
-              <td>{index + 1}</td>
-              <td>
-                <div className="customer-name">
-                  {customer.name}
-                  <br />
-                  <span className="email">{customer.email}</span>
-                </div>
-              </td>
-              <td>
-                <div className="customer-id">
-                  {customer.customerId}
-                  <FaCopy 
-                    className="copy-icon" 
-                    onClick={() => {
-                      navigator.clipboard.writeText(customer.customerId);
-                      // Add toast notification here if needed
-                    }}
+      {!showNewCustomerForm ? (
+        <>
+          <div className="breadcrumb">
+            <span>Customers</span>
+           
+          </div>
+          <div className="customers-header">
+            <h2>Customers</h2>
+            <div className="customers-actions">
+              <div className="search-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z"
+                    stroke="#706C72"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                </div>
-              </td>
-              <td>
-                <span className="status">{customer.status}</span>
-              </td>
-              <td>
-                <button className="edit-btn">Edit</button>
-                <button className="delete-btn">Delete</button>
-              </td>
-              <td>{customer.createdOn}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search among customers"
+                  className="search-input"
+                />
+              </div>
+              <button className="sam-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+              <button className="new-customer-btn" onClick={handleNewCustomer}>
+                + New Customer
+              </button>
+            </div>
+          </div>
+
+          <table className="customers-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Name</th>
+                <th>Customer ID</th>
+                <th>Status</th>
+                <th>Actions</th>
+                <th>Created On</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dummyCustomers.map((customer, index) => (
+                <tr key={customer.id}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <div className="name-cell">
+                      <div className="name">{customer.name}</div>
+                      <div className="email">{customer.email}</div>
+                    </div>
+                  </td>
+                  <td>{customer.customerId}</td>
+                  <td>
+                    <span className="status-badge">{customer.status}</span>
+                  </td>
+                  <td>
+                    <div className="action-icons">
+                      <button className="edit-btn">
+edit                      </button>
+                      <button className="delete-btn">
+delete                      </button>
+                    </div>
+                  </td>
+                  <td>{customer.createdOn}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : (
+        <CustomerForm onClose={handleCloseForm} />
+      )}
     </div>
   );
 };

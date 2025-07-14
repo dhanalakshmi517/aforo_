@@ -76,7 +76,7 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
   };
 
   return (
-    <div className="general-form">
+    <div className="general-forms">
       <div className="edit-form-group">
         <label>Product Name</label>
         <input
@@ -84,6 +84,8 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
           value={data.productName}
           onChange={handleProductNameChange}
           disabled={loading}
+          className="form-inputs"
+          placeholder="Enter Product Name"
         />
         {nameError && (
           <div className="error-message">{nameError}</div>

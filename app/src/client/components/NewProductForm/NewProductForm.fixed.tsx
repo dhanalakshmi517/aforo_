@@ -182,7 +182,7 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
           tags: formData.tags.reduce((acc, tag) => ({ ...acc, [tag.key]: tag.value }), {}),
           labels: formData.labels,
         };
-
+        console.log('payload before POST', basePayload);
         const res = await fetch('http://13.230.194.245:8080/api/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

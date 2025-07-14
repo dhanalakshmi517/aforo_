@@ -4,6 +4,44 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
 import { fetchRatePlans, deleteRatePlan } from './api';
 
+// ------------ Toast Notification Helpers ------------
+interface NotificationState {
+  type: 'success' | 'error';
+  ratePlanName: string;
+}
+
+const SuccessIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path d="M20 6L9 17L4 12" stroke="#23A36D" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ErrorIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path d="M12 8V12M12 16H12.01M7.9 20C9.8 21 12 21.2 14.1 20.75C16.2 20.3 18 19.05 19.3 17.3C20.6 15.55 21.15 13.4 20.98 11.3C20.81 9.15 19.89 7.15 18.37 5.63C16.85 4.11 14.85 3.18 12.71 3.02C10.57 2.85 8.44 3.45 6.71 4.72C4.97 5.98 3.75 7.82 3.25 9.91C2.76 12 3.02 14.19 4 16.1L2 22L7.9 20Z" stroke="#E34935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const Notification: React.FC<NotificationState> = ({ type, ratePlanName }) => {
+  const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
+  return (
+    <div className={`notification ${type === 'error' ? 'error' : ''}`}>
+      <div className="notification-icon">
+        <Icon />
+      </div>
+      <div className="notification-text">
+        <h5>{type === 'success' ? 'Rate Plan Deleted' : 'Failed to Delete Rate Plan'}</h5>
+        <p className="notification-details">
+          {type === 'success'
+            ? `The rate plan “${ratePlanName}” was successfully deleted.`
+            : `Failed to delete the rate plan “${ratePlanName}”. Please try again.`}
+        </p>
+      </div>
+    </div>
+  );
+};
+// ----------------------------------------------------
+
 export interface RatePlan {
   ratePlanId: number;
   ratePlanName: string;
@@ -11,7 +49,8 @@ export interface RatePlan {
   ratePlanType: string;
   billingFrequency: string;
   productId: number;
-  product: {
+  productName?: string;
+  product?: {
     productName: string;
   };
   status?: string;
@@ -30,7 +69,12 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
   const navigate = useNavigate();
   const [ratePlansState, setRatePlans] = useState(ratePlans);
   const [loadingState, setLoading] = useState(loading);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [errorState, setError] = useState(error);
+  const [notification, setNotification] = useState<NotificationState | null>(null);
 
   useEffect(() => {
     const fetchRatePlansData = async () => {
@@ -49,18 +93,31 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
   }, []);
 
   const handleEdit = (id: number) => {
-    navigate(`/rateplans/${id}/edit`);
+    navigate(`/get-started/rate-plans/${id}/edit`);
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this rate plan?')) {
-      try {
-        await deleteRatePlan(id.toString());
-        setRatePlans(prev => prev.filter(plan => plan.ratePlanId !== id));
-      } catch (error) {
-        setError('Failed to delete rate plan. Please try again.');
-        console.error('Error deleting rate plan:', error);
-      }
+  const handleDeleteClick = (id: number) => {
+    setDeleteTargetId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteTargetId == null) return;
+    const deletedPlan = ratePlansState.find(p => p.ratePlanId === deleteTargetId);
+    try {
+      setIsDeleting(true);
+      await deleteRatePlan(deleteTargetId.toString());
+      setRatePlans(prev => prev.filter(plan => plan.ratePlanId !== deleteTargetId));
+      setShowDeleteModal(false);
+      setNotification({ type: 'success', ratePlanName: deletedPlan?.ratePlanName || '' });
+    } catch (error) {
+      setError('Failed to delete rate plan. Please try again.');
+      console.error('Error deleting rate plan:', error);
+      setNotification({ type: 'error', ratePlanName: deletedPlan?.ratePlanName || '' });
+    } finally {
+      setIsDeleting(false);
+      // auto-dismiss toast
+      setTimeout(() => setNotification(null), 3000);
     }
   };
 
@@ -68,6 +125,11 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
 
   return (
     <div className="main-container">
+      {notification && (
+        <div className="notification-container">
+          <Notification {...notification} />
+        </div>
+      )}
       {!showCreatePlan && (
         <nav className="breadcrumb-nav">
           <div className="breadcrumb">
@@ -104,12 +166,42 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
               </svg>
               <span>Create New Rate Plan</span>
             </button>
+            <div className="plan-header-actions">
+              <button
+                className="cancel-button"
+                onClick={() => setShowCancelModal(true) }
+              >
+                Cancel
+              </button>
+              <button
+                className="draft-button"
+               
+                
+              >
+                Save as Draft
+              </button>
+            </div>
           </div>
           <CreatePricePlan 
             onClose={() => {
               setShowCreatePlan(false);
             }}
           />
+
+          {showCancelModal && (
+            <div className="delete-modal-overlay">
+              <div className="delete-modal-content">
+                <div className="delete-modal-body">
+                  <h5>Are you sure you want to cancel <br />creating this rate plan?</h5>
+                  <p>This action cannot be undone.</p>
+                </div>
+                <div className="delete-modal-footer">
+                  <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
+                  <button className="delete-modal-confirm" onClick={() => { setShowCancelModal(false); setShowCreatePlan(false); }}>Confirm</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="rate-plan-container">
@@ -135,6 +227,11 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                 </svg>
                 <input type="search" placeholder="Search among your rate plans..." className="products-search-input" />
               </div>
+              <button className="sam-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
               <button className="new-button" onClick={() => {
                 setShowCreatePlan(true);
                 navigate('/get-started/rate-plans');
@@ -151,25 +248,28 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                 <th>Rate Plan Name</th>
                 <th>Product Name</th>
                 <th>Billing Frequency</th>
-                <th>Status</th>
                 <th>Pricing Model</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {ratePlans.map((plan, index) => (
+              {loadingState && (
+                <tr><td colSpan={7}>Loading...</td></tr>
+              )}
+              {errorState && !loadingState && (
+                <tr><td colSpan={7} style={{color:'red'}}>{errorState}</td></tr>
+              )}
+              {ratePlansState.map((plan, index) => (
                 <tr key={plan.ratePlanId}>
                   <td>{index + 1}</td>
                   <td>{plan.ratePlanName || 'N/A'}</td>
                   <td>
-                    <span className={`pp-badge ${plan.product?.productName?.toLowerCase()?.replace(/\s/g, '-') || 'default-badge'}`}>
-                      {plan.product?.productName || 'N/A'}
+                    <span className={`pp-badge ${(plan.productName || plan.product?.productName || 'default').toLowerCase().replace(/\s/g, '-')}`}>
+                      {plan.productName || plan.product?.productName || 'N/A'}
                     </span>
                   </td>
                   <td>{plan.billingFrequency || 'N/A'}</td>
-                  <td>
-                    <span className="pp-status">{plan.status || 'In Progress'}</span>
-                  </td>
+                 
                   <td>{plan.ratePlanType || 'N/A'}</td>
                   <td>
                     <div className="action-buttons">
@@ -184,7 +284,7 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                       </button>
                       <button 
                         className="delete-button" 
-                        onClick={() => handleDelete(plan.ratePlanId)}
+                        onClick={() => handleDeleteClick(plan.ratePlanId)}
                         title="Delete"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
@@ -197,6 +297,26 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
               ))}
             </tbody>
           </table>
+
+          {/* Delete confirmation modal */}
+          {showDeleteModal && (
+            <div className="delete-modal-overlay">
+              <div className="delete-modal-content">
+                <div className="delete-modal-body">
+                  <h5>Are you sure you want to delete this <br />rate plan?</h5>
+                  <p>This action cannot be undone.</p>
+                </div>
+                <div className="delete-modal-footer">
+                  <button className="delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>
+                    Back
+                  </button>
+                  <button className="delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
+                    {isDeleting ? 'Deleting...' : 'Confirm'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

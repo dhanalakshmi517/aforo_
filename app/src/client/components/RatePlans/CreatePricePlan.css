@@ -1,122 +1,181 @@
 @import "../Variables/Variables.css";
 
-/* Container Styling */
 .price-plan-details-section {
     margin-left: 20px;
+    width:1100px;
+    height: 800px auto;
+    background: var(--color-neutral-white);
+    border-right: 1px solid var(--color-neutral-200);
+
+
 }
 
 .price-plan-outer-container {
     padding: 24px;
-    font-family: 'Segoe UI', sans-serif;
     align-items: center;
+    height: 900px;
+    background: var(--color-neutral-white);
+    border: 1px solid var(--color-neutral-200);
+
+
+
 }
 
 .price-plan-container {
     background: var(--color-neutral-white);
     border-radius: 8px;
-    box-shadow: 0px 18px 54px 0px rgba(0, 0, 0, 0.07), 0px 2.254px 43.336px 0px rgba(0, 0, 0, 0.00);
-    width: 1000px;
     position: relative;
     margin-top: -20px;
-    margin-left: -80px;
+    margin-left: -180px;
 
-    height: 697px;
+    min-width: 1100px;
+    height: 900px;
+    min-height: 800px auto;
+    /* border: 1px solid var(--color-neutral-200); */
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-200);
+
+    
 }
 
 
 .stepper-and-form {
     display: flex;
     flex-direction: row;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-sm);
 }
 
 
 .vertical-stepper {
     position: relative;
-    width: 300px;
+    flex: 0 0 250px;
+    width: 250px;
     padding: 16px;
     border-right: 1px solid var(--color-neutral-200);
     background-color: var(--color-neutral-white);
-    height: 697px;
+    min-height: 800px; 
 }
 
-.vertical-stepper {
+
+.price-plan-form-section {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     position: relative;
+    height: auto;
+    border: 1px solid var(--color-neutral-200);
+
 }
+
 
 .step:not(:last-child) {
     position: relative;
 }
 
-.step:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 32px;
-    top: 16px;
-    bottom: 16px;
-    width: 2px;
-    background-color: var(--color-neutral-200);
-}
 
 .step {
     display: flex;
     align-items: flex-start;
     cursor: pointer;
     margin-bottom: 24px;
-    transition: all 0.3s ease;
-    opacity: 0.6;
     position: relative;
-    padding-left: 12px;
+    padding-left: 0;
 }
 
-.step.active {
-    opacity: 1;
-}
+
+
+
 
 .step {
     display: flex;
     align-items: flex-start;
     cursor: pointer;
-    margin-bottom: 24px;
-    transition: all 0.3s ease;
-    opacity: 0.6;
+    margin-bottom: 10px;
 }
 
-.step.active {
-    opacity: 1;
+.step-line {
+    position: absolute;
+    left: 10px; 
+    top: 40px; 
+    z-index: 0;
+  }
+
+
+
+
+
+
+
+
+/* --- step titles (e.g., “Plan Details”) --- */
+ .step-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .step-icon {
-  width: 30px;
-  height: 30px;
-  margin-right: 12px;
-  margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }
 
-.step.active .step-icon circle {
-  stroke: var(--color-primary-500) !important;
+.step-info {
+    flex: 1;
+    min-width: 0;
 }
 
-
-.step-content strong {
-    display: block;
-    color: var(--color-neutral-1700);
-
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-lg);
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--line-height-body-lg);
+.step-info p {
+    margin: 4px 0 0;
+    flex: 1;
+    min-width: 0;
 }
-
-.step-content p {
-    color: var(--color-neutral-800);
-
+.step-title {
+    color:var(--color-neutral-1700);
+  
+    /* body/semibold/md */
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
+    font-weight: 600;
     line-height: var(--line-height-body-md);
-    margin: 2px 0 0;
+    margin-bottom: 2px;
+  }
+  .step-titles {
+    display: block;
+    color:var(--color-primary-900);
+  
+    /* body/semibold/md */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+    margin-bottom: 2px;
+  }
+  .circle{
+    margin-top: -30px;
+  }
+  
+  .step-content p {
+    color: var(--color-neutral-900);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body-sm);
+    margin: 0;
+    flex: 1;
+  } 
+
+.button-group {
+    position: absolute;
+    left: 0;
+    bottom: 24px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 24px;
 }
 
 /* Header */
@@ -137,21 +196,7 @@
     margin-top: -30px;
 }
 
-/* Button Styles */
-.button-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-    padding: 24px;
-    border-top: 1px solid var(--color-neutral-200);
-    position: absolute;
-    bottom: -40px;
-    left: 0;
-    right: 0;
-    background: var(--color-neutral-white);
-    z-index: 1;
-}
+
 
 .button-group-left,
 .button-group-right {
@@ -159,44 +204,51 @@
     gap: 16px;
 }
 
-.buttonPrimary {
-    background-color: var(--color-primary-500);
+.button-primary {
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    
+    display: flex;
+    width: 164px;
+    padding: 8px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    height:40px;
     color: var(--color-neutral-white);
-    border: none;
-    padding: 8px 24px;
-    border-radius: 4px;
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); 
+background-color: var(--color-primary-800);
+}
+
+.button-secondary {
+   
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
+    
     display: flex;
-    text-align: center;
+    width: 140px;
+    padding: 8px 20px;
+    justify-content: center;
     align-items: center;
     gap: 8px;
+    height:40px;
+    color: var(--color-primary-800);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); 
+background-color: var(--color-primary-000);
 }
 
-.buttonSecondary {
-    background-color: transparent;
-    border: 1px solid var(--color-neutral-400);
-    color: var(--color-neutral-1000);
-    padding: 8px 24px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
 
-.buttonPrimary:disabled,
-.buttonSecondary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Tabs */
-.price-plan-tabs {
+/* .price-plan-tabs {
     display: flex;
     justify-content: center;
     margin-bottom: 24px;
@@ -225,16 +277,18 @@
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
+    height: 900px;
 }
 
 .price-plan-form-groups {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     width: 100%;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    margin-left: -8px;
 }
 
 .price-plan-form-groups label {
@@ -298,11 +352,10 @@
 .price-plan-form-groups select:focus {
     border-color: 1px solid var(--color-primary-500);
     /* Or your preferred highlight color */
-    outline: none;
+    /* outline: none; */
     /* Optional: removes default browser outline */
-}
-
-.price-plan-form-groups input,
+    
+  /* .price-plan-form-groups input,
 .price-plan-form-groups textarea {
     width: 420px;
     padding: 10px;
@@ -319,83 +372,7 @@
 }
 
 
-.button-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-    padding: 0 16px;
-    /* Increase left space */
-}
 
-.button-group-left {
-    flex: 1;
-    margin-left: 20px;
-}
-
-.button-group-right {
-    display: flex;
-    gap: 12px;
-    /* Add space between Back and Next */
-    justify-content: flex-end;
-    margin-right: 20px;
-}
-
-
-.button-group .aforo-button {
-    flex: 0 0 auto;
-    width: 180px;
-    height: 40px;
-    color: var(--color-error-400);
-    background-color: var(--color-error-100);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    padding: 12px 24px;
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-left: -20px;
-}
-
-
-.buttonPrimary {
-    width: 206px;
-    height: 40px;
-    color: var(--color-neutral-white);
-    background-color: var(--color-primary-600);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    padding: 12px 24px;
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-right: 20px;
-
-}
-
-.buttonSecondary {
-    width: 206px;
-    height: 40px;
-    background-color: var(--color-primary-000);
-    color: var(--color-primary-800);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
 
 .price-plan-tabs {
     display: flex;
@@ -421,7 +398,6 @@
     padding: 16px 24px;
     border-bottom: 2px solid transparent;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .price-plan-tab:hover {
@@ -437,7 +413,6 @@
     position: relative;
     width: 100%;
     height: 4px;
-    background-color: var(--color-neutral-200);
     border-radius: 2px;
     margin-bottom: 12px;
 }
@@ -447,5 +422,4 @@
     height: 100%;
     background-color: var(--color-primary-500);
     border-radius: 2px;
-    transition: width 0.3s ease;
-}
+}  */
