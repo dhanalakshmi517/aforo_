@@ -7,7 +7,7 @@ import Review from './Review';
 interface CreateUsageMetricProps {
     onClose: () => void;
 }
-import './UsageMetric.css';
+import './Usagemetric.css';
 
 const steps = [
     {
