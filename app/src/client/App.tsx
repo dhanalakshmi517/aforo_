@@ -13,8 +13,12 @@ import SideNavbar from './components/SideNavbar/SideNavbar';
 import Customers from './components/Customers/Customers';
 import Products from './components/Products/Products';
 import Metering from './components/Metering/Metering';
-import EditPlan from './components/RatePlans/EditRatePlans/EditPlan';
+import Subscriptions from './components/Subscriptions/Subscriptions';
+import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
+import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
+import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
 import RatePlans from './components/Rateplan/RatePlans';
+import EditRatePlan from './components/Rateplan/EditRatePlan/EditRatePlan';
 import LoginPage from '../auth/LoginPage';
 
 /**
@@ -31,6 +35,7 @@ export default function App() {
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [showNewUsageMetricForm, setShowNewUsageMetricForm] = useState(false);
+  const [showNewSubscriptionForm, setShowNewSubscriptionForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -77,18 +82,19 @@ export default function App() {
     if (location.pathname === '/get-started/products') return 'Products';
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
+    if (location.pathname === '/get-started/subscriptions') return 'Subscriptions';
     return 'Get Started';
   })();
 
   // Hide sidebar when creating a new customer, rate plan, or product
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
-    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || isEditingPlan) {
+    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || isEditingPlan) {
       setShowSidebar(false);
     } else {
       setShowSidebar(true);
     }
-  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, location.pathname]);
+  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, showNewSubscriptionForm, location.pathname]);
 
   return (
     <div className='min-h-screen bg-white'>
@@ -105,6 +111,9 @@ export default function App() {
               </div>
             } />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/estimate-revenue" element={<EstimateRevenue />} />
+            <Route path="/usage-estimation" element={<UsageEstimation />} />
+            <Route path="/stair-estimation" element={<StairEstimation />} />
             <Route path="/get-started/*" element={
               <div className="empty-background">
                 <div className="flex h-full">
@@ -126,11 +135,16 @@ export default function App() {
                         setShowCreatePlan={setShowCreatePlan}
                         ratePlans={ratePlans}
                       />} />
+                      <Route path="rate-plans/:id/edit" element={<EditRatePlan />} />
+                      <Route path="subscriptions" element={<Subscriptions 
+                          showNewSubscriptionForm={showNewSubscriptionForm}
+                          setShowNewSubscriptionForm={setShowNewSubscriptionForm}
+                        />} />
+                      
                       <Route path="metering" element={<Metering 
                         showNewUsageMetricForm={showNewUsageMetricForm}
                         setShowNewUsageMetricForm={setShowNewUsageMetricForm}
                       />} />
-                      <Route path="rate-plans/:id/edit" element={<EditPlan onClose={() => navigate(-1)} />} />
                     </Routes>
                   </div>
                 </div>

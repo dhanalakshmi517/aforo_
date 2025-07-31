@@ -1,17 +1,17 @@
 @import "../Variables/Variables.css";
 
-  .form-header {
+  .cus-form-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   
-  .form-actions {
+  .cus-form-actions {
     display: flex;
     gap: 12px;
   }
   
-  .cancel-btn {
+  .cus-cancel-btn {
     padding: 6px 14px;
         background-color: var(--color-error-100);
         border-radius: var(--border-radius-sm);
@@ -29,7 +29,7 @@
     cursor: pointer;
   }
   
-  .draft-btn {
+  .cus-draft-btn {
     
     padding: 6px 14px;
     border: none;
@@ -49,7 +49,7 @@
    line-height: var(--line-height-body-md);
   }
   
-  .form-body {
+  .cus-form-body {
     display: flex;
     margin-top: 24px;
     border: 1.5px solid var(--color-neutral-200);
@@ -59,37 +59,37 @@
     border-radius: var(--border-radius-sm);
   }
   
-  .form-sidebar {
+  .cus-form-sidebar {
     width: 300px;
     border-right: 1px solid var(--color-neutral-200);
     padding-right: 20px;
   }
   
-  .form-sidebar ul {
+  .cus-form-sidebar ul {
     list-style: none;
     padding: 0;
   }
   
-  .form-sidebar li {
+  .cus-form-sidebar li {
     margin-bottom: 20px;
   }
   
-  .form-sidebar li.active span {
+  .cus-form-sidebar li.active span {
     font-weight: bold;
     color: var(--color-neutral-1400);
   }
   
-  .form-main {
+  .cus-form-main {
     flex: 1;
     padding-left: 30px;
   }
   
-  .form-main h3 {
+  .cus-form-main h3 {
     margin-bottom: 20px;
   }
  
   
-  .form-column input,
+  .cus-form-column input,
   form select {
     display: block;
     width: 420px;
@@ -101,17 +101,17 @@
     font-family:var(--font-family-primary)
   }
   
-  .form-row {
+  .cus-form-row {
     display: flex;
     gap: 10px;
     margin-bottom: 12px;
   }
   
-  .form-row input {
+  .cus-form-row input {
     width: 201px;
   }
   
-  .form-buttons {
+  .cus-form-buttons {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
@@ -133,19 +133,19 @@
   }
   
 
-  .form-sidebar .stepper {
+  .cus-form-sidebar .cus-stepper {
     list-style: none;
     padding: 0;
     margin: 0;
   }
   
-  .stepper li {
+  .cus-stepper li {
     display: flex;
     position: relative;
     padding-bottom: 5px;
   }
   
-  .step-icon {
+  .cus-step-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -154,14 +154,14 @@
     margin-top: 30px;
   }
   
-  .step-icon svg {
+  .cus-step-icon svg {
     display: block;
     margin-top: -23px;
 
   }
 
 
-  .step-icons {
+  .cus-step-icons {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -170,14 +170,14 @@
     margin-top: 30px;
   }
   
-  .step-icons svg {
+  .cus-step-icons svg {
     display: block;
     margin-top: -58px;
 
   }
   
 
-  .step-ics {
+  .cus-step-ics {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -186,22 +186,22 @@
     margin-top: 30px;
   }
   
-  .step-ics svg {
+  .cus-step-ics svg {
     display: block;
     margin-top: -70px;
 
   }
   
-  .step-line svg {
+  .cus-step-line svg {
     margin-top: 0px;
   }
   
-  .step-content {
+  .cus-step-content {
     max-width: 205px;
     margin-top: 10px;
   }
   
-  .step-content span {
+  .cus-step-content span {
     display: block;
     margin-bottom: 4px;
     color: var(--color-neutral-800);
@@ -215,7 +215,7 @@ line-height: var(--line-height-body-lg);
   }
   
 
-  .sample {
+  .cus-sample {
     display: block;
     margin-bottom: 4px;
     color: var(--color-neutral-800);
@@ -229,7 +229,7 @@ line-height: var(--line-height-body-lg);
 margin-top: -37px;
   }
 
-  .samples {
+  .cus-samples {
     display: block;
     margin-bottom: 4px;
     color: var(--color-neutral-800);
@@ -243,7 +243,7 @@ line-height: var(--line-height-body-lg);
 margin-top: -43px;
   }
   
-  .step-content p {
+  .cus-step-content p {
     color: var(--color-neutral-800);
 
     /* body/regular/md */

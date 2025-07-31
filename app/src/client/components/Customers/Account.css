@@ -1,4 +1,4 @@
-.account-form {
+.cus-account-form {
     padding: 32px;
     background-color: #ffffff;
     max-width: 600px;
@@ -11,57 +11,57 @@
     margin-bottom: 24px;
   }
   
-  .form-groups {
+  .cus-form-groups {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
   }
   
-  .form-groupss label {
+  .cus-form-groups label {
     font-weight: 500;
     margin-bottom: 6px;
   }
   
-  .form-groups input {
+  .cus-form-groups input {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
   }
   
-  .form-groups input[type="text"],
-  .form-groups input[type="email"] {
+  .cus-form-groups input[type="text"],
+  .cus-form-groups input[type="email"] {
     font-size: 14px;
   }
   
-  .form-row {
+  .cus-form-row {
     display: flex;
     gap: 16px;
   }
   
-  .form-row .form-groups {
+  .cus-form-row .cus-form-groups {
     flex: 1;
   }
   
-  .note {
+  .cus-note {
     font-size: 12px;
     color: #888;
     margin-top: 4px;
   }
   
-  .error {
+  .cus-error {
     font-size: 12px;
     color: red;
     margin-top: 4px;
   }
   
-  .email-actions {
+  .cus-email-actions {
     margin-top: 6px;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
   
-  .link-btn {
+  .cus-link-btn {
     background: none;
     border: none;
     color: #007bff;
@@ -71,17 +71,17 @@
     padding: 0;
   }
   
-  .form-section {
+  .cus-form-section {
     margin: 24px 0 8px;
   }
   
-  .section-title {
+  .cus-section-title {
     font-weight: 600;
     margin-bottom: 8px;
     display: block;
   }
   
-  .checkbox-group {
+  .cus-checkbox-group {
     display: flex;
     align-items: center;
     gap: 8px;

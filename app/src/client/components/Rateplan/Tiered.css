@@ -1,120 +1,208 @@
-/* @import "../Variables/Variables.css";
-.tiered-pricing-container {
-    width: 504px;
-    height: auto;
-    padding: 20px;
-    border-radius: var(--border-radius-sm);
-    margin-left: 20px;
-    border: 1px solid var(--color-neutral-300);
-  }
-  
-  
-  .tiered-pricing-container h5{
-    color: var(--color-neutral-1700);
-  
-      font-family: var(--font-family-primary);
-      font-size: var(--font-size-lg);
-      font-style: normal;
-      font-weight: 600;
-      line-height: var(--line-height-body-lg, 24px);
-      margin-top: 10px;
-  }
-  .tiered-pricing-container p {
-    color: var(--color-neutral-800);
-  
-      font-family: var(--font-family-primary);
-      font-size: var(--font-size-lg, 16px);
-      font-style: normal;
-      font-weight: 400;
-      line-height: var(--line-height-body-lg, 24px);
-      margin-top: 10px;
-  }
-  
-  .tiered-header {
-    display: flex;
-    gap: 95px;
-    color: var(--color-neutral-1400);
-  
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--line-height-body-md);  margin-top: 10px;
-  }
-  
-  .tiered-pricing-columns {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .tier-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  
-  .tier-inputs {
-    display: flex;
-    gap: 12px;
-    flex-wrap: nowrap;
-    border-radius: var(--border-radius-sm);
-  }
-  
-  .tier-input {
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius-sm);
-    background-color: var(--color-neutral-100);
-  }
-  
-  .from-input,
-  .to-input {
-    width: 131px;
-  }
-  
-  .price-input {
-    width:101px;
-    margin-left: 24px;
-  }
-  
-  .delete-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: red;
-  }
-  
-  .tier-actions {
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-  }
-  
-  .add-tier-btn {
-    background: none;
-    color: var(--color-primary-600);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-lg);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-lg); 
-  }
-   */
+@import "../Variables/Variables.css";
+
+.tiered-container {
+  display: flex;
+  justify-content: space-between;
+  background: var(--color-neutral-white);
+  padding: 20px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  font-family: Arial, sans-serif;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+
+
+.tiered-input-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tiered-header-row {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #444;
+  gap: 8px;
+  margin-bottom: -8px;
+}
+
+.tiered-usage-range-label {
+  width: 140px;
+}
+
+.tiered-cost-label {
+  width: 100px;
+  margin-left: 10px;
+}
+
+.tiered-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tiered-input-small {
+  width: 71px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.tiered-input-large {
+  width: 145px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.tiered-delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.tiered-checkbox-label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  position: relative;
+}
+
+/* Hide native checkbox visually but keep it accessible */
+.tiered-checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Default state – hide tick */
+.tiered-checkbox-label input[type="checkbox"]+svg .tick {
+  display: none;
+}
+
+/* Checked state – show tick */
+.tiered-checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Default SVG appearance */
+.tiered-checkbox-label input[type="checkbox"]+svg {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+/* When checked – fill inside square only */
+.tiered-checkbox-label input[type="checkbox"]:checked+svg path:not(.tick) {
+  fill: var(--color-primary-800);
+  stroke: var(--color-primary-800);
+}
+
+.tiered-checkbox-label input[type="checkbox"]:checked+svg .tick {
+  display: block;
+  stroke: #fff;
+}
+
+/* Hide tick by default */
+.tiered-checkbox-label input[type="checkbox"]+svg .tick {
+  display: none;
+}
+
+
+/* Cursor change */
+.tiered-checkbox-label svg {
+  cursor: pointer;
+}
+
+
+.tiered-add-btn {
+  width: 186px ;
+  height: 40px;
+  padding: 8px 20px;
+  background-color: var(--color-primary-000);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-primary-800);
+  color: var(--color-primary-800);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+
+
+  cursor: pointer;
+}
+
+.tiered-example-section {
+  flex: 1;
+  background: var(--color-info-100);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  border: 1px solid var(--color-neutral-200);
+  width: 435px;
+  height: 360px;
+}
+
+.tiered-example-section h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.tiered-example-section a {
+  font-size: 14px;
+  color: #1976d2;
+  text-decoration: none;
+  display: block;
+  margin: 8px 0;
+}
+
+.tiered-example-section table {
+  width: 100%;
+  border-spacing: 0 4px;
+  margin-left: -10px;
+  background-color: var(--color-info-100);
+}
+
+.tiered-example-section td {
+  padding: 4px 8px;
+}
+
+.tiered-consumer-note {
+  margin-top: 12px;
+  color: #666;
+}
+
+.tiered-extra-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.tiered-extra-fields label {
+  font-size: 14px;
+  color: #333;
+}
+
+.tiered-input-extra {
+  width: 350px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 4px;
+}

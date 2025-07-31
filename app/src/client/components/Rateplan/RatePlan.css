@@ -8,7 +8,7 @@
 
 .breadcrumb-nav {
   margin-bottom: 10px;
-  margin-top: -15px;
+  margin-top: -20px;
 }
 
 .breadcrumb {
@@ -144,13 +144,10 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 0px;
   flex: 1;
   justify-content: flex-end;
 }
-
-
-
 .products-actions {
   display: flex;
   gap: 10px;
@@ -213,7 +210,7 @@
 
 .sam-button:hover {
   background-color: var(--color-primary-000);
-  border-color: 1px solid var(--color-primary-600);
+  border: 1px solid var(--color-primary-600);
 }
 
 
@@ -286,9 +283,9 @@ line-height: var(--line-height-body-md);
   font-weight: 600;
 }
 
-.pp-rate-table td :hover {
+/* .pp-rate-table td :hover {
   background-color: var(--color-primary-100);
-}
+} */
 
 
 
@@ -310,11 +307,10 @@ line-height: var(--line-height-body-md);
 
 .delete-modal-content {
   background: var(--color-neutral-white);
-  border-radius: 12px;
-  padding: 24px;
-  width: 500px;
+  border-radius: var(--border-radius-sm);
+  /* padding: 24px; */
+  width: 450px;
   height: 200px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -348,18 +344,21 @@ line-height: var(--line-height-body-md);
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-lg);
-  text-align: center;
+  text-align: left;
+  margin-left: 85px;
 }
 
 .delete-modal-body h5 {
   color: var(--color-neutral-1700);
-  text-align: center;
+  text-align: left;
 
   font-family: var(--font-family-primary);
   font-size: var(--font-size-h5);
   font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-heading-h5);
+  margin-left: 35px;
+
 
 }
 
@@ -542,3 +541,37 @@ line-height: var(--line-height-body-md);
     transform: translateX(100%);
   }
 }
+
+/* -------------------------------------------------- */
+/* Action buttons styles specific to RatePlans table  */
+/* -------------------------------------------------- */
+.action-button {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right:180px;
+}
+
+.edit-buttons  {
+  background-color: var(--color-info-100);
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  /* color: rgba(29, 122, 252, 1); */
+  border-radius: var(--border-radius-sm);
+  width: 28px;
+  height: 28px;
+}
+
+.delete-buttons {
+  background-color: var(--color-error-100);
+  border: none;
+  color: var(--color-error-400);
+  padding: 6px;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  width: 28px;
+  height: 28px;
+}
+

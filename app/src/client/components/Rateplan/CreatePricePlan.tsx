@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import BillableMetrics from './BillableMetrics';
+import Billable from './Billable';
 import Pricing from './Pricing';
 import Extras from './Extras';
-// import Review from './Review';
+import Review from './Review';
 import { fetchProducts } from './api';
 
 interface Product {
@@ -40,6 +40,9 @@ const steps = [
 ];
 
 const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
+    const [planName, setPlanName] = useState<string>("");
+    const [planDescription, setPlanDescription] = useState<string>("");
+    const [billingFrequency, setBillingFrequency] = useState<string>("");
     const [selectedProductName, setSelectedProductName] = useState<string>("");
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
@@ -84,16 +87,16 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                     <>
                         <div className="create-form">
                             <label>Rate Plan Name</label>
-                            <input type="text" placeholder="Placeholder" />
+                            <input type="text" placeholder="Placeholder" value={planName} onChange={(e)=>setPlanName(e.target.value)} />
                         </div>
                         <div className="create-form">
                             <label>Rate Plan Description</label>
-                            <textarea placeholder="Placeholder Placeholder Placeholder" />
+                            <textarea placeholder="Placeholder Placeholder Placeholder" value={planDescription} onChange={(e)=>setPlanDescription(e.target.value)} />
                         </div>
                         <div className="form-row">
                             <div className="create-form">
                                 <label>Billing Frequency</label>
-                                <select>
+                                <select value={billingFrequency} onChange={(e)=>setBillingFrequency(e.target.value)}>
                                     <option>--select--</option>
                                 </select>
                             </div>
@@ -113,28 +116,29 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                     </>
                 );
             case 1:
-                return <BillableMetrics productName={selectedProductName} />;
+                return <Billable productName={selectedProductName} />;
             case 2:
                 return <Pricing />;
             case 3:
                 return <Extras noUpperLimit={false} />;
-            // case 4:
-            //     return (
-            //         <Review
-            //             metricName="Sample Metric"
-            //             description="Sample Description"
-            //             linkProduct="Product A"
-            //             defineUnit="Units"
-            //             defineAggregationType="Sum"
-            //         />
-    //             );
-    //         default:
-    //             return <p>Coming soon...</p>;
+            case 4:
+                const planDetails = {
+                    name: planName,
+                    description: planDescription,
+                    frequency: billingFrequency,
+                    product: selectedProductName
+                };
+                return (
+                    <Review planDetails={planDetails} />
+                );
+            default:
+                return <p>Coming soon...</p>;
          }
      };
 
     return (
         <div className="create-price-plan">
+      
             <div className="usage-metric-wrapper">
                 <aside className="sidebars">
                     {steps.map((step, index) => (

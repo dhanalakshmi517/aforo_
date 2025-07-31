@@ -3,15 +3,15 @@ import "./Account.css";
 
 const AccountDetailsForm: React.FC = () => {
   return (
-    <div className="account-form">
+    <div className="cus-account-form">
       <h3>ACCOUNT DETAILS</h3>
       <form>
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Account Name</label>
           <input type="text" placeholder="Placeholder" />
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Enter Net Term Days</label>
           <input type="text" placeholder="Placeholder" />
           <small className="note">
@@ -20,17 +20,17 @@ const AccountDetailsForm: React.FC = () => {
           </small>
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Account ID</label>
           <input type="text" placeholder="Placeholder" />
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Primary Email</label>
           <input type="email" placeholder="Placeholder" />
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Email Recipients</label>
           <input type="email" placeholder="Placeholder" />
           <span className="error">* Error text</span>
@@ -40,46 +40,46 @@ const AccountDetailsForm: React.FC = () => {
           </div>
         </div>
 
-        <div className="form-section">
-          <label className="section-title">Account Billing Address</label>
-          <div className="checkbox-group">
+        <div className="cus-form-section">
+          <label className="cus-section-title">Account Billing Address</label>
+          <div className="cus-checkbox-group">
             <input type="checkbox" id="inheritAddress" />
             <label htmlFor="inheritAddress">Inherit Address from Customer</label>
           </div>
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Phone Number</label>
           <input type="text" placeholder="45690785890" />
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Billing Address Line 1</label>
           <input type="text" placeholder="Placeholder" />
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Billing Address Line 2</label>
           <input type="text" placeholder="Placeholder" />
         </div>
 
-        <div className="form-row">
-          <div className="form-groups">
+        <div className="cus-form-row">
+          <div className="cus-form-groups">
             <label>City</label>
             <input type="text" placeholder="Placeholder" />
           </div>
-          <div className="form-groups">
+          <div className="cus-form-groups">
             <label>Postal Code</label>
             <input type="text" placeholder="Placeholder" />
           </div>
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>State</label>
           <input type="text" placeholder="Placeholder" />
         </div>
 
-        <div className="form-groups">
+        <div className="cus-form-groups">
           <label>Country</label>
           <input type="text" placeholder="Placeholder" />
         </div>

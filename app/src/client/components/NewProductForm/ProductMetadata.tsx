@@ -86,18 +86,18 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className={styles.sectionHeading}>PLAN DETAILS</h2>
-      <div className={styles.container}>
+      <h2 className={styles.sectionsHeading}>PLAN DETAILS</h2>
+      <div className={styles.containers}>
         <Grid container spacing={2} className={styles.formGrid}>
           <Grid item xs={12} sm={6}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>Internal SKU Code</label>
               <input
                 type="text"
                 name="internalSkuCode"
                 value={formData.internalSkuCode}
                 onChange={handleChange}
-                className={styles.inputField}
+                className={styles.metInput}
                 placeholder="Enter internal SKU code"
               />
               {errors.internalSkuCode && <div className={styles.error}>{errors.internalSkuCode}</div>}
@@ -105,14 +105,14 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>UOM</label>
               <input
                 type="text"
                 name="uom"
                 value={formData.uom}
                 onChange={handleChange}
-                className={styles.inputField}
+                className={styles.metInput}
                 placeholder="Enter UOM"
               />
               {errors.uom && <div className={styles.error}>{errors.uom}</div>}
@@ -120,35 +120,35 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>Effective Start Date</label>
               <input
                 type="date"
                 name="effectiveStartDate"
                 value={formData.effectiveStartDate}
                 onChange={handleChange}
-                className={styles.inputField}
+                className={styles.metInput}
               />
               {errors.effectiveStartDate && <div className={styles.error}>{errors.effectiveStartDate}</div>}
             </div>
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>Effective End Date</label>
               <input
                 type="date"
                 name="effectiveEndDate"
                 value={formData.effectiveEndDate}
                 onChange={handleChange}
-                className={styles.inputField}
+                className={styles.metInput}
               />
               {errors.effectiveEndDate && <div className={styles.error}>{errors.effectiveEndDate}</div>}
             </div>
           </Grid>
 
           <Grid item xs={12}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>Billable</label>
               <div className={styles.checkboxGroup}>
                 <input
@@ -163,7 +163,7 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
           </Grid>
 
           <Grid item xs={12}>
-            <label className={styles.formGroupLabel}>Labels</label>
+            <label className={styles.formGroupsLabel}>Labels</label>
             <div className={metadataStyles.labelInputWrapper}>
               <input
                 type="text"
@@ -215,7 +215,7 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>Linked Rate Plans</label>
               <input
                 type="text"
@@ -235,14 +235,14 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
                   }
                 }}
                 placeholder="Enter rate plan names"
-                className={styles.inputField}
+                className={styles.metInput}
               />
               {errors.linkedRatePlans && <div className={styles.error}>{errors.linkedRatePlans}</div>}
             </div>
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <div className={styles.formGroupLabel}>
+            <div className={styles.formGroupsLabel}>
               <label>Audit Log ID</label>
               <input
                 type="text"
@@ -250,7 +250,7 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
                 value={formData.auditLogId}
                 onChange={handleChange}
                 placeholder="Enter audit log ID"
-                className={styles.inputField}
+                className={styles.metInput}
               />
               {errors.auditLogId && <div className={styles.error}>{errors.auditLogId}</div>}
             </div>

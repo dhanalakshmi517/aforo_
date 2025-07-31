@@ -36,7 +36,7 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-h6);
   font-style: normal;
-  font-weight: 800;
+  font-weight: 500;
   line-height: var(--line-height-heading-h6);
   transition: all 0.3s ease;
   position: relative;
@@ -48,8 +48,8 @@
 
 .tab-button.active {
   color: var(--color-neutral-1400);
-  font-weight: 700;
-  border-left: 2px solid var(--color-primary-800);
+  font-weight: 500;
+  border-left: 1px solid var(--color-primary-800);
   padding-left: 1rem;
 }
 
@@ -77,7 +77,11 @@
 }
 
 .general-forms {
-  margin-top: -30px;
+  margin-top: 33px;
+}
+
+.general-form {
+  margin-top: 33px;
 }
 
 .form-heading {

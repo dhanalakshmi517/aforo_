@@ -11,16 +11,17 @@
   
   .sidebars {
     width: 280px;
-    background-color:var(--color-neutral-white);
+    background-color:var(--color-neutral-100);
     padding: 30px 20px;
     border-right: 1.5px solid var(--color-neutral-200);
   }
   
-  .step-item {
+  .met-step {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 25px;
+    margin-bottom: 50px; 
     cursor: pointer;
+    margin-top: -10px;
   }
   
   .icon-wrappers {
@@ -33,25 +34,52 @@
     margin-right: 12px;
   }
 
+  .met-step:nth-child(2) .icon-wrappers,
+  .met-step:nth-child(3) .icon-wrappers {
+    margin-top: -55px; 
+  }
+
+  .met-step:nth-child(2) .step-text,
+  .met-step:nth-child(3) .step-text {
+    margin-top: -55px; 
+  }
+
+  /* Offset connector line for 2nd and 3rd steps */
+  .met-step:nth-child(2) .icon-wrappers svg:nth-of-type(2),
+  .met-step:nth-child(3) .icon-wrappers svg:nth-of-type(3) {
+    margin-top: -2px;
+  }
+
   .icon-wrappers svg:first-child {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
   }
   
-  .connector {
+.connector {
     position: absolute;
-    top: 24px; 
-    left: 11px; 
+    top: 24px;
+    left: 11px;
     width: 2px;
-    height: 50px; 
-    background: transparent; 
-  }
-  .step-0 { height: 85px; }
-  .step-1 { height: 70px; }
-  .step-2 { height: 85px; }
-  .step-3 { height: 105px; }
+}
 
+.metric-connector {
+    display:none;
+}
+
+.step-connector {
+    position: absolute;
+    top: 24px;
+    left: 11px;
+    width: 2px;
+    height: 250px; 
+  }
+
+  /* Completed or active step connector color */
+  .met-step:not(.active) .icon-wrappers svg:nth-of-type(2) path {
+    stroke: #BDBBBE;
+  }
+  
 
   .step-text {
     max-width: 180px;
@@ -69,18 +97,18 @@ line-height: var(--line-height-body-lg);
   }
   
   
-  .step-item.active .icon-wrappers svg circle:first-child {
+  .met-step.active .icon-wrappers svg circle:first-child {
     stroke: var(--color-primary-800);
 
   }
 
-  .step-item.active .icon-wrappers svg circle:last-child {
+  .met-step.active .icon-wrappers svg circle:last-child {
     fill: var(--color-primary-800);
     stroke-width: 3; 
 
   }
 
-  .step-item.active .step-title {
+  .met-step.active .step-title {
     color: var(--color-neutral-1700);
   }
 
@@ -106,7 +134,7 @@ line-height: var(--line-height-body-md);
     margin-top: -30px;
   }
   
-  .top-actions {
+  .top-actionss {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -114,7 +142,7 @@ line-height: var(--line-height-body-md);
     margin-bottom: 20px;
   }
   
-  .top-title {
+  .top-titles {
     color: var(--color-neutral-1700);
 font-family: var(--font-family-primary);
 font-size: var(--font-size-h4);

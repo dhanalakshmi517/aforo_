@@ -41,6 +41,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<number | null>(null);
   const [deleteProductName, setDeleteProductName] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [notification, setNotification] = useState<NotificationState | null>(null);
 
   useEffect(() => {
@@ -168,8 +169,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       <div className="delete-modal-content">
         <div className="delete-modal-body">
           <h5>
-            Are you sure you want to delete the product?
-            <br />
+            Are you sure you want to delete <br />the product?
             <strong>"{deleteProductName}"</strong>
           </h5>
           <p>This action cannot be undone.</p>
@@ -262,7 +262,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <input type="search" placeholder="Search among your products..." className={styles.productsSearchInput} />
+                    <input
+                      type="search"
+                      placeholder="Search among your products..."
+                      className={styles.productsSearchInput}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
                   <button className={styles.samButton}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -291,7 +297,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product) => (
+                    {products
+                      .filter(product => product.productName.toLowerCase().includes(searchTerm.toLowerCase()))
+                      .map((product) => (
                       <tr key={product.productId}>
                         <td>{product.productId}</td>
                         <td>{product.productName}</td>

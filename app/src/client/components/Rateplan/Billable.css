@@ -1,0 +1,286 @@
+/* @import "../Variables/Variables.css";
+.billable-metrics-container h2 {
+    color: var(--color-neutral-1000);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h6);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-heading-h6);
+}
+
+.billable-metrics-container span {
+    font-weight: bold;
+}
+
+.billable-note {
+    color: var(--color-neutral-600);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 300;
+    line-height: var(--line-height-body-md);
+    margin-bottom: 10px;
+}
+
+.billable-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.billable-metric-card {
+    width:354px;
+    height: 72px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid var(--color-neutral-200);
+    padding: 14px;
+    border-radius: var(--border-radius-sm);
+    background: var(--color-neutral-white);
+    cursor: pointer;
+    transition: border 0.3s;
+}
+
+.billable-metric-card input[type="radio"] {
+    accent-color: var(--color-primary-800);
+    margin-top: 10px;
+}
+
+.billable-metric-card.selected {
+    border: 2px solid var(--color-primary-800);
+}
+
+.billable-metric-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.billable-metric-title {
+    color: var(--color-neutral-1700);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-lg);
+}
+
+.billable-metric-subtitle {
+    color: var(--color-neutral-1000);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+}
+
+.billable-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--border-radius-sm);
+    border: 0.6px solid #F2EAEA;
+
+
+    text-align: center;
+    padding-top: 4px;
+    box-shadow: 2px 2px 5.6px -1px rgba(33, 31, 32, 0.25) inset;
+
+}
+
+.billable-icon-text {
+    overflow: hidden;
+    text-align: center;
+
+    text-overflow: ellipsis;
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 10px;
+    letter-spacing: -1px;
+}
+
+.billable-icon-sub {
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+
+.billable-bg-orange-100 {
+    background-color: #ffe9cc;
+}
+
+.billable-text-orange-600 {
+    color: #F8891E;
+    
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; 
+}
+
+.billable-bg-purple-100 {
+    background-color: #f3e8ff;
+}
+
+.billable-text-purple-600 {
+    color: #6D0E4E;
+   
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; 
+    letter-spacing: -1px;}
+
+.billable-bg-yellow-100 {
+    background-color: #fef9c3;
+}
+
+.billable-text-yellow-700 {
+    color: #E4C111;
+    
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; 
+    letter-spacing: -1px;}
+
+.billable-bg-teal-100 {
+    background-color: #ccfbf1;
+}
+
+.billable-text-teal-700 {
+    color: #12BAA9;
+    
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; 
+    letter-spacing: -1px;}
+
+.billable-bg-blue-100 {
+    background-color: #dbeafe;
+}
+
+.billable-text-blue-700 {
+    color: #5460AC;
+   
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; 
+    letter-spacing: -1px;} */
+
+
+    /* .billable-metrics-container {
+        padding: 24px;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        max-width: 900px;
+        margin: 0 auto;
+        font-family: 'Inter', sans-serif;
+      } */
+      
+      .billable-metrics-container h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      
+      .billable-metrics-container h2 span {
+        font-weight: 600;
+        color: #3b82f6;
+      }
+      
+      .billable-note {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 24px;
+        line-height: 1.4;
+      }
+      
+      .billable-metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+      }
+      
+      .billable-metric-card {
+        display: block;
+        background: #f9fafb;
+        border-radius: 10px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        position: relative;
+      }
+      
+      .billable-metric-card:hover {
+        border-color: #d1d5db;
+      }
+      
+      .billable-metric-card input[type='radio'] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .billable-metric-card.selected {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+      }
+      
+      .billable-metric-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      
+      .billable-metric-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #111827;
+      }
+      
+      .billable-metric-subtitle {
+        font-size: 13px;
+        color: #6b7280;
+      }
+      
+      .billable-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        font-size: 11px;
+        text-align: center;
+        line-height: 1.2;
+      }
+      
+      .billable-icon-text {
+        font-size: 13px;
+      }
+      
+      .billable-icon-sub {
+        font-size: 11px;
+        opacity: 0.85;
+      }
+      

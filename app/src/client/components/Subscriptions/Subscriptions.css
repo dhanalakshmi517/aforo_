@@ -1,0 +1,131 @@
+@import "../Variables/Variables.css";
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary-700);
+  font-size: var(--font-size-lg);
+  border-bottom: 1px solid var(--color-neutral-200);
+  margin-left: 20px;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+  margin-left: 20px;
+  color: var(--color-primary-900);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-sm);
+}
+
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 20px;
+  }
+  
+  .header h2 {
+    color: var(--color-neutral-1700);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h4);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-heading-h4);
+  }
+  
+  .search-add {
+    display: flex;
+    gap: 10px;
+    margin-left: 310px;
+  }
+  
+  .search-add input {
+    padding: 8px 12px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-sm);
+    min-width: 250px;
+    color: var(--color-neutral-800);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg);
+    
+  }
+  
+  .add-btn {
+    padding: 8px 20px;
+    width:199px;
+    height:40px;
+    color: var(--color-neutral-white);
+    background-color: var(--color-primary-800);
+ 
+ font-family: var(--font-family-primary);
+ font-size: var(--font-size-md);
+ font-style: normal;
+ font-weight: 400;
+ line-height: var(--line-height-body-md);
+     cursor: pointer;
+     /* margin-left: 780px; */
+  }
+  
+  table {
+    width: 1000px;
+    margin-left: 30px;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .name-email .email {
+    color: gray;
+    font-size: 12px;
+  }
+  
+  .status {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  .status.active {
+    background-color: #e6f5ea;
+    color: #2dbd6e;
+    border: 1px solid #b6e2c0;
+  }
+  
+  .icon {
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .icon.edit {
+    color: #0d6efd;
+  }
+  
+  .icon.delete {
+    color: #ff5c5c;
+  }
+  
