@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './stairstep.css';
+import './StairStep.css';
 
 interface Stair {
   from: string;
