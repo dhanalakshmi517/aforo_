@@ -7,8 +7,8 @@ import { Routes, Route } from 'react-router-dom';
 import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUserLastActiveTimestamp } from 'wasp/client/operations';
 import { cn } from './cn';
-import LandingPage from '../landing-page/LandingPage';
-import NavBar from './components/NavBar/NavBar';
+import Landing from './components/Landing/Landing';
+
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import Customers from './components/Customers/Customers';
 import Products from './components/Products/Products';
@@ -49,32 +49,7 @@ export default function App() {
     }
   }, [user]);
 
-  const navigationItems = [
-    {
-      name: 'Home',
-      to: '/',
-    },
-    {
-      name: 'Get Started',
-      to: '/get-started',
-    },
-    {
-      name: 'Customers',
-      to: '/get-started/customers',
-    },
-    {
-      name: 'Products',
-      to: '/get-started/products',
-    },
-    {
-      name: 'Rate Plans',
-      to: '/get-started/rate-plans',
-    },
-    {
-      name: 'Billable Metrics',
-      to: '/get-started/metering',
-    }
-  ];
+  
 
   const currentTab = (() => {
     if (location.pathname === '/get-started') return 'Get Started';
@@ -100,14 +75,12 @@ export default function App() {
     <div className='min-h-screen bg-white'>
       <CookieConsentBanner />
       <div className='flex flex-col'>
-        {location.pathname === '/' && (
-          <NavBar navigationItems={navigationItems} />
-        )}
+        
         <div className='flex-1'>
           <Routes>
             <Route path="/" element={
               <div className="min-h-screen">
-                <LandingPage />
+                <Landing />
               </div>
             } />
             <Route path="/login" element={<LoginPage />} />
