@@ -18,11 +18,10 @@
 }
 
 .logo {
-  padding: 24px;
+  padding: 16px 24px 8px;
   display: flex;
   justify-content: left;
   align-items: center;
-  margin-top: 10px;
 }
 
 
@@ -31,7 +30,7 @@
   flex: 1;
   padding: 16px 0;
   overflow-y: auto;
-  padding: 8px 0 16px 0;
+  padding: 4px 0 16px 0;
   /* Reduced top padding from 16px to 8px */
 
 }
@@ -47,25 +46,36 @@
   padding: 12px 24px;
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 5px;
-  margin-top: -10px;
+  margin-bottom: 1px;
+  margin-top: 0;
   margin-right: 16px;
   margin-left: 16px;
 }
 
+
+.logo-text {
+  color: #465B66;
+font-family: "Altone Variable";
+font-size: 28.441px;
+font-style: normal;
+font-weight: 500;
+line-height: 40.302px; 
+letter-spacing: -1.896px;
+}
 .nav-item:hover {
   background-color: var(--color-neutral-200);
 }
 
 .nav-item.active {
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-sm);
   position: relative;
   z-index: 1;
-  padding: 8px 24px;
+  padding: 12px 24px;
   color: var(--color-primary-800);
+  font-weight: 500;
 }
 
 .nav-item.active .icon-wrapper {
@@ -128,5 +138,5 @@
 
 .nav-item.active .tab-name {
   color: var(--color-primary-800);
-  font-weight: 600;
+  font-weight: 500;
 }

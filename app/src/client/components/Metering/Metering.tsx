@@ -71,6 +71,36 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       <div className="metering-header">
         <h2>Usage Metrics</h2>
         <div className="metering-actions">
+<<<<<<< HEAD
+           <div className="search-wrappers">
+             {/* <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z"
+                stroke="#706C72"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>   */}
+            <input
+              type="text"
+              placeholder="Search among customers"
+              className="search-input"
+            />
+          </div> 
+          <button className="sam-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button className="new-button" onClick={() => setShowNewUsageMetricForm(true)}>+ New Usage Metric</button>
+=======
         <div className="search-wrapper">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,6 +129,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                     </svg>
                   </button>
                         <button className="new-button" onClick={() => setShowNewUsageMetricForm(true)}>+ New Usage Metric</button>
+>>>>>>> main
         </div>
       </div>
       <table className="metering-table">
@@ -120,9 +151,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               <td>{metric.unit}</td>
               <td>
                 <span
+<<<<<<< HEAD
+                  className={`status-tag ${metric.status === "Active" ? "active" : "inactive"
+                    }`}
+=======
                   className={`status-tag ${
                     metric.status === "Active" ? "active" : "inactive"
                   }`}
+>>>>>>> main
                 >
                   {metric.status}
                 </span>

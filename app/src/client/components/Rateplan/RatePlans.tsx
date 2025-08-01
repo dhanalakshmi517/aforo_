@@ -1,4 +1,9 @@
+<<<<<<< HEAD
+import React, { useState, useEffect } from 'react';
+import { fetchRatePlans, deleteRatePlan } from './api';
+=======
 import React, { useState } from 'react';
+>>>>>>> main
 import './RatePlan.css';
 import { Link, useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
@@ -58,12 +63,34 @@ export interface RatePlan {
 interface RatePlansProps {
   showCreatePlan: boolean;
   setShowCreatePlan: (show: boolean) => void;
+<<<<<<< HEAD
+  ratePlans?: RatePlan[];
+=======
   ratePlans: RatePlan[];
+>>>>>>> main
 }
 
 const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan, ratePlans }) => {
   const navigate = useNavigate();
+<<<<<<< HEAD
+  const [ratePlansState, setRatePlans] = useState<RatePlan[]>(ratePlans || []);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Fetch rate plans from backend on component mount
+  useEffect(() => {
+    const loadRatePlans = async () => {
+      try {
+        const data = await fetchRatePlans();
+        setRatePlans(data);
+      } catch (error) {
+        console.error('Failed to fetch rate plans', error);
+      }
+    };
+    loadRatePlans();
+  }, []);
+=======
   const [ratePlansState, setRatePlans] = useState<RatePlan[]>(ratePlans);
+>>>>>>> main
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
@@ -71,7 +98,12 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
   const [notification, setNotification] = useState<NotificationState | null>(null);
 
   const handleEdit = (id: number) => {
+<<<<<<< HEAD
+    const plan = ratePlansState.find(p => p.ratePlanId === id);
+    navigate(`/get-started/rate-plans/${id}/edit`, { state: { ratePlanName: plan?.ratePlanName || '' } });
+=======
     navigate(`/get-started/rate-plans/${id}/edit`);
+>>>>>>> main
   };
 
   const handleDeleteClick = (id: number) => {
@@ -84,7 +116,12 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
     const deletedPlan = ratePlansState.find(p => p.ratePlanId === deleteTargetId);
     try {
       setIsDeleting(true);
+<<<<<<< HEAD
+      await deleteRatePlan(deleteTargetId);
+      // Update UI after successful deletion
+=======
       // Simulate deletion success
+>>>>>>> main
       setRatePlans(prev => prev.filter(plan => plan.ratePlanId !== deleteTargetId));
       setShowDeleteModal(false);
       setNotification({ type: 'success', ratePlanName: deletedPlan?.ratePlanName || '' });
@@ -127,7 +164,16 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
               <span>Create New Rate Plan</span>
             </button>
             <div className="plan-header-actions">
+<<<<<<< HEAD
+              <button
+                className="cancel-button"
+                onClick={() => setShowCancelModal(true)}
+              >
+                Cancel
+              </button>
+=======
               <button className="cancel-button" onClick={() => setShowCancelModal(true)}>Cancel</button>
+>>>>>>> main
               <button className="draft-button">Save as Draft</button>
             </div>
           </div>
@@ -143,7 +189,20 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                 </div>
                 <div className="delete-modal-footer">
                   <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
+<<<<<<< HEAD
+                  <button
+                      className="delete-modal-confirm"
+                      onClick={() => {
+                        setShowCancelModal(false);
+                        setShowCreatePlan(false);
+                        navigate('/get-started/rate-plans');
+                      }}
+                    >
+                      Confirm
+                    </button>
+=======
                   <button className="delete-modal-confirm" onClick={() => { setShowCancelModal(false); setShowCreatePlan(false); }}>Confirm</button>
+>>>>>>> main
                 </div>
               </div>
             </div>
@@ -154,7 +213,40 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
           <div className="rate-plan-header">
             <h2>Rate Plans</h2>
             <div className="header-actions">
+<<<<<<< HEAD
+              <div className="products-search">
+                <svg 
+                  className="search-icon" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 20 20" 
+                  fill="none"
+                >
+                  <path 
+                    d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" 
+                    stroke="currentColor" 
+                    strokeWidth="1.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                  />
+                </svg>
+                <input
+                  type="search"
+                  placeholder="Search among your rate plans..."
+                  className="products-search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button className="sam-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+=======
               <input type="search" placeholder="Search among your rate plans..." className="products-search-input" />
+>>>>>>> main
               <button className="new-button" onClick={() => {
                 setShowCreatePlan(true);
                 navigate('/get-started/rate-plans');
@@ -176,7 +268,13 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
               </tr>
             </thead>
             <tbody>
+<<<<<<< HEAD
+              {ratePlansState
+                .filter(plan => plan.ratePlanName.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((plan, index) => (
+=======
               {ratePlansState.map((plan, index) => (
+>>>>>>> main
                 <tr key={plan.ratePlanId}>
                   <td>{index + 1}</td>
                   <td>{plan.ratePlanName || 'N/A'}</td>
@@ -188,9 +286,19 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                   <td>{plan.billingFrequency || 'N/A'}</td>
                   <td>{plan.ratePlanType || 'N/A'}</td>
                   <td>
+<<<<<<< HEAD
+                    <div className="action-button">
+                      <button className="edit-buttons" onClick={() => handleEdit(plan.ratePlanId)} title="Edit"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
+  <path d="M8.49933 13.3332H14.4993M11.4167 2.41449C11.6821 2.1491 12.042 2 12.4173 2C12.7927 2 13.1526 2.1491 13.418 2.41449C13.6834 2.67988 13.8325 3.03983 13.8325 3.41516C13.8325 3.79048 13.6834 4.15043 13.418 4.41582L5.41133 12.4232C5.25273 12.5818 5.05668 12.6978 4.84133 12.7605L2.92667 13.3192C2.8693 13.3359 2.80849 13.3369 2.75061 13.3221C2.69272 13.3072 2.63988 13.2771 2.59763 13.2349C2.55538 13.1926 2.52526 13.1398 2.51043 13.0819C2.4956 13.024 2.4966 12.9632 2.51333 12.9058L3.072 10.9912C3.13481 10.776 3.25083 10.5802 3.40933 10.4218L11.4167 2.41449Z" stroke="#1D7AFC" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></button>
+                      <button className="delete-buttons" onClick={() => handleDeleteClick(plan.ratePlanId)} title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
+  <path d="M2.5 4.00016H14.5M13.1667 4.00016V13.3335C13.1667 14.0002 12.5 14.6668 11.8333 14.6668H5.16667C4.5 14.6668 3.83333 14.0002 3.83333 13.3335V4.00016M5.83333 4.00016V2.66683C5.83333 2.00016 6.5 1.3335 7.16667 1.3335H9.83333C10.5 1.3335 11.1667 2.00016 11.1667 2.66683V4.00016M7.16667 7.3335V11.3335M9.83333 7.3335V11.3335" stroke="#E34935" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></button>
+=======
                     <div className="action-buttons">
                       <button className="edit-button" onClick={() => handleEdit(plan.ratePlanId)} title="Edit">Edit</button>
                       <button className="delete-button" onClick={() => handleDeleteClick(plan.ratePlanId)} title="Delete">Delete</button>
+>>>>>>> main
                     </div>
                   </td>
                 </tr>

@@ -1,0 +1,48 @@
+  
+  .edit-dropdown-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-neutral-1400);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+  }
+  
+  .edit-custom-select {
+    width: 403px;
+    height:40px;
+    padding: 8px 12px;
+    font-size: var(--font-size-md);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-200);
+    background-color: var(--color-neutral-100);
+    resize: none;
+    color: var(--color-neutral-1400);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+  }
+  
+  .custom-select:hover,
+  .custom-select:focus {
+    border-color: #bbb;
+    outline: none;
+  }
+  
+  /* Flat Fee Container Styles */
+  .flat-fee-container {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .flat-fee-container > * {
+    flex: 1;
+    min-width: 0;
+  }

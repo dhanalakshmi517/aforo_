@@ -23,7 +23,65 @@
   width: 420px;
   /* margin-left: 250px; */
 }
-.formGroupLabel {
+.formsInput {
+  /* generic wide input; retained for backwards compatibility */
+  width: 100%;
+  max-width: 534px;
+  padding: 8px 12px;
+  height:40px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+/* Metadata specific input class */
+.metInput {
+  width: 100%;
+  max-width: 534px;
+  padding: 8px 12px;
+  height: 40px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+/* Alias for fields still using the older class name */
+.inputField {
+  width: 100%;
+  max-width: 534px;
+  padding: 8px 12px;
+  height: 40px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+.formGroupsLabel {
+  /* styles for container div */
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
@@ -33,7 +91,18 @@
   margin-bottom: 8px;
   display: block;
   /* margin-left: 250px;  */
-  width: 210px;
+  width: 100%;
+  max-width: 550px;
+}
+
+.formGroupsLabel label {
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-md);
+
 }
 
 .checkbox {

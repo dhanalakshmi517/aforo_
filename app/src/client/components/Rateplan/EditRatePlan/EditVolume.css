@@ -1,0 +1,174 @@
+@import "../../Variables/Variables.css";
+
+.edit-volume-container {
+  display: flex;
+  justify-content: space-between;
+  background: var(--color-neutral-white);
+  padding: 20px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  font-family: Arial, sans-serif;
+  gap: 30px;
+  margin-top: 30px;
+  width:400px;
+}
+
+
+
+.edit-volume-input-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* ensure child rows & labels start from left */
+  align-items: flex-start;
+}
+
+.edit-volume-header-row {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #444;
+  gap: 8px;
+  margin-bottom: -8px;
+}
+
+.edit-volume-usage-range-label {
+  width: 140px;
+}
+
+.edit-volume-cost-label {
+  width: 100px;
+  margin-left: 10px;
+}
+
+.edit-volume-stair-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-volume-input-small {
+  width: 71px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.edit-volume-input-large {
+  width: 145px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.edit-volume-delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.edit-volume-checkbox-label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  position: relative;
+}
+
+/* Hide native checkbox visually but keep it accessible */
+.edit-volume-checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Default state – hide tick */
+.edit-volume-checkbox-label input[type="checkbox"]+svg .tick {
+  display: none;
+}
+
+/* Checked state – show tick */
+.edit-volume-checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Default SVG appearance */
+.edit-volume-checkbox-label input[type="checkbox"]+svg {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+/* When checked – fill inside square only */
+.edit-volume-checkbox-label input[type="checkbox"]:checked+svg path:not(.tick) {
+  fill: var(--color-primary-800);
+  stroke: var(--color-primary-800);
+}
+
+.edit-volume-checkbox-label input[type="checkbox"]:checked+svg .tick {
+  display: block;
+  stroke: #fff;
+}
+
+/* Hide tick by default */
+.edit-volume-checkbox-label input[type="checkbox"]+svg .tick {
+  display: none;
+}
+
+
+/* Cursor change */
+.edit-volume-checkbox-label svg {
+  cursor: pointer;
+}
+
+
+.edit-volume-add-stair-btn {
+  width: 186px ;
+  height: 40px;
+  padding: 8px 20px;
+  background-color: var(--color-primary-000);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-primary-800);
+  color: var(--color-primary-800);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+
+
+  cursor: pointer;
+}
+
+
+
+
+.edit-volume-extra-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.edit-volume-extra-fields label {
+  font-size: 14px;
+  color: #333;
+}
+
+.edit-volume-input-extra {
+  width: 350px !important;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 4px;
+}

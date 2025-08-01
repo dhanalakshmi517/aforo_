@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+/* .usage-metric-wrapper {
+=======
 .usage-metric-wrapper {
+>>>>>>> main
     display: flex;
     font-family: 'Inter', sans-serif;
     background-color:var(--color-neutral-white);
@@ -262,4 +266,8 @@ font-weight: 400;
 line-height: var(--line-height-body-md); 
 background-color: var(--color-primary-800);
   }
+<<<<<<< HEAD
+   */
+=======
   
+>>>>>>> main

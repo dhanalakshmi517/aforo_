@@ -133,6 +133,24 @@
   line-height: var(--line-height-body-md);
 }
 
+
+.formsInput {
+  width: 534px;
+  padding: 8px 12px;
+  height:40px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1200);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
 .formInput:focus {
   outline: none;
   outline-offset: 0;

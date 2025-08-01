@@ -7,14 +7,23 @@ import { Routes, Route } from 'react-router-dom';
 import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUserLastActiveTimestamp } from 'wasp/client/operations';
 import { cn } from './cn';
-import LandingPage from '../landing-page/LandingPage';
-import NavBar from './components/NavBar/NavBar';
+import Landing from './components/Landing/Landing';
+
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import Customers from './components/Customers/Customers';
 import Products from './components/Products/Products';
 import Metering from './components/Metering/Metering';
+<<<<<<< HEAD
+import Subscriptions from './components/Subscriptions/Subscriptions';
+import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
+import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
+import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
+import RatePlans from './components/Rateplan/RatePlans';
+import EditRatePlan from './components/Rateplan/EditRatePlan/EditRatePlan';
+=======
 import EditPlan from './components/RatePlans/EditRatePlans/EditPlan';
 import RatePlans from './components/Rateplan/RatePlans';
+>>>>>>> main
 import LoginPage from '../auth/LoginPage';
 
 /**
@@ -31,6 +40,10 @@ export default function App() {
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [showNewUsageMetricForm, setShowNewUsageMetricForm] = useState(false);
+<<<<<<< HEAD
+  const [showNewSubscriptionForm, setShowNewSubscriptionForm] = useState(false);
+=======
+>>>>>>> main
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -44,6 +57,9 @@ export default function App() {
     }
   }, [user]);
 
+<<<<<<< HEAD
+  
+=======
   const navigationItems = [
     {
       name: 'Home',
@@ -70,6 +86,7 @@ export default function App() {
       to: '/get-started/metering',
     }
   ];
+>>>>>>> main
 
   const currentTab = (() => {
     if (location.pathname === '/get-started') return 'Get Started';
@@ -77,34 +94,47 @@ export default function App() {
     if (location.pathname === '/get-started/products') return 'Products';
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
+<<<<<<< HEAD
+    if (location.pathname === '/get-started/subscriptions') return 'Subscriptions';
+=======
+>>>>>>> main
     return 'Get Started';
   })();
 
   // Hide sidebar when creating a new customer, rate plan, or product
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
+<<<<<<< HEAD
+    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || isEditingPlan) {
+=======
     if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || isEditingPlan) {
+>>>>>>> main
       setShowSidebar(false);
     } else {
       setShowSidebar(true);
     }
+<<<<<<< HEAD
+  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, showNewSubscriptionForm, location.pathname]);
+=======
   }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, location.pathname]);
+>>>>>>> main
 
   return (
     <div className='min-h-screen bg-white'>
       <CookieConsentBanner />
       <div className='flex flex-col'>
-        {location.pathname === '/' && (
-          <NavBar navigationItems={navigationItems} />
-        )}
+        
         <div className='flex-1'>
           <Routes>
             <Route path="/" element={
               <div className="min-h-screen">
-                <LandingPage />
+                <Landing />
               </div>
             } />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/estimate-revenue" element={<EstimateRevenue />} />
+            <Route path="/usage-estimation" element={<UsageEstimation />} />
+            <Route path="/stair-estimation" element={<StairEstimation />} />
             <Route path="/get-started/*" element={
               <div className="empty-background">
                 <div className="flex h-full">
@@ -125,6 +155,19 @@ export default function App() {
                         showCreatePlan={showCreatePlan} 
                         setShowCreatePlan={setShowCreatePlan}
                         ratePlans={ratePlans}
+<<<<<<< HEAD
+                      />} />
+                      <Route path="rate-plans/:id/edit" element={<EditRatePlan />} />
+                      <Route path="subscriptions" element={<Subscriptions 
+                          showNewSubscriptionForm={showNewSubscriptionForm}
+                          setShowNewSubscriptionForm={setShowNewSubscriptionForm}
+                        />} />
+                      
+                      <Route path="metering" element={<Metering 
+                        showNewUsageMetricForm={showNewUsageMetricForm}
+                        setShowNewUsageMetricForm={setShowNewUsageMetricForm}
+=======
+>>>>>>> main
                       />} />
                       <Route path="metering" element={<Metering 
                         showNewUsageMetricForm={showNewUsageMetricForm}

@@ -1,0 +1,36 @@
+@import "../../Variables/Variables.css";
+
+.edit-usage-container {
+  display: flex;
+  justify-content: space-between;
+  background: var(--color-neutral-white);
+  padding: 20px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  font-family: Arial, sans-serif;
+  gap: 30px;
+  margin-top: 30px;
+  width:400px;
+}
+
+.edit-usage-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.edit-usage-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.edit-usage-input {
+  width: 320px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+

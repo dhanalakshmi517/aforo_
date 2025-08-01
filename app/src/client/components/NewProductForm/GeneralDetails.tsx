@@ -168,7 +168,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
               name="productName"
               value={formData.productName}
               onChange={(e) => onChange({ productName: e.target.value })}
-              className={styles.formInput}
+              className={styles.formsInput}
               placeholder="Enter Product Name"
               required
             />
@@ -200,7 +200,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             name="version"
             value={formData.version}
             onChange={(e) => onChange({ version: e.target.value })}
-            className={styles.formInput}
+            className={styles.formsInput}
             placeholder="Enter Version"
           />
           {errors.version && <div className={styles.error}>{errors.version}</div>}

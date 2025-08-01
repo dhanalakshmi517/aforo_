@@ -1,3 +1,214 @@
+<<<<<<< HEAD
+@import "../Variables/Variables.css";
+
+.volume-container {
+  display: flex;
+  justify-content: space-between;
+  background: var(--color-neutral-white);
+  padding: 20px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  font-family: Arial, sans-serif;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+
+
+.volume-input-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.volume-header-row {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #444;
+  gap: 8px;
+  margin-bottom: -8px;
+}
+
+.volume-usage-range-label {
+  width: 140px;
+}
+
+.volume-cost-label {
+  width: 100px;
+  margin-left: 10px;
+}
+
+.volume-stair-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.volume-input-small {
+  width: 71px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.volume-input-large {
+  width: 145px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.volume-delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.volume-checkbox-label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  position: relative;
+}
+
+/* Hide native checkbox visually but keep it accessible */
+.volume-checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Default state – hide tick */
+.volume-checkbox-label input[type="checkbox"]+svg .tick {
+  display: none;
+}
+
+/* Checked state – show tick */
+.volume-checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Default SVG appearance */
+.volume-checkbox-label input[type="checkbox"]+svg {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+/* When checked – fill inside square only */
+.volume-checkbox-label input[type="checkbox"]:checked+svg path:not(.tick) {
+  fill: var(--color-primary-800);
+  stroke: var(--color-primary-800);
+}
+
+.volume-checkbox-label input[type="checkbox"]:checked+svg .tick {
+  display: block;
+  stroke: #fff;
+}
+
+/* Hide tick by default */
+.volume-checkbox-label input[type="checkbox"]+svg .tick {
+  display: none;
+}
+
+
+/* Cursor change */
+.volume-checkbox-label svg {
+  cursor: pointer;
+}
+
+
+.volume-add-stair-btn {
+  width: 186px ;
+  height: 40px;
+  padding: 8px 20px;
+  background-color: var(--color-primary-000);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-primary-800);
+  color: var(--color-primary-800);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+
+
+  cursor: pointer;
+}
+
+.volume-example-section {
+  flex: 1;
+  background: var(--color-info-100);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  border: 1px solid var(--color-neutral-200);
+  width: 435px;
+  height: 350px;
+}
+
+.volume-example-section h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.volume-example-section a {
+  font-size: 14px;
+  color: #1976d2;
+  text-decoration: none;
+  display: block;
+  margin: 8px 0;
+}
+
+.volume-example-section table {
+  width: 100%;
+  border-spacing: 0 4px;
+  margin-left: -10px;
+  background-color: var(--color-info-100);
+}
+
+.volume-example-section td {
+  padding: 4px 8px;
+  margin-right: 10px;
+}
+
+.volume-consumer-note {
+  margin-top: 2px;
+  color: #666;
+}
+
+.volume-extra-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.volume-extra-fields label {
+  font-size: 14px;
+  color: #333;
+}
+
+.volume-extra-fields input {
+  width: 350px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+=======
 .tiered-pricing-container {
     width: 410px;
     height: auto;
@@ -135,3 +346,4 @@
     line-height: var(--line-height-body-lg); /* 150% */
   }
   
+>>>>>>> main
