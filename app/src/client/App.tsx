@@ -13,12 +13,17 @@ import SideNavbar from './components/SideNavbar/SideNavbar';
 import Customers from './components/Customers/Customers';
 import Products from './components/Products/Products';
 import Metering from './components/Metering/Metering';
+<<<<<<< HEAD
 import Subscriptions from './components/Subscriptions/Subscriptions';
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
 import RatePlans from './components/Rateplan/RatePlans';
 import EditRatePlan from './components/Rateplan/EditRatePlan/EditRatePlan';
+=======
+import EditPlan from './components/RatePlans/EditRatePlans/EditPlan';
+import RatePlans from './components/Rateplan/RatePlans';
+>>>>>>> main
 import LoginPage from '../auth/LoginPage';
 
 /**
@@ -35,7 +40,10 @@ export default function App() {
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [showNewUsageMetricForm, setShowNewUsageMetricForm] = useState(false);
+<<<<<<< HEAD
   const [showNewSubscriptionForm, setShowNewSubscriptionForm] = useState(false);
+=======
+>>>>>>> main
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -49,7 +57,36 @@ export default function App() {
     }
   }, [user]);
 
+<<<<<<< HEAD
   
+=======
+  const navigationItems = [
+    {
+      name: 'Home',
+      to: '/',
+    },
+    {
+      name: 'Get Started',
+      to: '/get-started',
+    },
+    {
+      name: 'Customers',
+      to: '/get-started/customers',
+    },
+    {
+      name: 'Products',
+      to: '/get-started/products',
+    },
+    {
+      name: 'Rate Plans',
+      to: '/get-started/rate-plans',
+    },
+    {
+      name: 'Billable Metrics',
+      to: '/get-started/metering',
+    }
+  ];
+>>>>>>> main
 
   const currentTab = (() => {
     if (location.pathname === '/get-started') return 'Get Started';
@@ -57,19 +94,30 @@ export default function App() {
     if (location.pathname === '/get-started/products') return 'Products';
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
+<<<<<<< HEAD
     if (location.pathname === '/get-started/subscriptions') return 'Subscriptions';
+=======
+>>>>>>> main
     return 'Get Started';
   })();
 
   // Hide sidebar when creating a new customer, rate plan, or product
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
+<<<<<<< HEAD
     if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || isEditingPlan) {
+=======
+    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || isEditingPlan) {
+>>>>>>> main
       setShowSidebar(false);
     } else {
       setShowSidebar(true);
     }
+<<<<<<< HEAD
   }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, showNewSubscriptionForm, location.pathname]);
+=======
+  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, location.pathname]);
+>>>>>>> main
 
   return (
     <div className='min-h-screen bg-white'>
@@ -107,6 +155,7 @@ export default function App() {
                         showCreatePlan={showCreatePlan} 
                         setShowCreatePlan={setShowCreatePlan}
                         ratePlans={ratePlans}
+<<<<<<< HEAD
                       />} />
                       <Route path="rate-plans/:id/edit" element={<EditRatePlan />} />
                       <Route path="subscriptions" element={<Subscriptions 
@@ -117,7 +166,14 @@ export default function App() {
                       <Route path="metering" element={<Metering 
                         showNewUsageMetricForm={showNewUsageMetricForm}
                         setShowNewUsageMetricForm={setShowNewUsageMetricForm}
+=======
+>>>>>>> main
                       />} />
+                      <Route path="metering" element={<Metering 
+                        showNewUsageMetricForm={showNewUsageMetricForm}
+                        setShowNewUsageMetricForm={setShowNewUsageMetricForm}
+                      />} />
+                      <Route path="rate-plans/:id/edit" element={<EditPlan onClose={() => navigate(-1)} />} />
                     </Routes>
                   </div>
                 </div>

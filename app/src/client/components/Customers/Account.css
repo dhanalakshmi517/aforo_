@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 .cus-account-form {
+=======
+.account-form {
+>>>>>>> main
     padding: 32px;
     background-color: #ffffff;
     max-width: 600px;
@@ -11,57 +15,98 @@
     margin-bottom: 24px;
   }
   
+<<<<<<< HEAD
   .cus-form-groups {
+=======
+  .form-groups {
+>>>>>>> main
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
   }
   
+<<<<<<< HEAD
   .cus-form-groups label {
+=======
+  .form-groupss label {
+>>>>>>> main
     font-weight: 500;
     margin-bottom: 6px;
   }
   
+<<<<<<< HEAD
   .cus-form-groups input {
+=======
+  .form-groups input {
+>>>>>>> main
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
   }
   
+<<<<<<< HEAD
   .cus-form-groups input[type="text"],
   .cus-form-groups input[type="email"] {
     font-size: 14px;
   }
   
   .cus-form-row {
+=======
+  .form-groups input[type="text"],
+  .form-groups input[type="email"] {
+    font-size: 14px;
+  }
+  
+  .form-row {
+>>>>>>> main
     display: flex;
     gap: 16px;
   }
   
+<<<<<<< HEAD
   .cus-form-row .cus-form-groups {
     flex: 1;
   }
   
   .cus-note {
+=======
+  .form-row .form-groups {
+    flex: 1;
+  }
+  
+  .note {
+>>>>>>> main
     font-size: 12px;
     color: #888;
     margin-top: 4px;
   }
   
+<<<<<<< HEAD
   .cus-error {
+=======
+  .error {
+>>>>>>> main
     font-size: 12px;
     color: red;
     margin-top: 4px;
   }
   
+<<<<<<< HEAD
   .cus-email-actions {
+=======
+  .email-actions {
+>>>>>>> main
     margin-top: 6px;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
   
+<<<<<<< HEAD
   .cus-link-btn {
+=======
+  .link-btn {
+>>>>>>> main
     background: none;
     border: none;
     color: #007bff;
@@ -71,17 +116,29 @@
     padding: 0;
   }
   
+<<<<<<< HEAD
   .cus-form-section {
     margin: 24px 0 8px;
   }
   
   .cus-section-title {
+=======
+  .form-section {
+    margin: 24px 0 8px;
+  }
+  
+  .section-title {
+>>>>>>> main
     font-weight: 600;
     margin-bottom: 8px;
     display: block;
   }
   
+<<<<<<< HEAD
   .cus-checkbox-group {
+=======
+  .checkbox-group {
+>>>>>>> main
     display: flex;
     align-items: center;
     gap: 8px;

@@ -1,0 +1,58 @@
+@import "../../Variables/Variables.css";
+.summary-panel {
+    padding: 20px;
+    max-width: 700px;
+    height:800px;
+    }
+  
+  .summary-section {
+    background: var(--color-neutral-100);
+    border-radius: var(--border-radius-md);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  
+  .summary-title {
+    color: var(--color-neutral-1400);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 200;
+line-height: var(--line-height-body-md); 
+    margin-bottom: 12px;
+  }
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--color-neutral-200);
+  }
+  
+  .summary-row:last-child {
+    border-bottom: none;
+  }
+  
+  .summary-label {
+    color: var(--color-neutral-1400);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); 
+  }
+  
+  .summary-value {
+    color: var(--color-neutral-1400);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 600;
+line-height: var(--line-height-body-md); 
+  }
+  
+ 

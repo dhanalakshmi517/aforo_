@@ -48,8 +48,13 @@
 
 .tab-button.active {
   color: var(--color-neutral-1400);
+<<<<<<< HEAD
   font-weight: 500;
   border-left: 1px solid var(--color-primary-800);
+=======
+  font-weight: 700;
+  border-left: 2px solid var(--color-primary-800);
+>>>>>>> main
   padding-left: 1rem;
 }
 
@@ -77,11 +82,15 @@
 }
 
 .general-forms {
+<<<<<<< HEAD
   margin-top: 33px;
 }
 
 .general-form {
   margin-top: 33px;
+=======
+  margin-top: -30px;
+>>>>>>> main
 }
 
 .form-heading {

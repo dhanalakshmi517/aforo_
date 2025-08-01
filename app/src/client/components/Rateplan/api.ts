@@ -18,6 +18,7 @@ export interface Product {
 
 export const BASE_URL = 'http://13.230.194.245:8080/api';
 
+<<<<<<< HEAD
 // -------------------- Rate Plans --------------------
 export interface RatePlan {
   ratePlanId: number;
@@ -39,6 +40,8 @@ export const fetchRatePlans = async (): Promise<RatePlan[]> => {
   return response.data;
 };
 
+=======
+>>>>>>> main
 /**
  * Fetch all products from the backend service
  */
@@ -46,6 +49,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
   const response = await axios.get(`${BASE_URL}/products`);
   return response.data;
 };
+<<<<<<< HEAD
 
 /**
  * Delete a rate plan by id
@@ -53,3 +57,5 @@ export const fetchProducts = async (): Promise<Product[]> => {
 export const deleteRatePlan = async (id: number): Promise<void> => {
   await axios.delete(`${BASE_URL}/rateplans/${id}`);
 };
+=======
+>>>>>>> main

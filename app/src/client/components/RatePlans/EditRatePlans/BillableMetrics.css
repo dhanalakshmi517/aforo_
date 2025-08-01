@@ -1,0 +1,98 @@
+@import "../../Variables/Variables.css";
+.metrics-wrapper {
+    padding: 30px;
+    max-width: 457px;
+}
+
+
+.tab-toggle-container {
+    background-color: var(--color-neutral-200);
+    padding: 6px;
+    border-radius: var(--border-radius-lg);
+    display: inline-flex;
+    margin-bottom: 20px;
+    justify-content: flex-start;
+    width: 300px;
+    height: 44px;
+    margin-left: -8px;
+}
+
+.tab-toggle-button {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    color: var(--color-neutral-1000);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tab-toggle-button.active {
+    background-color: var(--color-neutral-white);
+    color: var(--color-neutral-1000);
+    box-shadow: 0px 9px 76px 0px rgba(0, 0, 0, 0.07), 0px 2.01px 16.976px 0px rgba(0, 0, 0, 0.07), 0px 0.599px 5.054px 0px rgba(0, 0, 0, 0.07);
+    border-radius: var(--border-radius-md);
+}
+
+
+
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.metrics-wrapper .label {
+    display: block;
+    color: var(--color-neutral-1400);
+
+    /* body/semibold/md */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+    margin-bottom: 6px;
+}
+
+.metrics-wrapper .input,
+.metrics-wrapper .select,
+.metrics-wrapper .textarea {
+    width: 457px ;
+    height:40px;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-200);
+    font-size: var(--font-size-md);
+    background-color: var(--color-neutral-100);
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+}
+
+.metrics-wrapper .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* Label text beside the “Save Metric for Reuse” checkbox */
+.metrics-wrapper .checkbox-wrapper label {
+    color: var(--color-neutral-1400);
+  
+    /* body/regular/md */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+  
+    
+  }

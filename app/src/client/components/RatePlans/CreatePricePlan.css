@@ -1,0 +1,425 @@
+@import "../Variables/Variables.css";
+
+.price-plan-details-section {
+    margin-left: 20px;
+    width:1100px;
+    height: 800px auto;
+    background: var(--color-neutral-white);
+    border-right: 1px solid var(--color-neutral-200);
+
+
+}
+
+.price-plan-outer-container {
+    padding: 24px;
+    align-items: center;
+    height: 900px;
+    background: var(--color-neutral-white);
+    border: 1px solid var(--color-neutral-200);
+
+
+
+}
+
+.price-plan-container {
+    background: var(--color-neutral-white);
+    border-radius: 8px;
+    position: relative;
+    margin-top: -20px;
+    margin-left: -180px;
+
+    min-width: 1100px;
+    height: 900px;
+    min-height: 800px auto;
+    /* border: 1px solid var(--color-neutral-200); */
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-200);
+
+    
+}
+
+
+.stepper-and-form {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-sm);
+}
+
+
+.vertical-stepper {
+    position: relative;
+    flex: 0 0 250px;
+    width: 250px;
+    padding: 16px;
+    border-right: 1px solid var(--color-neutral-200);
+    background-color: var(--color-neutral-white);
+    min-height: 800px; 
+}
+
+
+.price-plan-form-section {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: auto;
+    border: 1px solid var(--color-neutral-200);
+
+}
+
+
+.step:not(:last-child) {
+    position: relative;
+}
+
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    margin-bottom: 24px;
+    position: relative;
+    padding-left: 0;
+}
+
+
+
+
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.step-line {
+    position: absolute;
+    left: 10px; 
+    top: 40px; 
+    z-index: 0;
+  }
+
+
+
+
+
+
+
+
+/* --- step titles (e.g., “Plan Details”) --- */
+ .step-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.step-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.step-info p {
+    margin: 4px 0 0;
+    flex: 1;
+    min-width: 0;
+}
+.step-title {
+    color:var(--color-neutral-1700);
+  
+    /* body/semibold/md */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+    margin-bottom: 2px;
+  }
+  .step-titles {
+    display: block;
+    color:var(--color-primary-900);
+  
+    /* body/semibold/md */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+    margin-bottom: 2px;
+  }
+  .circle{
+    margin-top: -30px;
+  }
+  
+  .step-content p {
+    color: var(--color-neutral-900);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body-sm);
+    margin: 0;
+    flex: 1;
+  } 
+
+.button-group {
+    position: absolute;
+    left: 0;
+    bottom: 24px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+
+/* Header */
+.price-plan-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.price-plan-outer-container h2 {
+    color: var(--color-neutral-1700);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h4);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-heading-h4);
+    margin-top: -30px;
+}
+
+
+
+.button-group-left,
+.button-group-right {
+    display: flex;
+    gap: 16px;
+}
+
+.button-primary {
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    
+    display: flex;
+    width: 164px;
+    padding: 8px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    height:40px;
+    color: var(--color-neutral-white);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); 
+background-color: var(--color-primary-800);
+}
+
+.button-secondary {
+   
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    
+    display: flex;
+    width: 140px;
+    padding: 8px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    height:40px;
+    color: var(--color-primary-800);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); 
+background-color: var(--color-primary-000);
+}
+
+
+/* .price-plan-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.price-plan-tab {
+    color: var(--color-neutral-1700);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-lg);
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+}
+
+.price-plan-form-section {
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 900px;
+}
+
+.price-plan-form-groups {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-left: -8px;
+}
+
+.price-plan-form-groups label {
+    color: var(--color-neutral-1400);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-md);
+}
+
+.price-plan-form-groups select {
+    width: 410px;
+    padding: 10px;
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-neutral-100);
+    margin: 0;
+}
+
+.price-plan-form-groups input {
+    width: 415px;
+    padding: 10px;
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-neutral-100);
+    margin: 0;
+}
+
+
+.price-plan-form-groups textarea {
+    width: 415px;
+    padding: 10px;
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-neutral-100);
+    margin: 0;
+}
+
+.price-plan-form-groups input,
+.price-plan-form-groups textarea,
+.price-plan-form-groups select:focus {
+    border-color: 1px solid var(--color-primary-500);
+    /* Or your preferred highlight color */
+    /* outline: none; */
+    /* Optional: removes default browser outline */
+    
+  /* .price-plan-form-groups input,
+.price-plan-form-groups textarea {
+    width: 420px;
+    padding: 10px;
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-neutral-100);
+    margin: 0;
+}
+
+
+
+
+.price-plan-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.price-plan-tab {
+    color: var(--color-neutral-1700);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-lg);
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+    padding: 16px 24px;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+
+.price-plan-tab:hover {
+    color: var(--color-primary-500);
+}
+
+.price-plan-tab-active {
+    color: var(--color-primary-500);
+    border-bottom: 2px solid var(--color-primary-500);
+}
+
+.price-plan-progress {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+}
+
+.price-plan-progress-bar {
+    position: absolute;
+    height: 100%;
+    background-color: var(--color-primary-500);
+    border-radius: 2px;
+}  */

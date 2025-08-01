@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import Billable from './Billable';
 import Pricing from './Pricing';
 import Extras from './Extras';
 import Review from './Review';
+=======
+import BillableMetrics from './BillableMetrics';
+import Pricing from './Pricing';
+import Extras from './Extras';
+// import Review from './Review';
+>>>>>>> main
 import { fetchProducts } from './api';
 
 interface Product {
@@ -40,9 +47,12 @@ const steps = [
 ];
 
 const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
+<<<<<<< HEAD
     const [planName, setPlanName] = useState<string>("");
     const [planDescription, setPlanDescription] = useState<string>("");
     const [billingFrequency, setBillingFrequency] = useState<string>("");
+=======
+>>>>>>> main
     const [selectedProductName, setSelectedProductName] = useState<string>("");
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
@@ -87,16 +97,28 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                     <>
                         <div className="create-form">
                             <label>Rate Plan Name</label>
+<<<<<<< HEAD
                             <input type="text" placeholder="Placeholder" value={planName} onChange={(e)=>setPlanName(e.target.value)} />
                         </div>
                         <div className="create-form">
                             <label>Rate Plan Description</label>
                             <textarea placeholder="Placeholder Placeholder Placeholder" value={planDescription} onChange={(e)=>setPlanDescription(e.target.value)} />
+=======
+                            <input type="text" placeholder="Placeholder" />
+                        </div>
+                        <div className="create-form">
+                            <label>Rate Plan Description</label>
+                            <textarea placeholder="Placeholder Placeholder Placeholder" />
+>>>>>>> main
                         </div>
                         <div className="form-row">
                             <div className="create-form">
                                 <label>Billing Frequency</label>
+<<<<<<< HEAD
                                 <select value={billingFrequency} onChange={(e)=>setBillingFrequency(e.target.value)}>
+=======
+                                <select>
+>>>>>>> main
                                     <option>--select--</option>
                                 </select>
                             </div>
@@ -116,11 +138,16 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                     </>
                 );
             case 1:
+<<<<<<< HEAD
                 return <Billable productName={selectedProductName} />;
+=======
+                return <BillableMetrics productName={selectedProductName} />;
+>>>>>>> main
             case 2:
                 return <Pricing />;
             case 3:
                 return <Extras noUpperLimit={false} />;
+<<<<<<< HEAD
             case 4:
                 const planDetails = {
                     name: planName,
@@ -133,12 +160,29 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                 );
             default:
                 return <p>Coming soon...</p>;
+=======
+            // case 4:
+            //     return (
+            //         <Review
+            //             metricName="Sample Metric"
+            //             description="Sample Description"
+            //             linkProduct="Product A"
+            //             defineUnit="Units"
+            //             defineAggregationType="Sum"
+            //         />
+    //             );
+    //         default:
+    //             return <p>Coming soon...</p>;
+>>>>>>> main
          }
      };
 
     return (
         <div className="create-price-plan">
+<<<<<<< HEAD
       
+=======
+>>>>>>> main
             <div className="usage-metric-wrapper">
                 <aside className="sidebars">
                     {steps.map((step, index) => (

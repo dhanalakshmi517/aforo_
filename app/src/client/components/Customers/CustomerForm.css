@@ -1,17 +1,29 @@
 @import "../Variables/Variables.css";
 
+<<<<<<< HEAD
   .cus-form-header {
+=======
+  .form-header {
+>>>>>>> main
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   
+<<<<<<< HEAD
   .cus-form-actions {
+=======
+  .form-actions {
+>>>>>>> main
     display: flex;
     gap: 12px;
   }
   
+<<<<<<< HEAD
   .cus-cancel-btn {
+=======
+  .cancel-btn {
+>>>>>>> main
     padding: 6px 14px;
         background-color: var(--color-error-100);
         border-radius: var(--border-radius-sm);
@@ -29,7 +41,11 @@
     cursor: pointer;
   }
   
+<<<<<<< HEAD
   .cus-draft-btn {
+=======
+  .draft-btn {
+>>>>>>> main
     
     padding: 6px 14px;
     border: none;
@@ -49,7 +65,11 @@
    line-height: var(--line-height-body-md);
   }
   
+<<<<<<< HEAD
   .cus-form-body {
+=======
+  .form-body {
+>>>>>>> main
     display: flex;
     margin-top: 24px;
     border: 1.5px solid var(--color-neutral-200);
@@ -59,37 +79,65 @@
     border-radius: var(--border-radius-sm);
   }
   
+<<<<<<< HEAD
   .cus-form-sidebar {
+=======
+  .form-sidebar {
+>>>>>>> main
     width: 300px;
     border-right: 1px solid var(--color-neutral-200);
     padding-right: 20px;
   }
   
+<<<<<<< HEAD
   .cus-form-sidebar ul {
+=======
+  .form-sidebar ul {
+>>>>>>> main
     list-style: none;
     padding: 0;
   }
   
+<<<<<<< HEAD
   .cus-form-sidebar li {
     margin-bottom: 20px;
   }
   
   .cus-form-sidebar li.active span {
+=======
+  .form-sidebar li {
+    margin-bottom: 20px;
+  }
+  
+  .form-sidebar li.active span {
+>>>>>>> main
     font-weight: bold;
     color: var(--color-neutral-1400);
   }
   
+<<<<<<< HEAD
   .cus-form-main {
+=======
+  .form-main {
+>>>>>>> main
     flex: 1;
     padding-left: 30px;
   }
   
+<<<<<<< HEAD
   .cus-form-main h3 {
+=======
+  .form-main h3 {
+>>>>>>> main
     margin-bottom: 20px;
   }
  
   
+<<<<<<< HEAD
   .cus-form-column input,
+=======
+  .form-column input,
+>>>>>>> main
   form select {
     display: block;
     width: 420px;
@@ -101,17 +149,29 @@
     font-family:var(--font-family-primary)
   }
   
+<<<<<<< HEAD
   .cus-form-row {
+=======
+  .form-row {
+>>>>>>> main
     display: flex;
     gap: 10px;
     margin-bottom: 12px;
   }
   
+<<<<<<< HEAD
   .cus-form-row input {
     width: 201px;
   }
   
   .cus-form-buttons {
+=======
+  .form-row input {
+    width: 201px;
+  }
+  
+  .form-buttons {
+>>>>>>> main
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
@@ -133,19 +193,31 @@
   }
   
 
+<<<<<<< HEAD
   .cus-form-sidebar .cus-stepper {
+=======
+  .form-sidebar .stepper {
+>>>>>>> main
     list-style: none;
     padding: 0;
     margin: 0;
   }
   
+<<<<<<< HEAD
   .cus-stepper li {
+=======
+  .stepper li {
+>>>>>>> main
     display: flex;
     position: relative;
     padding-bottom: 5px;
   }
   
+<<<<<<< HEAD
   .cus-step-icon {
+=======
+  .step-icon {
+>>>>>>> main
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -154,14 +226,22 @@
     margin-top: 30px;
   }
   
+<<<<<<< HEAD
   .cus-step-icon svg {
+=======
+  .step-icon svg {
+>>>>>>> main
     display: block;
     margin-top: -23px;
 
   }
 
 
+<<<<<<< HEAD
   .cus-step-icons {
+=======
+  .step-icons {
+>>>>>>> main
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -170,14 +250,22 @@
     margin-top: 30px;
   }
   
+<<<<<<< HEAD
   .cus-step-icons svg {
+=======
+  .step-icons svg {
+>>>>>>> main
     display: block;
     margin-top: -58px;
 
   }
   
 
+<<<<<<< HEAD
   .cus-step-ics {
+=======
+  .step-ics {
+>>>>>>> main
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -186,22 +274,38 @@
     margin-top: 30px;
   }
   
+<<<<<<< HEAD
   .cus-step-ics svg {
+=======
+  .step-ics svg {
+>>>>>>> main
     display: block;
     margin-top: -70px;
 
   }
   
+<<<<<<< HEAD
   .cus-step-line svg {
     margin-top: 0px;
   }
   
   .cus-step-content {
+=======
+  .step-line svg {
+    margin-top: 0px;
+  }
+  
+  .step-content {
+>>>>>>> main
     max-width: 205px;
     margin-top: 10px;
   }
   
+<<<<<<< HEAD
   .cus-step-content span {
+=======
+  .step-content span {
+>>>>>>> main
     display: block;
     margin-bottom: 4px;
     color: var(--color-neutral-800);
@@ -215,7 +319,11 @@ line-height: var(--line-height-body-lg);
   }
   
 
+<<<<<<< HEAD
   .cus-sample {
+=======
+  .sample {
+>>>>>>> main
     display: block;
     margin-bottom: 4px;
     color: var(--color-neutral-800);
@@ -229,7 +337,11 @@ line-height: var(--line-height-body-lg);
 margin-top: -37px;
   }
 
+<<<<<<< HEAD
   .cus-samples {
+=======
+  .samples {
+>>>>>>> main
     display: block;
     margin-bottom: 4px;
     color: var(--color-neutral-800);
@@ -243,7 +355,11 @@ line-height: var(--line-height-body-lg);
 margin-top: -43px;
   }
   
+<<<<<<< HEAD
   .cus-step-content p {
+=======
+  .step-content p {
+>>>>>>> main
     color: var(--color-neutral-800);
 
     /* body/regular/md */

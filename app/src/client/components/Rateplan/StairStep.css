@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import "../Variables/Variables.css";
 
 .stair-container {
@@ -206,3 +207,125 @@
   font-size: 14px;
   margin-top: 4px;
 }
+=======
+/* @import "../Variables/Variables.css";
+.tiered-pricing-container {
+    width: 504px;
+    height: auto;
+    padding: 20px;
+    border-radius: var(--border-radius-sm);
+    margin-left: 20px;
+    border: 1px solid var(--color-neutral-300);
+  }
+  
+  
+  .tiered-pricing-container h5{
+    color: var(--color-neutral-1700);
+  
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-lg);
+      font-style: normal;
+      font-weight: 600;
+      line-height: var(--line-height-body-lg, 24px);
+      margin-top: 10px;
+  }
+  .tiered-pricing-container p {
+    color: var(--color-neutral-800);
+  
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-lg, 16px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: var(--line-height-body-lg, 24px);
+      margin-top: 10px;
+  }
+  
+  .tiered-header {
+    display: flex;
+    gap: 105px;
+    color: var(--color-neutral-1400);
+  
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-md);  margin-top: 10px;
+  }
+  
+  .tiered-pricing-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .tier-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .tier-inputs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: nowrap;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .tier-input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-neutral-100);
+  }
+  
+  .from-input,
+  .to-input {
+    width: 131px;
+  }
+  
+  .price-input {
+    width:101px;
+    margin-left: 24px;
+  }
+  
+  .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: red;
+  }
+  
+  .tier-actions {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  
+  .add-tier-btn {
+    background: none;
+    color: var(--color-primary-600);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg); 
+  }
+   */
+>>>>>>> main

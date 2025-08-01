@@ -11,17 +11,29 @@
   
   .sidebars {
     width: 280px;
+<<<<<<< HEAD
     background-color:var(--color-neutral-100);
+=======
+    background-color:var(--color-neutral-white);
+>>>>>>> main
     padding: 30px 20px;
     border-right: 1.5px solid var(--color-neutral-200);
   }
   
+<<<<<<< HEAD
   .met-step {
     display: flex;
     align-items: flex-start;
     margin-bottom: 50px; 
     cursor: pointer;
     margin-top: -10px;
+=======
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    cursor: pointer;
+>>>>>>> main
   }
   
   .icon-wrappers {
@@ -34,6 +46,7 @@
     margin-right: 12px;
   }
 
+<<<<<<< HEAD
   .met-step:nth-child(2) .icon-wrappers,
   .met-step:nth-child(3) .icon-wrappers {
     margin-top: -55px; 
@@ -50,12 +63,15 @@
     margin-top: -2px;
   }
 
+=======
+>>>>>>> main
   .icon-wrappers svg:first-child {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
   }
   
+<<<<<<< HEAD
 .connector {
     position: absolute;
     top: 24px;
@@ -80,6 +96,21 @@
     stroke: #BDBBBE;
   }
   
+=======
+  .connector {
+    position: absolute;
+    top: 24px; 
+    left: 11px; 
+    width: 2px;
+    height: 50px; 
+    background: transparent; 
+  }
+  .step-0 { height: 85px; }
+  .step-1 { height: 70px; }
+  .step-2 { height: 85px; }
+  .step-3 { height: 105px; }
+
+>>>>>>> main
 
   .step-text {
     max-width: 180px;
@@ -97,18 +128,30 @@ line-height: var(--line-height-body-lg);
   }
   
   
+<<<<<<< HEAD
   .met-step.active .icon-wrappers svg circle:first-child {
+=======
+  .step-item.active .icon-wrappers svg circle:first-child {
+>>>>>>> main
     stroke: var(--color-primary-800);
 
   }
 
+<<<<<<< HEAD
   .met-step.active .icon-wrappers svg circle:last-child {
+=======
+  .step-item.active .icon-wrappers svg circle:last-child {
+>>>>>>> main
     fill: var(--color-primary-800);
     stroke-width: 3; 
 
   }
 
+<<<<<<< HEAD
   .met-step.active .step-title {
+=======
+  .step-item.active .step-title {
+>>>>>>> main
     color: var(--color-neutral-1700);
   }
 
@@ -134,7 +177,11 @@ line-height: var(--line-height-body-md);
     margin-top: -30px;
   }
   
+<<<<<<< HEAD
   .top-actionss {
+=======
+  .top-actions {
+>>>>>>> main
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -142,7 +189,11 @@ line-height: var(--line-height-body-md);
     margin-bottom: 20px;
   }
   
+<<<<<<< HEAD
   .top-titles {
+=======
+  .top-title {
+>>>>>>> main
     color: var(--color-neutral-1700);
 font-family: var(--font-family-primary);
 font-size: var(--font-size-h4);
