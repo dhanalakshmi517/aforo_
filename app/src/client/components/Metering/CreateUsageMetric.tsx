@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getProducts, Product } from './api';
 import UsageConditionForm from './UsageConditionForm';
 import BillableReview from './BillableReview';
-import './UsageMetric.css';
+import './Usagemetric.css';
 
 interface CreateUsageMetricProps {
     onClose: () => void;
