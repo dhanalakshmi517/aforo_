@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getProducts, Product } from './api';
 import UsageConditionForm from './UsageConditionForm';
 import BillableReview from './BillableReview';
 import './UsageMetric.css';
@@ -25,6 +26,15 @@ const steps = [
 const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [selectedProductId, setSelectedProductId] = useState<string>('');
+
+    // Fetch products once on mount
+    useEffect(() => {
+        getProducts()
+            .then(setProducts)
+            .catch((err: unknown) => console.error('Failed to load products', err));
+    }, []);
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
@@ -51,7 +61,12 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                         </div>
                         <div className="create-form">
                             <label>Link to Product</label>
-                            <input type="text" placeholder="Placeholder" />
+                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}>
+                                <option value="">--select--</option>
+                                {products.map(p => (
+                                    <option key={p.productId} value={String(p.productId)}>{p.productName}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="create-form">
                             <label>Version</label>
@@ -99,10 +114,12 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
 
     return (
         <div className="create-usage-metric">
-            <div className="top-actionss">
-                <h3 className="top-titles">Create New Usage Metric</h3>
-                <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                <button className="btn save-draft">Save as Draft</button>
+            <div className="metric-header">
+                <h3 className="metric-title">Create New Usage Metric</h3>
+                <div className="metric-actions">
+                    <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
+                    <button className="btn save-draft">Save as Draft</button>
+                </div>
             </div>
             <div className="usage-metric-wrapper">
                 <aside className="sidebars">
