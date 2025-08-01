@@ -1,0 +1,184 @@
+@import "../Variables/Variables.css";
+.metrics-container h2 {
+    color: var(--color-neutral-1000);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h6);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-heading-h6);
+}
+
+.metrics-container span {
+    font-weight: bold;
+}
+
+.note {
+    color: var(--color-neutral-600);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 300;
+    line-height: var(--line-height-body-md);
+    margin-bottom: 10px;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.metric-card {
+    width:354px;
+    height: 72px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid var(--color-neutral-200);
+    padding: 14px;
+    border-radius: var(--border-radius-sm);
+    background: var(--color-neutral-white);
+    cursor: pointer;
+    transition: border 0.3s;
+}
+
+.metric-card input[type="radio"] {
+    accent-color: var(--color-primary-800);
+    margin-top: 10px;
+}
+
+.metric-card.selected {
+    border: 2px solid var(--color-primary-800);
+}
+
+.metric-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-title {
+    color: var(--color-neutral-1700);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-lg);
+}
+
+.metric-subtitle {
+    color: var(--color-neutral-1000);
+
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md);
+}
+
+.icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--border-radius-sm);
+    border: 0.6px solid #F2EAEA;
+
+
+    text-align: center;
+    padding-top: 4px;
+    box-shadow: 2px 2px 5.6px -1px rgba(33, 31, 32, 0.25) inset;
+
+}
+
+.icon-text {
+    overflow: hidden;
+    text-align: center;
+
+    text-overflow: ellipsis;
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 10px;
+    /* 100% */
+    letter-spacing: -1px;
+}
+
+.icon-sub {
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+
+.bg-orange-100 {
+    background-color: #ffe9cc;
+}
+
+.text-orange-600 {
+    color: #F8891E;
+    
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; /* 174.968% */
+}
+
+.bg-purple-100 {
+    background-color: #f3e8ff;
+}
+
+.text-purple-600 {
+    color: #6D0E4E;
+   
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; /* 174.968% */
+    letter-spacing: -1px;}
+
+.bg-yellow-100 {
+    background-color: #fef9c3;
+}
+
+.text-yellow-700 {
+    color: #E4C111;
+    
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; /* 174.968% */
+    letter-spacing: -1px;}
+
+.bg-teal-100 {
+    background-color: #ccfbf1;
+}
+
+.text-teal-700 {
+    color: #12BAA9;
+    
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; /* 174.968% */
+    letter-spacing: -1px;}
+
+.bg-blue-100 {
+    background-color: #dbeafe;
+}
+
+.text-blue-700 {
+    color: #5460AC;
+   
+    font-family: "Aeonik Mono VF";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20.996px; /* 174.968% */
+    letter-spacing: -1px;}

@@ -41,6 +41,9 @@ interface PricingFormData {
 }
 
 interface Props {
+  chargePerUser: string;
+  handleChargePerUserChange: (value: string) => void;
+  onPricingModelSelect: (model: string) => void;
   selectedPricingModel: string;
   pricingFormData: PricingFormData;
   handleFlatDetailsChange: (field: keyof FlatFee, value: string) => void;
@@ -58,7 +61,10 @@ interface Props {
 }
 
 const PricingModelSetup: React.FC<Props> = ({
+  chargePerUser,
+  handleChargePerUserChange,
   selectedPricingModel,
+  onPricingModelSelect,
   pricingFormData,
   handleFlatDetailsChange,
   handleTierChange,
@@ -70,7 +76,11 @@ const PricingModelSetup: React.FC<Props> = ({
 }) => {
   const model = selectedPricingModel?.toLowerCase();
 
-  if (model === 'flat_fee') {
+  const renderModelSpecificUI = () => {
+
+    if (!model) return null;
+
+    if (model === 'flat_fee') {
     return (
       <div className="price-plan-form-group">
         <h6>Flat Fee</h6>
@@ -99,7 +109,7 @@ const PricingModelSetup: React.FC<Props> = ({
     );
   }
 
-  if (model === 'tiered') {
+    if (model === 'tiered') {
     return (
       <TieredPricingDetails
         tiers={pricingFormData.tiered.tiers}
@@ -115,7 +125,7 @@ const PricingModelSetup: React.FC<Props> = ({
     );
   }
 
-  if (model === 'volume_based') {
+    if (model === 'volume_based') {
     return (
       <VolumeBasedPricingDetails
         tiers={pricingFormData.volume.tiers}
@@ -131,7 +141,7 @@ const PricingModelSetup: React.FC<Props> = ({
     );
   }
 
-  if (model === 'stairstep') {
+    if (model === 'stairstep') {
     return (
       <StairStepPricing
         steps={pricingFormData.stairstep.tiers}
@@ -147,7 +157,7 @@ const PricingModelSetup: React.FC<Props> = ({
     );
   }
 
-  if (model === 'usage_based') {
+    if (model === 'usage_based') {
     return (
       <div className="price-plan-form-group">
         <h6>Usage Based</h6>
@@ -168,7 +178,39 @@ const PricingModelSetup: React.FC<Props> = ({
     );
   }
 
-  return <p>Please select a pricing model to continue.</p>;
+      return <p>Please select a pricing model to continue.</p>;
+  };
+
+  return (
+    <div className="pricing-model-setup">
+       <div className="price-plan-form-group">
+        <label>Rate Plan Type</label>
+        <select
+          value={selectedPricingModel}
+          onChange={(e) => onPricingModelSelect(e.target.value)}
+          className="pricing-model-select"
+        >
+          <option value="">--Select--</option>
+          <option value="FLAT_FEE">FLAT_FEE</option>
+          <option value="TIERED">TIERED</option>
+          <option value="VOLUME_BASED">VOLUME_BASED</option>
+          <option value="STAIRSTEP">STAIRSTEP</option>
+          <option value="USAGE_BASED">USAGE_BASED</option>
+        </select>
+      </div> 
+
+      {renderModelSpecificUI()}
+      <div className="price-plan-group">
+  <label>Charge Per User</label>
+  <input
+    value={chargePerUser}
+    onChange={(e) => handleChargePerUserChange(e.target.value)}
+    placeholder="$0.00"
+    className="pricing-model-select"
+  />
+</div>
+    </div>
+  );
 };
 
 export default PricingModelSetup;

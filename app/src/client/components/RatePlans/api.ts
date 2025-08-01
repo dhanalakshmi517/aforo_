@@ -12,6 +12,7 @@ interface Product {
 }
 
 export interface RatePlan {
+  ratePlanId: string;
   ratePlanName: string;
   productName: string;
   description: string;
@@ -60,6 +61,13 @@ export const updateRatePlan = async (id: string, data: any): Promise<any> => {
     throw error;
   }
 };
+
+// Pricing model endpoints
+export const saveFlatFee = (id: string, body: any) => axios.post(`${BASE_URL}/rateplans/${id}/flatfee`, body);
+export const saveTieredPricing = (id: string, body: any) => axios.post(`${BASE_URL}/rateplans/${id}/tiered-pricing`, body);
+export const saveVolumePricing = (id: string, body: any) => axios.post(`${BASE_URL}/rateplans/${id}/volume-pricing`, body);
+export const saveStairStepPricing = (id: string, body: any) => axios.post(`${BASE_URL}/rateplans/${id}/stair-step-pricing`, body);
+export const saveUsageBased = (id: string, body: any) => axios.post(`${BASE_URL}/rateplans/${id}/usage-based`, body);
 
 export const deleteRatePlan = async (id: string): Promise<void> => {
   try {
