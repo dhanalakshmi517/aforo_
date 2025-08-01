@@ -71,11 +71,7 @@ const [minimumCharge, setMinimumCharge] = useState('');
   );
 
   return (
-<<<<<<< HEAD
-    <>
-=======
     <div className="extras-container">
->>>>>>> main
       {/* Setup Fee */}
       <div className="section">
         {renderHeader('Setup Fee(Optional)', 'setupFee')}
@@ -92,12 +88,6 @@ const [minimumCharge, setMinimumCharge] = useState('');
         )}
       </div>
 
-<<<<<<< HEAD
-      
-      {/* Discounts */}
-      <div className="section">
-        {renderHeader('Discounts(Optional)', 'discounts')}
-=======
       {/* Overage Charges - only visible if noUpperLimit is false */}
       {!noUpperLimit && (
         <div className="section">
@@ -117,7 +107,6 @@ const [minimumCharge, setMinimumCharge] = useState('');
       {/* Discounts */}
       <div className="section">
         {renderHeader('Discounts', 'discounts')}
->>>>>>> main
         <div className="description-row"><p className="description">Add time-bound or recurring discounts to attract or retain users.</p><button className="icon-btn" aria-label="Add discount action" /></div>
         {activeSections.includes('discounts') && (
           <div className="section-content">
@@ -146,11 +135,7 @@ const [minimumCharge, setMinimumCharge] = useState('');
 
       {/* Freemium Setup */}
       <div className="section">
-<<<<<<< HEAD
-        {renderHeader('Freemium Setup(Optional)', 'freemium')}
-=======
         {renderHeader('Freemium Setup', 'freemium')}
->>>>>>> main
         <div className="description-row"><p className="description">Allow limited access to features for free before switching to paid tiers.</p><button className="icon-btn" aria-label="Add freemium action" /></div>
         {activeSections.includes('freemium') && (
           <div className="section-content">
@@ -192,11 +177,7 @@ const [minimumCharge, setMinimumCharge] = useState('');
 
       {/* Minimum Commitment */}
       <div className="section">
-<<<<<<< HEAD
-        {renderHeader('Minimum Commitment(Optional)', 'commitment')}
-=======
         {renderHeader('Minimum Commitment', 'commitment')}
->>>>>>> main
         <div className="description-row"><p className="description">Define how customers are billed when usage exceeds the plan limits.</p><button className="icon-btn" aria-label="Add commitment action" /></div>
         {activeSections.includes('commitment') && (
           <div className="section-content">
@@ -226,14 +207,11 @@ const [minimumCharge, setMinimumCharge] = useState('');
           </div>
         )}
       </div>
-<<<<<<< HEAD
-      </>
 
      
-=======
 
      
     </div>
->>>>>>> main
+
   );
 }

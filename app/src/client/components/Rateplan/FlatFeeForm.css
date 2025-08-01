@@ -1,5 +1,4 @@
 @import "../Variables/Variables.css";
-<<<<<<< HEAD
 .flat-fee-container {
   display: flex;
   justify-content: space-between;
@@ -119,7 +118,6 @@ line-height: var(--line-height-body-lg);
   display: block;
   margin: 8px 0;
 }
-=======
 .flat-fee-fields{
     width:410px;
     height:auto;
@@ -182,4 +180,3 @@ line-height: var(--line-height-body-lg);
     line-height: var(--line-height-body-md);
   }
   
->>>>>>> main
