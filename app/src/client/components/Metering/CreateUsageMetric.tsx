@@ -1,20 +1,12 @@
-import React, { useState } from 'react';
-<<<<<<< HEAD
+import React, { useState, useEffect } from 'react';
+import { getProducts, Product } from './api';
 import UsageConditionForm from './UsageConditionForm';
-
 import BillableReview from './BillableReview';
-=======
-import UsageConditionForm from './UsageUsageConditionForm';
-import Billing from './Billing';
-import Lifecycle from './LifeCycle';
-import Review from './Review';
->>>>>>> main
+import './UsageMetric.css';
 
 interface CreateUsageMetricProps {
     onClose: () => void;
 }
-<<<<<<< HEAD
-import './UsageMetric.css';
 
 const steps = [
     {
@@ -25,47 +17,24 @@ const steps = [
         title: 'Usage Conditions',
         desc: 'Define how usage is calculated — set thresholds, group data, and apply any rules needed for billing.'
     },
-    // {
-    //     title: 'Billing & Aggregation',
-    //     desc: 'Choose how to count usage, apply thresholds, and group data for billing.'
-    // },
-    // {
-    //     title: 'Lifecycle & Advanced Settings',
-    //     desc: 'Control when the metric is active, enable dry runs, and set processing preferences.'
-    // },
     {
         title: 'Review & Confirm',
         desc: 'Review your setup to make sure everything is correct before saving the metric.'
-=======
-import './Usagemetric.css';
-
-const steps = [
-    {
-        title: 'Define Metric',
-        desc: 'Give your metric a name, format, and connect it to a data source.'
-    },
-    {
-        title: 'Filter Usage Conditions',
-        desc: 'Set rules to include only the events you want to measure.'
-    },
-    {
-        title: 'Billing & Aggregation',
-        desc: 'Choose how to count usage, apply thresholds, and group data for billing.'
-    },
-    {
-        title: 'Lifecycle & Advanced Settings',
-        desc: 'Control when the metric is active, enable dry runs, and set processing preferences.'
-    },
-    {
-        title: 'Review & Confirm',
-        desc: 'Double-check your configuration before saving the metric.'
->>>>>>> main
     }
 ];
 
 const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [selectedProductId, setSelectedProductId] = useState<string>('');
+
+    // Fetch products once on mount
+    useEffect(() => {
+        getProducts()
+            .then(setProducts)
+            .catch((err: unknown) => console.error('Failed to load products', err));
+    }, []);
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
@@ -77,36 +46,33 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
         if (currentStep > 0) {
             setCurrentStep((prev) => prev - 1);
         } else {
-            // optional: close the drawer/wizard when at the first step
             onClose();
         }
     };
-    // Helper to render form markup per step
+
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
                 return (
-<<<<<<< HEAD
                     <>
-=======
-                    <> 
->>>>>>> main
                         <div className="create-form">
                             <label>Metric Name</label>
                             <input type="text" placeholder="Placeholder" />
                         </div>
                         <div className="create-form">
-<<<<<<< HEAD
                             <label>Link to Product</label>
-                            <input type="text" placeholder="Placeholder" />
+                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}>
+                                <option value="">--select--</option>
+                                {products.map(p => (
+                                    <option key={p.productId} value={String(p.productId)}>{p.productName}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="create-form">
                             <label>Version</label>
                             <input type="text" placeholder="Placeholder" />
                         </div>
                         <div className="create-form">
-=======
->>>>>>> main
                             <label>Description</label>
                             <textarea placeholder="Placeholder Placeholder Placeholder" />
                         </div>
@@ -118,11 +84,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                 </select>
                             </div>
                             <div className="create-form">
-<<<<<<< HEAD
                                 <label>Aggregation Function</label>
-=======
-                                <label>Transaction Format (extractor)</label>
->>>>>>> main
                                 <select>
                                     <option>--select--</option>
                                     <option>API</option>
@@ -131,26 +93,10 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                 </select>
                             </div>
                         </div>
-<<<<<<< HEAD
-                        {/* <div className="create-form">
-                            <label>Data Source / Event Type</label>
-                            <input type="text" placeholder="e.g. api_call, item_request" />
-                        </div> */}
-=======
-                        <div className="create-form">
-                            <label>Data Source / Event Type</label>
-                            <input type="text" placeholder="e.g. api_call, item_request" />
-                        </div>
->>>>>>> main
                     </>
                 );
             case 1:
                 return <UsageConditionForm />;
-<<<<<<< HEAD
-            // case 2:
-            //     return <Billing />;
-            // case 3:
-            //     return <Lifecycle />;
             case 2:
                 return (
                     <BillableReview
@@ -159,20 +105,6 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                         linkProduct=""
                         unit=""
                         aggregationType=""
-=======
-            case 2:
-                return <Billing />;
-            case 3:
-                return <Lifecycle />;
-            case 4:
-                return (
-                    <Review
-                        metricName="Sample Metric"
-                        description="Sample Description"
-                        linkProduct="Product A"
-                        defineUnit="Units"
-                        defineAggregationType="Sum"
->>>>>>> main
                     />
                 );
             default:
@@ -182,24 +114,17 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
 
     return (
         <div className="create-usage-metric">
-<<<<<<< HEAD
-            <div className="top-actionss">
-                <h3 className="top-titles">Create New Usage Metric</h3>
-=======
-            <div className="top-actions">
-        <h3 className="top-title">Create New Usage Metric</h3>
->>>>>>> main
-                <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                <button className="btn save-draft">Save as Draft</button>
+            <div className="metric-header">
+                <h3 className="metric-title">Create New Usage Metric</h3>
+                <div className="metric-actions">
+                    <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
+                    <button className="btn save-draft">Save as Draft</button>
+                </div>
             </div>
             <div className="usage-metric-wrapper">
                 <aside className="sidebars">
                     {steps.map((step, index) => (
-<<<<<<< HEAD
                         <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>
-=======
-                        <div key={index} className={`step-item ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>
->>>>>>> main
                             <div className="icon-wrappers">
                                 {index < currentStep ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -213,7 +138,6 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     </svg>
                                 )}
                                 {index < steps.length - 1 && (
-<<<<<<< HEAD
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="2"
@@ -229,13 +153,6 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                         />
                                     </svg>
                                 )}
-
-=======
-                                    <svg className={`connector step-${index}`} xmlns="http://www.w3.org/2000/svg" width="2" viewBox="0 0 2 111" fill="none">
-                                        <path d="M1 110L1 1" stroke={index < currentStep ? 'var(--color-primary-800)' : '#D6D5D7'} strokeWidth="2" strokeLinecap="round" />
-                                    </svg>
-                                )}
->>>>>>> main
                             </div>
                             <div className="step-text">
                                 <span className="step-title">{step.title}</span>
@@ -250,22 +167,12 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                         {renderStepContent()}
                     </div>
                     <div className="button-group">
-<<<<<<< HEAD
                         <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
                         <button className="btn save-next" onClick={handleNext} disabled={currentStep === steps.length - 1}>Save & Next</button>
                     </div>
-
                 </div>
-
-=======
-                    <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
-                     <button className="btn save-next" onClick={handleNext} disabled={currentStep === steps.length - 1}>Save & Next</button>
-                </div>
-
-                </div>
-               
->>>>>>> main
             </div>
+
             {showCancelModal && (
                 <div className="delete-modal-overlay">
                     <div className="delete-modal-content">
@@ -281,11 +188,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                 </div>
             )}
         </div>
-<<<<<<< HEAD
     );
-=======
-     );
->>>>>>> main
 };
 
 export default CreateUsageMetric;

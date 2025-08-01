@@ -1,5 +1,4 @@
 @import "../Variables/Variables.css";
-<<<<<<< HEAD
 
 .usage-metric-wrapper {
   display: flex;
@@ -102,8 +101,7 @@
 
 .step-desc {
   color: var(--color-neutral-800);
-
-=======
+}
 .usage-metric-wrapper {
     display: flex;
     font-family: 'Inter', sans-serif;
@@ -247,13 +245,11 @@ line-height: var(--line-height-heading-h4);
     height: 40px;
     color: var(--color-error-400);
   
->>>>>>> main
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-md);
-<<<<<<< HEAD
   display: block;
 }
 
@@ -319,26 +315,7 @@ line-height: var(--line-height-heading-h4);
 
 .save-next {
   border-radius: var(--border-radius-sm);
-  cursor: pointer;
-
-  display: flex;
-  width: 164px;
-  padding: 8px 20px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  color: var(--color-neutral-white);
-
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
-  background-color: var(--color-primary-800);
-}
-=======
-  }
+  cursor: pointer;}
   
   .save-draft {
     border: 1px solid var(--color-primary-800);
@@ -383,7 +360,7 @@ line-height: var(--line-height-heading-h4);
   
   .create-form input[type="text"]
   {
-    width: 65%;
+    width: 85%;
     height:40px;
     padding: 8px 12px;
     font-size: var(--font-size-md);
@@ -490,26 +467,4 @@ background-color: var(--color-primary-000);
   
   .save-next {
     border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    
-    display: flex;
-    width: 164px;
-    padding: 8px 20px;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    height:40px;
-    color: var(--color-neutral-white);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md); 
-background-color: var(--color-primary-800);
   }
-  
-
-
- 
->>>>>>> main

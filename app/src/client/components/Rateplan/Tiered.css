@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @import "../Variables/Variables.css";
 
 .tiered-container {
@@ -207,7 +206,6 @@
   font-size: 14px;
   margin-top: 4px;
 }
-=======
 /* @import "../Variables/Variables.css";
 .tiered-pricing-container {
     width: 504px;
@@ -328,4 +326,3 @@
     line-height: var(--line-height-body-lg); 
   }
    */
->>>>>>> main

@@ -8,11 +8,7 @@
 
 .breadcrumb-nav {
   margin-bottom: 10px;
-<<<<<<< HEAD
   margin-top: -20px;
-=======
-  margin-top: -15px;
->>>>>>> main
 }
 
 .breadcrumb {
@@ -148,20 +144,11 @@
 .header-actions {
   display: flex;
   align-items: center;
-<<<<<<< HEAD
   gap: 0px;
   flex: 1;
   justify-content: flex-end;
 }
-=======
-  gap: 16px;
-  flex: 1;
-  justify-content: flex-end;
-}
 
-
-
->>>>>>> main
 .products-actions {
   display: flex;
   gap: 10px;
@@ -224,11 +211,7 @@
 
 .sam-button:hover {
   background-color: var(--color-primary-000);
-<<<<<<< HEAD
   border: 1px solid var(--color-primary-600);
-=======
-  border-color: 1px solid var(--color-primary-600);
->>>>>>> main
 }
 
 
@@ -301,17 +284,6 @@ line-height: var(--line-height-body-md);
   font-weight: 600;
 }
 
-<<<<<<< HEAD
-/* .pp-rate-table td :hover {
-  background-color: var(--color-primary-100);
-} */
-=======
-.pp-rate-table td :hover {
-  background-color: var(--color-primary-100);
-}
->>>>>>> main
-
-
 
 
 
@@ -331,18 +303,11 @@ line-height: var(--line-height-body-md);
 
 .delete-modal-content {
   background: var(--color-neutral-white);
-<<<<<<< HEAD
   border-radius: var(--border-radius-sm);
   /* padding: 24px; */
   width: 450px;
   height: 200px;
-=======
-  border-radius: 12px;
-  padding: 24px;
-  width: 500px;
-  height: 200px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
->>>>>>> main
+
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -376,32 +341,21 @@ line-height: var(--line-height-body-md);
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-lg);
-<<<<<<< HEAD
   text-align: left;
   margin-left: 85px;
-=======
-  text-align: center;
->>>>>>> main
+
 }
 
 .delete-modal-body h5 {
   color: var(--color-neutral-1700);
-<<<<<<< HEAD
   text-align: left;
-=======
-  text-align: center;
->>>>>>> main
 
   font-family: var(--font-family-primary);
   font-size: var(--font-size-h5);
   font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-heading-h5);
-<<<<<<< HEAD
   margin-left: 35px;
-
-=======
->>>>>>> main
 
 }
 
@@ -584,7 +538,6 @@ line-height: var(--line-height-body-md);
     transform: translateX(100%);
   }
 }
-<<<<<<< HEAD
 
 /* -------------------------------------------------- */
 /* Action buttons styles specific to RatePlans table  */
@@ -619,5 +572,3 @@ line-height: var(--line-height-body-md);
   height: 28px;
 }
 
-=======
->>>>>>> main

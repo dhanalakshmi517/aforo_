@@ -1,373 +1,199 @@
 @import "../Variables/Variables.css";
 
-<<<<<<< HEAD
-  .cus-form-header {
-=======
-  .form-header {
->>>>>>> main
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-<<<<<<< HEAD
-  .cus-form-actions {
-=======
-  .form-actions {
->>>>>>> main
-    display: flex;
-    gap: 12px;
-  }
-  
-<<<<<<< HEAD
-  .cus-cancel-btn {
-=======
-  .cancel-btn {
->>>>>>> main
-    padding: 6px 14px;
-        background-color: var(--color-error-100);
-        border-radius: var(--border-radius-sm);
-        cursor: pointer;
-        width:139px;
-        height: 40px;
-        color: var(--color-error-400);
-      
-      font-family: var(--font-family-primary);
-      font-size: var(--font-size-md);
-      font-style: normal;
-      font-weight: 400;
-      line-height: var(--line-height-body-md);
-      
-    cursor: pointer;
-  }
-  
-<<<<<<< HEAD
-  .cus-draft-btn {
-=======
-  .draft-btn {
->>>>>>> main
-    
-    padding: 6px 14px;
-    border: none;
-    cursor: pointer;
-    border: 1px solid var(--color-primary-800);
-    background-color: var(--color-primary-000);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    width:139px;
-    height: 40px;
-    color: var(--color-primary-800);
-   
-   font-family: var(--font-family-primary);
-   font-size: var(--font-size-md);
-   font-style: normal;
-   font-weight: 400;
-   line-height: var(--line-height-body-md);
-  }
-  
-<<<<<<< HEAD
-  .cus-form-body {
-=======
-  .form-body {
->>>>>>> main
-    display: flex;
-    margin-top: 24px;
-    border: 1.5px solid var(--color-neutral-200);
-    width:1100px;
-    margin-left: -90px;
-    height:800px auto;
-    border-radius: var(--border-radius-sm);
-  }
-  
-<<<<<<< HEAD
-  .cus-form-sidebar {
-=======
-  .form-sidebar {
->>>>>>> main
-    width: 300px;
-    border-right: 1px solid var(--color-neutral-200);
-    padding-right: 20px;
-  }
-  
-<<<<<<< HEAD
-  .cus-form-sidebar ul {
-=======
-  .form-sidebar ul {
->>>>>>> main
-    list-style: none;
-    padding: 0;
-  }
-  
-<<<<<<< HEAD
-  .cus-form-sidebar li {
-    margin-bottom: 20px;
-  }
-  
-  .cus-form-sidebar li.active span {
-=======
-  .form-sidebar li {
-    margin-bottom: 20px;
-  }
-  
-  .form-sidebar li.active span {
->>>>>>> main
-    font-weight: bold;
-    color: var(--color-neutral-1400);
-  }
-  
-<<<<<<< HEAD
-  .cus-form-main {
-=======
-  .form-main {
->>>>>>> main
-    flex: 1;
-    padding-left: 30px;
-  }
-  
-<<<<<<< HEAD
-  .cus-form-main h3 {
-=======
-  .form-main h3 {
->>>>>>> main
-    margin-bottom: 20px;
-  }
- 
-  
-<<<<<<< HEAD
-  .cus-form-column input,
-=======
-  .form-column input,
->>>>>>> main
-  form select {
-    display: block;
-    width: 420px;
-    padding:8px 12px;
-    margin-bottom: 12px;
-    border-radius: 4px;
-    border: 1px solid var(--color-neutral-200);
-    background-color:var(--color-neutral-100);
-    font-family:var(--font-family-primary)
-  }
-  
-<<<<<<< HEAD
-  .cus-form-row {
-=======
-  .form-row {
->>>>>>> main
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  
-<<<<<<< HEAD
-  .cus-form-row input {
-    width: 201px;
-  }
-  
-  .cus-form-buttons {
-=======
-  .form-row input {
-    width: 201px;
-  }
-  
-  .form-buttons {
->>>>>>> main
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .back-btn-outline {
-    background: #f3f3f3;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-  }
-  
-  .next-btn {
-    background: #007bff;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-  }
-  
+.cus-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-<<<<<<< HEAD
-  .cus-form-sidebar .cus-stepper {
-=======
-  .form-sidebar .stepper {
->>>>>>> main
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-<<<<<<< HEAD
-  .cus-stepper li {
-=======
-  .stepper li {
->>>>>>> main
-    display: flex;
-    position: relative;
-    padding-bottom: 5px;
-  }
-  
-<<<<<<< HEAD
-  .cus-step-icon {
-=======
-  .step-icon {
->>>>>>> main
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 8px;
-    position: relative;
-    margin-top: 30px;
-  }
-  
-<<<<<<< HEAD
-  .cus-step-icon svg {
-=======
-  .step-icon svg {
->>>>>>> main
-    display: block;
-    margin-top: -23px;
+.cus-form-actions {
+  display: flex;
+  gap: 12px;
+}
 
-  }
+.cus-cancel-btn {
+  padding: 6px 14px;
+  background-color: var(--color-error-100);
+  border-radius: var(--border-radius-sm);
+  width: 139px;
+  height: 40px;
+  color: var(--color-error-400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+}
 
+.cus-draft-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--color-primary-800);
+  background-color: var(--color-primary-000);
+  border-radius: var(--border-radius-sm);
+  width: 139px;
+  height: 40px;
+  color: var(--color-primary-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+}
 
-<<<<<<< HEAD
-  .cus-step-icons {
-=======
-  .step-icons {
->>>>>>> main
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 8px;
-    position: relative;
-    margin-top: 30px;
-  }
-  
-<<<<<<< HEAD
-  .cus-step-icons svg {
-=======
-  .step-icons svg {
->>>>>>> main
-    display: block;
-    margin-top: -58px;
+.cus-form-body {
+  display: flex;
+  margin-top: 24px;
+  border: 1.5px solid var(--color-neutral-200);
+  width: 1100px;
+  margin-left: -90px;
+  height: 800px auto;
+  border-radius: var(--border-radius-sm);
+}
 
-  }
-  
+.cus-form-sidebar {
+  width: 300px;
+  border-right: 1px solid var(--color-neutral-200);
+  padding-right: 20px;
+}
 
-<<<<<<< HEAD
-  .cus-step-ics {
-=======
-  .step-ics {
->>>>>>> main
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 8px;
-    position: relative;
-    margin-top: 30px;
-  }
-  
-<<<<<<< HEAD
-  .cus-step-ics svg {
-=======
-  .step-ics svg {
->>>>>>> main
-    display: block;
-    margin-top: -70px;
+.cus-form-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
 
-  }
-  
-<<<<<<< HEAD
-  .cus-step-line svg {
-    margin-top: 0px;
-  }
-  
-  .cus-step-content {
-=======
-  .step-line svg {
-    margin-top: 0px;
-  }
-  
-  .step-content {
->>>>>>> main
-    max-width: 205px;
-    margin-top: 10px;
-  }
-  
-<<<<<<< HEAD
-  .cus-step-content span {
-=======
-  .step-content span {
->>>>>>> main
-    display: block;
-    margin-bottom: 4px;
-    color: var(--color-neutral-800);
+.cus-form-sidebar li {
+  margin-bottom: 20px;
+}
 
-/* body/regular/md */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 600;
-line-height: var(--line-height-body-lg); 
-  }
-  
+.cus-form-sidebar li.active span {
+  font-weight: bold;
+  color: var(--color-neutral-1400);
+}
 
-<<<<<<< HEAD
-  .cus-sample {
-=======
-  .sample {
->>>>>>> main
-    display: block;
-    margin-bottom: 4px;
-    color: var(--color-neutral-800);
+.cus-form-main {
+  flex: 1;
+  padding-left: 30px;
+}
 
-/* body/regular/md */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 600;
-line-height: var(--line-height-body-lg); 
-margin-top: -37px;
-  }
+.cus-form-main h3 {
+  margin-bottom: 20px;
+}
 
-<<<<<<< HEAD
-  .cus-samples {
-=======
-  .samples {
->>>>>>> main
-    display: block;
-    margin-bottom: 4px;
-    color: var(--color-neutral-800);
+.cus-form-column input,
+form select {
+  display: block;
+  width: 420px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-100);
+  font-family: var(--font-family-primary);
+}
 
-/* body/regular/md */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 600;
-line-height: var(--line-height-body-lg); 
-margin-top: -43px;
-  }
-  
-<<<<<<< HEAD
-  .cus-step-content p {
-=======
-  .step-content p {
->>>>>>> main
-    color: var(--color-neutral-800);
+.cus-form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
 
-    /* body/regular/md */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md); 
-    margin: 0;
-  }
-  
+.cus-form-row input {
+  width: 201px;
+}
+
+.cus-form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.cus-form-sidebar .cus-stepper {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cus-stepper li {
+  display: flex;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.cus-step-icon,
+.cus-step-icons,
+.cus-step-ics {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 8px;
+  position: relative;
+  margin-top: 30px;
+}
+
+.cus-step-icon svg {
+  margin-top: -23px;
+}
+
+.cus-step-icons svg {
+  margin-top: -58px;
+}
+
+.cus-step-ics svg {
+  margin-top: -70px;
+}
+
+.cus-step-line svg {
+  margin-top: 0px;
+}
+
+.cus-step-content {
+  max-width: 205px;
+  margin-top: 10px;
+}
+
+.cus-step-content span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+}
+
+.cus-sample {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+  margin-top: -37px;
+}
+
+.cus-samples {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-lg);
+  margin-top: -43px;
+}
+
+.cus-step-content p {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  margin: 0;
+}
