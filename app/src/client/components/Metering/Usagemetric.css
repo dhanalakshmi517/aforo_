@@ -162,7 +162,8 @@ line-height: var(--line-height-body-md);
     margin-bottom: 20px;
   }
   
-  .top-title {
+  .top-titles{
+    display: flex;
     color: var(--color-neutral-1700);
 font-family: var(--font-family-primary);
 font-size: var(--font-size-h4);

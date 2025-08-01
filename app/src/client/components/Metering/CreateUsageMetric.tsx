@@ -1,38 +1,24 @@
 import React, { useState } from 'react';
 import UsageConditionForm from './UsageConditionForm';
-
-import Billing from './Billing';
-import Lifecycle from './LifeCycle';
-import Review from './Review';
+import BillableReview from './BillableReview';
 import './UsageMetric.css';
-
 
 interface CreateUsageMetricProps {
     onClose: () => void;
 }
 
-
-
 const steps = [
     {
-        title: 'Define Metric',
-        desc: 'Give your metric a name, format, and connect it to a data source.'
+        title: 'Define Metric & Aggregation',
+        desc: 'Give your metric a name, set its unit, and connect it to the product or event source it will measure.'
     },
     {
-        title: 'Filter Usage Conditions',
-        desc: 'Set rules to include only the events you want to measure.'
-    },
-    {
-        title: 'Billing & Aggregation',
-        desc: 'Choose how to count usage, apply thresholds, and group data for billing.'
-    },
-    {
-        title: 'Lifecycle & Advanced Settings',
-        desc: 'Control when the metric is active, enable dry runs, and set processing preferences.'
+        title: 'Usage Conditions',
+        desc: 'Define how usage is calculated — set thresholds, group data, and apply any rules needed for billing.'
     },
     {
         title: 'Review & Confirm',
-        desc: 'Double-check your configuration before saving the metric.'
+        desc: 'Review your setup to make sure everything is correct before saving the metric.'
     }
 ];
 
@@ -50,16 +36,15 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
         if (currentStep > 0) {
             setCurrentStep((prev) => prev - 1);
         } else {
-            // optional: close the drawer/wizard when at the first step
             onClose();
         }
     };
-    // Helper to render form markup per step
+
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
                 return (
-                   <>
+                    <>
                         <div className="create-form">
                             <label>Metric Name</label>
                             <input type="text" placeholder="Placeholder" />
@@ -85,7 +70,6 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                             </div>
                             <div className="create-form">
                                 <label>Aggregation Function</label>
-                                <label>Transaction Format (extractor)</label>
                                 <select>
                                     <option>--select--</option>
                                     <option>API</option>
@@ -94,34 +78,18 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                 </select>
                             </div>
                         </div>
-                        {/* <div className="create-form">
-                            <label>Data Source / Event Type</label>
-                            <input type="text" placeholder="e.g. api_call, item_request" />
-                        </div> */}
-                        <div className="create-form">
-                            <label>Data Source / Event Type</label>
-                            <input type="text" placeholder="e.g. api_call, item_request" />
-                        </div>
                     </>
                 );
             case 1:
                 return <UsageConditionForm />;
-            // case 2:
-            //     return <Billing />;
-            // case 3:
-            //     return <Lifecycle />;
             case 2:
-                return <Billing />;
-            case 3:
-                return <Lifecycle />;
-            case 4:
                 return (
-                    <Review
-                        metricName="Sample Metric"
-                        description="Sample Description"
-                        linkProduct="Product A"
-                        defineUnit="Units"
-                        defineAggregationType="Sum"
+                    <BillableReview
+                        metricName=""
+                        description=""
+                        linkProduct=""
+                        unit=""
+                        aggregationType=""
                     />
                 );
             default:
@@ -131,19 +99,15 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
 
     return (
         <div className="create-usage-metric">
-            <div className="top-actions">
-                <h3 className="top-title">Create New Usage Metric</h3>
+            <div className="top-actionss">
+                <h3 className="top-titles">Create New Usage Metric</h3>
                 <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
                 <button className="btn save-draft">Save as Draft</button>
             </div>
             <div className="usage-metric-wrapper">
                 <aside className="sidebars">
                     {steps.map((step, index) => (
-
-
-
-                        <div key={index} className={`step-item ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>
-
+                        <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>
                             <div className="icon-wrappers">
                                 {index < currentStep ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -189,11 +153,9 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                         <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
                         <button className="btn save-next" onClick={handleNext} disabled={currentStep === steps.length - 1}>Save & Next</button>
                     </div>
-
                 </div>
-
-
             </div>
+
             {showCancelModal && (
                 <div className="delete-modal-overlay">
                     <div className="delete-modal-content">
