@@ -1,7 +1,7 @@
 import { FormData, ProductType } from './types';
 import { normalizeProductType } from './utils';
 
-const API_BASE_URL = 'http://13.230.194.245:8080/api/products';
+const API_BASE_URL = 'http://54.238.204.246:8080/api/products';
 
 export const fetchProductData = async (
   productId: string,

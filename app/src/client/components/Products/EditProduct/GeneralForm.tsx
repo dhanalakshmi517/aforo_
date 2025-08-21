@@ -61,7 +61,7 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
       return;
     }
     try {
-      const response = await fetch('http://13.230.194.245:8080/api/products');
+      const response = await fetch('http://54.238.204.246:8080/api/products');
       const products = await response.json();
       const isDuplicate = products.some((p: any) => p.productName?.toLowerCase() === productName.toLowerCase() && p.id !== productId);
       if (isDuplicate) {

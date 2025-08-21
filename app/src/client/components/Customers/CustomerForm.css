@@ -11,6 +11,78 @@
   gap: 12px;
 }
 
+/* Upload field container: input-like box + button on the right */
+.upload-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Left clickable box that shows icon + text (acts like input) */
+.logo-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  background: #F6F6F7;
+  border: 1px solid #E6E5E7;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logo-icon {
+  opacity: 0.8;
+}
+
+.logo-placeholder {
+  color: #8C8A8F;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Upload button on the right */
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid #D6D5D7;
+  background: #FFFFFF;
+  color: #3B3A3F;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.upload-btn:hover {
+  background: #F3F3F4;
+}
+
+/* filename + remove link */
+.file-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #5A5860;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clear-file {
+  background: none;
+  border: none;
+  color: #7A38F5; /* primary-800 if you have it as var */
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+}
+
+
 .cus-cancel-btn {
   padding: 6px 14px;
   background-color: var(--color-error-100);
@@ -196,4 +268,13 @@ form select {
   font-weight: 400;
   line-height: var(--line-height-body-md);
   margin: 0;
+}
+.products-search {
+  display: flex;
+  align-items: center;
+  background: var(--color-neutral-100);
+  border-radius: 6px;
+  padding: 8px 12px;
+  width: 300px;
+  border: 1px solid var(--color-neutral-300);
 }

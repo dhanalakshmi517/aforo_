@@ -1,4 +1,4 @@
-.newProductForm {
+/* .newProductForm {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -27,7 +27,7 @@
 }
 
 .tabsContainer {
-  width: 250px;
+  width: 300px;
   min-width: 250px;
   margin-right: 1rem;
 }
@@ -35,5 +35,6 @@
 .contentContainer {
   flex: 1;
   min-width: 0;
-  width: calc(100% - 260px); /* 250px width + 10px margin */
-}
+  width: calc(100% - 260px); 
+} */
+ 

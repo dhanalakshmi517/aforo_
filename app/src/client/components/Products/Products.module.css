@@ -84,6 +84,7 @@ font-size: var(--font-size-lg);
 font-style: normal;
 font-weight: 400; 
 line-height: var(--line-height-body-lg);
+margin-left: -30px;
 
 }
 
@@ -94,6 +95,7 @@ line-height: var(--line-height-body-lg);
   border: none;
   outline: none;
   box-shadow: none;
+  border: 1px solid var(--color-neutral-300);
 }
 
 .productsSearchInput:focus {

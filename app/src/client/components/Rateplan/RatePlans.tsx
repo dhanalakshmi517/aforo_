@@ -5,6 +5,7 @@ import { fetchRatePlans, deleteRatePlan } from './api';
 import './RatePlan.css';
 import { Link, useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
+import Search from '../Components/Search';
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -68,13 +69,20 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
   const navigate = useNavigate();
   const [ratePlansState, setRatePlans] = useState<RatePlan[]>(ratePlans || []);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  
+  // Derive filtered list based on search term (matches rate plan or product name)
+  const filteredPlans = (ratePlansState ?? []).filter(plan => {
+    const name = (plan.ratePlanName ?? '').toLowerCase();
+    const prod = (plan.productName ?? plan.product?.productName ?? '').toLowerCase();
+    return name.includes(searchTerm.toLowerCase()) || prod.includes(searchTerm.toLowerCase());
+  });
 
   // Fetch rate plans from backend on component mount
   useEffect(() => {
     const loadRatePlans = async () => {
       try {
         const data = await fetchRatePlans();
-        setRatePlans(data);
+        setRatePlans(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch rate plans', error);
       }
@@ -104,7 +112,7 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
       setIsDeleting(true);
       await deleteRatePlan(deleteTargetId);
       // Update UI after successful deletion
-      setRatePlans(prev => prev.filter(plan => plan.ratePlanId !== deleteTargetId));
+      setRatePlans(prev => (prev ?? []).filter(plan => plan.ratePlanId !== deleteTargetId));
       setShowDeleteModal(false);
       setNotification({ type: 'success', ratePlanName: deletedPlan?.ratePlanName || '' });
     } catch {
@@ -187,38 +195,14 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
           <div className="rate-plan-header">
             <h2>Rate Plans</h2>
             <div className="header-actions">
-              <div className="products-search">
-                <svg 
-                  className="search-icon" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 20 20" 
-                  fill="none"
-                >
-                  <path 
-                    d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" 
-                    stroke="currentColor" 
-                    strokeWidth="1.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                  />
-                </svg>
-                <input
-                  type="search"
-                  placeholder="Search among your rate plans..."
-                  className="products-search-input"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <Search onSearch={setSearchTerm} />
               <button className="sam-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </button>
-              <input type="search" placeholder="Search among your rate plans..." className="products-search-input" />
-              <button className="new-button" onClick={() => {
+              {/* Search component handles input */}
+              <button className="new-rate-button" onClick={() => {
                 setShowCreatePlan(true);
                 navigate('/get-started/rate-plans');
               }}>
@@ -234,15 +218,13 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                 <th>Rate Plan Name</th>
                 <th>Product Name</th>
                 <th>Billing Frequency</th>
-                <th>Pricing Model</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
 
-              {ratePlansState
-                .filter(plan => plan.ratePlanName.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map((plan, index) => (                <tr key={plan.ratePlanId}>
+              {filteredPlans.map((plan, index) => (                <tr key={plan.ratePlanId}>
                   <td>{index + 1}</td>
                   <td>{plan.ratePlanName || 'N/A'}</td>
                   <td>
@@ -251,12 +233,16 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
                     </span>
                   </td>
                   <td>{plan.billingFrequency || 'N/A'}</td>
-                  <td>{plan.ratePlanType || 'N/A'}</td>
+                  <td>{plan.status || 'N/A'}</td>
                   <td>
 
                     <div className="action-buttons">
-                      <button className="edit-button" onClick={() => handleEdit(plan.ratePlanId)} title="Edit">Edit</button>
-                      <button className="delete-button" onClick={() => handleDeleteClick(plan.ratePlanId)} title="Delete">Delete</button>
+                      <button className="edit-button" onClick={() => handleEdit(plan.ratePlanId)} title="Edit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M7.99933 13.3332H13.9993M10.9167 2.41449C11.1821 2.1491 11.542 2 11.9173 2C12.2927 2 12.6526 2.1491 12.918 2.41449C13.1834 2.67988 13.3325 3.03983 13.3325 3.41516C13.3325 3.79048 13.1834 4.15043 12.918 4.41582L4.91133 12.4232C4.75273 12.5818 4.55668 12.6978 4.34133 12.7605L2.42667 13.3192C2.3693 13.3359 2.30849 13.3369 2.25061 13.3221C2.19272 13.3072 2.13988 13.2771 2.09763 13.2349C2.05538 13.1926 2.02526 13.1398 2.01043 13.0819C1.9956 13.024 1.9966 12.9632 2.01333 12.9058L2.572 10.9912C2.63481 10.776 2.75083 10.5802 2.90933 10.4218L10.9167 2.41449Z" stroke="#1D7AFC" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></button>
+                      <button className="delete-button" onClick={() => handleDeleteClick(plan.ratePlanId)} title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></button>
                     </div>
 
                   </td>

@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import './UsageConditionForm.css';
+import ApiDimensionSelect from './ApiDimensionSelect';
+import ApiOperatorSelect from './ApiOperatorSelect';
+import FlatfileDimensionSelect from './FlatfileDimensionSelect';
+import FlatfileOperatorSelect from './FlatfileOperatorSelect';
+import SqlDimensionSelect from './SqlDimensionSelect';
+import SqlOperatorSelect from './SqlOperatorSelect';
+import LlmDimensionSelect from './LlmDimensionSelect';
+import LlmOperatorSelect from './LlmOperatorSelect';
 
 interface FilterCondition {
   id: number;
@@ -17,8 +25,25 @@ const defaultCondition = (): FilterCondition => ({
   value: '',
 });
 
-const UsageConditionForm: React.FC = () => {
-  const [filters, setFilters] = useState<FilterCondition[]>([defaultCondition()]);
+interface UsageConditionFormProps {
+  productType: string;
+  unitOfMeasure: string;
+  conditions: {
+    dimension: string;
+    operator: string;
+    value: string;
+  }[];
+  setConditions: React.Dispatch<React.SetStateAction<{
+    dimension: string;
+    operator: string;
+    value: string;
+  }[]>>;
+  billingCriteria: string;
+  onBillingCriteriaChange: (val: string) => void;
+}
+
+const UsageConditionForm: React.FC<UsageConditionFormProps> = ({ productType, unitOfMeasure, conditions, setConditions, billingCriteria, onBillingCriteriaChange }) => {
+  const [filters, setFilters] = useState<FilterCondition[]>(conditions.length ? conditions.map((c,i)=>({id:i,usageCondition:c.dimension,customCondition:'',operator:c.operator,value:c.value})) : [defaultCondition()]);
 
   const handleChange = (id: number, field: keyof FilterCondition, val: string) => {
     setFilters((prev) =>
@@ -34,6 +59,12 @@ const UsageConditionForm: React.FC = () => {
     setFilters((prev) => prev.filter((f) => f.id !== id));
   };
 
+  // Sync local filters to parent whenever they change
+  React.useEffect(()=>{
+    const mapped = filters.map(f=>({dimension:f.usageCondition, operator:f.operator, value:f.value}));
+    setConditions(mapped);
+  },[filters, setConditions]);
+
   return (
     <div className="usage-form-container">
       {filters.map((filter, index) => (
@@ -45,51 +76,74 @@ const UsageConditionForm: React.FC = () => {
 </svg></button>
           </div>
 
-          <label>Usage Condition</label>
-          <select
-            value={filter.usageCondition}
-            onChange={(e) => handleChange(filter.id, 'usageCondition', e.target.value)}
-          >
-            <option value="">--select--</option>
-            <option value="Custom Condition">Custom Condition</option>
-            <option value="Standard Condition">Standard Condition</option>
-          </select>
+          <label>Dimensions</label>
+          {(() => {
+             const upperType = productType.toUpperCase();
+             const upperUom = unitOfMeasure.toUpperCase();
+             const isApi = upperType === 'API' && ['API_CALL','REQUEST','TRANSACTION','HIT'].includes(upperUom);
+             const isFlat = upperType === 'FLATFILE' && ['FILE','DELIVERY','MB','RECORD','ROW'].includes(upperUom);
+             const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION','CELL','ROW','MB'].includes(upperUom);
+              const isLlm = upperType === 'LLMTOKEN' && ['TOKEN','PROMPT_TOKEN','COMPLETION_TOKEN'].includes(upperUom);
+             if (isApi) {
+               return (
+                 <ApiDimensionSelect unitOfMeasure={upperUom} value={filter.usageCondition} onChange={val=>handleChange(filter.id,'usageCondition',val)} />
+               );
+             }
+             if (isFlat) {
+                return (
+                  <FlatfileDimensionSelect unitOfMeasure={upperUom} value={filter.usageCondition} onChange={val=>handleChange(filter.id,'usageCondition',val)} />
+                );
+              }
+              if (isSql) {
+                return (
+                  <SqlDimensionSelect unitOfMeasure={upperUom} value={filter.usageCondition} onChange={val=>handleChange(filter.id,'usageCondition',val)} />
+                );
+              }
+              if (isLlm) {
+                return (
+                  <LlmDimensionSelect unitOfMeasure={upperUom} value={filter.usageCondition} onChange={val=>handleChange(filter.id,'usageCondition',val)} />
+                );
+              }
+             return (
+               <input type="text" placeholder="Dimension" value={filter.usageCondition} onChange={e=>handleChange(filter.id,'usageCondition',e.target.value)} />
+             );
+           })()}
 
-          <div className="choose-dimension"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-  <g clip-path="url(#clip0_4454_10823)">
-    <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-  <defs>
-    <clipPath id="clip0_4454_10823">
-      <rect width="12" height="12" fill="white"/>
-    </clipPath>
-  </defs>
-</svg> Choose Dimension</div>
-
-          {filter.usageCondition === 'Custom Condition' && (
-            <>
-              <label>Enter Custom Condition</label>
-              <input
-                type="text"
-                value={filter.customCondition}
-                placeholder="e.g. Response Time"
-                onChange={(e) => handleChange(filter.id, 'customCondition', e.target.value)}
-              />
-            </>
-          )}
 
           <div className="row">
             <div className="column">
-              <label>Operator</label>
-              <select
-                value={filter.operator}
-                onChange={(e) => handleChange(filter.id, 'operator', e.target.value)}
-              >
-                <option value="">--select--</option>
-                <option value=">">Greater Than</option>
-                <option value="<">Less Than</option>
-                <option value="=">Equal To</option>
-              </select>
+               <label>Operator</label>
+               {(() => {
+                 const upperType = productType.toUpperCase();
+                 const upperUom = unitOfMeasure.toUpperCase();
+                 const isApi = upperType === 'API' && ['API_CALL','REQUEST','TRANSACTION','HIT'].includes(upperUom);
+                 const isFlat = upperType === 'FLATFILE' && ['FILE','DELIVERY','MB','RECORD','ROW'].includes(upperUom);
+                 const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION','CELL','ROW','MB'].includes(upperUom);
+                 const isLlm = upperType === 'LLMTOKEN' && ['TOKEN','PROMPT_TOKEN','COMPLETION_TOKEN'].includes(upperUom);
+                 if (isApi) {
+                   return (
+                     <ApiOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val=>handleChange(filter.id,'operator',val)} />
+                   );
+                 }
+                 if (isFlat) {
+                   return (
+                     <FlatfileOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val=>handleChange(filter.id,'operator',val)} />
+                   );
+                 }
+                 if (isSql) {
+                    return (
+                      <SqlOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val=>handleChange(filter.id,'operator',val)} />
+                    );
+                  }
+                  if (isLlm) {
+                    return (
+                      <LlmOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val=>handleChange(filter.id,'operator',val)} />
+                    );
+                  }
+                 return (
+                   <input type="text" placeholder="Operator" value={filter.operator} onChange={e=>handleChange(filter.id,'operator',e.target.value)} />
+                 );
+               })()}
             </div>
 
             <div className="column">
@@ -106,7 +160,27 @@ const UsageConditionForm: React.FC = () => {
       ))}
 
       <button className="add-btn" onClick={handleAdd}>Add Filter</button>
+      <div className="billing-section">
+  <label>Select Billing Criteria</label>
+  <select className="billing-criteria-dropdown" value={billingCriteria} onChange={e=>onBillingCriteriaChange(e.target.value)}>
+    <option value="">--select--</option>
+    <option value="BILL_BASED_ON_USAGE_CONDITIONS">Bill based on usage conditions</option>
+    <option value="BILL_EXCLUDING_USAGE_CONDITIONS">Bill excluding usage conditions</option>
+  </select>
+  <p className="billing-note">
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+  <g clip-path="url(#clip0_5214_8669)">
+    <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_5214_8669">
+      <rect width="12" height="12" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>Note: Multiple usage conditions must all be true (AND logic).  </p>
+</div>
     </div>
+    
   );
 };
 

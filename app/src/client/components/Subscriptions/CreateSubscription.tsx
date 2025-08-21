@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
  import SubReview from './SubReview';
-import { Api, Product, RatePlan } from './api';
+import { Api, Product, RatePlan, Customer } from './api';
 import './CreateSubscription.css'; // You can rename this if desired
+import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 
 interface CreateSubscriptionProps {
   onClose: () => void;
@@ -19,23 +20,30 @@ const steps = [
 ];
 
 const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
-  const [planName, setPlanName] = useState('');
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [planDescription, setPlanDescription] = useState('');
   const [billingFrequency, setBillingFrequency] = useState('');
   const [selectedProductName, setSelectedProductName] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [selectedRatePlanName, setSelectedRatePlanName] = useState('');
+  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+  const [paymentType, setPaymentType] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, ratePlansData] = await Promise.all([
+        const [productsData, ratePlansData, customersData] = await Promise.all([
           Api.getProducts(),
           Api.getRatePlans(),
+          Api.getCustomers(),
         ]);
         setProducts(productsData);
         setRatePlans(ratePlansData);
+        setCustomers(customersData);
       } catch (error) {
         console.error(error);
       }
@@ -44,8 +52,27 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
   }, []);
   const [currentStep, setCurrentStep] = useState(0);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      try {
+        const payload = {
+          customerId: selectedCustomerId || 0,
+          productId: selectedProductId || 0,
+          ratePlanId: selectedRatePlanId || 0,
+          paymentType: paymentType || 'PREPAID',
+          adminNotes: planDescription,
+        };
+        console.log('Creating subscription payload', payload);
+        const resp = await Api.createSubscription(payload);
+        console.log('Subscription created successfully', resp);
+        setSubmissionStatus('success');
+      } catch (e) {
+        console.error('Failed to create subscription', e);
+        setSubmissionStatus('error');
+      }
+    }
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
@@ -64,72 +91,75 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
       case 0:
         return (
           <>
-            <div className="sub-create-form">
-              <label>Customer Name</label>
-              <input
-                type="text"
-                placeholder="Enter customer name"
-                value={planName}
-                onChange={(e) => setPlanName(e.target.value)}
-              />
-            </div>
-           
-            <div className="sub-form-row">
               <div className="sub-create-form">
-                <label>Product</label>
-                <select
-                  value={selectedProductName}
-                  onChange={(e) => {
-                    setSelectedProductName(e.target.value);
+              <SelectField
+                label="Customer"
+                value={selectedCustomerId?.toString() || ''}
+                onChange={(val) => {
+                  const id = Number(val);
+                  setSelectedCustomerId(id);
+                  const cust = customers.find(c => c.customerId === id);
+                  setSelectedCustomerName(cust?.customerName || '');
+                }}
+                options={customers.map(c => ({ label: c.customerName, value: c.customerId.toString() }))}
+              />
+              </div>
+           
+                <SelectField
+                  label="Product"
+                  value={selectedProductId?.toString() || ''}
+                  onChange={(val) => {
+                    const id = Number(val);
+                    setSelectedProductId(id);
+                    const prod = products.find(p => p.productId === id);
+                    setSelectedProductName(prod?.productName || '');
                     setSelectedRatePlanName('');
                   }}
-                >
-                  <option value="">--select--</option>
-                  {products.map((product) => (
-                    <option key={product.productId} value={product.productName}>
-                      {product.productName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="sub-create-form">
-                <label>Rate Plan</label>
-                <select
-                  value={selectedRatePlanName}
-                  onChange={(e) => setSelectedRatePlanName(e.target.value)}
-                >
-                  <option value="">--select--</option>
-                  {ratePlans.map((plan) => (
-                    <option key={plan.ratePlanId} value={plan.ratePlanName}>
-                      {plan.ratePlanName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="sub-create-form">
-              <label>Admin Notes</label>
-              <textarea
+                  options={products.map(p => ({ label: p.productName, value: p.productId.toString() }))}
+                />
+                <SelectField
+                  label="Rate Plan"
+                  value={selectedRatePlanId?.toString() || ''}
+                  onChange={(val) => {
+                    const id = Number(val);
+                    setSelectedRatePlanId(id);
+                    const rp = ratePlans.find(r => r.ratePlanId === id);
+                    setSelectedRatePlanName(rp?.ratePlanName || '');
+                  }}
+                  options={ratePlans.map(rp => ({ label: rp.ratePlanName, value: rp.ratePlanId.toString() }))}
+                />
+                <p className="field-note">Select a rate plan associated with the chosen product. Changing the product will reset this selection.</p>
+                <SelectField
+                  label="Payment Type"
+                  value={paymentType}
+                  onChange={setPaymentType}
+                  options={[
+                    { label: 'Post-Paid', value: 'POSTPAID' },
+                    { label: 'Pre-Paid', value: 'PREPAID' }
+                  ]}
+                />
+              <TextareaField
+                label="Admin Notes"
                 placeholder="Enter admin notes"
                 value={planDescription}
-                onChange={(e) => setPlanDescription(e.target.value)}
+                onChange={setPlanDescription}
               />
-            </div>
-            </div>
+           
           </>
         );
       case 1:
         const planDetails = {
-          name: planName,
+          name: selectedCustomerName,
           description: planDescription,
           frequency: billingFrequency,
           product: selectedProductName,
         };
         return (
           <SubReview
-            customerName={planName || ''}
+            customerName={selectedCustomerName || ''}
             productName={selectedProductName || ''}
             ratePlan={selectedRatePlanName || ''}
-            paymentMethod="Invoice (Net Terms)"
+            paymentMethod={paymentType || 'Invoice (Net Terms)'}
             basePrice={0}
             quantity={1}
           />
@@ -210,6 +240,9 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
           </div>
         </div>
       </div>
+
+      {submissionStatus === 'success' && <p className="success-msg">Subscription created successfully.</p>}
+      {submissionStatus === 'error' && <p className="error-msg">Failed to create subscription.</p>}
 
       {showCancelModal && (
         <div className="delete-modal-overlay">

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, Product } from './api';
 import UsageConditionForm from './UsageConditionForm';
-import BillableReview from './BillableReview';
+import AggregationFunctionSelect from './AggregationFunctionSelect';
+import AggregationWindowSelect from './AggregationWindowSelect';
 import './Usagemetric.css';
+import { InputField, TextareaField, SelectField } from '../Components/InputFields';
+import Review from './Review';
 
 interface CreateUsageMetricProps {
     onClose: () => void;
@@ -24,10 +27,21 @@ const steps = [
 ];
 
 const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
+    // form states
+    const [metricName, setMetricName] = useState('');
+    const [version, setVersion] = useState('');
+    const [unitOfMeasure, setUnitOfMeasure] = useState('');
+    const [description, setDescription] = useState('');
+    const [aggregationFunction, setAggregationFunction] = useState('');
+    const [aggregationWindow, setAggregationWindow] = useState('');
+    const [usageConditions, setUsageConditions] = useState<{ dimension: string; operator: string; value: string; }[]>([]);
+    const [billingCriteria, setBillingCriteria] = useState('');
     const [currentStep, setCurrentStep] = useState(0);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedProductId, setSelectedProductId] = useState<string>('');
+    const [selectedProductName, setSelectedProductName] = useState<string>('');
+    const [selectedProductType, setSelectedProductType] = useState<string>('');
 
     // Fetch products once on mount
     useEffect(() => {
@@ -36,7 +50,31 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
             .catch((err: unknown) => console.error('Failed to load products', err));
     }, []);
 
-    const handleNext = () => {
+    const handleNext = async () => {
+        // If we're on the Review step and user clicks Save & Next, attempt to POST metric
+        if (currentStep === 2) {
+            const payload = {
+                // constructed payload
+                metricName,
+                productId: Number(selectedProductId),
+                version,
+                unitOfMeasure,
+                description,
+                aggregationFunction,
+                aggregationWindow,
+                billingCriteria,
+                usageConditions,
+            } as import('./api').BillableMetricPayload;
+            console.log('Billable Metric payload:', payload);
+            const ok = await (await import('./api')).createBillableMetric(payload);
+            if (!ok) {
+                alert('Failed to create metric');
+                return;
+            }
+            onClose();
+            return;
+        }
+
         if (currentStep < steps.length - 1) {
             setCurrentStep((prev) => prev + 1);
         }
@@ -55,56 +93,102 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
             case 0:
                 return (
                     <>
-                        <div className="create-form">
-                            <label>Metric Name</label>
-                            <input type="text" placeholder="Placeholder" />
-                        </div>
-                        <div className="create-form">
-                            <label>Link to Product</label>
-                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}>
-                                <option value="">--select--</option>
-                                {products.map(p => (
-                                    <option key={p.productId} value={String(p.productId)}>{p.productName}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="create-form">
-                            <label>Version</label>
-                            <input type="text" placeholder="Placeholder" />
-                        </div>
-                        <div className="create-form">
-                            <label>Description</label>
-                            <textarea placeholder="Placeholder Placeholder Placeholder" />
+                        <div className="form-row">
+                            <div className="forms-groups">
+                                <InputField
+                                    label="Metric Name"
+                                    placeholder="Metric"
+                                    value={metricName}
+                                    onChange={setMetricName}
+                                />
+                            </div>
+                            <div className="forms-groups">
+                                <SelectField
+                                    label="Product Name"
+                                    value={selectedProductId}
+                                    onChange={(val)=>{
+                                        setSelectedProductId(val);
+                                        const prod = products.find(p => String(p.productId) === val);
+                                        setSelectedProductName(prod ? prod.productName : '');
+                                        setSelectedProductType(prod ? prod.productType : '');
+                                        setUnitOfMeasure('');
+                                    }}
+                                    options={products.map(p => ({ label: p.productName, value: String(p.productId) }))}
+                                />
+                            </div>
+                            <div className="forms-groups">
+                                <InputField
+                                    label="Version (optional)"
+                                    placeholder="Version"
+                                    value={version}
+                                    onChange={setVersion}
+                                />
+                            </div>
+                            <div className="forms-groups">
+                                <TextareaField
+                                    label="Description"
+                                    placeholder="Enter description"
+                                    value={description}
+                                    onChange={setDescription}
+                                />
+                            </div>
                         </div>
                         <div className="form-row">
-                            <div className="create-form">
+                            <div className="forms-groups">  
                                 <label>Unit of Measure</label>
-                                <select>
-                                    <option>--select--</option>
-                                </select>
+                                {(() => {
+                                    const optionsMap: Record<string, string[]> = {
+                                        API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
+                                        FLATFILE: ['FILE', 'ROW', 'RECORD','DELIVERY','MB'],
+                                        SQLRESULT: ['CELL','MB','ROW','QUERY_EXECUTION'],
+                                        LLMTOKEN: ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'],
+                                    };
+                                    const key = selectedProductType?.toUpperCase();
+                                    const opts = optionsMap[key] || null;
+                                    if (opts) {
+                                        return (
+                                            <SelectField
+                                                value={unitOfMeasure}
+                                                onChange={setUnitOfMeasure}
+                                                options={opts.map(o => ({ label: o, value: o }))}
+                                            />
+                                        );
+                                    }
+                                    return (
+                                        <InputField
+                                            label="Unit of Measure"
+                                            placeholder="Unit"
+                                            value={unitOfMeasure}
+                                            onChange={setUnitOfMeasure}
+                                        />
+                                    );
+                                })()}
                             </div>
-                            <div className="create-form">
+                            <div className="forms-groups">
                                 <label>Aggregation Function</label>
-                                <select>
-                                    <option>--select--</option>
-                                    <option>API</option>
-                                    <option>LLM</option>
-                                    <option>Others</option>
-                                </select>
+                                <AggregationFunctionSelect productType={selectedProductType} unitOfMeasure={unitOfMeasure} value={aggregationFunction} onChange={setAggregationFunction} />
+                            </div>
+                            <div className="forms-groups">
+                                <label>Aggregation Window</label>
+                                <AggregationWindowSelect productType={selectedProductType} unitOfMeasure={unitOfMeasure} value={aggregationWindow} onChange={setAggregationWindow} />
                             </div>
                         </div>
                     </>
                 );
             case 1:
-                return <UsageConditionForm />;
+                return <UsageConditionForm productType={selectedProductType} unitOfMeasure={unitOfMeasure} conditions={usageConditions} setConditions={setUsageConditions} billingCriteria={billingCriteria} onBillingCriteriaChange={setBillingCriteria} />;
             case 2:
                 return (
-                    <BillableReview
-                        metricName=""
-                        description=""
-                        linkProduct=""
-                        unit=""
-                        aggregationType=""
+                    <Review
+                        metricName={metricName}
+                        productName={selectedProductName}
+                        description={description}
+                        version={version}
+                        unitOfMeasure={unitOfMeasure}
+                        aggregationFunction={aggregationFunction}
+                        aggregationWindow={aggregationWindow}
+                        usageConditions={usageConditions}
+                        billingCriteria={billingCriteria}
                     />
                 );
             default:
@@ -168,7 +252,9 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                     </div>
                     <div className="button-group">
                         <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
-                        <button className="btn save-next" onClick={handleNext} disabled={currentStep === steps.length - 1}>Save & Next</button>
+                        <button className="btn save-next" onClick={handleNext}>
+                            {currentStep === steps.length - 1 ? 'Save' : 'Save & Next'}
+                        </button>
                     </div>
                 </div>
             </div>

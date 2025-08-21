@@ -2,7 +2,7 @@
 
 .sidebar {
   width: 240px;
-  height: 863px;
+  height: 100vh; /* full viewport height so nav can scroll appropriately */
   background-color: var(--color-neutral-100);
   border-right: 1px solid var(--color-neutral-200);
 
@@ -22,17 +22,51 @@
   display: flex;
   justify-content: left;
   align-items: center;
+  margin-bottom: 20px; /* reduced gap below logo */
+  margin-top: 22px;   /* reduced top margin */
 }
-
-
-
 .nav {
   flex: 1;
-  padding: 16px 0;
+  padding: 4px 0 16px 0; /* Reduced top padding */
   overflow-y: auto;
-  padding: 4px 0 16px 0;
-  /* Reduced top padding from 16px to 8px */
 
+  /* Hide scrollbar by default */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Show scrollbar on hover (Firefox) */
+.nav:hover {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-400) transparent;
+}
+
+/* WebKit-based browsers */
+.nav::-webkit-scrollbar {
+  width: 0px; /* hidden by default */
+}
+
+/* Show scrollbar on hover (WebKit) */
+.nav:hover::-webkit-scrollbar {
+  width: 4px; /* match SVG stroke width */
+}
+
+.nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23CCCBCD' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-position: center;
+  background-size: 4px 49px;
+  border-radius: 2px;
+}
+
+.nav:hover::-webkit-scrollbar-thumb {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23929294' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-position: center;
+  background-size: 4px 49px;
 }
 
 .nav ul {
@@ -49,7 +83,7 @@
   gap: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 1px;
+  margin-bottom: 7px;
   margin-top: 0;
   margin-right: 16px;
   margin-left: 16px;
@@ -57,16 +91,17 @@
 
 
 .logo-text {
-  color: #465B66;
-font-family: "Altone Variable";
+  color: #4F5B61;
+font-family: "ABC Repro";
 font-size: 28.441px;
 font-style: normal;
-font-weight: 500;
+font-weight: 500; 
 line-height: 40.302px; 
 letter-spacing: -1.896px;
 }
 .nav-item:hover {
   background-color: var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
 }
 
 .nav-item.active {
@@ -107,7 +142,7 @@ letter-spacing: -1.896px;
   justify-content: center;
   margin-right: 0px;
   color: var(--color-neutral-1000);
-  margin-left: -17px;
+  margin-left: -7px;
 }
 
 .nav-item.active .icon-wrapper {
@@ -116,7 +151,7 @@ letter-spacing: -1.896px;
 
 .tab-name {
 
-  color: var(--grey-1000);
+  color: var(--color-neutral-1000);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;

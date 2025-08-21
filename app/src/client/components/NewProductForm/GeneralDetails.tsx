@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { InputField, SelectField, TextareaField } from '../Components/InputFields';
 import { Grid, Box } from '@mui/material';
 import styles from './GeneralDetails.module.css';
 import { validateProductName } from '../../api/productValidation';
@@ -75,8 +76,6 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
   const [errors, setErrors] = useState<ErrorState>({});
   const [isCheckingName, setIsCheckingName] = useState(false);
   const [isUnique, setIsUnique] = useState(true);
-
-  // Remove the checkProductNameUnique function since we're handling validation directly in useEffect
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -160,98 +159,70 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
     <div className={styles.formContainer}>
       <h2 className={styles.sectionHeading}>PLAN DETAILS</h2>
       <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <label className={styles.label}>{formLabels.productName}</label>
-          <div className={styles.inputWithLoader}>
-            <input
-              type="text"
-              name="productName"
-              value={formData.productName}
-              onChange={(e) => onChange({ productName: e.target.value })}
-              className={styles.formsInput}
-              placeholder="Enter Product Name"
-              required
-            />
-            {isCheckingName && <span className={styles.loadingIndicator}>Checking...</span>}
-            {errors.productName && <div className={styles.error}>{errors.productName}</div>}
-          </div>
+        <Grid item xs={12} sm={12}>
+          <InputField
+            label={formLabels.productName}
+            placeholder="Enter Product Name"
+            value={formData.productName}
+            onChange={(val) => onChange({ productName: val })}
+          />
+          {isCheckingName && <span className={styles.loadingIndicator}>Checking...</span>}
+          {errors.productName && <div className={styles.error}>{errors.productName}</div>}
         </Grid>
 
-        <Grid item xs={12}>
-          <label className={styles.label}>{formLabels.productType}</label>
-          <select
-            className={styles.formSelect}
-            name="productType"
+        <Grid item xs={12} sm={12}>
+          <SelectField
+            label={formLabels.productType}
             value={formData.productType}
-            onChange={handleSelectChange}
-          >
-            <option value="">--Select--</option>
-            {productTypeOptions.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+            onChange={(val) => onChange({ productType: val })}
+            options={productTypeOptions.map((t) => ({ label: t, value: t }))}
+          />
           {errors.productType && <div className={styles.error}>{errors.productType}</div>}
         </Grid>
 
-        <Grid item xs={12}>
-          <label className={styles.label}>{formLabels.version}</label>
-          <input
-            type="text"
-            name="version"
-            value={formData.version}
-            onChange={(e) => onChange({ version: e.target.value })}
-            className={styles.formsInput}
-            placeholder="Enter Version"
-          />
-          {errors.version && <div className={styles.error}>{errors.version}</div>}
-        </Grid>
+        <div className="sub-create-form">
+          <Grid item xs={12} sm={12}>
+            <InputField
+              label={formLabels.version}
+              placeholder="Enter Version"
+              value={formData.version}
+              onChange={(val) => onChange({ version: val })}
+            />
+            {errors.version && <div className={styles.error}>{errors.version}</div>}
+          </Grid>
+        </div>
 
-        <Grid item xs={12}>
-          <label className={styles.label}>{formLabels.productDescription}</label>
-          <textarea
-            name="productDescription"
-            value={formData.productDescription}
-            onChange={(e) => onChange({ productDescription: e.target.value })}
-            className={styles.formTextarea}
+        <Grid item xs={12} sm={12}>
+          <TextareaField
+            label={formLabels.productDescription}
             placeholder="Enter Product Description"
-            rows={3}
+            value={formData.productDescription}
+            onChange={(val) => onChange({ productDescription: val })}
           />
           {errors.productDescription && <div className={styles.error}>{errors.productDescription}</div>}
         </Grid>
 
-        <Grid item xs={12}>
-          <label className={styles.label}>{formLabels.category}</label>
-          <select
-            className={styles.formSelect}
-            name="category"
+        <Grid item xs={12} sm={12}>
+          <SelectField
+            label={formLabels.category}
             value={formData.category}
-            onChange={handleSelectChange}
-          >
-            <option value="">--Select--</option>
-            {categoryOptions.map((category) => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
+            onChange={(val) => onChange({ category: val })}
+            options={categoryOptions.map((c) => ({ label: c, value: c }))}
+          />
           {errors.category && <div className={styles.error}>{errors.category}</div>}
         </Grid>
 
-        <Grid item xs={12}>
-          <label className={styles.label}>{formLabels.status}</label>
-          <select
-            className={styles.formSelect}
-            name="status"
+        <Grid item xs={12} sm={12}>
+          <SelectField
+            label={formLabels.status}
             value={formData.status}
-            onChange={handleSelectChange}
-          >
-            <option value="">--Select--</option>
-            {statusOptions.map((status) => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
+            onChange={(val) => onChange({ status: val })}
+            options={statusOptions.map((s) => ({ label: s, value: s }))}
+          />
           {errors.status && <div className={styles.error}>{errors.status}</div>}
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={12}>
           <label className={styles.label}>{formLabels.tags}</label>
           <div className={styles.tagInputWrapper}>
             <input
@@ -281,20 +252,25 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           </div>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={12}>
           <label className={styles.label}>{formLabels.visibility}</label>
-          <div className={styles.checkboxContainer}>
+          <label className={styles.checkboxContainer}>
             <input
               type="checkbox"
               name="visibility"
               checked={formData.visibility}
               onChange={(e) => onChange({ visibility: e.target.checked })}
-              className={styles.visibilityCheckbox}
+              className={styles.hiddenCheckbox}
             />
-          </div>
+            <span className={styles.visibilityIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2"/>
+              </svg>
+            </span>
+          </label>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={12}>
           <Box className={styles.buttonGroup}>
             <button type="button" onClick={onCancel} className={styles.buttonSecondary}>Cancel</button>
             <button

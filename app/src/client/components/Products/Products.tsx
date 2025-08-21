@@ -5,6 +5,7 @@ import { ProductFormData } from '../../../types/productTypes';
 import EditProductForm from './EditProduct/EditProductForm';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
 import './Products.css';
+import Search from '../Components/Search';
 import styles from './Products.module.css';
 
 interface Product {
@@ -89,7 +90,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://13.230.194.245:8080/api/products');
+        const response = await fetch('http://54.238.204.246:8080/api/products');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -110,7 +111,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const handleNewProductSubmit = async (formData: ProductFormData) => {
     setShowNewProductForm(false);
     try {
-      const response = await fetch('http://13.230.194.245:8080/api/products', {
+      const response = await fetch('http://54.238.204.246:8080/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`http://13.230.194.245:8080/api/products/${deleteProductId}`, {
+      const response = await fetch(`http://54.238.204.246:8080/api/products/${deleteProductId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -259,16 +260,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 <h2>Products</h2>
                 <div className="products-actions">
                   <div className="products-search">
-                    <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <input
-                      type="search"
-                      placeholder="Search among your products..."
-                      className={styles.productsSearchInput}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                    <Search onSearch={(query) => setSearchTerm(query)} />
                   </div>
                   <button className={styles.samButton}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">

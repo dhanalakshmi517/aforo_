@@ -1,17 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
+import SignIn from './SignIn';
 import './Landing.css';
-import bgPipes from './bg-pipes.svg'; // Import the SVG
+import visual from './visual.svg'; // Import the SVG background
+import aforoWordmark from './aforologo.svg';
 import Features from './Features';
 import ProgressSection from './ProgressSection';
 import Revenue from './Revenue';
+import HeroSection from './HeroSection';
+import Organization from './Organization';
 import Footer from './Footer';
 
 const Landing: React.FC = () => {
+  const [showOrg, setShowOrg] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   return (
     <>
     <div
       className="landing-section"
-      style={{ backgroundImage: `url(${bgPipes})` }}
+      style={{ backgroundImage: `url(${visual})` }}
     >
       <header className="navbar">
         <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -28,27 +34,29 @@ const Landing: React.FC = () => {
               </linearGradient>
             </defs>
           </svg>
-          <span className="logo-text">aforo</span>
+          <img src={aforoWordmark} alt="Aforo" className="logo-text" height={24} />
         </div>
         <nav className="nav-links">
           <a href="#">Home</a>
           <a href="#">Pricing</a>
           <a href="#">Built For</a>
           <a href="#">Resources</a>
-          <button className="contact-btn">Contact Sales</button>
+          <button className="nav-link-btn" onClick={() => { setShowSignIn(true); setShowOrg(false); }}>
+            Sign In
+          </button>
+          <button className="contact-btn" onClick={()=>setShowOrg(true)}>Contact Sales</button>
         </nav>
       </header>
 
-      <main className="hero">
-        <h1 className="gradient-text">Bill with Precision</h1>
-        <p>
-          Aforo is the billing platform built to capture every drop — usage-based,
-          subscription, or hybrid pricing.
-        </p>
-        <button className="demo-btn">Schedule a Demo</button>
-      </main>
-
-      <section className="usage-info">
+      {/* Hero or Organization */}
+      {showSignIn ? (
+        <SignIn />
+      ) : showOrg ? (
+        <Organization />
+      ) : (
+        <>
+          <HeroSection />
+          <section className="usage-info">
         <h2>
           Track Every Usage, Bill with Accuracy
         </h2>
@@ -56,17 +64,23 @@ const Landing: React.FC = () => {
           Aforo turns your usage data into accurate, on-time invoices—automatically.
           Simplify metering and billing so you can focus on growing your business.
         </p>
-      </section>
+                </section>
+        </>
+      )}
     </div>
-    <section>
-      <Features />
-    </section>
-    <section>
-      <ProgressSection />
-    </section>
-    <section>
-      <Revenue />
-    </section>
+    {!showOrg && !showSignIn && (
+      <>
+        <section>
+          <Features />
+        </section>
+        <section>
+          <ProgressSection />
+        </section>
+        <section>
+          <Revenue />
+        </section>
+      </>
+    )}
     <section>
       <Footer />
     </section>

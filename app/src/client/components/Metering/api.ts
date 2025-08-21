@@ -7,14 +7,105 @@ export interface Product {
   tags: Record<string, unknown>;
 }
 
-export async function getProducts(): Promise<Product[]> {
+export interface UsageMetricDTO {
+  metricId: number;
+  metricName: string;
+  productId: number;
+  productName: string;
+  version: string;
+  unitOfMeasure: string;
+  description: string;
+  aggregationFunction: string;
+  aggregationWindow: string;
+  billingCriteria: string;
+}
+
+// Separate base URLs: one for billable metrics (typically local Swagger) and one for products service.
+// Updated to point to new metrics service endpoint
+const METRICS_BASE_URL = (import.meta as any).env?.VITE_METRICS_API_URL || 'http://18.182.19.181:8081/api';
+const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://54.238.204.246:8080/api';
+
+export async function getUsageMetrics(): Promise<UsageMetricDTO[]> {
   try {
-    const response = await fetch('http://13.230.194.245:8080/api/products');
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`);
     if (!response.ok) {
       throw new Error(`API error with status ${response.status}`);
     }
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
+    const payload = await response.json();
+    const data = Array.isArray(payload)
+      ? payload
+      : Array.isArray((payload as any)?.data)
+      ? (payload as any).data
+      : Array.isArray((payload as any)?.content)
+      ? (payload as any).content
+      : [];
+    return data;
+  } catch (error) {
+    console.error('Error fetching usage metrics:', error);
+    return [];
+  }
+}
+
+export async function deleteUsageMetric(id: number): Promise<boolean> {
+  try {
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${id}`, {
+      method: 'DELETE',
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error deleting usage metric:', error);
+    return false;
+  }
+}
+
+export interface UsageConditionPayload {
+  dimension: string;
+  operator: string;
+  value: string;
+}
+
+export interface BillableMetricPayload {
+  metricName: string;
+  productId: number;
+  version: string;
+  unitOfMeasure: string;
+  description: string;
+  aggregationFunction: string;
+  aggregationWindow: string;
+  usageConditions: UsageConditionPayload[];
+}
+
+export async function createBillableMetric(payload: BillableMetricPayload): Promise<boolean> {
+  try {
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error creating billable metric:', error);
+    return false;
+  }
+}
+
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const response = await fetch(`${PRODUCTS_BASE_URL}/products`);
+    if (!response.ok) {
+      throw new Error(`API error with status ${response.status}`);
+    }
+    const payload = await response.json();
+    const data = Array.isArray(payload)
+      ? payload
+      : Array.isArray((payload as any)?.data)
+      ? (payload as any).data
+      : Array.isArray((payload as any)?.content)
+      ? (payload as any).content
+      : [];
+    return data;
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];

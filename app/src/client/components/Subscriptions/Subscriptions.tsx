@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CreateSubscription from './CreateSubscription';
 import EditSubscription from './EditSubscriptions/EditSubscription';
 import './Subscriptions.css';
+import Search from '../Components/Search';
 import { FiEdit2, FiTrash } from 'react-icons/fi';
 
 interface Subscription {
@@ -13,7 +14,7 @@ interface Subscription {
   status: string;
 }
 
-const subscriptions: Subscription[] = [
+const allSubscriptions: Subscription[] = [
   {
     id: 1,
     name: 'Aditya Inc',
@@ -62,6 +63,7 @@ interface SubscriptionsProps {
 }
 
 const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, setShowNewSubscriptionForm }) => {
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
 
   // Hide sidebar whenever edit wizard is open
@@ -89,8 +91,8 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       <div className="header">
         <h2>Subscriptions</h2>
         <div className="search-add">
-          <input type="text" placeholder="Search among customers" />
-          <button className="add-btn" onClick={() => setShowNewSubscriptionForm(true)}>+ New Subscription</button>
+          <Search onSearch={setSearchQuery} />
+          <button className="add-btn" onClick={() => setShowNewSubscriptionForm(true)}>+ New Purchase</button>
         </div>
       </div>
 
@@ -106,7 +108,10 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
           </tr>
         </thead>
         <tbody>
-          {subscriptions.map((sub, index) => (
+          {allSubscriptions.filter(sub =>
+            sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            sub.email.toLowerCase().includes(searchQuery.toLowerCase())
+          ).map((sub, index) => (
             <tr key={sub.id}>
               <td>{index + 1}</td>
               <td>
@@ -131,5 +136,4 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     </div>
   );
 };
-
 export default Subscriptions;

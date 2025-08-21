@@ -42,7 +42,7 @@
   .search-add {
     display: flex;
     gap: 10px;
-    margin-left: 310px;
+    align-items: center;
   }
   
   .search-add input {

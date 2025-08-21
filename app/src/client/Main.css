@@ -172,10 +172,37 @@ span.flatpickr-weekday,
   background-color: white; 
   margin: 0;
   box-sizing: border-box;
-    overflow-x: hidden;
-      max-width: 1440px;
+  overflow-x: hidden;
+  max-width: 1440px;
 }
 
+/* === Global slim scrollbar === */
+html,
+body {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--color-neutral-400) transparent; /* Firefox */
+}
+
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  width: 8px; /* Slim width */
+}
+
+body::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-400);
+  border-radius: 4px;
+}
+
+body:hover::-webkit-scrollbar-thumb,
+html:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-600);
+}
 
 
 

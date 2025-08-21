@@ -1,0 +1,203 @@
+@import "./Variables.css";
+  .org-page {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    background: var(--color-neutral-white);
+  }
+  
+  .org-bg {
+    position: absolute;
+    inset: -80px -120px -80px -120px;
+    width: calc(100% + 240px);
+    height: calc(100% + 160px);
+    z-index: 0;
+  }
+  
+  .org-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  
+  .org-copy {
+    padding-top: 24px;
+  }
+  
+  .org-title {
+    margin: 0 0 16px;
+    font-weight: 800;
+    line-height: 1.08;
+    font-size: clamp(28px, 3.4vw, 44px);
+    color: var(--text);
+  }
+  
+  .org-title span {
+    color: var(--color-primary-800);
+  }
+  
+  .org-sub {
+    margin: 10px 0 0;
+    max-width: 560px;
+    color: var(--color-primary-700);
+
+    /* body/semibold/lg */
+    font-family: altone-variable;
+    font-size: var(--font-size-lg,);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg, 24px); /* 150% */
+  }
+  
+   .org-form-card {
+    background: var(--color-neutral-white);
+    border-radius: var(--border-radius-sm);
+    padding: 10px;
+    width:480px;
+    margin-top: -10px;
+  }
+   
+  .org-form {
+    display: grid;
+    gap: 16px;
+  }
+  
+  .org-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  
+  .org-field {
+    display: grid;
+    gap: 8px;
+  }
+  
+  .org-field.org-empty { visibility: hidden; }
+  
+  .org-field label {
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-md, 20px); 
+  }
+  
+  .req { color:var(--color-neutral-1400); margin-left: 2px; }
+  
+  .org-field input,
+  .org-field select,
+  .org-field textarea {
+    width: 100%;
+    border: 1px solid var(--color-neutral-300);
+    background: var(--color-neutral-200);
+    padding: 8px 12px;
+    border-radius: 10px;
+    outline: none;
+    font-size: 14px;
+  }
+  
+  .org-field select {
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, #7c8da6 50%),
+      linear-gradient(135deg, #7c8da6 50%, transparent 50%);
+    background-position: calc(100% - 20px) calc(1.1em), calc(100% - 15px) calc(1.1em);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+  }
+  
+  .org-field textarea { resize: vertical; min-height: 112px; }
+  
+  .org-field input::placeholder,
+  .org-field textarea::placeholder {
+    color: #98a7be;
+  }
+  
+  
+  
+  .org-terms {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    align-items: start;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  
+  .org-terms input[type="checkbox"] {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1.2px solid #E6E5E6;
+    background-color: #fff;
+    cursor: pointer;
+    position: relative;
+    outline: none; 
+  }
+  .org-terms input[type="checkbox"]:checked {
+    background-color: var(--color-primary-800);
+    border-color: var(--color-primary-800);
+  }
+
+  /* Remove default focus ring */
+  .org-terms input[type="checkbox"]:focus,
+  .org-terms input[type="checkbox"]:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .org-terms input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 12px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    top: 3px;
+    left: 8px;
+  }
+  
+  .org-terms a {
+    color: var(--color-primary-800);
+    text-decoration: none;
+  }
+  .org-terms a:hover { text-decoration: underline; }
+  
+  .org-btn {
+    margin-top: 4px;
+    width: 100%;
+    padding: 8px 20px;
+    border: none;
+    color: var(--color-neutral-white);
+    cursor: pointer;
+    transition: background .2s, transform .02s;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-primary-800);
+
+  }
+  
+  
+  /* Responsive */
+  @media (max-width: 980px) {
+    .org-wrap { grid-template-columns: 1fr; gap: 28px; }
+    .org-form-card { max-width: 640px; }
+    .org-copy { padding-right: 0; }
+  }
+  
+  @media (max-width: 560px) {
+    .org-row { grid-template-columns: 1fr; }
+    .org-form-card { padding: 18px; }
+  }
+  

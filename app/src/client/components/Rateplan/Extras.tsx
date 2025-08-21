@@ -1,16 +1,87 @@
 import React, { useState } from 'react';
+import { saveSetupFee, saveDiscounts, saveFreemiums, saveMinimumCommitment,
+  DiscountPayload, FreemiumPayload, MinimumCommitmentPayload } from './api';
 import './Extras.css';
 
 interface ExtrasProps {
+  ratePlanId: number | null;
   noUpperLimit: boolean;
 }
 
-export default function Extras({ noUpperLimit }: ExtrasProps): JSX.Element {
-  const [activeSections, setActiveSections] = useState<string[]>([]);
-  const [freemiumType, setFreemiumType] = useState('');
-  const [minimumUsage, setMinimumUsage] = useState('');
-const [minimumCharge, setMinimumCharge] = useState('');
+export default function Extras({ ratePlanId, noUpperLimit }: ExtrasProps): JSX.Element {
+  // Setup Fee state
+  const [setupFeePayload, setSetupFeePayload] = useState({
+    setupFee: 0,
+    applicationTiming: 0,
+    invoiceDescription: '',
+  });
+  // Discounts state
+  const [discountPayload, setDiscountPayload] = useState<DiscountPayload>({
+    discountType: 'PERCENTAGE',
+    percentageDiscount: 0,
+    flatDiscountAmount: 0,
+    eligibility: '',
+    startDate: '',
+    endDate: '',
+  });
 
+  // Save Discounts handler
+  const saveDiscount = async () => {
+    if (!ratePlanId) { alert('Rate plan not yet created'); return; }
+    try {
+      console.log('Discount payload', discountPayload);
+      await saveDiscounts(ratePlanId, discountPayload);
+      alert('Discount saved');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save');
+    }
+  };
+
+  // keep existing state hooks below
+  // Freemium state
+  const [freemiumPayload, setFreemiumPayload] = useState<FreemiumPayload>({
+    freemiumType: 'FREE_UNITS',
+    freeUnits: 0,
+    freeTrialDuration: 0,
+    startDate: '',
+    endDate: '',
+  });
+
+  const saveFreemium = async () => {
+    if (!ratePlanId) { alert('Rate plan not yet created'); return; }
+    try {
+      console.log('Freemium payload', freemiumPayload, 'Freemium type', freemiumType);
+      await saveFreemiums(ratePlanId, freemiumPayload);
+      alert('Freemium saved');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save');
+    }
+  };
+
+  const [activeSections, setActiveSections] = useState<string[]>([]);
+  // Track currently selected freemium type; initialise to FREE_UNITS to stay in sync with payload
+// use backend enum literals
+const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION'>('FREE_UNITS');
+  const [minimumUsage, setMinimumUsage] = useState('');
+  const [minimumCharge, setMinimumCharge] = useState('');
+
+  const saveCommitment = async () => {
+    if (!ratePlanId) { alert('Rate plan not yet created'); return; }
+    const payload: MinimumCommitmentPayload = {
+      minimumUsage: minimumUsage ? +minimumUsage : 0,
+      minimumCharge: minimumCharge ? +minimumCharge : 0,
+    };
+    try {
+      console.log('Minimum commitment payload', payload);
+      await saveMinimumCommitment(ratePlanId, payload);
+      alert('Minimum commitment saved');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save');
+    }
+  };
 
   const toggleSection = (section: string) => {
     setActiveSections(prev =>
@@ -23,27 +94,23 @@ const [minimumCharge, setMinimumCharge] = useState('');
   const iconMap: Record<string, JSX.Element> = {
     setupFee: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <path d="M14.6994 6.30022C14.5161 6.48715 14.4135 6.73847 14.4135 7.00022C14.4135 7.26198 14.5161 7.51329 14.6994 7.70022L16.2994 9.30022C16.4863 9.48345 16.7376 9.58608 16.9994 9.58608C17.2611 9.58608 17.5124 9.48345 17.6994 9.30022L21.4694 5.53022C21.9722 6.64141 22.1244 7.87946 21.9058 9.07937C21.6872 10.2793 21.1081 11.3841 20.2456 12.2465C19.3832 13.1089 18.2784 13.6881 17.0785 13.9067C15.8786 14.1253 14.6406 13.9731 13.5294 13.4702L6.61937 20.3802C6.22154 20.778 5.68198 21.0015 5.11937 21.0015C4.55676 21.0015 4.01719 20.778 3.61937 20.3802C3.22154 19.9824 2.99805 19.4428 2.99805 18.8802C2.99805 18.3176 3.22154 17.778 3.61937 17.3802L10.5294 10.4702C10.0265 9.35904 9.87428 8.12099 10.0929 6.92108C10.3115 5.72117 10.8907 4.61638 11.7531 3.75395C12.6155 2.89151 13.7203 2.31239 14.9202 2.09377C16.1201 1.87514 17.3582 2.02739 18.4694 2.53022L14.6994 6.30022Z" stroke="#2B7194" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    ),
-    overageCharges: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M3 3V19C3 19.5304 3.21071 20.0391 3.58579 20.4142C3.96086 20.7893 4.46957 21 5 21H21M7 16C7.5 14 8.5 9 11 9C13 9 13 12 15 12C17.5 12 19.5 7 20 5" stroke="#2B7194" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14.6994 6.30022C14.5161 6.48715 14.4135 6.73847 14.4135 7.00022C14.4135 7.26198 14.5161 7.51329 14.6994 7.70022L16.2994 9.30022C16.4863 9.48345 16.7376 9.58608 16.9994 9.58608C17.2611 9.58608 17.5124 9.48345 17.6994 9.30022L21.4694 5.53022C21.9722 6.64141 22.1244 7.87946 21.9058 9.07937C21.6872 10.2793 21.1081 11.3841 20.2456 12.2465C19.3832 13.1089 18.2784 13.6881 17.0785 13.9067C15.8786 14.1253 14.6406 13.9731 13.5294 13.4702L6.61937 20.3802C6.22154 20.778 5.68198 21.0015 5.11937 21.0015C4.55676 21.0015 4.01719 20.778 3.61937 20.3802C3.22154 19.9824 2.99805 19.4428 2.99805 18.8802C2.99805 18.3176 3.22154 17.778 3.61937 17.3802L10.5294 10.4702C10.0265 9.35904 9.87428 8.12099 10.0929 6.92108C10.3115 5.72117 10.8907 4.61638 11.7531 3.75395C12.6155 2.89151 13.7203 2.31239 14.9202 2.09377C16.1201 1.87514 17.3582 2.02739 18.4694 2.53022L14.6994 6.30022Z" stroke="#D59026" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
     ),
+   
     discounts: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M15 9L9 15M9 9H9.01M15 15H15.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="#2B7194" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+      <path d="M15 9L9 15M9 9H9.01M15 15H15.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="#D59026" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
     ),
     freemium: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M12 7.99995V20.9999M12 7.99995C11.6383 6.50935 11.0154 5.23501 10.2127 4.34311C9.41003 3.45121 8.46469 2.98314 7.5 2.99995C6.83696 2.99995 6.20107 3.26334 5.73223 3.73218C5.26339 4.20102 5 4.83691 5 5.49995C5 6.16299 5.26339 6.79887 5.73223 7.26772C6.20107 7.73656 6.83696 7.99995 7.5 7.99995M12 7.99995C12.3617 6.50935 12.9846 5.23501 13.7873 4.34311C14.59 3.45121 15.5353 2.98314 16.5 2.99995C17.163 2.99995 17.7989 3.26334 18.2678 3.73218C18.7366 4.20102 19 4.83691 19 5.49995C19 6.16299 18.7366 6.79887 18.2678 7.26772C17.7989 7.73656 17.163 7.99995 16.5 7.99995M19 11.9999V18.9999C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7892 17.5304 20.9999 17 20.9999H7C6.46957 20.9999 5.96086 20.7892 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 18.9999V11.9999M4 7.99995H20C20.5523 7.99995 21 8.44766 21 8.99995V10.9999C21 11.5522 20.5523 11.9999 20 11.9999H4C3.44772 11.9999 3 11.5522 3 10.9999V8.99995C3 8.44766 3.44772 7.99995 4 7.99995Z" stroke="#2B7194" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 7.99995V20.9999M12 7.99995C11.6383 6.50935 11.0154 5.23501 10.2127 4.34311C9.41003 3.45121 8.46469 2.98314 7.5 2.99995C6.83696 2.99995 6.20107 3.26334 5.73223 3.73218C5.26339 4.20102 5 4.83691 5 5.49995C5 6.16299 5.26339 6.79887 5.73223 7.26772C6.20107 7.73656 6.83696 7.99995 7.5 7.99995M12 7.99995C12.3617 6.50935 12.9846 5.23501 13.7873 4.34311C14.59 3.45121 15.5353 2.98314 16.5 2.99995C17.163 2.99995 17.7989 3.26334 18.2678 3.73218C18.7366 4.20102 19 4.83691 19 5.49995C19 6.16299 18.7366 6.79887 18.2678 7.26772C17.7989 7.73656 17.163 7.99995 16.5 7.99995M19 11.9999V18.9999C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7892 17.5304 20.9999 17 20.9999H7C6.46957 20.9999 5.96086 20.7892 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 18.9999V11.9999M4 7.99995H20C20.5523 7.99995 21 8.44766 21 8.99995V10.9999C21 11.5522 20.5523 11.9999 20 11.9999H4C3.44772 11.9999 3 11.5522 3 10.9999V8.99995C3 8.44766 3.44772 7.99995 4 7.99995Z" stroke="#D59026" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
     ),
     commitment: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M9 12.0004H15M20 13.0004C20 18.0004 16.5 20.5004 12.34 21.9504C12.1222 22.0243 11.8855 22.0207 11.67 21.9404C7.5 20.5004 4 18.0004 4 13.0004V6.00045C4 5.73523 4.10536 5.48088 4.29289 5.29334C4.48043 5.10581 4.73478 5.00045 5 5.00045C7 5.00045 9.5 3.80045 11.24 2.28045C11.4519 2.09945 11.7214 2 12 2C12.2786 2 12.5481 2.09945 12.76 2.28045C14.51 3.81045 17 5.00045 19 5.00045C19.2652 5.00045 19.5196 5.10581 19.7071 5.29334C19.8946 5.48088 20 5.73523 20 6.00045V13.0004Z" stroke="#2B7194" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M9 12H15M20 13C20 18 16.5 20.5 12.34 21.95C12.1222 22.0238 11.8855 22.0202 11.67 21.94C7.5 20.5 4 18 4 13V5.99996C4 5.73474 4.10536 5.48039 4.29289 5.29285C4.48043 5.10532 4.73478 4.99996 5 4.99996C7 4.99996 9.5 3.79996 11.24 2.27996C11.4519 2.09896 11.7214 1.99951 12 1.99951C12.2786 1.99951 12.5481 2.09896 12.76 2.27996C14.51 3.80996 17 4.99996 19 4.99996C19.2652 4.99996 19.5196 5.10532 19.7071 5.29285C19.8946 5.48039 20 5.73474 20 5.99996V13Z" stroke="#D59026" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
     ),
   
@@ -51,7 +118,7 @@ const [minimumCharge, setMinimumCharge] = useState('');
 
   const renderHeader = (label: string, section: string): JSX.Element => (
     <div className="section-header" onClick={() => toggleSection(section)}>
-      <button type="button" className="header-icon-btn" aria-label={`${label} icon`}>
+      <button type="button" className="extras-icon-btn" aria-label={`${label} icon`}>
         {iconMap[section]}
       </button>
       <span className="header-label">{label}</span>
@@ -79,30 +146,22 @@ const [minimumCharge, setMinimumCharge] = useState('');
         {activeSections.includes('setupFee') && (
           <div className="section-content">
             <label>Enter one-time Setup Fee <span className="optional">(optional)</span></label>
-            <input type="text" placeholder="$22" />
+            <input type="number" value={setupFeePayload.setupFee}
+              onChange={e=>setSetupFeePayload({...setupFeePayload, setupFee:+e.target.value})} placeholder="$0" />
             <label>Application Timing</label>
-            <input type="text" placeholder="$22" />
+            <input type="number" value={setupFeePayload.applicationTiming}
+              onChange={e=>setSetupFeePayload({...setupFeePayload, applicationTiming:+e.target.value})} placeholder="0" />
             <label>Invoice Description</label>
-            <textarea placeholder="Invoice Description"></textarea>
+            <textarea value={setupFeePayload.invoiceDescription}
+              onChange={e=>setSetupFeePayload({...setupFeePayload, invoiceDescription:e.target.value})} placeholder="Invoice Description"></textarea>
+            <button type="button" className="extras-save-btn" onClick={async()=>{
+              if(ratePlanId==null){alert('Rate plan not yet created');return;}
+              try{console.log('Setup fee payload', setupFeePayload);
+              await saveSetupFee(ratePlanId, setupFeePayload);alert('Setup fee saved');}catch(err){console.error(err);alert('Failed to save');}
+            }}>Save</button>
           </div>
         )}
       </div>
-
-      {/* Overage Charges - only visible if noUpperLimit is false */}
-      {!noUpperLimit && (
-        <div className="section">
-          {renderHeader('Overage Charges', 'overageCharges')}
-          <div className="description-row"><p className="description">Define how customers are billed when usage exceeds the plan limits.</p><button className="icon-btn" aria-label="Add overage action" /></div>
-          {activeSections.includes('overageCharges') && (
-            <div className="section-content">
-              <label>Overage unit rate</label>
-              <input type="text" placeholder="Placeholder" />
-              <label>Grace buffer <span className="optional">(optional)</span></label>
-              <input type="text" placeholder="Placeholder" />
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Discounts */}
       <div className="section">
@@ -111,24 +170,35 @@ const [minimumCharge, setMinimumCharge] = useState('');
         {activeSections.includes('discounts') && (
           <div className="section-content">
             <label>Discount Type</label>
-            <select><option>Placeholder</option></select>
+            <select value={discountPayload.discountType}
+              onChange={e=>setDiscountPayload({...discountPayload, discountType:e.target.value as 'PERCENTAGE' | 'FLAT'})}>
+              <option value="">--Select--</option>
+              <option value="PERCENTAGE">PERCENTAGE</option>
+              <option value="FLAT">FLAT</option>  
+            </select>
             <label>Enter % discount</label>
-            <input type="text" placeholder="Placeholder" />
+            <input type="number" value={discountPayload.percentageDiscount}
+              onChange={e=>setDiscountPayload({...discountPayload, percentageDiscount:+e.target.value})} placeholder="0" />
             <label>Enter Flat Discount Amount</label>
-            <input type="text" placeholder="Placeholder" />
+            <input type="number" value={discountPayload.flatDiscountAmount}
+              onChange={e=>setDiscountPayload({...discountPayload, flatDiscountAmount:+e.target.value})} placeholder="0" />
             <label>Eligibility</label>
-            <select><option>Placeholder</option></select>
+            <input type="text" value={discountPayload.eligibility}
+              onChange={e=>setDiscountPayload({...discountPayload, eligibility:e.target.value})} placeholder="e.g. new users" />
             <label>Validity Period</label>
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input type="date" />
+                <input type="date" value={discountPayload.startDate}
+                    onChange={e=>setDiscountPayload({...discountPayload, startDate:e.target.value})} />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input type="date" />
+                <input type="date" value={discountPayload.endDate}
+                    onChange={e=>setDiscountPayload({...discountPayload, endDate:e.target.value})} />
               </div>
             </div>
+            <button type="button" className="extras-save-btn" onClick={saveDiscount}>Save</button>
           </div>
         )}
       </div>
@@ -140,37 +210,73 @@ const [minimumCharge, setMinimumCharge] = useState('');
         {activeSections.includes('freemium') && (
           <div className="section-content">
             <label>Freemium Type</label>
-            <select value={freemiumType} onChange={(e) => setFreemiumType(e.target.value)}>
+            <select
+              value={freemiumType}
+              onChange={e => {
+                const type = e.target.value as 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
+                setFreemiumType(type);
+                // payload type differs from backend enum; suppress TS error for assignment
+                // @ts-ignore
+                setFreemiumPayload({ ...freemiumPayload, freemiumType: type });
+              }}>
               <option value="">--Select--</option>
-              <option value="free_units">Free Units</option>
-              <option value="free_trial">Free Trial Duration</option>
-              <option value="units_per_duration">Free Units for Duration</option>
+              <option value="FREE_UNITS">Free Units</option>
+              <option value="FREE_TRIAL_DURATION">Free Trial Duration</option>
+              <option value="FREE_UNITS_PER_DURATION">Free Units for Duration</option>
             </select>
 
-            {(freemiumType === 'free_units' || freemiumType === 'units_per_duration') && (
+            {(freemiumType === 'FREE_UNITS' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
                 <label>Select Free Units</label>
-                <input type="text" placeholder="Enter Free Units" />
+                <input type="number" value={freemiumPayload.freeUnits}
+                  onChange={e =>
+                    setFreemiumPayload({ ...freemiumPayload, freeUnits: +e.target.value })
+                  }
+                  placeholder="Enter Free Units" />
               </>
             )}
 
-            {(freemiumType === 'free_trial' || freemiumType === 'units_per_duration') && (
+            {(freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
                 <label>Select Free Trial Duration</label>
-                <input type="text" placeholder="Enter Trial Duration" />
+                <input
+                  type="number"
+                  value={freemiumPayload.freeTrialDuration}
+                  onChange={e =>
+                    setFreemiumPayload({ ...freemiumPayload, freeTrialDuration: +e.target.value })
+                  }
+                  placeholder="Enter Trial Duration"
+                />
               </>
             )}
 
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input type="date" />
+                <input
+                  type="date"
+                  value={freemiumPayload.startDate}
+                  onChange={e =>
+                    setFreemiumPayload({ ...freemiumPayload, startDate: e.target.value })
+                  }
+                />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input type="date" />
+                <input
+                  type="date"
+                  value={freemiumPayload.endDate}
+                  onChange={e =>
+                    setFreemiumPayload({ ...freemiumPayload, endDate: e.target.value })
+                  }
+                />
               </div>
             </div>
+            <button type="button" className="extras-save-btn" onClick={async()=>{
+  if(ratePlanId==null){alert('Rate plan not yet created');return;}
+  try{console.log('Freemium payload', freemiumPayload);
+  await saveFreemiums(ratePlanId, freemiumPayload);alert('Freemium saved');}catch(err){console.error(err);alert('Failed to save');}
+}}>Save</button>
           </div>
         )}
       </div>
@@ -204,11 +310,16 @@ const [minimumCharge, setMinimumCharge] = useState('');
               }}
               disabled={!!minimumUsage}
             />
+            <button
+              type="button"
+              className="extras-save-btn"
+              onClick={saveCommitment}
+            >
+              Save
+            </button>
           </div>
         )}
       </div>
-
-     
 
      
     </div>

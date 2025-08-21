@@ -119,7 +119,7 @@ const EditProductForm = ({
               throw new Error(`Invalid product type: ${updatedData.productType}`);
             }
 
-            const configResponse = await fetch(`http://13.230.194.245:8080/api/products/${productId}/${apiType}`);
+            const configResponse = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${apiType}`);
             if (!configResponse.ok) {
               throw new Error('Failed to fetch configuration details');
             }
@@ -159,7 +159,7 @@ const EditProductForm = ({
         await updateProduct(productId, formData);
 
         try {
-          const config = await fetch(`http://13.230.194.245:8080/api/products/${productId}/${formData.productType.toLowerCase()}`);
+          const config = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${formData.productType.toLowerCase()}`);
           if (config.ok) {
             const configData = await config.json();
             await updateProduct(productId, {

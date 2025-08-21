@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
-import BillableMetrics from './BillableMetrics';
-import Pricing from './Pricing';
+import Billable from './Billable';
+import Pricing, { PricingHandle } from './Pricing';
 import Extras from './Extras';
 import Review from './Review';
-import { fetchProducts } from './api';
-
-interface Product {
-    productId: string;
-    productName: string;
-}
+import { fetchProducts, Product, createRatePlan, RatePlanRequest, confirmRatePlan } from './api';
 
 interface CreatePricePlanProps {
     onClose: () => void;
 }
 
 import './CreatePricePlan.css';
+import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 
 const steps = [
     {
@@ -41,11 +37,16 @@ const steps = [
 ];
 
 const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
+    const pricingRef = React.useRef<PricingHandle>(null);
     const [planName, setPlanName] = useState<string>("");
     const [planDescription, setPlanDescription] = useState<string>("");
     const [billingFrequency, setBillingFrequency] = useState<string>("");
     const [selectedProductName, setSelectedProductName] = useState<string>("");
+    const [paymentMethod, setPaymentMethod] = useState<string>("");
     const [products, setProducts] = useState<Product[]>([]);
+    const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
+    const [ratePlanId, setRatePlanId] = useState<number | null>(null);
+    const [saving, setSaving] = useState(false);
     const [loadingProducts, setLoadingProducts] = useState(true);
     const [productError, setProductError] = useState("");
 
@@ -53,7 +54,7 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
         const getProducts = async () => {
             try {
                 const data = await fetchProducts();
-                setProducts(data);
+                setProducts(data as Product[]);
             } catch (err) {
                 console.error(err);
                 setProductError("Failed to load products");
@@ -65,10 +66,78 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
     }, []);
 
     const [currentStep, setCurrentStep] = useState(0);
+
+    // Validate required fields for step 0 (Plan Details)
+    const validateStep0 = (): boolean => {
+        if (!planName.trim()) { alert('Rate Plan Name is required'); return false; }
+        if (!planDescription.trim()) { alert('Rate Plan Description is required'); return false; }
+        if (!billingFrequency) { alert('Billing Frequency is required'); return false; }
+        if (!selectedProductName) { alert('Product selection is required'); return false; }
+        if (!paymentMethod) { alert('Payment Method is required'); return false; }
+        return true;
+    };
     const [showCancelModal, setShowCancelModal] = useState(false);
 
-    const handleNext = () => {
+    const handleNext = async () => {
+        // On Review & Confirm step, just confirm the rate plan
+        if (currentStep === steps.length - 1) {
+            if (!ratePlanId) { alert('Rate plan ID missing'); return; }
+            try {
+                setSaving(true);
+                await confirmRatePlan(ratePlanId);
+                console.log('Rate plan confirmed');
+                onClose();
+            } catch (err) {
+                console.error('Failed to confirm rate plan', err);
+                alert('Failed to confirm rate plan');
+            } finally {
+                setSaving(false);
+            }
+            return;
+        }
         if (currentStep < steps.length - 1) {
+            // Validate step 0 fields before proceeding
+            if (currentStep === 0 && !validateStep0()) {
+                return; // stay on the same step if validation fails
+            }
+            // When leaving Pricing step, attempt to save pricing
+            if (currentStep === 2) {
+                if (pricingRef.current) {
+                    setSaving(true);
+                    const ok = await pricingRef.current.save();
+                    setSaving(false);
+                    if (!ok) return; // stay if failure
+                }
+            }
+            // Trigger save when leaving Billable (step 1) before entering Pricing (step 2)
+            if (currentStep === 1) {
+                // Ensure all required fields present
+                if (selectedMetricId === null) {
+                    alert('Please select a billable metric.');
+                    return;
+                }
+                const payload: RatePlanRequest = {
+                    // ---- payload constructed ----
+                    ratePlanName: planName,
+                    productName: selectedProductName,
+                    description: planDescription,
+                    billingFrequency: billingFrequency as any,
+                    paymentType: paymentMethod as any,
+                    billableMetricId: selectedMetricId
+                };
+                try {
+                    setSaving(true);
+                    console.log('Creating rate plan with payload', payload);
+                    const created = await createRatePlan(payload);
+                        setRatePlanId(created.ratePlanId);
+                } catch (err) {
+                    console.error('Failed to create rate plan', err, payload);
+                    alert('Failed to create rate plan');
+                    setSaving(false);
+                    return;
+                }
+                setSaving(false);
+            }
             setCurrentStep((prev) => prev + 1);
         }
     };
@@ -87,48 +156,80 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                 return (
                     <>
                         <div className="create-form">
-                            <label>Rate Plan Name</label>
-                            <input type="text" placeholder="Placeholder" value={planName} onChange={(e)=>setPlanName(e.target.value)} />
+                            <InputField
+                                label="Rate Plan Name *"
+                                placeholder="Placeholder"
+                                value={planName}
+                                onChange={setPlanName}
+                            />
                         </div>
                         <div className="create-form">
-                            <label>Rate Plan Description</label>
-                            <textarea placeholder="Placeholder Placeholder Placeholder" value={planDescription} onChange={(e)=>setPlanDescription(e.target.value)} />
+                            <TextareaField
+                                label="Rate Plan Description *"
+                                placeholder="Placeholder Placeholder Placeholder"
+                                value={planDescription}
+                                onChange={setPlanDescription}
+                            />
                             
                         </div>
                         <div className="form-row">
                             <div className="create-form">
-                                <label>Billing Frequency</label>
-                                <select value={billingFrequency} onChange={(e)=>setBillingFrequency(e.target.value)}>
-                                                                    <option>--select--</option>
-                                </select>
+                                <SelectField
+                                    label="Billing Frequency *"
+                                    value={billingFrequency}
+                                    onChange={setBillingFrequency}
+                                    options={[
+                                        { label: 'Monthly', value: 'MONTHLY' },
+                                        { label: 'Yearly', value: 'YEARLY' },
+                                        {label:'daily',value:'DAILY'},
+                                        {label:'hourly',value:'HOURLY'},
+                                        {label:'weekly',value:'WEEKLY'}
+
+
+
+                                    ]}
+                                />
                             </div>
                             <div className="create-form">
-                                <label>Select Product</label>
-                                <select value={selectedProductName} onChange={(e)=>setSelectedProductName(e.target.options[e.target.selectedIndex].text)}>
-                                    <option value="">--select--</option>
-                                    {loadingProducts && <option>Loading...</option>}
-                                    {productError && <option disabled>{productError}</option>}
-                                    {products.map((prod) => (
-                                        <option key={prod.productId} value={prod.productName}>{prod.productName}</option>
-                                    ))}
-                                </select>
+                                <SelectField
+                                    label="Select Product *"
+                                    value={selectedProductName}
+                                    onChange={setSelectedProductName}
+                                    options={[
+                                        { label: '--select--', value: '' },
+                                        { label: productError, value: '' },
+                                        ...products.map((prod) => ({ label: prod.productName, value: prod.productName }))
+                                    ]}
+                                />
+                            </div>
+                            <div className="create-form">
+                                <SelectField
+                                    label="Payment Method *"
+                                    value={paymentMethod}
+                                    onChange={setPaymentMethod}
+                                    options={[
+                                        { label: 'Post-Paid', value: 'POSTPAID' },
+                                        { label: 'Pre-Paid', value: 'PREPAID' }
+                                    ]}
+                                />
                             </div>
                         </div>
                        
                     </>
                 );
             case 1:
-                return <BillableMetrics productName={selectedProductName} />;
+                return <Billable productName={selectedProductName} selectedMetricId={selectedMetricId} onSelectMetric={setSelectedMetricId} />;
             case 2:
-                return <Pricing />;
+                return <Pricing ref={pricingRef} ratePlanId={ratePlanId} />;
             case 3:
-                return <Extras noUpperLimit={false} />;
+                return <Extras ratePlanId={ratePlanId} noUpperLimit={false} />;
             case 4:
                 const planDetails = {
                     name: planName,
                     description: planDescription,
                     frequency: billingFrequency,
-                    product: selectedProductName
+                    product: selectedProductName,
+                    paymentMethod
                 };
                 return (
                     <Review planDetails={planDetails} />
@@ -184,7 +285,7 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                     </div>
                     <div className="button-group">
                         <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
-                        <button className="btn save-next" onClick={handleNext} disabled={currentStep === steps.length - 1}>Save & Next</button>
+                        <button className="btn save-next" onClick={handleNext} disabled={saving}>Save & Next</button>
                     </div>
                 </div>
             </div>

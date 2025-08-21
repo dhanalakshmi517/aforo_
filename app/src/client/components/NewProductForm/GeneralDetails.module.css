@@ -118,7 +118,7 @@
 }
 
 .formInput {
-  width: 434px;
+  width: 100%;
   padding: 8px 12px;
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
@@ -135,7 +135,7 @@
 
 
 .formsInput {
-  width: 534px;
+  width: 68%;
   padding: 8px 12px;
   height:40px;
   border: 1px solid var(--color-neutral-300);
@@ -159,7 +159,7 @@
 }
 
 .formTextarea {
-  width: 430px;
+  width: 65%;
   padding: 1rem;
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
@@ -179,7 +179,7 @@
 }
 
 .formSelect {
-  width: 434px;
+  width: 65%;
   padding: 8px 12px;
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
@@ -203,8 +203,8 @@
 
 .inputWrapper {
   position: relative;
-  width: 434px;
-  width: 422px;
+  width: 100%;
+  width: 100%;
   /* margin-left: 250px; */
 }
 
@@ -257,7 +257,53 @@
   color: var(--color-neutral-900);
 }
 .visibilityCheckbox {
+  /* legacy style - no longer used */
   margin-top: 8px;
+}
+
+/* New custom checkbox styles */
+.hiddenCheckbox {
+  position: absolute;
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.visibilityIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.checkboxContainer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+
+
+.hiddenCheckbox:checked + .visibilityIcon svg path {
+  stroke: var(--color-neutral-white);
+  fill: var(--color-primary-600);
+}
+
+/* white tick overlay */
+.visibilityIcon::after {
+  content: '\2713'; /* checkmark */
+  position: absolute;
+  font-size: 14px;
+  color: var(--color-neutral-white);
+  display: none;
+}
+
+.hiddenCheckbox:checked + .visibilityIcon::after {
+  display: block;
 }
 
 .tagContainer {
@@ -272,7 +318,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
-  width: 420px;
+  width: 100%;
   /* margin-left: 250px; */
 }
 
@@ -372,8 +418,7 @@
 
   border-radius:var(--border-radius-sm);
   font-size: 14px;
-  width: 420px;
-  /* margin-left: 250px; */
+  width: 68%;
 
 }
 

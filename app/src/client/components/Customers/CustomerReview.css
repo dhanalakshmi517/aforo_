@@ -1,0 +1,42 @@
+.review-wrapper {
+    width: 100%;
+    padding: 24px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #1e1e1e;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .review-section {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #666;
+    text-transform: uppercase;
+  }
+  
+  .review-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    row-gap: 12px;
+    column-gap: 16px;
+  }
+  
+  .review-label {
+    font-weight: 500;
+    color: #888;
+  }
+  
+  .review-value {
+    color: #1e1e1e;
+  }
+  

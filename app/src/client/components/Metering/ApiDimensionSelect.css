@@ -1,0 +1,23 @@
+@import "../Variables/Variables.css";
+
+.dimension-select {
+  width: 90%;
+  height: 40px;
+  padding: 8px 12px;
+  font-size: var(--font-size-md);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+ 
+
+/* Optional: focus styles */
+.dimension-select:focus {
+  outline: none;
+  border-color: var(--color-primary-800);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}

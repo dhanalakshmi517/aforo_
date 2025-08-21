@@ -1,6 +1,7 @@
 import React from 'react';
 import { ProductFormData } from '../../../../types/productTypes';
 import styles from './ApiConfig.module.css';
+import { InputField, SelectField } from '../../Components/InputFields';
 
 interface Props {
   formData: ProductFormData;
@@ -9,111 +10,83 @@ interface Props {
 }
 
 const ApiConfig: React.FC<Props> = ({ formData, setFormData, errors }) => {
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
-    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+  const update = (patch: Partial<ProductFormData>) => setFormData({ ...formData, ...patch });
+
+  // local handlers for native inputs/selects
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    update({ [name]: type === 'checkbox' ? checked : value } as unknown as Partial<ProductFormData>);
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    update({ [name]: value } as unknown as Partial<ProductFormData>);
   };
 
   return (
     <div className={styles.formGrid}>
+      {/* Endpoint URL */}
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="endpointUrl">
-          Endpoint URL *
-        </label>
-        <input
-          id="endpointUrl"
-          name="endpointUrl"
-          type="url"
-          value={formData.endpointUrl || ''}
-          onChange={handleInputChange}
-          className={`${styles.formGroupInput} ${errors.endpointUrl ? styles.error : ''}`}
+        <InputField
+          label="Endpoint URL *"
           placeholder="Ex:https://api.example.com/endpoint"
-          required
+          value={formData.endpointUrl || ''}
+          onChange={(val) => setFormData({ ...formData, endpointUrl: val })}
         />
-        {errors.endpointUrl && 
+        {errors.endpointUrl && (
           <div className={styles.errorMessage}>{errors.endpointUrl}</div>
-        }
-        
+        )}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="authType">
-          Authentication Type
-        </label>
-        <select
-          id="authType"
-          name="authType"
+        <SelectField
+          label="Authentication Type"
           value={formData.authType || ''}
-          onChange={handleSelectChange}
-          className={`${styles.formGroupSelect} ${errors.authType ? styles.error : ''}`}
-        >
-          <option value="">--Select--</option>
-          <option value="NONE">NONE</option>
-          <option value="API_KEY">API_KEY</option>
-          <option value="OAUTH2">OAUTH2</option>
-          <option value="BASIC_AUTH">BASIC_AUTH</option>
-        </select>
-        {errors.authType && 
+          onChange={(val) => setFormData({ ...formData, authType: val })}
+          options={[
+            { label: 'NONE', value: 'NONE' },
+            { label: 'API_KEY', value: 'API_KEY' },
+            { label: 'OAUTH2', value: 'OAUTH2' },
+            { label: 'BASIC_AUTH', value: 'BASIC_AUTH' },
+          ]}
+        />
+        {errors.authType && (
           <div className={styles.errorMessage}>{errors.authType}</div>
-        }
+        )}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="payloadMetric">
-          Payload Metric
-        </label>
-        <input
-          id="payloadMetric"
-          name="payloadMetric"
-          type="text"
+        <InputField
+          label="Payload Metric"
+          placeholder="Enter Payload Metric"
           value={formData.payloadMetric || ''}
-          onChange={handleInputChange}
-          className={`${styles.formGroupInput} ${errors.payloadMetric ? styles.error : ''}`}
-          placeholder="EnterPayload Metric"
+          onChange={(val) => setFormData({ ...formData, payloadMetric: val })}
         />
-        {errors.payloadMetric && 
+        {errors.payloadMetric && (
           <div className={styles.errorMessage}>{errors.payloadMetric}</div>
-        }
+        )}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="rateLimitPolicy">
-          Rate Limit Policy
-        </label>
-        <input
-          type="text"
-          id="rateLimitPolicy"
-          name="rateLimitPolicy"
-          value={formData.rateLimitPolicy || ''}
-          onChange={handleInputChange}
-          className={`${styles.formGroupInput} ${errors.rateLimitPolicy ? styles.error : ''}`}
+        <InputField
+          label="Rate Limit Policy"
           placeholder="Enter Rate Limit Policy"
-          required
+          value={formData.rateLimitPolicy || ''}
+          onChange={(val) => setFormData({ ...formData, rateLimitPolicy: val })}
+          
         />
-        {errors.rateLimitPolicy && 
+        {errors.rateLimitPolicy && (
           <div className={styles.errorMessage}>{errors.rateLimitPolicy}</div>
-        }
+        )}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="granularity">
-          Granularity
-        </label>
-        <input
-          type="text"
-          id="granularity"
-          name="granularity"
-          value={formData.granularity || ''}
-          onChange={handleInputChange}
+        <InputField
+          label="Granularity"
           placeholder="Enter Granularity"
-          className={`${styles.formGroupInput} ${errors.granularity ? styles.error : ''}`}
+          value={formData.granularity || ''}
+          onChange={(val) => update({ granularity: val })}
+          
         />
         {errors.granularity && 
           <div className={styles.errorMessage}>{errors.granularity}</div>
@@ -158,24 +131,16 @@ const ApiConfig: React.FC<Props> = ({ formData, setFormData, errors }) => {
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="grouping">
-          Grouping 
-        </label>
-        <input
-          id="grouping"
-          name="grouping"
-          type="text"
-          value={formData.grouping || ''}
-          onChange={handleInputChange}
-          className={styles.formGroupInput}
-          placeholder="Enter grouping e.g., customer_id, region"
+        <InputField
+          label="Grouping"
+          placeholder="Enter grouping"
+          value={formData.grouping ?? ''}
+          onChange={(val) => update({ grouping: val })}
         />
-        {errors.grouping && 
-          <div className={styles.errorMessage}>{errors.grouping}</div>
-        }
+        {errors.grouping && <div className={styles.errorMessage}>{errors.grouping}</div>}
       </div>
     </div>
   );
 };
 
-export default ApiConfig; 
+export default ApiConfig;

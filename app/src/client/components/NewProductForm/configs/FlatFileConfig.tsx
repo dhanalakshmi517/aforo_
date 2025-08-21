@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './FlatFileConfig.module.css';
 import { ProductFormData } from '../../../../types/productTypes';
+import { InputField } from '../../Components/InputFields';
 
 interface FlatFileConfigProps {
   formData: ProductFormData;
@@ -89,43 +90,31 @@ const FlatFileConfig: React.FC<FlatFileConfigProps> = ({ formData, setFormData, 
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="size">Size</label>
-        <input
-          type="text"
-          id="size"
-          name="size"
-          value={formData.size || ''}
-          onChange={handleChange}
+        <InputField
+          label="Size"
           placeholder="e.g., 10MB, 1000 rows"
-          className={styles.formGroupInput}
+          value={formData.size ?? ''}
+          onChange={(val) => setFormData({ size: val })}
         />
         {errors.size && <div className={styles.errorMessage}>{errors.size}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="retentionPolicy">Retention Policy</label>
-        <input
-          type="text"
-          id="retentionPolicy"
-          name="retentionPolicy"
-          value={formData.retentionPolicy || ''}
-          onChange={handleChange}
+        <InputField
+          label="Retention Policy"
           placeholder="e.g., 30 days"
-          className={styles.formGroupInput}
+          value={formData.retentionPolicy ?? ''}
+          onChange={(val) => setFormData({ retentionPolicy: val })}
         />
         {errors.retentionPolicy && <div className={styles.errorMessage}>{errors.retentionPolicy}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="fileNamingConvention">File Naming Convention</label>
-        <input
-          type="text"
-          id="fileNamingConvention"
-          name="fileNamingConvention"
-          value={formData.fileNamingConvention || ''}
-          onChange={handleChange}
+        <InputField
+          label="File Naming Convention"
           placeholder="e.g., YYYYMMDD_HHMMSS"
-          className={styles.formGroupInput}
+          value={formData.fileNamingConvention ?? ''}
+          onChange={(val) => setFormData({ fileNamingConvention: val })}
         />
         {errors.fileNamingConvention && <div className={styles.errorMessage}>{errors.fileNamingConvention}</div>}
       </div>

@@ -83,15 +83,13 @@ line-height: var(--line-height-body-sm);
 color: var(--color-neutral-800);
 text-overflow: ellipsis;
 
-/* body/regular/lg */
 font-family: var(--font-family-primary);
 font-size: var(--font-size-lg);
 font-style: normal;
 font-weight: 400;
 line-height: var(--line-height-body-lg);
 border:None;
-margin-left: 30px;
-
+margin-left: 8px;
 }
 
 .new-customer-btn {
@@ -99,9 +97,9 @@ margin-left: 30px;
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 164px;
+  width: 174px;
   height: 40px;
-   background-color:var(--color-primary-700);
+  background-color:var(--color-primary-700);
   color: var(--color-neutral-white);
   padding: 8px 20px;
   border: none;
@@ -119,17 +117,35 @@ line-height: var(--line-height-body-lg);
   width: 900px;
   border-collapse: collapse;
   font-size: var(--font-size-lg);
-  margin-left: 30px;
-  border-radius:var(--border-radius-sm)
+  margin-left: 8px;
+  border-radius:var(--border-radius-sm);
+  margin-left:30px;
 }
 
 .customers-table th,
 .customers-table td {
-  border: 1px solid #ddd;
+  border-bottom: 1px solid #ddd; /* horizontal lines only */
   padding: 12px 10px;
   text-align: center;
 }
 
+.customer-logo {
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.action-icons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.action-icons button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
 
 .customers-table th {
   background-color: #f4f4f4;
