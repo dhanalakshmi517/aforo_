@@ -1,0 +1,243 @@
+@import 'variables.css';
+.signin-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #f7fbfd 0%, #ffffff 100%);
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  
+  /* Card */
+  .signin-card {
+    width: 100%;
+    max-width: 478px;
+    background: var(--color-neutral-white);
+    border-radius: var(--border-radius-md);
+    padding: 28px 28px 24px;
+    text-align: center;
+  }
+  
+  /* Logo */
+  .signin-logo {
+    width: 90px;
+    height: auto;
+    display: inline-block;
+    margin: 0;
+    vertical-align: middle;
+  }
+  
+  /* Text next to logo */
+  .logo-text {
+    color: #4F5B61;
+font-family: "ABC Repro";
+font-size: 30.441px;
+font-style: normal;
+font-weight: 500;
+line-height: 43.136px; /* 141.704% */
+letter-spacing: -2.248px;
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  
+  /* Title */
+  .signin-title {
+   
+    margin: 6px 0 18px;
+    text-align: center;
+
+    /* heading/bold/h5 */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h5);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-heading-h5); /* 140% */
+    background: var(--gradient-blue, linear-gradient(180deg, #286584 0%, var(--primary-color-400, #5FB7E2) 100%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; 
+  }
+  
+  /* Form fields */
+  .signin-form {
+    text-align: left;
+  }
+  
+  .field-label {
+    display: block;
+    color: var(--color-neutral-1400);
+    text-align: left;
+    
+    /* body/regular/xs */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md); /* 160% */
+    margin-bottom: 6px;
+  }
+  
+  .field-input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-neutral-300);
+    background:var(--color-neutral-100);
+    font-size: var(--font-size-xs);
+    margin-bottom: 14px;
+    box-sizing: border-box;
+  }
+
+  /* Password input wrapper */
+  .password-wrapper {
+    position: relative;
+  }
+  .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .toggle-password svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-neutral-1400);
+  }
+  
+  /* Password row (label + forgot link) */
+  .password-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .forgot-link {
+    color: var(--color-primary-800);
+
+    /* body/semibold/xs */
+    font-family: var(--type-font-family-primary);
+    font-size: var(--font-size-xs);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-xs);
+    text-decoration: none;
+  }
+  
+  /* Primary button */
+  .primary-btn {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: var(--color-primary-800);
+    color: var(--color-neutral-white);
+
+    /* body/regular/lg */
+    font-family: var(--type-font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg);
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+    color: #bfc9cc;
+    font-size: 13px;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eef3f5;
+  }
+  
+  /* Social buttons list */
+  .social-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .social-btn {
+    width: 100%;
+    padding: 8px 20px;
+    border-radius: var(--border-radius-sm);
+    background: var(--color-primary-000);
+    color: var(--color-primary-800);
+
+    /* body/regular/lg */
+    font-family: var(--type-font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .social-btn svg {
+    margin-right: 8px;
+  }
+  
+  /* subtle variants (just visual difference) */
+  .social-btn.google { background: #f6fbff; }
+  .social-btn.apple { background: #f6fbff; }
+  .social-btn.ms { background: #f6fbff; }
+  .social-btn.passkey { background: #f6fbff; }
+  
+  /* Footer text */
+    .signin-footer {
+      color: var(--color-neutral-1000);
+text-align: center;
+
+/* body/regular/xs */
+font-family: var(--type-font-family-primary);
+font-size: var(--font-size-xs);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-xs);
+
+    margin-top: 12px;
+  }
+  
+  .signin-footer a {
+    text-decoration: none;
+    color: var(--color-neutral-1000);
+text-align: center;
+
+font-family: var(--type-font-family-primary);
+font-size: var(--font-size-xs);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-xs);
+  }
+  
+  /* Responsive */
+  @media (max-width: 420px) {
+    .signin-card {
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .signin-title { font-size: 14px; }
+    .field-input { padding: 10px; }
+    .primary-btn { padding: 10px; }
+  }
+  

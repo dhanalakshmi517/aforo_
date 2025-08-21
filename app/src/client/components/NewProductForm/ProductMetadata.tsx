@@ -3,6 +3,7 @@ import { Grid } from '@mui/material';
 import { ProductFormData, enums } from '../../../types/productTypes';
 import styles from './ProductMetadata.module.css';
 import metadataStyles from './MetadataLabels.module.css';
+import { InputField } from '../Components/InputFields';
 
 interface ProductMetadataProps {
   formData: ProductFormData;
@@ -91,14 +92,11 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
         <Grid container spacing={2} className={styles.formGrid}>
           <Grid item xs={12} sm={6}>
             <div className={styles.formGroupsLabel}>
-              <label>Internal SKU Code</label>
-              <input
-                type="text"
-                name="internalSkuCode"
-                value={formData.internalSkuCode}
-                onChange={handleChange}
-                className={styles.metInput}
+              <InputField
+                label="Internal SKU Code"
                 placeholder="Enter internal SKU code"
+                value={formData.internalSkuCode}
+                onChange={(val) => onChange({ internalSkuCode: val })}
               />
               {errors.internalSkuCode && <div className={styles.error}>{errors.internalSkuCode}</div>}
             </div>
@@ -106,14 +104,11 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
           <Grid item xs={12} sm={6}>
             <div className={styles.formGroupsLabel}>
-              <label>UOM</label>
-              <input
-                type="text"
-                name="uom"
-                value={formData.uom}
-                onChange={handleChange}
-                className={styles.metInput}
+              <InputField
+                label="UOM"
                 placeholder="Enter UOM"
+                value={formData.uom}
+                onChange={(val) => onChange({ uom: val })}
               />
               {errors.uom && <div className={styles.error}>{errors.uom}</div>}
             </div>
@@ -121,13 +116,11 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
           <Grid item xs={12} sm={6}>
             <div className={styles.formGroupsLabel}>
-              <label>Effective Start Date</label>
-              <input
+              <InputField
+                label="Effective Start Date"
                 type="date"
-                name="effectiveStartDate"
-                value={formData.effectiveStartDate}
-                onChange={handleChange}
-                className={styles.metInput}
+                value={formData.effectiveStartDate ?? ''}
+                onChange={(val) => onChange({ effectiveStartDate: val })}
               />
               {errors.effectiveStartDate && <div className={styles.error}>{errors.effectiveStartDate}</div>}
             </div>
@@ -135,18 +128,15 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
           <Grid item xs={12} sm={6}>
             <div className={styles.formGroupsLabel}>
-              <label>Effective End Date</label>
-              <input
+              <InputField
+                label="Effective End Date"
                 type="date"
-                name="effectiveEndDate"
-                value={formData.effectiveEndDate}
-                onChange={handleChange}
-                className={styles.metInput}
+                value={formData.effectiveEndDate ?? ''}
+                onChange={(val) => onChange({ effectiveEndDate: val })}
               />
               {errors.effectiveEndDate && <div className={styles.error}>{errors.effectiveEndDate}</div>}
             </div>
           </Grid>
-
           <Grid item xs={12}>
             <div className={styles.formGroupsLabel}>
               <label>Billable</label>
@@ -216,14 +206,12 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
           <Grid item xs={12} sm={6}>
             <div className={styles.formGroupsLabel}>
-              <label>Linked Rate Plans</label>
-              <input
-                type="text"
-                name="linkedRatePlans"
+              <InputField
+                label="Linked Rate Plans"
+                placeholder="Enter rate plan names (comma separated)"
                 value={Array.isArray(formData.linkedRatePlans) ? formData.linkedRatePlans.join(', ') : ''}
-                onChange={(e) => {
-                  const value = e.target.value.trim();
-                  const ids = value ? value.split(',').map((v) => v.trim()) : [];
+                onChange={(val) => {
+                  const ids = val.trim() ? val.split(',').map((v) => v.trim()) : [];
                   onChange({ linkedRatePlans: ids });
 
                   if (ids.length > 0 && errors.linkedRatePlans) {
@@ -234,8 +222,6 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
                     });
                   }
                 }}
-                placeholder="Enter rate plan names"
-                className={styles.metInput}
               />
               {errors.linkedRatePlans && <div className={styles.error}>{errors.linkedRatePlans}</div>}
             </div>
@@ -243,14 +229,11 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
           <Grid item xs={12} sm={6}>
             <div className={styles.formGroupsLabel}>
-              <label>Audit Log ID</label>
-              <input
-                type="text"
-                name="auditLogId"
-                value={formData.auditLogId}
-                onChange={handleChange}
+              <InputField
+                label="Audit Log ID"
                 placeholder="Enter audit log ID"
-                className={styles.metInput}
+                value={formData.auditLogId ?? ''}
+                onChange={(val) => onChange({ auditLogId: val })}
               />
               {errors.auditLogId && <div className={styles.error}>{errors.auditLogId}</div>}
             </div>

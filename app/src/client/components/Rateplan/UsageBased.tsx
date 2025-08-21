@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
 import './UsageBased.css';
 
-const UsageBased: React.FC = () => {
-  const [unitAmount, setUnitAmount] = useState('$2');
+
+
+export interface UsagePayload { perUnitAmount: number; }
+
+interface UsageBasedProps {
+  data: UsagePayload;
+  onChange: (payload: UsagePayload) => void;
+}
+
+const numToStr = (n: number | undefined): string => (n && n !== 0 ? n.toString() : '');
+
+const UsageBased: React.FC<UsageBasedProps> = ({ data, onChange }) => {
+  const [unitAmount, setUnitAmount] = useState<string>(numToStr(data.perUnitAmount));
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="usage-container">
@@ -12,9 +24,20 @@ const UsageBased: React.FC = () => {
           className="usage-input-field"
           type="text"
           value={unitAmount}
-          onChange={(e) => setUnitAmount(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setUnitAmount(val);
+            const num = val.trim() === '' ? NaN : Number(val);
+            if (isNaN(num) || num <= 0) {
+              setError('Enter a valid amount');
+            } else {
+              setError(null);
+            }
+            onChange({ perUnitAmount: num });
+          }}
           placeholder="$0.10"
         />
+        {error && <span className="error-text">{error}</span>}
       </div>
 
       <div className="usage-example-section">
@@ -26,6 +49,7 @@ const UsageBased: React.FC = () => {
           <em>“You’ve consumed 10,000 units this cycle. At $0.10 per unit, your total comes to $1,000.”</em>
         </p>
       </div>
+          
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ProductFormData } from '../../../../types/productTypes';
 import styles from './SqlResultConfig.module.css';
+import { InputField, SelectField, TextareaField } from '../../Components/InputFields';
 
 interface Props {
   formData: ProductFormData;
@@ -20,116 +21,91 @@ const SqlResultConfig: React.FC<Props> = ({ formData, setFormData, errors }) => 
     const { name, value } = e.target;
     setFormData({ [name]: value });
   };
-
   return (
     <div className={styles.formGrid}>
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="queryTemplate">Query Template</label>
-        <textarea
-          id="queryTemplate"
-          name="queryTemplate"
-          value={formData.queryTemplate || ''}
-          onChange={handleInputChange}
-          rows={3}
-          className={styles.formGroupInput}
+        <TextareaField
+          label="Query Template"
+          value={formData.queryTemplate ?? ''}
           placeholder="Enter query template"
-        ></textarea>
+          onChange={(val) => setFormData({ queryTemplate: val })}
+        />
         {errors.queryTemplate && <div className={styles.errorMessage}>{errors.queryTemplate}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="dbType">Database Type</label>
-        <select
-          id="dbType"
-          name="dbType"
-          value={formData.dbType || ''}
-          onChange={handleSelectChange}
-          className={styles.formGroupSelect}
-        >
-          <option value="">--Select--</option>
-          <option value="MYSQL">MYSQL</option>
-          <option value="POSTGRES">POSTGRES</option>
-          <option value="SQLSERVER">SQLSERVER</option>
-          <option value="ORACLE">ORACLE</option>
-        </select>
+        <SelectField
+          label="Database Type"
+          value={formData.dbType ?? ''}
+          onChange={(val) => setFormData({ dbType: val })}
+          options={[
+            { label: 'MYSQL', value: 'MYSQL' },
+            { label: 'POSTGRES', value: 'POSTGRES' },
+            { label: 'SQLSERVER', value: 'SQLSERVER' },
+            { label: 'ORACLE', value: 'ORACLE' },
+          ]}
+        />
         {errors.dbType && <div className={styles.errorMessage}>{errors.dbType}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="freshness">Freshness</label>
-        <select
-          id="freshness"
-          name="freshness"
-          value={formData.freshness || ''}
-          onChange={handleSelectChange}
-          className={styles.formGroupSelect}
-        >
-          <option value="">--Select--</option>
-          <option value="REALTIME">REALTIME</option>
-          <option value="HOURLY">HOURLY</option>
-          <option value="DAILY">DAILY</option>
-        </select>
+        <SelectField
+          label="Freshness"
+          value={formData.freshness ?? ''}
+          onChange={(val) => setFormData({ freshness: val })}
+          options={[
+            { label: 'REALTIME', value: 'REALTIME' },
+            { label: 'HOURLY', value: 'HOURLY' },
+            { label: 'DAILY', value: 'DAILY' },
+          ]}
+        />
         {errors.freshness && <div className={styles.errorMessage}>{errors.freshness}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="executionFrequency">Execution Frequency</label>
-        <select
-          id="executionFrequency"
-          name="executionFrequency"
-          value={formData.executionFrequency || ''}
-          onChange={handleSelectChange}
-          className={styles.formGroupSelect}
-        >
-          <option value="">--Select--</option>
-          <option value="ON_DEMAND">ON_DEMAND</option>
-          <option value="SCHEDULED">SCHEDULED</option>
-          <option value="EVENT_DRIVEN">EVENT_DRIVEN</option>
-        </select>
+        <SelectField
+          label="Execution Frequency"
+          value={formData.executionFrequency ?? ''}
+          onChange={(val) => setFormData({ executionFrequency: val })}
+          options={[
+            { label: 'ON_DEMAND', value: 'ON_DEMAND' },
+            { label: 'SCHEDULED', value: 'SCHEDULED' },
+            { label: 'EVENT_DRIVEN', value: 'EVENT_DRIVEN' },
+          ]}
+        />
         {errors.executionFrequency && <div className={styles.errorMessage}>{errors.executionFrequency}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="expectedRowRange">Expected Row Range</label>
-        <input
-          type="text"
-          id="expectedRowRange"
-          name="expectedRowRange"
-          value={formData.expectedRowRange || ''}
-          onChange={handleInputChange}
-          className={styles.formGroupInput}
+        <InputField
+          label="Expected Row Range"
           placeholder="Enter expected row range"
+          value={formData.expectedRowRange ?? ''}
+          onChange={(val) => setFormData({ expectedRowRange: val })}
         />
         {errors.expectedRowRange && <div className={styles.errorMessage}>{errors.expectedRowRange}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="joinComplexity">Join Complexity</label>
-        <select
-          id="joinComplexity"
-          name="joinComplexity"
-          value={formData.joinComplexity || ''}
-          onChange={handleSelectChange}
-          className={styles.formGroupSelect}
-        >
-          <option value="">--Select--</option>
-          <option value="LOW">LOW</option>
-          <option value="MEDIUM">MEDIUM</option>
-          <option value="HIGH">HIGH</option>
-        </select>
+        <SelectField
+          label="Join Complexity"
+          value={formData.joinComplexity ?? ''}
+          onChange={(val) => setFormData({ joinComplexity: val })}
+          options={[
+            { label: 'LOW', value: 'LOW' },
+            { label: 'MEDIUM', value: 'MEDIUM' },
+            { label: 'HIGH', value: 'HIGH' },
+          ]}
+        />
         {errors.joinComplexity && <div className={styles.errorMessage}>{errors.joinComplexity}</div>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formGroupLabel} htmlFor="resultSize">Result Size</label>
-        <input
-          type="text"
-          id="resultSize"
-          name="resultSize"
-          value={formData.resultSize || ''}
-          onChange={handleInputChange}
-          className={styles.formGroupInput}
+        <InputField
+          label="Result Size"
           placeholder="Enter result size"
+          value={formData.resultSize ?? ''}
+          onChange={(val) => setFormData({ resultSize: val })}
         />
         {errors.resultSize && <div className={styles.errorMessage}>{errors.resultSize}</div>}
       </div>

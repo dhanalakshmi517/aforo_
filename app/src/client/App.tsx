@@ -8,6 +8,7 @@ import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUserLastActiveTimestamp } from 'wasp/client/operations';
 import { cn } from './cn';
 import Landing from './components/Landing/Landing';
+import Organization from './components/Landing/Organization';
 
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import Customers from './components/Customers/Customers';
@@ -37,6 +38,7 @@ export default function App() {
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [showNewUsageMetricForm, setShowNewUsageMetricForm] = useState(false);
+  const [hideSidebarOnEditMetric, setHideSidebarOnEditMetric] = useState(false);
 
   const [showNewSubscriptionForm, setShowNewSubscriptionForm] = useState(false);
 
@@ -92,7 +94,7 @@ export default function App() {
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
 
-    if (location.pathname === '/get-started/subscriptions') return 'Subscriptions';
+    if (location.pathname === '/get-started/subscriptions') return 'Purchases';
 
 
     return 'Get Started';
@@ -102,13 +104,13 @@ export default function App() {
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
 
-    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || isEditingPlan) {
+    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || hideSidebarOnEditMetric || isEditingPlan) {
       setShowSidebar(false);
     } else {
       setShowSidebar(true);
     }
 
-  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, showNewSubscriptionForm, location.pathname]);
+  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, showNewSubscriptionForm, hideSidebarOnEditMetric, location.pathname]);
 
 
 
@@ -125,6 +127,7 @@ export default function App() {
               </div>
             } />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/contact-sales" element={<Organization />} />
             <Route path="/estimate-revenue" element={<EstimateRevenue />} />
             <Route path="/usage-estimation" element={<UsageEstimation />} />
             <Route path="/stair-estimation" element={<StairEstimation />} />
@@ -134,7 +137,10 @@ export default function App() {
                   <SideNavbar 
                     activeTab={currentTab} 
                     onTabClick={(tab) => {
-                      const slug = tab === 'Billable Metrics' ? 'metering' : tab.toLowerCase().replace(/\s+/g, '-');
+                      const slug =
+                      tab === 'Billable Metrics' ? 'metering'
+                      : tab === 'Purchases' ? 'subscriptions'
+                      : tab.toLowerCase().replace(/\s+/g, '-');
                       navigate(`/get-started/${slug}`);
                     }} 
                     hidden={!showSidebar} 
@@ -159,6 +165,7 @@ export default function App() {
                       <Route path="metering" element={<Metering 
                         showNewUsageMetricForm={showNewUsageMetricForm}
                         setShowNewUsageMetricForm={setShowNewUsageMetricForm}
+                        setHideSidebarOnEditMetric={setHideSidebarOnEditMetric}
                       />} />
                     </Routes>
                   </div>

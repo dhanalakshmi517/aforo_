@@ -10,14 +10,26 @@ interface Stair {
 
 const StairStep: React.FC = () => {
   const [stairs, setStairs] = useState<Stair[]>([
-    { from: '00', to: '10', cost: '$11' },
-    { from: '11', to: '20', cost: '$10' },
-    { from: '21', to: '', cost: '$8' },
+    { from: '', to: '', cost: '' },
   ]);
 
   const [unlimited, setUnlimited] = useState(false);
+
   const [overageCharge, setOverageCharge] = useState('');
   const [graceBuffer, setGraceBuffer] = useState('');
+
+  // Persist values so Pricing save can read
+  React.useEffect(() => {
+    localStorage.setItem('stairTiers', JSON.stringify(stairs));
+  }, [stairs]);
+
+  React.useEffect(() => {
+    localStorage.setItem('stairOverage', overageCharge);
+  }, [overageCharge]);
+
+  React.useEffect(() => {
+    localStorage.setItem('stairGrace', graceBuffer);
+  }, [graceBuffer]);
 
   const handleAddStair = () => {
     setStairs([...stairs, { from: '', to: '', cost: '' }]);

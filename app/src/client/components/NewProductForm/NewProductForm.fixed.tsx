@@ -183,7 +183,7 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
           labels: formData.labels,
         };
         console.log('payload before POST', basePayload);
-        const res = await fetch('http://13.230.194.245:8080/api/products', {
+        const res = await fetch('http://54.238.204.246:8080/api/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(basePayload),
@@ -295,7 +295,7 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
         LLMToken: 'llm-token',
       };
 
-      const configRes = await fetch(`http://13.230.194.245:8080/api/products/${productId}/${endpointMap[formData.productType]}`, {
+      const configRes = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${endpointMap[formData.productType]}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(configBody),

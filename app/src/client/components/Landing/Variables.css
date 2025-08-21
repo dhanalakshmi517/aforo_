@@ -78,6 +78,8 @@
   
     /* Font Family */
     --font-family-primary: 'altone-variable', sans-serif;
+    --type-font-family-primary: 'Altone Variable', Arial, sans-serif;
+
   
     /* Font Weights (string values not specified in the image) */
     --font-weight-light: 300;

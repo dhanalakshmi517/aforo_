@@ -1,0 +1,49 @@
+@import 'variables.css';
+.thankyou {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 20px;
+    background: #fff;
+    text-align: center;
+  }
+  
+  .thankyou-content {
+    max-width: 600px;
+  }
+  
+  .check-icon {
+    width: 81px;
+    height: 80px;
+    margin: 0 auto 20px;
+    display: block; /* let internal SVG determine visuals */
+  }
+  
+  .thankyou h1 {
+ 
+/* heading/semibold/h1 */
+font-family: var(--font-family-primary);
+font-size: 48px;
+font-style: normal;
+font-weight: 400;
+line-height: 64px; /* 133.333% */
+margin-bottom: 12px;
+
+background: var(--gradient-blue, linear-gradient(180deg, #286584 0%, var(--primary-color-400, #5FB7E2) 100%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+  }
+  
+  .thankyou p {
+    color: var(--color-neutral-800);
+    text-align: center;
+    
+    /* heading/regular/h6 */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h6);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-heading-h6); /* 133.333% */
+  }
+  

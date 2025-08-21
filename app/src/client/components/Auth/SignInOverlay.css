@@ -1,0 +1,24 @@
+.signin-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 2000;
+}
+
+.signin-backdrop .signin-page {
+  background: transparent;
+  min-height: auto;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signin-backdrop .signin-card {
+  margin: 0;
+}
+

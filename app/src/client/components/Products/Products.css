@@ -161,7 +161,6 @@
   justify-content: flex-end;
   margin-top: 0;
   margin-bottom: 2px;
-  margin-left: 400px;
 }
 
 .products-search {
@@ -212,13 +211,12 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-
 font-family: var(--font-family-primary);
 font-size: var(--font-size-lg);
 font-style: normal;
 font-weight: 400; 
 line-height: var(--line-height-body-lg);
-
+margin-left: -30px;
 }
 
 

@@ -1,0 +1,121 @@
+import React from 'react';
+
+interface AggregationWindowSelectProps {
+  productType: string;
+  unitOfMeasure: string;
+  value: string;
+  onChange: (val: string) => void;
+}
+
+/**
+ * Displays appropriate aggregation-window options based on product type + unit-of-measure.
+ * Currently only API product rules are defined as per requirements.
+ */
+const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ productType, unitOfMeasure, value, onChange }) => {
+  const type = productType.toUpperCase();
+  const uom = unitOfMeasure.toUpperCase();
+
+  let options: string[] | null = null;
+
+  if (type === 'API') {
+    const common = ['PER_EVENT', 'PER_MINUTE', 'PER_HOUR', 'PER_DAY'];
+    const noMinute = ['PER_EVENT', 'PER_HOUR', 'PER_DAY'];
+    const noDayMinute = ['PER_EVENT', 'PER_MINUTE', 'PER_HOUR'];
+
+    switch (uom) {
+      case 'API_CALL':
+      case 'REQUEST':
+        options = common;
+        break;
+      case 'TRANSACTION':
+        options = noMinute; // per_event, per_hour, per_day
+        break;
+      case 'HIT':
+        options = noDayMinute; // per_event, per_minute, per_hour
+        break;
+      default:
+        options = null;
+    }
+  }
+  // --- LLM TOKEN rules ---
+  else if (type === 'LLMTOKEN') {
+    const all = ['PER_EVENT', 'PER_MINUTE', 'PER_HOUR', 'PER_DAY'];
+    const noMinute = ['PER_EVENT', 'PER_HOUR', 'PER_DAY'];
+    switch (uom) {
+      case 'TOKEN':
+        options = all;
+        break;
+      case 'PROMPT_TOKEN':
+      case 'COMPLETION_TOKEN':
+        options = noMinute;
+        break;
+      default:
+        options = null;
+    }
+  }
+  // --- FLATFILE rules ---
+  else if (type === 'FLATFILE') {
+    switch (uom) {
+      case 'FILE':
+        options = ['PER_EVENT', 'PER_DAY', 'PER_WEEK', 'PER_MONTH'];
+        break;
+      case 'DELIVERY':
+        options = ['PER_DAY', 'PER_WEEK', 'PER_MONTH'];
+        break;
+      case 'MB':
+        options = ['PER_DELIVERY', 'PER_DAY', 'PER_MONTH'];
+        break;
+      case 'RECORD':
+        options = ['PER_FILE', 'PER_DELIVERY', 'PER_DAY'];
+        break;
+      case 'ROW':
+        options = ['PER_FILE', 'PER_DAY', 'PER_MONTH'];
+        break;
+      default:
+        options = null;
+    }
+  }
+  // --- SQLRESULT rules ---
+  else if (type === 'SQLRESULT') {
+    switch (uom) {
+      case 'ROW':
+        options = ['PER_QUERY', 'PER_HOUR', 'PER_DAY'];
+        break;
+      case 'QUERY_EXECUTION':
+        options = ['PER_HOUR', 'PER_DAY', 'PER_MONTH'];
+        break;
+      case 'CELL':
+        options = ['PER_QUERY', 'PER_DAY', 'PER_MONTH'];
+        break;
+      case 'MB':
+        options = ['PER_QUERY', 'PER_DAY', 'PER_MONTH'];
+        break;
+      default:
+        options = null;
+    }
+  }
+
+  if (options) {
+    return (
+      <select className="select-field" value={value} onChange={e => onChange(e.target.value)}>
+        <option value="">--select--</option>
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+    );
+  }
+
+  // Fallback free text
+  return (
+    <input
+      type="text"
+      className="input-field"
+      placeholder="Aggregation Window"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+    />
+  );
+};
+
+export default AggregationWindowSelect;

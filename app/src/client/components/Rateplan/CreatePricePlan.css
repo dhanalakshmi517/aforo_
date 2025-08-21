@@ -360,7 +360,7 @@ line-height: var(--line-height-heading-h4);
   
   .create-form input[type="text"]
   {
-    width: 85%;
+    width: 60%;
     height:40px;
     padding: 8px 12px;
     font-size: var(--font-size-md);
@@ -379,7 +379,7 @@ line-height: var(--line-height-heading-h4);
 
 
 .create-form textarea {
-    width: 65%;
+    width: 60%;
     height:40px;
     padding: 8px 12px;
     font-size: var(--font-size-md);

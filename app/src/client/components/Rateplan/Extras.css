@@ -10,6 +10,27 @@
    
   
   }
+  .extras-save-btn{
+    width:140px;
+    height:40px;
+    border:none;
+    background:transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    border-radius:var(--border-radius-sm);
+    background-color: var(--color-primary-000);
+    color: var(--color-primary-800);
+
+/* body/regular/md */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md);
+    
+  }
   
   .dropdown-group {
     display: flex;
@@ -20,19 +41,23 @@
     border-bottom: 1px solid var(--color-neutral-200);
   }
   
-  .header-icon-btn{
+  
+
+.extras-icon-btn{
  
   display:flex;
   align-items:center;
   justify-content:center;
   border:none;
   border-radius:var(--border-radius-sm);
-  background-color:var(--color-primary-000);
+  background-color: var(--color-secondary-100);
   cursor:pointer;
   margin-right:8px;
+  width:48px;
+  height:48px;
 }
 
-.header-icon-btn svg{width:24px;height:24px;}
+.extras-icon-btn svg{width:24px;height:24px; color: var(--color-secondary-700);}
 
 /* legacy span class still used elsewhere */
 .header-icon{display:none;}
@@ -78,7 +103,8 @@ margin-left:10px;
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 600;
-  min-height: 36px
+  min-height: 36px;
+  width: 80%;
 }
 
 .dropdown-group select:invalid {
@@ -148,7 +174,7 @@ margin-left:10px;
     border: 1px solid var(--color-neutral-200);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-md);
-    width: 100%;
+    width: 80%;
     background-color: var(--color-neutral-100);
       /* margin-left: 250px; */
   
@@ -161,7 +187,7 @@ margin-left:10px;
   
   }
   .section-content select{
-  width: 100%;
+  width: 80%;
   padding:6px 10px;
   height:36px;
     background-color: var(--color-neutral-100);
@@ -225,7 +251,7 @@ margin-left:10px;
   }
   
   .date-input input[type="date"] {
-    width: 230px; 
+    width: 300px; 
     padding: 8px 10px;
     font-size: 14px;
   }
