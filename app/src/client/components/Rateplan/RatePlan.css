@@ -6,20 +6,50 @@
   box-sizing: border-box;
 }
 
+
 .breadcrumb-nav {
   margin-bottom: 10px;
   margin-top: -20px;
+  width: 100%;
+  padding-left: 210px; /* align with sidebar without reducing width */
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .breadcrumb-nav {
+    margin-left: 0;
+    width: 100%;
+  }
+  .rate-plan-container {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 .breadcrumb {
   display: flex;
   gap: 12px;
   align-items: center;
-  width: 1200px;
+  width: 100%;
+  max-width: none;
   background-color: var(--color-neutral-white);
   height: 42px;
   border: 1px solid var(--color-neutral-200);
-  margin-left: -4px;
+  margin: 0;
+  overflow: hidden; /* prevent scrollbar */
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .breadcrumb {
+    gap: 8px;
+    height: auto;
+    padding: 8px;
+  }
+  .breadcrumb-item {
+    flex: 0 0 auto; /* prevent shrinking */
+    white-space: nowrap;
+  }
 }
 
 .breadcrumb-item {
@@ -93,9 +123,10 @@
 
 .rate-plan-container {
   padding: 20px;
-  width: 1010px;
+  width: calc(100% - 210px); /* leave room for sidebar */
+  max-width: none;
   box-sizing: border-box;
-  margin-left: 30px;
+  margin-left: 210px; /* sidebar width */
   background: none;
   box-shadow: none;
 }
@@ -139,6 +170,9 @@
   font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-heading-h5);
+  justify-content: flex-start;
+
+
 }
 
 .header-actions {
@@ -156,7 +190,7 @@
   justify-content: flex-end;
   margin-top: 0;
   margin-bottom: 2px;
-  margin-left: 370px;
+  /* margin-left: 370px; */
   margin-top: 10px;
 }
 
@@ -194,7 +228,7 @@
   cursor: pointer;
   width:170px;
   height:40px;
-  margin-right: 20px;
+  /* margin-right: 20px; */
 }
 
 .sam-button {
@@ -253,7 +287,6 @@ line-height: var(--line-height-body-md);
 .plan-header-actions {
   display: flex;
   gap: 12px;
-  margin-left: -50px;
 }
 
 
@@ -261,15 +294,15 @@ line-height: var(--line-height-body-md);
 /* Table styles */
 .pp-rate-table {
   width: 100%;
-  max-width: 1200px;
+  table-layout: fixed; /* distribute columns evenly */
   border-collapse: collapse;
   margin-top: 20px;
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #fff;
-  border-radius: 10px;
+  width: 100%;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 0;
+
 }
 
 .pp-rate-table th,
@@ -278,6 +311,7 @@ line-height: var(--line-height-body-md);
   text-align: left;
   border-bottom: 1px solid #eee;
   font-size: 14px;
+  word-wrap: break-word;
 }
 
 .pp-rate-table th {
@@ -286,8 +320,23 @@ line-height: var(--line-height-body-md);
   font-weight: 600;
 }
 
+/* Equal column widths (except first) */
+.pp-rate-table th:nth-child(1),
+.pp-rate-table td:nth-child(1) {
+  width: 60px;
+}
+.pp-rate-table th:nth-child(n+2),
+.pp-rate-table td:nth-child(n+2) {
+  width: calc((100% - 60px)/5);
+}
 
-
+/* Small screens: allow horizontal scroll rather than squishing */
+@media (max-width: 768px) {
+  .pp-rate-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
 
 .delete-modal-overlay {
   position: fixed;
@@ -543,16 +592,19 @@ line-height: var(--line-height-body-md);
 
 /* -------------------------------------------------- */
 /* Action buttons styles specific to RatePlans table  */
+
 /* -------------------------------------------------- */
-.action-button {
+.action-buttons {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
   align-items: center;
-  margin-right:180px;
+  justify-content: center;
+  width: fit-content;
+  margin: 0 auto;
 }
 
-.edit-buttons  {
+
+.edit-button  {
   background-color: var(--color-info-100);
   border: none;
   padding: 6px;
@@ -563,7 +615,7 @@ line-height: var(--line-height-body-md);
   height: 28px;
 }
 
-.delete-buttons {
+.delete-button {
   background-color: var(--color-error-100);
   border: none;
   color: var(--color-error-400);

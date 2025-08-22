@@ -16,6 +16,7 @@ import Products from './components/Products/Products';
 import Metering from './components/Metering/Metering';
 
 import Subscriptions from './components/Subscriptions/Subscriptions';
+import DataIngestion from './components/DataIngestion/DataIngestion';
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
@@ -93,6 +94,7 @@ export default function App() {
     if (location.pathname === '/get-started/products') return 'Products';
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
+    if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
 
     if (location.pathname === '/get-started/subscriptions') return 'Purchases';
 
@@ -132,7 +134,7 @@ export default function App() {
             <Route path="/usage-estimation" element={<UsageEstimation />} />
             <Route path="/stair-estimation" element={<StairEstimation />} />
             <Route path="/get-started/*" element={
-              <div className="empty-background">
+              <div>
                 <div className="flex h-full">
                   <SideNavbar 
                     activeTab={currentTab} 
@@ -140,6 +142,7 @@ export default function App() {
                       const slug =
                       tab === 'Billable Metrics' ? 'metering'
                       : tab === 'Purchases' ? 'subscriptions'
+                      : tab === 'Data Ingetion' ? 'data-ingetion'
                       : tab.toLowerCase().replace(/\s+/g, '-');
                       navigate(`/get-started/${slug}`);
                     }} 
@@ -154,7 +157,6 @@ export default function App() {
                         showCreatePlan={showCreatePlan} 
                         setShowCreatePlan={setShowCreatePlan}
                         ratePlans={ratePlans}
-
                       />} />
                       <Route path="rate-plans/:id/edit" element={<EditPlan onClose={() => navigate(-1)} />} />
                       <Route path="subscriptions" element={<Subscriptions 
@@ -162,6 +164,7 @@ export default function App() {
                           setShowNewSubscriptionForm={setShowNewSubscriptionForm}
                         />} />
                       
+                      <Route path="data-ingetion" element={<DataIngestion />} />
                       <Route path="metering" element={<Metering 
                         showNewUsageMetricForm={showNewUsageMetricForm}
                         setShowNewUsageMetricForm={setShowNewUsageMetricForm}

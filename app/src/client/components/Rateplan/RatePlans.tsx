@@ -196,11 +196,11 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
             <h2>Rate Plans</h2>
             <div className="header-actions">
               <Search onSearch={setSearchTerm} />
-              <button className="sam-button">
+              {/* <button className="sam-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                  </button>
+                  </button> */}
               {/* Search component handles input */}
               <button className="new-rate-button" onClick={() => {
                 setShowCreatePlan(true);

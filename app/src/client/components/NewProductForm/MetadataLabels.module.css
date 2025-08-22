@@ -171,6 +171,7 @@
 .labelValue {
   flex: 1;
   font-weight: 500;
+  margin-right: 24px; /* provide visual gap before delete icon */
 }
 
 .labelDeleteBtn {

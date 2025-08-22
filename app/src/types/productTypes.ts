@@ -11,7 +11,7 @@ export interface ProductFormData {
   effectiveStartDate?: string;
   effectiveEndDate?: string;
   billable: boolean;
-  auditLogId?: string;
+  auditLogId?: number;
   linkedRatePlans: string[];
   tags: { key: string; value: string }[];
   labels: Record<string, string>;

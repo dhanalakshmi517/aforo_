@@ -1,9 +1,16 @@
 @import "../Variables/Variables.css";
 .products-container {
-  padding: 0 px;
+  /* Use full available width; add side padding for consistent spacing */
+  padding: 0 30px;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 991px) {
+  .products-container {
+    padding: 0 8px;
+  }
 }
 
 .hide-sidebar .sidebar {
@@ -216,24 +223,31 @@ font-size: var(--font-size-lg);
 font-style: normal;
 font-weight: 400; 
 line-height: var(--line-height-body-lg);
-margin-left: -30px;
 }
 
 
+
+.products-table-container {
+  width: 100%;
+  overflow-x: auto; /* Enables horizontal scroll on small screens */
+}
 
 .products-table {
   border-collapse: collapse;
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-md);
-  overflow: hidden;
+  box-sizing: border-box;
   padding: 12px;
-  width: 1000px;
-  margin-left: 30px;
-  margin-top: 4px;
-  box-shadow: 0px 18px 54px 0px rgba(0, 0, 0, 0.07), 0px 2.254px 43.336px 0px rgba(0, 0, 0, 0.00);
-
-
+  width: 100%;
+  min-width: 500px; /* Ensures columns don't break badly */
+  margin: 4px 30px 0;
+  margin-left: 250px;
 }
+
+
+
+
+
 
 .products-table th,
 .products-table td {

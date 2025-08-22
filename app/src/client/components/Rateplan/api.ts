@@ -80,7 +80,7 @@ export interface RatePlanRequest {
 
 export const confirmRatePlan = async (ratePlanId: number) => {
   // Calls endpoint that changes status from DRAFT to ACTIVE
-  return axios.post(`${BASE_URL}/rateplans/api/rateplans/${ratePlanId}/confirm`);
+  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/confirm`);
 };
 
 export const createRatePlan = async (payload: RatePlanRequest) => {

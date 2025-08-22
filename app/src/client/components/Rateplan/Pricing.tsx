@@ -14,7 +14,11 @@ interface Tier {
   isUnlimited?: boolean;
 }
 
-export interface PricingHandle { save: () => Promise<boolean>; }
+export interface PricingHandle {
+  save: () => Promise<boolean>;
+  setFlatFee: (payload: FlatFeePayload) => void;
+  getFlatFee: () => FlatFeePayload;
+}
 interface PricingProps { ratePlanId: number | null; }
 
 const Pricing = React.forwardRef<PricingHandle, PricingProps>(({ ratePlanId }, ref) => {
@@ -29,8 +33,12 @@ const Pricing = React.forwardRef<PricingHandle, PricingProps>(({ ratePlanId }, r
   const [usage, setUsage] = useState<UsagePayload>({ perUnitAmount: 0 });
   const [overageUnitRate, setOverageUnitRate] = useState(0);
   const [graceBuffer, setGraceBuffer] = useState(0);
-    // expose save via ref
-  React.useImperativeHandle(ref, () => ({ save: savePricing }));
+    // expose save and state manipulators via ref (handy for unit tests)
+  React.useImperativeHandle(ref, () => ({
+    save: savePricing,
+    getFlatFee: () => flatFee,
+    setFlatFee,
+  }));
 
   // helper to persist chosen model across sessions if desired (optional)
   // Save handler

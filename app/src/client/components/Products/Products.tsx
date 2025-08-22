@@ -259,9 +259,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               <div className="products-header" style={{ marginTop: '24px' }}>
                 <h2>Products</h2>
                 <div className="products-actions">
-                  <div className="products-search">
-                    <Search onSearch={(query) => setSearchTerm(query)} />
-                  </div>
+                  <Search onSearch={(query) => setSearchTerm(query)} />
                   <button className={styles.samButton}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -279,7 +277,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 <table className="products-table">
                   <thead>
                     <tr>
-                      <th>ProductID</th>
                       <th>Product Name</th>
                       <th>Product Type</th>
                       <th>Billable</th>
@@ -293,7 +290,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       .filter(product => product.productName.toLowerCase().includes(searchTerm.toLowerCase()))
                       .map((product) => (
                       <tr key={product.productId}>
-                        <td>{product.productId}</td>
                         <td>{product.productName}</td>
                         <td>
                           <span className={`product-type-badge--${product.productType.toLowerCase()}`}>

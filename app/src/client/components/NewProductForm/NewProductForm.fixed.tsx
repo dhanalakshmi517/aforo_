@@ -77,11 +77,10 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
     effectiveStartDate: '',
     effectiveEndDate: '',
     billable: false,
-    auditLogId: '',
+    auditLogId: 0,
     linkedRatePlans: [],
     tags: [],
     labels: {},
-
     endpointUrl: '',
     authType: '',
     payloadMetric: '',
