@@ -95,7 +95,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
-        setProducts(data);
+        const list = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
+        setProducts(list);
         setError(null);
       } catch (err) {
         setError('Failed to load products');

@@ -6,23 +6,30 @@ const UsageEstimation: React.FC = () => {
   const navigate = useNavigate();
   const [usage, setUsage] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
-  const [includeSetup, setIncludeSetup] = useState(true);
-  const [includeDiscount, setIncludeDiscount] = useState(true);
+  const perUsageRate = Number(localStorage.getItem('usagePerUnitAmount') || 0);
+  const setupFee = Number(localStorage.getItem('setupFee') || 0);
+  const discountPercent = Number(localStorage.getItem('discountPercent') || 0);
+  const discountFlat = Number(localStorage.getItem('discountFlat') || 0);
+  const freemiumUnits = Number(localStorage.getItem('freemiumUnits') || 0);
+  const minimumUsage = Number(localStorage.getItem('minimumUsage') || 0);
+  const minimumCharge = Number(localStorage.getItem('minimumCharge') || 0);
+
+  const [includeSetup, setIncludeSetup] = useState(false);
+  const [includeDiscount, setIncludeDiscount] = useState(false);
   const [includeFreemium, setIncludeFreemium] = useState(false);
-  const [includeCommitment, setIncludeCommitment] = useState(true);
+  const [includeCommitment, setIncludeCommitment] = useState(false);
   const [showCalculation, setShowCalculation] = useState(false);
 
-  const perUsageRate = 0.1;
-  const setupFee = 10;
-  const discountPercent = 10;
-  const freemiumUnits = 20;
 
   const usageNum = Number(usage) || 0;
   const usageTotal = usageNum * perUsageRate;
   const setupComponent = includeSetup ? setupFee : 0;
   const subtotal = usageTotal + setupComponent;
-  const discountAmount = includeDiscount ? (discountPercent / 100) * subtotal : 0;
-  const totalEstimation = subtotal - discountAmount;
+  const discountAmount = includeDiscount ? (discountPercent>0 ? (discountPercent/100)*subtotal : discountFlat) : 0;
+  let totalEstimation = subtotal - discountAmount;
+  if(includeCommitment && minimumCharge>0){
+    totalEstimation = Math.max(totalEstimation, minimumCharge);
+  }
 
   const handleCalculate = () => {
     setIsCalculating(true);
@@ -52,10 +59,10 @@ const UsageEstimation: React.FC = () => {
               value={usage}
               onChange={(e) => setUsage(e.target.value)}
             />
-            <button onClick={handleCalculate} disabled={isCalculating}>
-              {isCalculating ? <span className="loader"></span> : 'Calculate Revenue'}
-            </button>
           </div>
+          <button onClick={handleCalculate} disabled={isCalculating}>
+            {isCalculating ? <span className="loader"></span> : 'Calculate Revenue'}
+          </button>
         </div>
 
         <table className="estimate-table">
@@ -75,8 +82,8 @@ const UsageEstimation: React.FC = () => {
             </tr>
             <tr>
               <td>Per Usage Amount</td>
-              <td>$0.1</td>
-              {showCalculation && <><td>$0.1 * {usage}</td><td>${usageTotal.toFixed(0)}</td></>}
+              <td>{`$${perUsageRate}`}</td>
+              {showCalculation && <><td>{`$${perUsageRate} * ${usage}`}</td><td>{`$${usageTotal.toFixed(2)}`}</td></>}
             </tr>
             <tr>
               <td>
@@ -90,8 +97,8 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Setup Fee
               </td>
-              <td>$10</td>
-              {showCalculation && <><td>$10</td><td>${setupComponent}</td></>}
+              <td>{setupFee>0 ? `$${setupFee}` : '-'}</td>
+              {showCalculation && includeSetup && <><td>{`$${setupFee}`}</td><td>{`$${setupComponent.toFixed(2)}`}</td></>}
             </tr>
             <tr>
               <td>
@@ -105,11 +112,11 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Discounts
               </td>
-              <td>10%</td>
+              <td>{discountPercent>0 ? `${discountPercent}%` : discountFlat>0 ? `$${discountFlat}` : '-'}</td>
               {showCalculation && (
                 <>
-                  <td>10% of ${subtotal.toFixed(0)} = ${discountAmount.toFixed(0)}</td>
-                  <td>-${discountAmount.toFixed(0)}</td>
+                  <td>{discountPercent>0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`}</td>
+                  <td>{`-$${discountAmount.toFixed(2)}`}</td>
                 </>
               )}
             </tr>
@@ -125,7 +132,7 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Freemium Setup
               </td>
-              <td>Free Units - {freemiumUnits}</td>
+              <td>{freemiumUnits>0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
               {showCalculation && <><td>-</td><td>-</td></>}
             </tr>
             <tr>
@@ -140,7 +147,7 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Minimum Commitment
               </td>
-              <td>10 APIs</td>
+              <td>{minimumCharge>0 ? `${minimumUsage} units / $${minimumCharge}` : '-'}</td>
               {showCalculation && <><td>-</td><td>-</td></>}
             </tr>
             {showCalculation && (

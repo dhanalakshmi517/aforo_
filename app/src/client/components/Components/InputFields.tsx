@@ -18,6 +18,7 @@ export const InputField: React.FC<InputProps> = ({ label, value, placeholder, on
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
+      aria-label={label || placeholder || type}
       className="input-field"
     />
   </div>
@@ -38,6 +39,7 @@ export const TextareaField: React.FC<TextareaProps> = ({ label, value, placehold
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
+      aria-label={label || placeholder || 'textarea'}
       className="textarea-field"
     />
   </div>
@@ -58,6 +60,7 @@ export const SelectField: React.FC<SelectProps> = ({ label, value, onChange, opt
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={label || 'select'}
       className="select-field"
       disabled={disabled}
     >

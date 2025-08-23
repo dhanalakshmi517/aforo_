@@ -56,6 +56,12 @@ const Pricing = React.forwardRef<PricingHandle, PricingProps>(({ ratePlanId }, r
           alert('Please complete all flat-fee fields before saving.');
           return false;
         }
+        // Persist to localStorage for estimator/Review
+        localStorage.setItem('flatFeeAmount', flatFeeAmount.toString());
+        localStorage.setItem('flatFeeApiCalls', numberOfApiCalls.toString());
+        localStorage.setItem('flatFeeOverage', overageUnitRate.toString());
+        localStorage.setItem('flatFeeGrace', (graceBuffer || 0).toString());
+
         console.log('Flat-fee pricing payload', flatFee);
         await saveFlatFeePricing(ratePlanId, flatFee);
         alert('Flat-fee pricing saved');
@@ -64,6 +70,7 @@ const Pricing = React.forwardRef<PricingHandle, PricingProps>(({ ratePlanId }, r
           alert('Please enter a valid per-unit amount.');
           return false;
         }
+        localStorage.setItem('usagePerUnitAmount', usage.perUnitAmount.toString());
         console.log('Usage-based pricing payload', usage);
         await saveUsageBasedPricing(ratePlanId, usage);
         alert('Usage-based pricing saved');
@@ -158,6 +165,13 @@ const Pricing = React.forwardRef<PricingHandle, PricingProps>(({ ratePlanId }, r
     { from: 0, to: 0, price: 0, isUnlimited: false },
   ]);
   const [noUpperLimit, setNoUpperLimit] = useState(false);
+
+  // Persist chosen model so Review step can access it
+  React.useEffect(() => {
+    if (selected) {
+      localStorage.setItem('pricingModel', selected);
+    }
+  }, [selected]);
 
   const handleAddTier = () => {
     setTiers([...tiers, { from: 0, to: 0, price: 0, isUnlimited: false }]);

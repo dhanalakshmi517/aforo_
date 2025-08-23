@@ -87,7 +87,7 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className={styles.sectionsHeading}>PLAN DETAILS</h2>
+      <h2 className={styles.sectionsHeading}>Product Metadata</h2>
       <div className={styles.containers}>
         <Grid container spacing={2} className={styles.formGrid}>
           <Grid item xs={12} sm={6}>

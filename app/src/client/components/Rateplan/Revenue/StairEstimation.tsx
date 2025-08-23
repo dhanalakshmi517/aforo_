@@ -6,24 +6,32 @@ const StairEstimation: React.FC = () => {
   const navigate = useNavigate();
 
   const [usage, setUsage] = useState('');
-  const [includeSetup, setIncludeSetup] = useState(true);
-  const [includeDiscount, setIncludeDiscount] = useState(true);
-  const [includeFreemium, setIncludeFreemium] = useState(true);
+  // read saved pricing model details
+  const storedStairs = JSON.parse(localStorage.getItem('stairTiers') || '[]');
+  const overageRate = Number(localStorage.getItem('stairOverage') || 0);
+  const setupFee = Number(localStorage.getItem('setupFee') || 0);
+  const discountPercent = Number(localStorage.getItem('discountPercent') || 0);
+  const discountFlat = Number(localStorage.getItem('discountFlat') || 0);
+  const freemiumUnits = Number(localStorage.getItem('freemiumUnits') || 0);
+  const minimumUsage = Number(localStorage.getItem('minimumUsage') || 0);
+  const minimumCharge = Number(localStorage.getItem('minimumCharge') || 0);
+
+  const [includeSetup, setIncludeSetup] = useState(false);
+  const [includeDiscount, setIncludeDiscount] = useState(false);
+  const [includeFreemium, setIncludeFreemium] = useState(false);
   const [includeCommitment, setIncludeCommitment] = useState(false);
   const [showCalculation, setShowCalculation] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  const stairs = [
-    { label: 'Stair 1', range: '1 – 200', amount: 20, max: 200 },
-    { label: 'Stair 2', range: '201 – 500', amount: 30, max: 500 },
-    { label: 'Stair 3', range: '501 – 700', amount: 40, max: 700 },
-  ];
-
-  const overageRate = 1;
-  const setupFee = 10;
-  const discountPercent = 10;
-  const freemiumUnits = 20;
-  const perUnitRate = 0.1;
+  interface Stair { label: string; range: string; amount: number; max: number; }
+  const stairs: Stair[] = storedStairs.length > 0
+    ? storedStairs.map((s: any, i: number): Stair => ({
+        label: `Stair ${i + 1}`,
+        range: `${s.from}–${s.to ?? '∞'}`,
+        amount: Number(s.cost),
+        max: s.to ?? Number.MAX_SAFE_INTEGER,
+      }))
+    : [];
 
   const usageNum = Number(usage) || 0;
   const highestStair = stairs[stairs.length - 1];
@@ -31,15 +39,19 @@ const StairEstimation: React.FC = () => {
   const overageUnits = isOverage ? usageNum - highestStair.max : 0;
   const overageAmount = overageUnits * overageRate;
 
-  const matchedStair = stairs.findLast(stair => usageNum >= stair.max);
+  const matchedStair = stairs.slice().reverse().find((stair: Stair) => usageNum >= stair.max);
   const stairCharge = matchedStair ? matchedStair.amount : 0;
 
   const setupAmount = includeSetup ? setupFee : 0;
+  const perUnitRate = overageRate; // assume same
   const freemiumAmount = includeFreemium ? freemiumUnits * perUnitRate : 0;
 
-  const preDiscountTotal = stairCharge + overageAmount + setupAmount - freemiumAmount;
-  const discountAmount = includeDiscount ? (discountPercent / 100) * preDiscountTotal : 0;
-  const totalEstimation = preDiscountTotal - discountAmount;
+  const subtotal = stairCharge + overageAmount + setupAmount - freemiumAmount;
+  const discountAmount = includeDiscount ? (discountPercent>0 ? (discountPercent/100)*subtotal : discountFlat) : 0;
+  let totalEstimation = subtotal - discountAmount;
+  if(includeCommitment && minimumCharge>0){
+    totalEstimation = Math.max(totalEstimation, minimumCharge);
+  }
 
   const handleCalculate = () => {
     setIsCalculating(true);
@@ -70,10 +82,10 @@ const StairEstimation: React.FC = () => {
               value={usage}
               onChange={(e) => setUsage(e.target.value)}
             />
-            <button onClick={handleCalculate} disabled={isCalculating}>
-              {isCalculating ? <span className="loader"></span> : 'Calculate Revenue'}
-            </button>
           </div>
+          <button onClick={handleCalculate} disabled={isCalculating}>
+            {isCalculating ? <span className="loader"></span> : 'Calculate Revenue'}
+          </button>
         </div>
 
         <table className="estimate-table">
@@ -88,7 +100,7 @@ const StairEstimation: React.FC = () => {
           <tbody>
             <tr><td>Model Type</td><td>Stair – Step Pricing</td>{showCalculation && <><td>-</td><td>-</td></>}</tr>
 
-            {stairs.map((stair, index) => (
+            {stairs.map((stair: Stair, index: number) => (
               <tr key={index}>
                 <td>{stair.label}<br /><small>{stair.range}</small></td>
                 <td>${stair.amount}</td>
@@ -103,10 +115,10 @@ const StairEstimation: React.FC = () => {
 
             <tr>
               <td>Overage Charges</td>
-              <td>$1</td>
+              <td>${overageRate}</td>
               {showCalculation && (
                 <>
-                  <td>{isOverage ? `${overageUnits} * $1` : '-'}</td>
+                  <td>{isOverage ? `${overageUnits} * ${overageRate}` : '-'}</td>
                   <td>{isOverage ? `$${overageAmount}` : '-'}</td>
                 </>
               )}
@@ -124,8 +136,8 @@ const StairEstimation: React.FC = () => {
                 </label>
                 &nbsp;Setup Fee
               </td>
-              <td>$10</td>
-              {showCalculation && <><td>{includeSetup ? '$10' : '-'}</td><td>{includeSetup ? '$10' : '-'}</td></>}
+              <td>{setupFee>0 ? `$${setupFee}` : '-'}</td>
+              {showCalculation && <><td>{includeSetup ? `$${setupFee}` : '-'}</td><td>{includeSetup ? `$${setupFee}` : '-'}</td></>}
             </tr>
 
             <tr>
@@ -140,11 +152,11 @@ const StairEstimation: React.FC = () => {
                 </label>
                 &nbsp;Discounts
               </td>
-              <td>10%</td>
+              <td>{discountPercent>0 ? `${discountPercent}%` : discountFlat>0 ? `$${discountFlat}` : '-'}</td>
               {showCalculation && (
                 <>
-                  <td>{includeDiscount ? `10% of $${preDiscountTotal.toFixed(0)} = $${discountAmount.toFixed(0)}` : '-'}</td>
-                  <td>{includeDiscount ? `-$${discountAmount.toFixed(0)}` : '-'}</td>
+                  <td>{includeDiscount ? (discountPercent>0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`) : '-'}</td>
+                  <td>{includeDiscount ? `-$${discountAmount.toFixed(2)}` : '-'}</td>
                 </>
               )}
             </tr>
@@ -177,8 +189,8 @@ const StairEstimation: React.FC = () => {
                 </label>
                 &nbsp;Minimum Commitment
               </td>
-              <td>10 APIs</td>
-              {showCalculation && <><td>-</td><td>-</td></>}
+              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : '-'}</td>
+              {showCalculation && <><td>{includeCommitment ? `Floor to $${minimumCharge}` : '-'}</td><td>{includeCommitment ? `$${totalEstimation.toFixed(2)}` : '-'}</td></>}
             </tr>
 
             {showCalculation && (

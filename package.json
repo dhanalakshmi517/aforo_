@@ -1,6 +1,10 @@
 {
   "scripts": {
-    "test": "vitest --environment jsdom"
+    "test": "vitest --environment jsdom",
+    "test:e2e": "playwright test --config e2e-tests/playwright.config.ts",
+    "test:e2e:headed": "playwright test --headed --config e2e-tests/playwright.config.ts",
+    "test:e2e:ui": "playwright test --ui --ui-host 0.0.0.0 --ui-port 9333 --config e2e-tests/playwright.config.ts",
+    "test:e2e:update-snapshots": "playwright test --update-snapshots --config e2e-tests/playwright.config.ts"
   },
   "dependencies": {
     "sweetalert2": "^11.22.1"
@@ -14,7 +18,11 @@
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
+    "linebyline": "^1.4.0",
     "ts-jest": "^29.4.1",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "typescript": "^5.1.0",
+    "@types/express": "^4.17.13",
+    "@playwright/test": "^1.42.1"
   }
 }
