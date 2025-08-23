@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { saveSetupFee, saveDiscounts, saveFreemiums, saveMinimumCommitment,
   DiscountPayload, FreemiumPayload, MinimumCommitmentPayload } from './api';
 import './Extras.css';
+import { clearExtrasLocalStorage } from './utils/localStorageExtras';
 
 interface ExtrasProps {
   ratePlanId: number | null;
@@ -9,17 +10,28 @@ interface ExtrasProps {
 }
 
 export default function Extras({ ratePlanId, noUpperLimit }: ExtrasProps): JSX.Element {
+  // clear cached extras once when component mounts AND there's no ratePlan yet
+  React.useEffect(() => {
+    if (!ratePlanId) {
+      clearExtrasLocalStorage();
+    }
+  }, [ratePlanId]);
   // Setup Fee state
   const [setupFeePayload, setSetupFeePayload] = useState({
-    setupFee: 0,
+    setupFee: Number(localStorage.getItem('setupFee') || 0),
     applicationTiming: 0,
     invoiceDescription: '',
   });
   // Discounts state
-  const [discountPayload, setDiscountPayload] = useState<DiscountPayload>({
+  type DiscountForm = Omit<DiscountPayload, 'percentageDiscount' | 'flatDiscountAmount'> & {
+    percentageDiscountStr: string;
+    flatDiscountAmountStr: string;
+  };
+
+  const [discountForm, setDiscountForm] = useState<DiscountForm>({
     discountType: 'PERCENTAGE',
-    percentageDiscount: 0,
-    flatDiscountAmount: 0,
+    percentageDiscountStr: '',
+    flatDiscountAmountStr: '',
     eligibility: '',
     startDate: '',
     endDate: '',
@@ -29,8 +41,30 @@ export default function Extras({ ratePlanId, noUpperLimit }: ExtrasProps): JSX.E
   const saveDiscount = async () => {
     if (!ratePlanId) { alert('Rate plan not yet created'); return; }
     try {
-      console.log('Discount payload', discountPayload);
-      await saveDiscounts(ratePlanId, discountPayload);
+      console.log('Discount form', discountForm);
+      // persist for estimator
+      const percentVal = Number(discountForm.percentageDiscountStr || 0);
+      const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
+      if(discountForm.discountType==='PERCENTAGE'){
+        if(percentVal>0){
+          localStorage.setItem('discountPercent', percentVal.toString());
+        } else {
+          localStorage.removeItem('discountPercent');
+        }
+        localStorage.removeItem('discountFlat');
+      } else {
+        if(flatVal>0){
+          localStorage.setItem('discountFlat', flatVal.toString());
+        } else {
+          localStorage.removeItem('discountFlat');
+        }
+        localStorage.removeItem('discountPercent');
+      }
+      await saveDiscounts(ratePlanId, {
+        ...discountForm,
+        percentageDiscount: percentVal,
+        flatDiscountAmount: flatVal,
+      });
       alert('Discount saved');
     } catch (err) {
       console.error(err);
@@ -52,6 +86,10 @@ export default function Extras({ ratePlanId, noUpperLimit }: ExtrasProps): JSX.E
     if (!ratePlanId) { alert('Rate plan not yet created'); return; }
     try {
       console.log('Freemium payload', freemiumPayload, 'Freemium type', freemiumType);
+      // persist for estimator (free units)
+      if(freemiumType==='FREE_UNITS'){
+        localStorage.setItem('freemiumUnits', freemiumPayload.freeUnits.toString());
+      }
       await saveFreemiums(ratePlanId, freemiumPayload);
       alert('Freemium saved');
     } catch (err) {
@@ -75,6 +113,13 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
     };
     try {
       console.log('Minimum commitment payload', payload);
+      // persist for estimator
+      localStorage.setItem('minimumUsage', payload.minimumUsage.toString());
+      if(payload.minimumCharge>0){
+        localStorage.setItem('minimumCharge', payload.minimumCharge.toString());
+      } else {
+        localStorage.removeItem('minimumCharge');
+      }
       await saveMinimumCommitment(ratePlanId, payload);
       alert('Minimum commitment saved');
     } catch (err) {
@@ -146,18 +191,31 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
         {activeSections.includes('setupFee') && (
           <div className="section-content">
             <label>Enter one-time Setup Fee <span className="optional">(optional)</span></label>
-            <input type="number" value={setupFeePayload.setupFee}
-              onChange={e=>setSetupFeePayload({...setupFeePayload, setupFee:+e.target.value})} placeholder="$0" />
+            <input type="number" value={setupFeePayload.setupFee || ''}
+              onChange={e=>{
+                const val = e.target.value;
+                setSetupFeePayload({...setupFeePayload, setupFee: val.trim()==='' ? 0 : Number(val)});
+              }} placeholder="$0" />
             <label>Application Timing</label>
-            <input type="number" value={setupFeePayload.applicationTiming}
-              onChange={e=>setSetupFeePayload({...setupFeePayload, applicationTiming:+e.target.value})} placeholder="0" />
+            <input type="number" value={setupFeePayload.applicationTiming || ''}
+              onChange={e=>{
+                const val = e.target.value;
+                setSetupFeePayload({...setupFeePayload, applicationTiming: val.trim()==='' ? 0 : Number(val)});
+              }} placeholder="0" />
             <label>Invoice Description</label>
             <textarea value={setupFeePayload.invoiceDescription}
               onChange={e=>setSetupFeePayload({...setupFeePayload, invoiceDescription:e.target.value})} placeholder="Invoice Description"></textarea>
             <button type="button" className="extras-save-btn" onClick={async()=>{
               if(ratePlanId==null){alert('Rate plan not yet created');return;}
               try{console.log('Setup fee payload', setupFeePayload);
-              await saveSetupFee(ratePlanId, setupFeePayload);alert('Setup fee saved');}catch(err){console.error(err);alert('Failed to save');}
+              // persist for estimator
+              if(setupFeePayload.setupFee>0){
+                localStorage.setItem('setupFee', setupFeePayload.setupFee.toString());
+              } else {
+                localStorage.removeItem('setupFee');
+              }
+              await saveSetupFee(ratePlanId, setupFeePayload);
+              alert('Setup fee saved');}catch(err){console.error(err);alert('Failed to save');}
             }}>Save</button>
           </div>
         )}
@@ -170,32 +228,36 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
         {activeSections.includes('discounts') && (
           <div className="section-content">
             <label>Discount Type</label>
-            <select value={discountPayload.discountType}
-              onChange={e=>setDiscountPayload({...discountPayload, discountType:e.target.value as 'PERCENTAGE' | 'FLAT'})}>
+            <select value={discountForm.discountType}
+              onChange={e=>setDiscountForm({...discountForm, discountType:e.target.value as 'PERCENTAGE' | 'FLAT'})}>
               <option value="">--Select--</option>
               <option value="PERCENTAGE">PERCENTAGE</option>
               <option value="FLAT">FLAT</option>  
             </select>
             <label>Enter % discount</label>
-            <input type="number" value={discountPayload.percentageDiscount}
-              onChange={e=>setDiscountPayload({...discountPayload, percentageDiscount:+e.target.value})} placeholder="0" />
+            <input type="text" inputMode="decimal" pattern="[0-9]*" value={discountForm.percentageDiscountStr}
+              onChange={e=>{
+                setDiscountForm({...discountForm, percentageDiscountStr: e.target.value});
+              }} placeholder="0" />
             <label>Enter Flat Discount Amount</label>
-            <input type="number" value={discountPayload.flatDiscountAmount}
-              onChange={e=>setDiscountPayload({...discountPayload, flatDiscountAmount:+e.target.value})} placeholder="0" />
+            <input type="text" inputMode="decimal" pattern="[0-9]*" value={discountForm.flatDiscountAmountStr}
+              onChange={e=>{
+                setDiscountForm({...discountForm, flatDiscountAmountStr: e.target.value});
+              }} placeholder="0" />
             <label>Eligibility</label>
-            <input type="text" value={discountPayload.eligibility}
-              onChange={e=>setDiscountPayload({...discountPayload, eligibility:e.target.value})} placeholder="e.g. new users" />
+            <input type="text" value={discountForm.eligibility}
+              onChange={e=>setDiscountForm({...discountForm, eligibility:e.target.value})} placeholder="e.g. new users" />
             <label>Validity Period</label>
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input type="date" value={discountPayload.startDate}
-                    onChange={e=>setDiscountPayload({...discountPayload, startDate:e.target.value})} />
+                <input type="date" value={discountForm.startDate}
+                    onChange={e=>setDiscountForm({...discountForm, startDate:e.target.value})} />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input type="date" value={discountPayload.endDate}
-                    onChange={e=>setDiscountPayload({...discountPayload, endDate:e.target.value})} />
+                <input type="date" value={discountForm.endDate}
+                    onChange={e=>setDiscountForm({...discountForm, endDate:e.target.value})} />
               </div>
             </div>
             <button type="button" className="extras-save-btn" onClick={saveDiscount}>Save</button>
@@ -228,10 +290,11 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
             {(freemiumType === 'FREE_UNITS' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
                 <label>Select Free Units</label>
-                <input type="number" value={freemiumPayload.freeUnits}
-                  onChange={e =>
-                    setFreemiumPayload({ ...freemiumPayload, freeUnits: +e.target.value })
-                  }
+                <input type="number" value={freemiumPayload.freeUnits === 0 ? '' : freemiumPayload.freeUnits}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFreemiumPayload({ ...freemiumPayload, freeUnits: val.trim() === '' ? 0 : Number(val) });
+                  }}
                   placeholder="Enter Free Units" />
               </>
             )}
@@ -241,10 +304,11 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
                 <label>Select Free Trial Duration</label>
                 <input
                   type="number"
-                  value={freemiumPayload.freeTrialDuration}
-                  onChange={e =>
-                    setFreemiumPayload({ ...freemiumPayload, freeTrialDuration: +e.target.value })
-                  }
+                  value={freemiumPayload.freeTrialDuration === 0 ? '' : freemiumPayload.freeTrialDuration}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFreemiumPayload({ ...freemiumPayload, freeTrialDuration: val.trim() === '' ? 0 : Number(val) });
+                  }}
                   placeholder="Enter Trial Duration"
                 />
               </>
@@ -291,9 +355,9 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
             <input
               type="text"
               placeholder="Enter usage"
-              value={minimumUsage}
+              value={minimumUsage.replace(/^0+(?=\d)/, '')}
               onChange={(e) => {
-                setMinimumUsage(e.target.value);
+                setMinimumUsage(e.target.value.replace(/^0+(?=\d)/, ''));
                 if (e.target.value) setMinimumCharge(''); // Clear charge
               }}
               disabled={!!minimumCharge}
@@ -303,9 +367,9 @@ const [freemiumType, setFreemiumType] = useState<'FREE_UNITS' | 'FREE_TRIAL_DURA
             <input
               type="text"
               placeholder="Enter charge"
-              value={minimumCharge}
+              value={minimumCharge.replace(/^0+(?=\d)/, '')}
               onChange={(e) => {
-                setMinimumCharge(e.target.value);
+                setMinimumCharge(e.target.value.replace(/^0+(?=\d)/, ''));
                 if (e.target.value) setMinimumUsage(''); // Clear usage
               }}
               disabled={!!minimumUsage}

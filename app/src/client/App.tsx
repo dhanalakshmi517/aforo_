@@ -18,6 +18,8 @@ import Metering from './components/Metering/Metering';
 import Subscriptions from './components/Subscriptions/Subscriptions';
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
+import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
+import TieredEstimation from './components/Rateplan/Revenue/TieredEstimation';
 import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
 import RatePlans from './components/Rateplan/RatePlans';
 import EditPlan from './components/Rateplan/EditRatePlan/EditRatePlan';
@@ -130,6 +132,8 @@ export default function App() {
             <Route path="/contact-sales" element={<Organization />} />
             <Route path="/estimate-revenue" element={<EstimateRevenue />} />
             <Route path="/usage-estimation" element={<UsageEstimation />} />
+            <Route path="/volume-estimation" element={<VolumeEstimation />} />
+            <Route path="/tiered-estimation" element={<TieredEstimation />} />
             <Route path="/stair-estimation" element={<StairEstimation />} />
             <Route path="/get-started/*" element={
               <div className="empty-background">
@@ -157,6 +161,12 @@ export default function App() {
 
                       />} />
                       <Route path="rate-plans/:id/edit" element={<EditPlan onClose={() => navigate(-1)} />} />
+                      {/* Revenue estimation routes nested under rate-plans */}
+                      <Route path="rate-plans/estimate-revenue" element={<EstimateRevenue />} />
+                      <Route path="rate-plans/usage-estimation" element={<UsageEstimation />} />
+                      <Route path="rate-plans/volume-estimation" element={<VolumeEstimation />} />
+                      <Route path="rate-plans/tiered-estimation" element={<TieredEstimation />} />
+                      <Route path="rate-plans/stair-estimation" element={<StairEstimation />} />
                       <Route path="subscriptions" element={<Subscriptions 
                           showNewSubscriptionForm={showNewSubscriptionForm}
                           setShowNewSubscriptionForm={setShowNewSubscriptionForm}

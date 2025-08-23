@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  testMatch: /.*\.spec\.ts$/, // run every *.spec.ts including revenue estimator
   outputDir: './test-results',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -38,11 +39,16 @@ export default defineConfig({
    * causing errors when trying to run `wasp start` afterwards. To avoid this, we let Playwright run web server only in CI (where this is not a problem because after tests we don't do anything else).
    * For local development, where this does pose a nuisance, we start the app / web server manually with `wasp db start` and `wasp start` and then start tests with `npm run local:e2e:start`.
    */
-  webServer: {
-    command: 'npm run ci:e2e:start',
-    // Wait for the backend to start
-    url: 'http://localhost:3001',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  // Start app automatically only on CI where docker is available.
+  ...(process.env.CI
+    ? {
+        webServer: {
+          command: 'npm run ci:e2e:start',
+          // Backend API server listens on 30001 in CI
+          url: 'http://localhost:3001',
+          reuseExistingServer: false,
+          timeout: 120 * 1000,
+        },
+      }
+    : {}),
 });
