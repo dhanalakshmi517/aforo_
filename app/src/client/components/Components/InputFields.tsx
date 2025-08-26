@@ -8,9 +8,14 @@ interface InputProps {
   placeholder?: string;
   type?: string;
   onChange: (val: string) => void;
+  /** HTML input pattern attribute */
+  pattern?: string;
+  /** HTML inputMode attribute e.g., 'numeric' */
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  error?: string;
 }
 
-export const InputField: React.FC<InputProps> = ({ label, value, placeholder, onChange, type = 'text' }) => (
+export const InputField: React.FC<InputProps> = ({ label, value, placeholder, onChange, type = 'text', pattern, inputMode, error }) => (
   <div className="com-form-group">
     {label && <label className="com-form-label">{label}</label>}
     <input
@@ -19,6 +24,8 @@ export const InputField: React.FC<InputProps> = ({ label, value, placeholder, on
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className="input-field"
+      pattern={pattern}
+      inputMode={inputMode}
     />
   </div>
 );
@@ -50,9 +57,10 @@ interface SelectProps {
   onChange: (val: string) => void;
   options?: { label: string; value: string }[];
   disabled?: boolean;
+  required?: boolean;
 }
 
-export const SelectField: React.FC<SelectProps> = ({ label, value, onChange, options = [], disabled = false }) => (
+export const SelectField: React.FC<SelectProps> = ({ label, value, onChange, options = [], disabled = false, required = false }) => (
   <div className="com-form-group">
     {label && <label className="com-form-label">{label}</label>}
     <select
@@ -60,6 +68,7 @@ export const SelectField: React.FC<SelectProps> = ({ label, value, onChange, opt
       onChange={(e) => onChange(e.target.value)}
       className="select-field"
       disabled={disabled}
+      required={required}
     >
       <option value="">--Select--</option>
       {options.map((opt, idx) => (

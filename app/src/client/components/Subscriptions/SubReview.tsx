@@ -6,8 +6,7 @@ interface SubReviewProps {
   productName: string;
   ratePlan: string;
   paymentMethod: string;
-  basePrice: number;
-  quantity: number;
+  adminNotes: string;
 }
 
 const SubReview: React.FC<SubReviewProps> = ({
@@ -15,10 +14,8 @@ const SubReview: React.FC<SubReviewProps> = ({
   productName,
   ratePlan,
   paymentMethod,
-  basePrice,
-  quantity,
+  adminNotes,
 }) => {
-  const total = basePrice * quantity;
 
   return (
     <div className="review-container">
@@ -42,16 +39,8 @@ const SubReview: React.FC<SubReviewProps> = ({
             <td>{paymentMethod}</td>
           </tr>
           <tr>
-            <td>Base Price</td>
-            <td>${basePrice.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Quantity</td>
-            <td>{quantity}</td>
-          </tr>
-          <tr className="total-row">
-            <td>Total</td>
-            <td><strong>${total.toFixed(2)}</strong></td>
+            <td>Admin Notes</td>
+            <td>{adminNotes}</td>
           </tr>
         </tbody>
       </table>

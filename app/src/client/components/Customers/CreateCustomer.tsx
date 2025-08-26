@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomerReview from './CustomerReview';
 import { createCustomer } from '../../api';
 import { AccountDetailsData } from './AccountDetailsForm';
@@ -9,6 +9,8 @@ import './CustomerForm.css'; // You can rename this if needed
 interface CreateCustomerProps {
   onClose: () => void;
 }
+
+const connectorHeights = [70,90];
 
 const steps = [
   { title: 'Customer Details', desc: 'Enter core information for the customer.' },
@@ -36,10 +38,87 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
   const [selectedProductName, setSelectedProductName] = useState('');
   const [selectedRatePlanName, setSelectedRatePlanName] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [accountErrors, setAccountErrors] = useState<{ [key: string]: string }>({});
+
+  // Automatically clear Account Details errors when fields become valid
+  useEffect(() => {
+    if (!accountDetails) return;
+
+    setAccountErrors((prev) => {
+      if (!prev || Object.keys(prev).length === 0) return prev;
+      const updated: { [key: string]: string } = { ...prev };
+
+      const clearIfValid = (key: keyof typeof updated, valid: boolean) => {
+        if (updated[key] && valid) delete updated[key];
+      };
+
+      clearIfValid('phoneNumber', !!accountDetails.phoneNumber?.trim());
+      clearIfValid(
+        'primaryEmail',
+        !!accountDetails.primaryEmail?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(accountDetails.primaryEmail)
+      );
+
+      const stringFields: (keyof typeof updated)[] = [
+        'billingAddressLine1',
+        'billingAddressLine2',
+        'billingCity',
+        'billingState',
+        'billingPostalCode',
+        'billingCountry',
+        'customerAddressLine1',
+        'customerAddressLine2',
+        'customerCity',
+        'customerState',
+        'customerPostalCode',
+        'customerCountry',
+      ];
+      stringFields.forEach((field) => clearIfValid(field, !!(accountDetails as any)[field]?.trim?.()));
+
+      return updated;
+    });
+  }, [accountDetails]);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const handleNext = async () => {
+    // Validate required fields on step 0 before progressing
+    if (currentStep === 0) {
+      const newErrors: { [key: string]: string } = {};
+      if (!companyName.trim()) newErrors.companyName = 'Company Name is required';
+      if (!customerName.trim()) newErrors.customerName = 'Customer Name is required';
+      if (!companyType.trim()) newErrors.companyType = 'Company Type is required';
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length) return; // stop navigation until fixed
+    }
+    // Validate required fields on step 1 before progressing
     if (currentStep === 1) {
+      const newAccErrs: { [key: string]: string } = {};
+      if (!accountDetails?.phoneNumber?.trim()) newAccErrs.phoneNumber = 'Phone Number is required';
+      if (!accountDetails?.primaryEmail?.trim()) {
+        newAccErrs.primaryEmail = 'Primary Email is required';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(accountDetails.primaryEmail)) {
+        newAccErrs.primaryEmail = 'Enter a valid email address';
+      }
+
+      // Address validation
+      if (!accountDetails?.billingAddressLine1?.trim()) newAccErrs.billingAddressLine1 = 'Billing Address Line 1 is required';
+      if (!accountDetails?.billingAddressLine2?.trim()) newAccErrs.billingAddressLine2 = 'Billing Address Line 2 is required';
+      if (!accountDetails?.billingCity?.trim()) newAccErrs.billingCity = 'Billing City is required';
+      if (!accountDetails?.billingState?.trim()) newAccErrs.billingState = 'Billing State is required';
+      if (!accountDetails?.billingPostalCode?.trim()) newAccErrs.billingPostalCode = 'Billing Postal Code is required';
+      if (!accountDetails?.billingCountry?.trim()) newAccErrs.billingCountry = 'Billing Country is required';
+
+      if (!accountDetails?.customerAddressLine1?.trim()) newAccErrs.customerAddressLine1 = 'Customer Address Line 1 is required';
+      if (!accountDetails?.customerAddressLine2?.trim()) newAccErrs.customerAddressLine2 = 'Customer Address Line 2 is required';
+      if (!accountDetails?.customerCity?.trim()) newAccErrs.customerCity = 'Customer City is required';
+      if (!accountDetails?.customerState?.trim()) newAccErrs.customerState = 'Customer State is required';
+      if (!accountDetails?.customerPostalCode?.trim()) newAccErrs.customerPostalCode = 'Customer Postal Code is required';
+      if (!accountDetails?.customerCountry?.trim()) newAccErrs.customerCountry = 'Customer Country is required';
+      setAccountErrors(newAccErrs);
+      if (Object.keys(newAccErrs).length) return;
+    }
+    const isLastStep = currentStep === steps.length - 1;
+    if (isLastStep) {
       // prepare payload and call API
       if (!accountDetails) {
         alert('Please complete account details');
@@ -84,13 +163,17 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
         return;
       }
       setIsSubmitting(false);
+      alert('Customer created successfully');
+      onClose();
+    } else {
+      setCurrentStep((prev) => prev + 1);
     }
-    if (currentStep < steps.length - 1) setCurrentStep((prev) => prev + 1);
   };
+
+  
 
   const handleBack = () => {
     if (currentStep > 0) setCurrentStep((prev) => prev - 1);
-    else onClose();
   };
 
   const renderStepContent = () => {
@@ -104,8 +187,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
                 label="Company Name"
                 value={companyName}
                 placeholder="Enter company name"
-                onChange={setCompanyName}
+                onChange={(val) => { setCompanyName(val); if(errors.companyName) setErrors(prev=>({ ...prev, companyName: '' })); }}
               />
+              {errors.companyName && <span className="field-error">{errors.companyName}</span>}
             </div>
       
             {/* Company Logo (Upload) */}
@@ -160,8 +244,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
                 label="Customer Name"
                 value={customerName}
                 placeholder="Enter customer name"
-                onChange={setCustomerName}
+                onChange={(val)=>{ setCustomerName(val); if(errors.customerName) setErrors(prev=>({ ...prev, customerName: '' })); }}
               />
+              {errors.customerName && <span className="field-error">{errors.customerName}</span>}
             </div>
       
             {/* Company Type (select) */}
@@ -169,24 +254,30 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
               <SelectField
                 label="Company Type"
                 value={companyType}
-                onChange={setCompanyType}
+                onChange={(val)=>{ setCompanyType(val); if(errors.companyType) setErrors(prev=>({ ...prev, companyType: '' })); }}
                 options={[
                   { label: 'Individual', value: 'INDIVIDUAL' },
                   { label: 'Business', value: 'BUSINESS' },
                 ]}
               />
+              {errors.companyType && <span className="field-error">{errors.companyType}</span>}
             </div>
           </>
         );
       
       case 1:
         return (
-          <AccountDetailsForm onChange={setAccountDetails} />
+          <AccountDetailsForm data={accountDetails ?? undefined} onChange={setAccountDetails} errors={accountErrors} />
         );
 
       case 2:
         return (
-          <CustomerReview />
+          <CustomerReview
+          customerName={customerName}
+          companyName={companyName}
+          companyType={companyType}
+          accountDetails={accountDetails}
+        />
         );
 
       default:
@@ -199,13 +290,13 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
       <div className="sub-header">
         <h2>Create New Customer</h2>
         <div className="header-actions">
-                    <button className="cancel-btn" onClick={() => setShowCancelModal(true)} disabled={isSubmitting}>Cancel</button>
-          <button className="draft-btn" disabled={isSubmitting}>Save as Draft</button>
+                    <button className="btn cancel" onClick={() => setShowCancelModal(true)} disabled={isSubmitting}>Cancel</button>
+          <button className="btn save-draft" disabled={isSubmitting}>Save as Draft</button>
         </div>
       </div>
       <div className="sub-create-price-plan">
-        <div className="sub-usage-metric-wrapper">
-          <aside className="sub-sidebars">
+        <div className="cus-wrapper">
+          <aside className="cus-sidebar">
             {steps.map((step, index) => (
               <div
                 key={index}
@@ -214,23 +305,32 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
               >
                 <div className="sub-icon-wrappers">
                   {index < currentStep ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <svg style={index === 2 ? { transform: 'translateY(-6px)' } : undefined} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
                       <path d="M7 12l3 3 6-6" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <svg style={index === 2 ? { transform: 'translateY(-6px)' } : undefined} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
                       <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
                     </svg>
                   )}
                   {index < steps.length - 1 && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="2" height="111" viewBox="0 0 2 111" fill="none">
-                      <path
-                        d="M1 110L1 1"
-                        stroke={index < currentStep ? 'var(--color-primary-800)' : '#BDBBBE'}
+                    <svg
+                      className="sub-step-line"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="2"
+                      height={connectorHeights[index]}
+                      viewBox={`0 0 2 ${connectorHeights[index]}`}
+                      fill="none"
+                    >
+                      <line
+                        x1="1"
+                        y1="0"
+                        x2="1"
+                        y2={connectorHeights[index]}
+                        stroke={index < currentStep ? '#2D7CA4' : '#BDBBBE'}
                         strokeWidth="2"
-                        strokeLinecap="round"
                       />
                     </svg>
                   )}
@@ -244,10 +344,18 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
           </aside>
 
           <div className="form-section">
-            <div className="form-card">{renderStepContent()}</div>
+            <div className="form-card">
+              <h4 className="form-section-heading">{steps[currentStep].title.toUpperCase()}</h4>
+              <hr className="form-section-divider" />
+              {renderStepContent()}
+            </div>
             <div className="button-group">
               <button className="back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
-              <button className="save-next" onClick={handleNext} disabled={currentStep === steps.length - 1}>Save & Next</button>
+              <button
+                className="save-next"
+                onClick={handleNext}
+                disabled={isSubmitting}
+              >{currentStep === steps.length - 1 ? 'Create Customer' : 'Save & Next'}</button>
             </div>
           </div>
         </div>

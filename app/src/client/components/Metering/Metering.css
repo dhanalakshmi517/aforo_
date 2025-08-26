@@ -1,18 +1,38 @@
 @import "../Variables/Variables.css";
+body {
+  overflow-x: hidden;
+}
+.metering-container{
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding-left: 260px; /* Offset for fixed sidebar */
+}
 
-.breadcrumb {
+@media(max-width: 991px){
+  .metering-container{
+    padding-left: 0;
+  }
+  .metering-breadcrumb span{
+    margin-left: 0;
+  }
+}
+
+
+.metering-breadcrumb {
   display: flex;
+  margin-left:0;
+  width: 100%;
   align-items: center;
   gap: 8px;
   color: var(--color-primary-700);
   font-size: var(--font-size-lg);
   border-bottom: 1px solid var(--color-neutral-200);
-  margin-left: 20px;
-}
+    }
 
-.breadcrumb span {
+.metering-breadcrumb span {
   cursor: pointer;
-  margin-left: 20px;
+  margin-left: 15px;
   color: var(--color-primary-900);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
@@ -24,19 +44,21 @@
 
 .metering-header {
   flex-wrap: nowrap;
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 0 40px;
+  margin-left:0;
   width: 100%;
+      display: flex;
+  align-items: center;
+    margin-bottom: 15px;
+  padding: 0 20px;
   box-sizing: border-box;
   position: relative; 
 }
 
 
 .metering-header h2 {
+  /* push title slightly right */
   white-space: nowrap;
-  margin: 0;
+  margin: 0 0 0 40px;
   color: var(--color-neutral-1700);
 
   font-family: var(--font-family-primary);
@@ -88,7 +110,12 @@
 
 .new-button {
   margin-left: 12px;
-  width: 199px;
+  min-width: 199px;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
   height: 40px;
   color: var(--color-neutral-white);
   background-color: var(--color-primary-800);
@@ -117,19 +144,44 @@
 }
 
 .metering-table {
-  width: 970px;
+  width: 100%;
   border-collapse: collapse;
-  margin-left: 40px;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
 }
 
+.metering-table {
+  width: 100%;
+    table-layout: auto;
+}
+
+/* No fixed column widths; let browser auto-size */
+/* widen first column */
+.metering-table-container{
+  width: 100%;
+  box-sizing: border-box;
+  margin-left:0;
+  padding: 0; 
+  overflow-x: visible;
+  
+}
+
 .metering-table th,
 .metering-table td {
-  vertical-align: middle;
+    vertical-align: middle;
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-neutral-200);
   text-align: left;
+  word-wrap: break-word;
+}
+
+/* Allow first column (Usage Metric) to expand and show full text */
+.metering-table th:first-child,
+.metering-table td:first-child {
+  width: auto;
+  max-width: 400px; /* Adjust as needed */
+  overflow: visible;
+  text-overflow: initial;
 }
 
 .status-tag {
@@ -154,7 +206,7 @@
   gap: 8px;
   justify-content: center;
   align-items: center;
-  min-width: 100px; 
+  min-width: 70px; 
 }
 
 .edit-btn,
@@ -214,18 +266,20 @@ line-height: var(--line-height-body-md);
   }
   
   .metering-table {
-    width:970px;
+            table-layout: auto;
     border-collapse: collapse;
-    margin-left: 40px;
-    border:1px solid var(--color-neutral-200);
+        border:1px solid var(--color-neutral-200);
     border-radius: var(--border-radius-sm);
   }
   
   .metering-table th,
   .metering-table td {
-    padding: 12px;
+        padding: 12px;
     border-bottom: 1px solid #e0e0e0;
     text-align: left;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
   }
   
   .status-tag {
@@ -488,7 +542,134 @@ line-height: var(--line-height-body-md);
     font-weight: 500;
   }
   
-  /* Animations */
+  
+/* Sidebar alignment overrides */
+.metering-table-container,
+.metering-table {
+  width: 100%;
+  margin-left: 0;
+}
+
+.metering-table th,
+.metering-table td {
+  width: 20%;
+}
+
+/* Responsive override: reset left margin on narrow screens */
+@media (max-width: 991px) {
+  .metering-breadcrumb, .metering-header, .metering-table, .metering-table-container{ width:100%; }
+  .metering-table-container{ margin-left:0; padding:0 10px;}
+
+  .metering-header {
+    margin-left: 0;
+  }
+  .metering-breadcrumb {
+    margin-left: 0;
+    width: 100%;
+  }
+  .metering-table {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Rounded corners for table */
+.metering-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Force Usage Metric column to expand (override late width rules) */
+.metering-table th:first-child,
+.metering-table td:first-child {
+  width: auto !important;
+  max-width: 400px;
+}
+
+/* Metering page breadcrumb */
+.metering-breadcrumb {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary-700);
+  font-size: var(--font-size-lg);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+.metering-breadcrumb span {
+  cursor: pointer;
+  margin-left: 15px;
+  color: var(--color-primary-900);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-sm);
+}
+@media(max-width: 991px){
+  .metering-breadcrumb span {
+    margin-left: 0;
+  }
+}
+
+/* Breadcrumb navigation for Metering (reusing RatePlan styles) */
+.metering-breadcrumb-nav {
+  margin: 0;
+  width: calc(100% + 260px); /* stretch under sidebar */
+  margin-left: -260px; /* pull to left to touch sidebar */
+  height: 40px;
+  background-color: var(--color-neutral-white);
+  border-bottom: 1px solid var(--color-neutral-200);
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .metering-breadcrumb-nav {
+    margin-left: 0;
+    width: 100%;
+    padding-left: 0;
+  }
+}
+
+.metering-breadcrumb {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  max-width: none;
+  background-color: var(--color-neutral-white);
+  height: 40px;
+  border: 1px solid var(--color-neutral-200);
+  margin: 0;
+  overflow: hidden; /* prevent scrollbar */
+  padding-left: 260px;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .metering-breadcrumb {
+    padding-left: 0;
+    gap: 8px;
+    height: auto;
+    padding: 8px;
+  }
+  .metering-breadcrumb-item {
+    flex: 0 0 auto; /* prevent shrinking */
+    white-space: nowrap;
+  }
+}
+
+.metering-breadcrumb span, .metering-breadcrumb-item {
+  color: var(--color-primary-700);
+  text-align: center;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-sm);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Animations */
   @keyframes slideIn {
     from {
       transform: translateX(100%);

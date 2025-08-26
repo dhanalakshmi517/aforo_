@@ -165,18 +165,17 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
           </div>
 
           <CreatePricePlan onClose={() => setShowCreatePlan(false)} />
-
           {showCancelModal && (
-            <div className="delete-modal-overlay">
-              <div className="delete-modal-content">
-                <div className="delete-modal-body">
+            <div className="rate-delete-modal-overlay">
+              <div className="rate-delete-modal-content">
+                <div className="rate-delete-modal-body">
                   <h5>Are you sure you want to cancel <br />creating this rate plan?</h5>
                   <p>This action cannot be undone.</p>
                 </div>
-                <div className="delete-modal-footer">
-                  <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
+                <div className="rate-delete-modal-footer">
+                  <button className="rate-delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
                   <button
-                      className="delete-modal-confirm"
+                      className="rate-delete-modal-confirm"
                       onClick={() => {
                         setShowCancelModal(false);
                         setShowCreatePlan(false);
@@ -252,15 +251,15 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
           </table>
 
           {showDeleteModal && (
-            <div className="delete-modal-overlay">
-              <div className="delete-modal-content">
-                <div className="delete-modal-body">
+            <div className="rate-delete-modal-overlay">
+              <div className="rate-delete-modal-content">
+                <div className="rate-delete-modal-body">
                   <h5>Are you sure you want to delete this <br />rate plan?</h5>
                   <p>This action cannot be undone.</p>
                 </div>
-                <div className="delete-modal-footer">
-                  <button className="delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>Back</button>
-                  <button className="delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
+                <div className="rate-delete-modal-footer">
+                  <button className="rate-delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>Back</button>
+                  <button className="rate-delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
                     {isDeleting ? 'Deleting...' : 'Confirm'}
                   </button>
                 </div>

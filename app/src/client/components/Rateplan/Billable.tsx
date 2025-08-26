@@ -74,7 +74,7 @@ const Billable: React.FC<BillableProps> = ({ productName, selectedMetricId, onSe
   }, [productName]);
 
   return (
-    <div className="billable-metrics-container">
+    <div className="billable-section">
       <h2>
         Billable metrics applicable for <span>“{productName || 'Selected Product'}”</span>
       </h2>

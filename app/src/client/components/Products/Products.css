@@ -104,13 +104,22 @@
   gap: 8px;
   font-size: 14px;
   color: var(--color-neutral-1000);
+  margin-left: 210px;
   margin-bottom: 14px;
   font-weight: 500;
   padding: 6px 0;
   background-color: var(--color-neutral-white);
-  width: calc(100% - 20rem);
+  width: calc(100% - 210px);
   height: 40px;
   border: 1px solid var(--color-neutral-200);
+}
+
+/* Responsive override: breadcrumb spans full width on small screens */
+@media (max-width: 991px) {
+  .breadcrumb {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .breadcrumb-item {
@@ -145,7 +154,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-left: 210px;
   margin-bottom: 4px;
+}
+
+/* Responsive override: reset left margin on narrow screens */
+@media (max-width: 991px) {
+  .products-header {
+    margin-left: 0;
+  }
 }
 
 .products-header h2 {
@@ -229,7 +246,13 @@ line-height: var(--line-height-body-lg);
 
 .products-table-container {
   width: 100%;
-  overflow-x: auto; /* Enables horizontal scroll on small screens */
+  overflow-x: visible; /* no scroll on wider screens */
+}
+
+@media (max-width: 991px) {
+  .products-table-container {
+    overflow-x: auto; /* allow scroll only on small devices */
+  }
 }
 
 .products-table {
@@ -238,10 +261,18 @@ line-height: var(--line-height-body-lg);
   border-radius: var(--border-radius-md);
   box-sizing: border-box;
   padding: 12px;
-  width: 100%;
-  min-width: 500px; /* Ensures columns don't break badly */
-  margin: 4px 30px 0;
-  margin-left: 250px;
+  /* occupy remaining viewport beside sidebar */
+  width: calc(100% - 250px);
+  margin: 4px 0 0 250px;
+  table-layout: fixed; /* equal-width columns & no overflow */
+}
+
+/* Small screens: table uses full width */
+@media (max-width: 991px) {
+  .products-table {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 
@@ -254,9 +285,8 @@ line-height: var(--line-height-body-lg);
   padding: 12px 16px;
   text-align: left;
   border-bottom: 1px solid var(--color-neutral-200);
-
-
-
+  width: 16.66%; /* six columns equal width */
+  word-wrap: break-word;
 }
 
 .products-table td {
@@ -342,8 +372,8 @@ line-height: var(--line-height-body-lg);
   gap: 8px;
   justify-content: flex-end;
   align-items: center;
-  margin-right: 250px;
 }
+
 
 .edit-button {
   background-color: #e0f3ff;

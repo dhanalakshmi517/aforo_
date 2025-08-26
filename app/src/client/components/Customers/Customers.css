@@ -1,5 +1,27 @@
 @import "../Variables/Variables.css";
 
+/* Typography for customers table values */
+.customers-table tbody td {
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+/* Sidebar alignment */
+.breadcrumb, .customers-header, .customers-table {
+  box-sizing:border-box;
+}
+
+@media (max-width: 991px) {
+  .breadcrumb, .customers-header, .customers-table {
+    margin-left:0;
+    width:100%;
+  }
+}
+
 
 
 .breadcrumb {
@@ -42,7 +64,9 @@ line-height: var(--line-height-body-sm);
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  padding: 0 30px;
+  margin-left:210px;
+  width: calc(100% - 210px);
+  padding: 0 20px;
 }
 
 .customers-header h2 {
@@ -114,22 +138,28 @@ line-height: var(--line-height-body-lg);
 }
 
 .customers-table {
-  width: 900px;
+  width: calc(100% - 210px);
   border-collapse: collapse;
+  margin-left:210px;
+  table-layout: fixed;
+  padding: 0 16px;
   font-size: var(--font-size-lg);
-  margin-left: 8px;
   border-radius:var(--border-radius-sm);
-  margin-left:30px;
+  margin-left:210px;
+  width: calc(100% - 210px);
 }
 
 .customers-table th,
 .customers-table td {
-  border-bottom: 1px solid #ddd; /* horizontal lines only */
+  width:20%;
+  border-bottom: 1px solid #ddd;
   padding: 12px 10px;
   text-align: center;
 }
 
 .customer-logo {
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   border-radius: 4px;
 }

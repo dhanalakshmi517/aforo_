@@ -1,5 +1,5 @@
 /* @import "../Variables/Variables.css";
-.billable-metrics-container h2 {
+.billable-section h2 {
     color: var(--color-neutral-1000);
 
     font-family: var(--font-family-primary);
@@ -9,7 +9,7 @@
     line-height: var(--line-height-heading-h6);
 }
 
-.billable-metrics-container span {
+.billable-section span {
     font-weight: bold;
 }
 
@@ -31,8 +31,8 @@
 }
 
 .billable-metric-card {
-    width:354px;
-    height: 72px;
+    width: 100%;
+    height: auto;
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -183,7 +183,7 @@
     letter-spacing: -1px;} */
 
 
-    /* .billable-metrics-container {
+    /* .billable-section {
         padding: 24px;
         background-color: #fff;
         border-radius: 12px;
@@ -193,13 +193,13 @@
         font-family: 'Inter', sans-serif;
       } */
       
-      .billable-metrics-container h2 {
+      .billable-section h2 {
         font-size: 18px;
         font-weight: 600;
         margin-bottom: 6px;
       }
       
-      .billable-metrics-container h2 span {
+      .billable-section h2 span {
         font-weight: 600;
         color: #3b82f6;
       }
@@ -213,7 +213,7 @@
       
       .billable-metric-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 16px;
       }
       
@@ -283,4 +283,54 @@
         font-size: 11px;
         opacity: 0.85;
       }
-      
+
+.billable-section {
+  text-align: left;
+  margin: 0;
+  max-width: none;
+  width: 100%;
+  padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .billable-section {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .billable-section {
+    margin-left: 0;
+    width: 100%;
+    padding-left: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .billable-section {
+    padding-left: 8px;
+  }
+}
+
+.billable-metric-grid {
+  justify-content: flex-start;
+  justify-items: start;
+}
+
+/* Mobile adjustments */
+
+/* Final override to ensure section aligns left even inside centered flex parent */
+.billable-section {
+  align-self: flex-start !important;
+  text-align: left !important;
+  margin-left: 0 !important;
+}
+@media (max-width: 768px) {
+  .billable-metric-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .billable-metric-card {
+    width: 100%;
+    padding: 12px;
+  }
+}

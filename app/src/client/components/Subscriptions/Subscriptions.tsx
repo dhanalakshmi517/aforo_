@@ -104,7 +104,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         <h2>Purchases</h2>
         <div className="search-add">
           <Search onSearch={setSearchQuery} />
-          <button className="add-btn" onClick={() => setShowNewSubscriptionForm(true)}>+ New Purchase</button>
+          <button className="sub-add-btn" onClick={() => setShowNewSubscriptionForm(true)}>+ New Purchase</button>
         </div>
       </div>
 
@@ -140,8 +140,8 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
               </td>
               <td>{new Date(sub.createdAt).toLocaleString()}</td>
               <td>
-                <FiEdit2 className="icon edit" onClick={() => setEditingSub(sub)} />
-                <FiTrash className="icon delete" />
+                <FiEdit2 className="edit button" onClick={() => setEditingSub(sub)} />
+                <FiTrash className="delete button" />
               </td>
             </tr>
           ))}

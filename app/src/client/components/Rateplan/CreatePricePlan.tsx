@@ -249,8 +249,8 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
     return (
         <div className="create-price-plan">
       
-            <div className="usage-metric-wrapper">
-                <aside className="sidebars">
+            <div className="price-plan-wrapper">
+                <aside className="price-plan-sidebars">
                     {steps.map((step, index) => (
                         <div key={index} className={`step-item ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>
                             <div className="icon-wrappers">
@@ -279,7 +279,7 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
                     ))}
                 </aside>
 
-                <div className="form-section">
+                <div className="price-plan-section">
                     <div className="form-card">
                         {renderStepContent()}
                     </div>

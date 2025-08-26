@@ -52,7 +52,7 @@ letter-spacing: -2.248px;
     font-family: var(--font-family-primary);
     font-size: var(--font-size-h5);
     font-style: normal;
-    font-weight: 500;
+    font-weight: 800;
     line-height: var(--line-height-heading-h5); /* 140% */
     background: var(--gradient-blue, linear-gradient(180deg, #286584 0%, var(--primary-color-400, #5FB7E2) 100%));
     background-clip: text;
@@ -74,15 +74,16 @@ letter-spacing: -2.248px;
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
-    font-weight: 400;
+    font-weight: 600;
     line-height: var(--line-height-body-md); /* 160% */
     margin-bottom: 6px;
   }
   
   .field-input {
     width: 100%;
+    height:24px;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-sm);
     border: 1px solid var(--color-neutral-300);
     background:var(--color-neutral-100);
     font-size: var(--font-size-xs);
@@ -104,12 +105,7 @@ letter-spacing: -2.248px;
     cursor: pointer;
     padding: 0;
   }
-  .toggle-password svg {
-    width: 18px;
-    height: 18px;
-    fill: var(--color-neutral-1400);
-  }
-  
+ 
   /* Password row (label + forgot link) */
   .password-row {
     display: flex;
@@ -191,10 +187,11 @@ letter-spacing: -2.248px;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    border:none;
   }
   
   .social-btn svg {
-    margin-right: 8px;
+    margin-right: 3px;
   }
   
   /* subtle variants (just visual difference) */
@@ -220,7 +217,7 @@ line-height: var(--line-height-body-xs);
   
   .signin-footer a {
     text-decoration: none;
-    color: var(--color-neutral-1000);
+    color: var(--color-primary-800);
 text-align: center;
 
 font-family: var(--type-font-family-primary);

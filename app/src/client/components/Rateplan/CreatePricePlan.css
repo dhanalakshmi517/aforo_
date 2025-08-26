@@ -1,6 +1,33 @@
 @import "../Variables/Variables.css";
 
-.usage-metric-wrapper {
+/* Responsive layout overrides */
+
+/* Layout fixes to prevent horizontal scroll */
+.price-plan-wrapper { gap: 24px; }
+.price-plan-section, .form-card { box-sizing: border-box; min-width: 0; }
+@media (max-width: 992px) {
+  .price-plan-wrapper {
+    flex-direction: column; /* stack sidebar on top */
+  }
+  .price-plan-sidebars {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1.5px solid var(--color-neutral-200);
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .price-plan-wrapper {
+    padding: 0 8px;
+  }
+  .price-plan-sidebars {
+    padding: 20px 12px;
+  }
+}
+
+.price-plan-wrapper {
   display: flex;
   font-family: 'Inter', sans-serif;
   background-color: var(--color-neutral-white);
@@ -13,10 +40,10 @@
   overflow: hidden;
 }
 
-.sidebars {
+.price-plan-sidebars {
   width: 300px;
   background-color: var(--color-neutral-100);
-  padding: 30px 20px;
+  padding: 24px 16px;
   border-right: 1.5px solid var(--color-neutral-200);
 }
 
@@ -104,7 +131,7 @@
 .step-desc {
   color: var(--color-neutral-800);
 }
-.usage-metric-wrapper {
+.price-plan-wrapper {
     display: flex;
     font-family: var(--font-family-primary);
     background-color: var(--color-neutral-white);
@@ -117,9 +144,9 @@
     overflow: hidden;
   }
   
-  .sidebars {
-    width: 280px;
-    background-color:var(--color-neutral-white);
+  .price-plan-sidebars {
+    width: 300px;
+    background-color:var(--color-neutral-100);
     padding: 30px 20px;
     border-right: 1.5px solid var(--color-neutral-200);
   }
@@ -204,14 +231,13 @@ line-height: var(--line-height-body-md);
     display: block;
   }
   
-  .form-section {
+  .price-plan-section {
     flex: 1;
     background-color:transparent;
     position: relative;
-    border:None;
+    border: none;
     padding: 0;
-    margin-left: 0;
-    margin-top: 0;
+        margin-top: 0;
   }
   
   .top-actions {
@@ -257,12 +283,12 @@ line-height: var(--line-height-heading-h4);
   display: block;
 }
 
-.form-section {
+.price-plan-section {
   flex: 1 1 auto; /* allow to take remaining width */
   background-color: transparent;
   border: none;
   padding: 0 40px;
-  margin-left: 0;
+  /* margin removed - use flex gap */
   margin-top: 0;
   display: flex;
   flex-direction: column;
@@ -339,8 +365,8 @@ line-height: var(--line-height-heading-h4);
   }
   
   .form-card {
-    background-color:transparent;
-    padding: 30px;
+    background-color: transparent;
+    padding: 16px;
     margin-top: 30px;
     max-width: none; width: 100%;
     height: auto;
