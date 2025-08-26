@@ -16,6 +16,7 @@ vi.mock('../Billable', () => ({
     </div>
   ),
 }));
+
 vi.mock('../Pricing', () => {
   const saveSpy = vi.fn().mockResolvedValue(true);
   const PricingMock = React.forwardRef((_: any, ref: any) => {
@@ -221,4 +222,48 @@ it('Test 5: does not advance from Pricing when pricingRef.save() returns false',
   await waitFor(() => expect(saveSpy).toHaveBeenCalledTimes(1));
   expect(screen.getByTestId('pricing-step')).toBeInTheDocument(); // still here
   expect(screen.queryByTestId('extras-step')).not.toBeInTheDocument();
+});
+
+
+
+it('Test 7: shows alert and stays on Billable if no metric is selected', async () => {
+  mockFetchProducts.mockResolvedValue([{ productName: 'ProdA' }]);
+  const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+  mockCreateRatePlan.mockReset();
+
+  render(<CreatePricePlan onClose={onClose} />);
+
+  // ---- Step 0: fill details to enter Billable ----
+  fireEvent.change(await screen.findByLabelText('Rate Plan Name *'), {
+    target: { value: 'My Plan' },
+  });
+  fireEvent.change(screen.getByLabelText('Rate Plan Description *'), {
+    target: { value: 'Desc' },
+  });
+  fireEvent.change(screen.getByTestId('Billing Frequency *'), {
+    target: { value: 'MONTHLY' },
+  });
+  fireEvent.change(screen.getByTestId('Select Product *'), {
+    target: { value: 'ProdA' },
+  });
+  fireEvent.change(screen.getByTestId('Payment Method *'), {
+    target: { value: 'POSTPAID' },
+  });
+
+  const saveNext = screen.getByRole('button', { name: /save & next/i });
+
+  // Move to Step 1 (Billable)
+  fireEvent.click(saveNext);
+  expect(await screen.findByTestId('billable-step')).toBeInTheDocument();
+
+  // Try to leave Billable WITHOUT selecting a metric
+  fireEvent.click(saveNext);
+
+  // Expect alert and remain on Billable; no API call
+  await waitFor(() =>
+    expect(alertSpy).toHaveBeenCalledWith('Please select a billable metric.')
+  );
+  expect(screen.getByTestId('billable-step')).toBeInTheDocument();
+  expect(screen.queryByTestId('pricing-step')).not.toBeInTheDocument();
+  expect(mockCreateRatePlan).not.toHaveBeenCalled();
 });

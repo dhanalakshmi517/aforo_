@@ -1,4 +1,4 @@
-@import "../Variables/Variables.css";
+@import "../../Variables/Variables.css";
 
 .cus-form-header {
   display: flex;
@@ -237,35 +237,12 @@ form select {
   margin-top: 0px;
 }
 
-.cus-step-content {
+.edit-step-textent {
   max-width: 205px;
   margin-top: 10px;
 }
 
-.cus-step-content span {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--color-neutral-800);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-lg);
-}
-
-.cus-sample {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--color-neutral-800);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-lg);
-  margin-top: -37px;
-}
-
-.cus-samples {
+.edit-step-textent span {
   display: block;
   margin-bottom: 4px;
   color: var(--color-neutral-800);
@@ -277,7 +254,7 @@ form select {
   margin-top: -43px;
 }
 
-.cus-step-content p {
+.edit-step-textent p {
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
@@ -362,6 +339,42 @@ form select {
   padding: 30px 40px 120px;
   box-sizing: border-box;
   background: transparent;
+}
+
+.edit-step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 32px;
+  padding-left: 16px; /* space for the indicator */
+  position: relative;
+  cursor: pointer;
+}
+.edit-step-item:last-child {
+  margin-bottom: 0;
+}
+/* vertical indicator */
+.edit-step-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: var(--color-neutral-300);
+  border-radius: 1px;
+}
+.edit-step-item.active::before {
+  background: var(--color-primary-800);
+}
+.edit-step-title {
+  color: var(--color-neutral-900);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+}
+.edit-step-item.active .edit-step-title {
+  color: var(--color-primary-800);
 }
 
 @media (max-width: 768px) {

@@ -98,18 +98,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     }
   };
 
-
-
-
   useEffect(() => {
     getUsageMetrics().then((data: UsageMetricDTO[]) => {
       const mapped: Metric[] = data.map((m) => ({
-        // Prefer `metricId`; fallback to newer `billableMetricId` if API changed
         id: (m as any).metricId ?? (m as any).billableMetricId,
         usageMetric: m.metricName,
         productName: m.productName,
         unit: m.unitOfMeasure,
-        status: "Active", // backend doesn’t send status; set default
+        status: "Active", 
         
       }));
       setMetrics(mapped);
@@ -130,13 +126,16 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   );
 
   return (
-    <div className="metering-container">
-      <div className="breadcrumb">
-        <span>Usage Metrics</span>
-      </div>
+    <div className="metering-container meter-full">
+      <nav className="metering-breadcrumb-nav">
+        <div className="metering-breadcrumb">
+          <span>Usage Metrics</span>
+        </div>
+      </nav>
       <div className="metering-header">
         <h2>Usage Metrics</h2>
         <div className="metering-actions">
+          {/* <div className="search-wrappers">
             {/* <div className="search-wrappers">
             <input
               type="text"
@@ -154,15 +153,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       
         </div>
       </div>
-      <table className="metering-table">
+      <div className="metering-table-container">
+        <table className="metering-table">
         <thead>
           <tr>
-            <th>Metric ID</th>
             <th>Usage Metric</th>
             <th>Product Name</th>
             <th>Unit Of Measure</th>
-            <th>Status</th>
-            
+            <th>Status</th>           
             <th>Actions</th>
             
           </tr>
@@ -170,7 +168,6 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         <tbody>
           {filteredMetrics.map((metric) => (
             <tr key={metric.id}>
-              <td>{metric.id}</td>
               <td>{metric.usageMetric}</td>
               <td>{metric.productName}</td>
               <td>{metric.unit}</td>
@@ -183,12 +180,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               </td>
               
               <td className="actions">
-                <button className="edit-btn" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
+                <button className="edit-button" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M7.99933 13.3333H13.9993M10.9167 2.41461C11.1821 2.14922 11.542 2.00012 11.9173 2.00012C12.2927 2.00012 12.6526 2.14922 12.918 2.41461C13.1834 2.68001 13.3325 3.03996 13.3325 3.41528C13.3325 3.7906 13.1834 4.15055 12.918 4.41595L4.91133 12.4233C4.75273 12.5819 4.55668 12.6979 4.34133 12.7606L2.42667 13.3193C2.3693 13.336 2.30849 13.337 2.25061 13.3222C2.19272 13.3074 2.13988 13.2772 2.09763 13.235C2.05538 13.1927 2.02526 13.1399 2.01043 13.082C1.9956 13.0241 1.9966 12.9633 2.01333 12.9059L2.572 10.9913C2.63481 10.7762 2.75083 10.5804 2.90933 10.4219L10.9167 2.41461Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
-                <button className="delete-btn" onClick={() => handleDeleteClick(metric)}>
+                <button className="delete-button" onClick={() => handleDeleteClick(metric)}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M2 4.00004H14M12.6667 4.00004V13.3334C12.6667 14 12 14.6667 11.3333 14.6667H4.66667C4 14.6667 3.33333 14 3.33333 13.3334V4.00004M5.33333 4.00004V2.66671C5.33333 2.00004 6 1.33337 6.66667 1.33337H9.33333C10 1.33337 10.6667 2.00004 10.6667 2.66671V4.00004M6.66667 7.33337V11.3334M9.33333 7.33337V11.3334" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -197,7 +194,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
 
       {/* Delete confirmation modal */}
       {showDeleteModal && (

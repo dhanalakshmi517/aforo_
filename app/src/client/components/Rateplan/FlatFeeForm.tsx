@@ -91,7 +91,7 @@ const FlatFeeForm: React.FC<FlatFeeFormProps> = ({ data, onChange }) => {
 
   return (
     <div className="flat-fee-container">
-      <div className="form-sections">
+      <div className="ff-form-sections">
         <label className="ff-label">
           <span>Flat Fee Amount</span>
           <input

@@ -165,18 +165,17 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
           </div>
 
           <CreatePricePlan onClose={() => setShowCreatePlan(false)} />
-
           {showCancelModal && (
-            <div className="delete-modal-overlay">
-              <div className="delete-modal-content">
-                <div className="delete-modal-body">
+            <div className="rate-delete-modal-overlay">
+              <div className="rate-delete-modal-content">
+                <div className="rate-delete-modal-body">
                   <h5>Are you sure you want to cancel <br />creating this rate plan?</h5>
                   <p>This action cannot be undone.</p>
                 </div>
-                <div className="delete-modal-footer">
-                  <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
+                <div className="rate-delete-modal-footer">
+                  <button className="rate-delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
                   <button
-                      className="delete-modal-confirm"
+                      className="rate-delete-modal-confirm"
                       onClick={() => {
                         setShowCancelModal(false);
                         setShowCreatePlan(false);
@@ -196,11 +195,11 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
             <h2>Rate Plans</h2>
             <div className="header-actions">
               <Search onSearch={setSearchTerm} />
-              <button className="sam-button">
+              {/* <button className="sam-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                  </button>
+                  </button> */}
               {/* Search component handles input */}
               <button className="new-rate-button" onClick={() => {
                 setShowCreatePlan(true);
@@ -252,15 +251,15 @@ const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan
           </table>
 
           {showDeleteModal && (
-            <div className="delete-modal-overlay">
-              <div className="delete-modal-content">
-                <div className="delete-modal-body">
+            <div className="rate-delete-modal-overlay">
+              <div className="rate-delete-modal-content">
+                <div className="rate-delete-modal-body">
                   <h5>Are you sure you want to delete this <br />rate plan?</h5>
                   <p>This action cannot be undone.</p>
                 </div>
-                <div className="delete-modal-footer">
-                  <button className="delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>Back</button>
-                  <button className="delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
+                <div className="rate-delete-modal-footer">
+                  <button className="rate-delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>Back</button>
+                  <button className="rate-delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
                     {isDeleting ? 'Deleting...' : 'Confirm'}
                   </button>
                 </div>

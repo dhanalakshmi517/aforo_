@@ -22,13 +22,40 @@
   background: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
   padding: 1.5rem;
-  width: 1150px;
+  width: 100%; 
   justify-content: flex-start;
   align-items: flex-start;
   border: 1px solid var(--color-neutral-300);
-  margin: 0 auto;
+  margin: 0;
   gap: 1rem;
-  margin-left: -180px;
+}
+
+/* Responsive tweaks 2025-08-25 */
+@media (max-width: 991px) {
+  .formContainer {
+    flex-direction: column;
+    width: 100%;
+    padding: 1rem;
+  }
+  .stepIndicatorContainer {
+    width: 100%;
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--color-neutral-300);
+    padding-right: 0;
+    margin-right: 0;
+    height: auto;
+    overflow-x: auto;
+  }
+  .tabsContainer {
+    width: 100%;
+    flex-direction: row;
+    gap: 0.75rem;
+    overflow-x: auto;
+  }
+  .contentContainer {
+    width: 100%;
+  }
 }
 
 .tabsContainer {
@@ -220,9 +247,9 @@
 
 .newProductForm {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: none; /* removed 1200px constraint */
+  margin: 0;
+  padding: 2rem 1rem;
   position: relative;
 }
 

@@ -4,17 +4,21 @@ import EditSubscription from './EditSubscriptions/EditSubscription';
 import './Subscriptions.css';
 import Search from '../Components/Search';
 import { FiEdit2, FiTrash } from 'react-icons/fi';
+import axios from 'axios';
 
 interface Subscription {
-  id: number;
-  name: string;
-  email: string;
-  ratePlan: string;
-  createdOn: string;
+  subscriptionId: number;
+  customerId: number;
+  productId: number;
+  ratePlanId: number;
   status: string;
+  createdAt: string;
+  updatedAt: string;
+  paymentType: string;
+  adminNotes: string;
 }
 
-const allSubscriptions: Subscription[] = [
+/* dummy data removed
   {
     id: 1,
     name: 'Aditya Inc',
@@ -55,7 +59,7 @@ const allSubscriptions: Subscription[] = [
     createdOn: '06 Jan, 2025 08:58 IST',
     status: 'Active',
   },
-];
+dummy data removed */
 
 interface SubscriptionsProps {
   showNewSubscriptionForm: boolean;
@@ -65,6 +69,14 @@ interface SubscriptionsProps {
 const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, setShowNewSubscriptionForm }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+
+  // fetch subscriptions once on mount
+  useEffect(() => {
+    axios.get<Subscription[]>('http://13.113.70.183:8084/api/subscriptions')
+      .then(res => setSubscriptions(res.data))
+      .catch(err => console.error('Failed to fetch subscriptions', err));
+  }, []);
 
   // Hide sidebar whenever edit wizard is open
   useEffect(() => {
@@ -89,10 +101,10 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       <div className="breadcrumb"><span>Subscriptions</span></div>
     
       <div className="header">
-        <h2>Subscriptions</h2>
+        <h2>Purchases</h2>
         <div className="search-add">
           <Search onSearch={setSearchQuery} />
-          <button className="add-btn" onClick={() => setShowNewSubscriptionForm(true)}>+ New Purchase</button>
+          <button className="sub-add-btn" onClick={() => setShowNewSubscriptionForm(true)}>+ New Purchase</button>
         </div>
       </div>
 
@@ -100,34 +112,36 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         <thead>
           <tr>
             <th>S.No</th>
-            <th>Name</th>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Product</th>
             <th>Rate Plan</th>
-            <th>Created On</th>
             <th>Status</th>
+            <th>Created At</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {allSubscriptions.filter(sub =>
-            sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            sub.email.toLowerCase().includes(searchQuery.toLowerCase())
-          ).map((sub, index) => (
-            <tr key={sub.id}>
+          {subscriptions.filter(sub => {
+            const q = searchQuery.toLowerCase();
+            return (
+              sub.status?.toLowerCase().includes(q) ||
+              String(sub.subscriptionId).includes(q)
+            );
+          }).map((sub, index) => (
+            <tr key={sub.subscriptionId}>
               <td>{index + 1}</td>
+              <td>{sub.subscriptionId}</td>
+              <td>{sub.customerId}</td>
+              <td>{sub.productId}</td>
+              <td>{sub.ratePlanId}</td>
               <td>
-                <div className="name-email">
-                  <div>{sub.name}</div>
-                  <div className="email">{sub.email}</div>
-                </div>
+                <span className={`status ${sub.status?.toLowerCase()}`}>{sub.status}</span>
               </td>
-              <td>{sub.ratePlan}</td>
-              <td>{sub.createdOn}</td>
+              <td>{new Date(sub.createdAt).toLocaleString()}</td>
               <td>
-                <span className={`status ${sub.status.toLowerCase()}`}>{sub.status}</span>
-              </td>
-              <td>
-                <FiEdit2 className="icon edit" onClick={() => setEditingSub(sub)} />
-                <FiTrash className="icon delete" />
+                <FiEdit2 className="edit button" onClick={() => setEditingSub(sub)} />
+                <FiTrash className="delete button" />
               </td>
             </tr>
           ))}

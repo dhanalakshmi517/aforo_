@@ -53,7 +53,9 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
     if (!formData.uom?.trim()) newErrors.uom = 'UOM is required.';
     if (!formData.effectiveStartDate) newErrors.effectiveStartDate = 'Effective Start Date is required.';
     if (!formData.effectiveEndDate) newErrors.effectiveEndDate = 'Effective End Date is required.';
-    if (!formData.auditLogId?.trim()) newErrors.auditLogId = 'Audit Log ID is required.';
+    if (formData.auditLogId === undefined || formData.auditLogId === null || isNaN(formData.auditLogId)) {
+      newErrors.auditLogId = 'Audit Log ID is required.';
+    }
     if (!formData.linkedRatePlans || formData.linkedRatePlans.length === 0) {
       newErrors.linkedRatePlans = 'At least one rate plan is required.';
     }
@@ -232,8 +234,11 @@ const ProductMetadata: React.FC<ProductMetadataProps> = ({
               <InputField
                 label="Audit Log ID"
                 placeholder="Enter audit log ID"
-                value={formData.auditLogId ?? ''}
-                onChange={(val) => onChange({ auditLogId: val })}
+                value={formData.auditLogId !== undefined && formData.auditLogId !== null ? String(formData.auditLogId) : ''}
+                onChange={(val) => {
+                  const num = val !== '' ? parseInt(val, 10) : undefined;
+                  onChange({ auditLogId: num });
+                }}
               />
               {errors.auditLogId && <div className={styles.error}>{errors.auditLogId}</div>}
             </div>

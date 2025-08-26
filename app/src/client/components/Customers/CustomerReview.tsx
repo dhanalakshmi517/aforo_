@@ -1,4 +1,5 @@
 import React from 'react';
+import { AccountDetailsData } from './AccountDetailsForm';
 import './CustomerReview.css';
 
 interface Section {
@@ -6,31 +7,50 @@ interface Section {
   fields: { label: string; value: string }[];
 }
 
-const sections: Section[] = [
-  {
-    title: 'Customer Details',
-    fields: [
-      { label: 'Customer Name', value: 'Entered Value' },
-      { label: 'Company Name', value: 'Entered Value' },
-      { label: 'Company Type', value: 'Entered Value' },
-    ],
-  },
-  {
-    title: 'Account Details',
-    fields: [
-      { label: 'Account Name', value: 'Entered Value' },
-      { label: 'Net Term Days', value: 'Entered Value' },
-      { label: 'Primary Email', value: 'Entered Value' },
-      { label: 'Email Recipients', value: 'Entered Value' },
-      { label: 'Account Billing Address', value: 'Selected' },
-      { label: 'Phone Number', value: 'Entered Value' },
-      { label: 'Billing Address Line 1', value: 'Entered Value' },
-      { label: 'Billing Address Line 2', value: 'Entered Value' },
-    ],
-  },
-];
+interface CustomerReviewProps {
+  customerName: string;
+  companyName: string;
+  companyType: string;
+  accountDetails: AccountDetailsData | null;
+}
 
-const CustomerReview: React.FC = () => {
+const getSections = (props: CustomerReviewProps): Section[] => {
+  const customerFields: Section['fields'] = [
+    { label: 'Customer Name', value: props.customerName || '—' },
+    { label: 'Company Name', value: props.companyName || '—' },
+    { label: 'Company Type', value: props.companyType || '—' },
+  ];
+
+  const accountFields: Section['fields'] = [
+    // Contact Details
+    { label: 'Phone Number', value: props.accountDetails?.phoneNumber || '—' },
+    { label: 'Primary Email', value: props.accountDetails?.primaryEmail || '—' },
+    { label: 'Additional Email Recipients', value: props.accountDetails?.additionalEmailRecipients?.join(', ') || '—' },
+    // Customer Address
+    { label: 'Customer Address Line 1', value: props.accountDetails?.customerAddressLine1 || '—' },
+    { label: 'Customer Address Line 2', value: props.accountDetails?.customerAddressLine2 || '—' },
+    { label: 'Customer City', value: props.accountDetails?.customerCity || '—' },
+    { label: 'Customer State/Province', value: props.accountDetails?.customerState || '—' },
+    { label: 'Customer Postal Code', value: props.accountDetails?.customerPostalCode || '—' },
+    { label: 'Customer Country', value: props.accountDetails?.customerCountry || '—' },
+    // Billing Address
+    { label: 'Billing Same As Customer', value: props.accountDetails?.billingSameAsCustomer ? 'Yes' : 'No' },
+    { label: 'Billing Address Line 1', value: props.accountDetails?.billingAddressLine1 || '—' },
+    { label: 'Billing Address Line 2', value: props.accountDetails?.billingAddressLine2 || '—' },
+    { label: 'Billing City', value: props.accountDetails?.billingCity || '—' },
+    { label: 'Billing State/Province', value: props.accountDetails?.billingState || '—' },
+    { label: 'Billing Postal Code', value: props.accountDetails?.billingPostalCode || '—' },
+    { label: 'Billing Country', value: props.accountDetails?.billingCountry || '—' },
+  ];
+
+  return [
+    { title: 'Customer Details', fields: customerFields },
+    { title: 'Account Details', fields: accountFields },
+  ];
+};
+
+const CustomerReview: React.FC<CustomerReviewProps> = (props) => {
+  const sections = getSections(props);
   return (
     <div className="review-wrapper">
       {sections.map((section, idx) => (

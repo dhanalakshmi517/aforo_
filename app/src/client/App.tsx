@@ -12,10 +12,12 @@ import Organization from './components/Landing/Organization';
 
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import Customers from './components/Customers/Customers';
+import EditCustomer from './components/Customers/EditCustomers/EditCustomer';
 import Products from './components/Products/Products';
 import Metering from './components/Metering/Metering';
 
 import Subscriptions from './components/Subscriptions/Subscriptions';
+import DataIngestion from './components/DataIngestion/DataIngestion';
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
@@ -41,6 +43,7 @@ export default function App() {
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [showNewUsageMetricForm, setShowNewUsageMetricForm] = useState(false);
   const [hideSidebarOnEditMetric, setHideSidebarOnEditMetric] = useState(false);
+const [hideSidebarOnEditCustomer, setHideSidebarOnEditCustomer] = useState(false);
 
   const [showNewSubscriptionForm, setShowNewSubscriptionForm] = useState(false);
 
@@ -95,6 +98,7 @@ export default function App() {
     if (location.pathname === '/get-started/products') return 'Products';
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
+    if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
 
     if (location.pathname === '/get-started/subscriptions') return 'Purchases';
 
@@ -105,8 +109,9 @@ export default function App() {
   // Hide sidebar when creating a new customer, rate plan, or product
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
+    const isEditingCustomer = /\/get-started\/customers\/\d+\/edit$/.test(location.pathname);
 
-    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || hideSidebarOnEditMetric || isEditingPlan) {
+    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || hideSidebarOnEditMetric || isEditingPlan || isEditingCustomer) {
       setShowSidebar(false);
     } else {
       setShowSidebar(true);
@@ -136,7 +141,7 @@ export default function App() {
             <Route path="/tiered-estimation" element={<TieredEstimation />} />
             <Route path="/stair-estimation" element={<StairEstimation />} />
             <Route path="/get-started/*" element={
-              <div className="empty-background">
+              <div>
                 <div className="flex h-full">
                   <SideNavbar 
                     activeTab={currentTab} 
@@ -144,6 +149,7 @@ export default function App() {
                       const slug =
                       tab === 'Billable Metrics' ? 'metering'
                       : tab === 'Purchases' ? 'subscriptions'
+                      : tab === 'Data Ingetion' ? 'data-ingetion'
                       : tab.toLowerCase().replace(/\s+/g, '-');
                       navigate(`/get-started/${slug}`);
                     }} 
@@ -153,12 +159,12 @@ export default function App() {
                     <Routes>
                       <Route index element={<div className="flex-1 h-full">Empty Content</div>} />
                       <Route path="customers" element={<Customers showNewCustomerForm={showNewCustomerForm} setShowNewCustomerForm={setShowNewCustomerForm} />} />
+                      <Route path="customers/:id/edit" element={<EditCustomer />} />
                       <Route path="products" element={<Products showNewProductForm={showNewProductForm} setShowNewProductForm={setShowNewProductForm} />} />
                       <Route path="rate-plans" element={<RatePlans 
                         showCreatePlan={showCreatePlan} 
                         setShowCreatePlan={setShowCreatePlan}
                         ratePlans={ratePlans}
-
                       />} />
                       <Route path="rate-plans/:id/edit" element={<EditPlan onClose={() => navigate(-1)} />} />
                       {/* Revenue estimation routes nested under rate-plans */}
@@ -172,6 +178,7 @@ export default function App() {
                           setShowNewSubscriptionForm={setShowNewSubscriptionForm}
                         />} />
                       
+                      <Route path="data-ingetion" element={<DataIngestion />} />
                       <Route path="metering" element={<Metering 
                         showNewUsageMetricForm={showNewUsageMetricForm}
                         setShowNewUsageMetricForm={setShowNewUsageMetricForm}

@@ -160,8 +160,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
             productName={selectedProductName || ''}
             ratePlan={selectedRatePlanName || ''}
             paymentMethod={paymentType || 'Invoice (Net Terms)'}
-            basePrice={0}
-            quantity={1}
+            adminNotes={planDescription}
           />
         );
       default:
@@ -174,8 +173,8 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
     <div className="sub-header">
         <h2>Create New Subscription</h2>
         <div className="header-actions">
-          <button className="cancel-btn" onClick={() => setShowCancelModal(true)}>Cancel</button>
-          <button className="draft-btn">Save as Draft</button>
+          <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
+          <button className="btn save-draft">Save as Draft</button>
         </div>
       </div>
     <div className="sub-create-price-plan">

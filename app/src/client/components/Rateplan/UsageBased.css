@@ -2,17 +2,23 @@
 
 .usage-container {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 30px;
+  width: 100%;
+  box-sizing: border-box;
   background: var(--color-neutral-white);
   padding: 20px;
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-neutral-200);
   font-family: Arial, sans-serif;
-  gap: 30px;
   margin-top: 30px;
 }
 
 .usage-left {
+  flex: 1 1 auto;
+  flex: 1 1 60%; /* flexible, shrinks on small screens */
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -26,7 +32,8 @@
 }
 
 .usage-input-field {
-  width: 520px;
+  max-width: 100%;
+  width: 100%;
   padding: 10px;
   font-size: 14px;
   border: 1px solid var(--color-neutral-200);
@@ -39,7 +46,8 @@
   border-radius: var(--border-radius-lg);
   padding: 16px;
   border: 1px solid var(--color-neutral-200);
-  width: 435px;
+  flex: 1 1 40%; /* flexible share */
+  min-width: 260px;
 }
 
 .usage-example-section h4 {

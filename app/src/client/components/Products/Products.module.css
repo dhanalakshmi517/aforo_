@@ -1,11 +1,13 @@
 @import "../Variables/Variables.css";
 
 .breadcrumb {
+  flex-wrap: wrap;
   display: flex;
   padding: 1rem;
   background-color: var(--color-neutral-white);
   margin-bottom: 2rem;
-  width: 1188px;
+  margin-left: 230px;
+  width: auto;
   height: 42px;
   padding: 12px 16px;
   align-items: center;
@@ -13,8 +15,14 @@
   border: 1px solid var(--color-neutral-200);
 }
 
-.breadcrumbItem {
+@media (max-width: 991px) {
+  .breadcrumb {
+    margin: 0 8px 2rem;
+    width: auto;
+  }
+}
 
+.breadcrumbItem { 
   display: flex;
   color: var(--color-neutral-1000);
   text-align: center;
@@ -66,26 +74,32 @@
   border-color: 1px solid var(--color-primary-600);
 }
 .newButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 164px;
   height: 40px;
-   background-color:var(--color-primary-700);
+  min-width: 164px;
+  background-color: var(--color-primary-700);
   color: var(--color-neutral-white);
   padding: 8px 20px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  white-space: nowrap; /* keep label on single line */
 
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400; 
-line-height: var(--line-height-body-lg);
-margin-left: -30px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+  margin-left: -10px;
+}
 
+@media (max-width: 991px) {
+  .newButton {
+    margin-left: 0;
+  }
 }
 
 .productsSearchInput {
