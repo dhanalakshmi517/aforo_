@@ -36,13 +36,42 @@ export async function getCustomer(customerId: number | string): Promise<Customer
  */
 export async function updateCustomer(customerId: number | string, payload: Record<string, unknown> | FormData) {
   const isFormData = payload instanceof FormData;
+  // remove blank values that backend may reject (e.g., enum fields)
+  const sanitized = isFormData
+    ? payload
+    : Object.fromEntries(
+        Object.entries(payload as Record<string, unknown>).filter(
+          ([, v]) => v !== '' && v !== null && v !== undefined,
+        ),
+      );
+  // backend rule: customerCountry required when phoneNumber present. If missing, drop phoneNumber for draft saves.
+  if (!('customerCountry' in sanitized) || !sanitized.customerCountry) {
+    delete (sanitized as Record<string, unknown>).phoneNumber;
+  }
+  const bodyInit: BodyInit | undefined = isFormData ? (sanitized as FormData) : JSON.stringify(sanitized);
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: isFormData ? undefined : { 'Content-Type': 'application/json' },
-    body: isFormData ? payload : JSON.stringify(payload),
+    body: bodyInit,
   });
   if (!res.ok) {
     let msg = `Failed to update (status ${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) msg = data.message;
+    } catch {}
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+// Confirm customer
+export async function confirmCustomer(customerId: number | string) {
+  const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}/confirm`, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    let msg = `Failed to confirm (status ${res.status})`;
     try {
       const data = await res.json();
       if (data?.message) msg = data.message;

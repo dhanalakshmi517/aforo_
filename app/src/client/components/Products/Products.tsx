@@ -1,12 +1,72 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import NewProductForm from '../NewProductForm';
 import { ProductFormData } from '../../../types/productTypes';
 import EditProductForm from './EditProduct/EditProductForm';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
+import CreateProduct from './CreateProduct.s/CreateProduct';
 import './Products.css';
-import Search from '../Components/Search';
 import styles from './Products.module.css';
+
+// Icon components
+const SuccessIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path d="M20 6L9 17L4 12" stroke="#23A36D" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ErrorIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path d="M12 8V12M12 16H12.01M7.9 20C9.8 21 12 21.2 14.1 20.75C16.2 20.3 18 19.05 19.3 17.3C20.6 15.55 21.15 13.4 20.98 11.3C20.81 9.15 19.89 7.15 18.37 5.63C16.85 4.11 14.85 3.18 12.71 3.02C10.57 2.85 8.44 3.45 6.71 4.72C4.97 5.98 3.75 7.82 3.25 9.91C2.76 12 3.02 14.19 4 16.1L2 22L7.9 20Z" stroke="#E34935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+interface NotificationProps {
+  message: string;
+  type: 'success' | 'error';
+  productName: string;
+}
+
+const Notification: React.FC<NotificationProps> = ({ message, type, productName }) => {
+  const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
+  return (
+    <div className={`notification ${type === 'error' ? 'error' : ''}`}>
+      <div className="notification-icon">
+        <Icon />
+      </div>
+      <div className="notification-text">
+        <h5>{type === 'success' ? 'Product Deleted' : 'Failed to Delete Product'}</h5>
+        <p className="notification-details">
+          {type === 'success'
+            ? `The product "${productName}" was successfully deleted.`
+            : `Failed to delete the product "${productName}". Please try again.`}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+interface DeleteModalProps {
+  onCancel: () => void;
+  onConfirm: () => void;
+  isDeleting: boolean;
+}
+
+const DeleteModal: React.FC<DeleteModalProps> = ({ onCancel, onConfirm, isDeleting }) => (
+  <div className="rate-delete-modal-overlay">
+    <div className="rate-delete-modal-content">
+      <div className="rate-delete-modal-body">
+        <h5>Are you sure you want to delete this <br />rate plan?</h5>
+        <p>This action cannot be undone.</p>
+      </div>
+      <div className="rate-delete-modal-footer">
+        <button className="rate-delete-modal-cancel" onClick={onCancel}>Back</button>
+        <button className="rate-delete-modal-confirm" onClick={onConfirm} disabled={isDeleting}>
+          {isDeleting ? 'Deleting...' : 'Confirm'}
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 interface Product {
   productId: number;
@@ -15,6 +75,7 @@ interface Product {
   billable: boolean;
   status: string;
   category: string;
+  createdAt?: string; // ISO timestamp
 }
 
 interface ProductsProps {
@@ -35,7 +96,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isNewProductFormOpen, setIsNewProductFormOpen] = useState(showNewProductForm);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -44,14 +104,32 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [deleteProductName, setDeleteProductName] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
+  
+  // Memoize the cancel handler to prevent re-renders
+  const handleCreateProductCancel = React.useCallback(() => {
+    setShowCreateProduct(false);
+    setShowNewProductForm(false);
+  }, [setShowNewProductForm]);
+
+  // Sync with parent component's state
+
+  // Sync local state with prop, but only update if different to prevent re-renders
+  useEffect(() => {
+    console.log('useEffect - showNewProductForm changed:', { showNewProductForm, showCreateProduct });
+    if (showCreateProduct !== showNewProductForm) {
+      console.log('Updating showCreateProduct to:', showNewProductForm);
+      setShowCreateProduct(showNewProductForm);
+    }
+  }, [showNewProductForm, showCreateProduct]);
 
   useEffect(() => {
-    if (isNewProductFormOpen || isEditFormOpen) {
+    if (showCreateProduct || isEditFormOpen) {
       document.body.classList.add('hide-sidebar');
     } else {
       document.body.classList.remove('hide-sidebar');
     }
-  }, [isNewProductFormOpen, isEditFormOpen]);
+  }, [showCreateProduct, isEditFormOpen]);
 
   useEffect(() => {
     if (notification) {
@@ -76,11 +154,35 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return productTypeNames[normalizedType as ProductType] || type;
   };
 
+  const InfoIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginLeft: 4 }}>
+      <g clipPath="url(#clip0_6157_14454)">
+        <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#98959A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_6157_14454">
+          <rect width="12" height="12" fill="white"/>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+
   const renderBreadcrumb = () => {
-    if (!isNewProductFormOpen && !isEditFormOpen) {
+    if (!showCreateProduct && !isEditFormOpen) {
       return (
         <div className={styles.breadcrumb}>
           <span className={`${styles.breadcrumbItem} ${styles.active}`}>Products</span>
+          <div className={styles.breadcrumbRight}>
+            {/* Bell Icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M7.55606 16.5003C7.70234 16.7537 7.91274 16.964 8.16609 17.1103C8.41945 17.2566 8.70684 17.3336 8.99939 17.3336C9.29194 17.3336 9.57933 17.2566 9.83269 17.1103C10.086 16.964 10.2964 16.7537 10.4427 16.5003M1.71772 11.772C1.60886 11.8913 1.53702 12.0397 1.51094 12.1991C1.48486 12.3585 1.50566 12.522 1.57081 12.6698C1.63597 12.8176 1.74267 12.9433 1.87794 13.0316C2.0132 13.1198 2.17121 13.1669 2.33272 13.167H15.6661C15.8276 13.167 15.9856 13.1202 16.1209 13.0321C16.2563 12.944 16.3631 12.8184 16.4285 12.6708C16.4938 12.5231 16.5148 12.3596 16.4889 12.2001C16.4631 12.0407 16.3914 11.8923 16.2827 11.7728C15.1744 10.6303 13.9994 9.41616 13.9994 5.66699C13.9994 4.34091 13.4726 3.06914 12.5349 2.13146C11.5972 1.19378 10.3255 0.666992 8.99939 0.666992C7.67331 0.666992 6.40154 1.19378 5.46386 2.13146C4.52618 3.06914 3.99939 4.34091 3.99939 5.66699C3.99939 9.41616 2.82356 10.6303 1.71772 11.772Z" stroke="#706C72" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {/* Gear Icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9.18236 0.666992H8.81569C8.37366 0.666992 7.94974 0.842587 7.63718 1.15515C7.32462 1.46771 7.14902 1.89163 7.14902 2.33366V2.48366C7.14872 2.77593 7.07157 3.06298 6.92531 3.31602C6.77904 3.56906 6.56881 3.77919 6.31569 3.92533L5.95736 4.13366C5.70399 4.27994 5.41659 4.35695 5.12402 4.35695C4.83146 4.35695 4.54406 4.27994 4.29069 4.13366L4.16569 4.06699C3.78325 3.84638 3.32889 3.78653 2.90236 3.90058C2.47583 4.01464 2.11198 4.29327 1.89069 4.67533L1.70736 4.99199C1.48674 5.37444 1.42689 5.82879 1.54095 6.25532C1.655 6.68185 1.93364 7.0457 2.31569 7.26699L2.44069 7.35033C2.69259 7.49575 2.90204 7.70457 3.04823 7.95602C3.19443 8.20747 3.27227 8.4928 3.27403 8.78366V9.20866C3.27519 9.50234 3.19873 9.79112 3.05239 10.0457C2.90606 10.3004 2.69503 10.5118 2.44069 10.6587L2.31569 10.7337C1.93364 10.955 1.655 11.3188 1.54095 11.7453C1.42689 12.1719 1.48674 12.6262 1.70736 13.0087L1.89069 13.3253C2.11198 13.7074 2.47583 13.986 2.90236 14.1001C3.32889 14.2141 3.78325 14.1543 4.16569 13.9337L4.29069 13.867C4.54406 13.7207 4.83146 13.6437 5.12402 13.6437C5.41659 13.6437 5.70399 13.7207 5.95736 13.867L6.31569 14.0753C6.56881 14.2215 6.77904 14.4316 6.92531 14.6846C7.07157 14.9377 7.14872 15.2247 7.14902 15.517V15.667C7.14902 16.109 7.32462 16.5329 7.63718 16.8455C7.94974 17.1581 8.37366 17.3337 8.81569 17.3337H9.18236C9.62439 17.3337 10.0483 17.1581 10.3609 16.8455C10.6734 16.5329 10.849 16.109 10.849 15.667V15.517C10.8493 15.2247 10.9265 14.9377 11.0727 14.6846C11.219 14.4316 11.4292 14.2215 11.6824 14.0753L12.0407 13.867C12.2941 13.7207 12.5815 13.6437 12.874 13.6437C13.1666 13.6437 13.454 13.7207 13.7074 13.867L13.8324 13.9337C14.2148 14.1543 14.6692 14.2141 15.0957 14.1001C15.5222 13.986 15.8861 13.7074 16.1074 13.3253L16.2907 13.0003C16.5113 12.6179 16.5712 12.1635 16.4571 11.737C16.343 11.3105 16.0644 10.9466 15.6824 10.7253L15.5574 10.6587C15.303 10.5118 15.092 10.3004 14.9457 10.0457C14.7993 9.79112 14.7229 9.50234 14.724 9.20866V8.79199C14.7229 8.49831 14.7993 8.20953 14.9457 7.9549C15.092 7.70027 15.303 7.48883 15.5574 7.34199L15.6824 7.26699C16.0644 7.0457 16.343 6.68185 16.4571 6.25532C16.5712 5.82879 16.5113 5.37444 16.2907 4.99199L16.1074 4.67533C15.8861 4.29327 15.5222 4.01464 15.0957 3.90058C14.6692 3.78653 14.2148 3.84638 13.8324 4.06699L13.7074 4.13366C13.454 4.27994 13.1666 4.35695 12.874 4.35695C12.5815 4.35695 12.2941 4.27994 12.0407 4.13366L11.6824 3.92533C11.4292 3.77919 11.219 3.56906 11.0727 3.31602C10.9265 3.06298 10.8493 2.77593 10.849 2.48366V2.33366C10.849 1.89163 10.6734 1.46771 10.3609 1.15515C10.0483 0.842587 9.62439 0.666992 9.18236 0.666992Z" stroke="#706C72" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8.99902 11.5003C10.3797 11.5003 11.499 10.381 11.499 9.00033C11.499 7.61961 10.3797 6.50033 8.99902 6.50033C7.61831 6.50033 6.49902 7.61961 6.49902 9.00033C6.49902 10.381 7.61831 11.5003 8.99902 11.5003Z" stroke="#706C72" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
         </div>
       );
     }
@@ -126,7 +228,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
       const data = await response.json();
       setProducts([...products, data]);
-      setIsNewProductFormOpen(false);
+      setShowCreateProduct(false);
+      if (setShowNewProductForm) {
+        setShowNewProductForm(false);
+      }
     } catch (error) {
       console.error('Error creating product:', error);
       alert('Failed to create product. Please try again.');
@@ -166,78 +271,42 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     }
   };
 
-  const DeleteModal = () => (
-    <div className="delete-modal-overlay">
-      <div className="delete-modal-content">
-        <div className="delete-modal-body">
-          <h5>
-            Are you sure you want to delete <br />the product?
-            <strong>"{deleteProductName}"</strong>
-          </h5>
-          <p>This action cannot be undone.</p>
-        </div>
-        <div className="delete-modal-footer">
-          <button className="delete-modal-cancel" onClick={() => {
-            setShowDeleteModal(false);
-            setDeleteProductId(null);
-          }}>Cancel</button>
-          <button className="delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const SuccessIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-      <path d="M20 6L9 17L4 12" stroke="#23A36D" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-
-  const ErrorIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-      <path d="M12 8V12M12 16H12.01M7.9 20C9.8 21 12 21.2 14.1 20.75C16.2 20.3 18 19.05 19.3 17.3C20.6 15.55 21.15 13.4 20.98 11.3C20.81 9.15 19.89 7.15 18.37 5.63C16.85 4.11 14.85 3.18 12.71 3.02C10.57 2.85 8.44 3.45 6.71 4.72C4.97 5.98 3.75 7.82 3.25 9.91C2.76 12 3.02 14.19 4 16.1L2 22L7.9 20Z" stroke="#E34935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-
-  const Notification = ({ message, type, productName }: NotificationState) => {
-    const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
-    return (
-      <div className={`notification ${type === 'error' ? 'error' : ''}`}>
-        <div className="notification-icon">
-          <Icon />
-        </div>
-        <div className="notification-text">
-          <h5>{type === 'success' ? 'Product Deleted' : 'Failed to Delete Product'}</h5>
-          <p className="notification-details">
-            {type === 'success'
-              ? `The product “${productName}” was successfully deleted.`
-              : `Failed to delete the product “${productName}”. Please try again.`}
-          </p>
-        </div>
-      </div>
-    );
-  };
+  // Moved DeleteModal and Notification components outside the main component to prevent hook issues
 
   if (isLoading) return <div className="loading">Loading products...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  if (error) return <div className="error">Something Went wrong: {error}</div>;
 
   return (
     <>
       {notification && (
         <div className="notification-container">
-          <Notification {...notification} />
+          <Notification 
+            type={notification.type}
+            message={notification.message}
+            productName={notification.productName}
+          />
         </div>
       )}
 
       <div>
         {renderBreadcrumb()}
-        {showDeleteModal && <DeleteModal />}
+        {showDeleteModal && (
+          <DeleteModal 
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={confirmDelete}
+            isDeleting={isDeleting}
+          />
+        )}
 
-
-        <div className="products-container">
-          {isEditFormOpen ? (
+        {/* Create Product Form */}
+        {showCreateProduct && (
+          <CreateProduct 
+            onClose={handleCreateProductCancel} 
+          />
+        )}
+          
+          {/* Edit Product Form */}
+          {isEditFormOpen && (
             <div className="products-form-container">
               <EditProductForm
                 productId={editingProduct?.productId.toString() || ''}
@@ -246,27 +315,58 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 onClose={() => setIsEditFormOpen(false)}
                 onSave={() => {
                   setIsEditFormOpen(false);
-                  // You can add any additional save logic here
+                  // Refresh the products list after save by setting a new empty array
+                  // This will trigger a re-render and fetch the updated products
+                  setProducts([]);
                 }}
                 showEditForm={isEditFormOpen}
               />
             </div>
-          ) : isNewProductFormOpen ? (
-            <div className="products-form-container">
-              <NewProductForm onSubmit={handleNewProductSubmit} onClose={() => setIsNewProductFormOpen(false)} />
-            </div>
-          ) : (
+          )}
+          
+          {/* Main Content */}
+          {!showCreateProduct && !isEditFormOpen && (
             <div className="products-main-content">
-              <div className="products-header" style={{ marginTop: '24px' }}>
+              <div className="products-header" style={{ marginTop: '4px' }}>
                 <h2>Products</h2>
                 <div className="products-actions">
-                  <Search onSearch={(query) => setSearchTerm(query)} />
+                  <div className="products-search">
+                     {/* <svg
+                      className="search-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                    >
+                      <path
+                        d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      /> */}
+                    {/* </svg>  */}
+                    <input
+                      type="search"
+                      placeholder="Search among your Products..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="products-search-input"
+                    />
+                  </div>
                   <button className={styles.samButton}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </button>
-                  <button onClick={() => setIsNewProductFormOpen(true)} className={styles.newButton}>
+                  <button 
+                    onClick={() => {
+                      setShowCreateProduct(true);
+                      setShowNewProductForm(true);
+                    }} 
+                    className={styles.newButton}
+                  >
                     + New Product
                   </button>
                 </div>
@@ -275,43 +375,49 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               {products.length === 0 ? (
                 <p>No products found.</p>
               ) : (
-                <table className="products-table">
+                <div className="products-table-wrapper">
+                  <table className="products-table">
                   <thead>
                     <tr>
-                      <th>Product Name</th>
-                      <th>Product Type</th>
-                      <th>Billable</th>
-                      <th>Status</th>
-                      <th>Category</th>
-                      <th>Actions</th>
+                      <th>Product Name <InfoIcon /></th>
+                      <th>Product ID <InfoIcon /></th>
+                      <th>Product Type <InfoIcon /></th>
+                      <th>Billable Metrics <InfoIcon /></th>
+                      <th>Created On <InfoIcon /></th>
+                      <th className="actions-cell">Actions <InfoIcon /></th>
                     </tr>
                   </thead>
                   <tbody>
                     {products
-                      .filter(product => product.productName.toLowerCase().includes(searchTerm.toLowerCase()))
+                      .filter(product => 
+                        product?.productName?.toLowerCase()?.includes(searchTerm?.toLowerCase() || '')
+                      )
                       .map((product) => (
                       <tr key={product.productId}>
                         <td>{product.productName}</td>
+                        <td>{product.productId}</td>
                         <td>
-                          <span className={`product-type-badge--${product.productType.toLowerCase()}`}>
-                            {getProductTypeName(product.productType)}
+                          <span className={`product-type-badge--${product.productType?.toLowerCase() || 'default'}`}>
+                            {getProductTypeName(product.productType || '')}
                           </span>
                         </td>
-                        <td>{product.billable ? 'Yes' : 'No'}</td>
-                        <td>{product.status}</td>
-                        <td>{product.category}</td>
-                        <td>
+                        <td>{/* Billable Metrics - Add content here if needed */}</td>
+                        <td>{new Date(product.createdAt || '').toLocaleDateString()}</td>
+                        <td className="actions-cell">
                           <div className="action-buttons">
-                            <button className="edit-button" onClick={() => {
-                              setEditingProduct(product);
-                              setIsEditFormOpen(true);
-                            }}>
-                             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
-                                <path d="M8.59894 13.3332H14.5989M11.5163 2.41449C11.7817 2.1491 12.1416 2 12.5169 2C12.8923 2 13.2522 2.1491 13.5176 2.41449C13.783 2.67988 13.9321 3.03983 13.9321 3.41516C13.9321 3.79048 13.783 4.15043 13.5176 4.41582L5.51094 12.4232C5.35234 12.5818 5.15629 12.6978 4.94094 12.7605L3.02628 13.3192C2.96891 13.3359 2.9081 13.3369 2.85022 13.3221C2.79233 13.3072 2.73949 13.2771 2.69724 13.2349C2.65499 13.1926 2.62487 13.1398 2.61004 13.0819C2.59521 13.024 2.59621 12.9632 2.61294 12.9058L3.17161 10.9912C3.23442 10.776 3.35044 10.5802 3.50894 10.4218L11.5163 2.41449Z" stroke="#1D7AFC" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <button 
+                              className="prod-edit-button"
+                              onClick={() => {
+                                setEditingProduct(product);
+                                setIsEditFormOpen(true);
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 13.3333H14M11 2.33333C11.221 2.11231 11.5271 1.9974 11.8444 2.01796C12.1618 2.03852 12.4485 2.19215 12.6339 2.43697C12.8192 2.68179 12.8844 2.99249 12.8116 3.28499C12.7388 3.57749 12.5353 3.82114 12.26 3.94333L5.6 11.3333L2 12.6667L3.33333 9.06667L10 2.66667C10.1667 2.48889 10.3889 2.4 10.6111 2.4C10.8333 2.4 11.0556 2.48889 11.2222 2.66667L11 2.33333Z" stroke="#706C72" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                            <button
-                              className="delete-button"
+                            <button 
+                              className="prod-delete-button"
                               onClick={() => {
                                 setDeleteProductId(product.productId);
                                 setDeleteProductName(product.productName);
@@ -319,9 +425,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               }}
                               disabled={isDeleting}
                             >
-                              
                               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
-                                <path d="M2.59961 4.00016H14.5996M13.2663 4.00016V13.3335C13.2663 14.0002 12.5996 14.6668 11.9329 14.6668H5.26628C4.59961 14.6668 3.93294 14.0002 3.93294 13.3335V4.00016M5.93294 4.00016V2.66683C5.93294 2.00016 6.59961 1.3335 7.26628 1.3335H9.93294C10.5996 1.3335 11.2663 2.00016 11.2663 2.66683V4.00016M7.26628 7.3335V11.3335M9.93294 7.3335V11.3335" stroke="#E34935" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2.59961 4.00016H14.5996M13.2663 4.00016V13.3335C13.2663 14.0002 12.5996 14.6668 11.9329 14.6668H5.26628C4.59961 14.6668 3.93294 14.0002 3.93294 13.3335V4.00016M5.93294 4.00016V2.66683C5.93294 2.00016 6.59961 1.3335 7.26628 1.3335H9.93294C10.5996 1.3335 11.2663 2.00016 11.2663 2.66683V4.00016M7.26628 7.3335V11.3335M9.93294 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
                           </div>
@@ -330,10 +435,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
           )}
-        </div>
+        {/* </div> */}
       </div>
     </>
   );

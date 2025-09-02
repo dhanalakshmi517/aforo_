@@ -52,22 +52,99 @@ export async function getBillableMetricById(
 
 export async function updateBillableMetric(
   metricId: string | number,
-  payload: Omit<BillableMetricDetails, 'metricId'>,
+  payload: any,
 ): Promise<boolean> {
-  try {
-    const res = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('Update failed', res.status, text);
+  const url = `${METRICS_BASE_URL}/billable-metrics/${metricId}`;
+  const requestOptions = {
+    method: 'PUT',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(payload),
+  };
+
+  console.log('Sending update request:', {
+    url,
+    options: {
+      ...requestOptions,
+      body: JSON.parse(JSON.stringify(payload)) // Clone to avoid mutation
     }
-    return res.ok;
-  } catch (err) {
-    console.error('Failed to update billable metric', err);
-    return false;
+  });
+
+  try {
+    const startTime = performance.now();
+    const res = await fetch(url, requestOptions);
+    const responseTime = Math.round(performance.now() - startTime);
+    
+    const responseText = await res.text();
+    let responseData;
+    
+    try {
+      responseData = responseText ? JSON.parse(responseText) : {};
+    } catch (e) {
+      console.warn('Failed to parse JSON response:', { responseText, error: e });
+      responseData = { message: responseText };
+    }
+    
+    if (!res.ok) {
+      const errorDetails = {
+        status: res.status,
+        statusText: res.statusText,
+        responseTime: `${responseTime}ms`,
+        response: responseData,
+        request: {
+          url,
+          method: 'PUT',
+          payload: payload,
+          headers: requestOptions.headers
+        }
+      };
+      
+      console.error('Update failed with details:', JSON.stringify(errorDetails, null, 2));
+      
+      // Try to extract a meaningful error message
+      let errorMessage = `HTTP ${res.status} ${res.statusText}`;
+      if (responseData.message) {
+        errorMessage += `: ${responseData.message}`;
+      } else if (responseData.error) {
+        errorMessage += `: ${responseData.error}`;
+      } else if (typeof responseData === 'string') {
+        errorMessage += `: ${responseData}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+    
+    console.log(`Update successful (${responseTime}ms)`, {
+      status: res.status,
+      response: responseData
+    });
+    
+    return true;
+  } catch (error) {
+    const errorInfo = {
+      error: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      } : error,
+      request: {
+        url,
+        method: 'PUT',
+        payload: payload,
+        headers: requestOptions.headers
+      },
+      timestamp: new Date().toISOString()
+    };
+    
+    console.error('Failed to update billable metric:', JSON.stringify(errorInfo, null, 2));
+    
+    // Re-throw with more context if needed
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to update metric: ${String(error)}`);
   }
 }
 

@@ -1,53 +1,76 @@
 @import "../Variables/Variables.css";
+/* Error State Styles */
+.input-field.error,
+.textarea-field.error,
+.select-field.error {
+  border-color: red;
+}
+
+.label-error {
+  color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 2px;
+}
+
+
 
 .com-form-group {
-    margin-top: 16px;
-  }
-  
-  .com-form-label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--color-neutral-1000);
+  margin-top: 16px;
+}
 
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md);
-  }
-  
-  .sub-create-form .input-field,
-.sub-create-form .textarea-field,
-.sub-create-form .select-field,
+.com-form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+.com-create-form .input-field,
+.com-create-form .textarea-field,
+.com-create-form .select-field,
 .input-field,
-  .textarea-field,
-  .select-field {
-    width: 26.93rem !important;
-    height: 2.5rem;
-    padding: 8px 12px;
-    border: 1px solid var(--color-neutral-200);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-md);
-    outline: none;
-    transition: border 0.2s ease;
-    background-color: var(--color-neutral-100);
-  }
-  
-  .input-field:focus,
-  .textarea-field:focus,
-  .select-field:focus {
-    border-color: var(--color-neutral-200);
-    box-shadow: none;
-  }
-  
-  .textarea-field {
-    min-height: 5.5rem;
-    resize: vertical;
-    padding: 8px 12px;
-    border: 1px solid var(--color-neutral-200);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-md);
-    outline: none;
-    transition: border 0.2s ease;
-    background-color: var(--color-neutral-100);
-  }
+.textarea-field,
+.select-field {
+  width: 456px !important;
+  height: 2.5rem;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  outline: none;
+  transition: border 0.2s ease;
+  background-color: var(--color-neutral-100);
+}
+
+.input-field:focus,
+.textarea-field:focus,
+.select-field:focus {
+  border-color: var(--color-neutral-200);
+  box-shadow: none;
+}
+
+.textarea-field {
+  min-height: 5.5rem;
+  resize: vertical;
+  padding: 8px 12px;
+}
+
+/* 🔴 Error State */
+.com-input-field.error,
+.com-textarea-field.error,
+.com-select-field.error {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}

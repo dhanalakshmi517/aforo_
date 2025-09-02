@@ -46,6 +46,29 @@ export async function createCustomer(payload: CreateCustomerPayload | FormData) 
     headers: isFormData ? undefined : { 'Content-Type': 'application/json' },
     body: isFormData ? payload : JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error('Failed to create customer');
+  if (!res.ok) {
+    let msg = `Failed to create (status ${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) msg = data.message;
+    } catch {}
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+// Confirm customer after creation
+export async function confirmCustomer(customerId: number | string) {
+  const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}/confirm`, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    let msg = `Failed to confirm (status ${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) msg = data.message;
+    } catch {}
+    throw new Error(msg);
+  }
   return res.json();
 }

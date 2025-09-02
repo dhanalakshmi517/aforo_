@@ -22,9 +22,7 @@
   .price-plan-wrapper {
     padding: 0 8px;
   }
-  .price-plan-sidebars {
-    padding: 20px 12px;
-  }
+  
 }
 
 .price-plan-wrapper {
@@ -43,7 +41,7 @@
 .price-plan-sidebars {
   width: 300px;
   background-color: var(--color-neutral-100);
-  padding: 24px 16px;
+  /* padding: 24px 16px; */
   border-right: 1.5px solid var(--color-neutral-200);
 }
 
@@ -346,7 +344,8 @@ line-height: var(--line-height-heading-h4);
 
 .save-next {
   border-radius: var(--border-radius-sm);
-  cursor: pointer;}
+  cursor: pointer;
+}
   
   .save-draft {
     border: 1px solid var(--color-primary-800);
@@ -377,7 +376,7 @@ line-height: var(--line-height-heading-h4);
     margin-bottom: 10px;
   }
   
-  .create-form label {
+  .label {
     display: block;
     margin-bottom: 8px;
     color: var(--color-neutral-1400);
@@ -385,7 +384,7 @@ line-height: var(--line-height-heading-h4);
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: var(--line-height-body-md);
  }
   
@@ -487,11 +486,10 @@ line-height: var(--line-height-heading-h4);
     gap: 8px;
     height:40px;
     color: var(--color-primary-800);
-
 font-family: var(--font-family-primary);
 font-size: var(--font-size-md);
 font-style: normal;
-font-weight: 400;
+font-weight: 600;
 line-height: var(--line-height-body-md); 
 background-color: var(--color-primary-000);
   }

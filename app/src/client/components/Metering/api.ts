@@ -65,6 +65,7 @@ export interface UsageConditionPayload {
 }
 
 export interface BillableMetricPayload {
+  billingCriteria?: string;
   metricName: string;
   productId: number;
   version: string;
@@ -75,7 +76,12 @@ export interface BillableMetricPayload {
   usageConditions: UsageConditionPayload[];
 }
 
-export async function createBillableMetric(payload: BillableMetricPayload): Promise<boolean> {
+export interface CreateMetricResult {
+  ok: boolean;
+  id?: number;
+}
+
+export async function createBillableMetric(payload: BillableMetricPayload): Promise<CreateMetricResult> {
   try {
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
       method: 'POST',
@@ -84,9 +90,48 @@ export async function createBillableMetric(payload: BillableMetricPayload): Prom
       },
       body: JSON.stringify(payload),
     });
-    return response.ok;
+    if (!response.ok) {
+      return { ok: false };
+    }
+    // Try to parse the created metric ID from the response JSON (if any)
+    try {
+      const data = await response.json();
+      const id = (data?.metricId ?? data?.id ?? data?.billableMetricId) as number | undefined;
+      return { ok: true, id };
+    } catch {
+      // If response has no JSON body, just return success
+      return { ok: true };
+    }
   } catch (error) {
     console.error('Error creating billable metric:', error);
+    return { ok: false };
+  }
+}
+
+export type BillableMetricDetails = Partial<BillableMetricPayload> & { metricId?: number };
+
+export async function updateBillableMetric(metricId: number, payload: BillableMetricDetails): Promise<boolean> {
+  try {
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error updating billable metric:', error);
+    return false;
+  }
+}
+
+export async function finalizeBillableMetric(metricId: number): Promise<boolean> {
+  try {
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}/finalize`, { method: 'POST' });
+    return response.ok;
+  } catch (error) {
+    console.error('Error finalizing billable metric:', error);
     return false;
   }
 }

@@ -43,13 +43,29 @@ export default function App() {
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [showNewUsageMetricForm, setShowNewUsageMetricForm] = useState(false);
   const [hideSidebarOnEditMetric, setHideSidebarOnEditMetric] = useState(false);
-const [hideSidebarOnEditCustomer, setHideSidebarOnEditCustomer] = useState(false);
-
+  const [hideSidebarOnEditCustomer, setHideSidebarOnEditCustomer] = useState(false);
   const [showNewSubscriptionForm, setShowNewSubscriptionForm] = useState(false);
-
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [hideBreadcrumb, setHideBreadcrumb] = useState(false);
+
+  // Listen for toggleSidebar events from child components
+  useEffect(() => {
+    const handleToggleSidebar = (event: CustomEvent) => {
+      const { shouldShow, hideBreadcrumb: shouldHideBreadcrumb } = event.detail;
+      setShowSidebar(shouldShow);
+      setHideBreadcrumb(shouldHideBreadcrumb);
+    };
+
+    // @ts-ignore - CustomEvent type issue
+    window.addEventListener('toggleSidebar', handleToggleSidebar);
+    
+    // Cleanup
+    return () => {
+      // @ts-ignore - CustomEvent type issue
+      window.removeEventListener('toggleSidebar', handleToggleSidebar);
+    };
+  }, []);
 
   useEffect(() => {
     if (user) {

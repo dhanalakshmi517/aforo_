@@ -41,9 +41,17 @@ const Landing: React.FC = () => {
           <a href="#">Pricing</a>
           <a href="#">Built For</a>
           <a href="#">Resources</a>
-          <button className="nav-link-btn" onClick={() => { setShowSignIn(true); setShowOrg(false); }}>
+          <a 
+            href="#" 
+            className="nav-link" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              setShowSignIn(true); 
+              setShowOrg(false); 
+            }}
+          >
             Sign In
-          </button>
+          </a>
           <button className="contact-btn" onClick={()=>setShowOrg(true)}>Contact Sales</button>
         </nav>
       </header>

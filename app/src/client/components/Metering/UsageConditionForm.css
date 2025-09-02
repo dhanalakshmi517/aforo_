@@ -43,7 +43,7 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: var(--line-height-body-md);
 }
 
@@ -98,7 +98,7 @@ input[type='text'] {
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .column input[type='text'] {

@@ -6,7 +6,6 @@ body {
   width: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
-  padding-left: 260px; /* Offset for fixed sidebar */
 }
 
 @media(max-width: 991px){
@@ -44,11 +43,11 @@ body {
 
 .metering-header {
   flex-wrap: nowrap;
-  margin-left:0;
+  margin-left: 240px;
   width: 100%;
-      display: flex;
+  display: flex;
   align-items: center;
-    margin-bottom: 15px;
+  margin-bottom: 15px;
   padding: 0 20px;
   box-sizing: border-box;
   position: relative; 
@@ -57,10 +56,9 @@ body {
 
 .metering-header h2 {
   /* push title slightly right */
-  white-space: nowrap;
-  margin: 0 0 0 40px;
+  white-space: normal;
+  margin: 0;
   color: var(--color-neutral-1700);
-
   font-family: var(--font-family-primary);
   font-size: var(--font-size-h4);
   font-style: normal;
@@ -115,7 +113,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
+  white-space: normal;
   height: 40px;
   color: var(--color-neutral-white);
   background-color: var(--color-primary-800);
@@ -145,43 +143,42 @@ body {
 
 .metering-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
 }
 
-.metering-table {
-  width: 100%;
-    table-layout: auto;
-}
-
 /* No fixed column widths; let browser auto-size */
 /* widen first column */
-.metering-table-container{
-  width: 100%;
-  box-sizing: border-box;
-  margin-left:0;
-  padding: 0; 
-  overflow-x: visible;
-  
-}
 
 .metering-table th,
 .metering-table td {
-    vertical-align: middle;
-  padding: 12px;
-  border-bottom: 1px solid var(--color-neutral-200);
+  padding: 18px 16px;
   text-align: left;
+  white-space: normal;
+  border-bottom: 1px solid var(--color-neutral-200);
+  font-size: var(--font-size-sm);
   word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 
-/* Allow first column (Usage Metric) to expand and show full text */
+.metering-table th {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1000);
+  height: 28px;
+}
+
+
+
 .metering-table th:first-child,
 .metering-table td:first-child {
-  width: auto;
-  max-width: 400px; /* Adjust as needed */
-  overflow: visible;
-  text-overflow: initial;
+  width: 30%;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-tag {
@@ -206,7 +203,7 @@ body {
   gap: 8px;
   justify-content: center;
   align-items: center;
-  min-width: 70px; 
+  min-width: 70px;
 }
 
 .edit-btn,
@@ -222,7 +219,8 @@ body {
   cursor: pointer;
 }
 
-.edit-btn {
+.edit-btn,
+.edit-button { /* ensure buttons render even if different class name */
   background-color: var(--color-info-100); 
   border-radius: var(--border-radius-sm);
 }
@@ -265,23 +263,8 @@ line-height: var(--line-height-body-md);
     display: flex;
   }
   
-  .metering-table {
-            table-layout: auto;
-    border-collapse: collapse;
-        border:1px solid var(--color-neutral-200);
-    border-radius: var(--border-radius-sm);
-  }
-  
-  .metering-table th,
-  .metering-table td {
-        padding: 12px;
-    border-bottom: 1px solid #e0e0e0;
-    text-align: left;
-  word-wrap: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  }
-  
+    
+    
   .status-tag {
     padding: 4px 10px;
     border-radius: 12px;
@@ -543,17 +526,63 @@ line-height: var(--line-height-body-md);
   }
   
   
-/* Sidebar alignment overrides */
-.metering-table-container,
-.metering-table {
-  width: 100%;
-  margin-left: 0;
+
+.metering-page .rate-plans-table-wrapper {
+  margin: 0 24px 0 256px;
+  width: calc(100% - 256px - 48px);
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
+  overflow-x: auto;
+}
+.metering-page .rate-plans-table-wrapper::-webkit-scrollbar{
+  display: none;
 }
 
-.metering-table th,
-.metering-table td {
-  width: 20%;
+/* Align header on metering page */
+.metering-page .rate-plan-header {
+  margin: 0 24px 16px 256px; /* sidebar offset + gap */
+  width: calc(100% - 256px - 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  /* remove card styling */
+  background: transparent;
+  border: none;
+  padding: 0;
 }
+.metering-page .rate-plan-header h2 {
+  margin: 0;
+}
+
+.metering-table-container {
+  flex: 1;
+  overflow: visible;
+  margin-left: 0;
+  width: 100%;
+  padding: 0;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  border: 1px solid var(--color-neutral-200);
+}
+.metering-table-container:hover {
+  scrollbar-width: none;
+}
+.metering-table-container::-webkit-scrollbar { display:none; }
+.metering-table-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.metering-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+}
+
 
 /* Responsive override: reset left margin on narrow screens */
 @media (max-width: 991px) {
@@ -568,13 +597,80 @@ line-height: var(--line-height-body-md);
     width: 100%;
   }
   .metering-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
     margin-left: 0;
     width: 100%;
   }
 }
 
+/* Ensure Usage Metric column visibility */
+.metering-table th:first-child,
+.metering-table td:first-child {
+  width: 200px !important;
+}
+
 /* Rounded corners for table */
+
+/* === Overrides to ensure full-width layout & Actions buttons visible === */
+.metering-page.rate-plan-container,
+.metering-page .rate-plan-container {
+  margin-left: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+
+.metering-page .rate-plans-table-wrapper,
+.metering-page .rate-plans-table-wrapper:hover,
+.metering-page .metering-table-container {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  height: auto !important;
+  flex: unset !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+    }
+
+.metering-page .metering-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+.metering-table td.actions-cell, .metering-table th.actions-cell { text-align: center; }
+
+/* Center align action buttons wrapper */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.metering-page .actions {
+  visibility: visible;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.metering-page .actions button {
+  display: inline-flex;
+}
+
 .metering-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -615,8 +711,8 @@ line-height: var(--line-height-body-md);
 /* Breadcrumb navigation for Metering (reusing RatePlan styles) */
 .metering-breadcrumb-nav {
   margin: 0;
-  width: calc(100% + 260px); /* stretch under sidebar */
-  margin-left: -260px; /* pull to left to touch sidebar */
+  margin-left: 240px;
+  width: calc(100% - 240px);
   height: 40px;
   background-color: var(--color-neutral-white);
   border-bottom: 1px solid var(--color-neutral-200);
@@ -641,8 +737,8 @@ line-height: var(--line-height-body-md);
   border: 1px solid var(--color-neutral-200);
   margin: 0;
   overflow: hidden; /* prevent scrollbar */
-  padding-left: 260px;
-  white-space: nowrap;
+  padding-left: 0;
+  white-space: normal;
 }
 @media (max-width: 768px) {
   .metering-breadcrumb {
@@ -653,7 +749,7 @@ line-height: var(--line-height-body-md);
   }
   .metering-breadcrumb-item {
     flex: 0 0 auto; /* prevent shrinking */
-    white-space: nowrap;
+    white-space: normal;
   }
 }
 
@@ -667,6 +763,37 @@ line-height: var(--line-height-body-md);
   line-height: var(--line-height-body-sm);
   text-decoration: none;
   cursor: pointer;
+}
+
+/* --- Added to ensure action buttons render and are styled --- */
+.actions .edit-button,
+.edit-button {
+  height: 28px;
+  width: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: var(--color-info-100);
+  border-radius: var(--border-radius-sm);
+}
+
+.actions .delete-button,
+.delete-button {
+  height: 28px;
+  width: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: var(--color-error-400);
+  border-radius: var(--border-radius-sm);
 }
 
 /* Animations */

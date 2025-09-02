@@ -12,6 +12,11 @@ interface AggregationWindowSelectProps {
  * Currently only API product rules are defined as per requirements.
  */
 const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ productType, unitOfMeasure, value, onChange }) => {
+  // Add null/undefined checks
+  if (!productType || !unitOfMeasure) {
+    return null; // or return a loading state or default message
+  }
+  
   const type = productType.toUpperCase();
   const uom = unitOfMeasure.toUpperCase();
 

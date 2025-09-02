@@ -16,6 +16,11 @@ interface AggregationFunctionSelectProps {
  *   • Anything else          → free-text input so user can type a custom function.
  */
 const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ productType, unitOfMeasure, value, onChange }) => {
+  // Return null if either prop is missing
+  if (!productType || !unitOfMeasure) {
+    return null;
+  }
+
   const upperUOM = unitOfMeasure.toUpperCase();
   const upperType = productType.toUpperCase();
 
