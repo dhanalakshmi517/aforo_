@@ -1,16 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import CustomerReview from './CustomerReview';
-import { createCustomer } from '../../api';
+import { InputField, SelectField, TextareaField } from '../Components/InputFields';
+import { createCustomer, confirmCustomer } from '../../api';
 import { AccountDetailsData } from './AccountDetailsForm';
 import AccountDetailsForm from './AccountDetailsForm';
-import { InputField, SelectField } from '../Components/InputFields';
+/* Local simple input/select components removed; using shared components */
+/*
+interface SimpleInputProps {
+  label?: string;
+  value: string;
+  placeholder?: string;
+  type?: string;
+  onChange: (val: string) => void;
+}
+const InputField: React.FC<SimpleInputProps> = ({ label, value, placeholder, onChange, type = 'text' }) => (
+  <div className="com-form-group">
+    {label && <label className="com-form-label">{label}</label>}
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={e => onChange(e.target.value)}
+      className="cus-input"
+    />
+  </div>
+);
+
+interface SimpleSelectProps {
+  label?: string;
+  value: string;
+  onChange: (val: string) => void;
+  options?: { label: string; value: string }[];
+  disabled?: boolean;
+  placeholder?: string;
+}
+const _DeprecatedSelectField: React.FC<SimpleSelectProps> = ({ label, value, onChange, options = [], disabled = false, placeholder }) => (
+  <div className="com-form-group">
+    {label && <label className="com-form-label">{label}</label>}
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="cus-select"
+      disabled={disabled}
+    >
+      <option value="">{placeholder || '--Select--'}</option>
+      {options.map((opt, idx) => (
+        <option key={idx} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  </div>
+);
+
+*/
+
 import './CustomerForm.css'; // You can rename this if needed
+import buttonStyles from '../NewProductForm/GeneralDetails.module.css';
 
 interface CreateCustomerProps {
   onClose: () => void;
 }
 
-const connectorHeights = [70,90];
+const connectorHeights = [70, 70];
 
 const steps = [
   { title: 'Customer Details', desc: 'Enter core information for the customer.' },
@@ -40,6 +90,14 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [accountErrors, setAccountErrors] = useState<{ [key: string]: string }>({});
+
+  // Apply page-wide background color while CreateCustomer is mounted
+  useEffect(() => {
+    document.body.classList.add('create-customer-page');
+    return () => {
+      document.body.classList.remove('create-customer-page');
+    };
+  }, []);
 
   // Automatically clear Account Details errors when fields become valid
   useEffect(() => {
@@ -130,8 +188,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
       }
       const dataPayload = {
         companyName,
-        companyLogoUrl: companyLogo ? companyLogo.name : null,
-        customerName,
+                customerName,
         companyType,
         phoneNumber: accountDetails.phoneNumber,
         primaryEmail: accountDetails.primaryEmail,
@@ -156,7 +213,16 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
       console.log('Customer create payload (FormData):', Array.from(fd.entries()));
       try {
         setIsSubmitting(true);
-        await createCustomer(fd);
+        const createdResp = await createCustomer(fd);
+        const newCustomerId = createdResp?.id ?? createdResp?.customerId ?? createdResp?.data?.id;
+        if (newCustomerId !== undefined && newCustomerId !== null) {
+          try {
+            await confirmCustomer(newCustomerId);
+          } catch (confirmErr: any) {
+            console.error('Customer confirmation failed', confirmErr);
+            alert(confirmErr.message || 'Customer created but confirmation failed');
+          }
+        }
       } catch (err: any) {
         alert(err.message || 'Error creating customer');
         setIsSubmitting(false);
@@ -176,6 +242,65 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
     if (currentStep > 0) setCurrentStep((prev) => prev - 1);
   };
 
+  // Save as Draft: post whatever details are currently entered
+  const handleSaveDraft = async () => {
+    const nz = (v: string | undefined | null) => {
+      if (typeof v !== 'string') return v ?? null;
+      const t = v.trim();
+      return t === '' ? null : t;
+    };
+    // Sanitize phone: allow optional leading '+' then digits
+    const rawPhone = nz(accountDetails?.phoneNumber);
+    let sanitizedPhone: string | null = null;
+    if (rawPhone) {
+      const cleaned = rawPhone.replace(/[^0-9+]/g, ''); // keep digits & plus
+      sanitizedPhone = cleaned.startsWith('+')
+        ? '+' + cleaned.slice(1).replace(/[^0-9]/g, '')
+        : cleaned.replace(/[^0-9]/g, '');
+      if (sanitizedPhone.length === 0) sanitizedPhone = null;
+    }
+    // Construct payload (allowing partial data). Backend should treat this as draft.
+    const dataPayload = {
+      companyName: nz(companyName),
+      customerName: nz(customerName),
+      companyType: nz(companyType),
+      phoneNumber: sanitizedPhone,
+      primaryEmail: nz(accountDetails?.primaryEmail),
+      additionalEmailRecipients: accountDetails?.additionalEmailRecipients && accountDetails.additionalEmailRecipients.length ? accountDetails.additionalEmailRecipients : null,
+      customerAddressLine1: nz(accountDetails?.customerAddressLine1),
+      customerAddressLine2: nz(accountDetails?.customerAddressLine2),
+      customerCity: nz(accountDetails?.customerCity),
+      customerState: nz(accountDetails?.customerState),
+      customerPostalCode: nz(accountDetails?.customerPostalCode),
+      customerCountry: nz(accountDetails?.customerCountry),
+      billingSameAsCustomer: accountDetails?.billingSameAsCustomer ?? false,
+      billingAddressLine1: nz(accountDetails?.billingAddressLine1),
+      billingAddressLine2: nz(accountDetails?.billingAddressLine2),
+      billingCity: nz(accountDetails?.billingCity),
+      billingState: nz(accountDetails?.billingState),
+      billingPostalCode: nz(accountDetails?.billingPostalCode),
+      billingCountry: nz(accountDetails?.billingCountry)
+    } as const;
+
+    console.log('Save-draft JSON payload:', dataPayload);
+    const fd = new FormData();
+    fd.append('request', new Blob([JSON.stringify(dataPayload)], { type: 'application/json' }));
+    if (companyLogo) fd.append('companyLogo', companyLogo, companyLogo.name);
+    console.log('Save-draft payload (FormData):', Array.from(fd.entries()));
+
+    try {
+      setIsSubmitting(true);
+      await createCustomer(fd);
+      alert('Draft saved successfully');
+      onClose();
+    } catch (err: any) {
+      console.error('Save draft failed', err);
+      alert(err.message || 'Error saving draft');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -183,11 +308,13 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
           <>
             {/* Company Name */}
             <div className="sub-create-form">
-              <InputField
-                label="Company Name"
+              <label className="com-form-label">Company Name</label>
+              <input
+                type="text"
+                className="cus-input"
                 value={companyName}
-                placeholder="Enter company name"
-                onChange={(val) => { setCompanyName(val); if(errors.companyName) setErrors(prev=>({ ...prev, companyName: '' })); }}
+                placeholder="eg., abc company"
+                onChange={e => { setCompanyName(e.target.value); if (errors.companyName) setErrors(prev => ({ ...prev, companyName: '' })); }}
               />
               {errors.companyName && <span className="field-error">{errors.companyName}</span>}
             </div>
@@ -206,22 +333,20 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
       
                   <span className="logo-placeholder">
                     {companyLogo ? companyLogo.name : 'Upload Company Logo'}
-                  </span>
-
-                                  </div>
+                  </span>  </div>
 
                 <input
                   id="companyLogoInput"
                   type="file"
                   accept="image/*"
+                  className="company-logo-input"
                   onChange={(e) => {
                     const file = e.target.files && e.target.files[0];
                     setCompanyLogo(file ?? null);
                   }}
                   style={{ display: 'none' }}
                 />
-      
-                                                </div>
+       </div>
       
               {companyLogo && (
                 <div className="file-hint">
@@ -240,26 +365,28 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
       
             {/* Customer Name */}
             <div className="sub-create-form">
-              <InputField
-                label="Customer Name"
+              <label className="com-form-label">Customer Name</label>
+              <input
+                type="text"
+                className="cus-input"
                 value={customerName}
-                placeholder="Enter customer name"
-                onChange={(val)=>{ setCustomerName(val); if(errors.customerName) setErrors(prev=>({ ...prev, customerName: '' })); }}
+                placeholder="eg. john doe"
+                onChange={e => { setCustomerName(e.target.value); if (errors.customerName) setErrors(prev => ({ ...prev, customerName: '' })); }}
               />
               {errors.customerName && <span className="field-error">{errors.customerName}</span>}
             </div>
-      
             {/* Company Type (select) */}
             <div className="sub-create-form">
-              <SelectField
-                label="Company Type"
+              <label className="com-form-label">Company Type</label>
+              <select
+                className="cus-select"
                 value={companyType}
-                onChange={(val)=>{ setCompanyType(val); if(errors.companyType) setErrors(prev=>({ ...prev, companyType: '' })); }}
-                options={[
-                  { label: 'Individual', value: 'INDIVIDUAL' },
-                  { label: 'Business', value: 'BUSINESS' },
-                ]}
-              />
+                onChange={e => { setCompanyType(e.target.value); if (errors.companyType) setErrors(prev => ({ ...prev, companyType: '' })); }}
+              >
+                <option value="">Select Company Type</option>
+                <option value="INDIVIDUAL">Individual</option>
+                <option value="BUSINESS">Business</option>
+              </select>
               {errors.companyType && <span className="field-error">{errors.companyType}</span>}
             </div>
           </>
@@ -291,10 +418,11 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
         <h2>Create New Customer</h2>
         <div className="header-actions">
                     <button className="btn cancel" onClick={() => setShowCancelModal(true)} disabled={isSubmitting}>Cancel</button>
-          <button className="btn save-draft" disabled={isSubmitting}>Save as Draft</button>
+          <button className="btn save-draft" onClick={handleSaveDraft} disabled={isSubmitting}>Save as Draft</button>
         </div>
       </div>
-      <div className="sub-create-price-plan">
+      <hr className="sub-header-divider" />
+            <div className="sub-create-price-plan">
         <div className="cus-wrapper">
           <aside className="cus-sidebar">
             {steps.map((step, index) => (
@@ -305,12 +433,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
               >
                 <div className="sub-icon-wrappers">
                   {index < currentStep ? (
-                    <svg style={index === 2 ? { transform: 'translateY(-6px)' } : undefined} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
                       <path d="M7 12l3 3 6-6" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ) : (
-                    <svg style={index === 2 ? { transform: 'translateY(-6px)' } : undefined} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
                       <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
                     </svg>
@@ -343,16 +471,16 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
             ))}
           </aside>
 
-          <div className="form-section">
-            <div className="form-card">
-              <h4 className="form-section-heading">{steps[currentStep].title.toUpperCase()}</h4>
-              <hr className="form-section-divider" />
+          <div className="cus-form-section">
+            <div className="cus-form-card">
+              <h4 className="cus-form-section-heading">{steps[currentStep].title.toUpperCase()}</h4>
+              <hr className="cus-form-section-divider" />
               {renderStepContent()}
             </div>
             <div className="button-group">
-              <button className="back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
+              <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
               <button
-                className="save-next"
+                className={buttonStyles.buttonPrimary}
                 onClick={handleNext}
                 disabled={isSubmitting}
               >{currentStep === steps.length - 1 ? 'Create Customer' : 'Save & Next'}</button>
@@ -361,15 +489,15 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
         </div>
 
         {showCancelModal && (
-          <div className="delete-modal-overlay">
-            <div className="delete-modal-content">
-              <div className="delete-modal-body">
-                <h5>Are you sure you want to discard<br /> this plan?</h5>
-                <p>Your progress will not be saved.</p>
-              </div>
-              <div className="delete-modal-footer">
-                <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
-                <button className="delete-modal-confirm" onClick={onClose}>Confirm</button>
+          <div className="rate-delete-modal-overlay">
+          <div className="rate-delete-modal-content">
+            <div className="rate-delete-modal-body">
+              <h5>Are you sure you want to cancel <br />creating this rate plan?</h5>
+              <p>This action cannot be undone.</p>
+            </div>
+            <div className="rate-delete-modal-footer">
+                <button className="rate-delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
+                <button className="rate-delete-modal-confirm" onClick={onClose}>Confirm</button>
               </div>
             </div>
           </div>

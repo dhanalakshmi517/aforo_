@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getCustomer, updateCustomer } from '../api';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getCustomer, updateCustomer, confirmCustomer } from '../api';
 import type { Customer } from '../Customers';
 import EditReview from './EditReview';
 import { AccountDetailsData } from './EditAccount';
@@ -16,7 +16,9 @@ const steps = [
 
 const EditCustomer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Step 0: Customer info
   const [customerName, setCustomerName] = useState('');
@@ -86,6 +88,21 @@ const EditCustomer: React.FC = () => {
       }
       setAccountErrors(newAccErrs);
       if (Object.keys(newAccErrs).length) return;
+
+      // auto-save draft before moving to Review step
+      try {
+        const patchPayload: Record<string, any> = {
+          companyName,
+          customerName,
+          companyType,
+          ...(accountDetails ?? {}),
+        };
+        await updateCustomer(id!, patchPayload);
+      } catch (err) {
+        console.error('Failed to save draft', err);
+        alert('Could not save draft before review');
+        return; // prevent navigation if save fails
+      }
     }
 
     const isLastStep = currentStep === steps.length - 1;
@@ -98,7 +115,9 @@ const EditCustomer: React.FC = () => {
       };
       try {
         await updateCustomer(id!, payload);
-        alert('Changes saved successfully');
+        // call confirm API to finalize changes
+        await confirmCustomer(id!);
+        alert('Customer confirmed successfully');
       } catch (err) {
         console.error('Failed to update', err);
         alert('Failed to save changes');
@@ -110,6 +129,31 @@ const EditCustomer: React.FC = () => {
 
   const handleBack = () => {
     if (currentStep > 0) setCurrentStep((prev) => prev - 1);
+  };
+
+  // Save current form as draft
+  const handleSaveDraft = async () => {
+    // reset validation errors so "required" messages are not shown for draft saves
+    setErrors({});
+    setAccountErrors({});
+    if (!id) return;
+    const draftPayload: Record<string, any> = {
+      companyName,
+      customerName,
+      companyType,
+      ...(accountDetails ?? {}),
+          };
+    try {
+      setIsSubmitting(true);
+      await updateCustomer(id, draftPayload);
+      alert('Draft saved');
+      navigate(-1);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save draft');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -141,6 +185,49 @@ const EditCustomer: React.FC = () => {
                 }}
               />
               {errors.customerName && <span className="field-error">{errors.customerName}</span>}
+            </div>
+             {/* Company Logo (Upload) */}
+             <div className="sub-create-form">
+              <label>Company Logo</label>
+      
+              <div className="upload-field">
+                <div className="logo-box" onClick={() => document.getElementById('companyLogoInput')?.click()}>
+                  {/* user/avatar circle icon */}
+                  <svg className="logo-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="7.5" r="3.5" stroke="#8C8A8F" strokeWidth="1.5"/>
+                    <path d="M5 20c0-3.5 3.134-6 7-6s7 2.5 7 6" stroke="#8C8A8F" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+      
+                  <span className="logo-placeholder">
+                    {companyLogo ? companyLogo.name : 'Upload Company Logo'}
+                  </span>  </div>
+
+                <input
+                  id="companyLogoInput"
+                  type="file"
+                  accept="image/*"
+                  className="company-logo-input"
+                  onChange={(e) => {
+                    const file = e.target.files && e.target.files[0];
+                    setCompanyLogo(file ?? null);
+                  }}
+                  style={{ display: 'none' }}
+                />
+       </div>
+      
+              {companyLogo && (
+                <div className="file-hint">
+                  Selected: <strong>{companyLogo.name}</strong>
+                  <button
+                    type="button"
+                    className="clear-file"
+                    onClick={() => setCompanyLogo(null)}
+                    aria-label="Clear selected file"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="sub-create-form">
@@ -188,7 +275,29 @@ const EditCustomer: React.FC = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="edit-customer-container">
+    <>
+      <div className="sub-header">
+        <h2>Edit Customer</h2>
+        <div className="header-actions">
+          <button
+            className="btn cancel"
+            onClick={() => navigate(-1)}
+            disabled={isSubmitting || loading}
+          >
+            Cancel
+          </button>
+          <button
+            className="btn save-draft"
+            onClick={handleSaveDraft}
+            disabled={isSubmitting || loading}
+          >
+            Save as Draft
+          </button>
+        </div>
+      </div>
+      <hr className="sub-header-divider" />
+
+      <div className="edit-customer-container">
       <div className="cus-wrapper">
         <aside className="cus-sidebar">
           {steps.map((step, index) => (
@@ -218,9 +327,10 @@ const EditCustomer: React.FC = () => {
               {currentStep === steps.length - 1 ? 'Save Changes' : 'Next'}
             </button>
           </div>
-        </div>
-      </div>
-    </div>
+        </div>{/* form-section */}
+      </div>{/* cus-wrapper */}
+    </div>{/* edit-customer-container */}
+    </>
   );
 };
 

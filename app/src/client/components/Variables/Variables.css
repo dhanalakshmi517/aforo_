@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap');
 /* Brand Colors */
 :root {
   --brand-000: rgba(225, 240, 230, 1);
@@ -77,7 +78,7 @@
   --color-blue-darkest: rgba(10, 24, 42, 1);
 
   /* Font Family */
-  --font-family-primary: 'dm-sans', sans-serif;
+  --font-family-primary: "IBM Plex Sans", sans-serif;
 
   /* Font Weights (string values not specified in the image) */
   --font-weight-light: 300;

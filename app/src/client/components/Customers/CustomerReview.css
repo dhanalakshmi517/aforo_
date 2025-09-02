@@ -50,7 +50,7 @@ font-family: var(--font-family-primary);
 font-size: var(--font-size-md);
 font-style: normal;
 font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+line-height: var(--line-height-body-md);
   }
   
   .review-value {

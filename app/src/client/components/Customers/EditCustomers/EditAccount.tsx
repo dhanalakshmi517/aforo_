@@ -21,19 +21,19 @@ export interface AccountDetailsData {
   billingCountry: string;
 }
 
-interface EditAccountProps {
+interface Props {
   data?: AccountDetailsData;
   onChange?: (data: AccountDetailsData) => void;
   errors?: { [key: string]: string };
 }
 
-const EditAccount: React.FC<EditAccountProps> = ({ data, onChange, errors = {} }) => {
-  // Flag to sync incoming data only once (initial load)
+const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
+  // copy props only once when form is opened
   const [initialized, setInitialized] = useState(false);
+
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
-
   const [billingAddress, setBillingAddress] = useState({
     line1: '',
     line2: '',
@@ -42,7 +42,6 @@ const EditAccount: React.FC<EditAccountProps> = ({ data, onChange, errors = {} }
     zip: '',
     country: '',
   });
-
   const [customerAddress, setCustomerAddress] = useState({
     line1: '',
     line2: '',
@@ -51,10 +50,24 @@ const EditAccount: React.FC<EditAccountProps> = ({ data, onChange, errors = {} }
     zip: '',
     country: '',
   });
-
   const [sameAsBilling, setSameAsBilling] = useState(false);
+  const [countryOptions, setCountryOptions] = useState<{ label: string; value: string }[]>([]);
 
-  // Sync incoming data for Edit Mode (only first time)
+  // Fetch country list once
+  useEffect(() => {
+    fetch('http://43.206.110.213:8081/v1/api/meta/countries')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCountryOptions(
+            data.map((c: { code: string; name: string }) => ({ label: c.name, value: c.code }))
+          );
+        }
+      })
+      .catch((err) => console.error('Failed to load countries', err));
+  }, []);
+
+  // Sync incoming props to local state (only first time)
   useEffect(() => {
     if (!data || initialized) return;
     setPhoneNumber(data.phoneNumber || '');
@@ -80,13 +93,13 @@ const EditAccount: React.FC<EditAccountProps> = ({ data, onChange, errors = {} }
     setInitialized(true);
   }, [data, initialized]);
 
-  // Notify parent of changes
+  // Notify parent on state change
   useEffect(() => {
     if (!onChange) return;
-    onChange({
+    const updatedData: AccountDetailsData = {
       phoneNumber,
       primaryEmail,
-      additionalEmailRecipients: additionalEmails,
+      additionalEmailRecipients: additionalEmails.filter(Boolean),
       billingSameAsCustomer: sameAsBilling,
       customerAddressLine1: customerAddress.line1,
       customerAddressLine2: customerAddress.line2,
@@ -100,71 +113,267 @@ const EditAccount: React.FC<EditAccountProps> = ({ data, onChange, errors = {} }
       billingState: billingAddress.state,
       billingPostalCode: billingAddress.zip,
       billingCountry: billingAddress.country,
-    });
-  }, [phoneNumber, primaryEmail, additionalEmails, sameAsBilling, billingAddress, customerAddress, onChange]);
+    };
+    onChange(updatedData);
+  }, [phoneNumber, primaryEmail, additionalEmails, billingAddress, customerAddress, sameAsBilling, onChange]);
+
+  const Checkbox: React.FC<{ checked: boolean; onToggle: () => void }> = ({ checked, onToggle }) => (
+    <button type="button" className="checkbox-btn" onClick={onToggle} aria-label="Toggle same as billing">
+      {checked ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#2D7CA4">
+          <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#0066cc" strokeWidth="1.2"/>
+          <path d="M8 12.5L10.5 15L16 9.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2"/>
+        </svg>
+      )}
+    </button>
+  );
+
+  const handleBillingChange = (field: string, value: string) => {
+    const updated = { ...billingAddress, [field]: value };
+    setBillingAddress(updated);
+    if (sameAsBilling) {
+      setCustomerAddress(updated);
+    }
+  };
+
+  const handleCustomerChange = (field: string, value: string) => {
+    setCustomerAddress({ ...customerAddress, [field]: value });
+  };
+
+  const addEmailField = () => {
+    setAdditionalEmails([...additionalEmails, '']);
+  };
+
+  const updateAdditionalEmail = (index: number, value: string) => {
+    const updated = [...additionalEmails];
+    updated[index] = value;
+    setAdditionalEmails(updated);
+  };
+
+  const handleToggleSame = () => {
+    const newVal = !sameAsBilling;
+    setSameAsBilling(newVal);
+    if (newVal) {
+      setCustomerAddress({ ...billingAddress });
+    } else {
+      setCustomerAddress({ line1: '', line2: '', city: '', state: '', zip: '', country: '' });
+    }
+  };
 
   return (
-    <div className="edit-account-form">
-      <h3>Edit Account Details</h3>
-
-      {/* Phone Number */}
-      <InputField
-        label="Phone Number"
-        value={phoneNumber}
-        onChange={(val: string) => setPhoneNumber(val)}
-        error={errors.phoneNumber}
-      />
-
-      {/* Primary Email */}
-      <InputField
-        label="Primary Email"
-        value={primaryEmail}
-        onChange={(val: string) => setPrimaryEmail(val)}
-        error={errors.primaryEmail}
-      />
-
-      {/* Additional Emails */}
-      <InputField
-        label="Additional Emails (comma separated)"
-        value={additionalEmails.join(', ')}
-        onChange={(val: string) => setAdditionalEmails(val.split(',').map((email) => email.trim()))}
-      />
-
-      {/* Same as Billing */}
-      <div className="checkbox-field">
-        <label>
-          <input
-            type="checkbox"
-            checked={sameAsBilling}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSameAsBilling(e.target.checked)}
-          />
-          Billing Address same as Customer Address
-        </label>
+    <div className="account-details-form">
+      {/* Contact Info */}
+      <div className="acc-form-group">
+        <InputField
+          label="Customer Phone Number"
+          value={phoneNumber}
+          placeholder="e.g., +1234567890"
+          onChange={(val) => /^\+?\d*$/.test(val) && setPhoneNumber(val)}
+          type="tel"
+          inputMode="tel"
+          pattern="[+0-9]*"
+        />
+        {errors.phoneNumber && <span className="field-error">{errors.phoneNumber}</span>}
       </div>
 
-      {/* Customer Address */}
-      <h4>Customer Address</h4>
-      <InputField label="Line 1" value={customerAddress.line1} onChange={(val: string) => setCustomerAddress({ ...customerAddress, line1: val })} />
-      <InputField label="Line 2" value={customerAddress.line2} onChange={(val: string) => setCustomerAddress({ ...customerAddress, line2: val })} />
-      <InputField label="City" value={customerAddress.city} onChange={(val: string) => setCustomerAddress({ ...customerAddress, city: val })} />
-      <InputField label="State" value={customerAddress.state} onChange={(val: string) => setCustomerAddress({ ...customerAddress, state: val })} />
-      <InputField label="Postal Code" value={customerAddress.zip} onChange={(val: string) => setCustomerAddress({ ...customerAddress, zip: val })} />
-      <InputField label="Country" value={customerAddress.country} onChange={(val: string) => setCustomerAddress({ ...customerAddress, country: val })} />
+      <div className="acc-form-group">
+        <InputField
+          label="Primary Email ID"
+          value={primaryEmail}
+          placeholder="e.g., johndoe@example.com"
+          type="email"
+          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          onChange={setPrimaryEmail}
+        />
+        {errors.primaryEmail && <span className="field-error">{errors.primaryEmail}</span>}
+      </div>
+
+      {/* Secondary Email IDs */}
+      <div className="acc-form-group">
+        <label>Secondary Email IDs</label>
+        {additionalEmails.map((email, idx) => (
+          <div key={idx} className="email-row">
+            <InputField
+              type="email"
+              placeholder="e.g., johndoe@example.com"
+              value={email}
+              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              onChange={(val) => updateAdditionalEmail(idx, val)}
+            />
+          </div>
+        ))}
+        <button type="button" className="add-email-btn" onClick={addEmailField}>+ Add Additional Email Recipients</button>
+      </div>
+{/* Same as Billing Checkbox */}
+    <div className="checkbox-row">
+      <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
+      <span className="checkbox-label" onClick={handleToggleSame}>
+        Billing address is same as customer address
+      </span>
+    </div>
+
+    {/* Customer Address */}
+      <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
+        <h4>Customer Address</h4>
+        <div className="acc-form-group">
+          <label>Customer Address Line 1</label>
+          <input
+            type="text"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+            value={customerAddress.line1}
+            onChange={(e) => handleCustomerChange('line1', e.target.value)}
+            disabled={sameAsBilling}
+            required
+          />
+          {errors.customerAddressLine1 && <span className="field-error">{errors.customerAddressLine1}</span>}
+        </div>
+        <div className="acc-form-group">
+          <label>Customer Address Line 2</label>
+          <input
+            type="text"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+            value={customerAddress.line2}
+            onChange={(e) => handleCustomerChange('line2', e.target.value)}
+            disabled={sameAsBilling}
+            required
+          />
+          {errors.customerAddressLine2 && <span className="field-error">{errors.customerAddressLine2}</span>}
+        </div>
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <label>City</label>
+            <input
+              type="text"
+              value={customerAddress.city}
+              onChange={(e) => handleCustomerChange('city', e.target.value)}
+              placeholder="City"
+              required
+              disabled={sameAsBilling}
+            />
+            {errors.customerCity && <span className="field-error">{errors.customerCity}</span>}
+          </div>
+          <div className="acc-form-group">
+            <label>State/Province/Region</label>
+            <input
+              type="text"
+              value={customerAddress.state}
+              onChange={(e) => handleCustomerChange('state', e.target.value)}
+              placeholder="State/Province/Region"
+              required
+              disabled={sameAsBilling}
+            />
+            {errors.customerState && <span className="field-error">{errors.customerState}</span>}
+          </div>
+        </div>
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <label>ZIP/Postal Code</label>
+            <input
+              type="text"
+              value={customerAddress.zip}
+              onChange={(e) => handleCustomerChange('zip', e.target.value)}
+              placeholder="ZIP/Postal Code"
+              required
+              disabled={sameAsBilling}
+            />
+            {errors.customerPostalCode && <span className="field-error">{errors.customerPostalCode}</span>}
+          </div>
+          <div className="acc-form-group">
+            <label>Country</label>
+            <SelectField
+              value={customerAddress.country}
+              required
+              placeholder="Select Country"
+              onChange={(val) => handleCustomerChange('country', val)}
+              options={countryOptions}
+              disabled={sameAsBilling}
+            />
+            {errors.customerCountry && <span className="field-error">{errors.customerCountry}</span>}
+          </div>
+        </div>
+      </div>
 
       {/* Billing Address */}
-      {!sameAsBilling && (
-        <>
-          <h4>Billing Address</h4>
-          <InputField label="Line 1" value={billingAddress.line1} onChange={(val: string) => setBillingAddress({ ...billingAddress, line1: val })} />
-          <InputField label="Line 2" value={billingAddress.line2} onChange={(val: string) => setBillingAddress({ ...billingAddress, line2: val })} />
-          <InputField label="City" value={billingAddress.city} onChange={(val: string) => setBillingAddress({ ...billingAddress, city: val })} />
-          <InputField label="State" value={billingAddress.state} onChange={(val: string) => setBillingAddress({ ...billingAddress, state: val })} />
-          <InputField label="Postal Code" value={billingAddress.zip} onChange={(val: string) => setBillingAddress({ ...billingAddress, zip: val })} />
-          <InputField label="Country" value={billingAddress.country} onChange={(val: string) => setBillingAddress({ ...billingAddress, country: val })} />
-        </>
-      )}
+      <div className="address-section">
+        <h4>Billing Address</h4>
+        <div className="acc-form-group">
+          <label>Billing Address Line 1</label>
+          <input
+            type="text"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+            value={billingAddress.line1}
+            onChange={(e) => handleBillingChange('line1', e.target.value)}
+            required
+          />
+          {errors.billingAddressLine1 && <span className="field-error">{errors.billingAddressLine1}</span>}
+        </div>
+        <div className="acc-form-group">
+          <label>Billing Address Line 2</label>
+          <input
+            type="text"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+            value={billingAddress.line2}
+            onChange={(e) => handleBillingChange('line2', e.target.value)}
+            required
+          />
+          {errors.billingAddressLine2 && <span className="field-error">{errors.billingAddressLine2}</span>}
+        </div>
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <label>City</label>
+            <input
+              type="text"
+              value={billingAddress.city}
+              onChange={(e) => handleBillingChange('city', e.target.value)}
+              placeholder="City"
+              required
+            />
+            {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
+          </div>
+          <div className="acc-form-group">
+            <label>State/Province/Region</label>
+            <input
+              type="text"
+              value={billingAddress.state}
+              onChange={(e) => handleBillingChange('state', e.target.value)}
+              placeholder="State/Province/Region"
+              required
+            />
+            {errors.billingState && <span className="field-error">{errors.billingState}</span>}
+          </div>
+        </div>
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <label>ZIP/Postal Code</label>
+            <input
+              type="text"
+              value={billingAddress.zip}
+              onChange={(e) => handleBillingChange('zip', e.target.value)}
+              placeholder="ZIP/Postal Code"
+              required
+            />
+            {errors.billingPostalCode && <span className="field-error">{errors.billingPostalCode}</span>}
+          </div>
+          <div className="acc-form-group">
+            <label>Country</label>
+            <SelectField
+              value={billingAddress.country}
+              required
+              placeholder="Select Country"
+              onChange={(val) => handleBillingChange('country', val)}
+              options={countryOptions}
+            />
+            {errors.billingCountry && <span className="field-error">{errors.billingCountry}</span>}
+          </div>
+        </div>
+      </div>
+
     </div>
-  );
+ );
 };
 
 export default EditAccount;

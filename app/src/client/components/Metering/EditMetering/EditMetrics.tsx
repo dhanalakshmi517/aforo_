@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, Product } from './api';
+import { getProducts, Product, updateBillableMetric } from './api';
 import { getBillableMetricById, BillableMetricDetails } from './api';
 import EditUsage from './EditUsage';
 import EditAggregationFunction from './EditAggregationFunction';
@@ -15,6 +15,8 @@ interface EditMetricsProps {
 const steps = ['Define Metric', 'Usage Conditions', 'Review'];
 
 const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => {
+    // Track original values to detect changes
+    const [originalValues, setOriginalValues] = React.useState<any>({});
     const [metricName, setMetricName] = useState('');
     const [version, setVersion] = useState('');
     const [unitOfMeasure, setUnitOfMeasure] = useState('');
@@ -43,15 +45,30 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
         (async () => {
             const data = await getBillableMetricById(metricId);
             if (!data) return;
-            // Basic fields
-            setMetricName(data.metricName ?? '');
-            setVersion(data.version ?? '');
-            setUnitOfMeasure(data.unitOfMeasure ?? '');
-            setDescription(data.description ?? '');
-            setAggregationFunction(data.aggregationFunction ?? '');
-            setAggregationWindow(data.aggregationWindow ?? '');
-            setUsageConditions(Array.isArray(data.usageConditions) ? data.usageConditions : []);
-            setBillingCriteria(data.billingCriteria ?? '');
+            
+            // Store original values for change detection
+            const original = {
+                metricName: data.metricName ?? '',
+                version: data.version ?? '',
+                unitOfMeasure: data.unitOfMeasure ?? '',
+                description: data.description ?? '',
+                aggregationFunction: data.aggregationFunction ?? '',
+                aggregationWindow: data.aggregationWindow ?? '',
+                usageConditions: Array.isArray(data.usageConditions) ? data.usageConditions : [],
+                billingCriteria: data.billingCriteria ?? '',
+                productId: data.productId ? String(data.productId) : ''
+            };
+            setOriginalValues(original);
+            
+            // Set form fields
+            setMetricName(original.metricName);
+            setVersion(original.version);
+            setUnitOfMeasure(original.unitOfMeasure);
+            setDescription(original.description);
+            setAggregationFunction(original.aggregationFunction);
+            setAggregationWindow(original.aggregationWindow);
+            setUsageConditions(original.usageConditions);
+            setBillingCriteria(original.billingCriteria);
 
             // Product association (may need products list to translate)
             if (data.productId) {
@@ -81,29 +98,172 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                 onClose();
                 return;
             }
-            const payload = {
-                metricName,
-                productId: Number(selectedProductId),
-                version,
-                unitOfMeasure,
-                description,
-                aggregationFunction,
-                aggregationWindow,
-                billingCriteria,
-                usageConditions,
-            } as import('./api').BillableMetricDetails;
-            console.log('Update Billable Metric payload:', payload);
-            const ok = await (await import('./api')).updateBillableMetric(metricId, payload as any);
-            if (!ok) {
-                alert('Failed to update metric');
-                return;
+            
+            // Only include fields that have changed from original values
+            const payload: any = { metricId: Number(metricId) };
+            
+            // Add fields only if they have changed
+            if (metricName !== originalValues.metricName) payload.metricName = metricName;
+            if (selectedProductId && selectedProductId !== originalValues.productId) {
+                payload.productId = Number(selectedProductId);
             }
-            onClose();
+            if (version !== originalValues.version) payload.version = version;
+            if (unitOfMeasure !== originalValues.unitOfMeasure) payload.unitOfMeasure = unitOfMeasure;
+            if (description !== originalValues.description) payload.description = description;
+            if (aggregationFunction !== originalValues.aggregationFunction) {
+                payload.aggregationFunction = aggregationFunction;
+            }
+            if (aggregationWindow !== originalValues.aggregationWindow) {
+                payload.aggregationWindow = aggregationWindow;
+            }
+            if (billingCriteria !== originalValues.billingCriteria) {
+                payload.billingCriteria = billingCriteria;
+            }
+            
+            // Check if usage conditions have changed
+            const currentConditions = JSON.stringify(usageConditions);
+            const originalConditions = JSON.stringify(originalValues.usageConditions || []);
+            if (currentConditions !== originalConditions) {
+                const validConditions = usageConditions.filter(condition => 
+                    condition.dimension && condition.operator && condition.value
+                );
+                if (validConditions.length > 0) {
+                    payload.usageConditions = validConditions;
+                } else if (usageConditions.length === 0) {
+                    // If all conditions were removed, send empty array
+                    payload.usageConditions = [];
+                }
+            }
+            console.log('Update Billable Metric payload:', payload);
+            try {
+                const ok = await updateBillableMetric(Number(metricId), payload);
+                if (!ok) {
+                    alert('Failed to update metric');
+                    return;
+                }
+                alert('Metric updated successfully');
+                onClose();
+            } catch (error) {
+                console.error('Error updating metric:', error);
+                alert('Error updating metric');
+            }
             return;
         }
 
         if (currentStep < steps.length - 1) {
             setCurrentStep((prev) => prev + 1);
+        }
+    };
+
+    const handleSaveDraft = async () => {
+        console.log('Save draft clicked');
+        if (!metricId) { 
+            const error = new Error('No metricId found');
+            console.error(error);
+            alert('Error: No metric ID provided');
+            onClose();
+            return;
+        }
+        
+        try {
+            // Only include fields that have changed from original values
+            const payload: any = { metricId: Number(metricId) };
+            
+            // Track which fields are being included
+            const changedFields: string[] = [];
+            
+            // Add fields only if they have changed
+            if (metricName !== originalValues.metricName) {
+                payload.metricName = metricName;
+                changedFields.push('metricName');
+            }
+            
+            if (selectedProductId && selectedProductId !== originalValues.productId) {
+                payload.productId = Number(selectedProductId);
+                changedFields.push('productId');
+            }
+            
+            if (version !== originalValues.version) {
+                payload.version = version;
+                changedFields.push('version');
+            }
+            
+            if (unitOfMeasure !== originalValues.unitOfMeasure) {
+                payload.unitOfMeasure = unitOfMeasure;
+                changedFields.push('unitOfMeasure');
+            }
+            
+            if (description !== originalValues.description) {
+                payload.description = description;
+                changedFields.push('description');
+            }
+            
+            if (aggregationFunction !== originalValues.aggregationFunction) {
+                payload.aggregationFunction = aggregationFunction;
+                changedFields.push('aggregationFunction');
+            }
+            
+            if (aggregationWindow !== originalValues.aggregationWindow) {
+                payload.aggregationWindow = aggregationWindow;
+                changedFields.push('aggregationWindow');
+            }
+            
+            if (billingCriteria !== originalValues.billingCriteria) {
+                payload.billingCriteria = billingCriteria;
+                changedFields.push('billingCriteria');
+            }
+            
+            // Check if usage conditions have changed
+            const currentConditions = JSON.stringify(usageConditions);
+            const originalConditions = JSON.stringify(originalValues.usageConditions || []);
+            if (currentConditions !== originalConditions) {
+                const validConditions = usageConditions.filter(condition => 
+                    condition.dimension && condition.operator && condition.value
+                );
+                if (validConditions.length > 0) {
+                    payload.usageConditions = validConditions;
+                    changedFields.push('usageConditions');
+                } else if (usageConditions.length === 0) {
+                    // If all conditions were removed, send null to clear
+                    payload.usageConditions = null;
+                    changedFields.push('usageConditions (cleared)');
+                }
+            }
+            
+            // If no fields were modified, just close the form
+            if (changedFields.length === 0) {
+                console.log('No changes detected, closing form');
+                onClose();
+                return;
+            }
+            
+            console.log('Saving draft with changes:', {
+                changedFields,
+                payload
+            });
+            
+            const ok = await updateBillableMetric(Number(metricId), payload);
+            if (ok) {
+                console.log('Draft saved successfully');
+                alert('Draft saved successfully');
+                onClose();
+            } else {
+                throw new Error('Failed to save draft: API returned false');
+            }
+        } catch (error: any) {
+            const errorMessage = error?.message || 'Unknown error';
+            console.error('Error saving draft:', {
+                error,
+                errorMessage,
+                stack: error?.stack
+            });
+            
+            // Show a more detailed error message in development
+            const detailedMessage = process.env.NODE_ENV === 'development' 
+                ? `Error: ${errorMessage}\n\nCheck console for details.`
+                : 'Failed to save draft. Please check your input and try again.';
+                
+            alert(detailedMessage);
         }
     };
 
@@ -221,16 +381,16 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     };
 
     return (
-        <div className="create-usage-metric">
+        <div className="create-usage-metric metfront">
             <div className="metric-header">
                 <h3 className="metric-title">Edit Usage Metric</h3>
                 <div className="metric-actions">
                     <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                    <button className="btn save-draft">Save as Draft</button>
+                    <button className="btn save-draft" onClick={handleSaveDraft}>Save as Draft</button>
                 </div>
             </div>
 
-            <div className="usage-metric-wrapper">
+            <div className="usage-metric-wrapper metfront">
                 <aside className="sidebars">
                     {steps.map((step, index) => (
                         <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>

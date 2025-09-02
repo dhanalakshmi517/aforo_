@@ -1,36 +1,56 @@
+@import "../Variables/Variables.css";
+
+/* Layout tweak: place header on top (2025-08-28) */
+.create-usage-metric.metfront {
+  /* make outer wrapper transparent so only inner card shows */
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 24px 7.5rem 3.44rem 256px;
+
+  flex-direction: column; /* stack header above content */
+}
+
+/* Initial attempt moved header but rule was overridden lower in file. Override again with higher specificity after base header styles */
+.create-usage-metric.metfront .metric-header {
+  padding: 0 24px 20px; /* side padding */
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+/* Ensure header is horizontally aligned with form (starts after 300px sidebar + 24px gap) */
+.create-usage-metric.metfront > .metric-header {
+  margin-left: 324px;
+  width: calc(100% - 324px);
+}
+
+/* ========== Responsive tweaks added 2025-08-25 ========== */
+
 .usage-metric-wrapper {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
   font-family: 'Inter', sans-serif;
   background-color: var(--color-neutral-white);
-  margin: 24px auto;
-  width: 100%;
-  min-height: calc(100vh - 48px);
-  padding: 0 24px;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-  gap: 32px;
-  flex-wrap: wrap;
+  /* height removed for responsive */
   border: 1.5px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
+  width: auto; flex: 1;
+  padding: 24px 24px 40px;
+  gap: 24px;
+  margin: 24px 7.5rem 3.44rem 256px;
 }
 
 .sidebars {
   width: 300px;
-  background-color:var(--color-neutral-100);
+  background-color: var(--color-neutral-100);
   padding: 30px 20px;
-  flex-shrink: 0;
   border-right: 1.5px solid var(--color-neutral-200);
 }
 
 .met-step {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 50px; 
+  margin-bottom: 25px;
   cursor: pointer;
-  margin-top: -10px;
+  margin-top: 0; /* reset negative offset */
 }
 
 .step-item {
@@ -49,21 +69,7 @@
   margin-right: 12px;
 }
 
-.met-step:nth-child(2) .icon-wrappers,
-.met-step:nth-child(3) .icon-wrappers {
-  margin-top: -55px; 
-}
-
-.met-step:nth-child(2) .step-text,
-.met-step:nth-child(3) .step-text {
-  margin-top: -55px; 
-}
-
-/* Offset connector line for 2nd and 3rd steps */
-.met-step:nth-child(2) .icon-wrappers svg:nth-of-type(2),
-.met-step:nth-child(3) .icon-wrappers svg:nth-of-type(3) {
-  margin-top: -2px;
-}
+/* removed custom vertical offsets that hid step items */
 
 .icon-wrappers svg:first-child {
   width: 24px;
@@ -159,7 +165,7 @@ line-height: var(--line-height-body-md);
   border:None;
   padding: 0;
   margin-left: 0;
-  padding-left: 24px; /* space between sidebar and form */
+  /* padding-left: 24px;  */
   margin-top: 0;
 }
 
@@ -192,15 +198,25 @@ line-height: var(--line-height-body-md);
   gap: 12px;
 }
 
+.sub-header-divider {
+  display: block;
+  width: 100%;
+  border: none;
+  height: 1px;
+  background: var(--color-neutral-1200);
+  margin: 0 24px;
+}
+
 /* Responsive tweaks 2025-08-25 */
 @media (max-width: 991px) {
   .usage-metric-wrapper {
     flex-direction: column;
-    margin: 16px;
-    padding: 16px 16px 32px;
+    margin: 12px;
+    padding: 16px;
     gap: 16px;
     width: 100%;
     min-height: calc(100vh - 32px);
+    border: none;
   }
   .sidebars {
     width: 100%;
@@ -210,7 +226,9 @@ line-height: var(--line-height-body-md);
   }
   .form-section {
     margin-left: 0;
-    padding: 0 4px 100px;
+    padding: 0;
+    align-items: flex-start;
+    width: 100%;
   }
   .form-row,
   .create-form input[type="text"],
@@ -226,6 +244,26 @@ line-height: var(--line-height-body-md);
 }
 
 
+/* Mobile layout */
+@media (max-width: 768px) {
+  .usage-metric-wrapper {
+    flex-direction: column;
+    margin: 16px;
+    padding: 16px 16px 32px;
+    gap: 16px;
+    width: 100%;
+    min-height: calc(100vh - 32px);
+  }
+  .sidebars {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-neutral-200);
+    margin-bottom: 16px;
+  }
+  .form-section {
+    padding: 20px 16px 100px;
+  }
+}
 /* button group on the right of heading */
 .top-buttons {
   margin-left: auto; /* push to right */
@@ -260,6 +298,7 @@ line-height: var(--line-height-heading-h4);
   width:139px;
   height: 40px;
   color: var(--color-error-400);
+  border: 1px solid var(--color-error-400);
 
 font-family: var(--font-family-primary);
 font-size: var(--font-size-md);
@@ -285,11 +324,13 @@ line-height: var(--line-height-body-md);
 }
 
 .form-card {
-  margin: 0 auto;
-  background-color:transparent;
+  /* center the inner card */
+  max-width: 640px; /* comfortable readable width */
+  width: 100%;
+  /* margin: 30px auto 0;  */
+  flex: 1 1 auto;
+  background-color: transparent;
   padding: 30px;
-  margin-top: 30px;
-  max-width: 800px;
   height: auto;
   border: none;
 }
@@ -306,13 +347,13 @@ line-height: var(--line-height-body-md);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: var(--line-height-body-md);
 }
 
 .create-form input[type="text"]
 {
-  width:55%;
+  width: 100%;
   height:40px;
   padding: 8px 12px;
   font-size: var(--font-size-md);
@@ -331,7 +372,7 @@ line-height: var(--line-height-body-md);
 
 
 .create-form textarea {
-  width: 65%;
+  width: 100%;
   height:40px;
   padding: 8px 12px;
   font-size: var(--font-size-md);
@@ -348,7 +389,7 @@ line-height: var(--line-height-body-md);
   line-height: var(--line-height-body-md);
 }
 .form-row select {
-  width: 90%;
+  width: 100%;
   height:40px;
   padding: 8px 12px;
   font-size: var(--font-size-md);
@@ -367,7 +408,7 @@ line-height: var(--line-height-body-md);
 
 textarea {
   height: 60px;
-  width: 50%;
+  width: 100%;
   padding: 8px 12px;
   font-size: var(--font-size-md);
   border-radius: var(--border-radius-sm);
@@ -387,7 +428,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width:70%;
+  width: 100%;
 }
 
 .button-group {

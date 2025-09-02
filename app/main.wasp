@@ -60,13 +60,12 @@ app OpenSaaS {
     rootComponent: import App from "@src/client/App",
   },
 
-    server: {
+  server: {
     setupFn: import { serverSetup } from "@src/server/middleware"
   },
 
   emailSender: {
     provider: SMTP,
-
     defaultFrom: {
       name: "Aforo.ai",
       email: "eswarprasad@aforo.ai"
@@ -103,11 +102,9 @@ route EmailVerificationRoute { path: "/email-verification", to: EmailVerificatio
 page EmailVerificationPage {
   component: import { EmailVerificationPage } from "@src/auth/email-and-pass/EmailVerificationPage"
 }
-//#endregion
 
 //#region User
 route GetStartedRoute { path: "/get-started", to: GetStartedPage }
-
 page GetStartedPage {
   component: import GetStarted from "@src/client/components/GetStarted/GetStarted"
 }
@@ -197,7 +194,7 @@ query getDownloadFileSignedURL {
 //#region Admin Dashboard
 route AdminRoute { path: "/admin", to: AdminDashboardPage }
 page AdminDashboardPage {
-   component: import AdminUsers from "@src/admin/dashboards/users/UsersDashboardPage"
+  component: import AdminUsers from "@src/admin/dashboards/users/UsersDashboardPage"
 }
 
 route AdminUsersRoute { path: "/admin/users", to: AdminUsersPage }

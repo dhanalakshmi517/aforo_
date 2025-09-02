@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
  import SubReview from './SubReview';
 import { Api, Product, RatePlan, Customer } from './api';
-import './CreateSubscription.css'; // You can rename this if desired
+import './CreateSubscription.new.css';
 import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 
 interface CreateSubscriptionProps {
@@ -177,9 +177,23 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
           <button className="btn save-draft">Save as Draft</button>
         </div>
       </div>
-    <div className="sub-create-price-plan">
-      <div className="sub-usage-metric-wrapper">
-        <aside className="sub-sidebars">
+    <div className="sub-create-price-plan" style={{ padding: '24px 64px' }}>
+      <div className="sub-usage-metric-wrapper" style={{ width: '100%', maxWidth: '100%' }}>
+        <aside 
+          className="sub-sidebars"
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: '300px',
+            backgroundColor: 'var(--color-neutral-100)',
+            padding: '30px 20px',
+            borderRight: '1.5px solid var(--color-neutral-200)',
+            overflow: 'hidden',
+            zIndex: 1,
+          }}
+        >
           {steps.map((step, index) => (
             <div
               key={index}
@@ -223,7 +237,17 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
           ))}
         </aside>
 
-        <div className="form-section">
+        <div 
+          className="form-section"
+          style={{
+            marginLeft: '300px',
+            width: 'calc(100% - 300px)',
+            height: '100%',
+            overflow: 'hidden',
+            padding: '32px 40px',
+            position: 'relative',
+          }}
+        >
           <div className="form-card">{renderStepContent()}</div>
           <div className="button-group">
             <button className="back" onClick={handleBack} disabled={currentStep === 0}>

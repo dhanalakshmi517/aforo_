@@ -1,18 +1,11 @@
 @import "../Variables/Variables.css";
 
-.main-container {
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
 
 .breadcrumb-nav {
-  margin-bottom: 10px;
-  margin-top: -20px;
-  width: 100%;
-  padding-left: 210px; /* align with sidebar without reducing width */
+  margin: 0 0 10px 240px; /* start right after sidebar */
+  width: calc(100% - 240px);
   box-sizing: border-box;
+  background-color: var(--color-neutral-white);
 }
 
 @media (max-width: 768px) {
@@ -42,6 +35,7 @@
   background-color: var(--color-neutral-white);
   height: 42px;
   border: 1px solid var(--color-neutral-200);
+  /* removed to avoid double border */
   margin: 0;
   overflow: hidden; /* prevent scrollbar */
   white-space: nowrap;
@@ -129,13 +123,14 @@
 }
 
 .rate-plan-container {
-  padding: 20px;
-  width: calc(100% - 210px); /* leave room for sidebar */
+  padding: 0 16px 16px 16px; /* same as products */
+  width: 100%;
   max-width: none;
   box-sizing: border-box;
-  margin-left: 210px; /* sidebar width */
+  height: calc(100vh - 64px); /* fill viewport below navbar */
+  display: flex;
+  flex-direction: column;
   background: none;
-  box-shadow: none;
 }
 
 .price-plan-header {
@@ -163,7 +158,8 @@
 .rate-plan-header {
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
+  margin-left: 240px; /* align with sidebar */
+  margin-bottom: 16px;
 }
 
 .rate-plan-header h2 {
@@ -201,14 +197,18 @@
   margin-top: 10px;
 }
 
-.products-search {
+/* .products-search {
   display: flex;
-  align-items: center;
-  background: var(--color-neutral-100);
-  border-radius: 6px;
-  padding: 8px 12px;
-  width: 300px;
+  column-gap: 8px;
+  background-color: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
+  align-items: center;
+  width: 320px;
+  flex: 0 0 320px;
+  height: 40px;
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  margin: 0;
 }
 
 .search-icon {
@@ -217,13 +217,14 @@
 }
 
 .products-search-input {
+  flex: 1;
   border: none;
   background: none;
   outline: none;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   color: var(--color-neutral-1700);
   width: 100%;
-}
+} */
 
 .new-rate-button {
   background: var(--color-primary-800);
@@ -233,18 +234,27 @@
   border-radius: 6px;
   font-weight: 400;
   cursor: pointer;
-  width:170px;
-  height:40px;
-  /* margin-right: 40px; */
+  white-space: nowrap;
+  min-width: 170px;
+  height: 40px;
 }
 
-.sam-button {
+.new-rate-button:hover {
+  background-color: var(--color-primary-700);
+}
+
+.new-rate-button.selected,
+.new-rate-button.active {
+  background-color: var(--color-primary-900);
+}
+.rate-sam-button {
   width: 40px;
   height: 40px;
   background-color: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
+  transition: all 0.2s ease;
   margin: 0 12px;
   padding: 10px;
   justify-content: center;
@@ -252,10 +262,19 @@
   display: flex;
 }
 
-.sam-button:hover {
-  background-color: var(--color-primary-000);
-  border: 1px solid var(--color-primary-600);
+.rate-sam-button.selected,
+.rate-sam-button.active {
+  background-color: var(--color-primary-800);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--border-radius-sm);
 }
+
+.rate-sam-button:hover {
+  background-color: var(--color-info-100);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--border-radius-sm);
+}
+
 
 
 .cancel-button {
@@ -302,42 +321,56 @@ line-height: var(--line-height-body-md);
 /* Table styles */
 .pp-rate-table {
   width: 100%;
-  /* Let browser auto-calc column widths so long text does not spill */
-  table-layout: auto;
+  table-layout: fixed; /* equal column widths */
   border-collapse: collapse;
   margin-top: 20px;
-  width: 100%;
-  background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
   margin: 0;
-
+  box-shadow: none;
 }
 
 .pp-rate-table th,
 .pp-rate-table td {
-  padding: 12px 16px;
+  padding: 18px 16px;
   text-align: left;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-  word-wrap: break-word; /* keep for older browsers */
-  overflow: hidden; /* crop overflow */
-  text-overflow: ellipsis; /* show ... */
-  white-space: nowrap; /* keep on single line */
+  border-bottom: 1px solid var(--color-neutral-200);
+  font-size: var(--font-size-sm);
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 
 .pp-rate-table th {
-  background-color: #f4f4f4;
-  color: #333;
-  font-weight: 600;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1000);
+  height: 28px;
+  padding: 4px 16px;
+  border-bottom: 1px solid var(--color-neutral-300);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
 }
 
-/* Equal column widths (except first) */
+/* Center align Actions column */
+.pp-rate-table th:last-child,
+.pp-rate-table td:last-child {
+  text-align: center;
+}
+
+/* Equal column widths */
+.pp-rate-table th,
+.pp-rate-table td {
+  width: 16.66%;
+}
 .pp-rate-table th:nth-child(1),
 .pp-rate-table td:nth-child(1) {
-  width: 60px;
+  width: 60px; /* serial number narrower */
 }
-/* Removed equal-width rule to let each column size according to its content */
 
 /* Small screens: allow horizontal scroll rather than squishing */
 @media (max-width: 768px) {
@@ -345,9 +378,16 @@ line-height: var(--line-height-body-md);
   .rate-delete-modal-confirm {
     width: 100%;
   }
-  .pp-rate-table {
-    display: block;
-    overflow-x: auto;
+  .rate-plan-container {
+    padding: 0 8px;
+    height: auto;
+  }
+  .rate-plan-header {
+    margin-left: 0;
+  }
+  .rate-plans-table-wrapper {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
@@ -443,8 +483,8 @@ line-height: var(--line-height-body-md);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  border-left: none;
 }
-
 
 
 .rate-delete-modal-cancel {
@@ -598,7 +638,96 @@ line-height: var(--line-height-body-md);
   }
 }
 
+.rate-plans-table-wrapper {
+  flex: 1;
+  overflow-y: auto; /* vertical scroll */
+  scrollbar-width: none; /* Firefox */
+  margin-left: 240px; /* align with sidebar */
+  width: calc(100% - 240px);
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 0 0 rgba(0,0,0,0); /* subtle edge like products */
+  padding: 12px;
+}
+.rate-plans-table-wrapper:hover {
+  scrollbar-width: thin; /* show scroll bar on hover */
+}
+.rate-plans-table-wrapper:hover::-webkit-scrollbar {
+  width: 8px;
+}
+.rate-plans-table-wrapper:hover::-webkit-scrollbar {
+  width: 8px;
+}
+.rate-plans-table-wrapper::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 /* -------------------------------------------------- */
+/* Payment type badge */
+.payment-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--color-neutral-white);
+  border: 0.4px solid var(--color-neutral-500);
+  border-radius: 20px;
+  padding: 4px 12px;
+  height: 24px;
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-body-sm);
+}
+.payment-type-badge svg {
+  flex: 0 0 14px;
+}
+.payment-type-text {
+  white-space: nowrap;
+}
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  padding: 4px 12px;
+  height: 24px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: var(--line-height-body-sm);
+}
+.status-badge--draft {
+  color: #D18200; /* orange text */
+  background:  #FDF5E9;
+ 
+    border: 1px solid rgba(237, 157, 37, 0.40);
+
+}
+.status-badge--active {
+  color: #66AF17; /* green text */
+  background-color: #F3FAEE;
+  
+  
+  
+  
+  
+  
+  
+ 
+  border: 1px solid rgba(102, 175, 23, 0.40);
+
+}
+.status-badge--default {
+  color: var(--color-neutral-800);
+  background-color: var(--color-neutral-100);
+  border: 1px solid rgba(102, 175, 23, 0.40);
+
+}
+
 /* Action buttons styles specific to RatePlans table  */
 
 /* -------------------------------------------------- */
@@ -612,12 +741,12 @@ line-height: var(--line-height-body-md);
 }
 
 
-.edit-button  {
-  background-color: var(--color-info-100);
+.edit-button {
+  background-color: #e0f3ff; /* same as products */
   border: none;
   padding: 6px;
   cursor: pointer;
-  /* color: rgba(29, 122, 252, 1); */
+  color: rgba(29, 122, 252, 1);
   border-radius: var(--border-radius-sm);
   width: 28px;
   height: 28px;

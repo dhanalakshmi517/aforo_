@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, Product } from './api';
+import { getProducts, Product, createBillableMetric, BillableMetricPayload } from './api';
 import UsageConditionForm from './UsageConditionForm';
 import AggregationFunctionSelect from './AggregationFunctionSelect';
 import AggregationWindowSelect from './AggregationWindowSelect';
@@ -51,8 +51,12 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
     }, []);
 
     const handleNext = async () => {
-        // If we're on the Review step and user clicks Save & Next, attempt to POST metric
+        // If we're on the Review step and user clicks Save, ensure all required fields are filled then POST metric
         if (currentStep === 2) {
+            if (!metricName.trim() || !selectedProductId || !unitOfMeasure) {
+                alert('Please fill Metric Name, Product and Unit of Measure');
+                return;
+            }
             const payload = {
                 // constructed payload
                 metricName,
@@ -66,10 +70,18 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                 usageConditions,
             } as import('./api').BillableMetricPayload;
             console.log('Billable Metric payload:', payload);
-            const ok = await (await import('./api')).createBillableMetric(payload);
-            if (!ok) {
+            const { createBillableMetric, finalizeBillableMetric } = await import('./api');
+            const result = await createBillableMetric(payload);
+            if (!result.ok) {
                 alert('Failed to create metric');
                 return;
+            }
+            // If metricId returned, attempt to finalize
+            if (result.id !== undefined) {
+                const finalized = await finalizeBillableMetric(result.id);
+                if (!finalized) {
+                    alert('Metric created but failed to finalize');
+                }
             }
             onClose();
             return;
@@ -85,6 +97,39 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
             setCurrentStep((prev) => prev - 1);
         } else {
             onClose();
+        }
+    };
+
+    /* --- helper: save current form as draft --- */
+    const handleSaveDraft = async () => {
+        const cleanConditions = usageConditions.filter(c => c.dimension && c.operator && c.value);
+
+        const base: Partial<BillableMetricPayload> = { 
+            metricName,
+            productId: selectedProductId ? Number(selectedProductId) : undefined,
+            version,
+            unitOfMeasure,
+            description,
+            aggregationFunction,
+            aggregationWindow,
+            usageConditions: cleanConditions,
+        };
+        if (billingCriteria) (base as any).billingCriteria = billingCriteria;
+
+        const filtered: any = {};
+        Object.entries(base).forEach(([k,v])=>{
+            if (v !== '' && v !== undefined && !(Array.isArray(v)&&v.length===0)) filtered[k]=v;
+        });
+        const payload = filtered as BillableMetricPayload;
+        try {
+            console.log('POST payload draft', payload);
+        const result = await createBillableMetric(payload);
+            if (!result.ok) throw new Error('Failed');
+            alert('Draft saved');
+            onClose();
+        } catch (e) {
+            console.error(e);
+            alert('Failed to save draft');
         }
     };
 
@@ -105,6 +150,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                             <div className="forms-groups">
                                 <SelectField
                                     label="Product Name"
+                                    placeholder="Select Product"
                                     value={selectedProductId}
                                     onChange={(val)=>{
                                         setSelectedProductId(val);
@@ -148,6 +194,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     if (opts) {
                                         return (
                                             <SelectField
+                                                placeholder="Select Unit"
                                                 value={unitOfMeasure}
                                                 onChange={setUnitOfMeasure}
                                                 options={opts.map(o => ({ label: o, value: o }))}
@@ -156,7 +203,6 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     }
                                     return (
                                         <InputField
-                                            label="Unit of Measure"
                                             placeholder="Unit"
                                             value={unitOfMeasure}
                                             onChange={setUnitOfMeasure}
@@ -197,15 +243,16 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="create-usage-metric">
+        <div className="create-usage-metric metfront">
             <div className="metric-header">
                 <h3 className="metric-title">Create New Usage Metric</h3>
                 <div className="metric-actions">
                     <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                    <button className="btn save-draft">Save as Draft</button>
+                    <button className="btn save-draft" onClick={handleSaveDraft}>Save as Draft</button>
                 </div>
             </div>
-            <div className="usage-metric-wrapper">
+            <hr className="sub-header-divider" />
+            <div className="usage-metric-wrapper metfront">
                 <aside className="sidebars">
                     {steps.map((step, index) => (
                         <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>

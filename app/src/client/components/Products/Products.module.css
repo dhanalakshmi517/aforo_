@@ -5,7 +5,7 @@
   display: flex;
   padding: 1rem;
   background-color: var(--color-neutral-white);
-  margin-bottom: 2rem;
+  margin-bottom: 8px;
   margin-left: 230px;
   width: auto;
   height: 42px;
@@ -20,6 +20,12 @@
     margin: 0 8px 2rem;
     width: auto;
   }
+}
+
+.breadcrumbRight {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
 }
 
 .breadcrumbItem { 
@@ -39,14 +45,15 @@
 
 
 .breadcrumbItem.active {
-  color: var(--color-primary-900);
+  color: var(--color-neutral-800);
   text-align: center;
-
+  
+  /* body/md/reg */
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-sm);
+  font-weight: 400;
+  line-height: var(--line-height-body-md); /* 142.857% */
 }
 
 .breadcrumbSeparator {
@@ -69,10 +76,21 @@
   display: flex;
 }
 
-.samButton:hover {
-  background-color: var(--color-primary-000);
-  border-color: 1px solid var(--color-primary-600);
+.samButton.selected,
+.samButton.active {
+  background-color: var(--color-primary-800);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--border-radius-sm);
 }
+
+.samButton:hover {
+  background-color: var(--color-info-100);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--border-radius-sm);
+}
+
+
+
 .newButton {
   display: inline-flex;
   align-items: center;
@@ -80,7 +98,7 @@
   text-align: center;
   height: 40px;
   min-width: 164px;
-  background-color: var(--color-primary-700);
+  background-color: var(--color-primary-800);
   color: var(--color-neutral-white);
   padding: 8px 20px;
   border: none;
@@ -94,6 +112,15 @@
   font-weight: 400;
   line-height: var(--line-height-body-lg);
   margin-left: -10px;
+}
+
+.newButton:hover {
+  background-color: var(--color-primary-700);
+}
+
+.newButton.selected,
+.newButton.active {
+  background-color: var(--color-primary-900);
 }
 
 @media (max-width: 991px) {

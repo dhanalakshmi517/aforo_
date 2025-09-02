@@ -52,6 +52,20 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
 
   const [sameAsBilling, setSameAsBilling] = useState(false);
 
+  const [countryOptions, setCountryOptions] = useState<{ label: string; value: string }[]>([]);
+
+  // fetch country list once
+  useEffect(() => {
+    fetch('http://43.206.110.213:8081/v1/api/meta/countries')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCountryOptions(data.map((c: { code: string; name: string }) => ({ label: c.name, value: c.code })));
+        }
+      })
+      .catch((err) => console.error('Failed to load countries', err));
+  }, []);
+
   // Notify parent on state change
   useEffect(() => {
     if (!onChange) return;
@@ -179,14 +193,14 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         <InputField
           label="Customer Phone Number"
           value={phoneNumber}
-          placeholder="Enter digits only"
+          placeholder="e.g., +1234567890"
           onChange={(val) => {
-            // allow only digits
-            if (/^\d*$/.test(val)) setPhoneNumber(val);
+            // allow optional leading + followed by digits
+            if (/^\+?\d*$/.test(val)) setPhoneNumber(val);
           }}
           type="tel"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          inputMode="tel"
+          pattern="[+0-9]*"
         />
         {errors.phoneNumber && <span className="field-error">{errors.phoneNumber}</span>}
       </div>
@@ -195,7 +209,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         <InputField
           label="Primary Email ID"
           value={primaryEmail}
-          placeholder="example@domain.com"
+          placeholder="e.g., johndoe@example.com"
           type="email"
           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
           onChange={setPrimaryEmail}
@@ -210,7 +224,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           <div key={idx} className="email-row">
             <InputField
               type="email"
-              placeholder="example@domain.com"
+              placeholder="e.g., johndoe@example.com"
               value={email}
               pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
               onChange={(val) => updateAdditionalEmail(idx, val)}
@@ -228,7 +242,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           <label>Customer Address Line 1</label>
           <input
             type="text"
-            placeholder="Placeholder"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={billingAddress.line1}
             onChange={(e) => handleBillingChange('line1', e.target.value)}
             required
@@ -236,10 +250,10 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           {errors.billingAddressLine1 && <span className="field-error">{errors.billingAddressLine1}</span>}
         </div>
         <div className="acc-form-group">
-          <label>Customer Address Line 2</label>
+          <label>Billing Address Line 2</label>
           <input
             type="text"
-            placeholder="Placeholder"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={billingAddress.line2}
             onChange={(e) => handleBillingChange('line2', e.target.value)}
             required
@@ -249,33 +263,23 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         <div className="acc-form-row">
           <div className="acc-form-group">
             <label>City</label>
-            <SelectField
+            <input
+              type="text"
               value={billingAddress.city}
+              onChange={(e) => handleBillingChange('city', e.target.value)}
+              placeholder="City"
               required
-              onChange={(val) => handleBillingChange('city', val)}
-              options={[
-                { label: 'Bengaluru', value: 'BENGALURU' },
-                { label: 'Mumbai', value: 'MUMBAI' },
-                { label: 'Delhi', value: 'DELHI' },
-                { label: 'New York', value: 'NEW_YORK' },
-                { label: 'Toronto', value: 'TORONTO' },
-              ]}
             />
             {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
           </div>
           <div className="acc-form-group">
             <label>State/Province/Region</label>
-            <SelectField
+            <input
+              type="text"
               value={billingAddress.state}
+              onChange={(e) => handleBillingChange('state', e.target.value)}
+              placeholder="State/Province/Region"
               required
-              onChange={(val) => handleBillingChange('state', val)}
-              options={[
-                { label: 'KA', value: 'KA' },
-                { label: 'MH', value: 'MH' },
-                { label: 'CA', value: 'CA' },
-                { label: 'NY', value: 'NY' },
-                { label: 'ON', value: 'ON' },
-              ]}
             />
             {errors.billingState && <span className="field-error">{errors.billingState}</span>}
           </div>
@@ -283,17 +287,12 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         <div className="acc-form-row">
           <div className="acc-form-group">
             <label>ZIP/Postal Code</label>
-            <SelectField
+            <input
+              type="text"
               value={billingAddress.zip}
+              onChange={(e) => handleBillingChange('zip', e.target.value)}
+              placeholder="ZIP/Postal Code"
               required
-              onChange={(val) => handleBillingChange('zip', val)}
-              options={[
-                { label: '560001', value: 'CODE_560001' },
-                { label: '400001', value: 'CODE_400001' },
-                { label: '110001', value: 'CODE_110001' },
-                { label: '10001', value: 'CODE_10001' },
-                { label: 'M5H1A1', value: 'CODE_M5H1A1' },
-              ]}
             />
             {errors.billingPostalCode && <span className="field-error">{errors.billingPostalCode}</span>}
           </div>
@@ -302,14 +301,9 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
             <SelectField
               value={billingAddress.country}
               required
+              placeholder="Select Country"
               onChange={(val) => handleBillingChange('country', val)}
-              options={[
-                { label: 'India', value: 'INDIA' },
-                { label: 'USA', value: 'USA' },
-                { label: 'Canada', value: 'CANADA' },
-                { label: 'UK', value: 'UK' },
-                { label: 'Australia', value: 'AUSTRALIA' },
-              ]}
+              options={countryOptions}
             />
             {errors.billingCountry && <span className="field-error">{errors.billingCountry}</span>}
           </div>
@@ -331,7 +325,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           <label>Customer Address Line 1</label>
           <input
             type="text"
-            placeholder="Placeholder"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={customerAddress.line1}
             onChange={(e) => handleCustomerChange('line1', e.target.value)}
             disabled={sameAsBilling}
@@ -343,7 +337,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           <label>Customer Address Line 2</label>
           <input
             type="text"
-            placeholder="Placeholder"
+            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={customerAddress.line2}
             onChange={(e) => handleCustomerChange('line2', e.target.value)}
             disabled={sameAsBilling}
@@ -354,34 +348,24 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         <div className="acc-form-row">
           <div className="acc-form-group">
             <label>City</label>
-            <SelectField
+            <input
+              type="text"
               value={customerAddress.city}
+              onChange={(e) => handleCustomerChange('city', e.target.value)}
+              placeholder="City"
               required
-              onChange={(val) => handleCustomerChange('city', val)}
-              options={[
-                { label: 'Bengaluru', value: 'BENGALURU' },
-                { label: 'Mumbai', value: 'MUMBAI' },
-                { label: 'Delhi', value: 'DELHI' },
-                { label: 'New York', value: 'NEW_YORK' },
-                { label: 'Toronto', value: 'TORONTO' },
-              ]}
               disabled={sameAsBilling}
             />
             {errors.customerCity && <span className="field-error">{errors.customerCity}</span>}
           </div>
           <div className="acc-form-group">
             <label>State/Province/Region</label>
-            <SelectField
+            <input
+              type="text"
               value={customerAddress.state}
+              onChange={(e) => handleCustomerChange('state', e.target.value)}
+              placeholder="State/Province/Region"
               required
-              onChange={(val) => handleCustomerChange('state', val)}
-              options={[
-                { label: 'KA', value: 'KA' },
-                { label: 'MH', value: 'MH' },
-                { label: 'CA', value: 'CA' },
-                { label: 'NY', value: 'NY' },
-                { label: 'ON', value: 'ON' },
-              ]}
               disabled={sameAsBilling}
             />
             {errors.customerState && <span className="field-error">{errors.customerState}</span>}
@@ -390,17 +374,12 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         <div className="acc-form-row">
           <div className="acc-form-group">
             <label>ZIP/Postal Code</label>
-            <SelectField
+            <input
+              type="text"
               value={customerAddress.zip}
+              onChange={(e) => handleCustomerChange('zip', e.target.value)}
+              placeholder="ZIP/Postal Code"
               required
-              onChange={(val) => handleCustomerChange('zip', val)}
-              options={[
-                { label: '560001', value: 'CODE_560001' },
-                { label: '400001', value: 'CODE_400001' },
-                { label: '110001', value: 'CODE_110001' },
-                { label: '10001', value: 'CODE_10001' },
-                { label: 'M5H1A1', value: 'CODE_M5H1A1' },
-              ]}
               disabled={sameAsBilling}
             />
             {errors.customerPostalCode && <span className="field-error">{errors.customerPostalCode}</span>}
@@ -410,14 +389,9 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
             <SelectField
               value={customerAddress.country}
               required
+              placeholder="Select Country"
               onChange={(val) => handleCustomerChange('country', val)}
-              options={[
-                { label: 'India', value: 'INDIA' },
-                { label: 'USA', value: 'USA' },
-                { label: 'Canada', value: 'CANADA' },
-                { label: 'UK', value: 'UK' },
-                { label: 'Australia', value: 'AUSTRALIA' },
-              ]}
+              options={countryOptions}
               disabled={sameAsBilling}
             />
             {errors.customerCountry && <span className="field-error">{errors.customerCountry}</span>}
