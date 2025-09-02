@@ -37,9 +37,10 @@ interface TextareaProps {
   value: string;
   placeholder?: string;
   onChange: (val: string) => void;
+  error?: string;
 }
 
-export const TextareaField: React.FC<TextareaProps> = ({ label, value, placeholder, onChange }) => (
+export const TextareaField: React.FC<TextareaProps> = ({ label, value, placeholder, onChange, error }) => (
   <div className="com-form-group">
     {label && <label className="com-form-label">{label}</label>}
     <textarea
@@ -47,8 +48,9 @@ export const TextareaField: React.FC<TextareaProps> = ({ label, value, placehold
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={label || placeholder || 'textarea'}
-      className="textarea-field"
+      className={`textarea-field ${error ? 'error' : ''}`}
     />
+    {error && <div className="error-message">{error}</div>}
   </div>
 );
 
