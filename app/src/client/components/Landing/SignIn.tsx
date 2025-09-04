@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api';
+import { setAuthData, type LoginResponse } from '../../utils/auth';
 import "./SignIn.css";
 
 const SignIn: React.FC = () => {
@@ -18,8 +19,12 @@ const SignIn: React.FC = () => {
     console.log('Login payload', payload);
     try {
       setIsSubmitting(true);
-      await login(payload);
-      localStorage.setItem('authToken', 'true');
+      const loginResponse: LoginResponse = await login(payload);
+      console.log('Login response:', loginResponse);
+      
+      // Store authentication data including organizationId and token
+      setAuthData(loginResponse, email);
+      
       navigate('/get-started');
     } catch (err: any) {
       setError(err.message || 'Login failed');

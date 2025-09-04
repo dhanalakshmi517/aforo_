@@ -144,7 +144,7 @@ export default function App() {
         
         <div className='flex-1'>
           <Routes>
-            <Route path="/" element={
+            <Route path="/*" element={
               <div className="min-h-screen">
                 <Landing />
               </div>

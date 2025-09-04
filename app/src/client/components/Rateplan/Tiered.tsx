@@ -8,6 +8,9 @@ interface Tier {
   isUnlimited?: boolean;
 }
 
+type TierError = { from?: string; to?: string; price?: string };
+type TierTouched = { from: boolean; to: boolean; price: boolean };
+
 interface TieredProps {
   tiers?: Tier[];
   onAddTier?: () => void;
@@ -26,14 +29,17 @@ const Tiered: React.FC<TieredProps> = ({
   setNoUpperLimit,
 }) => {
   const [tiers, setTiers] = useState<Tier[]>(externalTiers ?? [
-    { from: '0', to: '10', price: '100' },
-    { from: '11', to: '20', price: '400' },
-    { from: '21', to: '0', price: '800' },
+    { from: '', to: '', price: '' },
   ]);
 
   const [unlimited, setUnlimited] = useState(externalUnlimited ?? false);
   const [overageCharge, setOverageCharge] = useState('');
   const [graceBuffer, setGraceBuffer] = useState('');
+
+  const [tierErrors, setTierErrors] = useState<TierError[]>([]);
+  const [tierTouched, setTierTouched] = useState<TierTouched[]>([]);
+  const [overageError, setOverageError] = useState<string | null>(null);
+  const [overageTouched, setOverageTouched] = useState(false);
 
   // Persist values so Review can consume
   useEffect(() => {
@@ -48,6 +54,79 @@ const Tiered: React.FC<TieredProps> = ({
     localStorage.setItem('tieredGrace', graceBuffer);
   }, [graceBuffer]);
 
+  const validateTier = (tier: Tier): TierError => {
+    const error: TierError = {};
+    
+    if (tier.from.trim() === '') {
+      error.from = 'This is a required field';
+    } else if (Number.isNaN(Number(tier.from)) || Number(tier.from) < 0) {
+      error.from = 'Enter a valid value';
+    }
+
+    if (!tier.isUnlimited) {
+      if (tier.to.trim() === '') {
+        error.to = 'This is a required field';
+      } else if (Number.isNaN(Number(tier.to)) || Number(tier.to) < 0) {
+        error.to = 'Enter a valid value';
+      } else if (!error.from && Number(tier.to) < Number(tier.from)) {
+        error.to = 'Must be ≥ From';
+      }
+    }
+
+    if (tier.price.trim() === '') {
+      error.price = 'This is a required field';
+    } else if (Number.isNaN(Number(tier.price)) || Number(tier.price) <= 0) {
+      error.price = 'Enter a valid value';
+    }
+
+    return error;
+  };
+
+  const validateOverage = (value: string): string | null => {
+    if (value.trim() === '') return 'This is a required field';
+    if (Number.isNaN(Number(value)) || Number(value) <= 0) return 'Enter a valid value';
+    return null;
+  };
+
+  const ensureArrays = (length: number) => {
+    setTierTouched(prev => {
+      const newTouched = [...prev];
+      while (newTouched.length < length) {
+        newTouched.push({ from: false, to: false, price: false });
+      }
+      return newTouched.slice(0, length);
+    });
+    setTierErrors(prev => {
+      const newErrors = [...prev];
+      while (newErrors.length < length) {
+        newErrors.push({});
+      }
+      return newErrors.slice(0, length);
+    });
+  };
+
+  useEffect(() => {
+    ensureArrays(tiers.length);
+    setTierErrors(tiers.map(validateTier));
+    
+    if (!unlimited) {
+      setOverageError(validateOverage(overageCharge));
+    } else {
+      setOverageError(null);
+    }
+  }, [tiers, unlimited, overageCharge]);
+
+  const markTouched = (index: number, field: keyof TierTouched) => {
+    setTierTouched(prev => {
+      const newTouched = [...prev];
+      if (!newTouched[index]) {
+        newTouched[index] = { from: false, to: false, price: false };
+      }
+      newTouched[index][field] = true;
+      return newTouched;
+    });
+  };
+
   const handleAddTier = () => {
     setTiers([...tiers, { from: '', to: '', price: '' }]);
   };
@@ -55,6 +134,7 @@ const Tiered: React.FC<TieredProps> = ({
   const handleDeleteTier = (index: number) => {
     const updated = tiers.filter((_, i) => i !== index);
     setTiers(updated);
+    setTierTouched(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleChange = (index: number, field: keyof Tier, value: string) => {
@@ -80,35 +160,56 @@ const Tiered: React.FC<TieredProps> = ({
           <div className="tiered-cost-label">Price per Unit</div>
         </div>
 
-        {tiers.map((tier, index) => (
-          <div className="tiered-row" key={index}>
-            <input
-              className="tiered-input-small"
-              value={tier.from}
-              onChange={(e) => handleChange(index, 'from', e.target.value)}
-              placeholder="From"
-            />
-            <span>-</span>
-            <input
-              className="tiered-input-small"
-              value={tier.isUnlimited ? 'Unlimited' : tier.to}
-              placeholder="To"
-              disabled={tier.isUnlimited}
-              onChange={(e) => handleChange(index, 'to', e.target.value)}
-            />
-            <input
-              className="tiered-input-large"
-              value={tier.price}
-              onChange={(e) => handleChange(index, 'price', e.target.value)}
-              placeholder="Price"
-            />
-            <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        ))}
+        {tiers.map((tier, index) => {
+          const error = tierErrors[index] || {};
+          const touched = tierTouched[index] || { from: false, to: false, price: false };
+          
+          return (
+            <div className="tiered-row" key={index}>
+              <div className="field-col">
+                <input
+                  className={`tiered-input-small ${touched.from && error.from ? 'error-input' : ''}`}
+                  value={tier.from}
+                  onChange={(e) => handleChange(index, 'from', e.target.value)}
+                  onBlur={() => markTouched(index, 'from')}
+                  placeholder="From"
+                />
+                {touched.from && error.from && <span className="error-text">{error.from}</span>}
+              </div>
+              
+              <span>-</span>
+              
+              <div className="field-col">
+                <input
+                  className={`tiered-input-small ${touched.to && error.to ? 'error-input' : ''}`}
+                  value={tier.isUnlimited ? 'Unlimited' : tier.to}
+                  placeholder="To"
+                  disabled={tier.isUnlimited}
+                  onChange={(e) => handleChange(index, 'to', e.target.value)}
+                  onBlur={() => markTouched(index, 'to')}
+                />
+                {!tier.isUnlimited && touched.to && error.to && <span className="error-text">{error.to}</span>}
+              </div>
+              
+              <div className="field-col">
+                <input
+                  className={`tiered-input-large ${touched.price && error.price ? 'error-input' : ''}`}
+                  value={tier.price}
+                  onChange={(e) => handleChange(index, 'price', e.target.value)}
+                  onBlur={() => markTouched(index, 'price')}
+                  placeholder="Price"
+                />
+                {touched.price && error.price && <span className="error-text">{error.price}</span>}
+              </div>
+              
+              <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          );
+        })}
 
         <label className="tiered-checkbox-label">
           <input
@@ -134,11 +235,13 @@ const Tiered: React.FC<TieredProps> = ({
               Overage Charge
               <input
                 type="text"
-                className="tiered-input-extra"
+                className={`tiered-input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                 value={overageCharge}
                 onChange={(e) => setOverageCharge(e.target.value)}
+                onBlur={() => setOverageTouched(true)}
                 placeholder="Enter overage charge"
               />
+              {overageTouched && overageError && <span className="error-text">{overageError}</span>}
             </label>
             <label>
               Grace Buffer (optional)

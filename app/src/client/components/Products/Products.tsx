@@ -5,6 +5,7 @@ import EditProductForm from './EditProduct/EditProductForm';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
 import CreateProduct from './CreateProduct.s/CreateProduct';
 import './Products.css';
+import { getProducts, createProduct as createProductApi, deleteProduct as deleteProductApi } from './api';
 import styles from './Products.module.css';
 
 // Icon components
@@ -190,14 +191,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchAndSetProducts = async () => {
       try {
-        const response = await fetch('http://54.238.204.246:8080/api/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
-        const list = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
+        const list = await getProducts();
         setProducts(list);
         setError(null);
       } catch (err) {
@@ -208,26 +204,15 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       }
     };
 
-    fetchProducts();
+    fetchAndSetProducts();
   }, []);
 
   const handleNewProductSubmit = async (formData: ProductFormData) => {
     setShowNewProductForm(false);
     try {
-      const response = await fetch('http://54.238.204.246:8080/api/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const created = await createProductApi(formData);
 
-      if (!response.ok) {
-        throw new Error('Failed to create product');
-      }
-
-      const data = await response.json();
-      setProducts([...products, data]);
+      setProducts([...products, created]);
       setShowCreateProduct(false);
       if (setShowNewProductForm) {
         setShowNewProductForm(false);
@@ -243,12 +228,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`http://54.238.204.246:8080/api/products/${deleteProductId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (!response.ok) throw new Error('Delete failed');
+      await deleteProductApi(deleteProductId);
 
       setProducts(products.filter(p => p.productId !== deleteProductId));
       setNotification({

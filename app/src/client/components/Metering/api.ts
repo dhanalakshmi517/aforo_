@@ -22,12 +22,16 @@ export interface UsageMetricDTO {
 
 // Separate base URLs: one for billable metrics (typically local Swagger) and one for products service.
 // Updated to point to new metrics service endpoint
+import { getAuthHeaders } from '../../utils/auth';
+
 const METRICS_BASE_URL = (import.meta as any).env?.VITE_METRICS_API_URL || 'http://18.182.19.181:8081/api';
 const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://54.238.204.246:8080/api';
 
 export async function getUsageMetrics(): Promise<UsageMetricDTO[]> {
   try {
-    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`);
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
+    headers: getAuthHeaders(),
+  });
     if (!response.ok) {
       throw new Error(`API error with status ${response.status}`);
     }
@@ -50,6 +54,7 @@ export async function deleteUsageMetric(id: number): Promise<boolean> {
   try {
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     });
     return response.ok;
   } catch (error) {
@@ -86,6 +91,7 @@ export async function createBillableMetric(payload: BillableMetricPayload): Prom
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
       method: 'POST',
       headers: {
+        ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -115,6 +121,7 @@ export async function updateBillableMetric(metricId: number, payload: BillableMe
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}`, {
       method: 'PUT',
       headers: {
+        ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -128,7 +135,7 @@ export async function updateBillableMetric(metricId: number, payload: BillableMe
 
 export async function finalizeBillableMetric(metricId: number): Promise<boolean> {
   try {
-    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}/finalize`, { method: 'POST' });
+    const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}/finalize`, { method: 'POST', headers: getAuthHeaders() });
     return response.ok;
   } catch (error) {
     console.error('Error finalizing billable metric:', error);
@@ -138,7 +145,7 @@ export async function finalizeBillableMetric(metricId: number): Promise<boolean>
 
 export async function getProducts(): Promise<Product[]> {
   try {
-    const response = await fetch(`${PRODUCTS_BASE_URL}/products`);
+    const response = await fetch(`${PRODUCTS_BASE_URL}/products`, { headers: getAuthHeaders() });
     if (!response.ok) {
       throw new Error(`API error with status ${response.status}`);
     }

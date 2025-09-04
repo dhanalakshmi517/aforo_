@@ -5,6 +5,7 @@ import Search from "../Components/Search";
 import "../Rateplan/RatePlan.css";
 import "./Metering.css";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
+import { logout } from "../../utils/auth";
 
 // Props for Metering component
 interface MeteringProps {
@@ -102,8 +103,9 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   };
 
   useEffect(() => {
-    getUsageMetrics().then((data: UsageMetricDTO[]) => {
-      const mapped: Metric[] = data.map((m) => ({
+    getUsageMetrics()
+      .then((data: UsageMetricDTO[]) => {
+        const mapped: Metric[] = data.map((m) => ({
         id: (m as any).metricId ?? (m as any).billableMetricId,
         usageMetric: m.metricName,
         productName: m.productName,
@@ -112,7 +114,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         
       }));
       setMetrics(mapped);
-    });
+      })
+      .catch((err) => {
+        console.error(err);
+        if (String(err).includes("401")) {
+          // Token expired or unauthorized, logout user
+          logout();
+        }
+      });
   }, []);
 
   if (showNewUsageMetricForm) {

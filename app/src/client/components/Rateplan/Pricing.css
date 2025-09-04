@@ -1,81 +1,91 @@
-  
-  .dropdown-label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--color-neutral-1400);
-
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-  }
-  
-  .custom-select {
-    width: 100%;
-    height:40px;
-    padding: 8px 12px;
-    font-size: var(--font-size-md);
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--color-neutral-200);
-    background-color: var(--color-neutral-100);
-    resize: none;
-    color: var(--color-neutral-1400);
-
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-  }
-  
-  .custom-select:hover,
-  .custom-select:focus {
-    border-color: #bbb;
-    outline: none;
-  }
-  
-  /* Flat Fee Container Styles */
-
-/* Pricing section container */
-.pricing-container {
-  display: flex;
-  flex-direction: row;
-  gap: 14px;
-  align-items: flex-start;
-  text-align: left;
-  width: 100%;
-    padding: 0 24px;
+/* Variables mapped from Compose spec + danger tone for inline errors */
+:root{
+  --af-border-1: #EFF0F0;   /* Variables.borderBorder1 */
+  --af-surface-0: #FAFAFA;  /* Variables.surfaceSurfaceLightest */
+  --af-danger: var(--color-status-danger-700, #D92D20);
 }
 
-.left-section {
-  width: 100%;
-  }
-
-@media (max-width: 992px) {
-  /* tablet & below – switch to single column */
-  .pricing-container {
-    flex-direction: column;
-    gap: 16px;
-  }
+/* Label above the select */
+.dropdown-label{
+  display:block;
+  margin-bottom:8px;
+  color:var(--color-neutral-1400);
+  font-family:var(--font-family-primary);
+  font-size:var(--font-size-md);
+  font-weight:600;
+  line-height:var(--line-height-body-md);
 }
 
-@media (max-width: 768px) {
-  .pricing-container {
-    padding: 0 12px;
-  }
-  .custom-select {
-    width: 100%;
-  }
-}
-  .flat-fee-container {
-    flex-wrap: wrap;
-     display: flex;
-    gap: 24px;
-    width: 100%;
-  }
+/* UX-spec select (387x40, r=8, bg, border, chevron) */
+.custom-select{
+  width:387px;
+  height:40px;
+  padding:8px 36px 8px 12px;
+  border:1px solid var(--af-border-1);
+  border-radius:8px;
+  background-color:var(--af-surface-0);
+  box-sizing:border-box;
 
-  .flat-fee-container > * {
-    flex: 1;
-    min-width: 0;
-  }
+  font-family:var(--font-family-primary);
+  font-size:var(--font-size-md);
+  font-weight:400;
+  line-height:var(--line-height-body-md);
+  color:var(--color-neutral-1400);
+
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23706C72' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:20px 20px;
+}
+.custom-select:hover,
+.custom-select:focus{
+  border-color:#D8DBDE;
+  outline:none;
+}
+.custom-select.has-error{
+  border-color: var(--af-danger);
+}
+.custom-select option[value=""]{
+  color:var(--color-neutral-600);
+}
+
+/* Inline error (matches Rate Plan style) */
+.inline-error{
+  margin-top:6px;
+  font-size:12px;
+  line-height:16px;
+  color:var(--af-danger);
+}
+
+/* Layout shell */
+.pricing-container{
+  display:flex;
+  flex-direction:row;
+  gap:14px;
+  align-items:flex-start;
+  text-align:left;
+  width:100%;
+  padding:0 24px;
+}
+.left-section{ width:100%; }
+
+@media (max-width: 992px){
+  .pricing-container{ flex-direction:column; gap:16px; }
+}
+@media (max-width: 768px){
+  .pricing-container{ padding:0 12px; }
+  .custom-select{ width:100%; }
+}
+
+/* Subform wrapper utilities */
+.flat-fee-container{
+  display:flex;
+  flex-wrap:wrap;
+  gap:24px;
+  width:100%;
+}
+.flat-fee-container>*{ flex:1; min-width:0; }
