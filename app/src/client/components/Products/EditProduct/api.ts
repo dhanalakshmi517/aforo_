@@ -1,4 +1,5 @@
 import { FormData, ProductType } from './types';
+import { authFetch } from '../../../utils/authFetch';
 import { normalizeProductType } from './utils';
 
 const API_BASE_URL = 'http://54.238.204.246:8080/api/products';
@@ -9,13 +10,13 @@ export const fetchProductData = async (
 ): Promise<FormData> => {
   try {
     // Fetch general and metadata from main endpoint
-    const generalResponse = await fetch(`${API_BASE_URL}/${productId}`);
+    const generalResponse = await authFetch(`${API_BASE_URL}/${productId}`);
     if (!generalResponse.ok) throw new Error('Failed to fetch product data');
     const generalData = await generalResponse.json();
 
     // Fetch configuration from product type specific endpoint
     const normalizedType = normalizeProductType(productType);
-    const configResponse = await fetch(`${API_BASE_URL}/${productId}/${normalizedType}`);
+    const configResponse = await authFetch(`${API_BASE_URL}/${productId}/${normalizedType}`);
     if (!configResponse.ok) throw new Error('Failed to fetch configuration data');
     const configData = await configResponse.json();
 
@@ -95,7 +96,7 @@ export const fetchProductData = async (
 
 export const saveProductChanges = async (productId: string, data: FormData): Promise<FormData> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/${productId}`, {
+    const response = await authFetch(`${API_BASE_URL}/${productId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -139,7 +140,7 @@ export const updateProduct = async (
       configuration: formDataToUpdate.configuration
     };
 
-    const generalResponse = await fetch(`${API_BASE_URL}/${productId}`, {
+    const generalResponse = await authFetch(`${API_BASE_URL}/${productId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dataToSend)
@@ -155,7 +156,7 @@ export const updateProduct = async (
     // If configuration data exists, update it too
     if (formDataToUpdate.configuration) {
       const normalizedType = normalizeProductType(dataToSend.productType);
-      const configResponse = await fetch(`${API_BASE_URL}/${productId}/${normalizedType}`, {
+      const configResponse = await authFetch(`${API_BASE_URL}/${productId}/${normalizedType}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formDataToUpdate.configuration)

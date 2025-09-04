@@ -106,8 +106,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           <button className="btn save-draft">Save Draft</button>
         </div>
       </div>
-      <div className="usage-metric-wrapper">
-        <aside className="sidebars">
+      <div className="edit-usage-metric-wrapper">
+        <aside className="edit-sidebars">
           {steps.map((step, index) => (
             <div
               key={index}
@@ -119,9 +119,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           ))}
         </aside>
 
-        <div className="form-section">
-          <div className="form-card">{renderStepContent()}</div>
-          <div className="button-group">
+        <div className="edit-form-section">
+          <div className="edit-form-card">{renderStepContent()}</div>
+          <div className="edit-button-group">
             <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>
               Back
             </button>

@@ -1,3 +1,5 @@
+import { authFetch } from '../../../utils/authFetch';
+
 const BASE_URL = 'http://54.238.204.246:8080/api';
 
 export interface Product {
@@ -15,7 +17,7 @@ export async function checkProductNameExists(productName: string, currentProduct
   }
   
   try {
-    const response = await fetch(`${BASE_URL}/products?productName=${encodeURIComponent(productName)}`);
+    const response = await authFetch(`${BASE_URL}/products?productName=${encodeURIComponent(productName)}`);
     const products: Product[] = await response.json();
     
     // Check if any product (other than current one being edited) has this name
@@ -47,17 +49,40 @@ type CreateProductPayload = Omit<ProductData, 'status' | 'id'>;
 
 export async function createProduct(productData: ProductData): Promise<ProductData> {
   try {
-    // Only include fields that have values
-    const cleanedData: any = {};
-    
+    // Backend requires productType, category, visibility & status as well, so include sensible defaults
+    const cleanedData: any = {
+      productType: (productData.productType || 'api').toLowerCase(),
+      category: productData.category || 'INTERNAL',
+      visibility: productData.visibility ?? true,
+      status: productData.status || 'DRAFT',
+      billable: productData.billable ?? false,
+      uom: productData.uom || '',
+      effectiveStartDate: productData.effectiveStartDate || new Date().toISOString(),
+      effectiveEndDate: productData.effectiveEndDate || null,
+      linkedRatePlans: [],
+      auditLogId: 0,
+      tags: {},
+      labels: {},
+    } as Record<string, any>;
+
+    // Trim string fields
     if (productData.productName) cleanedData.productName = productData.productName.trim();
     if (productData.version) cleanedData.version = productData.version.trim();
     if (productData.internalSkuCode) cleanedData.internalSkuCode = productData.internalSkuCode.trim();
-    if (productData.productDescription) cleanedData.productDescription = productData.productDescription.trim();
+    if (productData.productDescription) cleanedData.description = productData.productDescription.trim();
+    if ((productData as any).description) cleanedData.description = (productData as any).description.trim();
     
+    // Remove empty strings, null or undefined to satisfy backend validation
+    Object.keys(cleanedData).forEach(key => {
+      const value = cleanedData[key];
+      if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
+        delete cleanedData[key];
+      }
+    });
+
     console.log('Sending product data:', cleanedData);
     
-    const response = await fetch(`${BASE_URL}/products`, {
+    const response = await authFetch(`${BASE_URL}/products`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +176,7 @@ export async function updateDraft(productId: string, productData: Partial<Produc
 
     console.log('Updating draft with ID:', productId, 'Data:', cleanedData);
     
-    const response = await fetch(`${BASE_URL}/products/${productId}`, {
+    const response = await authFetch(`${BASE_URL}/products/${productId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/merge-patch+json',

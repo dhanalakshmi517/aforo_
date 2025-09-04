@@ -87,7 +87,7 @@ line-height: var(--line-height-heading-h6);
 }
 
 
-.usage-metric-wrapper {
+.edit-usage-metric-wrapper {
   display: flex;
   font-family: 'Inter', sans-serif;
   background-color: var(--color-neutral-white);
@@ -98,7 +98,7 @@ line-height: var(--line-height-heading-h6);
   margin-left: -180px;
 }
 
-.sidebars {
+.edit-sidebars {
   width: 300px;
   background-color: var(--color-neutral-white);
   padding: 30px 20px;
@@ -209,7 +209,7 @@ line-height: var(--line-height-heading-h6);
   display: block;
 }
 
-.form-section {
+.edit-form-section {
   background-color: transparent;
   border: none;
   padding: 0 20px;
@@ -219,7 +219,7 @@ line-height: var(--line-height-heading-h6);
   flex-direction: column;
 }
 
-.form-card {
+.edit-form-card {
   background-color: transparent;
   padding: 30px;
   margin-top: 30px;
@@ -239,7 +239,7 @@ line-height: var(--line-height-heading-h6);
 }
 
 /* Button group styles */
-.button-group {
+.edit-button-group {
   display: flex;
   justify-content: space-between;
   margin-top: 24px;

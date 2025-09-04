@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import './UsageBased.css';
 
-
-
 export interface UsagePayload { perUnitAmount: number; }
 
 interface UsageBasedProps {
@@ -15,29 +13,47 @@ const numToStr = (n: number | undefined): string => (n && n !== 0 ? n.toString()
 const UsageBased: React.FC<UsageBasedProps> = ({ data, onChange }) => {
   const [unitAmount, setUnitAmount] = useState<string>(numToStr(data.perUnitAmount));
   const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<boolean>(false);
+
+  const validateAmount = (value: string): string | null => {
+    if (value.trim() === '') {
+      return 'This is a required field';
+    }
+    const num = Number(value);
+    if (Number.isNaN(num) || num <= 0) {
+      return 'Enter a valid value';
+    }
+    return null;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setUnitAmount(val);
+    
+    const validationError = validateAmount(val);
+    setError(validationError);
+    
+    const num = val.trim() === '' ? NaN : Number(val);
+    onChange({ perUnitAmount: num });
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+  };
 
   return (
     <div className="usage-container">
       <div className="usage-left">
         <label className="usage-label">Per Unit Amount</label>
         <input
-          className="usage-input-field"
+          className={`usage-input-field ${touched && error ? 'error-input' : ''}`}
           type="text"
           value={unitAmount}
-          onChange={(e) => {
-            const val = e.target.value;
-            setUnitAmount(val);
-            const num = val.trim() === '' ? NaN : Number(val);
-            if (isNaN(num) || num <= 0) {
-              setError('Enter a valid amount');
-            } else {
-              setError(null);
-            }
-            onChange({ perUnitAmount: num });
-          }}
+          onChange={handleChange}
+          onBlur={handleBlur}
           placeholder="$0.10"
         />
-        {error && <span className="error-text">{error}</span>}
+        {touched && error && <span className="error-text">{error}</span>}
       </div>
 
       <div className="usage-example-section">

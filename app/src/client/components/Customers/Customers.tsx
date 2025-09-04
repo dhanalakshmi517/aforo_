@@ -5,6 +5,8 @@ import styles from "./Customers.module.css";
 import "../Rateplan/RatePlan.css";
 import CreateCustomer from "./CreateCustomer";
 import { getCustomers, deleteCustomer } from "./api";
+import { isAuthenticated, getAuthData } from "../../utils/auth";
+import UserInfo from "../Auth/UserInfo";
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -120,6 +122,14 @@ const Customers: React.FC<CustomersProps> = ({
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const navigate = useNavigate();
 
+  // Check authentication on component mount
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
+
   // open modal
   const handleDeleteClick = (id?: number, name?: string) => {
     if (id == null) return;
@@ -152,11 +162,19 @@ const Customers: React.FC<CustomersProps> = ({
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!isAuthenticated()) {
+        return; // Don't fetch if not authenticated
+      }
+      
       try {
         setLoading(true);
         const data = await getCustomers();
         setCustomers(data);
       } catch (err: any) {
+        if (err.message?.includes('Session expired') || err.message?.includes('Not authenticated')) {
+          // Authentication error - redirect handled by auth utility
+          return;
+        }
         setErrorMsg(err.message || "Failed to load customers");
       } finally {
         setLoading(false);
@@ -190,6 +208,7 @@ const Customers: React.FC<CustomersProps> = ({
       <div className={styles.breadcrumb}>
         <span className={`${styles.breadcrumbItem} ${styles.active}`}>Customers</span>
         <div className={styles.breadcrumbRight}>
+          <UserInfo />
           {/* Bell Icon */}
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M7.55606 16.5003C7.70234 16.7537 7.91274 16.964 8.16609 17.1103C8.41945 17.2566 8.70684 17.3336 8.99939 17.3336C9.29194 17.3336 9.57933 17.2566 9.83269 17.1103C10.086 16.964 10.2964 16.7537 10.4427 16.5003M1.71772 11.772C1.60886 11.8913 1.53702 12.0397 1.51094 12.1991C1.48486 12.3585 1.50566 12.522 1.57081 12.6698C1.63597 12.8176 1.74267 12.9433 1.87794 13.0316C2.0132 13.1198 2.17121 13.1669 2.33272 13.167H15.6661C15.8276 13.167 15.9856 13.1202 16.1209 13.0321C16.2563 12.944 16.3631 12.8184 16.4285 12.6708C16.4938 12.5231 16.5148 12.3596 16.4889 12.2001C16.4631 12.0407 16.3914 11.8923 16.2827 11.7728C15.1744 10.6303 13.9994 9.41616 13.9994 5.66699C13.9994 4.34091 13.4726 3.06914 12.5349 2.13146C11.5972 1.19378 10.3255 0.666992 8.99939 0.666992C7.67331 0.666992 6.40154 1.19378 5.46386 2.13146C4.52618 3.06914 3.99939 4.34091 3.99939 5.66699C3.99939 9.41616 2.82356 10.6303 1.71772 11.772Z" stroke="#706C72" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />

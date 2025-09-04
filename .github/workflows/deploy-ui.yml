@@ -50,18 +50,20 @@ jobs:
           rm: true
           overwrite: true
 
-      - name: 🚀 SSH and deploy UI to Nginx
+      - name: 🚀 SSH and deploy UI to Nginx (NO-CACHE)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+
             echo "✅ Cleaning up old files in /var/www/html"
             sudo rm -rf /var/www/html/*
+            sudo mkdir -p /var/www/html
 
             echo "📦 Copying new build files to /var/www/html"
-            sudo mkdir -p /var/www/html
             sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
 
             echo "🔐 Setting ownership and permissions"
@@ -69,11 +71,30 @@ jobs:
             sudo find /var/www/html -type d -exec chmod 755 {} \;
             sudo find /var/www/html -type f -exec chmod 644 {} \;
 
+            echo "📝 Writing NO-CACHE Nginx server block"
+            sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
+            server {
+              listen 80;
+              server_name _;
+
+              root /var/www/html;
+              index index.html;
+
+              # ZERO-CACHE for everything (HTML + assets)
+              location / {
+                try_files $uri $uri/ /index.html;
+                add_header Cache-Control "no-store" always;
+                expires off;
+                etag off;
+              }
+            }
+            NGINXCONF
+
+            echo "🧪 Testing Nginx config & reloading"
+            sudo nginx -t
+            sudo systemctl reload nginx
+
             echo "📋 Final file list in /var/www/html"
             ls -la /var/www/html
 
-            echo "🔄 Restarting Nginx"
-            sudo systemctl restart nginx
-            sudo systemctl status nginx --no-pager
-
-            echo "🎉 UI Deployment complete!"
+            echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
