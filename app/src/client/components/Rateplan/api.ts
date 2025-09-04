@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../../utils/axiosInstance';
 
 export interface Product {
   productId: string;
@@ -71,7 +71,12 @@ export const deleteRatePlan = async (id: number): Promise<void> => {
 // ---- Create Rate Plan ----
 export interface RatePlanRequest {
   ratePlanName: string;
-  productName: string;
+  /**
+   * Prefer productId for backend compatibility. productName retained for
+   * legacy tests and will be ignored by backend if present.
+   */
+  productId?: number;
+  productName?: string;
   description: string;
   billingFrequency: 'MONTHLY' | 'WEEKLY' | 'YEARLY' | 'DAILY' | 'HOURLY';
   paymentType: 'POSTPAID' | 'PREPAID';
@@ -81,6 +86,10 @@ export interface RatePlanRequest {
 export const confirmRatePlan = async (ratePlanId: number) => {
   // Calls endpoint that changes status from DRAFT to ACTIVE
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/confirm`);
+};
+
+export const updateRatePlan = async (ratePlanId: number, payload: Partial<RatePlanRequest>) => {
+  return axios.put(`${BASE_URL}/rateplans/${ratePlanId}`, payload);
 };
 
 export const createRatePlan = async (payload: RatePlanRequest) => {

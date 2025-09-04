@@ -1,4 +1,5 @@
 import type { AccountDetailsData } from './components/Customers/AccountDetailsForm';
+import { getAuthHeaders, isAuthenticated, logout } from './utils/auth';
 
 const BASE_URL = 'http://43.206.110.213:8081/v1/api';
 
@@ -39,36 +40,65 @@ export interface CreateCustomerPayload {
   billingCountry: string;
 }
 
-export async function createCustomer(payload: CreateCustomerPayload | FormData) {
-  const isFormData = payload instanceof FormData;
-  const res = await fetch(`${BASE_URL}/customers`, {
-    method: 'POST',
-    headers: isFormData ? undefined : { 'Content-Type': 'application/json' },
-    body: isFormData ? payload : JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let msg = `Failed to create (status ${res.status})`;
-    try {
-      const data = await res.json();
-      if (data?.message) msg = data.message;
-    } catch {}
-    throw new Error(msg);
+/**
+ * Handle API response errors and authentication
+ */
+async function handleApiResponse(res: Response): Promise<any> {
+  if (res.status === 401) {
+    // Unauthorized - clear auth data and redirect to login
+    logout();
+    throw new Error('Session expired. Please login again.');
   }
+  
+  if (!res.ok) {
+    let errorMessage = `API error ${res.status}`;
+    try {
+      const errorData = await res.json();
+      if (errorData?.message) {
+        errorMessage = errorData.message;
+      }
+    } catch {
+      // If response is not JSON, use status text
+      errorMessage = res.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
+  }
+  
   return res.json();
 }
 
-// Confirm customer after creation
+export async function createCustomer(payload: CreateCustomerPayload | FormData) {
+  if (!isAuthenticated()) {
+    throw new Error('Not authenticated');
+  }
+  
+  const isFormData = payload instanceof FormData;
+  const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
+  
+  // Remove Content-Type for FormData to let browser set it with boundary
+  if (isFormData && headers['Content-Type']) {
+    delete headers['Content-Type'];
+  }
+  
+  const res = await fetch(`${BASE_URL}/customers`, {
+    method: 'POST',
+    headers,
+    body: isFormData ? payload : JSON.stringify(payload),
+  });
+  
+  return handleApiResponse(res);
+}
+
+// Confirm customer after creation with authentication
 export async function confirmCustomer(customerId: number | string) {
+  if (!isAuthenticated()) {
+    throw new Error('Not authenticated');
+  }
+  
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}/confirm`, {
     method: 'POST',
+    headers: getAuthHeaders(),
   });
-  if (!res.ok) {
-    let msg = `Failed to confirm (status ${res.status})`;
-    try {
-      const data = await res.json();
-      if (data?.message) msg = data.message;
-    } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
+  
+  return handleApiResponse(res);
 }

@@ -3,14 +3,14 @@ import './Billable.css';
 
 interface Metric {
   id: number;
-  
   title: string;
   subtitle: string;
   iconText: string;
   iconSubText: string;
   iconClass: string;
+  unit?: string;
+  aggregation?: string;
 }
-
 
 const RadioIcon: React.FC<{ active: boolean }> = ({ active }) => (
   <svg
@@ -63,6 +63,9 @@ const Billable: React.FC<BillableProps> = ({ productName, selectedMetricId, onSe
           iconText: m.metricName.slice(0, 3).toUpperCase(),
           iconSubText: m.metricName.length > 3 ? m.metricName.slice(3, 6) : '',
           iconClass: colorClasses[idx % colorClasses.length],
+          // assuming backend may supply unit and aggregation fields
+          unit: (m as any).unit,
+          aggregation: (m as any).aggregationType,
         }));
         setMetrics(mapped);
       } catch (err) {
@@ -76,7 +79,7 @@ const Billable: React.FC<BillableProps> = ({ productName, selectedMetricId, onSe
   return (
     <div className="billable-section">
       <h2>
-        Billable metrics applicable for <span>“{productName || 'Selected Product'}”</span>
+        Billable metrics applicable for <span>"{productName || 'Selected Product'}"</span>
       </h2>
       <p className="billable-note">
         Billable metrics must be defined before adding them to a rate plan. Save this rate
@@ -95,14 +98,21 @@ const Billable: React.FC<BillableProps> = ({ productName, selectedMetricId, onSe
               name="metric"
               value={metric.id}
               checked={selectedMetricId === metric.id}
-              onChange={() => onSelectMetric(metric.id)}
+              onChange={() => {
+                onSelectMetric(metric.id);
+                // Persist details for review step
+                localStorage.setItem('billableMetricName', metric.title);
+                localStorage.setItem('billableMetricDescription', metric.subtitle || '');
+                if (metric.unit) localStorage.setItem('billableMetricUnit', metric.unit);
+                if (metric.aggregation) localStorage.setItem('billableMetricAggregation', metric.aggregation);
+              }}
               className="hidden"
             />
             <RadioIcon active={selectedMetricId === metric.id} />
             <div className="billable-metric-content">
-              <div>
+              <div className="billable-metric-info">
                 <div className="billable-metric-title">{metric.title}</div>
-                <div className="billable-metric-subtitle">{metric.subtitle}</div>
+                <div className="billable-metric-subtitle">Metric Unit</div>
               </div>
               <div className={`billable-icon-box ${metric.iconClass}`}>
                 <div className="billable-icon-text">{metric.iconText}</div>

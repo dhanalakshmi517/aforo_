@@ -12,9 +12,13 @@ interface AggregationWindowSelectProps {
  * Currently only API product rules are defined as per requirements.
  */
 const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ productType, unitOfMeasure, value, onChange }) => {
-  // Add null/undefined checks
+  // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
-    return null; // or return a loading state or default message
+    return (
+      <select className="select-field" value="" disabled>
+        <option value="">-- select product/unit first --</option>
+      </select>
+    );
   }
   
   const type = productType.toUpperCase();

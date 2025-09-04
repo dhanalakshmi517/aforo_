@@ -225,3 +225,22 @@
   font-size: 14px;
   margin-top: 4px;
 }
+
+/* Error styling */
+.error-input {
+  border-color: var(--color-semantic-danger-700, #B42318) !important;
+}
+
+.error-text {
+  color: var(--color-semantic-danger-700, #B42318);
+  font-size: 12px;
+  line-height: 16px;
+  margin-top: 4px;
+  display: block;
+}
+
+.field-col {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}

@@ -1,182 +1,137 @@
 @import "../Variables/Variables.css";
-.flat-fee-container {
+
+/* ===== Container (aligned with UsageBased) ===== */
+.flat-fee-container{
   display: flex;
-  justify-content: space-between;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 30px;
+  width: 100%;
+  box-sizing: border-box;
+
   background: var(--color-neutral-white);
   padding: 20px;
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-neutral-200);
-  font-family: Arial, sans-serif;
-  gap: 30px;
   margin-top: 30px;
+  font-family: var(--font-family-primary);
 }
 
-.ff-form-sections {
-  flex: 1;
+/* Left side (fields) */
+.form-sections{
+  flex: 1 1 60%;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.form-section label {
-  display: flex;
-  flex-direction: column;
+/* One field group */
+.form-section{ display: flex; flex-direction: column; gap: 8px; }
+
+/* Label = body/bold/md */
+.form-section label,
+.ff-label span{
   color: var(--color-neutral-1400);
-  
-  /* body/bold/md */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-md);
+}
+
+/* Inputs (match UsageBased styles) */
+.form-section input,
+.ff-label input{
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1400);
+
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md); 
+  line-height: var(--line-height-body-md);
+}
+.form-section input:focus,
+.ff-label input:focus{
+  outline: none;
+  border-color: var(--color-neutral-300);
 }
 
-.form-section input {
-  margin-top: 4px;
-  display: flex;
-padding: 8px 12px;
-align-items: center;
-gap: 8px;
-overflow: hidden;
-color: var(--color-neutral-1400);
-text-overflow: ellipsis;
-background-color: var(--color-neutral-100);
-border-radius: var(--border-radius-sm);
-border: 1px solid var(--color-neutral-200);
-
-/* body/regular/md */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md); /* 150% */
-
+/* Placeholder look */
+.form-section input::placeholder,
+.ff-label input::placeholder{
+  color: var(--color-text-placeholder, #B3B9BF);
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  opacity: .9;
 }
 
-.optional {
-  color: #888;
+/* Validation feedback (red) */
+.error-input{
+  border-color: var(--color-danger-700, #E34935) !important;
+}
+.error-text{
+  color: var(--color-danger-700, #E34935);
   font-size: 12px;
+  margin-top: 4px;
+  display: block;
 }
 
-.example-section {
-  flex: 1;
-  background:var(--color-info-100);
+/* Right-side example card */
+.example-section{
+  flex: 1 1 40%;
+  min-width: 260px;
+  background: var(--color-info-100);
   border-radius: var(--border-radius-lg);
   padding: 16px;
-border: 1px solid var(--color-neutral-200);
-width:410px;
-height:200px;
+  border: 1px solid var(--color-neutral-200);
+  width: 410px;
+  height: 200px;
 }
-
-.example-section h4 {
+.example-section h4{
   margin: 0;
   color: var(--color-neutral-700);
-
-  /* body/light/xs */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
   font-weight: 300;
-  line-height: var(--line-height-body-lg); 
+  line-height: var(--line-height-body-lg);
 }
 
-.example-section a {
+.linklike{
+  background: none;
+  border: none;
   color: var(--color-primary-900);
-
-/* body/light/xs */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 300;
-line-height: var(--line-height-body-lg); 
-  text-decoration: none;
-  display: block;
-  margin: 8px 0;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
 }
 
-.consumer-note {
+.consumer-note{
   margin-top: 1px;
+  margin-bottom: 20px;
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: italic;
   font-weight: 200;
-  line-height: var(--line-height-body-lg); 
-  margin-bottom: 20px;
+  line-height: var(--line-height-body-lg);
 }
 
-.consumer-note a {
-  color: var(--color-primary-900);
-
-/* body/light/xs */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 300;
-line-height: var(--line-height-body-lg); 
-  text-decoration: none;
-  display: block;
-  margin: 8px 0;
+/* Responsive parity with UsageBased */
+@media (max-width: 1024px){
+  .flat-fee-container{ flex-wrap: wrap; }
+  .form-sections{ flex-basis: 100%; order: 1; }
+  .example-section{ flex-basis: 100%; order: 2; width: 100%; height: auto; }
 }
-.flat-fee-fields{
-    width:410px;
-    height:auto;
-    border:1px solid var(--color-neutral-200);
-    padding:16px;
-    border-radius:var(--border-radius-sm);
-    margin-top: 10px;
-}
-.flat-fee-fields h5 {
-    color: var(--color-neutral-1700);
-
-    /* body/bold/lg */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-lg);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-lg); 
-}
-  
-  .flat-fee-fields p {
-    color: var(--text-text-darkest, #151312);
-
-    /* body/bold/lg */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-  }
-  
-  .form-flat {
-    margin-bottom: 12px;
-  }
-  
-  .form-flat label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--color-neutral-1400);
-
-    /* body/bold/md */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-  }
-  
-  .form-flat input {
-    width: 100%;
-    height:40px;
-    padding: 8px 12px;
-    border: 1px solid var(--color-neutral-200);
-    border-radius: var(--border-radius-sm);
-    background-color: var(--color-neutral-100);
-    color: var(--color-neutral-1400);
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-  }
-  

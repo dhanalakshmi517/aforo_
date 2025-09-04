@@ -22,6 +22,12 @@ const Review: React.FC<ReviewProps> = ({ planDetails }) => {
   const isTier = pricingModel === 'Tiered Pricing';
   const isUsage = pricingModel === 'Usage-Based';
 
+  // Billable metric details
+  const billableName = localStorage.getItem('billableMetricName') || '';
+  const billableDesc = localStorage.getItem('billableMetricDescription') || '';
+  const billableUnit = localStorage.getItem('billableMetricUnit') || '';
+  const billableAgg = localStorage.getItem('billableMetricAggregation') || '';
+
   // Fetch Flat Fee details if applicable
   const flatFeeAmount = isFlat ? localStorage.getItem('flatFeeAmount') || '' : '';
   const flatFeeLimit = isFlat ? localStorage.getItem('flatFeeApiCalls') || '' : '';
@@ -43,6 +49,27 @@ const Review: React.FC<ReviewProps> = ({ planDetails }) => {
     : isTier
     ? '/get-started/rate-plans/tiered-estimation'
     : '/';
+
+  // Extras data
+  const setupFee = localStorage.getItem('setupFee') || '';
+  const discountPercent = localStorage.getItem('discountPercent') || '';
+  const discountFlat = localStorage.getItem('discountFlat') || '';
+  const freemiumUnits = localStorage.getItem('freemiumUnits') || '';
+  const minimumUsage = localStorage.getItem('minimumUsage') || '';
+  const minimumCharge = localStorage.getItem('minimumCharge') || '';
+
+  // Usage-based
+  const usagePerUnit = isUsage ? localStorage.getItem('usagePerUnitAmount') || '' : '';
+
+  // Volume data
+  const volumeTiers = isVolume ? JSON.parse(localStorage.getItem('volumeTiers') || '[]') as any[] : [];
+  const volumeOverage = isVolume ? localStorage.getItem('volumeOverage') || '' : '';
+  const volumeGrace = isVolume ? localStorage.getItem('volumeGrace') || '' : '';
+
+  // Stair data
+  const stairTiers = isStair ? JSON.parse(localStorage.getItem('stairTiers') || '[]') as any[] : [];
+  const stairOverage = isStair ? localStorage.getItem('stairOverage') || '' : '';
+  const stairGrace = isStair ? localStorage.getItem('stairGrace') || '' : '';
 
   const canNavigate = isFlat || isUsage || isStair || isVolume || isTier;
 
@@ -103,19 +130,19 @@ const Review: React.FC<ReviewProps> = ({ planDetails }) => {
         <h3>DEFINE BILLABLE METRICS</h3>
         <div className="row">
           <label>Description</label>
-          <span>Selected Option</span>
+          <span>{billableDesc || 'Selected Option'}</span>
         </div>
         <div className="row">
           <label>Metric Name</label>
-          <span>Entered Value</span>
+          <span>{billableName || 'Entered Value'}</span>
         </div>
         <div className="row">
           <label>Define Unit</label>
-          <span>Selected Option</span>
+          <span>{billableUnit || 'Selected Option'}</span>
         </div>
         <div className="row">
           <label>Define Aggregation Type</label>
-          <span>Selected Option</span>
+          <span>{billableAgg || 'Selected Option'}</span>
         </div>
       </div>
 
@@ -165,7 +192,31 @@ const Review: React.FC<ReviewProps> = ({ planDetails }) => {
           </>
         )}
   
-        {!isFlat && !isTier && (
+        {isUsage && (
+          <div className="row"><label>Per-unit Amount</label><span>{usagePerUnit ? `$${usagePerUnit}` : 'Selected Option'}</span></div>
+        )}
+
+        {isVolume && (
+          <>
+            {volumeTiers.length > 0 && (
+              <div className="row"><label>Tiers</label><span>{volumeTiers.map((t:any)=>`${t.from}-${t.to || (t.isUnlimited?'∞':'')} @ ${t.price}`).join('; ')}</span></div>
+            )}
+            <div className="row"><label>Overage Charge</label><span>{volumeOverage || 'Selected Option'}</span></div>
+            <div className="row"><label>Grace Buffer</label><span>{volumeGrace || 'Selected Option'}</span></div>
+          </>
+        )}
+
+        {isStair && (
+          <>
+            {stairTiers.length > 0 && (
+              <div className="row"><label>Stairs</label><span>{stairTiers.map((s:any)=>`${s.from}-${s.to || (s.isUnlimited?'∞':'')} cost $${s.cost}`).join('; ')}</span></div>
+            )}
+            <div className="row"><label>Overage Charge</label><span>{stairOverage || 'Selected Option'}</span></div>
+            <div className="row"><label>Grace Buffer</label><span>{stairGrace || 'Selected Option'}</span></div>
+          </>
+        )}
+
+        {!isFlat && !isTier && !isUsage && !isVolume && !isStair && (
           <div className="row"><span>Select a pricing model and enter details</span></div>
         )}
 
@@ -173,14 +224,12 @@ const Review: React.FC<ReviewProps> = ({ planDetails }) => {
 
       <div className="card">
         <h3>EXTRAS</h3>
-        <div className="row">
-          <label>Setup Fee (Optional)</label>
-          <span>Selected Option</span>
-        </div>
-        <div className="row">
-          <label>One-time Setup Fee</label>
-          <span>Selected Option</span>
-        </div>
+        <div className="row"><label>Setup Fee</label><span>{setupFee ? `$${setupFee}` : 'Not added'}</span></div>
+        <div className="row"><label>Discount (%)</label><span>{discountPercent || '—'}</span></div>
+        <div className="row"><label>Discount (Flat)</label><span>{discountFlat ? `$${discountFlat}` : '—'}</span></div>
+        <div className="row"><label>Freemium Units</label><span>{freemiumUnits || '—'}</span></div>
+        <div className="row"><label>Minimum Usage</label><span>{minimumUsage || '—'}</span></div>
+        <div className="row"><label>Minimum Charge</label><span>{minimumCharge ? `$${minimumCharge}` : '—'}</span></div>
       </div>
     </div>
   );

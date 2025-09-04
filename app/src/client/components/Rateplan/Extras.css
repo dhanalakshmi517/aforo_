@@ -1,268 +1,184 @@
 @import "../Variables/Variables.css";
+
+/* Design tokens / fallbacks */
+:root{
+  /* Saved pill */
+  --surface-success: var(--color-success-050, #E7F9F2);
+  --text-success: var(--color-success-900, #1B5E20);
+
+  /* Default Save button surface from UX: surfaceSecondaryButtonActive2 */
+  --surface-secondary-btn-active-2: #EBF6FB;
+}
+
+/* ===== Container ===== */
 .extras-container {
-    overflow-x: hidden;
-    width: 100%;
-    margin: 0 auto;
-    padding: 24px;
-    background-color: var(--color-neutral-white);
-    border-radius: var(--border-radius-sm);
-    font-family: sans-serif;
-   
-  
-  }
-  .extras-save-btn{
-    width:140px;
-    height:40px;
-    border:none;
-    background:transparent;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    border-radius:var(--border-radius-sm);
-    background-color: var(--color-primary-000);
-    color: var(--color-primary-800);
-
-/* body/regular/md */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md);
-    
-  }
-  
-  .dropdown-group {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background-color: var(--color-neutral-white);
-    /* border-radius: var(--border-radius-sm); */
-    border-bottom: 1px solid var(--color-neutral-200);
-  }
-  
-  
-
-.extras-icon-btn{
- 
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:none;
-  border-radius:var(--border-radius-sm);
-  background-color: var(--color-secondary-100);
-  cursor:pointer;
-  margin-right:8px;
-  width:48px;
-  height:48px;
-}
-
-.extras-icon-btn svg{width:24px;height:24px; color: var(--color-secondary-700);}
-
-/* legacy span class still used elsewhere */
-.header-icon{display:none;}
-
-
-.description-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.icon-btn{
-  width:60px;
-  height:48px;
-  border:none;
-  background:transparent;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-
-.description{
-  /* margin-bottom:12px;
-  margin-bottom:100px; */
-  color: var(--color-neutral-800);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md); /* 142.857% */
-margin-left:10px;
-}
-
-.dropdown-group select {
-    border-bottom: 1px solid var(--color-neutral-200);
-    /* border-radius: var(--border-radius-sm); */
-    background-color: var(--color-neutral-white);
-    color: var(--color-neutral-1400);
-  
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 600;
-  min-height: 36px;
-  width: 80%;
 }
 
-.dropdown-group select:invalid {
-    color: #888;
-  }
-  
-  
-  
-  
-  .section {
-    border-bottom: 1px solid var(--color-neutral-200);
-    /* border-radius: var(--border-radius-sm); */
-    margin-bottom: 12px;
-
-    width: 100%;
-    color: var(--color-neutral-1700);
-    background-color: var(--color-neutral-white);
-    border-bottom: 1px solid var(--color-neutral-200);
-    /* border-radius: var(--border-radius-sm); */
-  
+.section {
+  border-bottom: 1px solid var(--color-neutral-200);
+  margin-bottom: 12px;
+  background-color: var(--color-neutral-white);
   padding: 18px 10px;
   color: var(--color-neutral-1700);
-  
-  /* body/bold/lg */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-body-lg);
-  font-style: normal;
   font-weight: 600;
-  line-height: var(--line-height-body-lg ); /* 150% */
-  /* line-height: 24px; */
-  
-  }
-  
-  .header-label{white-space:nowrap;}
+}
 
 .section-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background-color: var(--color-neutral-white);
-    cursor: pointer;
-    margin-top: -20px;
-  }
-  
-  .section-content {
-    padding: 16px;
-    background-color: var(--color-neutral-white);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-.section-content label{    
-    color: var(--color-neutral-1400);
-  
-  /* body/bold/md */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: var(--color-neutral-white);
+  cursor: pointer;
+  margin-top: -20px;
+}
+
+.header-label { white-space: nowrap; }
+
+.dropdown-icon {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+.section-header .dropdown-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: #726E6C;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Icon chip */
+.extras-icon-btn{
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-secondary-100);
+  color: var(--color-secondary-700);
+  margin-right: 8px;
+}
+.extras-icon-btn svg{ width:24px; height:24px; }
+
+/* Description row */
+.description-row{ display:flex; align-items:center; gap:8px; }
+.icon-btn{
+  width:60px; height:48px; border:none; background:transparent;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.description{
+  color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md); 
-  }
-  
-  .section-content input,
-  .section-content textarea {
-    padding: 8px;
-    border: 1px solid var(--color-neutral-200);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-md);
-    width: 80%;
-    background-color: var(--color-neutral-100);
-      /* margin-left: 250px; */
-  
-  }
-  
-  .section-content textarea {
-    resize: vertical;
-    background-color: var(--color-neutral-100);
-      /* margin-left: 250px; */
-  
-  }
-  .section-content select{
-  width: 80%;
-  padding:6px 10px;
-  height:36px;
-    background-color: var(--color-neutral-100);
-    /* border-radius: var( --border-radius-sm); */
-    width: 100%;
-  }
-  
-  .optional {
-    color: var(--color-neutral-800);
+  line-height: var(--line-height-body-md);
+  margin-left: 10px;
+}
 
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md); 
-  }
-  
-  
-  .dropdown-icon {
-    margin-left:auto;
-    margin-bottom:0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;   /* Slightly bigger clickable area */
-    height: 24px;
-    cursor: pointer;
-    margin-top: 20px;
-
-    
-  }
-  
-  
-  
-  .section-header .dropdown-icon svg {
-    stroke: #726E6C;
-    width: 20px;
-    height: 20px;
-    user-select: none;
-    pointer-events: none;
-      margin-bottom: 40px;
-  
-  }
-  
-  .date-range {
-    display: flex;
-    gap: 20px; /* space between the two date fields */
-    align-items: flex-end;
-  }
-  
-  .date-input {
-    display: flex;
-    flex-direction: column;
-    color: var(--color-neutral-800);
-  
+/* Body fields */
+.section-content {
+  padding: 16px;
+  background-color: var(--color-neutral-white);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.section-content label{
+  color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
-  font-size: var(--fontsize-md);
-  font-style: normal;
+  font-size: var(--font-size-md);
   font-weight: 400;
-  line-height: var(--line-height-body-md); 
-  }
-  
-  .date-input input[type="date"] {
-    width: 300px; 
-    padding: 8px 10px;
-    font-size: 14px;
-  }
-  
-.custom-dropdown-container {
-  position: relative;
+  line-height: var(--line-height-body-md);
+}
+.section-content input,
+.section-content textarea{
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  width: 80%;
+  background-color: var(--color-neutral-100);
+}
+.section-content textarea{ resize: vertical; }
+.section-content select{
+  width: 80%;
+  padding: 6px 10px;
+  height: 36px;
+  background-color: var(--color-neutral-100);
 }
 
-.custom-dropdown {
-  padding:8px 10px;
-    background-color: var(--color-neutral-white);
-    border-radius: var( --border-radius-sm);
-    width: 100%;
+.optional{
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
 }
+
+/* Date range */
+.date-range{ display:flex; gap:20px; align-items:flex-end; }
+.date-input{
+  display:flex; flex-direction:column;
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+.date-input input[type="date"]{
+  width:300px; padding:8px 10px; font-size:14px;
+}
+
+/* ===== Save button (with stroke by default) =====
+   width 105px, height 40px, padding 8/20, radius 8, bg #EBF6FB */
+.extras-save-btn{
+  width: 140px;
+  height: 40px;
+  padding: 8px 20px;
+  background-color: var(--surface-secondary-btn-active-2);
+  color: var(--color-primary-800);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease;
+}
+
+.extras-save-btn:hover{
+  filter: brightness(0.95);
+}
+
+.extras-save-btn.is-saving{
+  opacity: .7;
+  pointer-events: none;
+}
+
+/* Saved state: green pill, NO stroke */
+.extras-save-btn.is-saved{
+  background-color: var(--surface-success);
+  color: var(--text-success);
+  border-color: transparent;
+}
+
+/* check icon inherits current text color */
+.saved-check{ display:inline-block; }

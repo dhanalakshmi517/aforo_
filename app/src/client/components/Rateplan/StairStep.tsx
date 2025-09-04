@@ -1,149 +1,200 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './StairStep.css';
 
-interface Stair {
-  from: string;
-  to: string;
-  cost: string;
-  isUnlimited?: boolean;
-}
+interface Stair { from: string; to: string; cost: string; isUnlimited?: boolean; }
+type RowError = { from?: string; to?: string; cost?: string };
+type RowTouched = { from: boolean; to: boolean; cost: boolean };
 
 const StairStep: React.FC = () => {
-  const [stairs, setStairs] = useState<Stair[]>([
-    { from: '', to: '', cost: '' },
-  ]);
+  const [stairs, setStairs] = useState<Stair[]>([{ from: '', to: '', cost: '' }]);
+  const [touched, setTouched] = useState<RowTouched[]>([{ from:false, to:false, cost:false }]);
+  const [rowErrors, setRowErrors] = useState<RowError[]>([{}]);
 
   const [unlimited, setUnlimited] = useState(false);
-
   const [overageCharge, setOverageCharge] = useState('');
+  const [overageTouched, setOverageTouched] = useState(false);
   const [graceBuffer, setGraceBuffer] = useState('');
 
-  // Persist values so Pricing save can read
-  React.useEffect(() => {
-    localStorage.setItem('stairTiers', JSON.stringify(stairs));
-  }, [stairs]);
+  const [mustHaveOneError, setMustHaveOneError] = useState<string | null>(null);
+  const [overageError, setOverageError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    localStorage.setItem('stairOverage', overageCharge);
-  }, [overageCharge]);
+  useEffect(() => { localStorage.setItem('stairTiers', JSON.stringify(stairs)); }, [stairs]);
+  useEffect(() => { localStorage.setItem('stairOverage', overageCharge); }, [overageCharge]);
+  useEffect(() => { localStorage.setItem('stairGrace', graceBuffer); }, [graceBuffer]);
 
-  React.useEffect(() => {
-    localStorage.setItem('stairGrace', graceBuffer);
-  }, [graceBuffer]);
-
-  const handleAddStair = () => {
-    setStairs([...stairs, { from: '', to: '', cost: '' }]);
+  const ensureArrays = (len:number) => {
+    setTouched(prev => { const n=[...prev]; while(n.length<len) n.push({from:false,to:false,cost:false}); return n.slice(0,len);});
+    setRowErrors(prev => { const n=[...prev]; while(n.length<len) n.push({}); return n.slice(0,len);});
   };
 
-  const handleDeleteStair = (index: number) => {
-    const updated = stairs.filter((_, i) => i !== index);
-    setStairs(updated);
-  };
+  const markTouched = (i:number, f:keyof RowTouched) =>
+    setTouched(ts => { const n=[...ts]; if(!n[i]) n[i]={from:false,to:false,cost:false}; n[i][f]=true; return n; });
 
-  const handleChange = (index: number, field: keyof Stair, value: string) => {
-    const updated = [...stairs];
-    (updated[index] as any)[field] = value;
-    setStairs(updated);
-  };
+  const isNonNegInt = (s:string)=>/^\d+$/.test(s);
+  const isPositiveNum = (s:string)=>{ const n=Number(s); return !Number.isNaN(n) && n>0; };
 
-  const handleUnlimitedToggle = (checked: boolean, index: number) => {
-    const updated = [...stairs];
-    updated[index].isUnlimited = checked;
-    if (checked) {
-      updated[index].to = '';
+  const validateRow = (r:Stair): RowError => {
+    const e: RowError = {};
+    if (r.from.trim()==='') e.from='This is a required field';
+    else if(!isNonNegInt(r.from)) e.from='Enter a valid value';
+    if (!r.isUnlimited){
+      if (r.to.trim()==='') e.to='This is a required field';
+      else if(!isNonNegInt(r.to)) e.to='Enter a valid value';
+      if(!e.from && !e.to && Number(r.to)<Number(r.from)) e.to='Must be ≥ From';
     }
-    setStairs(updated);
+    if (r.cost.trim()==='') e.cost='This is a required field';
+    else if(!isPositiveNum(r.cost)) e.cost='Enter a valid value';
+    return e;
   };
+
+  const validateOverage = (value: string): string | null => {
+    if (value.trim() === '') return 'This is a required field';
+    if (!isPositiveNum(value)) return 'Enter a valid value';
+    return null;
+  };
+
+  const validateGrace = (value: string): string | null => {
+    // Grace buffer is optional
+    if (value.trim() !== '' && !isNonNegInt(value)) {
+      return 'Enter a valid value';
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    ensureArrays(stairs.length);
+    setRowErrors(stairs.map(validateRow));
+    setMustHaveOneError(stairs.length===0 ? 'At least one stair is required' : null);
+
+    if (!unlimited){
+      setOverageError(validateOverage(overageCharge));
+    } else setOverageError(null);
+  }, [stairs, unlimited, overageCharge]);
+
+  const addStair = () => setStairs(prev => [...prev, { from:'', to:'', cost:'' }]);
+
+  const deleteStair = (index:number) => {
+    setStairs(prev => {
+      const n = prev.filter((_,i)=>i!==index);
+      return n.length===0 ? [{from:'',to:'',cost:''}] : n;
+    });
+    setTouched(prev => {
+      const n = prev.filter((_,i)=>i!==index);
+      return n.length===0 ? [{from:false,to:false,cost:false}] : n;
+    });
+  };
+
+  const change = (i:number, field:keyof Stair, val:string) => {
+    if (field==='to' && stairs[i].isUnlimited) return;
+    const n=[...stairs]; (n[i] as any)[field]=val; setStairs(n);
+  };
+
+  const toggleUnlimited = (checked:boolean, index:number) => {
+    const n=[...stairs]; n[index].isUnlimited=checked; if(checked) n[index].to=''; setStairs(n); setUnlimited(checked);
+  };
+
+  const last = stairs.length-1;
 
   return (
     <div className="stair-container">
       <div className="stair-input-section">
-        {/* Heading Row */}
+        {mustHaveOneError && <div className="error-banner">{mustHaveOneError}</div>}
+
         <div className="stair-header-row">
           <div className="usage-range-label">Usage Range</div>
           <div className="cost-label">Flat–Stair Cost</div>
         </div>
 
-        {stairs.map((stair, index) => (
-          <div className="stair-row" key={index}>
-            <input
-              className="input-small"
-              value={stair.from}
-              onChange={(e) => handleChange(index, 'from', e.target.value)}
-              placeholder="From"
-            />
-            <span>-</span>
-            <input
-              className="input-small"
-              value={stair.isUnlimited ? 'Unlimited' : stair.to}
-              placeholder="To"
-              disabled={stair.isUnlimited}
-              onChange={(e) => handleChange(index, 'to', e.target.value)}
-            />
-            <input
-              className="input-large"
-              value={stair.cost}
-              onChange={(e) => handleChange(index, 'cost', e.target.value)}
-              placeholder="Cost"
-            />
-            <button className="delete-btn" onClick={() => handleDeleteStair(index)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        ))}
+        {stairs.map((row, i) => {
+          const e = rowErrors[i] || {};
+          const t = touched[i] || {from:false,to:false,cost:false};
+          return (
+            <div className="stair-row" key={i}>
+              <div className="field-col">
+                <input
+                  className={`input-small ${t.from && e.from ? 'error-input' : ''}`}
+                  value={row.from}
+                  onChange={(ev)=>change(i,'from',ev.target.value)}
+                  onBlur={()=>markTouched(i,'from')}
+                  placeholder="From"
+                />
+                {t.from && e.from && <span className="error-text">{e.from}</span>}
+              </div>
 
-        {/* Unlimited checkbox */}
+              <span className="dash">-</span>
+
+              <div className="field-col">
+                <input
+                  className={`input-small ${t.to && e.to ? 'error-input' : ''}`}
+                  value={row.isUnlimited ? 'Unlimited' : row.to}
+                  placeholder="To"
+                  disabled={row.isUnlimited}
+                  onChange={(ev)=>change(i,'to',ev.target.value)}
+                  onBlur={()=>markTouched(i,'to')}
+                />
+                {!row.isUnlimited && t.to && e.to && <span className="error-text">{e.to}</span>}
+              </div>
+
+              <div className="field-col">
+                <input
+                  className={`input-large ${t.cost && e.cost ? 'error-input' : ''}`}
+                  value={row.cost}
+                  onChange={(ev)=>change(i,'cost',ev.target.value)}
+                  onBlur={()=>markTouched(i,'cost')}
+                  placeholder="Cost"
+                />
+                {t.cost && e.cost && <span className="error-text">{e.cost}</span>}
+              </div>
+
+              <button className="delete-btn" onClick={()=>deleteStair(i)} aria-label="Delete stair">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          );
+        })}
+
         <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={unlimited}
-            onChange={(e) => {
-              setUnlimited(e.target.checked);
-              if (e.target.checked && stairs.length > 0) {
-                handleUnlimitedToggle(true, stairs.length - 1);
-              }
-            }}
-          />
+          <input type="checkbox" checked={unlimited} onChange={(e)=>toggleUnlimited(e.target.checked, last)} />
           <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z"
-              stroke="#E6E5E6" strokeWidth="1.2" />
+            <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
             <path className="tick" d="M8 12.5L10.5 15L16 9.5" stroke="#4C7EFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span>No upper limit for this Stair</span>
         </label>
 
-        {/* Conditionally shown fields */}
         {!unlimited && (
           <div className="extra-fields">
-            <label>
+            <label className="extra-label">
               Overage Charge
               <input
                 type="text"
-                className="input-extra"
+                className={`input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                 value={overageCharge}
-                onChange={(e) => setOverageCharge(e.target.value)}
+                onChange={(e)=>setOverageCharge(e.target.value)}
+                onBlur={()=>setOverageTouched(true)}
                 placeholder="Enter overage charge"
               />
+              {overageTouched && overageError && <span className="error-text">{overageError}</span>}
             </label>
-            <label>
-              Grace Buffer(optional)
+
+            <label className="extra-label">
+              Grace Buffer (optional)
               <input
                 type="text"
                 className="input-extra"
                 value={graceBuffer}
-                onChange={(e) => setGraceBuffer(e.target.value)}
+                onChange={(e)=>setGraceBuffer(e.target.value)}
                 placeholder="Enter grace buffer"
               />
             </label>
           </div>
         )}
 
-        <button className="add-stair-btn" onClick={handleAddStair}>+ Add Stair</button>
+        <button className="add-stair-btn" onClick={addStair}>+ Add Stair</button>
       </div>
 
-      {/* Example Section */}
       <div className="stair-example-section">
         <h4>EXAMPLE</h4>
         <a href="#">Stair – Step Pricing</a>
@@ -158,7 +209,6 @@ const StairStep: React.FC = () => {
           <a href="#">You to consumer:</a><br />
           <em>“You’ve used 300 units this billing cycle, placing you in Stair 2. Your total charge will be $30.”</em>
         </p>
-
       </div>
     </div>
   );
