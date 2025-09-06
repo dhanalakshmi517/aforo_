@@ -149,7 +149,6 @@
   --paragraph-spacing-body-md: 1rem;
   --paragraph-spacing-body-lg: 1.25rem;
 
-  /* Paragraph Spacing for Heading Text */
   --paragraph-spacing-heading-h1: 3rem;
   --paragraph-spacing-heading-h2: 2.5rem;
   --paragraph-spacing-heading-h3: 2.25rem;
@@ -160,22 +159,25 @@
 
   /* ALIAS */
   /* Primary Color Palette (from the image) */
-  --color-primary-000: rgba(235, 246, 251, 1);
+  --color-primary-000:rgba(225, 244, 251, 1);
   /* Assuming a very light shade based on the 000 naming */
-  --color-primary-100: rgba(215, 237, 248, 1);
+  --color-primary-100: rgba(196, 233, 249, 1);
   /* Assuming lighter shades */
-  --color-primary-200: rgba(181, 219, 239, 1);
-  --color-primary-300: rgba(136, 200, 232, 1);
-  --color-primary-400: rgba(95, 183, 226, 1);
-  --color-primary-500: rgba(55, 165, 219, 1);
-  --color-primary-600: rgba(52, 150, 199, 1);
-  --color-primary-700: rgba(48, 136, 180, 1);
+  --color-primary-200: rgba(147, 212, 240, 1);
+  --color-primary-300: rgba(87, 189, 234, 1);
+  --color-primary-400: rgba(34, 167, 229, 1);
+  --color-primary-500:rgba(0, 146, 223, 1);
+  --color-primary-600: rgba(0, 130, 204, 1);
+  --color-primary-700: rgba(2, 90, 148, 1);
   /* Directly from the image: #4339AC */
-  --color-primary-800:rgba(45, 124, 164, 1);
+  --color-primary-800:rgba(0, 75, 128, 1);
   /* Assuming darker shades */
-  --color-primary-900: rgba(43, 113, 148, 1);
-  --color-primary-1000: rgba(40, 101, 132, 1);
-  --color-primary-1100: rgba(35, 84, 108, 1);
+  --color-primary-900: rgba(0, 75, 128, 1);
+  --color-primary-1000: rgba(0, 54, 90, 1);
+  --color-primary-1100: rgba(0, 40, 67, 1);
+  --color-primary-1200: rgba(0, 33, 55, 1);
+  --color-primary-1300: rgba(0, 31, 49, 1);
+  --color-primary-1400: rgba(0, 21, 32, 1);
 
   /* Secondary Color Palette */
   --color-secondary-100: #FFEBD6;
@@ -190,25 +192,25 @@
 
 
   /* Neutrals Color Palette */
-  --color-neutral-white: rgba(255, 255, 255, 1);
-  --color-neutral-100: rgba(250, 250, 250, 1);
-  --color-neutral-200: rgba(240, 239, 240, 1);
-  --color-neutral-300: rgba(229, 229, 230, 1);
-  --color-neutral-400: rgba(204, 203, 205, 1);
-  --color-neutral-500: rgba(189, 187, 190, 1);
-  --color-neutral-600: rgba(152, 149, 154, 1);
-  --color-neutral-700: rgba(132, 128, 134, 1);
-  --color-neutral-800: rgba(112, 108, 114, 1);
-  --color-neutral-900: rgba(90, 86, 93, 1);
-  --color-neutral-1000: rgba(71, 66, 74, 1);
-  --color-neutral-1100: rgba(49, 44, 53, 1);
-  --color-neutral-1200: rgba(39, 35, 42, 1);
-  --color-neutral-1300: rgba(35, 31, 37, 1);
-  --color-neutral-1400: rgba(30, 26, 32, 1);
-  --color-neutral-1500: rgba(30, 26, 32, 1);
-  --color-neutral-1600: rgba(27, 24, 22, 1);
-  --color-neutral-1700: rgba(21, 19, 18, 1);
-  --color-neutral-black: rgba(18, 18, 19, 1);
+  --color-neutral-white:rgba(255, 255, 255, 1);
+  --color-neutral-100:rgba(248, 247, 250, 1);
+  --color-neutral-200: rgba(233, 233, 238, 1);
+  --color-neutral-300: rgba(213, 212, 223, 1);
+  --color-neutral-400: rgba(191, 190, 206, 1);
+  --color-neutral-500: rgba(195, 194, 208, 1);
+  --color-neutral-600: rgba(179, 184, 188, 1);
+  --color-neutral-700: rgba(157, 162, 166, 1);
+  --color-neutral-800: rgba(144, 149, 153, 1);
+  --color-neutral-900: rgba(130, 134, 139, 1);
+  --color-neutral-1000: rgba(117, 121, 126, 1);
+  --color-neutral-1100: rgba(102, 106, 111, 1);
+  --color-neutral-1200: rgba(89, 94, 98, 1);
+  --color-neutral-1300:rgba(74, 78, 83, 1);
+  --color-neutral-1400: rgba(55, 59, 64, 1);
+  --color-neutral-1500: rgba(43, 47, 51, 1);
+  --color-neutral-1600: rgba(32, 37, 41, 1);
+  --color-neutral-1700: rgba(26, 33, 38, 1);
+  --color-neutral-black: rgba(0, 0, 0, 1);
 
   /* Error Color Palette */
   --color-error-100: #FFECEC;

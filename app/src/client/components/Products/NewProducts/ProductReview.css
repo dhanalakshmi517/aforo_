@@ -1,0 +1,87 @@
+
+/* Root layout */
+:root {
+  --pr-bg: #f6f7fb;
+  --pr-card-bg: #ffffff;
+  --pr-border: #e5e7ef;
+  --pr-title: #8b90a5; /* muted section title */
+  --pr-label: #6b7280; /* gray-600 */
+  --pr-value: #111827; /* gray-900 */
+  --pr-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
+  --pr-radius: 14px;
+}
+
+.pr-wrapper {
+  width: 100%;
+  padding: 16px;
+  background: var(--pr-bg);
+}
+
+.pr-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .pr-grid {
+    grid-template-columns: 1fr 1fr; /* two columns like the screenshot */
+  }
+}
+
+/* Card */
+.pr-card {
+  background: var(--pr-card-bg);
+  border: 1px solid var(--pr-border);
+  border-radius: var(--pr-radius);
+  box-shadow: var(--pr-shadow);
+  overflow: hidden;
+}
+
+.pr-card__header {
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #f8f9fc 0%, #f4f6fb 100%);
+  border-bottom: 1px solid var(--pr-border);
+}
+
+.pr-card__title {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  color: var(--pr-title);
+  font-weight: 700;
+}
+
+/* Rows */
+.pr-card__body {
+  padding: 6px 0; /* rows supply their own padding */
+}
+
+.pr-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr; /* label : value ratio to mimic screenshot */
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px dashed var(--pr-border);
+}
+
+.pr-row:last-child {
+  border-bottom: none;
+}
+
+.pr-row__label {
+  font-size: 13px;
+  color: var(--pr-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pr-row__value {
+  justify-self: end; /* right column right-aligned */
+  font-size: 13px;
+  color: var(--pr-value);
+  font-weight: 600;
+}
+
+/* Subtle rounding on the outer card only; rows are flush like the reference */

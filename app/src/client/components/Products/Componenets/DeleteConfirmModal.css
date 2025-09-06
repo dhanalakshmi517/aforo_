@@ -1,0 +1,102 @@
+@import "../../Variables/Variables.css";
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+  
+  /* Modal box */
+  .delete-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 512px;
+    height: 212px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  
+  /* Title and text */
+  .modal-title {
+    color: var(--color-neutral-1700);
+    text-align: center;
+  
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h5);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-heading-h5);
+  }
+  
+  .modal-text {
+    color: var(--color-neutral-1000);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg);
+    text-align: center;
+  }
+  
+  /* Buttons container */
+  .modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  /* Common button styles */
+  .btn {
+    display: flex;
+    gap: 12px;
+    padding: 8px 20px;
+
+  }
+  
+  /* Discard button */
+  .btn-cancel {
+    text-align: center;
+    width: 222px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-neutral-600);
+    color: var(--color-neutral-800);
+  
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-lg);
+  }
+  
+  
+  
+  /* Delete button */
+  .btn-delete {
+    text-align: center;
+    width: 222px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-error-400);
+    color: var(--color-neutral-white);
+  
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-body-lg);
+  }
+ 
+  

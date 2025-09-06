@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SignIn from './SignIn';
 import './Landing.css';
 import visual from './visual.svg'; // Import the SVG background
-import aforoWordmark from './aforologo.svg';
+import aforoWordmark from './logoaforo.svg';
 import Features from './Features';
 import ProgressSection from './ProgressSection';
 import Revenue from './Revenue';
@@ -13,48 +13,47 @@ import Footer from './Footer';
 const Landing: React.FC = () => {
   const [showOrg, setShowOrg] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  // Only show navbar when not showing organization form or sign in
+  const showNavbar = !showOrg && !showSignIn;
+  
   return (
     <>
     <div
       className="landing-section"
-      style={{ backgroundImage: `url(${visual})` }}
+      style={{ 
+        backgroundImage: showNavbar ? `url(${visual})` : 'none',
+        backgroundColor: showNavbar ? 'transparent' : 'white'
+      }}
     >
-      <header className="navbar">
-        <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Aforo logo icon */}
-          <svg xmlns="http://www.w3.org/2000/svg" width="49" height="49" viewBox="0 0 49 49" fill="none">
-            <path d="M15.5193 16.6599C19.5627 9.65657 21.5844 6.15488 24.6169 6.15488C27.6495 6.15488 29.6712 9.65657 33.7146 16.6599L36.0838 20.7635C40.1272 27.7669 42.1489 31.2686 40.6326 33.8948C39.1163 36.5211 35.0729 36.5211 26.9861 36.5211H22.2477C14.1609 36.5211 10.1175 36.5211 8.60126 33.8948C7.08498 31.2686 9.10668 27.7669 13.1501 20.7635L15.5193 16.6599Z" fill="#2B7194" />
-            <g style={{ mixBlendMode: 'overlay' }}>
-              <path d="M18.5115 11.7605C16.3463 15.2249 14.1811 18.6892 12.0159 22.1535C12.3432 22.2829 12.6672 22.4214 13.0008 22.5773C16.0509 23.927 18.9823 26.5938 23.4574 29.1405C25.6723 30.3768 28.8584 31.3918 31.7915 30.8828C34.7161 30.4123 36.8659 29.0163 38.6721 27.5825C39.0747 27.2581 39.4405 26.9392 39.8299 26.5891C38.9514 25.334 38.0728 24.079 37.1943 22.8239C36.7982 23.023 36.4328 23.1879 36.0523 23.3486C34.3474 24.0766 32.6531 24.4272 31.4309 24.1901C30.2208 23.9578 29.3728 23.321 28.2405 22.2037C25.9975 19.9555 23.574 16.1893 19.8169 12.8558C19.3953 12.4824 18.9673 12.1208 18.5115 11.7605Z" fill="url(#paint0_linear_5076_290)" />
-            </g>
-            <defs>
-              <linearGradient id="paint0_linear_5076_290" x1="12.6899" y1="5.82884" x2="33.1529" y2="29.3558" gradientUnits="userSpaceOnUse">
-                <stop stopColor="white" />
-                <stop offset="1" stopColor="#989898" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <img src={aforoWordmark} alt="Aforo" className="logo-text" height={24} />
-        </div>
-        <nav className="nav-links">
-          <a href="#">Home</a>
-          <a href="#">Pricing</a>
-          <a href="#">Built For</a>
-          <a href="#">Resources</a>
-          <a 
-            href="#" 
-            className="nav-link" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              setShowSignIn(true); 
-              setShowOrg(false); 
-            }}
-          >
-            Sign In
-          </a>
-          <button className="contact-btn" onClick={()=>setShowOrg(true)}>Contact Sales</button>
-        </nav>
-      </header>
+      {showNavbar && (
+        <header className="navbar">
+          <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="34" height="31" viewBox="0 0 34 31" fill="none">
+  <path d="M15.9656 0.5566C14.4403 0.992399 11.88 4.733 10.7905 6.54883C14.059 8.45545 17.0551 13.0858 20.0512 16.0819C23.0473 19.078 24.1368 18.8057 25.7711 18.8057C27.0785 18.8057 29.2211 17.7162 30.129 17.1714C28.4948 14.2661 24.6816 7.63833 22.5026 4.36984C19.7788 0.284226 17.8722 0.0118523 15.9656 0.5566Z" fill="#23546C"/>
+  <path d="M33.6699 24.7979C33.452 23.9263 32.4896 21.711 32.0357 20.7123C30.7283 22.0197 28.5856 23.2544 27.6777 23.7084C21.1407 26.9769 14.8761 22.3465 11.0629 19.3504C8.01227 16.9535 5.97855 15.9911 5.34301 15.8095C4.97984 16.4451 3.81771 18.5878 2.07452 22.0742C-0.104474 26.4321 0.985022 28.3388 2.89164 29.4283C4.79826 30.5177 8.88387 30.7901 16.238 30.7901C23.5921 30.7901 28.2224 30.7901 31.2185 29.7006C34.2147 28.6111 33.9423 25.8874 33.6699 24.7979Z" fill="#23546C"/>
+</svg>
+            <img src={aforoWordmark} alt="Aforo" className="logo-text" height={24} />
+          </div>
+          <nav className="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Pricing</a>
+            <a href="#">Built For</a>
+            <a href="#">Resources</a>
+            <a 
+              href="#" 
+              className="nav-link" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setShowSignIn(true); 
+                setShowOrg(false); 
+              }}
+            >
+              Sign In
+            </a>
+            <button className="contact-btn" onClick={()=>setShowOrg(true)}>Contact Sales</button>
+          </nav>
+        </header>
+      )}
 
       {/* Hero or Organization */}
       {showSignIn ? (
@@ -89,9 +88,12 @@ const Landing: React.FC = () => {
         </section>
       </>
     )}
-    <section>
-      <Footer />
-    </section>
+    {/* Only show footer when not showing organization form or sign in */}
+    {!showOrg && !showSignIn && (
+      <section>
+        <Footer />
+      </section>
+    )}
     </>
   );
 };

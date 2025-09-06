@@ -8,14 +8,50 @@ export interface LoginPayload {
   password: string;
 }
 
-export async function login(payload: LoginPayload) {
-  const res = await fetch(`${BASE_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Login failed');
-  return res.json();
+export interface LoginResponse {
+  success: boolean;
+  organizationId: number;
+  status: string;
+  message: string;
+  token: string;
+}
+
+export async function login(payload: LoginPayload): Promise<LoginResponse> {
+  try {
+    console.log('Sending login request to:', `${BASE_URL}/login`);
+    console.log('Request payload:', JSON.stringify(payload));
+    
+    const res = await fetch(`${BASE_URL}/login`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const responseText = await res.text();
+    console.log('Login response status:', res.status);
+    console.log('Login response headers:', Object.fromEntries(res.headers.entries()));
+    console.log('Login response body:', responseText);
+
+    if (!res.ok) {
+      let errorMessage = 'Login failed';
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        // If we can't parse the error as JSON, use the raw text
+        errorMessage = responseText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return JSON.parse(responseText);
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
 }
 
 export interface CreateCustomerPayload {
