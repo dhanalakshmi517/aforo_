@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './Main.css';
 import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/Landing/SignIn';
-import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUserLastActiveTimestamp } from 'wasp/client/operations';
 import { cn } from './cn';
@@ -37,8 +36,10 @@ export default function App() {
   const navigate = useNavigate();
   const { data: user, isLoading: isAuthLoading } = useAuth();
   const location = useLocation();
+
   const isNewProductPage = location.pathname === '/get-started/products/new';
   const isAuthRoute = ['/signin', '/login', '/contact-sales', '/thank-you', '/'].includes(location.pathname);
+
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showNewProductForm, setShowNewProductForm] = useState(false);
@@ -62,8 +63,7 @@ export default function App() {
 
     // @ts-ignore - CustomEvent type issue
     window.addEventListener('toggleSidebar', handleToggleSidebar);
-    
-    // Cleanup
+
     return () => {
       // @ts-ignore - CustomEvent type issue
       window.removeEventListener('toggleSidebar', handleToggleSidebar);
@@ -80,37 +80,6 @@ export default function App() {
     }
   }, [user]);
 
-
-  
-
-  const navigationItems = [
-    {
-      name: 'Home',
-      to: '/',
-    },
-    {
-      name: 'Get Started',
-      to: '/get-started',
-    },
-    {
-      name: 'Customers',
-      to: '/get-started/customers',
-    },
-    {
-      name: 'Products',
-      to: '/get-started/products',
-    },
-    {
-      name: 'Rate Plans',
-      to: '/get-started/rate-plans',
-    },
-    {
-      name: 'Billable Metrics',
-      to: '/get-started/metering',
-    }
-  ];
-
-
   const currentTab = (() => {
     if (location.pathname === '/get-started') return 'Get Started';
     if (location.pathname === '/get-started/customers') return 'Customers';
@@ -118,27 +87,38 @@ export default function App() {
     if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
     if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
-
     if (location.pathname === '/get-started/subscriptions') return 'Purchases';
-
-
     return 'Get Started';
   })();
 
-  // Hide sidebar when creating a new customer, rate plan, or product
+  // Hide sidebar when creating or editing entities
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
     const isEditingCustomer = /\/get-started\/customers\/\d+\/edit$/.test(location.pathname);
 
-    if (showCreatePlan || showNewProductForm || showNewCustomerForm || showNewUsageMetricForm || showNewSubscriptionForm || hideSidebarOnEditMetric || isEditingPlan || isEditingCustomer) {
+    if (
+      showCreatePlan ||
+      showNewProductForm ||
+      showNewCustomerForm ||
+      showNewUsageMetricForm ||
+      showNewSubscriptionForm ||
+      hideSidebarOnEditMetric ||
+      isEditingPlan ||
+      isEditingCustomer
+    ) {
       setShowSidebar(false);
     } else {
       setShowSidebar(true);
     }
-
-  }, [showCreatePlan, showNewProductForm, showNewCustomerForm, showNewUsageMetricForm, showNewSubscriptionForm, hideSidebarOnEditMetric, location.pathname]);
-
-
+  }, [
+    showCreatePlan,
+    showNewProductForm,
+    showNewCustomerForm,
+    showNewUsageMetricForm,
+    showNewSubscriptionForm,
+    hideSidebarOnEditMetric,
+    location.pathname
+  ]);
 
   // Show loading state while checking auth
   if (isAuthLoading && !isAuthRoute) {
@@ -150,115 +130,159 @@ export default function App() {
   }
 
   return (
-    <div className='min-h-screen bg-white'>
+    <div className="min-h-screen bg-white">
       <CookieConsentBanner />
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signin" element={
-          user ? <Navigate to="/get-started" replace /> : <SignIn />
-        } />
-        <Route path="/contact-sales" element={
-          <div className="min-h-screen">
-            <Organization />
-          </div>
-        } />
-        <Route path="/thank-you" element={
-          <div className="min-h-screen">
-            <ThankYou />
-          </div>
-        } />
-        <Route path="/" element={
-          user ? <Navigate to="/get-started" replace /> : (
+        <Route
+          path="/signin"
+          element={user ? <Navigate to="/get-started" replace /> : <SignIn />}
+        />
+        <Route
+          path="/contact-sales"
+          element={
             <div className="min-h-screen">
-              <Landing />
+              <Organization />
             </div>
-          )
-        } />
-        
-        {/* Protected routes */}
-        <Route element={<ProtectedRoute><div className="flex flex-col"><div className="flex-1">
-          {!isNewProductPage && (
-            <SideNavbar 
-              activeTab={currentTab} 
-              onTabClick={(tab) => {
-                const slug =
-                tab === 'Billable Metrics' ? 'metering'
-                : tab === 'Purchases' ? 'subscriptions'
-                : tab === 'Data Ingetion' ? 'data-ingetion'
-                : tab.toLowerCase().replace(/\s+/g, '-');
-                navigate(`/get-started/${slug}`);
-              }} 
-              hidden={!showSidebar} 
-            />
-          )}
-          <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <Routes>
-              <Route index element={<Navigate to="/get-started" replace />} />
-              <Route path="estimate-revenue" element={<EstimateRevenue />} />
-              <Route path="usage-estimation" element={<UsageEstimation />} />
-              <Route path="volume-estimation" element={<VolumeEstimation />} />
-              <Route path="tiered-estimation" element={<TieredEstimation />} />
-              <Route path="stair-estimation" element={<StairEstimation />} />
-              
-              <Route path="get-started">
-                <Route index element={<div className="flex-1 h-full">Empty Content</div>} />
-                <Route path="customers" element={
-                  <Customers 
-                    showNewCustomerForm={showNewCustomerForm} 
-                    setShowNewCustomerForm={setShowNewCustomerForm} 
-                  />
-                } />
-                <Route path="customers/:id/edit" element={<EditCustomer />} />
-                <Route path="products" element={
-                  <Products 
-                    showNewProductForm={showNewProductForm} 
-                    setShowNewProductForm={setShowNewProductForm} 
-                  />
-                } />
-                <Route path="products/new" element={
-                  <NewProduct 
-                    onClose={() => navigate('/get-started/products')} 
-                  />
-                } />
-                <Route path="rate-plans" element={
-                  <RatePlans 
-                    showCreatePlan={showCreatePlan} 
-                    setShowCreatePlan={setShowCreatePlan}
-                    ratePlans={ratePlans}
-                  />
-                } />
-                <Route path="rate-plans/:id/edit" element={
-                  <EditPlan onClose={() => navigate(-1)} />
-                } />
-                <Route path="rate-plans/estimate-revenue" element={<EstimateRevenue />} />
-                <Route path="rate-plans/usage-estimation" element={<UsageEstimation />} />
-                <Route path="rate-plans/volume-estimation" element={<VolumeEstimation />} />
-                <Route path="rate-plans/tiered-estimation" element={<TieredEstimation />} />
-                <Route path="rate-plans/stair-estimation" element={<StairEstimation />} />
-                <Route path="subscriptions" element={
-                  <Subscriptions 
-                    showNewSubscriptionForm={showNewSubscriptionForm}
-                    setShowNewSubscriptionForm={setShowNewSubscriptionForm}
-                  />
-                } />
-                <Route path="data-ingetion" element={<DataIngestion />} />
-                <Route path="metering" element={
-                  <Metering 
-                    showNewUsageMetricForm={showNewUsageMetricForm}
-                    setShowNewUsageMetricForm={setShowNewUsageMetricForm}
-                    setHideSidebarOnEditMetric={setHideSidebarOnEditMetric}
-                  />
-                } />
-              </Route>
-            </Routes>
-          </div>
-        </div></div></ProtectedRoute>}>
-          {/* These routes are protected and will be wrapped by the ProtectedRoute */}
-          <Route path="/*" element={
-            <Navigate to="/get-started" replace />
-          } />
-        </Route>
+          }
+        />
+        <Route
+          path="/thank-you"
+          element={
+            <div className="min-h-screen">
+              <ThankYou />
+            </div>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            user ? (
+              <Navigate to="/get-started" replace />
+            ) : (
+              <div className="min-h-screen">
+                <Landing />
+              </div>
+            )
+          }
+        />
+
+        {/* Protected routes (HEAD kept) */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <div className="flex flex-col">
+                <div className="flex-1">
+                  {/* Sidebar, hidden on New Product page and when toggled off */}
+                  {!isNewProductPage && (
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                  )}
+
+                  <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                    {/* Inner routes that are protected */}
+                    <Routes>
+                      {/* Redirect default protected index to /get-started */}
+                      <Route index element={<Navigate to="/get-started" replace />} />
+
+                      {/* Estimation shortcuts (protected) */}
+                      <Route path="estimate-revenue" element={<EstimateRevenue />} />
+                      <Route path="usage-estimation" element={<UsageEstimation />} />
+                      <Route path="volume-estimation" element={<VolumeEstimation />} />
+                      <Route path="tiered-estimation" element={<TieredEstimation />} />
+                      <Route path="stair-estimation" element={<StairEstimation />} />
+
+                      {/* Get Started tree */}
+                      <Route path="get-started">
+                        <Route index element={<div className="flex-1 h-full">Empty Content</div>} />
+
+                        <Route
+                          path="customers"
+                          element={
+                            <Customers
+                              showNewCustomerForm={showNewCustomerForm}
+                              setShowNewCustomerForm={setShowNewCustomerForm}
+                            />
+                          }
+                        />
+                        <Route path="customers/:id/edit" element={<EditCustomer />} />
+
+                        <Route
+                          path="products"
+                          element={
+                            <Products
+                              showNewProductForm={showNewProductForm}
+                              setShowNewProductForm={setShowNewProductForm}
+                            />
+                          }
+                        />
+                        <Route
+                          path="products/new"
+                          element={<NewProduct onClose={() => navigate('/get-started/products')} />}
+                        />
+
+                        <Route
+                          path="rate-plans"
+                          element={
+                            <RatePlans
+                              showCreatePlan={showCreatePlan}
+                              setShowCreatePlan={setShowCreatePlan}
+                              ratePlans={ratePlans}
+                            />
+                          }
+                        />
+                        <Route path="rate-plans/:id/edit" element={<EditPlan onClose={() => navigate(-1)} />} />
+                        <Route path="rate-plans/estimate-revenue" element={<EstimateRevenue />} />
+                        <Route path="rate-plans/usage-estimation" element={<UsageEstimation />} />
+                        <Route path="rate-plans/volume-estimation" element={<VolumeEstimation />} />
+                        <Route path="rate-plans/tiered-estimation" element={<TieredEstimation />} />
+                        <Route path="rate-plans/stair-estimation" element={<StairEstimation />} />
+
+                        <Route
+                          path="subscriptions"
+                          element={
+                            <Subscriptions
+                              showNewSubscriptionForm={showNewSubscriptionForm}
+                              setShowNewSubscriptionForm={setShowNewSubscriptionForm}
+                            />
+                          }
+                        />
+                        <Route path="data-ingetion" element={<DataIngestion />} />
+                        <Route
+                          path="metering"
+                          element={
+                            <Metering
+                              showNewUsageMetricForm={showNewUsageMetricForm}
+                              setShowNewUsageMetricForm={setShowNewUsageMetricForm}
+                              setHideSidebarOnEditMetric={setHideSidebarOnEditMetric}
+                            />
+                          }
+                        />
+                      </Route>
+
+                      {/* Fallback inside protected area */}
+                      <Route path="*" element={<Navigate to="/get-started" replace />} />
+                    </Routes>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

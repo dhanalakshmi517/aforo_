@@ -46,7 +46,6 @@ const SignIn: React.FC = () => {
       const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/get-started';
       console.log('Login successful, redirecting to:', redirectTo);
       navigate(redirectTo);
-      
     } catch (err: any) {
       console.error('Login error details:', {
         name: err.name,
