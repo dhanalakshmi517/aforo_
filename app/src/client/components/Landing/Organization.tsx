@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { createOrganization, fetchCountries, type OrganizationPayload } from "./api";
-import ThankYou from "./ThankYou";
-import VisualBg from "./visual.svg";
+import { useNavigate } from "react-router-dom";
 import CountrySelector from "../Common/CountrySelector";
 import "./Organization.css";
+import aforoWordmark from "./logoaforo.svg";
 
 interface Country {
   code: string;
@@ -12,8 +12,9 @@ interface Country {
 }
 
 const Organization: React.FC = () => {
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [selectedCountry, setSelectedCountry] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countries, setCountries] = useState<Country[]>([]);
@@ -27,12 +28,7 @@ const Organization: React.FC = () => {
       try {
         const data = await fetchCountries();
         setCountries(data);
-        // Set default country to India if available
-        const india = data.find(c => c.code === 'IN');
-        if (india) {
-          setSelectedCountry('IN');
-          setPhoneNumber(india.dialCode);
-        }
+        // No default country selected, will show placeholder
       } catch (error) {
         console.error('Failed to load countries:', error);
       } finally {
@@ -56,18 +52,59 @@ const Organization: React.FC = () => {
   };
 
   const handleDialCodeChange = (dialCode: string) => {
+    const dialCodeWithSpace = `${dialCode} `;
+    
     // If the current phone number is empty or matches the old dial code, replace it with the new one
     if (!phoneNumber || phoneNumber.startsWith('+') || phoneNumber === '') {
-      setPhoneNumber(dialCode);
+      setPhoneNumber(dialCodeWithSpace);
     } else {
       // Otherwise, keep the user's input but update the dial code
-      const userNumber = phoneNumber.replace(/^\+?[0-9]+/, '');
-      setPhoneNumber(dialCode + userNumber);
+      const userNumber = phoneNumber.replace(/^\+?[0-9]+\s*/, '');
+      setPhoneNumber(dialCodeWithSpace + userNumber);
+    }
+    
+    // Clear any phone validation errors when dial code changes
+    if (errors.phone) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.phone;
+        return newErrors;
+      });
     }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhoneNumber(e.target.value);
+    const input = e.target.value;
+    const selected = countries.find(c => c.code === selectedCountry);
+    
+    if (!selected) {
+      setPhoneNumber(input);
+      return;
+    }
+
+    const dialCode = selected.dialCode;
+    const dialCodeWithSpace = `${dialCode} `;
+    
+    // If input is empty, just set the dial code with space
+    if (input === '') {
+      setPhoneNumber(dialCodeWithSpace);
+      return;
+    }
+
+    // If input already starts with the dial code
+    if (input.startsWith(dialCode)) {
+      // If there's no space after dial code, add it
+      if (input.length > dialCode.length && input[dialCode.length] !== ' ') {
+        const numberPart = input.substring(dialCode.length).replace(/\D/g, '');
+        setPhoneNumber(`${dialCode} ${numberPart}`);
+      } else {
+        setPhoneNumber(input);
+      }
+    } else {
+      // Otherwise, prepend the dial code and clean the input
+      const numberPart = input.replace(/\D/g, '');
+      setPhoneNumber(`${dialCode} ${numberPart}`);
+    }
   };
 
   const handleFieldChange = (
@@ -97,11 +134,17 @@ const Organization: React.FC = () => {
     
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    const formValues = Object.fromEntries(formData.entries());
+    const formValues: Record<string, any> = Object.fromEntries(formData.entries());
     
-    // Use the otherRole if 'OTHER' is selected
-    if (selectedRole === 'OTHER' && otherRole.trim()) {
-      formValues.role = otherRole;
+    // Set the role and customRole based on selection
+    if (selectedRole === 'OTHER') {
+      // When 'Other' is selected, set role to 'OTHERS' and include the custom role text
+      formValues.role = 'OTHERS';
+      formValues.customRole = otherRole.trim();
+    } else {
+      // For all other roles, just set the role
+      formValues.role = selectedRole;
+      formValues.customRole = null; // Clear customRole for non-other roles
     }
     
     // Manually add the selected country and phone number
@@ -109,28 +152,69 @@ const Organization: React.FC = () => {
     formValues.phone = phoneNumber;
 
     const newErrors: Record<string, string> = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\+?[0-9\s-()]{10,}$/;
+    // Business email validation - doesn't allow common free email domains
+    const emailRegex = /^[^\s@]+@(?!gmail\.com|yahoo\.com|hotmail\.com|outlook\.com|aol\.com|icloud\.com|mail\.com|protonmail\.com|zoho\.com|yandex\.com|gmx\.com|tutanota\.com|tutanota\.de|tutanota\.io|tuta\.io|tutanota\.com|tuta\.io|mail\.ru|inbox\.ru|list\.ru|bk\.ru|ya\.ru)[^\s@]+\.[^\s@]+$/;
+    
+    // Phone number validation based on country
+    const phoneNumberWithoutFormatting = phoneNumber.replace(/\D/g, '');
+    const countryCode = selectedCountry;
+    let phoneIsValid = true;
+    let phoneError = '';
+    
+    if (countryCode === 'IN') {
+      // India: 10 digits after country code (91)
+      const digitsOnly = phoneNumberWithoutFormatting.replace(/^91/, '');
+      if (digitsOnly.length !== 10) {
+        phoneIsValid = false;
+        phoneError = 'Indian phone numbers must be 10 digits';
+      }
+    } else if (countryCode === 'US' || countryCode === 'CA') {
+      // US/Canada: 10 digits after country code (1)
+      const digitsOnly = phoneNumberWithoutFormatting.replace(/^1/, '');
+      if (digitsOnly.length !== 10) {
+        phoneIsValid = false;
+        phoneError = 'US/Canada phone numbers must be 10 digits';
+      }
+    } else {
+      // Default validation for other countries (at least 8 digits)
+      const digitsOnly = phoneNumberWithoutFormatting.replace(/^\+?[0-9]{1,3}/, '');
+      if (digitsOnly.length < 8) {
+        phoneIsValid = false;
+        phoneError = 'Invalid phone number length';
+      }
+    }
 
     const requiredFields: [string, string][] = [
       ["firstName", "This field is required"],
       ["lastName", "This field is required"],
-      ["email", "Please enter a valid email address"],
+      ["email", "Invalid email address"],
       ["company", "This field is required"],
       ["role", "This field is required"],
       ["empSize", "This field is required"],
       ["country", "This field is required"],
-      ["phone", "Please enter a valid phone number"],
+      ["phone", "Invalid phone number"],
     ];
+
+    // Add phone validation if phone field exists
+    if (!phoneIsValid && phoneError) {
+      newErrors.phone = phoneError;
+    }
 
     requiredFields.forEach(([field, message]) => {
       const value = formValues[field]?.toString().trim();
       if (!value) {
         newErrors[field] = "This field is required";
-      } else if (field === 'email' && !emailRegex.test(value)) {
-        newErrors[field] = message;
-      } else if (field === 'phone' && !phoneRegex.test(value)) {
-        newErrors[field] = message;
+      } else if (field === 'email') {
+        if (!emailRegex.test(value)) {
+          newErrors[field] = 'Invalid business email';
+        } else if (!value.endsWith('.com') && !value.endsWith('.net') && !value.endsWith('.org') && !value.endsWith('.io') && !value.endsWith('.co') && !value.endsWith('.ai')) {
+          newErrors[field] = 'Invalid business email';
+        }
+      } else if (field === 'phone' && !phoneIsValid) {
+        // Use the specific phone error message we set earlier
+        if (!newErrors.phone) {
+          newErrors[field] = message;
+        }
       }
     });
 
@@ -138,45 +222,80 @@ const Organization: React.FC = () => {
       setErrors(newErrors);
       return;
     }
-    setErrors({});
-    const payload: OrganizationPayload = {
-      firstName: formValues.firstName || null,
-      lastName: formValues.lastName || null,
-      company: formValues.company || null,
-      businessEmail: formValues.email || null,
-      role: formValues.role || null,
-      employeeSize: formValues.empSize || null,
-      country: formValues.country || null,
-      phoneNumber: formValues.phone || null,
-      howCanWeHelp: formValues.help || null,
-      marketingOptIn: formValues.agree === "on",
-    };
-
+    
     try {
-      console.log("Submitting organization payload", payload);
-      const responseJson = await createOrganization(payload);
-      console.log("Organization created successfully", responseJson);
+      // Prepare the payload for the API
+      const roleValue = selectedRole === 'OTHER' ? 'OTHERS' : selectedRole;
+      const customRoleValue = selectedRole === 'OTHER' && otherRole.trim() ? otherRole.trim() : null;
+      
+      console.log('Form values:', formValues);
+      console.log('Selected role:', selectedRole);
+      console.log('Other role:', otherRole);
+      console.log('Sending role:', roleValue);
+      console.log('Sending customRole:', customRoleValue);
+      
+      // Create base payload without customRole
+      const payload: any = {
+        firstName: formValues.firstName?.toString() || null,
+        lastName: formValues.lastName?.toString() || null,
+        company: formValues.company?.toString() || null,
+        businessEmail: formValues.email?.toString() || null,
+        role: roleValue,
+        employeeSize: formValues.empSize?.toString() || null,
+        country: formValues.country?.toString() || null,
+        phoneNumber: formValues.phone?.toString() || null,
+        howCanWeHelp: formValues.help?.toString() || null,
+        marketingOptIn: formValues.agree === 'on',
+      };
+      
+      // Only add customRole if 'Other' is selected and has a value
+      if (selectedRole === 'OTHER' && customRoleValue) {
+        payload.customRole = customRoleValue;
+      }
+
+      console.log('Submitting organization payload:', payload);
+      const response = await createOrganization(payload);
+      console.log('Organization created successfully:', response);
+      
+      // Reset form and show success
       setSubmitted(true);
+      setErrors({});
+      navigate('/thank-you', { replace: true });
     } catch (err: any) {
-      console.error("Organization creation failed", err);
-      alert(`Failed to submit: ${err.message || err}`);
+      console.error('Error creating organization:', err);
+      
+      // Handle backend validation errors
+      if (err.response?.data?.phoneNumber) {
+        setErrors(prev => ({
+          ...prev,
+          phone: 'Invalid phone number' // Show simple error message
+        }));
+      } else {
+        // For other errors, show a generic error
+        alert(`Failed to submit: ${err.message || 'An error occurred. Please try again.'}`);
+      }
     }
-  };
-  if (submitted) return <ThankYou />;
+  }
 
   return (
     <div className="org-page">
-      {/* Decorative background SVG */}
-      <img src={VisualBg} alt="" className="org-bg" aria-hidden="true"/>
+      {/* Decorative background  visual svg is there na remove it i dont wnat */}
 
 
       <div className="org-wrap">
         {/* Left copy */}
         <section className="org-copy">
+          <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="47" height="43" viewBox="0 0 47 43" fill="none">
+              <path d="M21.9507 0.678484C19.8152 1.2886 16.2308 6.52545 14.7055 9.06761C19.2814 11.7369 23.476 18.2194 27.6705 22.4139C31.8651 26.6085 33.3904 26.2272 35.6783 26.2272C37.5087 26.2272 40.5084 24.7019 41.7795 23.9392C39.4916 19.8718 34.153 10.5929 31.1024 6.01702C27.2892 0.29716 24.6199 -0.0841636 21.9507 0.678484Z" fill="#1F3F50"/>
+              <path d="M46.7367 34.6163C46.4316 33.3961 45.0843 30.2946 44.4488 28.8964C42.6184 30.7268 39.6187 32.4555 38.3476 33.091C29.1958 37.6669 20.4254 31.1844 15.0868 26.9898C10.816 23.6342 7.96879 22.2868 7.07904 22.0326C6.5706 22.9224 4.94362 25.9221 2.50315 30.8031C-0.547436 36.9042 0.977859 39.5735 3.64712 41.0988C6.31639 42.6241 12.0362 43.0054 22.332 43.0054C32.6277 43.0054 39.1102 43.0054 43.3048 41.4801C47.4993 39.9548 47.118 36.1416 46.7367 34.6163Z" fill="#1F3F50"/>
+            </svg>
+            <img src={aforoWordmark} alt="Aforo" height={24} />
+          </div>
           <h1 className="org-title">
             You Focus on the Product.
             <br />
-            <span>Aforo Will Handle the Billing.</span>
+            Aforo Will Handle the Billing.
           </h1>
           <p className="org-sub">
             Get expert help from Aforo’s sales team to set up everything —
@@ -278,16 +397,21 @@ const Organization: React.FC = () => {
                     <option value="OTHER">Other</option>
                   </select>
                   {selectedRole === 'OTHER' && (
-                    <div className="other-role-input" style={{ marginTop: '8px' }}>
+                    <div className="other-role-input" style={{ marginTop: '8px', width: '100%' }}>
+                      <label htmlFor="otherRole" className="form-label">
+                        Specify your role
+                      </label>
                       <input
                         type="text"
-                        placeholder="Please specify your role"
+                        id="otherRole"
+                        placeholder="Specify your role"
                         value={otherRole}
                         onChange={(e) => setOtherRole(e.target.value)}
-                        className={`${!otherRole.trim() && errors.role ? 'error' : ''}`}
+                        className={`field-input ${!otherRole.trim() && errors.role ? 'error' : ''}`}
+                        style={{ width: '100%' }}
                       />
                       {!otherRole.trim() && errors.role && (
-                        <span className="error-msg">Please specify your role</span>
+                        <span className="error-msg">Specify your role</span>
                       )}
                     </div>
                   )}
@@ -339,35 +463,77 @@ const Organization: React.FC = () => {
               </div>
               <div className="org-field">
                 <label htmlFor="phone" className="form-label">Phone Number</label>
-                <input 
-                  id="phone" 
-                  name="phone" 
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    const selected = countries.find(c => c.code === selectedCountry);
-                    if (selected) {
-                      // If user tries to delete the dial code, keep it
-                      if (!e.target.value.startsWith(selected.dialCode)) {
-                        const newNumber = e.target.value.replace(/^\+?\d*/, '');
-                        setPhoneNumber(selected.dialCode + newNumber);
-                        return;
-                      }
-                    }
-                    setPhoneNumber(e.target.value);
-                    // Clear phone error when user types
-                    if (errors.phone) {
-                      setErrors(prev => {
-                        const newErrors = { ...prev };
-                        delete newErrors.phone;
-                        return newErrors;
-                      });
-                    }
-                  }}
-                  placeholder="Phone Number"
-                  className={errors.phone ? 'error' : ''}
-                  style={{ width: '100%' }}
-                />
-                {errors.phone && <span className="error-msg">{errors.phone}</span>}
+                <div className="phone-input-container">
+                  <div className="phone-input-wrapper">
+                    <div className="country-code-display">
+                      {selectedCountry && (
+                        <>
+                          <span className={`fi fi-${selectedCountry.toLowerCase()}`} style={{marginRight: '8px'}}></span>
+                          <span>{countries.find(c => c.code === selectedCountry)?.dialCode}</span>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      className={`phone-input ${errors.phone ? 'error' : ''}`}
+                      value={(() => {
+                        // Only show the user's input without the country code
+                        if (!selectedCountry) return '';
+                        const dialCode = countries.find(c => c.code === selectedCountry)?.dialCode || '';
+                        return phoneNumber.startsWith(dialCode) 
+                          ? phoneNumber.substring(dialCode.length).trim() 
+                          : phoneNumber;
+                      })()}
+                      onChange={(e) => {
+                        const selected = countries.find(c => c.code === selectedCountry);
+                        if (!selected) return;
+                        
+                        const input = e.target.value;
+                        const dialCode = selected.dialCode;
+                        
+                        // If input is empty, just set the dial code with space
+                        if (input === '') {
+                          setPhoneNumber(dialCode + ' ');
+                          return;
+                        }
+                        
+                        // Format the phone number
+                        const userNumber = input.replace(/\D/g, ''); // Remove all non-digits
+                        const formattedNumber = userNumber.replace(/(\d{3})(?=\d)/g, '$1 '); // Add space after every 3 digits
+                        
+                        // Only add the dial code if it's not already there
+                        const newPhoneNumber = phoneNumber.startsWith(dialCode) 
+                          ? dialCode + (formattedNumber ? ' ' + formattedNumber : '')
+                          : formattedNumber;
+                        
+                        setPhoneNumber(newPhoneNumber);
+                        
+                        // Clear phone error when user types
+                        if (errors.phone) {
+                          setErrors(prev => ({
+                            ...prev,
+                            phone: undefined
+                          }));
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        // Prevent backspace from deleting the country code and space
+                        const selectionStart = (e.target as HTMLInputElement).selectionStart || 0;
+                        const dialCode = selectedCountry ? 
+                          countries.find(c => c.code === selectedCountry)?.dialCode || '' : '';
+                        const dialCodeWithSpace = `${dialCode} `;
+                        
+                        if (e.key === 'Backspace' && selectionStart <= dialCodeWithSpace.length) {
+                          e.preventDefault();
+                        }
+                      }}
+                      placeholder="123-456-7890"
+                    />
+                  </div>
+                  {errors.phone && <span className="error-msg">{errors.phone}</span>}
+                </div>
               </div>
             </div>
 

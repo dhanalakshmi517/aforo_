@@ -1,8 +1,8 @@
 @import "../Variables/Variables.css";
 /* Error State Styles */
-.input-field.error,
-.textarea-field.error,
-.select-field.error {
+.com-input-field.error,
+.com-textarea-field.error,
+.com-select-field.error {
   border-color: red;
 }
 
@@ -19,58 +19,65 @@
 
 
 .com-form-group {
-  margin-top: 16px;
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .com-form-label {
   display: block;
-  margin-bottom: 6px;
-  color: var(--color-neutral-1000);
+  margin-bottom: 4px;
+  color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
+  font-size: 13px;
   font-weight: 400;
-  line-height: var(--line-height-body-md);
+  line-height: 1.2;
 }
 
-.com-create-form .input-field,
-.com-create-form .textarea-field,
-.com-create-form .select-field,
-.input-field,
-.textarea-field,
-.select-field {
-  width: 456px !important;
-  height: 2.5rem;
+.com-input-field,
+.com-textarea-field,
+.com-select-field {
+  width: 300px;
+  height: 40px;
   padding: 8px 12px;
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-md);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  font-size: 13px;
   outline: none;
-  transition: border 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background-color: var(--color-neutral-100);
+  box-sizing: border-box;
+  line-height: 1.2;
 }
 
-.input-field:focus,
-.textarea-field:focus,
-.select-field:focus {
+.com-input-field:focus,
+.com-textarea-field:focus,
+.com-select-field:focus {
   border-color: var(--color-neutral-200);
   box-shadow: none;
 }
 
-.textarea-field {
-  min-height: 5.5rem;
+.com-textarea-field {
+  min-height: 80px;
+  height: auto;
   resize: vertical;
   padding: 8px 12px;
+  line-height: 1.5;
+  background-color: var(--color-neutral-100);
+  min-width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
 }
 
 /* 🔴 Error State */
-.com-input-field.error,
-.com-textarea-field.error,
-.com-select-field.error {
-  border-color: red;
-}
 
 .error-message {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 4px;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 2px;
+  min-height: 16px;
+  line-height: 1.2;
 }

@@ -1,6 +1,13 @@
 // Shared API utilities for Landing page components
 // Keep all fetch logic centralized for easier maintenance and testing.
 
+interface ApiError extends Error {
+  response?: {
+    data: any;
+    status: number;
+  };
+}
+
 export interface Country {
   code: string;
   name: string;
@@ -13,6 +20,7 @@ export interface OrganizationPayload {
   company: FormDataEntryValue | null;
   businessEmail: FormDataEntryValue | null;
   role: FormDataEntryValue | null;
+  customRole: FormDataEntryValue | null;
   employeeSize: FormDataEntryValue | null;
   country: FormDataEntryValue | null;
   phoneNumber: FormDataEntryValue | null;
@@ -39,9 +47,20 @@ export async function createOrganization(payload: OrganizationPayload) {
     });
 
     if (!res.ok) {
+      let errorData;
       const errorText = await res.text();
       console.error("API Error Response:", errorText);
-      throw new Error(errorText || "Failed to create organization");
+      
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        // If we can't parse the error as JSON, use the raw text
+        errorData = { message: errorText };
+      }
+      
+      const error: ApiError = new Error(errorData.message || "Failed to create organization");
+      error.response = { data: errorData, status: res.status };
+      throw error;
     }
 
     return await res.json();

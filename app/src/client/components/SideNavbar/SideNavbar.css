@@ -153,14 +153,14 @@ letter-spacing: -1.896px;
 
 /* Thicken SVG strokes when active */
 .nav-item.active .icon-wrapper svg path {
-  stroke-width: 1.5;
+  stroke-width: 1.8;
 }
 
 .tab-name {
 
   color: var(--color-neutral-100);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
+  font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-md);

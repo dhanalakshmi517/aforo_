@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
  import SubReview from './SubReview';
 import { Api, Product, RatePlan, Customer } from './api';
@@ -128,7 +129,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose }) => {
                   }}
                   options={ratePlans.map(rp => ({ label: rp.ratePlanName, value: rp.ratePlanId.toString() }))}
                 />
-                <p className="field-note">Select a rate plan associated with the chosen product. Changing the product will reset this selection.</p>
+                <p className="field-note">Select a rate plan associated with the chosen product. Changing<hr /> the product will reset this selection.</p>
                 <SelectField
                   label="Payment Type"
                   value={paymentType}

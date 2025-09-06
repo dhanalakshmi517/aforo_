@@ -15,19 +15,58 @@ const SignIn: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const payload = { businessEmail: email, password };
-    console.log('Login payload', payload);
+    
+    // Basic validation
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
+    const payload = { businessEmail: email.trim(), password };
+    
     try {
       setIsSubmitting(true);
-      const loginResponse: LoginResponse = await login(payload);
-      console.log('Login response:', loginResponse);
+      console.log('Attempting login with email:', email);
+      
+      const loginResponse = await login(payload);
+      console.log('Login response received:', loginResponse);
+      
+      if (!loginResponse || !loginResponse.token) {
+        throw new Error(loginResponse?.message || 'No authentication token received');
+      }
+      
+      if (!loginResponse.success) {
+        throw new Error(loginResponse.message || 'Login failed');
+      }
       
       // Store authentication data including organizationId and token
-      setAuthData(loginResponse, email);
+      setAuthData(loginResponse, email.trim());
       
-      navigate('/get-started');
+      // Redirect to the dashboard or intended URL
+      const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/get-started';
+      console.log('Login successful, redirecting to:', redirectTo);
+      navigate(redirectTo);
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      console.error('Login error details:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+        response: err.response
+      });
+      
+      // More user-friendly error messages
+      let errorMessage = 'Login failed. Please check your credentials and try again.';
+      
+      if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+      } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid credentials')) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (err.message) {
+        // Use the server's error message if available
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

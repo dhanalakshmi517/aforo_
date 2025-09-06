@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, Product, createBillableMetric, BillableMetricPayload } from './api';
+import { 
+  getProducts, 
+  Product, 
+  createBillableMetric, 
+  updateBillableMetric, 
+  BillableMetricPayload, 
+  BillableMetricDetails,
+  finalizeBillableMetric
+} from './api';
 import UsageConditionForm from './UsageConditionForm';
 import AggregationFunctionSelect from './AggregationFunctionSelect';
 import AggregationWindowSelect from './AggregationWindowSelect';
@@ -28,6 +36,7 @@ const steps = [
 
 const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
     // form states
+    const [metricId, setMetricId] = useState<number | null>(null);
     const [metricName, setMetricName] = useState('');
     const [version, setVersion] = useState('');
     const [unitOfMeasure, setUnitOfMeasure] = useState('');
@@ -50,13 +59,65 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
             .catch((err: unknown) => console.error('Failed to load products', err));
     }, []);
 
-    const handleNext = async () => {
-        // If we're on the Review step and user clicks Save, ensure all required fields are filled then POST metric
-        if (currentStep === 2) {
-            if (!metricName.trim() || !selectedProductId || !unitOfMeasure) {
-                alert('Please fill Metric Name, Product and Unit of Measure');
-                return;
+    const validateCurrentStep = (step: number): boolean => {
+        switch (step) {
+            case 0: // Step 1: Basic Info
+                if (!metricName.trim()) {
+                    alert('Please enter a Metric Name');
+                    return false;
+                }
+                if (!selectedProductId) {
+                    alert('Please select a Product');
+                    return false;
+                }
+                if (!unitOfMeasure) {
+                    alert('Please select a Unit of Measure');
+                    return false;
+                }
+                if (!aggregationFunction) {
+                    alert('Please select an Aggregation Function');
+                    return false;
+                }
+                return true;
+            
+            case 1: // Step 2: Usage Conditions
+                // Add any specific validation for usage conditions if needed
+                return true;
+                
+            case 2: // Step 3: Review
+                // Final validation before submission
+                if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !aggregationFunction) {
+                    alert('Please fill all required fields');
+                    return false;
+                }
+                return true;
+                
+            default:
+                return true;
+        }
+    };
+
+    // Track previous values for comparison
+    const [previousValues, setPreviousValues] = useState<Partial<BillableMetricPayload>>({});
+
+    const saveOrUpdateMetric = async (isDraft: boolean = false) => {
+        // Only validate if not a draft save
+        if (!isDraft && !validateCurrentStep(currentStep)) {
+            return false;
+        }
+        
+        const payload: any = {};
+        
+        if (metricId) {
+            // For updates, include all required fields with their current values
+            // This ensures we don't accidentally clear required fields
+            if (metricName !== undefined) {
+                payload.metricName = metricName;
             }
+<<<<<<< HEAD
+            if (selectedProductId) {
+                payload.productId = Number(selectedProductId);
+=======
             const basePayload: Partial<import('./api').BillableMetricPayload> = {
                 metricName,
                 productId: Number(selectedProductId),
@@ -82,20 +143,127 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
             if (!result.ok) {
                 alert('Failed to create metric');
                 return;
+>>>>>>> main
             }
-            // If metricId returned, attempt to finalize
-            if (result.id !== undefined) {
-                const finalized = await finalizeBillableMetric(result.id);
-                if (!finalized) {
-                    alert('Metric created but failed to finalize');
+            if (version !== undefined) {
+                payload.version = version;
+            }
+            if (unitOfMeasure !== undefined) {
+                payload.unitOfMeasure = unitOfMeasure;
+            }
+            if (description !== undefined) {
+                payload.description = description;
+            }
+            if (aggregationFunction) {
+                payload.aggregationFunction = aggregationFunction;
+            }
+            if (aggregationWindow) {
+                payload.aggregationWindow = aggregationWindow;
+            }
+            if (billingCriteria !== undefined) {
+                payload.billingCriteria = billingCriteria || '';
+            }
+            if (usageConditions) {
+                payload.usageConditions = usageConditions;
+            }
+        } else if (isDraft) {
+            // For draft saves, only include fields that have values
+            if (metricName && metricName.trim() !== '') payload.metricName = metricName;
+            if (selectedProductId) payload.productId = Number(selectedProductId);
+            if (version && version.trim() !== '') payload.version = version;
+            if (unitOfMeasure && unitOfMeasure.trim() !== '') payload.unitOfMeasure = unitOfMeasure;
+            if (description && description.trim() !== '') payload.description = description;
+            if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
+            if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
+            if (billingCriteria) payload.billingCriteria = billingCriteria;
+            if (usageConditions && usageConditions.length > 0) payload.usageConditions = usageConditions;
+        } else {
+            // For final save, include all required fields with their current values
+            if (metricName.trim() !== '') payload.metricName = metricName;
+            if (selectedProductId) payload.productId = Number(selectedProductId);
+            if (version.trim() !== '') payload.version = version;
+            if (unitOfMeasure.trim() !== '') payload.unitOfMeasure = unitOfMeasure;
+            if (description.trim() !== '') payload.description = description;
+            if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
+            if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
+            if (billingCriteria) payload.billingCriteria = billingCriteria;
+            if (usageConditions) payload.usageConditions = usageConditions;
+        }
+        
+        console.log('Saving payload:', { metricId, payload }); // For debugging
+
+        try {
+            let result;
+            if (metricId) {
+                // Always use PUT for updates after the first save
+                console.log('Updating existing metric with ID:', metricId, 'Changes:', payload);
+                const success = await updateBillableMetric(metricId, payload);
+                if (!success) throw new Error('Failed to update metric');
+                result = { ok: true, id: metricId };
+                // Update previous values with the new values
+                setPreviousValues(prev => ({
+                    ...prev,
+                    ...payload
+                }));
+            } else {
+                // Only use POST for the very first save
+                if (Object.keys(payload).length === 0) {
+                    throw new Error('No fields to save');
+                }
+                console.log('Creating new metric');
+                const createResult = await createBillableMetric(payload);
+                console.log('Create metric result:', createResult);
+                if (!createResult.ok) throw new Error('Failed to create metric');
+                result = createResult;
+                // Save the metric ID for future updates
+                if (result.id) {
+                    console.log('Setting new metric ID:', result.id);
+                    setMetricId(result.id);
+                    // Update previous values after first save
+                    setPreviousValues({
+                        metricName,
+                        productId: selectedProductId ? Number(selectedProductId) : 0,
+                        version,
+                        unitOfMeasure,
+                        description,
+                        aggregationFunction,
+                        aggregationWindow,
+                        billingCriteria,
+                        usageConditions
+                    });
+                } else {
+                    console.warn('No metric ID returned from create operation');
                 }
             }
-            onClose();
-            return;
-        }
 
+            // Only finalize if not a draft
+            if (!isDraft && result.id) {
+                const finalized = await finalizeBillableMetric(result.id);
+                if (!finalized) {
+                    throw new Error('Failed to finalize metric');
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error saving metric:', error);
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+            alert(`Failed to save metric: ${errorMessage}`);
+            return false;
+        }
+    };
+
+    const handleNext = () => {
         if (currentStep < steps.length - 1) {
-            setCurrentStep((prev) => prev + 1);
+            // Only validate current step before moving to next
+            if (validateCurrentStep(currentStep)) {
+                setCurrentStep(prev => prev + 1);
+            }
+        } else {
+            // On final step, validate before saving
+            if (validateCurrentStep(currentStep)) {
+                saveOrUpdateMetric(false);
+            }
         }
     };
 
@@ -107,36 +275,19 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
         }
     };
 
-    /* --- helper: save current form as draft --- */
+    // Handle saving as draft
     const handleSaveDraft = async () => {
-        const cleanConditions = usageConditions.filter(c => c.dimension && c.operator && c.value);
-
-        const base: Partial<BillableMetricPayload> = { 
-            metricName,
-            productId: selectedProductId ? Number(selectedProductId) : undefined,
-            version,
-            unitOfMeasure,
-            description,
-            aggregationFunction,
-            aggregationWindow,
-            usageConditions: cleanConditions,
-        };
-        if (billingCriteria) (base as any).billingCriteria = billingCriteria;
-
-        const filtered: any = {};
-        Object.entries(base).forEach(([k,v])=>{
-            if (v !== '' && v !== undefined && !(Array.isArray(v)&&v.length===0)) filtered[k]=v;
-        });
-        const payload = filtered as BillableMetricPayload;
-        try {
-            console.log('POST payload draft', payload);
-        const result = await createBillableMetric(payload);
-            if (!result.ok) throw new Error('Failed');
-            alert('Draft saved');
-            onClose();
-        } catch (e) {
-            console.error(e);
-            alert('Failed to save draft');
+        // For drafts, we don't require all fields to be filled
+        const success = await saveOrUpdateMetric(true);
+        if (success) {
+            alert(metricId ? 'Draft updated successfully!' : 'Draft saved successfully!');
+            
+            // Only reset form if it's a completely new draft (first save)
+            if (!metricId) {
+                // Don't reset the form fields here - we want to keep the entered values
+                // The metricId will be updated by saveOrUpdateMetric
+                setCurrentStep(0);
+            }
         }
     };
 
@@ -146,7 +297,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                 return (
                     <>
                         <div className="form-row">
-                            <div className="forms-groups">
+                            <div className="forms-group">
                                 <InputField
                                     label="Metric Name"
                                     placeholder="Metric"
@@ -154,7 +305,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     onChange={setMetricName}
                                 />
                             </div>
-                            <div className="forms-groups">
+                            <div className="forms-group">
                                 <SelectField
                                     label="Product Name"
                                     placeholder="Select Product"
@@ -169,7 +320,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     options={products.map(p => ({ label: p.productName, value: String(p.productId) }))}
                                 />
                             </div>
-                            <div className="forms-groups">
+                            <div className="forms-group">
                                 <InputField
                                     label="Version (optional)"
                                     placeholder="Version"
@@ -177,7 +328,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     onChange={setVersion}
                                 />
                             </div>
-                            <div className="forms-groups">
+                            <div className="forms-group">
                                 <TextareaField
                                     label="Description"
                                     placeholder="Enter description"
@@ -258,7 +409,6 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                     <button className="btn save-draft" onClick={handleSaveDraft}>Save as Draft</button>
                 </div>
             </div>
-            <hr className="sub-header-divider" />
             <div className="usage-metric-wrapper metfront">
                 <aside className="sidebars">
                     {steps.map((step, index) => (
@@ -307,7 +457,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                     <div className="button-group">
                         <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
                         <button className="btn save-next" onClick={handleNext}>
-                            {currentStep === steps.length - 1 ? 'Save' : 'Save & Next'}
+                            {currentStep === steps.length - 1 ? 'Save' : 'Next'}
                         </button>
                     </div>
                 </div>

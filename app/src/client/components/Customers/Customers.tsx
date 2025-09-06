@@ -251,7 +251,7 @@ const Customers: React.FC<CustomersProps> = ({
           <div className="customers-header">
             <h2>Customers</h2>
             <div className="customers-actions">
-              <div className="products-search">
+              <div className="productsssss-search">
                 {/* <svg
                   className="search-icon"
                   xmlns="http://www.w3.org/2000/svg"
@@ -273,7 +273,7 @@ const Customers: React.FC<CustomersProps> = ({
                   placeholder="Search among your customers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="products-search-input"
+                  className="productssss-search-input"
                 />
               </div>
               <button className="sam-button">
