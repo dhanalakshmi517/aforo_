@@ -1,123 +1,123 @@
 .configuration-tab {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: var(--color-neutral-white);
-  }
-  
-  .configuration-fields {
-    margin-top: 24px;
-    padding: 20px;
-    /* background: #f8f9fa; */
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-  }
-  
-  .configuration-fields h4 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: #343a40;
-    font-size: 18px;
-    font-weight: 600;
-  }
-  
-  .form-group {
-    margin-bottom: 16px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #495057;
-  }
-  
-  .form-control {
-    width: 70%;
-    padding: 10px 12px;
-    border: 1px solid var(--color-neutral-300);
-    border-radius: 4px;
-    font-size: 14px;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-  
-  
-  select.form-control {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
-  }
-  
-  input[type='checkbox'] {
-    margin-right: 8px;
-  }
-  
-  .navigation-buttons {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-  }
-  
-  .navigation-buttons .left-buttons {
-    display: flex;
-    gap: 12px;
-  }
-  
-  .navigation-buttons .outline-button {
-    padding: 8px 16px;
-    border: 1px solid #3b82f6;
-    border-radius: 4px;
-    background: transparent;
-    color: #3b82f6;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-  }
-  
-  .navigation-buttons .outline-button:hover:not(:disabled) {
-    background: rgba(59, 130, 246, 0.1);
-  }
-  
-  .navigation-buttons .outline-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  /* Restrict select/dropdown width */
-  .configuration-tab .com-select-field {
-    width: 500px;
-  }
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--color-neutral-white);
+}
 
-  .error-message {
-    color: #dc3545;
-    font-size: 12px;
-    margin-top: 4px;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    color: var(--color-neutral-1000);
-  
-    /* body/md/reg */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md, 20px); /* 142.857% */
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-  }
-  
+.configuration-fields {
+  margin-top: 24px;
+  padding: 20px;
+  /* background: #f8f9fa; */
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.configuration-fields h4 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #343a40;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-control {
+  width: 70%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+input[type='checkbox'] {
+  margin-right: 8px;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.navigation-buttons .left-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.navigation-buttons .outline-button {
+  padding: 8px 16px;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  background: transparent;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.navigation-buttons .outline-button:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.navigation-buttons .outline-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Restrict select/dropdown width */
+.configuration-tab .com-select-field {
+  width: 500px;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  color: var(--color-neutral-1000);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
