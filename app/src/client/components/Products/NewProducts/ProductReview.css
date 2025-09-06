@@ -1,9 +1,10 @@
 
 /* Root layout */
 :root {
-  --pr-bg: #f6f7fb;
-  --pr-card-bg: #ffffff;
-  --pr-border: #e5e7ef;
+  --pr-bg:  #8b90a5;
+  --pr-card-bg:  #8b90a5;
+  --pr-border: #8b90a5;
+  
   --pr-title: #8b90a5; /* muted section title */
   --pr-label: #6b7280; /* gray-600 */
   --pr-value: #111827; /* gray-900 */
@@ -25,10 +26,8 @@
 
 @media (min-width: 900px) {
   .pr-grid {
-    grid-template-columns: 1fr 1fr; /* two columns like the screenshot */
-  }
-}
-
+    grid-template-columns: 1fr; /* always single column */
+  }}
 /* Card */
 .pr-card {
   background: var(--pr-card-bg);

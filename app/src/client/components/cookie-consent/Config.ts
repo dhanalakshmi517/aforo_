@@ -60,7 +60,8 @@ const getConfig = () => {
               try {
                 const GA_ANALYTICS_ID = (import.meta.env.VITE_GOOGLE_ANALYTICS_ID || import.meta.env.REACT_APP_GOOGLE_ANALYTICS_ID) as string | undefined;
                 if (!GA_ANALYTICS_ID || GA_ANALYTICS_ID.trim() === '') {
-                  throw new Error('Google Analytics ID is missing');
+                  console.warn('Google Analytics ID is missing - skipping GA initialization');
+                  return;
                 }
                 window.dataLayer = window.dataLayer || [];
                 function gtag(..._args: unknown[]) {

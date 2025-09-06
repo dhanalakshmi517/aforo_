@@ -1,93 +1,96 @@
 @import "../Variables/Variables.css";
+
+/* Default search container styles */
 .search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 480px;
-    height: 45px;
-  }
-  
-  .search-container input {
-    width: 100%;
-    padding: 8px 40px 8px 55px;
-    background-color: var(--color-neutral-100);
-    border: 1px solid var(--color-neutral-100); /* subtle border */
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-md);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    color: var(--color-neutral-800);
-  }
+  display: flex;
+  align-items: center;
+  background-color: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  width: 360px;
+  height: 40px;
+  transition: all 0.2s ease;
+}
 
-  /* Placeholder color */
-  .search-container input::placeholder {
-    color: var(--color-neutral-600);
-  }
-  
-  /* HOVER state → second bar */
-  .search-container:hover input {
-    border-color: var(--color-neutral-200);
-    background-color: var(--color-neutral-white);
-  }
-  
-  /* FOCUS state → second bar with highlight */
-  .search-container.focused input,
-.search-container input:focus {
+/* Hover state */
+.search-container:hover:not(.disabled) {
+  border-color: var(--color-primary-200);
+}
+
+/* Focus/Writing state */
+.search-container.focused:not(.disabled) {
+  border-color: var(--color-primary-200);
+  background-color: var(--color-neutral-white);
+}
+
+/* Typing state */
+.search-container.typing:not(.disabled) {
+  background-color: var(--color-neutral-white);
+}
+
+/* Disabled state */
+.search-container.disabled {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-200);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Search icon styles */
+.search-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  color: var(--color-neutral-500);
+}
+
+.search-container.disabled .search-icon {
+  color: var(--color-neutral-400);
+}
+
+/* Input field styles */
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
   outline: none;
-  box-shadow: none;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  color: var(--color-neutral-1700);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
 
-    border-color: var(--color-neutral-200);
-    outline: none;
+.search-input::placeholder {
+  color: var(--color-neutral-500);
+  opacity: 1;
+}
 
-  }
-  
-  /* Search Icon Position */
-  .search-icon {
-    position: absolute;
-    left: 10px;
-    display: flex;
-    align-items: center;
-    margin-right: 2px;
-  }
-  
-  /* Count Badge — shown when hover/focus or typing */
-  .count-badge {
-    position: absolute;
-    right: 35px;
-    background-color: var(--color-neutral-white);
-    color: var(--color-neutral-black);
-    padding: 2px 6px;
-    font-size: 12px;
-    border-radius: 10px;
-    display: none;
-  }
-  
-  /* Show badge in hover/focus or typing */
-  .search-container.focused .count-badge,
-  .search-container.typing .count-badge,
-  .search-container:hover .count-badge {
-    display: inline-block;
-  }
-  
-  /* Force padding so text doesn't overlap icon */
-  .search-container > input {
-    padding-left: 55px !important;
-    box-sizing: border-box;
-  }
+.search-input:disabled {
+  color: var(--color-neutral-500);
+  cursor: not-allowed;
+}
 
-  /* Clear Button (typing only) */
-  .clear-btn {
-    position: absolute;
-    right: 8px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-  }
-  
-  .clear-btn:hover svg path {
-    stroke: #000;
-  }
+.search-input:disabled::placeholder {
+  color: var(--color-neutral-400);
+}
+
+/* Clear button styles */
+.clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 8px;
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.clear-btn:hover {
+  background-color: var(--color-neutral-200);
+}
   

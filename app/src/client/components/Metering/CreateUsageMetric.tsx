@@ -114,36 +114,8 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
             if (metricName !== undefined) {
                 payload.metricName = metricName;
             }
-<<<<<<< HEAD
             if (selectedProductId) {
                 payload.productId = Number(selectedProductId);
-=======
-            const basePayload: Partial<import('./api').BillableMetricPayload> = {
-                metricName,
-                productId: Number(selectedProductId),
-                version,
-                unitOfMeasure,
-                description,
-                aggregationFunction,
-                aggregationWindow,
-                billingCriteria,
-                usageConditions,
-            };
-            // remove empty string/undefined or empty array fields
-            const payload: import('./api').BillableMetricPayload = Object.fromEntries(
-                Object.entries(basePayload).filter(([_, v]) => {
-                    if (v === undefined || v === '') return false;
-                    if (Array.isArray(v)) return v.length > 0;
-                    return true;
-                })
-            ) as any;
-            console.log('Billable Metric payload:', payload);
-            const { createBillableMetric, finalizeBillableMetric } = await import('./api');
-            const result = await createBillableMetric(payload);
-            if (!result.ok) {
-                alert('Failed to create metric');
-                return;
->>>>>>> main
             }
             if (version !== undefined) {
                 payload.version = version;

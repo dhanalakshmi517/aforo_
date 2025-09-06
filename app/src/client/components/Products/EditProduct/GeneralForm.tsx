@@ -92,20 +92,7 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
         )}
       </div>
 
-      <div className="edit-form-group">
-        <label>Product Type</label>
-        <select
-          value={normalizeProductType(data.productType)}
-          onChange={(e) => onChange({ ...data, productType: normalizeProductType(e.target.value) })}
-          disabled
-        >
-          <option value="">Select Product Type</option>
-          <option value="api">API</option>
-          <option value="flatfile">FlatFile</option>
-          <option value="sqlresult">SQLResult</option>
-          <option value="llmtoken">LLMToken</option>
-        </select>
-      </div>
+      
 
       <div className="edit-form-group">
         <label>Description</label>
@@ -116,33 +103,8 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
         />
       </div>
 
-      <div className="edit-form-group">
-        <label>Status</label>
-        <select
-          value={data.status}
-          onChange={(e) => onChange({ ...data, status: e.target.value })}
-          disabled={loading}
-        >
-          <option value="">Select Status</option>
-          {Object.values(Status).map((status) => (
-            <option key={status} value={status}>{status}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="edit-form-group">
-        <label>Category</label>
-        <select
-          value={data.category}
-          onChange={(e) => onChange({ ...data, category: e.target.value })}
-          disabled={loading}
-        >
-          <option value="">Select Category</option>
-          {Object.values(Category).map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-      </div>
+     
+     
 
       <div className="edit-form-group">
         <label>Version</label>
@@ -154,18 +116,7 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
         />
       </div>
 
-      <div className="edit-form-group">
-        <label>Visibility</label>
-        <label className="switch">
-          <input
-            type="checkbox"
-            checked={data.visibility}
-            onChange={(e) => onChange({ ...data, visibility: e.target.checked })}
-            disabled={loading}
-          />
-          <span className="slider round"></span>
-        </label>
-      </div>
+      
     </div>
   );
 };

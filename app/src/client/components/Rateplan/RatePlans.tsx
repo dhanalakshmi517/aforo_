@@ -60,11 +60,14 @@ interface RatePlansProps {
   showCreatePlan: boolean;
   setShowCreatePlan: (show: boolean) => void;
   ratePlans?: RatePlan[];
+  setRatePlans?: React.Dispatch<React.SetStateAction<RatePlan[]>>;
 }
 
-const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan, ratePlans }) => {
+const RatePlans: React.FC<RatePlansProps> = ({ showCreatePlan, setShowCreatePlan, ratePlans, setRatePlans: setRatePlansProp }) => {
   const navigate = useNavigate();
-  const [ratePlansState, setRatePlans] = useState<RatePlan[]>(ratePlans || []);
+  const [ratePlansState, setRatePlansState] = useState<RatePlan[]>(ratePlans || []);
+  // allow external control
+  const setRatePlans = setRatePlansProp ?? setRatePlansState;
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const filteredPlans = (ratePlansState ?? []).filter(plan => {

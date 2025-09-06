@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ProductFormData } from '../../../types/productTypes';
-import EditProductForm from './EditProduct/EditProductForm';
+import EditProduct from './EditProductsss/EditProduct';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
 import CreateProduct from './NewProducts/NewProduct';
 import './Products.css';
@@ -289,18 +289,14 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           {/* Edit Product Form */}
           {isEditFormOpen && (
             <div className="products-form-container">
-              <EditProductForm
+              <EditProduct
                 productId={editingProduct?.productId.toString() || ''}
-                productType={(editingProduct?.productType as ProductType) ?? ProductType.API}
-                productName={editingProduct?.productName || ''}
-                onClose={() => setIsEditFormOpen(false)}
-                onSave={() => {
+                onClose={() => {
                   setIsEditFormOpen(false);
                   // Refresh the products list after save by setting a new empty array
                   // This will trigger a re-render and fetch the updated products
                   setProducts([]);
                 }}
-                showEditForm={isEditFormOpen}
               />
             </div>
           )}
@@ -421,7 +417,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
                             <img src={EmptyBox} alt="No products" style={{ width: 200, height: 200 }} />
-                            <p style={{ marginTop: 8 }}>No products added yet. Click "New Product" to <br/> create your first product.</p>
+                            <p className="products-empty-state-text" style={{ marginTop: 8 }}>No products added yet. Click "New Product" to <br/> create your first product.</p>
                             <button
                               onClick={() => {
                                 setShowCreateProduct(true);
