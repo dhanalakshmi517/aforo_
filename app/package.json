@@ -1,11 +1,4 @@
 {
-  "scripts": {
-    "test": "vitest --environment jsdom",
-    "test:e2e": "playwright test --config e2e-tests/playwright.config.ts",
-    "test:e2e:headed": "playwright test --headed --config e2e-tests/playwright.config.ts",
-    "test:e2e:ui": "playwright test --ui --ui-host 0.0.0.0 --ui-port 9333 --config e2e-tests/playwright.config.ts",
-    "test:e2e:update-snapshots": "playwright test --update-snapshots --config e2e-tests/playwright.config.ts"
-  },
   "dependencies": {
     "sweetalert2": "^11.22.1"
   },
