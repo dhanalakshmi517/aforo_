@@ -86,6 +86,11 @@
     cursor: not-allowed;
   }
   
+  /* Restrict select/dropdown width */
+  .configuration-tab .com-select-field {
+    width: 500px;
+  }
+
   .error-message {
     color: #dc3545;
     font-size: 12px;

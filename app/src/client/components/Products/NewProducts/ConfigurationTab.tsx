@@ -24,7 +24,6 @@ export enum ProductTypeEnum {
   FlatFile = 'FlatFile',
   SQLResult = 'SQLResult',
   LLMToken = 'LLMToken',
-  Storage = 'Storage',
 }
 
 export const productOptions = [
@@ -32,7 +31,6 @@ export const productOptions = [
   { label: 'Flat File', value: ProductTypeEnum.FlatFile },
   { label: 'SQL Result', value: ProductTypeEnum.SQLResult },
   { label: 'LLM Token', value: ProductTypeEnum.LLMToken },
-  { label: 'Storage', value: ProductTypeEnum.Storage },
 ];
 
 export const configurationFields: Record<string, FieldProps[]> = {
@@ -317,12 +315,50 @@ export const buildRequestBody = (
   productType: string,
   formData: Record<string, string>,
   isDraft: boolean = false,
-): Record<string, any> => ({
-  productType,
-  configuration: formData,
-  isDraft,
-  timestamp: new Date().toISOString(),
-});
+): Record<string, any> => {
+  // Map UI field labels to backend payload keys
+  const normalizedConfig: Record<string, string> = {};
+
+  const lowerType = productType.toLowerCase();
+
+  if (lowerType === 'llmtoken' || lowerType === 'llm_token') {
+    if (formData['Model Name']) normalizedConfig['modelName'] = formData['Model Name'];
+    if (formData['Endpoint URL']) normalizedConfig['endpointUrl'] = formData['Endpoint URL'];
+    if (formData['Auth Type']) normalizedConfig['authType'] = formData['Auth Type'];
+  } else if (lowerType === 'api') {
+    if (formData['Endpoint URL']) normalizedConfig['endpointUrl'] = formData['Endpoint URL'];
+    if (formData['Auth Type']) normalizedConfig['authType'] = formData['Auth Type'];
+  } else if (lowerType === 'flatfile') {
+    // Backend expects `format` and `fileLocation`
+    if (formData['File Format']) {
+      normalizedConfig['format'] = formData['File Format'];
+    }
+    if (formData['File Location']) {
+      normalizedConfig['fileLocation'] = formData['File Location'];
+    }
+  } else {
+    // Fallback – camel-case the label text, e.g. "Endpoint URL" -> "endpointUrl"
+    Object.entries(formData).forEach(([label, value]) => {
+      if (!value) return; // skip empty values
+      const key = label
+        .split(/\s+/)
+        .map((w, idx) => (idx === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1)))
+        .join('');
+      normalizedConfig[key] = value;
+    });
+  }
+
+  // For LLM Token and API types backend expects only specific keys
+  if (lowerType === 'llmtoken' || lowerType === 'llm_token' || lowerType === 'api') {
+    return { ...normalizedConfig, ...(isDraft ? { isDraft: true } : {}) };
+  }
+  return {
+    ...(productType ? { productType } : {}),
+    ...normalizedConfig,
+    ...(isDraft ? { isDraft: true } : {}),
+    timestamp: new Date().toISOString(),
+  };
+};
 /* ------------------------------------
  * End inlined configuration defs
  * ------------------------------------*/ 
@@ -421,6 +457,19 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
         setError('Please select a product type first');
         return false;
       }
+
+      // Validate that all required fields for selected product type have values
+      const missingRequired: Record<string,string> = {};
+      (configurationFields[productType] || []).forEach((f)=>{
+        if (f.required && !formData[f.label]) {
+          missingRequired[f.label] = 'This field is required';
+        }
+      });
+      if (Object.keys(missingRequired).length) {
+        setFieldErrors((prev)=>({...prev,...missingRequired}));
+        setError('Please fill all required fields before proceeding');
+        return false;
+      }
       
       setIsSaving(true);
       setError('');
@@ -442,6 +491,18 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
           formData
         });
 
+        if (productType.toLowerCase() === 'flatfile') {
+          await (await import('../api')).createProductFlatfileConfig(productId, body as any);
+          console.log('FlatFile config saved');
+          return true;
+        }
+        if (productType.toLowerCase() === 'api') {
+          await (await import('../api')).createProductApiConfig(productId, body as any);
+          console.log('API config saved');
+          return true;
+        }
+
+        // Fallback to original fetch for other types
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: {
@@ -451,8 +512,6 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
           body: JSON.stringify(body),
         });
 
-        console.log('API Response status:', res.status);
-        
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           console.error('API Error:', errData);
@@ -550,7 +609,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
 
       const handleBlur = () => {
         if (field.required && !fieldValue) {
-          setFieldErrors((prev) => ({ ...prev, [field.label]: `${field.label} is required` }));
+          setFieldErrors((prev) => ({ ...prev, [field.label]: `This field is required` }));
         } else if (fieldError) {
           setFieldErrors((prev) => ({
             ...Object.fromEntries(Object.entries(prev).filter(([key]) => key !== field.label)),
@@ -558,13 +617,14 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
         }
       };
 
+      const labelText = field.label;
       // Handle different input types
       switch (field.type) {
         case 'select':
           return (
             <div className="form-group">
               <SelectField
-                label={field.label}
+                label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
                 onBlur={handleBlur}
@@ -583,7 +643,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
             <div className="form-group">
               <InputField
                 type="checkbox"
-                label={field.label}
+                label={labelText}
                 checked={fieldValue === 'true'}
                 onChange={(val) => {
                   const newValue = val === 'true' ? 'false' : 'true';
@@ -598,7 +658,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
           return (
             <div className="form-group">
               <TextareaField
-                label={field.label}
+                label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
                 placeholder={field.placeholder}
@@ -613,7 +673,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
             <div className="form-group">
               <InputField
                 type="number"
-                label={field.label}
+                label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
                 onBlur={handleBlur}
@@ -632,7 +692,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
             <div className="form-group">
               <InputField
                 type="password"
-                label={field.label}
+                label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
                 placeholder={field.placeholder}
@@ -646,7 +706,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
             <div className="form-group">
               <InputField
                 type="email"
-                label={field.label}
+                label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
                 onBlur={handleBlur}
@@ -661,14 +721,14 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
         // Default to text input
         default:
           const commonProps = {
-            label: field.label,
+            label: labelText,
             value: fieldValue,
             onChange: handleInputChange(field.label),
             placeholder: field.placeholder,
             error: fieldError,
             onBlur: () => {
               if (field.required && !fieldValue) {
-                setFieldErrors((prev) => ({ ...prev, [field.label]: `${field.label} is required` }));
+                setFieldErrors((prev) => ({ ...prev, [field.label]: `This field is required` }));
               } else if (fieldError) {
                 setFieldErrors((prev) => ({
                   ...Object.fromEntries(Object.entries(prev).filter(([key]) => key !== field.label)),

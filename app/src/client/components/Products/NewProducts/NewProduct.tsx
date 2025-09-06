@@ -33,6 +33,8 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>('general');
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
+  // draftStatus: idle | saving | saved
+  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -42,6 +44,8 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
     description: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [existingProductNames, setExistingProductNames] = useState<string[]>([]);
+  const [existingSkuCodes, setExistingSkuCodes] = useState<string[]>([]);
   const [productIcon, setProductIcon] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [configuration, setConfiguration] = useState<Record<string, string>>({});
@@ -50,6 +54,19 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Fetch existing product names once on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const allProducts = await (await import('../api')).getProducts();
+        setExistingProductNames(allProducts.map((p: any) => (p.productName || '').toLowerCase()));
+        setExistingSkuCodes(allProducts.map((p: any) => (p.internalSkuCode || '').toLowerCase()));
+      } catch (err) {
+        console.error('Failed to fetch existing products for name validation', err);
+      }
+    })();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -99,8 +116,16 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.productName.trim()) newErrors.productName = 'Product name is required';
-    if (!formData.skuCode.trim()) newErrors.skuCode = 'SKU code is required';
+    if (!formData.productName.trim()) {
+      newErrors.productName = 'Product name is required';
+    } else if (existingProductNames.includes(formData.productName.trim().toLowerCase())) {
+      newErrors.productName = 'Product name is already taken';
+    }
+    if (!formData.skuCode.trim()) {
+      newErrors.skuCode = 'SKU code is required';
+    } else if (existingSkuCodes.includes(formData.skuCode.trim().toLowerCase())) {
+      newErrors.skuCode = 'SKU code is already taken';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -116,7 +141,18 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
   };
 
   const handleSaveDraft = () => {
+    if (draftStatus === 'saving') return;
+    setDraftStatus('saving');
+
+    // Simulate or hook up actual API call here
     console.log('Saving as draft...', formData);
+
+    // After operation completes (simulate immediate success)
+    setTimeout(() => {
+      setDraftStatus('saved');
+      // Reset back to idle after 4 seconds to allow re-saving if needed
+      setTimeout(() => setDraftStatus('idle'), 4000);
+    }, 4000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -130,22 +166,26 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
       setSubmitError(null);
 
       const baseUrl = 'http://54.238.204.246:8080/api/products';
-      const productId = createdProductId || formData.skuCode || '0';
+      const productId = parseInt(createdProductId || formData.skuCode || '0');
       const endpoint = `${baseUrl}/${productId}/finalize`;
 
       console.log('Finalizing product – POST', endpoint);
+      console.log('Product ID being sent:', productId, typeof productId);
+      console.log('Auth headers:', getAuthHeaders());
 
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeaders()
-        },
-        body: JSON.stringify({ timestamp: new Date().toISOString() }),
+        }
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
+        console.error('API Error Response:', errData);
+        console.error('Response Status:', res.status);
+        console.error('Response Headers:', Object.fromEntries(res.headers.entries()));
         throw new Error(errData.message || `Finalize failed (${res.status})`);
       }
 
@@ -244,8 +284,12 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
           <button type="button" className="product-cancel-btn" onClick={handleCancel}>
             Cancel
           </button>
-          <button type="button" className="product-save-draft-btn" onClick={handleSaveDraft}>
-            Save as Draft
+          <button
+            type="button"
+            className="product-save-draft-btn"
+            onClick={handleSaveDraft}
+            disabled={draftStatus === 'saving'}>
+            {draftStatus === 'saving' ? 'Saving...' : draftStatus === 'saved' ? 'Saved' : 'Save as Draft'}
           </button>
         </div>
       </div>
@@ -417,7 +461,6 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
               type="button"
               className="product-save-next-btn"
               onClick={handleNextStep}
-              disabled={!formData.productName || !formData.skuCode}
             >
               Save &Next
             </button>

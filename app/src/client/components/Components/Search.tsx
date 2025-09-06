@@ -3,22 +3,31 @@ import "./Search.css";
 
 interface SearchProps {
   onSearch: (query: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-const Search: React.FC<SearchProps> = ({ onSearch }) => {
+const Search: React.FC<SearchProps> = ({ onSearch, disabled = false, placeholder = "Search among your rate plans" }) => {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
 
   const handleClear = () => {
+    if (disabled) return;
     setValue("");
     onSearch("");
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    setValue(e.target.value);
+    onSearch(e.target.value);
   };
 
   return (
     <div
       className={`search-container ${focused ? "focused" : ""} ${
         value ? "typing" : ""
-      }`}
+      } ${disabled ? "disabled" : ""}`}
     >
       {/* Search Icon */}
       <span className="search-icon">
@@ -42,18 +51,17 @@ const Search: React.FC<SearchProps> = ({ onSearch }) => {
       {/* Input */}
       <input
         type="text"
-        placeholder="Search among your rate plans"
+        placeholder={placeholder}
         value={value}
-        onChange={(e) => {
-          setValue(e.target.value);
-          onSearch(e.target.value);
-        }}
-        onFocus={() => setFocused(true)}
+        onChange={handleChange}
+        onFocus={() => !disabled && setFocused(true)}
         onBlur={() => setFocused(false)}
+        disabled={disabled}
+        className="search-input"
       />
 
       {/* Clear Button */}
-      {value && (
+      {value && !disabled && (
         <button className="clear-btn" onClick={handleClear}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
