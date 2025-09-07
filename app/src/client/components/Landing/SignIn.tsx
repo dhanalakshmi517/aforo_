@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import * as React from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api';
 import { setAuthData, type LoginResponse } from '../../utils/auth';
@@ -87,7 +88,7 @@ const SignIn: React.FC = () => {
           <input
             className="field-input"
             type="email"
-            placeholder="Placeholder"
+            placeholder="john@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -103,7 +104,7 @@ const SignIn: React.FC = () => {
             <input
               className="field-input"
               type={showPassword ? "text" : "password"}
-              placeholder="Placeholder"
+              placeholder="........"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

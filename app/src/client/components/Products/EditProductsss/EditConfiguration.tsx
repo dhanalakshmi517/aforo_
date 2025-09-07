@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import './ConfigurationTab.css';
 import { SelectField, InputField, TextareaField } from '../../Components/InputFields';
 
@@ -231,7 +232,10 @@ export interface ConfigurationTabProps {
  * Component (renamed): EditConfiguration
  * ------------------------------------*/
 const EditConfiguration = React.forwardRef<ConfigurationTabHandle, ConfigurationTabProps>(
-  ({ onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit }, ref) => {
+  (
+    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit }: ConfigurationTabProps,
+    ref
+  ) => {
     const [formData, setFormData] = useState<Record<string, string>>({});
     const [productType, setProductType] = useState(initialProductType || '');
     const [error, setError] = useState('');
@@ -315,7 +319,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}`, { headers });
           
           if (res.ok) {
+            console.log('Fetched configuration details:', productId, productType);
+
             const configData = await res.json();
+            console.log('Configuration JSON:', configData);
             if (configData) {
               // Map backend keys to UI labels for prefill
               const lowerType = productType.toLowerCase();
@@ -412,7 +419,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 type="checkbox"
                 label={labelText}
                 checked={fieldValue === 'true'}
-                onChange={(val) => {
+                onChange={(val: string) => {
                   const newValue = val === 'true' ? 'false' : 'true';
                   handleInputChange(field.label)(newValue);
                 }}

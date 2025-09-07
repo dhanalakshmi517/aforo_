@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { getAuthHeaders } from '../../../utils/auth';
+import * as React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './ConfigurationTab.css';
-import { SelectField } from '../../Components/InputFields';
+import { SelectField, InputField, TextareaField } from '../../Components/InputFields';
 
-import { InputField, TextareaField } from '../../Components/InputFields';
 /* ------------------------------------
  * Configuration field definitions
  * ------------------------------------*/
@@ -35,12 +34,7 @@ export const productOptions = [
 
 export const configurationFields: Record<string, FieldProps[]> = {
   [ProductTypeEnum.API]: [
-    {
-      label: 'Endpoint URL',
-      type: 'text',
-      placeholder: 'https://api.example.com/v1/endpoint',
-      required: true,
-    },
+    { label: 'Endpoint URL', type: 'text', placeholder: 'https://api.example.com/v1/endpoint', required: true },
     {
       label: 'Auth Type',
       type: 'select',
@@ -66,12 +60,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Others', value: 'OTHERS' },
       ],
     },
-    {
-      label: 'File Location',
-      type: 'text',
-      placeholder: '/path/to/file or s3://bucket/key',
-      required: true,
-    },
+    { label: 'File Location', type: 'text', placeholder: '/path/to/file or s3://bucket/key', required: true },
   ],
   [ProductTypeEnum.SQLResult]: [
     {
@@ -107,18 +96,8 @@ export const configurationFields: Record<string, FieldProps[]> = {
     },
   ],
   [ProductTypeEnum.LLMToken]: [
-    {
-      label: 'Model Name',
-      type: 'text',
-      placeholder: 'gpt-4o',
-      required: true,
-    },
-    {
-      label: 'Endpoint URL',
-      type: 'text',
-      placeholder: 'https://api.llmprovider.com/v1/chat',
-      required: true,
-    },
+    { label: 'Model Name', type: 'text', placeholder: 'gpt-4o', required: true },
+    { label: 'Endpoint URL', type: 'text', placeholder: 'https://api.llmprovider.com/v1/chat', required: true },
     {
       label: 'Auth Type',
       type: 'select',
@@ -142,12 +121,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Enterprise', value: 'enterprise' },
       ],
     },
-    {
-      label: 'Version',
-      type: 'text',
-      placeholder: 'e.g., 1.0.0',
-      required: true,
-    },
+    { label: 'Version', type: 'text', placeholder: 'e.g., 1.0.0', required: true },
     {
       label: 'Platform',
       type: 'select',
@@ -159,26 +133,11 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Web', value: 'web' },
       ],
     },
-    {
-      label: 'System Requirements',
-      type: 'textarea',
-      placeholder: 'Minimum system requirements...',
-    },
+    { label: 'System Requirements', type: 'textarea', placeholder: 'Minimum system requirements...' },
   ],
   hardware: [
-    {
-      label: 'Model Number',
-      type: 'text',
-      placeholder: 'e.g., HW-2024-001',
-      required: true,
-    },
-    {
-      label: 'Warranty Period (months)',
-      type: 'number',
-      min: 1,
-      max: 120,
-      required: true,
-    },
+    { label: 'Model Number', type: 'text', placeholder: 'e.g., HW-2024-001', required: true },
+    { label: 'Warranty Period (months)', type: 'number', min: 1, max: 120, required: true },
     {
       label: 'Color',
       type: 'select',
@@ -189,17 +148,8 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Custom', value: 'custom' },
       ],
     },
-    {
-      label: 'Dimensions',
-      type: 'text',
-      placeholder: 'L x W x H (cm)',
-    },
-    {
-      label: 'Weight (kg)',
-      type: 'number',
-      step: 0.1,
-      min: 0,
-    },
+    { label: 'Dimensions', type: 'text', placeholder: 'L x W x H (cm)' },
+    { label: 'Weight (kg)', type: 'number', step: 0.1, min: 0 },
   ],
   service: [
     {
@@ -213,12 +163,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Training', value: 'training' },
       ],
     },
-    {
-      label: 'Duration (hours)',
-      type: 'number',
-      min: 1,
-      required: true,
-    },
+    { label: 'Duration (hours)', type: 'number', min: 1, required: true },
     {
       label: 'Location',
       type: 'select',
@@ -228,11 +173,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Hybrid', value: 'hybrid' },
       ],
     },
-    {
-      label: 'Prerequisites',
-      type: 'textarea',
-      placeholder: 'Any requirements or prerequisites...',
-    },
+    { label: 'Prerequisites', type: 'textarea', placeholder: 'Any requirements or prerequisites...' },
   ],
   digital: [
     {
@@ -247,12 +188,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Other', value: 'other' },
       ],
     },
-    {
-      label: 'File Size (MB)',
-      type: 'number',
-      min: 0.1,
-      step: 0.1,
-    },
+    { label: 'File Size (MB)', type: 'number', min: 0.1, step: 0.1 },
     {
       label: 'Access Type',
       type: 'select',
@@ -263,10 +199,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Online Access', value: 'online' },
       ],
     },
-    {
-      label: 'DRM Protection',
-      type: 'checkbox',
-    },
+    { label: 'DRM Protection', type: 'checkbox' },
     {
       label: 'Description',
       type: 'textarea',
@@ -280,328 +213,167 @@ export const getSelectOptions = (fieldLabel: string): Array<{ label: string; val
   return null;
 };
 
-export const buildApiEndpoint = (
-  baseUrl: string,
-  productId: string,
-  productType: string
-): string | null => {
-  if (!productType || !productId) return null;
-
-  // Normalise productType string for safer comparison
-  const typeKey = productType.toLowerCase();
-
-  switch (typeKey) {
-    case 'api':
-      // e.g. http://.../products/8/api
-      return `${baseUrl}/${productId}/api`;
-    case 'flatfile':
-      // e.g. http://.../products/8/flatfile
-      return `${baseUrl}/${productId}/flatfile`;
-    case 'sqlresult':
-    case 'sql_result':
-      // http://.../products/6/sql-result
-      return `${baseUrl}/${productId}/sql-result`;
-    case 'llmtoken':
-    case 'llm_token':
-      // http://.../products/9/llm-token
-      return `${baseUrl}/${productId}/llm-token`;
-    default:
-      // Fallback to previous pattern
-      return `${baseUrl}/${productId}/configuration/${productType}`;
-  }
-};
-
-export const buildRequestBody = (
-  productType: string,
-  formData: Record<string, string>,
-  isDraft: boolean = false,
-): Record<string, any> => {
-  // Map UI field labels to backend payload keys
-  const normalizedConfig: Record<string, string> = {};
-
-  const lowerType = productType.toLowerCase();
-
-  if (lowerType === 'llmtoken' || lowerType === 'llm_token') {
-    if (formData['Model Name']) normalizedConfig['modelName'] = formData['Model Name'];
-    if (formData['Endpoint URL']) normalizedConfig['endpointUrl'] = formData['Endpoint URL'];
-    if (formData['Auth Type']) normalizedConfig['authType'] = formData['Auth Type'];
-  } else if (lowerType === 'api') {
-    if (formData['Endpoint URL']) normalizedConfig['endpointUrl'] = formData['Endpoint URL'];
-    if (formData['Auth Type']) normalizedConfig['authType'] = formData['Auth Type'];
-  } else if (lowerType === 'flatfile') {
-    // Backend expects `format` and `fileLocation`
-    if (formData['File Format']) {
-      normalizedConfig['format'] = formData['File Format'];
-    }
-    if (formData['File Location']) {
-      normalizedConfig['fileLocation'] = formData['File Location'];
-    }
-  } else {
-    // Fallback – camel-case the label text, e.g. "Endpoint URL" -> "endpointUrl"
-    Object.entries(formData).forEach(([label, value]) => {
-      if (!value) return; // skip empty values
-      const key = label
-        .split(/\s+/)
-        .map((w, idx) => (idx === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1)))
-        .join('');
-      normalizedConfig[key] = value;
-    });
-  }
-
-  // For LLM Token and API types backend expects only specific keys
-  if (lowerType === 'llmtoken' || lowerType === 'llm_token' || lowerType === 'api') {
-    return { ...normalizedConfig, ...(isDraft ? { isDraft: true } : {}) };
-  }
-  return {
-    ...(productType ? { productType } : {}),
-    ...normalizedConfig,
-    ...(isDraft ? { isDraft: true } : {}),
-    timestamp: new Date().toISOString(),
-  };
-};
 /* ------------------------------------
- * End inlined configuration defs
- * ------------------------------------*/ 
-
-
+ * Public API
+ * ------------------------------------*/
 export interface ConfigurationTabHandle {
-  submit: () => Promise<boolean>;
+  submit: () => Promise<boolean>; // now: purely client-side validation
 }
 
 export interface ConfigurationTabProps {
+  initialProductType?: string;
   onConfigChange: (config: Record<string, string>) => void;
   onProductTypeChange: (type: string) => void;
-  productId?: string;
-  onSubmit: () => Promise<boolean>;
+  productId?: string; // kept for compatibility; unused
+  onSubmit?: () => Promise<boolean>; // kept for compatibility; optional, called after validation
 }
 
-const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationTabProps>(
-  ({
-    onConfigChange,
-    onProductTypeChange,
-    productId,
-    onSubmit,
-  }, ref) => {
+
+
+const EditConfiguration = React.forwardRef<ConfigurationTabHandle, ConfigurationTabProps>(
+  (
+    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit }: ConfigurationTabProps,
+    ref
+  ) => {
     const [formData, setFormData] = useState<Record<string, string>>({});
-    const [productType, setProductType] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
-    const [isSavingDraft, setIsSavingDraft] = useState(false);
+    const [productType, setProductType] = useState(initialProductType || '');
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-    // Memoize the config change handler to prevent unnecessary re-renders
-    const handleConfigChange = React.useCallback((updates: Record<string, string>) => {
-      const newFormData = { ...formData, ...updates };
-      setFormData(newFormData);
-      onConfigChange(newFormData);
-    }, [formData, onConfigChange]);
+    // Memoized change handlers
+    const handleConfigChange = React.useCallback(
+      (updates: Record<string, string>) => {
+        const newFormData = { ...formData, ...updates };
+        setFormData(newFormData);
+        onConfigChange(newFormData);
+      },
+      [formData, onConfigChange]
+    );
 
-    // Memoize the product type change handler
-    const handleProductTypeChange = React.useCallback((type: string) => {
-      setProductType(type);
-      onProductTypeChange(type);
-      // Reset form data when product type changes
-      setFormData({});
-    }, [onProductTypeChange]);
+    const handleProductTypeChange = React.useCallback(
+      (type: string) => {
+        setProductType(type);
+        onProductTypeChange(type);
+        setFormData({});
+        setFieldErrors({});
+        setError('');
+      },
+      [onProductTypeChange]
+    );
 
-    const handleSaveDraft = async () => {
-      if (!productId) {
-        setError('Product ID is missing');
-        return false;
-      }
-
-      setIsSavingDraft(true);
-      setError('');
-
-      try {
-        const baseUrl = 'http://54.238.204.246:8080/api/products';
-        const endpoint = buildApiEndpoint(baseUrl, productId, productType);
-        const body = buildRequestBody(productType, formData, true);
-        
-        if (!endpoint) {
-          return false;
-        }
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || 'Failed to save draft');
-        }
-
-        alert('Configuration draft saved successfully!');
-        return true;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to save draft';
-        setError(errorMessage);
-        console.error('Error saving draft:', errorMessage);
-        return false;
-      } finally {
-        setIsSavingDraft(false);
-      }
-    };
-
-    // Submit function that can be called from parent via ref
-    const submit = async (): Promise<boolean> => {
-      // reuse logic below without needing SyntheticEvent
-      if (!productId) {
-        setError('Product ID is missing');
-        return false;
-      }
-      
+    // Validation (no network)
+    const validate = (): boolean => {
       if (!productType) {
         setError('Please select a product type first');
         return false;
       }
-
-      // Validate that all required fields for selected product type have values
-      const missingRequired: Record<string,string> = {};
-      (configurationFields[productType] || []).forEach((f)=>{
-        if (f.required && !formData[f.label]) {
-          missingRequired[f.label] = 'This field is required';
+      const fields = configurationFields[productType] || [];
+      const errs: Record<string, string> = {};
+      fields.forEach((f) => {
+        if (f.required && !(`${formData[f.label] || ''}`.trim())) {
+          errs[f.label] = `${f.label} is required`;
         }
       });
-      if (Object.keys(missingRequired).length) {
-        setFieldErrors((prev)=>({...prev,...missingRequired}));
-        setError('Please fill all required fields before proceeding');
-        return false;
-      }
-      
-      setIsSaving(true);
-      setError('');
-      
-      try {
-        const baseUrl = 'http://54.238.204.246:8080/api/products';
-        const endpoint = buildApiEndpoint(baseUrl, productId, productType);
-        const body = buildRequestBody(productType, formData, false);
-        
-        if (!endpoint) {
-          setError('Invalid product type selected');
-          return false;
-        }
-
-        console.log('Submitting configuration payload:', {
-          endpoint,
-          body,
-          productType,
-          formData
-        });
-
-        if (productType.toLowerCase() === 'flatfile') {
-          await (await import('../api')).createProductFlatfileConfig(productId, body as any);
-          console.log('FlatFile config saved');
-          return true;
-        }
-        if (productType.toLowerCase() === 'api') {
-          await (await import('../api')).createProductApiConfig(productId, body as any);
-          console.log('API config saved');
-          return true;
-        }
-
-        // Fallback to original fetch for other types
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            ...getAuthHeaders(),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          console.error('API Error:', errData);
-          throw new Error(errData.message || `Configuration failed (${res.status})`);
-        }
-
-        const result = await res.json().catch(() => ({}));
-        console.log('Configuration saved successfully:', result);
-        onConfigChange({ ...formData, ...result });
-        return true;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Configuration failed';
-        console.error('Configuration error:', err);
-        setError(msg);
-        return false;
-      } finally {
-        setIsSaving(false);
-      }
+      setFieldErrors(errs);
+      setError(Object.keys(errs).length ? 'Please fix the highlighted fields.' : '');
+      return Object.keys(errs).length === 0;
     };
 
-    // expose submit via ref
-    React.useImperativeHandle(ref, () => ({ submit }));
-
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!productId) {
-        setError('Product ID is missing');
-        return false;
-      }
-
-      setIsSaving(true);
-      setError('');
-      try {
-        const baseUrl = 'http://54.238.204.246:8080/api/products';
-        const endpoint = buildApiEndpoint(baseUrl, productId, productType);
-        const body = buildRequestBody(productType, formData, false);
-        
-        if (!endpoint) {
-          onConfigChange(formData);
-          return;
-        }
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || 'Failed to save configuration');
-        }
-
-        const result = await response.json();
-        onConfigChange({ ...formData, ...result });
-
-        // Call the parent's onSubmit handler
+    // Expose submit via ref (client-side only)
+    React.useImperativeHandle(ref, () => ({
+      submit: async () => {
+        const ok = validate();
+        if (!ok) return false;
         if (onSubmit) {
-          return await onSubmit();
+          try {
+            const res = await onSubmit(); // optional callback
+            return res !== false;
+          } catch {
+            return false;
+          }
         }
-
         return true;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to save configuration';
-        console.error('Error saving configuration:', errorMessage);
-        setError(errorMessage);
-        return false;
-      } finally {
-        setIsSaving(false);
       }
-    };
+    }));
+
+    // Fetch configuration data when productId and productType are available
+    useEffect(() => {
+      const fetchConfigData = async () => {
+        if (!productId || !productType) return;
+        
+        try {
+          const { getAuthData } = await import('../../../utils/auth');
+          const authData = getAuthData();
+          
+          if (!authData?.token) return;
+
+          const headers = {
+            'Authorization': `Bearer ${authData.token}`,
+            'Content-Type': 'application/json',
+            'X-Organization-Id': authData?.organizationId?.toString() || ''
+          };
+
+          const apiEndpoint = productType.replace(/_/g, '-').toLowerCase();
+          console.debug('Fetching config', productId, apiEndpoint);
+          const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}` , { headers });
+          
+          if (res.ok) {
+            console.log('Fetched configuration details:', productId, productType);
+
+            const configData = await res.json();
+            console.log('Configuration JSON:', configData);
+            if (configData) {
+              // Map backend keys to UI labels for prefill
+              const lowerType = productType.toLowerCase();
+              const mapped: Record<string,string> = {};
+              if (lowerType === 'llmtoken' || lowerType === 'llm-token') {
+                if (configData.modelName) mapped['Model Name'] = configData.modelName;
+                if (configData.endpointUrl) mapped['Endpoint URL'] = configData.endpointUrl;
+                if (configData.authType) mapped['Auth Type'] = configData.authType;
+              } else if (lowerType === 'api') {
+                if (configData.endpointUrl) mapped['Endpoint URL'] = configData.endpointUrl;
+                if (configData.authType) mapped['Auth Type'] = configData.authType;
+              } else if (lowerType === 'flatfile') {
+                if (configData.format) mapped['File Format'] = configData.format;
+                if (configData.fileLocation) mapped['File Location'] = configData.fileLocation;
+              } else if (lowerType === 'sqlresult' || lowerType === 'sql-result') {
+                if (configData.connectionString) mapped['Connection String'] = configData.connectionString;
+                if (configData.dbType) mapped['DB Type'] = configData.dbType;
+                if (configData.authType) mapped['Auth Type'] = configData.authType;
+              }
+              setFormData(mapped);
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to fetch config data:', err);
+        }
+      };
+
+      fetchConfigData();
+    }, [productId, productType, onConfigChange, initialProductType]);
 
     useEffect(() => {
       onConfigChange(formData);
     }, [formData, onConfigChange]);
 
-
-
-    const handleInputChange = React.useCallback((field: string) => (value: string) => {
-      const newFormData = {
-        ...formData,
-        [field]: value,
-      };
-      setFormData(newFormData);
-      onConfigChange(newFormData);
-    }, [formData, onConfigChange]);
-
-
+    const handleInputChange = React.useCallback(
+      (field: string) => (value: string) => {
+        const newFormData = { ...formData, [field]: value };
+        setFormData(newFormData);
+        onConfigChange(newFormData);
+        // inline validation for required fields
+        const def = (configurationFields[productType] || []).find((f) => f.label === field);
+        if (def?.required && !value) {
+          setFieldErrors((prev) => ({ ...prev, [field]: `${field} is required` }));
+        } else {
+          setFieldErrors((prev) => {
+            const { [field]: _, ...rest } = prev;
+            return rest;
+          });
+        }
+      },
+      [formData, onConfigChange, productType]
+    );
 
     const renderField = (field: FieldProps) => {
       const fieldValue = formData[field.label] || '';
@@ -609,16 +381,17 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
 
       const handleBlur = () => {
         if (field.required && !fieldValue) {
-          setFieldErrors((prev) => ({ ...prev, [field.label]: `This field is required` }));
+          setFieldErrors((prev) => ({ ...prev, [field.label]: `${field.label} is required` }));
         } else if (fieldError) {
-          setFieldErrors((prev) => ({
-            ...Object.fromEntries(Object.entries(prev).filter(([key]) => key !== field.label)),
-          }));
+          setFieldErrors((prev) => {
+            const { [field.label]: _, ...rest } = prev;
+            return rest;
+          });
         }
       };
 
       const labelText = field.label;
-      // Handle different input types
+
       switch (field.type) {
         case 'select':
           return (
@@ -629,7 +402,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
                 onChange={handleInputChange(field.label)}
                 onBlur={handleBlur}
                 options={[
-                  { label: field.placeholder || 'Select an option', value: '' },
+                  { label: field.placeholder || `Select ${labelText}`, value: '' },
                   ...(field.options || getSelectOptions(field.label) || []),
                 ]}
                 error={fieldError}
@@ -645,7 +418,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
                 type="checkbox"
                 label={labelText}
                 checked={fieldValue === 'true'}
-                onChange={(val) => {
+                onChange={(val: string) => {
                   const newValue = val === 'true' ? 'false' : 'true';
                   handleInputChange(field.label)(newValue);
                 }}
@@ -718,29 +491,16 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
             </div>
           );
 
-        // Default to text input
         default:
-          const commonProps = {
-            label: labelText,
-            value: fieldValue,
-            onChange: handleInputChange(field.label),
-            placeholder: field.placeholder,
-            error: fieldError,
-            onBlur: () => {
-              if (field.required && !fieldValue) {
-                setFieldErrors((prev) => ({ ...prev, [field.label]: `This field is required` }));
-              } else if (fieldError) {
-                setFieldErrors((prev) => ({
-                  ...Object.fromEntries(Object.entries(prev).filter(([key]) => key !== field.label)),
-                }));
-              }
-            },
-          };
-
           return (
             <div className="form-group">
               <InputField
-                {...commonProps}
+                label={labelText}
+                value={fieldValue}
+                onChange={handleInputChange(field.label)}
+                placeholder={field.placeholder}
+                error={fieldError}
+                onBlur={handleBlur}
                 type={field.type as any}
               />
             </div>
@@ -755,10 +515,7 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
             label="Product Type"
             value={productType}
             onChange={handleProductTypeChange}
-            options={[
-              { label: 'Select Product Type', value: '' },
-              ...productOptions,
-            ]}
+            options={[{ label: 'Select Product Type', value: '' }, ...productOptions]}
             required
           />
         </div>
@@ -777,4 +534,6 @@ const ConfigurationTab = React.forwardRef<ConfigurationTabHandle, ConfigurationT
   }
 );
 
-export { ConfigurationTab };
+export { EditConfiguration };
+// Compat alias so existing imports keep working:
+export { EditConfiguration as ConfigurationTab };

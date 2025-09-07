@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { 
   getProducts, 
   Product, 
@@ -34,7 +35,7 @@ const steps = [
     }
 ];
 
-const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
+const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }: CreateUsageMetricProps) => {
     // form states
     const [metricId, setMetricId] = useState<number | null>(null);
     const [metricName, setMetricName] = useState('');
@@ -225,7 +226,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
         }
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentStep < steps.length - 1) {
             // Only validate current step before moving to next
             if (validateCurrentStep(currentStep)) {
@@ -234,7 +235,10 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
         } else {
             // On final step, validate before saving
             if (validateCurrentStep(currentStep)) {
-                saveOrUpdateMetric(false);
+                const ok = await saveOrUpdateMetric(false);
+                if (ok) {
+                    onClose();
+                }
             }
         }
     };
@@ -282,7 +286,7 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }) => {
                                     label="Product Name"
                                     placeholder="Select Product"
                                     value={selectedProductId}
-                                    onChange={(val)=>{
+                                    onChange={(val: string)=>{
                                         setSelectedProductId(val);
                                         const prod = products.find(p => String(p.productId) === val);
                                         setSelectedProductName(prod ? prod.productName : '');
