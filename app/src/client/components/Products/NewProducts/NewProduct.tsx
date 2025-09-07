@@ -1,5 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputField, TextareaField } from '../../Components/InputFields';
 import SaveAsDraftModal from '../Componenets/SaveAsDraftModel';
@@ -20,7 +20,7 @@ interface NewProductProps {
   onClose: () => void;
 }
 
-const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
+const NewProduct: React.FC<NewProductProps> = ({ onClose }: NewProductProps) => {
   useEffect(() => {
     document.body.classList.add('create-product-page');
     return () => {
@@ -416,7 +416,7 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
                       <InputField
                         value={formData.skuCode}
                         onChange={(val: string) => handleInputChange('skuCode', val)}
-                        placeholder="Enter SKU code"
+                        placeholder="eg. API-WTHR-STD-001"
                         error={errors.skuCode}
                       />
                     </div>
@@ -426,7 +426,7 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }) => {
                       <TextareaField
                         value={formData.description}
                         onChange={(val: string) => handleInputChange('description', val)}
-                        placeholder="Enter product description"
+                        placeholder="eg. Mapping service API for location-based apps"
                       />
                     </div>
                   </div>

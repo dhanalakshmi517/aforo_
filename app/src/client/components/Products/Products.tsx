@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ProductFormData } from '../../../types/productTypes';
 import EditProduct from './EditProductsss/EditProduct';
@@ -28,7 +29,7 @@ interface NotificationProps {
   productName: string;
 }
 
-const Notification: React.FC<NotificationProps> = ({ message, type, productName }) => {
+const Notification: React.FC<NotificationProps> = ({ message, type, productName }: NotificationProps) => {
   const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
   return (
     <div className={`notification ${type === 'error' ? 'error' : ''}`}>
@@ -53,7 +54,7 @@ interface DeleteModalProps {
   isDeleting: boolean;
 }
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ onCancel, onConfirm, isDeleting }) => (
+const DeleteModal: React.FC<DeleteModalProps> = ({ onCancel, onConfirm, isDeleting }: DeleteModalProps) => (
   <div className="rate-delete-modal-overlay">
     <div className="rate-delete-modal-content">
       <div className="rate-delete-modal-body">

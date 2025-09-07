@@ -2,7 +2,7 @@
 // Description: Read-only review UI matching the provided screenshot.
 // Usage: import and render <ProductReview />. Styles in ProductReview.css
 
-import React from "react";
+import * as React from "react";
 import "./ProductReview.css";
 
 // Types
@@ -54,7 +54,7 @@ interface ProductReviewProps {
   },
 */
 
-const CardSection: React.FC<ReviewSection> = ({ title, rows }) => {
+const CardSection: React.FC<ReviewSection> = ({ title, rows }: ReviewSection) => {
   return (
     <section className="pr-card" aria-label={title}>
       <header className="pr-card__header">
@@ -76,7 +76,7 @@ const CardSection: React.FC<ReviewSection> = ({ title, rows }) => {
   );
 };
 
-const ProductReview: React.FC<ProductReviewProps> = ({ generalDetails, configuration }) => {
+const ProductReview: React.FC<ProductReviewProps> = ({ generalDetails, configuration }: ProductReviewProps) => {
   const generalRows: ReviewRow[] = Object.entries(generalDetails).map(([k, v]) => ({
     label: prettify(k),
     value: v || '-'
@@ -103,4 +103,3 @@ const ProductReview: React.FC<ProductReviewProps> = ({ generalDetails, configura
 };
 
 export default ProductReview;
-

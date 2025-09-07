@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputField, TextareaField } from '../../Components/InputFields';
 import SaveAsDraftModal from '../Componenets/SaveAsDraftModel';
@@ -6,6 +7,11 @@ import DeleteConfirmModal from '../Componenets/DeleteConfirmModal';
 import { ConfigurationTab } from './EditConfiguration';
 import EditReview from './EditReview';
 import './EditProduct.css';
+
+// Minimal product type for local state (id only needed)
+interface Product {
+  productId: string;
+}
 
 const steps = [
   { id: 1, title: 'General Details', desc: 'Start with the basics of your product.' },
@@ -20,7 +26,7 @@ interface EditProductProps {
 
 type ActiveTab = 'general' | 'configuration' | 'review';
 
-const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
+const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditProductProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +37,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
   }, []);
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productType, setProductType] = useState<string>('');
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('general');
 
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
@@ -91,6 +100,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
 
   const handleProductTypeChange = (type: string) => {
     setConfiguration(prev => ({ ...prev, productType: type }));
+    setProductType(type);
   };
 
   const goToStep = (index: number) => {
@@ -185,7 +195,8 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
       };
       const endpoint = endpointMap[configuration.productType ?? ''] || (configuration.productType || '').toLowerCase();
       if (!endpoint) return false;
-      const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${endpoint}`, {
+      const res = await fetch(
+        `http://54.238.204.246:8080/api/products/${productId}/${endpoint}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(configuration)
@@ -229,6 +240,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
         const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}`, { headers });
         if (!res.ok) throw new Error('Failed to fetch product');
         const data = await res.json();
+        console.log('Fetched general product details:', data);
         
         setFormData(prev => ({
           ...prev,
@@ -240,7 +252,25 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
         
         // Set product type for configuration component to fetch its data
         if (data.productType) {
+          setProductType(data.productType);
           handleProductTypeChange(data.productType);
+        } else {
+          // Fallback: probe known configuration endpoints to infer type
+          const typeMap: Record<string,string> = { API:'api', FlatFile:'flatfile', SQLResult:'sql-result', LLMToken:'llm-token' };
+          for (const [key, slug] of Object.entries(typeMap)) {
+            try {
+              const probeRes = await fetch(
+                `http://54.238.204.246:8080/api/products/${productId}/${slug}`, { method: 'HEAD', headers });
+              if (probeRes.ok) {
+                console.log('Inferred productType via probe:', key);
+                setProductType(key);
+                handleProductTypeChange(key);
+                break;
+              }
+            } catch (probeErr) {
+              /* ignore */
+            }
+          }
         }
       } catch (err) {
         console.error(err);
@@ -373,6 +403,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }) => {
                   <div className="edit-configuration-tab-container">
                     <h3>CONFIGURATION</h3>
                     <ConfigurationTab
+                      initialProductType={productType}
                       onConfigChange={handleConfigChange}
                       onProductTypeChange={handleProductTypeChange}
                       ref={configRef}

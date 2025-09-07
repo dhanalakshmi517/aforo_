@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputField, TextareaField } from '../../Components/InputFields';
 import SaveAsDraftModal from '../Componenets/SaveAsDraftModel';
@@ -21,7 +22,7 @@ const steps = [
 
 type ActiveTab = 'general' | 'configuration' | 'review';
 
-const NewProductForm: React.FC<NewProductFormProps> = ({ onClose }) => {
+const NewProductForm: React.FC<NewProductFormProps> = ({ onClose }: NewProductFormProps) => {
   // original state and handlers (trimmed for brevity)
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>('general');

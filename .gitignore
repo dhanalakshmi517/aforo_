@@ -1,0 +1,25 @@
+# Ignore Node modules and Playwright binaries
+node_modules/
+
+# Ignore specific folders related to Playwright & types
+node_modules/@playwright/
+node_modules/playwright/
+node_modules/playwright-core/
+
+# Ignore TypeScript definition packages for backend libraries (client repo only)
+node_modules/@types/body-parser/
+node_modules/@types/connect/
+node_modules/@types/express/
+node_modules/@types/express-serve-static-core/
+node_modules/@types/http-errors/
+node_modules/@types/mime/
+node_modules/@types/qs/
+node_modules/@types/range-parser/
+node_modules/@types/send/
+node_modules/@types/serve-static/
+
+# Ignore SweetAlert2 bundled dist
+node_modules/sweetalert2/
+
+# Ignore any Playwright CLI wrappers
+node_modules/.bin/playwright*

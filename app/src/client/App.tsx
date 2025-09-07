@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import './Main.css';
 import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
@@ -11,20 +12,28 @@ import Landing from './components/Landing/Landing';
 import Organization from './components/Landing/Organization';
 import { ProtectedRoute } from './components/Common/ProtectedRoute';
 import SideNavbar from './components/SideNavbar/SideNavbar';
-import Customers from './components/Customers/Customers';
-import EditCustomer from './components/Customers/EditCustomers/EditCustomer';
-import Products from './components/Products/Products';
-import NewProduct from './components/Products/NewProducts/NewProduct';
-import Metering from './components/Metering/Metering';
-import Subscriptions from './components/Subscriptions/Subscriptions';
+const customersLoader = () => import('./components/Customers/Customers');
+const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
+const editCustomerLoader = () => import('./components/Customers/EditCustomers/EditCustomer');
+const EditCustomer = React.lazy(editCustomerLoader) as React.ComponentType<any>;
+const productsLoader = () => import('./components/Products/Products');
+const Products = React.lazy(productsLoader) as React.ComponentType<any>;
+const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
+const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
+const meteringLoader = () => import('./components/Metering/Metering');
+const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
+const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
+const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
 import DataIngestion from './components/DataIngestion/DataIngestion';
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
 import TieredEstimation from './components/Rateplan/Revenue/TieredEstimation';
 import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
-import RatePlans from './components/Rateplan/RatePlans';
-import EditPlan from './components/Rateplan/EditRatePlan/EditRatePlan';
+const ratePlansLoader = () => import('./components/Rateplan/RatePlans');
+const RatePlans = React.lazy(ratePlansLoader) as React.ComponentType<any>;
+const editPlanLoader = () => import('./components/Rateplan/EditRatePlan/EditRatePlan');
+const EditPlan = React.lazy(editPlanLoader) as React.ComponentType<any>;
 import LoginPage from '../auth/LoginPage';
 import ThankYou from './components/Landing/ThankYou';
 
@@ -120,19 +129,22 @@ export default function App() {
     location.pathname
   ]);
 
-  // Show loading state while checking auth
-  if (isAuthLoading && !isAuthRoute) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  // Prefetch heavy modules in background after initial render
+  useEffect(() => {
+    productsLoader();
+    customersLoader();
+    meteringLoader();
+    subscriptionsLoader();
+    ratePlansLoader();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-white">
       <CookieConsentBanner />
-      <Routes>
+      {/* Use minimal fallback only when no token in storage */}
+      <Suspense fallback={!localStorage.getItem('aforo_auth_token') ? (<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>) : null}>
+        <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route
@@ -394,10 +406,11 @@ export default function App() {
             </div>
           </ProtectedRoute>
         } />
-        
+        <Route path="*" element={<Navigate to="/get-started" replace />} />
+
         {/* Add other protected routes similarly */}
-        <Route path="*" element={<Navigate to="/get-started/products" replace />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </div>
   );
 }
