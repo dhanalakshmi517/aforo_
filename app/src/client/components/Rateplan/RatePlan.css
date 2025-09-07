@@ -1,107 +1,59 @@
 @import "../Variables/Variables.css";
 
-/* ================= Shared variables ================= */
+/* =========================================================
+   Global / Variables (component-level)
+   ========================================================= */
 :root {
-  /* Layout system */
-  --page-shell-pad: 20px;     /* .main-container padding */
-  --header-gutter: 120px;     /* L/R padding for the top bar & body gutter */
+  --page-shell-pad: 20px;
+  --header-gutter: 120px;
 
-  /* Back button metrics (for precise title offset) */
   --back-icon: 20px;
   --back-pad: 8px;
   --back-border: 1px;
-  --back-total: calc(var(--back-icon) + 2*var(--back-pad) + 2*var(--back-border)); /* 38px */
-
-  /* Title spacing from back button */
+  --back-total: calc(var(--back-icon) + 2*var(--back-pad) + 2*var(--back-border));
   --title-gap: 16px;
+
+  --resume-chip-bg: #EFECEC;
+  --resume-chip-fg: #2B7194;
+
+  --surface-sidebar: #004069;
+  --border-1: #E9E9EE;
+
+  --text-dark: #6B6F76;
 }
 
-/* ================= Shell ================= */
+/* =========================================================
+   Root container
+   ========================================================= */
 .main-container {
   width: 100%;
   padding: var(--page-shell-pad);
   box-sizing: border-box;
 }
 
-/* ================= Breadcrumb ================= */
-.breadcrumb-nav {
-  margin-bottom: 10px;
-  margin-top: -20px;
-  width: 100%;
-  padding-left: 210px; /* align with sidebar without reducing width */
-  box-sizing: border-box;
-}
-
-@media (max-width: 768px) {
-  .breadcrumb-nav {
-    margin-left: 0;
-    width: 100%;
-    padding-left: 0;
-  }
-}
-
-.breadcrumb {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  max-width: none;
-  background-color: var(--color-neutral-white);
-  height: 42px;
-  border: 1px solid var(--color-neutral-200);
-  margin: 0;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-  .breadcrumb {
-    gap: 8px;
-    height: auto;
-    padding: 8px;
-  }
-  .breadcrumb-item {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-}
-
-.breadcrumb-item {
-  color: var(--color-primary-700);
-  text-align: center;
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-sm);
-  text-decoration: none;
-}
-
-/* ================= Create Plan (Top Area) ================= */
-
+/* =========================================================
+   Create Plan (Top Area)
+   ========================================================= */
 .create-plan-container {
   width: 100%;
-  padding: 20px 0;               /* vertical only — share the same gutter horizontally */
+  padding: 20px 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-/* Top bar with absolute-anchored left cluster and right CTAs */
 .create-plan-header {
   position: relative;
   width: 100%;
   border-bottom: 1px solid var(--color-neutral-200);
-  padding: 16px 12px 16px var(--header-gutter); /* T/B 16, R 12, L 120 */
+  padding: 16px 12px 16px var(--header-gutter);
   box-sizing: border-box;
   min-height: 72px;
 }
 
-/* keep for semantics; layout is from absolute children */
 .header-left { position: static; }
 
-/* Back button — align to page shell left so it lines with the side nav/stepper */
 .back-button {
   position: absolute;
   left: var(--page-shell-pad);
@@ -112,7 +64,7 @@
   justify-content: center;
   gap: 8px;
   background: none;
-  border: 1px solid var(--color-neutral-300); /* stroke in design */
+  border: 1px solid var(--color-neutral-300);
   padding: var(--back-pad);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
@@ -122,7 +74,6 @@
 
 .back-icon { width: var(--back-icon); height: var(--back-icon); }
 
-/* Title — exactly 16px from the back button’s outer border */
 .create-title {
   position: absolute;
   left: calc(var(--page-shell-pad) + var(--back-total) + var(--title-gap));
@@ -130,9 +81,8 @@
   transform: translateY(-50%);
   margin: 0;
   color: var(--color-neutral-1700);
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-h4);
-  font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-heading-h4);
   white-space: nowrap;
@@ -140,80 +90,58 @@
   text-overflow: ellipsis;
 }
 
-/* Right-side actions — anchored to the right header gutter */
 .plan-header-actions {
   position: absolute;
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
-  gap: 16px; /* spacing between buttons */
+  gap: 16px;
   margin: 0;
 }
 
-/* Button specs */
 .cancel-button,
 .draft-button {
-  width: 137px;                  /* Fixed 137x40 per design */
+  width: 137px;
   height: 40px;
-  padding: 8px 20px;             /* T/B 8, L/R 20 */
+  padding: 8px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-md);
-  font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-body-md);
 }
-
 .cancel-button {
   background-color: var(--color-error-100);
   color: var(--color-error-400);
   border: none;
 }
-
 .draft-button {
   border: 1px solid var(--color-primary-800);
   background-color: var(--color-primary-000);
   color: var(--color-primary-800);
 }
 
-/* Body of create page shares the header gutter so everything aligns */
 .create-plan-body {
   padding: 0 var(--header-gutter);
   box-sizing: border-box;
 }
 
-/* ================= List page header ================= */
+/* =========================================================
+   List Page Header (title, search, actions)
+   ========================================================= */
 .rate-plan-container {
   padding: 20px;
-  width: calc(100% - 210px); /* leave room for sidebar */
+  width: calc(100% - 210px);
   max-width: none;
   box-sizing: border-box;
-  margin-left: 210px; /* sidebar width */
+  margin-left: 210px;
   background: none;
   box-shadow: none;
-}
-
-.price-plan-header { margin-bottom: 20px; }
-
-.price-plan-breadcrumb {
-  font-family: "DM Sans", sans-serif;
-  font-size: 22px;
-  font-weight: 600;
-  color: #151312;
-}
-
-.price-plan-content { margin-top: 30px; }
-
-.title-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
 }
 
 .rate-plan-header {
@@ -226,9 +154,8 @@
   margin: 0;
   flex: 1;
   color: var(--color-neutral-1700);
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-h5);
-  font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-heading-h5);
   justify-content: flex-start;
@@ -237,117 +164,312 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0px;
+  gap: 12px;
   flex: 1;
   justify-content: flex-end;
 }
 
-.products-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: 10px;
-  margin-bottom: 2px;
-}
-
-.products-search {
+/* Search */
+.rp-header-search {
   display: flex;
   align-items: center;
-  background: var(--color-neutral-100);
-  border-radius: 6px;
-  padding: 8px 12px;
-  width: 300px;
-  border: 1px solid var(--color-neutral-300);
+  height: 40px;
+  min-width: 520px;
+  border: 1px solid var(--border-1);
+  border-radius: 8px;
+  background: #F7F8FA;
+  overflow: hidden;
 }
 
-.search-icon { color: var(--color-neutral-500); margin-right: 8px; }
-
-.products-search-input {
+.rp-search-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #B8BCC6;
+  flex: 0 0 40px;
+}
+.rp-search-input {
+  flex: 1 1 auto;
+  height: 100%;
   border: none;
-  background: none;
   outline: none;
-  font-size: 14px;
+  padding: 0 12px;
+  background: transparent;
   color: var(--color-neutral-1700);
-  width: 100%;
+  font-size: 14px;
+}
+
+.rp-filter-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-1);
+  border-radius: 8px;
+  background: #fff;
+  color: #70737B;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .new-rate-button {
-  background: var(--color-primary-800);
+  background: var(--surface-sidebar);
   color: var(--color-neutral-white);
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 400;
+  border-radius: 8px;
+  font-weight: 500;
   cursor: pointer;
   width: 170px;
   height: 40px;
 }
+.new-rate-button:hover { filter: brightness(0.98); }
 
-/* Small utility icon button */
-.sam-button {
-  width: 40px;
-  height: 40px;
-  background-color: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  margin: 0 12px;
-  padding: 10px;
-  justify-content: center;
-  align-items: center;
+/* =========================================================
+   EMPTY STATE — match gaps: 198/199 top-bottom & 431 left-right
+   ========================================================= */
+.pp-empty-area {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 198px 431px;  /* ← requested corner gaps */
   display: flex;
-}
-.sam-button:hover {
-  background-color: var(--color-primary-000);
-  border: 1px solid var(--color-primary-600);
+  justify-content: center; /* keeps card centered if width differs */
 }
 
-/* ================= Table ================= */
+.rate-empty {
+  width: 306px;              /* spec */
+  min-height: 288px;         /* spec */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;                 /* spacing between image, text, button */
+}
+
+.rate-empty-illustration svg {
+  width: 160px;
+  height: 160px;
+  display: block;
+}
+
+.rate-empty-text {
+  margin: 0;
+  text-align: center;
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #1A2126;
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.empty-new-rate-btn {
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: var(--surface-sidebar);
+  color: #fff;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.empty-new-rate-btn:hover { filter: brightness(0.98); }
+.empty-btn-plus {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+/* =========================================================
+   Table
+   ========================================================= */
 .pp-rate-table {
   width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
   border-collapse: collapse;
-  margin-top: 20px;
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
   margin: 0;
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
+
+/* widths to match Figma */
+.col-rateplan-name { width: 244px; }
+.col-product       { width: 260px; }
+.col-payment       { width: 226px; }
+.col-created       { width: 221px; }
+.col-status        { width: 96px;  }
+.col-actions       { width: 97px;  }
 
 .pp-rate-table th,
 .pp-rate-table td {
-  padding: 12px 16px;
+  padding: 8px 16px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #EEE;
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 .pp-rate-table th {
-  background-color: #f4f4f4;
-  color: #333;
+  background-color: #F7F8FA;
+  color: var(--text-dark);
+  font-weight: 400;
+}
+
+/* Center the Actions column */
+.pp-rate-table .col-actions,
+.pp-rate-table td:nth-child(6) {
+  text-align: center;
+}
+
+/* =========================================================
+   Complex Rate Plan Name chip
+   ========================================================= */
+.rp-name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                                 /* Row spacedBy(8.dp) */
+  background: #F8F7FA;                      /* Variables.surfaceLayer3 */
+  border: 0.4px solid #D5D4DF;              /* Variables.borderBorder2 */
+  border-radius: 12px;                      /* Variables.borderRadiusMd */
+  height: 58px;
+  min-width: 182px;
+  padding: 8px 28px 8px 8px;                /* start=8, end=28 */
+}
+
+.rp-name-icon {
+  width: 44px;
+  height: 42px;
+  border: 0.6px solid #F6F6F6;
+  border-radius: 8px;                        /* borderRadiusSm */
+  background: rgba(128, 133, 110, 0.30);     /* multiColorsProductsShade2Opac */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.rp-name-initials { font-weight: 700; font-size: 12px; color: #2B2B2B; }
+
+.rp-name-texts { display: flex; flex-direction: column; justify-content: center; }
+
+.rp-name-title   { font-size: 14px; line-height: 20px; color: #12161B; font-weight: 600; }
+.rp-name-subtitle{ margin-top: 2px; font-size: 10px; line-height: 16px; color: #1A2126; }
+
+/* =========================================================
+   Product Badge
+   ========================================================= */
+.pp-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #F2F4F7;
+  color: #0F172A;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* =========================================================
+   Payment Type Pills
+   ========================================================= */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 10px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid #D8DEE7;
+  background: #FFFFFF;
+  color: #1A2126;
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.pill-icon { display: inline-flex; width: 18px; height: 18px; }
+.pill--unknown { color: #6B7280; }
+
+/* =========================================================
+   Status Pills
+   ========================================================= */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  font-size: 13px;
   font-weight: 600;
+  color: #0F172A;
+  background: #EDEFF2;
+}
+.status-badge.active { background: #E6F7EA; color: #107A3E; }
+.status-badge.draft  { background: #EEEAF7; color: #5D41A3; }
+.status-badge.staged { background: #E6F2FB; color: #2676B8; }
+
+/* =========================================================
+   Row Action Buttons
+   ========================================================= */
+.action-buttons {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 }
 
-.pp-rate-table th:nth-child(1),
-.pp-rate-table td:nth-child(1) { width: 60px; }
-
-/* ================= Modals ================= */
-@media (max-width: 768px) {
-  .rate-delete-modal-cancel,
-  .rate-delete-modal-confirm { width: 100%; }
-  .pp-rate-table { display: block; overflow-x: auto; }
+.edit-button  {
+  background-color: var(--color-info-100);
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  width: 28px;
+  height: 28px;
 }
 
+.resume-button {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  background-color: var(--resume-chip-bg);
+  color: var(--resume-chip-fg);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.resume-button svg { width: 16px; height: 16px; display: block; }
+
+.delete-button {
+  background-color: var(--color-error-100);
+  border: none;
+  color: var(--color-error-400);
+  padding: 6px;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  width: 28px;
+  height: 28px;
+}
+
+/* =========================================================
+   Delete / Cancel Modal
+   ========================================================= */
 .rate-delete-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -367,51 +489,25 @@
   gap: 16px;
 }
 
-.delete-modal-header {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.delete-modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #151312;
-  margin: 0;
-}
-
-.rate-delete-modal-body {
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.rate-delete-modal-body p {
-  color: var(--color-neutral-1000);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
-  text-align: center;
-}
+.rate-delete-modal-body { margin-bottom: 16px; text-align: center; }
 
 .rate-delete-modal-body h5 {
   color: var(--color-neutral-1700);
   text-align: center;
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-h5);
-  font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-heading-h5);
   margin: 0;
 }
 
-.warning-text {
-  color: #dc3545;
-  font-weight: 500;
-  margin-top: 8px;
-  font-size: 14px;
+.rate-delete-modal-body p {
+  color: var(--color-neutral-1000);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  text-align: center;
 }
 
 .rate-delete-modal-footer {
@@ -437,9 +533,8 @@
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-neutral-600);
   color: var(--color-neutral-800);
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-lg);
-  font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-body-lg);
 }
@@ -448,15 +543,16 @@
   border-radius: var(--border-radius-sm);
   background-color: var(--color-error-400);
   color: var(--color-neutral-white);
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-lg);
-  font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-body-lg);
 }
 .rate-delete-modal-confirm:hover { background-color: #c22; }
 
-/* ================= Notifications ================= */
+/* =========================================================
+   Notifications (toast)
+   ========================================================= */
 .notification-container {
   position: fixed;
   bottom: 20px;
@@ -474,7 +570,7 @@
   padding: 20px;
   border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease-out;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
   animation: slideIn 0.3s ease-out forwards;
   width: auto;
   max-width: 366px;
@@ -501,84 +597,60 @@
   margin-right: 40px;
 }
 .notification.error .notification-icon { background: white; }
-.notification-icon svg { width: 24px; height: 24px; stroke: green; }
-.notification.error .notification-icon svg { stroke: white; }
+.notification-icon svg { width: 24px; height: 24px; }
 
 .notification-text { flex: 1; }
 .notification-text h5 {
-  margin: 0;
+  margin: 0 0 6px 0;
   color: var(--color-neutral-1400);
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-lg);
-  font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-body-lg);
-  margin-bottom: 6px;
 }
 .notification-text p {
   margin: 0;
   color: var(--color-neutral-1400);
-  font-family: var(--font-family-primary);
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: var(--font-size-sm);
-  font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-sm);
 }
-.notification-details {
-  font-size: 13px;
-  color: var(--color-neutral-1200);
-  font-weight: 500;
-}
+.notification-details { font-size: 13px; color: var(--color-neutral-1200); font-weight: 500; }
 
-/* Animations */
 @keyframes slideIn {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 @keyframes slideOut {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(10px); opacity: 0; }
 }
 
-/* ================= Row action buttons ================= */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  width: fit-content;
-  margin: 0 auto;
-}
-.edit-button  {
-  background-color: var(--color-info-100);
-  border: none;
-  padding: 6px;
-  cursor: pointer;
-  border-radius: var(--border-radius-sm);
-  width: 28px;
-  height: 28px;
-}
-.delete-button {
-  background-color: var(--color-error-100);
-  border: none;
-  color: var(--color-error-400);
-  padding: 6px;
-  cursor: pointer;
-  border-radius: var(--border-radius-sm);
-  width: 28px;
-  height: 28px;
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 1280px) {
+  /* soften the fixed empty-state gaps on narrower viewports */
+  .pp-empty-area { padding: 120px 80px; }
 }
 
-/* ================= Responsive tweaks ================= */
 @media (max-width: 1024px) {
-  :root { --header-gutter: 24px; }          /* narrower gutter */
+  :root { --header-gutter: 24px; }
   .create-plan-header { padding: 16px var(--header-gutter); }
   .plan-header-actions { right: 12px; }
   .create-plan-body { padding: 0 var(--header-gutter); }
+  .rp-header-search { min-width: 0; width: 100%; }
 }
+
 @media (max-width: 768px) {
   .rate-plan-container { width: 100%; margin-left: 0; }
+  .rate-delete-modal-cancel,
+  .rate-delete-modal-confirm { width: 100%; }
+  .pp-rate-table { display: block; overflow-x: auto; }
+  .pp-empty-area { padding: 80px 24px; }
 }
+
 @media (max-width: 640px) {
   .create-plan-header { min-height: 96px; }
   .plan-header-actions {
@@ -587,4 +659,5 @@
     padding-top: 8px;
     justify-content: flex-start;
   }
+  .header-actions { gap: 8px; }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 
 import Billable from "./Billable";
 import Pricing, { PricingHandle } from "./Pricing";
@@ -10,6 +11,7 @@ import {
   createRatePlan,
   RatePlanRequest,
   confirmRatePlan,
+  updateRatePlan,
 } from "./api";
 
 import "./CreatePricePlan.css";
@@ -17,6 +19,7 @@ import { InputField, TextareaField, SelectField } from "../Components/InputField
 
 interface CreatePricePlanProps {
   onClose: () => void;
+  registerSaveDraft?: (fn: () => Promise<void>) => void;
 }
 
 const steps = [
@@ -27,7 +30,8 @@ const steps = [
   { title: "Review & confirm", desc: "Check and Finalize details." },
 ];
 
-const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
+const CreatePricePlan = React.forwardRef<{ back: () => boolean }, CreatePricePlanProps>(({ onClose, registerSaveDraft }, ref) => {
+  const navigate = useNavigate();
   const pricingRef = React.useRef<PricingHandle>(null);
 
   const [planName, setPlanName] = useState("");
@@ -40,10 +44,15 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [ratePlanId, setRatePlanId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [draftSaving, setDraftSaving] = useState(false);
   const [productError, setProductError] = useState("");
 
   // inline errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    registerSaveDraft?.(saveDraft);
+  }, [registerSaveDraft, planName, planDescription, billingFrequency, selectedProductName, paymentMethod, selectedMetricId, ratePlanId, products]);
 
   useEffect(() => {
     const getProducts = async () => {
@@ -58,6 +67,17 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
 
   const [currentStep, setCurrentStep] = useState(0);
 
+  // expose back method to parent
+  React.useImperativeHandle(ref, () => ({
+    back: () => {
+      if (currentStep > 0) {
+        setCurrentStep((s) => s - 1);
+        return true;
+      }
+      return false;
+    },
+  }), [currentStep]);
+
   const validateStep0 = (): boolean => {
     const e: Record<string, string> = {};
     if (!planName.trim()) e.planName = "This is required field";
@@ -69,13 +89,44 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
     return Object.keys(e).length === 0;
   };
 
+  const saveDraft = async () => {
+    try {
+      setDraftSaving(true);
+      // build partial payload from fields user has entered so far
+      const selectedProduct = products.find(p => p.productName === selectedProductName);
+      const partial: Partial<RatePlanRequest> = {
+        // @ts-ignore backend allows status
+        status: 'DRAFT',
+        ratePlanName: planName || undefined as any,
+        productId: selectedProduct ? Number(selectedProduct.productId) : undefined,
+        description: planDescription || undefined,
+        billingFrequency: billingFrequency as any,
+        paymentType: paymentMethod as any,
+      };
+      if (selectedMetricId !== null) (partial as any).billableMetricId = selectedMetricId;
+
+      if (!ratePlanId) {
+        // create
+        const created = await createRatePlan(partial as any);
+        setRatePlanId(created.ratePlanId);
+      } else {
+        await updateRatePlan(ratePlanId, partial as any);
+      }
+    } catch (e) {
+      console.error('Failed to save draft', e);
+    } finally {setDraftSaving(false);}  };
+
+  
   const handleNext = async () => {
     if (currentStep === steps.length - 1) {
       if (!ratePlanId) return;
       try {
         setSaving(true);
         await confirmRatePlan(ratePlanId);
+        // Close the modal in parent if present
         onClose();
+        // Navigate back to list and refresh
+        navigate('/get-started/rate-plans');
       } finally {
         setSaving(false);
       }
@@ -277,14 +328,14 @@ const CreatePricePlan: React.FC<CreatePricePlanProps> = ({ onClose }) => {
             <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>
               Back
             </button>
-            <button className="btn save-next" onClick={handleNext} disabled={saving}>
-              Save & Next
+                                      <button className="btn save-next" onClick={handleNext} disabled={saving}>
+              {currentStep === steps.length - 1 ? 'Create Rate Plan' : 'Save & Next'}
             </button>
           </div>
-        </div>
+                    </div>
       </div>
     </div>
   );
-};
+});
 
-export default CreatePricePlan;
+export default React.memo(CreatePricePlan);

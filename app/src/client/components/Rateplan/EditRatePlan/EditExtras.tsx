@@ -1,13 +1,31 @@
 import React, { useState } from 'react';
 import './EditExtras.css';
 
+import { saveSetupFee, saveDiscounts, saveFreemiums, saveMinimumCommitment } from '../api';
+
 interface EditExtrasProps {
   noUpperLimit: boolean;
+  ratePlanId?: number;
 }
 
-export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Element {
+export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps): JSX.Element {
   const [activeSections, setActiveSections] = useState<string[]>([]);
   const [freemiumType, setFreemiumType] = useState('');
+  const [setupFee, setSetupFee] = useState('');
+  const [applicationTiming, setApplicationTiming] = useState('');
+  const [invoiceDescription, setInvoiceDescription] = useState('');
+
+  const [discountType, setDiscountType] = useState<'PERCENTAGE'|'FLAT'|''>('');
+  const [percentageDiscount, setPercentageDiscount] = useState('');
+  const [flatDiscountAmount, setFlatDiscountAmount] = useState('');
+  const [eligibility, setEligibility] = useState('');
+  const [discountStart, setDiscountStart] = useState('');
+  const [discountEnd, setDiscountEnd] = useState('');
+
+  const [freeUnits, setFreeUnits] = useState('');
+  const [freeTrialDuration, setFreeTrialDuration] = useState('');
+  const [freeStart, setFreeStart] = useState('');
+  const [freeEnd, setFreeEnd] = useState('');
   const [minimumUsage, setMinimumUsage] = useState('');
   const [minimumCharge, setMinimumCharge] = useState('');
 
@@ -67,6 +85,51 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
     </div>
   );
 
+  const handleSaveExtras = async () => {
+    if (!ratePlanId) return;
+    try {
+      // Setup Fee
+      if (setupFee) {
+        await saveSetupFee(ratePlanId, {
+          setupFee: Number(setupFee),
+          applicationTiming: Number(applicationTiming||0),
+          invoiceDescription: invoiceDescription,
+        });
+      }
+      // Discounts
+      if (discountType) {
+        await saveDiscounts(ratePlanId, {
+          discountType: discountType as any,
+          percentageDiscount: Number(percentageDiscount||0),
+          flatDiscountAmount: Number(flatDiscountAmount||0),
+          eligibility,
+          startDate: discountStart,
+          endDate: discountEnd,
+        });
+      }
+      // Freemiums
+      if (freemiumType) {
+        await saveFreemiums(ratePlanId, {
+          freemiumType: freemiumType.toUpperCase() as any,
+          freeUnits: Number(freeUnits||0),
+          freeTrialDuration: Number(freeTrialDuration||0),
+          startDate: freeStart,
+          endDate: freeEnd,
+        });
+      }
+      // Minimum commitment
+      if (minimumUsage || minimumCharge) {
+        await saveMinimumCommitment(ratePlanId, {
+          minimumUsage: Number(minimumUsage||0),
+          minimumCharge: Number(minimumCharge||0),
+        });
+      }
+      alert('Extras saved');
+    } catch(err:any) {
+      alert(err?.message||'Failed to save extras');
+    }
+  };
+
   return (
     <>
       {/* Setup Fee */}
@@ -79,11 +142,11 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
         {activeSections.includes('setupFee') && (
           <div className="section-content">
             <label>Enter one-time Setup Fee <span className="optional">(optional)</span></label>
-            <input type="text" placeholder="$22" />
+            <input className="extras-w-440" type="number" placeholder="$22" value={setupFee} onChange={e=>setSetupFee(e.target.value)} />
             <label>Application Timing</label>
-            <input type="text" placeholder="On Activation / First Invoice" />
+            <input className="extras-w-440" type="number" placeholder="Timing code" value={applicationTiming} onChange={e=>setApplicationTiming(e.target.value)} />
             <label>Invoice Description</label>
-            <textarea placeholder="Invoice Description"></textarea>
+            <textarea className="extras-w-440" placeholder="Invoice Description" value={invoiceDescription} onChange={e=>setInvoiceDescription(e.target.value)}></textarea>
           </div>
         )}
       </div>
@@ -98,13 +161,13 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
         {activeSections.includes('discounts') && (
           <div className="section-content">
             <label>Discount Type</label>
-            <select><option>Recurring / One-time</option></select>
+            <select className="extras-w-440"><option>Recurring / One-time</option></select>
             <label>Enter % discount</label>
-            <input type="text" placeholder="10%" />
+            <input className="extras-w-440" type="text" placeholder="10%" />
             <label>Enter Flat Discount Amount</label>
-            <input type="text" placeholder="$50" />
+            <input className="extras-w-440" type="text" placeholder="$50" />
             <label>Eligibility</label>
-            <select><option>All Customers / New Customers</option></select>
+            <select className="extras-w-440"><option>All Customers / New Customers</option></select>
             <label>Validity Period</label>
             <div className="date-range">
               <div className="date-input">
@@ -130,7 +193,7 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
         {activeSections.includes('freemium') && (
           <div className="section-content">
             <label>Freemium Type</label>
-            <select value={freemiumType} onChange={(e) => setFreemiumType(e.target.value)}>
+            <select className="extras-w-440" value={freemiumType} onChange={(e) => setFreemiumType(e.target.value)}>
               <option value="">--Select--</option>
               <option value="free_units">Free Units</option>
               <option value="free_trial">Free Trial Duration</option>
@@ -140,14 +203,14 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
             {(freemiumType === 'free_units' || freemiumType === 'units_per_duration') && (
               <>
                 <label>Select Free Units</label>
-                <input type="text" placeholder="e.g., 1000 API calls" />
+                <input className="extras-w-440" type="text" placeholder="e.g., 1000 API calls" />
               </>
             )}
 
             {(freemiumType === 'free_trial' || freemiumType === 'units_per_duration') && (
               <>
                 <label>Select Free Trial Duration</label>
-                <input type="text" placeholder="e.g., 14 days" />
+                <input className="extras-w-440" type="text" placeholder="e.g., 14 days" />
               </>
             )}
 
@@ -176,6 +239,7 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
           <div className="section-content">
             <label>Minimum Usage</label>
             <input
+              className="extras-w-440"
               type="text"
               placeholder="Enter usage"
               value={minimumUsage}
@@ -188,6 +252,7 @@ export default function EditExtras({ noUpperLimit }: EditExtrasProps): JSX.Eleme
 
             <label>Minimum Charge</label>
             <input
+              className="extras-w-440"
               type="text"
               placeholder="Enter charge"
               value={minimumCharge}

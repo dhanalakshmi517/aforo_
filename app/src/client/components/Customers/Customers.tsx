@@ -160,28 +160,37 @@ const Customers: React.FC<CustomersProps> = ({
     return () => clearTimeout(t);
   }, [notification]);
 
+  // centralised function to load customers list
+  const fetchCustomers = async () => {
+    if (!isAuthenticated()) return; // Don't fetch if not authenticated
+    try {
+      setLoading(true);
+      const data = await getCustomers();
+      setCustomers(data);
+    } catch (err: any) {
+      if (err.message?.includes('Session expired') || err.message?.includes('Not authenticated')) {
+        // Authentication error - redirect handled by auth utility
+        return;
+      }
+      setErrorMsg(err.message || 'Failed to load customers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // initial fetch on mount
   useEffect(() => {
-    const fetchData = async () => {
-      if (!isAuthenticated()) {
-        return; // Don't fetch if not authenticated
-      }
-      
-      try {
-        setLoading(true);
-        const data = await getCustomers();
-        setCustomers(data);
-      } catch (err: any) {
-        if (err.message?.includes('Session expired') || err.message?.includes('Not authenticated')) {
-          // Authentication error - redirect handled by auth utility
-          return;
-        }
-        setErrorMsg(err.message || "Failed to load customers");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // re-fetch whenever the create form is closed (i.e., toggles to false)
+  useEffect(() => {
+    if (!showNewCustomerForm) {
+      fetchCustomers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showNewCustomerForm]);
 
   const handleNewCustomer = () => {
     setShowNewCustomerForm(true);

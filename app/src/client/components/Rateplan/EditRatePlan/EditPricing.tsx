@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './EditPricing.css';
+import { saveFlatFeePricing, saveVolumePricing, saveTieredPricing, saveStairStepPricing, saveUsageBasedPricing } from '../api';
  import EditFlat from './EditFlat';
 import EditVolume from './EditVolume';
 import EditTiered from './EditTiered';
@@ -12,8 +13,13 @@ interface Tier {
   price: number;
 }
 
-const EditPricing: React.FC = () => {
+interface EditPricingProps {
+  ratePlanId?: number;
+}
+
+const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId }) => {
   const [selected, setSelected] = useState('');
+  const [saving, setSaving] = useState(false);
   const [tiers, setTiers] = useState<Tier[]>([
     { from: 0, to: 0, price: 0 },
     { from: 0, to: 0, price: 0 },
@@ -44,6 +50,67 @@ const EditPricing: React.FC = () => {
       setSelected(savedModel);
     }
   }, []);
+
+  const handleSave = async () => {
+    if (!ratePlanId) return;
+    try {
+      setSaving(true);
+      if (selected === 'Flat Fee') {
+        const payload = {
+          flatFeeAmount: Number(localStorage.getItem('flatFeeAmount') || 0),
+          numberOfApiCalls: Number(localStorage.getItem('flatFeeApiCalls') || 0),
+          overageUnitRate: Number(localStorage.getItem('flatFeeOverage') || 0),
+          graceBuffer: Number(localStorage.getItem('flatFeeGrace') || 0),
+        };
+        await saveFlatFeePricing(ratePlanId, payload);
+      } else if (selected === 'Volume-Based') {
+        const saved = JSON.parse(localStorage.getItem('volumeTiers') || '[]');
+        const tiers = saved.map((t:any)=>({
+          usageStart: Number(t.from),
+          usageEnd: t.to ? Number(t.to) : null,
+          unitPrice: Number(t.price),
+        }));
+        const payload = {
+          tiers,
+          overageUnitRate: Number(localStorage.getItem('volumeOverage')||0),
+          graceBuffer: Number(localStorage.getItem('volumeGrace')||0),
+        };
+        await saveVolumePricing(ratePlanId,payload);
+      } else if (selected === 'Tiered Pricing') {
+        const saved = JSON.parse(localStorage.getItem('tieredTiers') || '[]');
+        const tiers = saved.map((t:any)=>({
+          startRange: Number(t.from),
+          endRange: t.to ? Number(t.to) : null,
+          unitPrice: Number(t.price),
+        }));
+        const payload = {
+          tiers,
+          overageUnitRate: Number(localStorage.getItem('tieredOverage')||0),
+          graceBuffer: Number(localStorage.getItem('tieredGrace')||0),
+        };
+        await saveTieredPricing(ratePlanId,payload);
+      } else if (selected === 'Stairstep') {
+        const saved = JSON.parse(localStorage.getItem('stairTiers') || '[]');
+        const tiers = saved.map((t:any)=>({
+          usageStart: Number(t.from),
+          usageEnd: t.to ? Number(t.to): null,
+          flatCost: Number(t.price)
+        }));
+        const payload = {
+          tiers,
+          overageUnitRate: Number(localStorage.getItem('stairOverage')||0),
+          graceBuffer: Number(localStorage.getItem('stairGrace')||0),
+        };
+        await saveStairStepPricing(ratePlanId,payload);
+      } else if (selected === 'Usage-Based') {
+        const perUnit = Number(localStorage.getItem('usagePerUnit')||0);
+        await saveUsageBasedPricing(ratePlanId,{ perUnitAmount: perUnit});
+      }
+      alert('Pricing saved');
+    } catch(err:any){
+      alert(err?.message||'Failed to save pricing');
+    } finally {setSaving(false);}
+  };
 
   return (
     <div className="edit-pricing-container">
@@ -90,6 +157,11 @@ const EditPricing: React.FC = () => {
             <EditUsage />
           </div>
         )}
+      </div>
+      <div style={{marginTop:'1rem'}}>
+        <button className="erp-btn erp-btn-primary" disabled={saving||!ratePlanId} onClick={handleSave}>
+          {saving? 'Saving...' : 'Save Pricing'}
+        </button>
       </div>
     </div>
   );

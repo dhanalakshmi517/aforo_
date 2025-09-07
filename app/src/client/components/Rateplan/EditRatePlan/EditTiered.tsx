@@ -9,15 +9,15 @@ interface Tier {
 }
 
 const EditTiered: React.FC = () => {
-  const [tiers, setTiers] = useState<Tier[]>([
-    { from: '00', to: '10', price: '$100' },
-    { from: '11', to: '20', price: '$400' },
-    { from: '21', to: '', price: '$800' },
-  ]);
+  const [tiers, setTiers] = useState<Tier[]>(() => {
+    const saved = localStorage.getItem('tieredTiers');
+    if (saved) return JSON.parse(saved);
+    return [{from:'',to:'',price:''}];
+  });
 
   const [unlimited, setUnlimited] = useState(false);
-  const [overageCharge, setOverageCharge] = useState('');
-  const [graceBuffer, setGraceBuffer] = useState('');
+  const [overageCharge, setOverageCharge] = useState(localStorage.getItem('tieredOverage')||'');
+  const [graceBuffer, setGraceBuffer] = useState(localStorage.getItem('tieredGrace')||'');
 
   useEffect(() => {
     localStorage.setItem('tieredTiers', JSON.stringify(tiers));
@@ -41,9 +41,8 @@ const EditTiered: React.FC = () => {
   };
 
   const handleChange = (index: number, field: keyof Tier, value: string) => {
-    setTiers(prev =>
-      prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[]
-    );
+    setTiers(prev=>prev.map((tier,i)=>(i===index?{...tier,[field]:value}:tier)) as Tier[]);
+    setTimeout(()=>localStorage.setItem('tieredTiers',JSON.stringify(tiers)),0);
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {

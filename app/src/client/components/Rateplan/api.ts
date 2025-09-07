@@ -54,6 +54,14 @@ export const fetchRatePlans = async (): Promise<RatePlan[]> => {
 };
 
 /**
+ * Fetch single rate plan by id
+ */
+export const fetchRatePlan = async (id: number): Promise<RatePlan & Record<string, any>> => {
+  const response = await axios.get(`${BASE_URL}/rateplans/${id}`);
+  return response.data;
+};
+
+/**
  * Fetch all products from the backend service
  */
 export const fetchProducts = async (): Promise<Product[]> => {

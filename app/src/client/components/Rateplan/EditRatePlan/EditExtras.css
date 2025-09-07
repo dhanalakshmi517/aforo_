@@ -1,27 +1,26 @@
 @import "../../Variables/Variables.css";
+
+/* Container (if you wrap with .extras-container somewhere, it’s ready) */
 .extras-container {
-    overflow-x: hidden;
-    width: 100%;
-    margin: 0 auto;
-    padding: 24px;
-    background-color: var(--color-neutral-white);
-    border-radius: var(--border-radius-sm);
-    font-family: sans-serif;
-   
-  
-  }
-  
-  .dropdown-group {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background-color: var(--color-neutral-white);
-    /* border-radius: var(--border-radius-sm); */
-    border-bottom: 1px solid var(--color-neutral-200);
-  }
-  
-  .header-icon-btn{
- 
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
+  font-family: sans-serif;
+}
+
+.dropdown-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--color-neutral-white);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+/* --- Header row --- */
+.header-icon-btn{
   display:flex;
   align-items:center;
   justify-content:center;
@@ -31,12 +30,8 @@
   cursor:pointer;
   margin-right:8px;
 }
-
 .header-icon-btn svg{width:24px;height:24px;}
-
-/* legacy span class still used elsewhere */
 .header-icon{display:none;}
-
 
 .description-row{
   display:flex;
@@ -56,190 +51,155 @@
 }
 
 .description{
-  /* margin-bottom:12px;
-  margin-bottom:100px; */
   color: var(--color-neutral-800);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md); /* 142.857% */
-margin-left:10px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  margin-left:10px;
 }
 
 .dropdown-group select {
-    border-bottom: 1px solid var(--color-neutral-200);
-    /* border-radius: var(--border-radius-sm); */
-    background-color: var(--color-neutral-white);
-    color: var(--color-neutral-1400);
-  
+  border-bottom: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-white);
+  color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 600;
   min-height: 36px
+}
+.dropdown-group select:invalid { color: #888; }
 
-  
-  }
-  
-  .dropdown-group select:invalid {
-    color: #888;
-  }
-  
-  
-  
-  
-  .section {
-    border-bottom: 1px solid var(--color-neutral-200);
-    /* border-radius: var(--border-radius-sm); */
-    margin-bottom: 12px;
-
-    width: 100%;
-    color: var(--color-neutral-1700);
-    background-color: var(--color-neutral-white);
-    border-bottom: 1px solid var(--color-neutral-200);
-    /* border-radius: var(--border-radius-sm); */
-  
-  
-  padding: 18px 10px;
+/* --- Sections --- */
+.section {
+  border-bottom: 1px solid var(--color-neutral-200);
+  margin-bottom: 12px;
+  width: 100%;
   color: var(--color-neutral-1700);
-  
-  /* body/bold/lg */
+  background-color: var(--color-neutral-white);
+  padding: 18px 10px;
   font-family: var(--font-family-primary);
   font-size: var(--font-body-lg);
   font-style: normal;
   font-weight: 600;
-  line-height: var(--line-height-body-lg ); /* 150% */
-  /* line-height: 24px; */
-  
-  }
-  
-  .header-label{white-space:nowrap;}
+  line-height: var(--line-height-body-lg);
+}
+
+.header-label{white-space:nowrap;}
 
 .section-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background-color: var(--color-neutral-white);
-    cursor: pointer;
-    margin-top: -20px;
-  }
-  
-  .section-content {
-    padding: 16px;
-    background-color: var(--color-neutral-white);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-.section-content label{    
-    color: var(--color-neutral-1400);
-  
-  /* body/bold/md */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: var(--color-neutral-white);
+  cursor: pointer;
+  margin-top: -20px;
+}
+
+.section-content {
+  padding: 16px;
+  background-color: var(--color-neutral-white);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-content label{
+  color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 600;
-  line-height: var(--line-height-body-md); 
-  }
-  
-  .section-content input,
-  .section-content textarea {
-    padding: 8px;
-    border: 1px solid var(--color-neutral-200);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-md);
-    width: 100%;
-    background-color: var(--color-neutral-100);
-      /* margin-left: 250px; */
-  
-  }
-  
-  .section-content textarea {
-    resize: vertical;
-    background-color: var(--color-neutral-100);
-      /* margin-left: 250px; */
-  
-  }
-  .section-content select{
-  width: 100%;
+  line-height: var(--line-height-body-md);
+}
+
+/* Base control styling */
+.section-content input,
+.section-content textarea {
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  background-color: var(--color-neutral-100);
+}
+
+/* Utility to match the Edit form spec (compact controls) */
+.extras-w-440 { width: 440px !important; max-width: 100%; }
+
+/* Textarea base */
+.section-content textarea {
+  resize: vertical;
+  background-color: var(--color-neutral-100);
+}
+
+/* Selects */
+.section-content select{
   padding:6px 10px;
   height:36px;
-    background-color: var(--color-neutral-100);
-    /* border-radius: var( --border-radius-sm); */
-    width: 100%;
-  }
-  
-  .optional {
-    color: var(--color-neutral-800);
+  background-color: var(--color-neutral-100);
+}
 
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md); 
-  }
-  
-  
-  .dropdown-icon {
-    margin-left:auto;
-    margin-bottom:0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;   /* Slightly bigger clickable area */
-    height: 24px;
-    cursor: pointer;
-    margin-top: 20px;
+/* Optional text */
+.optional {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
 
-    
-  }
-  
-  
-  
-  .section-header .dropdown-icon svg {
-    stroke: #726E6C;
-    width: 20px;
-    height: 20px;
-    user-select: none;
-    pointer-events: none;
-      margin-bottom: 40px;
-  
-  }
-  
-  .date-range {
-    display: flex;
-    gap: 20px; /* space between the two date fields */
-    align-items: flex-end;
-  }
-  
-  .date-input {
-    display: flex;
-    flex-direction: column;
-    color: var(--color-neutral-800);
-  
+/* Dropdown caret */
+.dropdown-icon {
+  margin-left:auto;
+  margin-bottom:0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+.section-header .dropdown-icon svg {
+  stroke: #726E6C;
+  width: 20px;
+  height: 20px;
+  user-select: none;
+  pointer-events: none;
+  margin-bottom: 40px;
+}
+
+/* Dates still use their compact width */
+.date-range {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+}
+.date-input {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--fontsize-md);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md); 
-  }
-  
-  .date-input input[type="date"] {
-    width: 230px; 
-    padding: 8px 10px;
-    font-size: 14px;
-  }
-  
-.custom-dropdown-container {
-  position: relative;
+  line-height: var(--line-height-body-md);
+}
+.date-input input[type="date"] {
+  width: 230px;
+  padding: 8px 10px;
+  font-size: 14px;
 }
 
+/* Optional custom dropdown hook-ups */
+.custom-dropdown-container { position: relative; }
 .custom-dropdown {
   padding:8px 10px;
-    background-color: var(--color-neutral-white);
-    border-radius: var( --border-radius-sm);
-    width: 100%;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-sm);
+  width: 100%;
 }
