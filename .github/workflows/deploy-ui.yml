@@ -31,7 +31,11 @@ jobs:
       - name: 🎨 Install frontend deps and build UI
         run: |
           cd app/.wasp/build/web-app
+          # Clean previous install to ensure correct optional deps for Linux
+          rm -rf node_modules package-lock.json
           npm install
+          # Workaround for npm optional dependency bug causing missing Rollup native binary
+          npm install --save-optional @rollup/rollup-linux-x64-gnu
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
           echo "Build output files:"
