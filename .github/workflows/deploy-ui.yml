@@ -23,6 +23,13 @@ jobs:
           echo "$HOME/.wasp/bin" >> $GITHUB_PATH
           export PATH="$HOME/.wasp/bin:$PATH"
 
+      - name: 📦 Install root deps and Rollup native binary
+        run: |
+          # Ensure correct Rollup native binary exists in root before Wasp build
+          rm -rf node_modules package-lock.json
+          npm install
+          npm install --save-optional @rollup/rollup-linux-x64-gnu
+
       - name: 🛠 Run wasp build from app folder
         run: |
           cd app
@@ -37,6 +44,8 @@ jobs:
           # Workaround for npm optional dependency bug causing missing Rollup native binary
           npm install --save-optional @rollup/rollup-linux-x64-gnu
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
+          # Downgrade rollup to JS-only v3 to avoid native binary issues
+          npm install --save-dev --save-exact rollup@3
           npm run build
           echo "Build output files:"
           ls -la build/
