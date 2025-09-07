@@ -239,7 +239,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
   
 
   const handleBack = () => {
-    if (currentStep > 0) setCurrentStep((prev) => prev - 1);
+    if (currentStep === 0) {
+      // If we are on the very first step, exit the create flow
+      onClose();
+    } else {
+      setCurrentStep((prev) => prev - 1);
+    }
   };
 
   // Save as Draft: post whatever details are currently entered
@@ -492,7 +497,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
           <div className="rate-delete-modal-overlay">
           <div className="rate-delete-modal-content">
             <div className="rate-delete-modal-body">
-              <h5>Are you sure you want to cancel <br />creating this rate plan?</h5>
+              <h5>Are you sure you want to cancel <br />creating this customer?</h5>
               <p>This action cannot be undone.</p>
             </div>
             <div className="rate-delete-modal-footer">

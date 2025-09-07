@@ -1,10 +1,16 @@
 @import "../Variables/Variables.css";
 
+/* use your provided color specs */
+:root{
+  --surface-sidebar: #004069;   /* Variables.surfaceSidebar */
+  --border-border-1: #E9E9EE;   /* Variables.borderBorder1 */
+}
+
 .sidebar {
   width: 240px;
-  height: 100vh; /* full viewport height so nav can scroll appropriately */
-  background-color: var(--color-primary-1100);
-  border-right: 1px solid var(--color-neutral-200);
+  height: 100vh;
+  background-color: var(--surface-sidebar);
+  border-right: 1px solid var(--border-border-1);
 
   position: fixed;
   left: 0;
@@ -13,9 +19,7 @@
   flex-direction: column;
 }
 
-.sidebar.hidden {
-  display: none;
-}
+.sidebar.hidden { display: none; }
 
 .logo {
   padding: 16px 24px 8px;
@@ -23,58 +27,29 @@
   justify-content: left;
   align-items: center;
   margin-bottom: 20px; 
-  margin-top: 22px;   /* reduced top margin */
+  margin-top: 22px;
 }
+
 .nav {
   flex: 1;
-  padding: 4px 0 16px 0; /* Reduced top padding */
+  padding: 4px 0 16px 0;
   overflow-y: auto;
-
-  /* Hide scrollbar by default */
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
-
-/* Show scrollbar on hover (Firefox) */
-.nav:hover {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary-1000) transparent;
-}
-
-/* WebKit-based browsers */
-.nav::-webkit-scrollbar {
-  width: 0px; /* hidden by default */
-}
-
-/* Show scrollbar on hover (WebKit) */
-.nav:hover::-webkit-scrollbar {
-  width: 4px; /* match SVG stroke width */
-}
-
-.nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+.nav:hover { scrollbar-width: thin; scrollbar-color: var(--color-primary-1000) transparent; }
+.nav::-webkit-scrollbar { width: 0px; }
+.nav:hover::-webkit-scrollbar { width: 4px; }
+.nav::-webkit-scrollbar-track { background: transparent; }
 .nav::-webkit-scrollbar-thumb {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23CCCBCD' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: repeat-y;
-  background-position: center;
-  background-size: 4px 49px;
-  border-radius: 2px;
+  background-repeat: repeat-y; background-position: center; background-size: 4px 49px; border-radius: 2px;
 }
-
 .nav:hover::-webkit-scrollbar-thumb {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23929294' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: repeat-y;
-  background-position: center;
-  background-size: 4px 49px;
+  background-repeat: repeat-y; background-position: center; background-size: 4px 49px;
 }
 
-.nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-}
+.nav ul { list-style: none; padding: 0; margin: 0; }
 
 .nav-item {
   padding: 12px 16px;
@@ -84,23 +59,22 @@
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: 7px;
-  margin-top: 0;
   margin-right: 16px;
   margin-left: 16px;
 }
 
-
 .logo-text {
   color:white;
-font-family: "ABC Repro";
-font-size: 28.441px;
-font-style: normal;
-font-weight: 500; 
-line-height: 40.302px; 
-letter-spacing: -1.896px;
+  font-family: "ABC Repro";
+  font-size: 28.441px;
+  font-style: normal;
+  font-weight: 500; 
+  line-height: 40.302px; 
+  letter-spacing: -1.896px;
 }
+
 .nav-item:hover {
-  background-color: var(--color-primary-1000);
+  background-color: rgba(255,255,255,0.06);
   border-radius: var(--border-radius-sm);
   color: var(--color-neutral-1000);
   font-weight: 600;
@@ -115,24 +89,15 @@ letter-spacing: -1.896px;
   font-weight: 500;
 }
 
-.nav-item.active .icon-wrapper {
-  color: var(--color-neutral-100 )!important;
-}
-
-.nav-item.active .tab-name {
-  color: var(--color-neutral-100) !important;
-  font-weight: 600;
-}
+.nav-item.active .icon-wrapper { color: var(--color-neutral-100 )!important; }
+.nav-item.active .tab-name { color: var(--color-neutral-100) !important; font-weight: 600; }
 
 .nav-item.active::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   border-radius: 8px;
-  background-color: var(--color-primary-1000);
+  background-color: rgba(255,255,255,0.08);
   z-index: -1;
 }
 
@@ -147,20 +112,12 @@ letter-spacing: -1.896px;
   margin-left: -7px;
 }
 
-.nav-item.active .icon-wrapper {
-  color: var(--color-neutral-100);
-}
-
-/* Thicken SVG strokes when active */
-.nav-item.active .icon-wrapper svg path {
-  stroke-width: 1.8;
-}
+.nav-item.active .icon-wrapper svg path { stroke-width: 1.5; }
 
 .tab-name {
-
   color: var(--color-neutral-100);
   font-family: var(--font-family-primary);
-  font-size: 14px;
+  font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-md);
@@ -175,10 +132,4 @@ letter-spacing: -1.896px;
   height: 19px;
   margin-top: -10px;
   margin-left: -30px;
-
-}
-
-.nav-item.active .tab-name {
-  color: var(--color-neutral-100);
-  font-weight: 600;
 }
