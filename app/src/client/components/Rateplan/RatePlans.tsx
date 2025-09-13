@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { fetchRatePlans, deleteRatePlan } from './api';
 import './RatePlan.css';
+import PageHeader from '../PageHeader/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
+import TopBar from '../TopBar/TopBar';
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -82,6 +84,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [draftSaving, setDraftSaving] = useState(false);
   const navigate = useNavigate();
 
+  // Auto-open wizard when coming back from estimator screens
+  useEffect(() => {
+    if (localStorage.getItem('ratePlanWizardOpen') === 'true') {
+      setShowCreatePlan(true);
+      localStorage.removeItem('ratePlanWizardOpen');
+    }
+  }, []);
+
   // Local state (mirrors parent if provided)
   const [ratePlansState, setRatePlansState] = useState<RatePlan[]>(ratePlans || []);
 
@@ -152,7 +162,17 @@ const RatePlans: React.FC<RatePlansProps> = ({
     }
   };
 
-  /** Payment Type → Pre-paid / Post-paid pill with icon. */
+  // Helper: turn "ACTIVE", "IN_REVIEW" etc. into "Active", "In Review"
+  const formatStatus = (value?: string) => {
+    const s = (value || '').trim();
+    if (!s) return 'N/A';
+    return s
+      .replace(/[_-]+/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  /** Payment Type → Pre-paid / Post-paid pill with icon (designer SVGs). */
   const renderPaymentType = (p: RatePlan) => {
     const raw = String(p.paymentType || p.ratePlanType || '')
       .trim()
@@ -163,32 +183,37 @@ const RatePlans: React.FC<RatePlansProps> = ({
       return (
         <span className="pill pill--prepaid">
           <span className="pill-icon" aria-hidden="true">
-            {/* coins */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M17 8.5c0 1.933-3.134 3.5-7 3.5S3 10.433 3 8.5 6.134 5 10 5s7 1.567 7 3.5Z" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M3 8.5v7c0 1.933 3.134 3.5 7 3.5s7-1.567 7-3.5v-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M21 7.5c0 1.38-2.239 2.5-5 2.5" stroke="currentColor" strokeWidth="1.5"/>
+            {/* Designer SVG: PREPAID (16x16) */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <g clipPath="url(#clip0_prepaid)">
+                <path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#1A2126" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_prepaid">
+                  <rect width="16" height="16" fill="white"/>
+                </clipPath>
+              </defs>
             </svg>
           </span>
           Pre-paid
         </span>
       );
     }
+
     if (raw === 'POSTPAID') {
       return (
         <span className="pill pill--postpaid">
           <span className="pill-icon" aria-hidden="true">
-            {/* money bag */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M14.2 4.5 13 3h-2l-1.2 1.5c.8.3 1.8.5 3.4 0Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M6 10c0-2.761 2.686-5 6-5s6 2.239 6 5-2 9-6 9-6-6.239-6-9Z" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M12 9v6M9.75 11.25h4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            {/* Designer SVG: POSTPAID (13.6x13.6, filled) */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126ZM7.0002 9.9924C6.60126 9.9924 6.26053 9.85113 5.978 9.5686C5.69533 9.28606 5.554 8.94533 5.554 8.5464C5.554 8.14733 5.69533 7.80653 5.978 7.524C6.26053 7.24146 6.60126 7.1002 7.0002 7.1002C7.39913 7.1002 7.73986 7.24146 8.0224 7.524C8.30506 7.80653 8.44639 8.14733 8.44639 8.5464C8.44639 8.94533 8.30506 9.28606 8.0224 9.5686C7.73986 9.85113 7.39913 9.9924 7.0002 9.9924ZM4.77721 2.74884C4.94689 3.08684 5.29273 3.3002 5.67093 3.3002H8.33486C8.7142 3.3002 9.06089 3.08555 9.23 2.74598L9.7562 1.68935C9.82241 1.55639 9.7257 1.4002 9.57717 1.4002H4.42438C4.27556 1.4002 4.17887 1.55693 4.24564 1.68992L4.77721 2.74884ZM4.2126 12.6002H9.7878C10.5735 12.6002 11.2387 12.3266 11.7832 11.7794C12.3279 11.2322 12.6002 10.5683 12.6002 9.7878C12.6002 9.45753 12.5435 9.13733 12.4302 8.8272C12.3169 8.51693 12.1551 8.23666 11.9448 7.9864L9.34306 4.86048C9.15307 4.63221 8.87144 4.5002 8.57445 4.5002H5.44359C5.14795 4.5002 4.86746 4.63102 4.67745 4.85752L2.0632 7.974C1.85293 8.22426 1.68986 8.5066 1.574 8.821C1.45813 9.13526 1.4002 9.45753 1.4002 9.7878C1.4002 10.5683 1.6738 11.2322 2.221 11.7794C2.7682 12.3266 3.43206 12.6002 4.2126 12.6002Z" fill="var(--icon-color-darkest, #1A2126)"/>
             </svg>
           </span>
           Post-paid
         </span>
       );
     }
+
     return <span className="pill pill--unknown">—</span>;
   };
 
@@ -227,50 +252,36 @@ const RatePlans: React.FC<RatePlansProps> = ({
       )}
 
       {showCreatePlan ? (
-        <div className="create-plan-container">
+        <div className="create-plan-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           {/* ======= TOP BAR ======= */}
-          <div className="create-plan-header">
-            <div className="header-left">
-              <button
-                className="back-button"
-                onClick={() => {
-                  if (createPlanRef.current && createPlanRef.current.back()) {
-                    return;
-                  }
-                  setShowCreatePlan(false);
-                  navigate('/get-started/rate-plans');
-                }}
-                aria-label="Back"
-              >
-                <svg className="back-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                  <path
-                    d="M9.99935 15.8332L4.16602 9.99984M4.16602 9.99984L9.99935 4.1665M4.16602 9.99984H15.8327"
-                    stroke="#706C72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <h1 className="create-title">Create New Rate Plan</h1>
-            </div>
-
-            <div className="plan-header-actions">
-              <button className="cancel-button" onClick={() => setShowCancelModal(true)}>Cancel</button>
-              <button
-                className="draft-button"
-                disabled={!saveDraftFn || draftSaving}
-                onClick={async () => {
-                  if (!saveDraftFn) return;
-                  setDraftSaving(true);
-                  await saveDraftFn();
-                  setDraftSaving(false);
-                }}
-              >
-                {draftSaving ? 'Saving...' : 'Save as Draft'}
-              </button>
-            </div>
-          </div>
+          <TopBar
+            title="Create New Rate Plan"
+            onBack={() => {
+              if (createPlanRef.current && createPlanRef.current.back()) {
+                return;
+              }
+              setShowCreatePlan(false);
+              navigate('/get-started/rate-plans');
+            }}
+            cancel={{
+              label: "Cancel",
+              onClick: () => setShowCancelModal(true)
+            }}
+            save={{
+              label: "Save as Draft",
+              saving: draftSaving,
+              disabled: !saveDraftFn,
+              onClick: async () => {
+                if (!saveDraftFn) return;
+                setDraftSaving(true);
+                await saveDraftFn();
+                setDraftSaving(false);
+              }
+            }}
+          />
 
           {/* ======= BODY ======= */}
-          <div className="create-plan-body">
+          <div className="create-plan-body" style={{ flex: 1 }}>
             <CreatePricePlan
               ref={createPlanRef}
               registerSaveDraft={(fn) => setSaveDraftFn(() => fn)}
@@ -310,56 +321,27 @@ const RatePlans: React.FC<RatePlansProps> = ({
         </div>
       ) : (
         <div className="rate-plan-container">
-          <div className="rate-plan-header">
-            <h2>Rate Plans</h2>
+          {/* Apply proper sidebar alignment like Products */}
+          <PageHeader
+            title="Rate Plans"
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            primaryLabel="New Rate Plan"
+            onPrimaryClick={() => {
+              setShowCreatePlan(true);
+              navigate('/get-started/rate-plans');
+            }}
+            onFilterClick={() => {
+              /* TODO: open filters */
+            }}
+            showPrimary={hasRows}
+          />
 
-            <div className="header-actions">
-              {/* Search */}
-              <div className="rp-header-search" role="search">
-                <span className="rp-search-icon" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z"
-                      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-                <input
-                  className="rp-search-input"
-                  aria-label="Search rate plans"
-                  placeholder=""
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              <button className="rp-filter-btn" aria-label="Open filters">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
-
-              {/* Hide top-right CTA when no rows */}
-              {hasRows && (
-                <button
-                  className="new-rate-button"
-                  onClick={() => {
-                    setShowCreatePlan(true);
-                    navigate('/get-started/rate-plans');
-                  }}
-                >
-                  + New Rate Plan
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* ======= EMPTY STATE (with required corner gaps) ======= */}
+          {/* ======= EMPTY STATE ======= */}
           {!hasRows ? (
             <div className="pp-empty-area">
               <div className="rate-empty">
                 <div className="rate-empty-illustration" aria-hidden="true">
-                  {/* 160 × 160 */}
                   <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
                     <g>
                       <path d="M40 30h52l8 14v80H40z" fill="#CACACA"/>
@@ -417,7 +399,6 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 {filteredPlans.map((plan) => (
                   <tr key={plan.ratePlanId}>
                     <td>{renderNameChip(plan)}</td>
-
                     <td>
                       <span
                         className={`pp-badge ${
@@ -429,17 +410,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         {plan.productName || plan.product?.productName || 'N/A'}
                       </span>
                     </td>
-
                     <td>{renderPaymentType(plan)}</td>
-
                     <td>{renderCreatedOn(plan)}</td>
-
                     <td>
                       <span className={`status-badge ${String(plan.status || '').toLowerCase() || 'default'}`}>
-                        {plan.status || 'N/A'}
+                        {formatStatus(plan.status)}
                       </span>
                     </td>
-
                     <td>
                       <div className="action-buttons">
                         {plan.status?.toLowerCase() === 'draft' ? (
@@ -449,10 +426,15 @@ const RatePlans: React.FC<RatePlansProps> = ({
                             title="Resume Draft"
                             aria-label="Resume Draft"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-                              <path d="M11.75 3.25a5.5 5.5 0 1 1-7.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M5.25 8h5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M8.5 6l2.25 2-2.25 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                              <g clipPath="url(#clip0_7416_37004)">
+                                <path d="M7.99967 1.33337C11.6816 1.33337 14.6663 4.31814 14.6663 8.00004C14.6663 11.6819 11.6816 14.6667 7.99967 14.6667C4.31778 14.6667 1.33301 11.6819 1.33301 8.00004H5.33301H10.6663M10.6663 8.00004L7.99967 10.6667M10.6663 8.00004L7.99967 5.33337" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_7416_37004">
+                                  <rect width="16" height="16" fill="white"/>
+                                </clipPath>
+                              </defs>
                             </svg>
                           </button>
                         ) : (

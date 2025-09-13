@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import {
   saveSetupFee,
   saveDiscounts,
@@ -10,6 +10,9 @@ import {
 } from './api';
 import './Extras.css';
 import { clearExtrasLocalStorage } from './utils/localStorageExtras';
+import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
+
+export interface ExtrasHandle { saveAll: (ratePlanId: number) => Promise<void>; }
 
 interface ExtrasProps {
   ratePlanId: number | null;
@@ -18,7 +21,7 @@ interface ExtrasProps {
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
+const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
   React.useEffect(() => {
     if (!ratePlanId) clearExtrasLocalStorage();
   }, [ratePlanId]);
@@ -38,7 +41,7 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
 
   /** Setup Fee */
   const [setupFeePayload, setSetupFeePayload] = useState({
-    setupFee: Number(localStorage.getItem('setupFee') || 0),
+    setupFee: Number(getRatePlanData('SETUP_FEE') || 0),
     applicationTiming: 0,
     invoiceDescription: '',
   });
@@ -131,6 +134,112 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
   const btnClass = (state: SaveState) =>
     `extras-save-btn ${state === 'saved' ? 'is-saved' : ''} ${state === 'saving' ? 'is-saving' : ''}`;
 
+  useImperativeHandle(ref, () => ({
+    saveAll: async (ratePlanId: number) => {
+      // Save all extras sections that have data with individual error handling
+      const savePromises: Promise<any>[] = [];
+      
+      if (setupFeePayload.setupFee > 0) {
+        // Update session storage
+        setRatePlanData('SETUP_FEE', setupFeePayload.setupFee.toString());
+        
+        savePromises.push(
+          saveSetupFee(ratePlanId, setupFeePayload).catch((err: any) => {
+            console.error('Setup fee save failed:', err);
+            if (err.response?.status === 500) {
+              console.warn('⚠️ 500 error during setup fee save - likely duplicate entry, continuing...');
+            } else {
+              throw err;
+            }
+          })
+        );
+      } else {
+        setRatePlanData('SETUP_FEE', '');
+      }
+      
+      if (discountForm.discountType && (discountForm.percentageDiscountStr || discountForm.flatDiscountAmountStr)) {
+        // Update session storage
+        const percentVal = Number(discountForm.percentageDiscountStr || 0);
+        const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
+        
+        if (discountForm.discountType === 'PERCENTAGE') {
+          if (percentVal > 0) setRatePlanData('DISCOUNT_PERCENT', String(percentVal));
+          setRatePlanData('DISCOUNT_FLAT', '');
+        } else {
+          if (flatVal > 0) setRatePlanData('DISCOUNT_FLAT', String(flatVal));
+          setRatePlanData('DISCOUNT_PERCENT', '');
+        }
+        
+        savePromises.push(
+          saveDiscounts(ratePlanId, {
+            ...discountForm,
+            percentageDiscount: percentVal,
+            flatDiscountAmount: flatVal,
+          }).catch((err: any) => {
+            console.error('Discounts save failed:', err);
+            if (err.response?.status === 500) {
+              console.warn('⚠️ 500 error during discounts save - likely duplicate entry, continuing...');
+            } else {
+              throw err;
+            }
+          })
+        );
+      } else {
+        setRatePlanData('DISCOUNT_PERCENT', '');
+        setRatePlanData('DISCOUNT_FLAT', '');
+      }
+      
+      if (freemiumPayload.freemiumType && (freemiumPayload.freeUnits > 0 || freemiumPayload.freeTrialDuration > 0)) {
+        // Update session storage
+        setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits.toString());
+        
+        savePromises.push(
+          saveFreemiums(ratePlanId, freemiumPayload).catch((err: any) => {
+            console.error('Freemiums save failed:', err);
+            if (err.response?.status === 500) {
+              console.warn('⚠️ 500 error during freemiums save - likely duplicate entry, continuing...');
+            } else {
+              throw err;
+            }
+          })
+        );
+      } else {
+        setRatePlanData('FREEMIUM_UNITS', '');
+      }
+      
+      if (minimumUsage || minimumCharge) {
+        // Update session storage
+        const payload = {
+          minimumUsage: minimumUsage ? +minimumUsage : 0,
+          minimumCharge: minimumCharge ? +minimumCharge : 0,
+        };
+        
+        setRatePlanData('MINIMUM_USAGE', String(payload.minimumUsage));
+        if (payload.minimumCharge > 0) {
+          setRatePlanData('MINIMUM_CHARGE', String(payload.minimumCharge));
+        } else {
+          setRatePlanData('MINIMUM_CHARGE', '');
+        }
+        
+        savePromises.push(
+          saveMinimumCommitment(ratePlanId, payload).catch((err: any) => {
+            console.error('Minimum commitment save failed:', err);
+            if (err.response?.status === 500) {
+              console.warn('⚠️ 500 error during minimum commitment save - likely duplicate entry, continuing...');
+            } else {
+              throw err;
+            }
+          })
+        );
+      } else {
+        setRatePlanData('MINIMUM_USAGE', '');
+        setRatePlanData('MINIMUM_CHARGE', '');
+      }
+      
+      await Promise.all(savePromises);
+    },
+  }));
+
   return (
     <div className="extras-container">
       {/* Setup Fee */}
@@ -190,9 +299,9 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
                 setSaveState(s => ({ ...s, setupFee: 'saving' }));
                 try {
                   if (setupFeePayload.setupFee > 0) {
-                    localStorage.setItem('setupFee', setupFeePayload.setupFee.toString());
+                    setRatePlanData('SETUP_FEE', setupFeePayload.setupFee.toString());
                   } else {
-                    localStorage.removeItem('setupFee');
+                    setRatePlanData('SETUP_FEE', '');
                   }
                   await saveSetupFee(ratePlanId, setupFeePayload);
                   setSaveState(s => ({ ...s, setupFee: 'saved' }));
@@ -298,11 +407,11 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
                   const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
 
                   if (discountForm.discountType === 'PERCENTAGE') {
-                    if (percentVal > 0) localStorage.setItem('discountPercent', String(percentVal));
-                    localStorage.removeItem('discountFlat');
+                    if (percentVal > 0) setRatePlanData('DISCOUNT_PERCENT', String(percentVal));
+                    setRatePlanData('DISCOUNT_FLAT', '');
                   } else {
-                    if (flatVal > 0) localStorage.setItem('discountFlat', String(flatVal));
-                    localStorage.removeItem('discountPercent');
+                    if (flatVal > 0) setRatePlanData('DISCOUNT_FLAT', String(flatVal));
+                    setRatePlanData('DISCOUNT_PERCENT', '');
                   }
 
                   await saveDiscounts(ratePlanId, {
@@ -416,6 +525,9 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, freemium: 'saving' }));
                 try {
+                  // Update session storage
+                  setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits.toString());
+                  
                   await saveFreemiums(ratePlanId, freemiumPayload);
                   setSaveState(s => ({ ...s, freemium: 'saved' }));
                 } catch {
@@ -480,11 +592,11 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
                   minimumCharge: minimumCharge ? +minimumCharge : 0,
                 };
                 try {
-                  localStorage.setItem('minimumUsage', String(payload.minimumUsage));
+                  setRatePlanData('MINIMUM_USAGE', String(payload.minimumUsage));
                   if (payload.minimumCharge > 0) {
-                    localStorage.setItem('minimumCharge', String(payload.minimumCharge));
+                    setRatePlanData('MINIMUM_CHARGE', String(payload.minimumCharge));
                   } else {
-                    localStorage.removeItem('minimumCharge');
+                    setRatePlanData('MINIMUM_CHARGE', '');
                   }
                   await saveMinimumCommitment(ratePlanId, payload);
                   setSaveState(s => ({ ...s, commitment: 'saved' }));
@@ -506,4 +618,6 @@ export default function Extras({ ratePlanId }: ExtrasProps): JSX.Element {
       </div>
     </div>
   );
-}
+});
+
+export default Extras;

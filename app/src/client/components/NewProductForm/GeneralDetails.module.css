@@ -19,13 +19,18 @@
 
 
 .buttonPrimary {
-  width: 140px;
-  height: 40px;
-  color: var(--color-neutral-white);
-  background-color: var(--color-primary-600);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-primary-button-active, #025A94);
   border: none;
-  border-radius: var(--border-radius-sm);
-  padding: 12px 24px;
+  color: var(--color-neutral-white);
+  
+  display: flex;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
@@ -33,7 +38,6 @@
   line-height: var(--line-height-body-md);
   cursor: pointer;
   transition: all 0.2s ease;
- 
 }
 
 

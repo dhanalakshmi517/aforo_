@@ -41,18 +41,6 @@ const EditReview: React.FC<EditReviewProps> = ({
             <td>Payment Method</td>
             <td>{paymentMethod}</td>
           </tr>
-          <tr>
-            <td>Base Price</td>
-            <td>${basePrice.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Quantity</td>
-            <td>{quantity}</td>
-          </tr>
-          <tr className="total-row">
-            <td>Total</td>
-            <td><strong>${total.toFixed(2)}</strong></td>
-          </tr>
         </tbody>
       </table>
       <p className="disclaimer-text">

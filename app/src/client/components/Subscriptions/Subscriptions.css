@@ -1,193 +1,60 @@
 @import "../Variables/Variables.css";
 
-/* Main content wrapper similar to Products */
+/* Page container (match Products & Customers) */
 .subscriptions-container {
-  flex: 1 1 auto;
+  padding: 0 16px 16px 16px;
+  width: 100%;
+  box-sizing: border-box;
+  height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
-  margin-left: 0; /* no extra offset; global layout handles sidebar gap */
-  width: 100%;
-  background-color: transparent;
-  border-radius: 0;
-  padding: 0 16px 16px 16px; /* add right & bottom padding similar to Products */
-  height: calc(100vh - 64px); /* full viewport height like Products */
 }
 
+/* Align the shared PageHeader with fixed 256px sidebar */
+.subscriptions-container > .rate-plan-header {
+  margin-left: 256px;
+  width: calc(100% - 256px);
+}
 @media (max-width: 991px) {
-  .subscriptions-container {
+  .subscriptions-container > .rate-plan-header {
     margin-left: 0;
     width: 100%;
   }
 }
 
-/* Sidebar alignment for Subscriptions page */
-.breadcrumb, .header, table {
+/* --------- Table panel (scrollable card) ---------- */
+.subscriptions-table-wrapper {
+  flex: 1;
+  min-height: calc(100vh - 120px);
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;          /* Firefox */
+  margin-left: 256px;             /* align with sidebar */
+  width: calc(100% - 280px);
+  margin-right: 24px;
+  margin-bottom: 24px;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-lg);
+  padding: 12px;
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+}
+.subscriptions-table-wrapper:hover { scrollbar-width: thin; }
+.subscriptions-table-wrapper:hover::-webkit-scrollbar { width: 8px; }
+.subscriptions-table-wrapper::-webkit-scrollbar { width: 0px; height: 0px; display: none; }
+
+@media (max-width: 991px) {
+  .subscriptions-table-wrapper { margin-left: 0; width: 100%; }
+}
+
+/* --------- Table ---------- */
+.subscriptions-table {
+  border-collapse: collapse;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius-md);
   box-sizing: border-box;
-}
-@media (max-width: 991px) {
-  .breadcrumb, .header, table {
-    margin-left: 0;
-    width: 100%;
-  }
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-primary-700);
-  font-size: var(--font-size-lg);
-  border-bottom: 1px solid var(--color-neutral-200);
-  margin-left: 0;
-  }
-
-.breadcrumb span {
-  cursor: pointer;
-  margin-left:0;
-  white-space: nowrap;
-    color: var(--color-primary-900);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-sm);
-}
-
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-left: 0;
-    }
-  
-  .header h2 {
-    color: var(--color-neutral-1700);
-
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-h4);
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--line-height-heading-h4);
-  }
-  
-  .search-add {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  
-  .search-add input {
-    padding: 8px 12px;
-    border: 1px solid var(--color-neutral-300);
-    border-radius: var(--border-radius-sm);
-    min-width: 250px;
-    color: var(--color-neutral-800);
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-lg);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-lg);
-    
-  }
-  
-  .sub-add-btn {
-    padding: 8px 20px;
-    width:199px;
-    height:40px;
-    color: var(--color-neutral-white);
-    background-color: var(--color-primary-800);
- 
- font-family: var(--font-family-primary);
- font-size: var(--font-size-md);
- font-style: normal;
- font-weight: 400;
- line-height: var(--line-height-body-md);
-     cursor: pointer;
-     border-radius: var(--border-radius-sm);
-     border:none;
-     margin-right: 10px;
-     /* margin-left: 780px; */
-  }
-  
-  .subscriptions-table-wrapper {
-    margin-left: 256px;
-    width: calc(100% - 256px);
-    background-color: var(--color-neutral-white);
-    border-radius: var(--border-radius-md);
-    padding: 12px;
-    margin-top: 0;
-    flex: 1 1 auto;
-    min-height: calc(100vh - 120px); /* more viewport height */
-    overflow-y: auto;
-    scrollbar-width: none;
-  }
-
-  @media (max-width: 991px) {
-    .subscriptions-table-wrapper {
-      margin-left: 0;
-      width: 100%;
-    }
-  }
-
-  .subscriptions-table-wrapper:hover::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .subscriptions-table-wrapper::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
-  }
-
-  .subscriptions-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--color-neutral-white);
-    table-layout: fixed;
-  }
-  
-  /* .subscriptions-table th,
-  .subscriptions-table td {
-    white-space: nowrap;
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  } */
-/*   
-  .subscriptions-table th:first-child,
-  .subscriptions-table td:first-child {
-    width: 100px;
-    padding-left: 12px;
-  } */
-
-  /* .subscriptions-table th {
-    background-color: var(--color-neutral-100);
-    font-weight: 600;
-    color: #333;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  } */
-  .subscriptions-table th,
-.subscriptions-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--color-neutral-200);
-  width: 16.66%; /* six columns equal width */
-  word-wrap: break-word;
-}
-
-.subscriptions-table td {
-  padding: 18px 16px;
-  overflow: hidden;
-  color: var(--color-neutral-1000);
-
-  font-family: "IBM Plex Sans";
-  font-size: var(--font-size-sm);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-sm);
+  padding: 12px;
+  width: 100%;
+  table-layout: auto;
 }
 
 .subscriptions-table th {
@@ -195,50 +62,44 @@
   height: 28px;
   padding: 4px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--color-neutral-300);
   position: sticky;
   top: 0;
   z-index: 1;
-  color: var(--color-neutral-1000);
+  color: var(--color-neutral-800);
+  border: none;
 
-  /* typography */
-  font-family: "IBM Plex Sans";
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
-  font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-body-sm);
 }
-  
-  .name-email .email {
-    color: gray;
-    font-size: 12px;
-  }
-  
-  .status {
-    padding: 5px 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 500;
-  }
-  
-  .status.active {
-    background-color: #e6f5ea;
-    color: #2dbd6e;
-    border: 1px solid #b6e2c0;
-  }
-  
-  .edit-button {
-  background-color: #e0f3ff;
+.subscriptions-table td {
+  padding: 18px 16px;
+  overflow: hidden;
+  color: var(--color-neutral-1700);
+  border-bottom: 1px solid var(--color-neutral-200);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-body-sm);
+}
+
+.subscriptions-table td.actions-cell,
+.subscriptions-table th.actions-cell { text-align: center; width: 100px; }
+
+/* --------- Actions ---------- */
+.action-buttons { display: flex; gap: 8px; justify-content: center; align-items: center; }
+.prod-edit-button {
+  background-color: var(--color-info-100);
   border: none;
   padding: 6px;
   cursor: pointer;
-  color: rgba(29, 122, 252, 1);
   border-radius: var(--border-radius-sm);
   width: 28px;
   height: 28px;
 }
-
-/* .product-delete-button {
+.prod-delete-button {
   background-color: var(--color-error-100);
   border: none;
   color: var(--color-error-400);
@@ -247,35 +108,18 @@
   border-radius: var(--border-radius-sm);
   width: 28px;
   height: 28px;
-} */
-
-/* Align action buttons horizontally */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
 }
 
-/* center header+cells and give fixed narrow width like Products */
-.subscriptions-table th.actions-cell,
-.subscriptions-table td.actions-cell {
-  text-align: center;
-  width: 90px;
+/* --------- Status badge (reuse classes from RatePlans) ---------- */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px 6px 12px;
+  border-radius: 20px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  background: #EDEFF2;
+  color: #0F172A;
 }
-
-
-.icon {
-    font-size: 16px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  
-  .icon.edit {
-    color: #0d6efd;
-  }
-  
-  .icon.delete {
-    color: #ff5c5c;
-  }
-  
+.status-badge--active { background: #E6F7EA; color: #107A3E; }
+.status-badge--draft  { background: #EEEAF7; color: #5D41A3; }

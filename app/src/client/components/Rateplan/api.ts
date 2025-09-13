@@ -1,5 +1,8 @@
 import axios from '../../utils/axiosInstance';
 
+/* =========================
+ * Types - Products
+ * ========================= */
 export interface Product {
   productId: string;
   productName: string;
@@ -16,14 +19,22 @@ export interface Product {
   effectiveEndDate: string | null;
 }
 
+/* =========================
+ * Constants
+ * ========================= */
 export const BASE_URL = 'http://54.238.204.246:8080/api';
 
-// Billable Metrics
+/* =========================
+ * Types - Billable Metrics
+ * ========================= */
 export interface BillableMetric {
   metricId: number;
   metricName: string;
 }
 
+/* =========================
+ * Billable Metrics APIs
+ * ========================= */
 export const fetchBillableMetrics = async (productName?: string): Promise<BillableMetric[]> => {
   const url = productName
     ? `http://18.182.19.181:8081/api/billable-metrics?product=${encodeURIComponent(productName)}`
@@ -32,7 +43,9 @@ export const fetchBillableMetrics = async (productName?: string): Promise<Billab
   return response.data;
 };
 
-// -------------------- Rate Plans --------------------
+/* =========================
+ * Types - Rate Plans
+ * ========================= */
 export interface RatePlan {
   ratePlanId: number;
   ratePlanName: string;
@@ -42,41 +55,8 @@ export interface RatePlan {
   productId: number;
   productName?: string;
   status?: string;
-  // Add any additional fields returned by backend here
 }
 
-/**
- * Fetch all rate plans from the backend service
- */
-export const fetchRatePlans = async (): Promise<RatePlan[]> => {
-  const response = await axios.get(`${BASE_URL}/rateplans`);
-  return response.data;
-};
-
-/**
- * Fetch single rate plan by id
- */
-export const fetchRatePlan = async (id: number): Promise<RatePlan & Record<string, any>> => {
-  const response = await axios.get(`${BASE_URL}/rateplans/${id}`);
-  return response.data;
-};
-
-/**
- * Fetch all products from the backend service
- */
-export const fetchProducts = async (): Promise<Product[]> => {
-  const response = await axios.get(`${BASE_URL}/products`);
-  return response.data;
-};
-
-/**
- * Delete a rate plan by id
- */
-export const deleteRatePlan = async (id: number): Promise<void> => {
-  await axios.delete(`${BASE_URL}/rateplans/${id}`);
-};
-
-// ---- Create Rate Plan ----
 export interface RatePlanRequest {
   ratePlanName: string;
   /**
@@ -91,111 +71,129 @@ export interface RatePlanRequest {
   billableMetricId: number;
 }
 
-export const confirmRatePlan = async (ratePlanId: number) => {
-  // Calls endpoint that changes status from DRAFT to ACTIVE
-  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/confirm`);
+/* =========================
+ * Rate Plan APIs
+ * ========================= */
+export const fetchRatePlans = async (): Promise<RatePlan[]> => {
+  const response = await axios.get(`${BASE_URL}/rateplans`);
+  return response.data;
+};
+
+export const fetchRatePlan = async (id: number): Promise<RatePlan & Record<string, any>> => {
+  const response = await axios.get(`${BASE_URL}/rateplans/${id}`);
+  return response.data;
+};
+
+export const fetchProducts = async (): Promise<Product[]> => {
+  const response = await axios.get(`${BASE_URL}/products`);
+  return response.data;
+};
+
+export const deleteRatePlan = async (id: number): Promise<void> => {
+  await axios.delete(`${BASE_URL}/rateplans/${id}`);
+};
+
+export const createRatePlan = async (payload: RatePlanRequest): Promise<RatePlan> => {
+  const response = await axios.post(`${BASE_URL}/rateplans`, payload);
+  return response.data as RatePlan;
 };
 
 export const updateRatePlan = async (ratePlanId: number, payload: Partial<RatePlanRequest>) => {
-  return axios.put(`${BASE_URL}/rateplans/${ratePlanId}`, payload);
+  return axios.patch(`${BASE_URL}/rateplans/${ratePlanId}`, payload);
 };
 
-export const createRatePlan = async (payload: RatePlanRequest) => {
-  const response = await axios.post(`${BASE_URL}/rateplans`, payload);
-  return response.data as RatePlan; // backend responds with created plan
+export const confirmRatePlan = async (ratePlanId: number) => {
+  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/confirm`);
 };
 
-// ------------ Pricing endpoints -----------------
-interface VolumeTierInput {
+/* =========================
+ * Types - Pricing Payloads
+ * ========================= */
+
+/** Flat Fee */
+export interface FlatFeePayload {
+  flatFeeAmount: number;
+  numberOfApiCalls: number;
+  overageUnitRate: number;
+  graceBuffer: number;
+}
+
+/** Volume Pricing */
+export interface VolumeTierInput {
   usageStart: number;
   usageEnd: number | null;
   unitPrice: number;
 }
-
-interface TieredTierInput {
-  startRange: number;
-  endRange: number | null;
-  unitPrice: number;
-}
-// Basic tier shape used by tiered & stairstep endpoints
-interface VolumeTier {
-  from: number;
-  to: number;
-  price: number;
-}
-
-interface VolumePricingPayload {
+export interface VolumePricingPayload {
   tiers: VolumeTierInput[];
   overageUnitRate: number;
   graceBuffer: number;
 }
-export const saveVolumePricing = async (
-  ratePlanId: number,
-  payload: VolumePricingPayload
-) => {
-  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/volume-pricing`, payload);
-};
 
-export const saveUsageBasedPricing = async (ratePlanId: number, payload: any) => {
-  console.log('Usage-based pricing payload', payload);
-  try {
-    const res = await axios.post(`${BASE_URL}/rateplans/${ratePlanId}/usagebased`, payload);
-    console.log('Usage-based pricing saved', res.status);
-    return res;
-  } catch (err) {
-    console.error('Failed to save usage-based pricing', err);
-    throw err;
-  }
-};
-
-interface TieredPricingPayload {
+/** Tiered Pricing */
+export interface TieredTierInput {
+  startRange: number;
+  endRange: number | null;
+  unitPrice: number;
+}
+export interface TieredPricingPayload {
   tiers: TieredTierInput[];
   overageUnitRate: number;
   graceBuffer: number;
 }
 
-export const saveTieredPricing = async (
-  ratePlanId: number,
-  payload: TieredPricingPayload
-) => {
-  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/tiered`, payload);
-};
-
-interface StairStepTierInput {
+/** Stair-Step Pricing */
+export interface StairStepTierInput {
   usageStart: number;
   usageEnd: number | null;
   flatCost: number;
 }
-
-interface StairStepPricingPayload {
+export interface StairStepPricingPayload {
   tiers: StairStepTierInput[];
   overageUnitRate: number;
   graceBuffer: number;
 }
 
-export const saveStairStepPricing = async (
-  ratePlanId: number,
-  payload: StairStepPricingPayload
-) => {
+/** Usage-Based Pricing */
+export interface UsageBasedPricingPayload {
+  perUnitAmount: number;
+  overageUnitRate?: number;
+  graceBuffer?: number;
+}
+
+/* =========================
+ * Pricing APIs
+ * ========================= */
+
+/** Flat Fee — keep ONLY this version (backend path: /flatfee) */
+export const saveFlatFeePricing = async (ratePlanId: number, payload: FlatFeePayload) => {
+  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/flatfee`, payload);
+};
+
+/** Volume */
+export const saveVolumePricing = async (ratePlanId: number, payload: VolumePricingPayload) => {
+  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/volume-pricing`, payload);
+};
+
+/** Tiered */
+export const saveTieredPricing = async (ratePlanId: number, payload: TieredPricingPayload) => {
+  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/tiered`, payload);
+};
+
+/** Stair-Step — use singular /stairstep to match backend */
+export const saveStairStepPricing = async (ratePlanId: number, payload: StairStepPricingPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/stairstep`, payload);
 };
 
-export const saveFlatFeePricing = async (
-  ratePlanId: number,
-  payload: { flatFeeAmount: number; numberOfApiCalls: number; overageUnitRate: number; graceBuffer: number; }
-) => {
-  console.log('Flat-fee pricing payload', payload);
-  try {
-    const res = await axios.post(`${BASE_URL}/rateplans/${ratePlanId}/flatfee`, payload);
-    console.log('Flat-fee pricing saved', res.status);
-    return res;
-  } catch (err) {
-    console.error('Failed to save flat-fee pricing', err);
-    throw err;
-  }
+/** Usage-Based */
+export const saveUsageBasedPricing = async (ratePlanId: number, payload: UsageBasedPricingPayload) => {
+  return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/usagebased`, payload);
 };
 
-// ------------------ Extras ------------------
+/* =========================
+ * Extras
+ * ========================= */
+
 export interface MinimumCommitmentPayload {
   minimumUsage: number;
   minimumCharge: number;
@@ -204,7 +202,6 @@ export const saveMinimumCommitment = (ratePlanId: number, payload: MinimumCommit
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/minimumcommitments`, payload);
 };
 
-// ------------------ Extras ------------------
 export interface SetupFeePayload {
   setupFee: number;
   applicationTiming: number;
@@ -226,7 +223,6 @@ export const saveDiscounts = (ratePlanId: number, payload: DiscountPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/discounts`, payload);
 };
 
-// ------------------ Freemium ------------------
 export interface FreemiumPayload {
   freemiumType: 'FREE_UNITS' | 'FREE_TRIAL' | 'UNITS_PER_DURATION';
   freeUnits: number;

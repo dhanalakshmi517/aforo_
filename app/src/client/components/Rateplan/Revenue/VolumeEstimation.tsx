@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './EstimateRevenue.css';
+import { getRatePlanData } from '../utils/sessionStorage';
 
 interface Tier {
   usageStart: number;
@@ -10,7 +11,7 @@ interface Tier {
 
 function parseVolumeTiers(): Tier[] {
   try {
-    const arr = JSON.parse(localStorage.getItem('volumeTiers') || '[]');
+    const arr = JSON.parse(getRatePlanData('VOLUME_TIERS') || '[]');
     return Array.isArray(arr)
       ? arr.map((t: any) => ({
           usageStart: Number(t.usageStart || 0),
@@ -31,16 +32,16 @@ const VolumeEstimation: React.FC = () => {
 
   // saved pricing
   const tiers = parseVolumeTiers();
-  const overageRate = Number(localStorage.getItem('volumeOverage') || 0);
-  const graceBuffer = Number(localStorage.getItem('volumeGrace') || 0);
+  const overageRate = Number(getRatePlanData('VOLUME_OVERAGE') || 0);
+  const graceBuffer = Number(getRatePlanData('VOLUME_GRACE') || 0);
 
   // extras
-  const setupFee = Number(localStorage.getItem('setupFee') || 0);
-  const discountPercent = Number(localStorage.getItem('discountPercent') || 0);
-  const discountFlat = Number(localStorage.getItem('discountFlat') || 0);
-  const freemiumUnits = Number(localStorage.getItem('freemiumUnits') || 0);
-  const minimumUsage = Number(localStorage.getItem('minimumUsage') || 0);
-  const minimumCharge = Number(localStorage.getItem('minimumCharge') || 0);
+  const setupFee = Number(getRatePlanData('SETUP_FEE') || 0);
+  const discountPercent = Number(getRatePlanData('DISCOUNT_PERCENT') || 0);
+  const discountFlat = Number(getRatePlanData('DISCOUNT_FLAT') || 0);
+  const freemiumUnits = Number(getRatePlanData('FREEMIUM_UNITS') || 0);
+  const minimumUsage = Number(getRatePlanData('MINIMUM_USAGE') || 0);
+  const minimumCharge = Number(getRatePlanData('MINIMUM_CHARGE') || 0);
 
   const [incSetup, setIncSetup] = useState(false);
   const [incDiscount, setIncDiscount] = useState(false);
@@ -87,7 +88,7 @@ const VolumeEstimation: React.FC = () => {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => navigate(-1)}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => { navigate('/get-started/rate-plans'); }}>
         ← Back
       </div>
       <div className="estimate-container">

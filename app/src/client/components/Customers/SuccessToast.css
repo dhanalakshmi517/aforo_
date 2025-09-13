@@ -1,0 +1,112 @@
+/* Success Toast Styles */
+.success-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  
+  /* Outer border specs */
+  border-radius: var(--border-radius-lg, 16px);
+  border: 0.4px solid var(--border-success, #9BCE80);
+  background: var(--surface-layer-4, #FFF);
+  box-shadow: 0 15px 36px 0 rgba(0, 0, 0, 0.07), 
+              0 6.118px 13.141px 0 rgba(0, 0, 0, 0.03), 
+              0 2.41px 6.38px 0 rgba(0, 0, 0, 0.02), 
+              0 1.111px 3.127px 0 rgba(0, 0, 0, 0.01), 
+              0 0.463px 1.237px 0 rgba(0, 0, 0, 0.01);
+  
+  /* Layout */
+  display: flex;
+  width: 366px;
+  padding: 16px;
+  align-items: center;
+  gap: 16px;
+  
+  /* Animation */
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Tick icon container */
+.success-toast-icon {
+  border-radius: 30px;
+  background: var(--surface-success, #EDF7E6);
+  
+  display: flex;
+  width: 52px;
+  height: 52px;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* Content container */
+.success-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  align-self: stretch;
+}
+
+/* Title text */
+.success-toast-title {
+  color: var(--text-text-darker, #373B40);
+  
+  /* body/lg/med */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-lg, 16px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-lg, 24px); /* 150% */
+  
+  align-self: stretch;
+}
+
+/* Message text */
+.success-toast-message {
+  align-self: stretch;
+  color: var(--text-text-darker, #373B40);
+  
+  /* body/sm/reg */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-sm, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+/* Close button */
+.success-toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.success-toast-close:hover {
+  background-color: rgba(55, 59, 64, 0.1);
+}
+
+.success-toast-close svg {
+  width: 16px;
+  height: 16px;
+}

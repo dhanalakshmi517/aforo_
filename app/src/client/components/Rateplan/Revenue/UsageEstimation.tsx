@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import './EstimateRevenue.css';
 import { useNavigate } from 'react-router-dom';
+import { getRatePlanData } from '../utils/sessionStorage';
 
 const UsageEstimation: React.FC = () => {
   const navigate = useNavigate();
   const [usage, setUsage] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
-  const perUsageRate = Number(localStorage.getItem('usagePerUnitAmount') || 0);
-  const setupFee = Number(localStorage.getItem('setupFee') || 0);
-  const discountPercent = Number(localStorage.getItem('discountPercent') || 0);
-  const discountFlat = Number(localStorage.getItem('discountFlat') || 0);
-  const freemiumUnits = Number(localStorage.getItem('freemiumUnits') || 0);
-  const minimumUsage = Number(localStorage.getItem('minimumUsage') || 0);
-  const minimumCharge = Number(localStorage.getItem('minimumCharge') || 0);
+  const perUsageRate = Number(getRatePlanData('USAGE_PER_UNIT_AMOUNT') || 0);
+  const setupFee = Number(getRatePlanData('SETUP_FEE') || 0);
+  const discountPercent = Number(getRatePlanData('DISCOUNT_PERCENT') || 0);
+  const discountFlat = Number(getRatePlanData('DISCOUNT_FLAT') || 0);
+  const freemiumUnits = Number(getRatePlanData('FREEMIUM_UNITS') || 0);
+  const minimumUsage = Number(getRatePlanData('MINIMUM_USAGE') || 0);
+  const minimumCharge = Number(getRatePlanData('MINIMUM_CHARGE') || 0);
 
   const [includeSetup, setIncludeSetup] = useState(false);
   const [includeDiscount, setIncludeDiscount] = useState(false);
@@ -42,12 +43,7 @@ const UsageEstimation: React.FC = () => {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate(-1)}>
-        <svg className="back-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10.0013 15.8337L4.16797 10.0003M4.16797 10.0003L10.0013 4.16699M4.16797 10.0003H15.8346" stroke="#706C72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <h2 style={{ margin: 0 }}>Estimate revenue</h2>
-      </div>
+      <h2 style={{ margin: 0 }}>Estimate revenue</h2>
 
       <div className="estimate-container">
         <div className="input-section">
