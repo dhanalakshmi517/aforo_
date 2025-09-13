@@ -38,3 +38,109 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
 };
 
 export default ConfirmDeleteModal;
+
+
+
+@import "../Variables/Variables.css";
+/* Background overlay */
+.del-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal container */
+  .del-modal-container {
+    background: var(--color-neutral-white);
+    border-radius: var(--border-radius-sm);
+    padding: 24px;
+    width: 512px;
+    height:220px auto;
+    text-align: center;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Title */
+  .del-modal-title {
+    color: var(--color-neutral-1700);
+    text-align: center;
+    
+    /* heading/h5/bold */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-h5);
+    font-style: normal;
+    font-weight: 700;
+    line-height: var(--line-height-heading-h5); /* 140% */
+    margin-bottom: 8px;
+  }
+  
+  /* Subtitle */
+  .del-modal-subtitle {
+    color: var(--color-neutral-1700);
+    text-align: center;
+    
+    /* body/lg/reg */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-lg); /* 150% */
+    margin-bottom: 24px;
+  }
+  
+  /* Button container */
+  .del-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  /* Discard button */
+  .del-modal-btn-discard {
+    width:222px;
+    height:40px;
+    background: var(--color-primary-000);
+    color: var(--color-primary-800);
+    border: none;
+    padding: 8px 20px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    color: var(--color-primary-800);
+
+    /* body/md/med */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-md); 
+    transition: background 0.2s;
+  }
+  
+  
+  /* Delete button */
+  .del-modal-btn-delete {
+    width:222px;
+    height:40px;
+   border:none;
+   background-color: var(--color-error-400);
+    padding: 8px 20px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    color: var(--color-neutral-white);
+
+    /* body/md/med */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-md); /* 150% */    transition: background 0.2s;
+  }
+  
+ 

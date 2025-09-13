@@ -497,3 +497,5 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     </>
   );
 }
+
+

@@ -608,3 +608,4 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 export { EditConfiguration };
 // Compat alias so existing imports keep working:
 export { EditConfiguration as ConfigurationTab };
+

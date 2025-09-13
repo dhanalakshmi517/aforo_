@@ -117,5 +117,4 @@ const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
     />
   );
 };
-
 export default EditAggregationWindow;

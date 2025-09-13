@@ -1,3 +1,4 @@
+
 import { FormData, ProductType, ConfigurationData } from './types';
 import { authFetch } from '../../../utils/authFetch';
 import { normalizeProductType } from './utils';
