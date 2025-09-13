@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField, InputField } from '../componenetsss/Inputs';
 
 interface AggregationWindowSelectProps {
   productType: string;
@@ -15,9 +16,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ produ
   // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
     return (
-      <select className="select-field" value="" disabled>
-        <option value="">-- select product/unit first --</option>
-      </select>
+      <SelectField value="" onChange={() => {}} options={[{label:'-- select product/unit first --',value:'',disabled:true}]} disabled />
     );
   }
   
@@ -106,23 +105,21 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ produ
 
   if (options) {
     return (
-      <select className="select-field" value={value} onChange={e => onChange(e.target.value)}>
-        <option value="">--select--</option>
-        {options.map(opt => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
+      <SelectField
+        value={value}
+        onChange={onChange}
+        options={options.map(opt=>({label:opt,value:opt}))}
+        placeholderOption="--select--"
+      />
     );
   }
 
   // Fallback free text
   return (
-    <input
-      type="text"
-      className="input-field"
-      placeholder="Aggregation Window"
+    <InputField
       value={value}
-      onChange={e => onChange(e.target.value)}
+      onChange={onChange}
+      placeholder="Aggregation Window"
     />
   );
 };

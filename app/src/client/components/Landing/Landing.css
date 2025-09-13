@@ -32,8 +32,8 @@
 
 .nav-links a {
     text-decoration: none;
+    cursor: pointer;
     color: var(--color-neutral-1400);
-
     font-family: var(--font-family-primary);
     font-size: var(--font-size-lg);
     font-style: normal;
@@ -74,7 +74,7 @@
 .contact-btn {
     padding: 12px 24px;
     background-color: var(--color-primary-800);
-    color: var(--text-primary-button-default, #FFF);
+    color: var(--color-neutral-white);
 
 font-family: var(--font-family-primary);
 font-size: var(--font-size-h6);
@@ -83,6 +83,8 @@ font-weight: 400;
 border-radius: var(--border-radius-sm);
 line-height: var(--line-height-heading-h6);
 border: none;
+cursor: pointer;
+
 }
 
 /* HERO SECTION */

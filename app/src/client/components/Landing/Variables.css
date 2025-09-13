@@ -213,13 +213,13 @@
   --color-neutral-black: rgba(0, 0, 0, 1);
 
   /* Error Color Palette */
-  --color-error-100: #FFECEC;
-  --color-error-200: #FFD6D6;
-  --color-error-300: #FFBFBF;
-  --color-error-400: rgba(227, 73, 53, 1);
-  --color-error-500: rgba(175, 42, 26, 1);
-  --color-error-600: rgba(96, 30, 23, 1);
-  --color-error-700: rgba(55, 32, 29, 1);
+  --color-error-100:rgba(255, 237, 233, 1);
+  --color-error-200: rgba(255, 205, 192, 1);
+  --color-error-300: rgba(255, 139, 121, 1);
+  --color-error-400: rgba(237, 81, 66, 1);
+  --color-error-500: rgba(212, 54, 47, 1);
+  --color-error-600: rgba(183, 33, 32, 1);
+  --color-error-700: rgba(149, 20, 22, 1);
 
   /* Success Color Palette */
   --color-success-100: #E8FCE8;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SignIn from './SignIn';
 import './Landing.css';
 import visual from './visual.svg'; // Import the SVG background
-import aforoWordmark from './logoaforo.svg';
+import SigninLogo from './signin.svg';
 import Features from './Features';
 import ProgressSection from './ProgressSection';
 import Revenue from './Revenue';
@@ -28,11 +28,21 @@ const Landing: React.FC = () => {
       {showNavbar && (
         <header className="navbar">
           <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="34" height="31" viewBox="0 0 34 31" fill="none">
-  <path d="M15.9656 0.5566C14.4403 0.992399 11.88 4.733 10.7905 6.54883C14.059 8.45545 17.0551 13.0858 20.0512 16.0819C23.0473 19.078 24.1368 18.8057 25.7711 18.8057C27.0785 18.8057 29.2211 17.7162 30.129 17.1714C28.4948 14.2661 24.6816 7.63833 22.5026 4.36984C19.7788 0.284226 17.8722 0.0118523 15.9656 0.5566Z" fill="#23546C"/>
-  <path d="M33.6699 24.7979C33.452 23.9263 32.4896 21.711 32.0357 20.7123C30.7283 22.0197 28.5856 23.2544 27.6777 23.7084C21.1407 26.9769 14.8761 22.3465 11.0629 19.3504C8.01227 16.9535 5.97855 15.9911 5.34301 15.8095C4.97984 16.4451 3.81771 18.5878 2.07452 22.0742C-0.104474 26.4321 0.985022 28.3388 2.89164 29.4283C4.79826 30.5177 8.88387 30.7901 16.238 30.7901C23.5921 30.7901 28.2224 30.7901 31.2185 29.7006C34.2147 28.6111 33.9423 25.8874 33.6699 24.7979Z" fill="#23546C"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="41" height="37" viewBox="0 0 41 37" fill="none">
+  <path d="M18.7663 0.845831C16.9507 1.36458 13.9031 5.81715 12.6062 7.9786C16.4968 10.2481 20.0632 15.7598 23.6296 19.3262C27.196 22.8926 28.4928 22.5683 30.4381 22.5683C31.9944 22.5683 34.5449 21.2715 35.6256 20.623C33.6803 17.1647 29.1413 9.27546 26.5475 5.38486C23.3054 0.521615 21.0359 0.197398 18.7663 0.845831Z" fill="url(#paint0_linear_7865_40146)"/>
+  <path d="M39.8404 29.7011C39.5811 28.6636 37.4355 24.0267 36.8951 22.8379C35.3389 24.3941 33.7884 25.8639 32.7077 26.4042C24.9265 30.2948 17.4695 24.7832 12.9305 21.2168C9.29923 18.3637 7.87841 17.2181 7.1219 17.002C6.68962 17.7585 4.30629 22.309 2.23131 26.4589C-0.362425 31.6464 0.934441 33.9159 3.20396 35.2128C5.47347 36.5097 10.3367 36.8339 19.0906 36.8339H19.0906C27.8444 36.8339 33.3561 36.8339 36.9225 35.537C40.4889 34.2401 40.1646 30.998 39.8404 29.7011Z" fill="url(#paint1_linear_7865_40146)"/>
+  <defs>
+    <linearGradient id="paint0_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#00365A"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#00365A"/>
+    </linearGradient>
+  </defs>
 </svg>
-            <img src={aforoWordmark} alt="Aforo" className="logo-text" height={24} />
+            <img src={SigninLogo} alt="Aforo" className="logo-text" height={24} />
           </div>
           <nav className="nav-links">
             <a href="#">Home</a>

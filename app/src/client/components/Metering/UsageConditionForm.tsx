@@ -8,6 +8,7 @@ import SqlDimensionSelect from './SqlDimensionSelect';
 import SqlOperatorSelect from './SqlOperatorSelect';
 import LlmDimensionSelect from './LlmDimensionSelect';
 import LlmOperatorSelect from './LlmOperatorSelect';
+import { InputField, SelectField } from '../componenetsss/Inputs';
 
 interface FilterCondition {
   id: number;
@@ -106,7 +107,11 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({ productType, un
                 );
               }
              return (
-               <input type="text" placeholder="Dimension" value={filter.usageCondition} onChange={e=>handleChange(filter.id,'usageCondition',e.target.value)} />
+               <InputField
+                 placeholder="Dimension"
+                 value={filter.usageCondition}
+                 onChange={(val)=>handleChange(filter.id,'usageCondition',val)}
+               />
              );
            })()}
 
@@ -121,6 +126,17 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({ productType, un
                  const isFlat = upperType === 'FLATFILE' && ['FILE','DELIVERY','MB','RECORD','ROW'].includes(upperUom);
                  const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION','CELL','ROW','MB'].includes(upperUom);
                  const isLlm = upperType === 'LLMTOKEN' && ['TOKEN','PROMPT_TOKEN','COMPLETION_TOKEN'].includes(upperUom);
+                 if (!filter.usageCondition) {
+                   return (
+                     <SelectField
+                       placeholder="--select--"
+                       value=""
+                       onChange={()=>{}}
+                       options={[{label:'--select--',value:'',disabled:true}]}
+                       disabled
+                     />
+                   );
+                 }
                  if (isApi) {
                    return (
                      <ApiOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val=>handleChange(filter.id,'operator',val)} />
@@ -142,18 +158,23 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({ productType, un
                     );
                   }
                  return (
-                   <input type="text" placeholder="Operator" value={filter.operator} onChange={e=>handleChange(filter.id,'operator',e.target.value)} />
+                   <InputField
+                     placeholder="Operator"
+                     value={filter.operator}
+                     onChange={(val)=>handleChange(filter.id,'operator',val)}
+                     disabled={!filter.usageCondition}
+                   />
                  );
                })()}
             </div>
 
             <div className="column">
               <label>Value</label>
-              <input
-                type="text"
-                placeholder="--select--"
+              <InputField
+                placeholder="Value"
                 value={filter.value}
-                onChange={(e) => handleChange(filter.id, 'value', e.target.value)}
+                onChange={(val)=>handleChange(filter.id,'value',val)}
+                disabled={!filter.operator}
               />
             </div>
           </div>
@@ -163,14 +184,18 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({ productType, un
       <button className="add-btn" onClick={handleAdd}>Add Filter</button>
       <div className="billing-section">
   <label>Select Billing Criteria</label>
-  <select className="billing-criteria-dropdown" value={billingCriteria} onChange={e=>onBillingCriteriaChange(e.target.value)}>
-    <option value="">--select--</option>
-    <option value="BILL_BASED_ON_USAGE_CONDITIONS">Bill based on usage conditions</option>
-    <option value="BILL_EXCLUDING_USAGE_CONDITIONS">Bill excluding usage conditions</option>
-  </select>
+  <SelectField
+    value={billingCriteria}
+    onChange={onBillingCriteriaChange}
+    options={[
+      {label:'--select--',value:'',disabled:true},
+      {label:'Bill based on usage conditions',value:'BILL_BASED_ON_USAGE_CONDITIONS'},
+      {label:'Bill excluding usage conditions',value:'BILL_EXCLUDING_USAGE_CONDITIONS'}
+    ]}
+  />
   <p className="billing-note">
   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-  <g clip-path="url(#clip0_5214_8669)">
+  <g clipPath="url(#clip0_5214_8669)">
     <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
   <defs>

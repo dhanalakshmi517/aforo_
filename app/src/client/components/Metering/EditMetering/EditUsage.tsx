@@ -8,6 +8,7 @@ import EditSqlDimension from './EditSqlDimension';
 import EditSqlOperator from './EditSqlOperator';
 import EditLlmDimension from './EditLlmDimension';
 import EditLlmOperator from './EditLlmOperator';
+import { SelectField, InputField, SelectOption } from '../../componenetsss/Inputs';
 
 interface FilterCondition {
   id: number;
@@ -101,12 +102,12 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
               genericDims = [filter.usageCondition, ...genericDims];
             }
             return (
-              <select value={filter.usageCondition} onChange={e => handleChange(filter.id, 'usageCondition', e.target.value)}>
-                <option value="">--select--</option>
-                {genericDims.map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
+              <SelectField
+                value={filter.usageCondition}
+                onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
+                options={genericDims.map((d) => ({ label: d, value: d } as SelectOption))}
+                placeholderOption="--select--"
+              />
             );
           })()}
 
@@ -129,23 +130,23 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                   genericOps = [filter.operator, ...genericOps];
                 }
                 return (
-                  <select value={filter.operator} onChange={e => handleChange(filter.id, 'operator', e.target.value)}>
-                    <option value="">--select--</option>
-                    {genericOps.map(o => (
-                      <option key={o} value={o}>{o}</option>
-                    ))}
-                  </select>
+                  <SelectField
+                    value={filter.operator}
+                    onChange={(val) => handleChange(filter.id, 'operator', val)}
+                    options={genericOps.map((o) => ({ label: o, value: o } as SelectOption))}
+                    placeholderOption="--select--"
+                  />
                 );
               })()}
             </div>
 
             <div className="column">
               <label>Value</label>
-              <input
+              <InputField
                 type="text"
                 placeholder="--select--"
                 value={filter.value}
-                onChange={(e) => handleChange(filter.id, 'value', e.target.value)}
+                onChange={(val) => handleChange(filter.id, 'value', val)}
               />
             </div>
           </div>
@@ -156,11 +157,16 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
 
       <div className="billing-section">
         <label>Select Billing Criteria</label>
-        <select value={billingCriteria} onChange={e=>onBillingCriteriaChange(e.target.value)}>
-          <option value="">--select--</option>
-          <option value="BILL_BASED_ON_USAGE_CONDITIONS">Bill based on usage conditions</option>
-          <option value="BILL_EXCLUDING_USAGE_CONDITIONS">Bill excluding usage conditions</option>
-        </select>
+        <SelectField
+          value={billingCriteria}
+          onChange={onBillingCriteriaChange}
+          options={[
+            { label: '--select--', value: '' },
+            { label: 'Bill based on usage conditions', value: 'BILL_BASED_ON_USAGE_CONDITIONS' },
+            { label: 'Bill excluding usage conditions', value: 'BILL_EXCLUDING_USAGE_CONDITIONS' },
+          ]}
+          placeholderOption="--select--"
+        />
         <p className="billing-note">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
             <g clipPath="url(#clip0_5214_8669)">

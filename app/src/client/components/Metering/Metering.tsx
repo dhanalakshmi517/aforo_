@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import CreateUsageMetric from "./CreateUsageMetric";
 import EditMetrics from "./EditMetering/EditMetrics";
-import Search from "../Components/Search";
 import "../Rateplan/RatePlan.css";
 import "./Metering.css";
+import "../Products/Products.css";
+import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import UsageEmptyImg from "./usage.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
 
@@ -132,6 +134,17 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     return <EditMetrics metricId={selectedMetricId.toString()} onClose={() => setShowEditMetricForm(false)} />;
   }
 
+  const metricColors = [
+    'rgba(234, 212, 174, 0.15)',
+    'rgba(226, 182, 190, 0.15)',
+    'rgba(226, 182, 204, 0.15)',
+    'rgba(220, 182, 226, 0.15)',
+    'rgba(204, 183, 225, 0.15)',
+    'rgba(196, 183, 225, 0.15)',
+    'rgba(174, 234, 214, 0.15)'
+  ];
+  const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
+
   const filteredMetrics = metrics.filter((m) =>
     m.usageMetric.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.productName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -147,26 +160,13 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       <div className="rate-plan-header">
         <h2>Usage Metrics</h2>
         <div className="header-actions">
-          {/* <div className="search-wrappers">
-            {/* <div className="search-wrappers">
-            <input
-              type="text"
-              placeholder="Search among customers"
-              className="search-input" 
-            />
-          </div> 
-          <button className="sam-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button> */}
-          <Search onSearch={setSearchQuery} />
+          {/* <Search onSearch={setSearchQuery} /> */}
           <button className="new-rate-button" onClick={() => setShowNewUsageMetricForm(true)}>+ New Usage Metric</button>
       
         </div>
       </div>
-      <div className="rate-plans-table-wrapper">
-        <table className="metering-table">
+      <div className="products-table-wrapper">
+        <table className="products-table">
         <thead>
           <tr>
             <th>Usage Metric</th>
@@ -178,9 +178,9 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
           </tr>
         </thead>
         <tbody>
-          {filteredMetrics.map((metric) => (
+          {filteredMetrics.map((metric, idx) => (
             <tr key={metric.id}>
-              <td>{display(metric.usageMetric)}</td>
+              <td className="metrics-cell"><div className="metrics-wrapper" style={{display:'flex',alignItems:'center',justifyContent:'flex-start'}}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom">{display(metric.unit)}</div><div className="metric-name">{display(metric.usageMetric)}</div></div></div><span style={{marginLeft:4}}>{display(metric.usageMetric)}</span></div></td>
               <td>{display(metric.productName)}</td>
               <td>{display(metric.unit)}</td>
               <td>
@@ -191,13 +191,21 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 </span>
               </td>
               
-              <td className="actions-cell"><div className="action-buttons">
-                <button className="prod-edit-button" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M7.99933 13.3333H13.9993M10.9167 2.41461C11.1821 2.14922 11.542 2.00012 11.9173 2.00012C12.2927 2.00012 12.6526 2.14922 12.918 2.41461C13.1834 2.68001 13.3325 3.03996 13.3325 3.41528C13.3325 3.7906 13.1834 4.15055 12.918 4.41595L4.91133 12.4233C4.75273 12.5819 4.55668 12.6979 4.34133 12.7606L2.42667 13.3193C2.3693 13.336 2.30849 13.337 2.25061 13.3222C2.19272 13.3074 2.13988 13.2772 2.09763 13.235C2.05538 13.1927 2.02526 13.1399 2.01043 13.082C1.9956 13.0241 1.9966 12.9633 2.01333 12.9059L2.572 10.9913C2.63481 10.7762 2.75083 10.5804 2.90933 10.4219L10.9167 2.41461Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                <button className="prod-delete-button" onClick={() => handleDeleteClick(metric)}>
+              <td className="actions-cell"><div className="product-action-buttons">
+                {String(metric.status).toLowerCase() === 'draft' ? (
+                  <button className="product-view-button" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M7.99967 1.33325C11.6816 1.33325 14.6663 4.31802 14.6663 7.99992C14.6663 11.6818 11.6816 14.6666 7.99967 14.6666C4.31778 14.6666 1.33301 11.6818 1.33301 7.99992H5.33301H10.6663M10.6663 7.99992L7.99967 10.6666M10.6663 7.99992L7.99967 5.33325" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                ) : (
+                  <button className="product-edit-button" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7.00031 12.3334H13.0003M9.91764 1.41473C10.183 1.14934 10.543 1.00024 10.9183 1.00024C11.2936 1.00024 11.6536 1.14934 11.919 1.41473C12.1844 1.68013 12.3335 2.04008 12.3335 2.4154C12.3335 2.79072 12.1844 3.15067 11.919 3.41607L3.91231 11.4234C3.75371 11.582 3.55766 11.698 3.34231 11.7607L1.42764 12.3194C1.37028 12.3361 1.30947 12.3371 1.25158 12.3223C1.1937 12.3075 1.14086 12.2774 1.09861 12.2351C1.05635 12.1929 1.02624 12.140 1.01141 12.0821C0.996575 12.0242 0.997578 11.9634 1.01431 11.9061L1.57298 9.9914C1.63579 9.77629 1.75181 9.58048 1.91031 9.42207L9.91764 1.41473Z" stroke="#1D7AFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                )}
+                <button className="product-delete-button" onClick={() => handleDeleteClick(metric)}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M2 4.00004H14M12.6667 4.00004V13.3334C12.6667 14 12 14.6667 11.3333 14.6667H4.66667C4 14.6667 3.33333 14 3.33333 13.3334V4.00004M5.33333 4.00004V2.66671C5.33333 2.00004 6 1.33337 6.66667 1.33337H9.33333C10 1.33337 10.6667 2.00004 10.6667 2.66671V4.00004M6.66667 7.33337V11.3334M9.33333 7.33337V11.3334" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -206,28 +214,35 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               </td>
             </tr>
           ))}
+          {filteredMetrics.length === 0 && (
+            <tr>
+              <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                <div className="metrics-empty-state">
+                  <img src={UsageEmptyImg} alt="No metrics" style={{ width: 200, height: 200 }} />
+                  <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
+                  <button
+                    onClick={() => setShowNewUsageMetricForm(true)}
+                    className="new-metric-button"
+                    style={{ marginTop: 12 }}
+                  >
+                    + New Billable Metric
+                  </button>
+                </div>
+              </td>
+            </tr>
+          )}
         </tbody>
         </table>
       </div>
 
       {/* Delete confirmation modal */}
       {showDeleteModal && (
-        <div className="delete-modal-overlay">
-          <div className="delete-modal-content">
-            <div className="delete-modal-body">
-              <h5>
-                Are you sure you want to delete <br />the usage metric? <strong>"{deleteMetricName}"</strong>
-              </h5>
-              <p>This action cannot be undone.</p>
-            </div>
-            <div className="delete-modal-footer">
-              <button className="delete-modal-cancel" onClick={() => { setShowDeleteModal(false); setDeleteMetricId(null); }}>Cancel</button>
-              <button className="delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDeleteModal
+          isOpen={showDeleteModal}
+          productName={deleteMetricName}
+          onConfirm={confirmDelete}
+          onCancel={() => { setShowDeleteModal(false); setDeleteMetricId(null); }}
+        />
       )}
 
       {/* Notification */}

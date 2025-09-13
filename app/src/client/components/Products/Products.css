@@ -9,11 +9,12 @@ body {
   /* top | right | bottom | left */
   padding: 0 16px 16px 16px;
   width: 100%;
-  max-width: none;
+  min-height: 100vh;
   box-sizing: border-box;
+  overflow-y: auto;
 
   /* make it occupy viewport height minus navbar (adjust 64px if needed) */
-  height: calc(100vh - 64px);
+  height: auto;
   display: flex;
   flex-direction: column;
 
@@ -35,16 +36,24 @@ body {
 }
 
 .table th {
+  border-radius: var(--border-radius-sm);
   padding: 12px 16px;
-  /* border-right: 1px solid var(--color-neutral-200); */
+  border-bottom-left-radius:var(--border-radius-sm); 
+  border-bottom-right-radius:var(--border-radius-sm); 
+  
+
 }
 
 .products-table th:first-child {
-  border-top-left-radius: var(--border-radius-md);
+  border-top-left-radius: var(--border-radius-sm);
+  border-bottom-left-radius: var(--border-radius-sm);
+  border-top-left-radius: var(--border-radius-sm);
 }
 .products-table th:last-child {
+  border-top-right-radius: var(--border-radius-sm);
+  border-bottom-right-radius: var(--border-radius-sm);
   border-right: none;
-  border-top-right-radius: var(--border-radius-md);
+  border-top-right-radius: var(--border-radius-sm);
 }
 
 .form-container {
@@ -119,8 +128,8 @@ body {
   font-weight: 500;
   padding: 6px 0;
   background-color: var(--color-neutral-white);
-  width: calc(100% - 256px);
-  margin-right: 24px;
+  width: calc(100% - 276px);
+  margin-right: 8px;
   height: 40px;
   border: 1px solid var(--color-neutral-200);
 }
@@ -163,11 +172,16 @@ body {
 
 .products-header {
   display: flex;
-  margin-top: 24px;
+  margin-top: 16px;
   margin-left: 250px; /* align with sidebar width so heading is visible */
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  background-color: var(--color-neutral-white);
+  z-index: 2;
 }
 
 /* Responsive override: reset left margin on narrow screens */
@@ -194,32 +208,35 @@ body {
   margin: 0; /* remove extra left gap */
   color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-h4);
+  font-size: var(--font-size-h5);
   font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-heading-h4);
+  font-weight: 700;
+  line-height: var(--line-height-heading-h5);
   margin-top: 0;
-  margin-bottom: 8px;
-  margin-left: 30px;
+  margin-bottom: 20px; /* constant viewport gap */
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .products-actions {
   display: flex;
-  gap: 8px;
+  flex-shrink: 0; /* prevent children overlapping */
+  gap: 12px;
+  padding-right: 20px;
   align-items: center;
   justify-content: flex-end;
   margin-top: 0;
   margin-bottom: 2px;
 }
 
-.products-search {
+/* .products-search {
   display: flex;
   column-gap: 8px;
-  background-color: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-200);
+  background-color: transparent;
+  border: none;
   align-items: center;
-  width: 360px;
-  flex: 0 0 360px;
+  width: 203px;
+  flex: 0 0 203px;
   height: 28px;
   border-radius: var(--border-radius-sm);
   padding: 4px 12px;
@@ -230,7 +247,7 @@ body {
   outline: none;
   border: none !important;
   box-shadow: none;
-}
+} */
 
 /* Disabled state */
 
@@ -250,7 +267,7 @@ body {
 }
 
 .products-search-input {
-  flex: 1;
+  flex: 1 1 auto;
   border: none;
   background: none;
   color: var(--color-neutral-1700);
@@ -303,7 +320,7 @@ body {
   width: 20px;
   height: 20px;
   color: var(--color-neutral-500);
-  margin-right: 8px;
+  margin-right: 20px;
 }
 .products-empty-state-text {
   color: var(--color-neutral-1000);
@@ -317,6 +334,7 @@ font-weight: 400;
 line-height: var(--line-height-body-md); /* 142.857% */
 }
 .new-button {
+  margin-left: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,25 +366,25 @@ line-height: var(--line-height-body-lg);
 }
 
 .products-main-content {
+  padding-bottom: 20px;
   padding-top: 24px;
   flex: 1 1 auto;
-  overflow-y: auto; /* allow it to grow and fill container */
+  overflow-y: visible; /* let child wrapper determine scroll */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* keep header visible, scroll table only */
 }
 
 .products-table-wrapper {
-  flex: 1;
-  min-height: calc(100vh - 120px);
-  height: 100%;
-  overflow-y: auto; /* enable scroll */
+  flex: 1 1 auto;
+  min-height: calc(100vh - 126px);
+  /* max-height removed to let wrapper size to content */
+  overflow-y: auto; /* enable scroll inside wrapper */
   scrollbar-width: none; /* Firefox hide scrollbar */
   /* align with sidebar width */
   margin-left: 256px;
-  width: calc(100% - 280px);
-  margin-right: 24px;
-  margin-bottom: 24px;
+  width: calc(100% - 276px);
+  margin-right: 20px;
+  margin-bottom: 20px; /* constant viewport gap */
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-lg);
   padding: 12px;
@@ -377,28 +395,60 @@ line-height: var(--line-height-body-lg);
 @media (max-width: 991px) {
   .products-table-wrapper {
     margin-left: 0;
-    width: 100%;
+    width: calc(100% - 40px); /* keep 20px side gap */
+    margin-right: 20px;
   }
 }
 
 /* ensure inner table stretches full wrapper */
+
+/* Prevent window scroll on Products page */
+body.products-page {
+  overflow: hidden;
+}
+
 .products-table-wrapper:hover {
   /* show scrollbar */
   scrollbar-width: thin;
 }
 
+.products-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+.products-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.products-table-wrapper::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* Firefox */
+.products-table-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: #C3C2D0 transparent;
+}
+
+/* Keep original hover override for wider bar if needed */
 .products-table-wrapper:hover::-webkit-scrollbar {
   width: 8px;
 }
 
 /* hide scrollbar track in Firefox */
 .products-table-wrapper {
-  scrollbar-width: none;
+  scrollbar-width: thin;
 }
 .products-table-wrapper::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
-  display: none; /* hide in WebKit */
+  width: 4px;
+}
+.products-table-wrapper::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: #C3C2D0;
+}
+.products-table-wrapper:hover::-webkit-scrollbar {
+  width: 8px;
 }
 
 .products-table-wrapper .products-table {
@@ -417,16 +467,166 @@ line-height: var(--line-height-body-lg);
 .products-table {
   border-collapse: collapse;
   background-color: var(--color-neutral-white);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-sm);
   /* border: 1px solid var(--color-neutral-200); */
+
+  /* Product Name */
+  .product-name {
+    font-weight: 500;
+    color: var(--color-neutral-900);
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 4px 0;
+  }
+
+  /* Billable Metrics Card */
+  .billable-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 200px;
+  }
+
+  .metrics-wrapper{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;}
+  .metric-item {
+    min-height: 36px; /* baseline */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 36px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.2;
+    color: #1F2937;
+    background-color: #F4E8FF;
+    border: 1px solid #E5E7EB;
+    padding: 4px 0;
+  }
+  
+  .metric-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 2px 4px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.metric-name {
+    white-space: normal; /* wrap metric name */
+    position: relative;
+    top: -2px;
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
+    width: 100%;
+    height: 100%;
+    padding: 2px 4px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  .metric-uom {
+    font-weight: 600;
+    font-size: 10px;
+    color: #1F2937;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    flex-shrink: 0;
+  }
+  
+  .metric-aggregation {
+    font-size: 8px;
+    color: #4B5563;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-transform: lowercase;
+    flex-shrink: 0;
+  }
+
+  .metric-uom {
+    position: relative;
+    top: -1px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Color variations for UOM badges */
+  .bg-blue {
+    color: #1E40AF;
+    background-color: #DBEAFE;
+  }
+  
+  .bg-green {
+    color: #065F46;
+    background-color: #D1FAE5;
+  }
+  
+  .bg-purple {
+    color: #5B21B6;
+    background-color: #EDE9FE;
+  }
+  
+  .bg-orange {
+    color: #9A3412;
+    background-color: #FFEDD5;
+  }
+  
+  .bg-pink {
+    color: #9D174D;
+    background-color: #FCE7F3;
+  }
+
+  .metric-separator {
+    color: #9CA3AF;
+    font-weight: 500;
+  }
+
+  .metric-aggregation {
+    color: #4B5563;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .no-metrics {
+    color: var(--color-neutral-400);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 36px;
+  }
   box-sizing: border-box;
   padding: 12px;
   width: 100%;
-
-
   margin: 0;
-
   table-layout: auto; /* allow columns to size based on content */
+}
+
+/* Apply bottom border radius */
+.products-table tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+.products-table tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-sm);
 }
 
 /* Status badge styles */
@@ -449,13 +649,16 @@ line-height: var(--line-height-body-lg);
 
 /* Make products table fill vertical space */
 .products-table-wrapper {
-  flex: 1 1 auto;
-  margin-bottom: 48px;
-  min-height: calc(100vh - 60px); /* fill screen even with few rows */
+  /* fixed height so rows scroll inside */
+  height: 600px;
+  max-height: 600px;
   overflow-y: auto;
-  height: 100%; /* stretch to parent flex container */
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 20px;
+  /* stop flex grow so it doesn’t stretch */
+  flex: 0 0 auto;
+  display: block;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-lg);
 }
 
 @media (max-width: 767px) {
@@ -613,6 +816,25 @@ line-height: var(--line-height-body-md);
   align-items: center;
 }
 
+/* --- Metric card layout overrides --- */
+.metric-item {
+  height: auto;
+  min-height: 48px; /* allow two text rows */
+}
+.metric-content {
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+}
+.metric-uom {
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+.metric-name {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 /* Align info icon in table headers */
 .products-table th svg {
   vertical-align: middle;
@@ -626,6 +848,22 @@ line-height: var(--line-height-body-md);
 .products-table th.actions-cell {
   text-align: center;
 }
+
+
+.product-view-button {
+  background-color: #ECECEC;
+  border: none;
+  padding: 6px;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
 
 
 .product-edit-button {
@@ -704,7 +942,7 @@ line-height: var(--line-height-body-md);
 }
 
 .delete-modal-body {
-  margin-bottom: 24px;
+  margin-bottom: 20px; /* constant viewport gap */
   width: 512px;
   height: 212px;
 
@@ -806,7 +1044,7 @@ line-height: var(--line-height-body-md);
 
 /* Main notification box */
 .notification {
-  padding: 20px;
+  padding: 12px;
   border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-out;
@@ -818,13 +1056,13 @@ line-height: var(--line-height-body-md);
   display: flex;
   align-items: flex-start;
   color: var(--color-neutral-1400);
-  background: var(--surface-success, #CBE8DE);
+  background: var(--color-neutral-white);
   pointer-events: all;
   position: relative;
 }
 
 .notification.error {
-  background: var(--color-error-100);
+  background: var(--color-neutral-white);
 }
 
 .notification.hide {
@@ -844,7 +1082,7 @@ line-height: var(--line-height-body-md);
 }
 
 .notification.error .notification-icon {
-  background: white;
+  background: pink;
 }
 
 .notification-icon svg {
@@ -857,34 +1095,51 @@ line-height: var(--line-height-body-md);
   stroke: white;
 }
 
+/* Close (X) button */
+.notification-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.notification-close svg {
+  pointer-events: none;
+}
+
 /* Notification text */
 .notification-text {
-  flex: 1;
+  flex: 1 1 auto;
 }
 
 .notification-text h5 {
+  margin: 0 0 2px 0;
   margin: 0;
-  color: var(--color-neutral-1400);
+  color: var(--color-neutral-1700);
 
-  /* body/semibold/lg */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-lg);
-  margin-bottom: 6px;
+/* body/lg/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg);
 }
 
 .notification-text p {
   margin: 0;
   color: var(--color-neutral-1400);
 
-  /* body/regular/sm */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-sm);
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
 .notification-details {

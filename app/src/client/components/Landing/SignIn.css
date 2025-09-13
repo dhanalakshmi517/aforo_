@@ -1,5 +1,6 @@
 @import "./Variables.css";
 .signin-page {
+    position: relative; /* enable pseudo overlay positioning */
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -12,14 +13,26 @@
   /* Card */
   .signin-card {
     width: 100%;
-    max-width: 478px;
+    max-width: 540px;
     background: var(--color-neutral-white);
     border-radius: var(--border-radius-md);
-    padding: 28px 28px 24px;
+    padding: 32px 32px 32px 32px;
     text-align: center;
+    height:490px auto;
+    border: 1px solid var(--color-neutral-300);
+
   }
   
-  /* Logo */
+  /* Header logo + emblem inline */
+.signin-header{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+/* Logo */
   .signin-logo {
     width: 90px;
     height: auto;
@@ -50,11 +63,11 @@ letter-spacing: -2.248px;
 
     /* heading/bold/h5 */
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-h5);
+    font-size: var(--font-size-h4);
     font-style: normal;
     font-weight: 800;
-    line-height: var(--line-height-heading-h5); /* 140% */
-    background: var(--gradient-blue, linear-gradient(180deg, #286584 0%, var(--primary-color-400, #5FB7E2) 100%));
+    line-height: var(--line-height-heading-h4); /* 140% */
+    background: var(--Gradient-blue, linear-gradient(254deg, var(--color-primary-700, #025A94) 26.47%, var(--color-primary-1000, #00365A) 76.37%));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent; 
@@ -67,28 +80,30 @@ letter-spacing: -2.248px;
   
   .field-label {
     display: block;
-    color: var(--color-neutral-1400);
+    color: var(--color-neutral-1700);
     text-align: left;
     
     /* body/regular/xs */
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: var(--line-height-body-md); /* 160% */
     margin-bottom: 6px;
+    margin-left: 4px;
   }
   
   .field-input {
     width: 100%;
-    padding: 12px 16px;
+    height:40px;
+    padding: 8px 12px;
     border: 1px solid var(--color-neutral-300);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-md);
     line-height: 1.5;
-    background-color: var(--color-neutral-200);
+    background-color: var(--color-neutral-100);
     color: var(--color-neutral-900);
-    background-color: var(--color-neutral-white);
+    background-color: var(--color-neutral-100);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   
@@ -126,8 +141,12 @@ letter-spacing: -2.248px;
   .toggle-password {
     position: absolute;
     right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 10%;
+    transform: translateY(-10%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; /* touch target */
     background: none;
     border: none;
     cursor: pointer;
@@ -146,10 +165,10 @@ letter-spacing: -2.248px;
 
     /* body/semibold/xs */
     font-family: var(--type-font-family-primary);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     font-style: normal;
     font-weight: 400;
-    line-height: var(--line-height-body-xs);
+    line-height: var(--line-height-body-sm);
     text-decoration: none;
   }
   
@@ -235,10 +254,10 @@ text-align: center;
 
 /* body/regular/xs */
 font-family: var(--type-font-family-primary);
-font-size: var(--font-size-xs);
+font-size: var(--font-size-md);
 font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-xs);
+font-weight: 500;
+line-height: var(--line-height-body-md);
 
     margin-top: 12px;
   }
@@ -249,13 +268,29 @@ line-height: var(--line-height-body-xs);
 text-align: center;
 
 font-family: var(--type-font-family-primary);
-font-size: var(--font-size-xs);
+font-size: var(--font-size-md);
 font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-xs);
+font-weight: 500;
+line-height: var(--line-height-body-md);
   }
   
-  /* Responsive */
+  /* Backdrop blur overlay */
+html.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(12px) brightness(0.8);
+  background: rgba(255,255,255,0.1); /* lighter wash */
+  z-index: 0;
+}
+
+/* keep card above overlay */
+.signin-card {
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive */
   @media (max-width: 420px) {
     .signin-card {
       padding: 20px;
@@ -266,3 +301,49 @@ line-height: var(--line-height-body-xs);
     .primary-btn { padding: 10px; }
   }
   
+  @import "./Variables.css";
+
+/* ...everything you already have... */
+
+/* Ensure the password input leaves space for the icon */
+.password-wrapper {
+  position: relative;
+}
+.password-wrapper .field-input {
+  /* give the eye breathing room on the right */
+  padding-right: 44px; /* was 16px; keep left padding as-is */
+}
+
+/* Make the toggle button fill the input’s height and center its contents */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 0;
+  bottom: 0;               /* stretch to wrapper height */
+  width: 36px;             /* comfy tap target */
+  display: flex;
+  align-items: center;     /* vertical center */
+  justify-content: center; /* horizontal center */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Normalize icon size to kill the “jump” on toggle */
+.toggle-password svg {
+  width: 18px !important;
+  height: 18px !important;
+  display: block;
+}
+
+/* Optional: keep input heights consistent */
+.field-input {
+  /* If you want a fixed height, uncomment:
+  height: 44px;
+  */
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+/* ...rest of your CSS unchanged... */

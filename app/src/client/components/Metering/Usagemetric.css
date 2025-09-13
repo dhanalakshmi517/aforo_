@@ -1,615 +1,499 @@
 @import "../Variables/Variables.css";
 
-/* Layout tweak: place header on top (2025-08-28) */
-.create-usage-metric.metfront {
-  /* make outer wrapper transparent so only inner card shows */
-  background: transparent;
-  border: none;
+.required {
+  color: var(--color-error-400);
+  margin-left: 2px;
+}
+
+:root {
+  /* Outer gaps */
+  --np-gap-left: 100px;
+  --np-gap-right: 100px;
+  --np-gap-top: 10px;
+  --np-gap-bottom: 15px;
+
+ 
+}
+/* Ensure full page height */
+
+/* Spacing between custom met-np-field groups */
+.met-np-grid-2 .if-field{margin-bottom:16px;}
+.met-np-grid-2 .if-field:last-child{margin-bottom:0;}
+
+/* Spacing between custom met-np-field groups */
+.met-np-field{margin-bottom:16px;display:flex;flex-direction:column;}
+.met-np-field:last-child{margin-bottom:0;}
+html, body, #root{
+ 
+  height: 100%; 
+  margin: 0;
   padding: 0;
-  margin: 24px 2rem 3.44rem 256px;
-
-  flex-direction: column; /* stack header above content */
+  overflow: visible; 
+}
+.create-product-page { 
+  min-height: 100vh; 
+  background: #f7f8fb;
+  /* padding-bottom: 40px;  */
 }
 
-/* Initial attempt moved header but rule was overridden lower in file. Override again with higher specificity after base header styles */
-.create-usage-metric.metfront .metric-header {
-  padding: 0 24px 20px; /* side padding */
-  border-bottom: 1px solid var(--color-neutral-200);
-}
-
-/* Ensure header is horizontally aligned with form (starts after 300px sidebar + 24px gap) */
-.create-usage-metric.metfront > .metric-header {
-  margin-left: 324px;
-  width: calc(100% - 324px);
-}
-
-/* ========== Responsive tweaks added 2025-08-25 ========== */
-
-.usage-metric-wrapper {
+/* Viewport fills screen */
+.met-np-viewport {
+  border-bottom: 1px solid var(--color-neutral-300);
+  padding: var(--np-gap-top) var(--np-gap-right) 30px var(--np-gap-left);
+  box-sizing: border-box;
+  height: calc(100vh - 40px);
+  width: 100%;
+  max-width: 100%;
   display: flex;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--color-neutral-white);
-  border: 1.5px solid var(--color-neutral-200);
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Card */
+.met-np-card {
+  margin-bottom: 40px;          /* gap beneath card */
+  padding-bottom: 32px; /* space below footer */
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
-  width: auto; 
-  flex: 1;
-  padding: 16px 16px 24px;
-  gap: 16px;
-  margin: 16px 1.5rem 2rem 1.5rem;
-}
-
-.sidebars {
-  width: 300px;
-  background-color: var(--color-neutral-100);
-  padding: 20px;
-  border-right: 1.5px solid var(--color-neutral-200);
-}
-
-.met-step {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 25px;
-  cursor: pointer;
-  margin-top: 0; /* reset negative offset */
-}
-
-.step-item {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 25px;
-  cursor: pointer;
-}
-
-.icon-wrappers {
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
+  width: 100%;
   position: relative;
-  overflow: visible;
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 40px);
+  overflow: hidden;
+}
+
+/* Grid fills height */
+.met-np-grid{
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ===== Rail with vertical connector line ===== */
+.met-np-rail{
+  background: var(--color-neutral-100);
+  height: auto;
+  align-self: stretch;
+  padding: 16px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--color-neutral-300);
+  display: flex;
+  flex-direction: column;
+  height:100vh;
+}
+
+/* Steps container */
+.met-np-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 8px 8px 0;
+  background-color: #f8f9fb;
+}
+
+/* Steps container */
+.met-np-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap between steps */
+  padding: 8px 8px 8px 0;
+  background-color: #f8f9fb;
+  position: relative;
+}
+
+/* Each step card */
+.met-np-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 8px;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  min-height: 70px; /* Reduced height for better alignment */
+}
+
+/* Bullet container */
+.met-np-step__bullet {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 12px;
+  width: 24px;
+  flex: 0 0 24px;
+  position: relative;
+  z-index: 2;
 }
 
-/* removed custom vertical offsets that hid step items */
-
-.icon-wrappers svg:first-child {
+/* Icon container */
+.met-np-step__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 24px;
   height: 24px;
-  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  background: #f8f9fb; /* Match the rail background */
 }
 
-.connector {
+/* Connector line container */
+.met-np-step__connector {
   position: absolute;
-  top: 24px;
+  top: 24px; /* Start from the bottom of the circle */
   left: 11px;
+  z-index: 1;
   width: 2px;
+  background-color: #C3C2D0; /* Match the circle stroke color */
+  content: '';
+  display: block;
 }
 
-.metric-connector {
-  display:none;
+/* Different heights for each connector */
+.met-np-step:nth-child(1) .met-np-step__connector {
+  height: 130px; /* Height for first connector */
 }
 
-.step-connector {
-  position: absolute;
-  top: 24px;
-  left: 11px;
-  width: 2px;
-  height: 250px; 
+.met-np-step:nth-child(2) .met-np-step__connector {
+  height: 109px; /* Height for second connector */
 }
 
-/* Completed or active step connector color */
-.met-step:not(.active) .icon-wrappers svg:nth-of-type(2) path {
-  stroke: #BDBBBE;
+
+/* Vertical tweaks for steps after the first */
+.met-np-step:not(:first-child) .met-np-step__bullet { margin-top: -20px; }
+.met-np-step:not(:first-child) .met-np-step__text { margin-top: -20px; }
+
+/* Step container */
+.met-np-step {
+  position: relative;
+  padding: 0 0 12px 0;
+  min-height: 100px; /* Increased to accommodate the tallest connector */
+  display: flex;
+  align-items: flex-start;
 }
 
-.connector {
-  position: absolute;
-  top: 24px; 
-  left: 11px; 
-  width: 2px;
-  height: 50px; 
-  background: transparent; 
-}
-.step-0 { height: 85px; }
-.step-1 { height: 70px; }
-.step-2 { height: 85px; }
-.step-3 { height: 105px; }
-
-
-.met-step-text{
-  max-width: 180px;
+/* Remove connector from last step */
+.met-np-step:last-child .met-np-step__connector {
+  display: none;
 }
 
-.step-title {
-  color: var(--color-neutral-800);
+/* Remove bottom padding from last step */
+.met-np-step:last-child {
+  padding-bottom: 0;
+}
+
+/* Text content */
+.met-np-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 4px;
+  padding-top: 2px; /* Align text with circle */
+}
+
+.met-np-step__connector svg {
+  display: block;
+  height: 100%;
+}
+
+.met-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
+.met-np-step__title{
+   color: var(--color-neutral-1400);
+
+/* body/md/reg */
 font-family: var(--font-family-primary);
 font-size: var(--font-size-lg);
 font-style: normal;
-font-weight: 600;
-line-height: var(--line-height-body-lg);
-  display: block;
-  margin-bottom: 2px;
-}
-
-
-.step-item.active .icon-wrappers svg circle:first-child {
-  stroke: var(--color-primary-800);
-
-}
-
-.step-item.active .icon-wrappers svg circle:last-child {
-  fill: var(--color-primary-800);
-  stroke-width: 3; 
-
-}
-
-.step-item.active .step-title {
-  color: var(--color-neutral-1700);
-}
-
-
-.step-desc {
-  color: var(--color-neutral-800);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
 font-weight: 400;
-line-height: var(--line-height-body-md);
-  display: block;
+line-height: var(--line-height-body-lg); /* 150% */
+text-align: left;
+margin-bottom: 2px;
 }
+.met-np-step__desc{ color: var(--color-neutral-1400);
 
-.form-section {
-  flex: 1;
-  background-color: transparent;
-  position: relative;
-  border: none;
-  padding: 0 0.5rem;
-  margin: 0;
-  max-width: calc(100% - 300px);
-}
-
-.top-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.metric-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.metric-title {
-  color: var(--color-neutral-1700);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-h4);
-  font-weight: 600;
-  margin: 0;
-}
-
-.metric-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 12px;
-}
-
-.sub-header-divider {
-  display: block;
-  width: 100%;
-  border: none;
-  height: 1px;
-  background: var(--color-neutral-1200);
-  margin: 0 24px;
-}
-
-/* Responsive tweaks 2025-08-25 */
-@media (max-width: 991px) {
-  .usage-metric-wrapper {
-    flex-direction: column;
-    margin: 12px;
-    padding: 16px;
-    gap: 16px;
-    width: 100%;
-    min-height: calc(100vh - 32px);
-    border: none;
-  }
-  .sidebars {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--color-neutral-200);
-    margin-bottom: 16px;
-  }
-  .form-section {
-    margin-left: 0;
-    padding: 0;
-    align-items: flex-start;
-    width: 100%;
-  }
-  .form-row,
-  .create-form input[type="text"],
-  .create-form textarea,
-  .form-row select {
-    width: 100%;
-  }
-  .button-group {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-}
-
-
-/* Mobile layout */
-@media (max-width: 768px) {
-  .usage-metric-wrapper {
-    flex-direction: column;
-    margin: 16px;
-    padding: 16px 16px 32px;
-    gap: 16px;
-    width: 100%;
-    min-height: calc(100vh - 32px);
-  }
-  .sidebars {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--color-neutral-200);
-    margin-bottom: 16px;
-  }
-  .form-section {
-    padding: 20px 16px 100px;
-  }
-}
-/* button group on the right of heading */
-.top-buttons {
-  margin-left: auto; /* push to right */
-  display: flex;
-  gap: 12px;
-}
-
-.top-titles{
-  display: flex;
-  color: var(--color-neutral-1700);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h4);
-font-style: normal;
-font-weight: 600;
-line-height: var(--line-height-heading-h4);
-  margin: 0;
-}
-
-.btn {
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 14px;
-  border: none;
-}
-
-.cancel {
-  background-color: var(--color-error-100);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  width:139px;
-  height: 40px;
-  color: var(--color-error-400);
-  border: 1px solid var(--color-error-400);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md);
-}
-
-.save-draft {
-  border: 1px solid var(--color-primary-800);
-  background-color: var(--color-primary-000);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  width:139px;
-  height: 40px;
-  color: var(--color-primary-800);
- 
- font-family: var(--font-family-primary);
- font-size: var(--font-size-md);
- font-style: normal;
- font-weight: 400;
- line-height: var(--line-height-body-md);
-}
-
-.form-card {
-  /* center the inner card */
-  max-width: 100%;
-  width: 100%;
-  flex: 1 1 auto;
-  background-color: transparent;
-  padding: 8px 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.create-form {
-  margin-bottom: 10px;
-}
-
-.create-form label {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--color-neutral-1400);
-  font-family: var(--font-family-primary);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.create-form input[type="text"] {
-  width: 100%;
-  height: 36px;
-  padding: 6px 10px;
-  font-size: 13px;
-  border-radius: 4px;
-  border: 1px solid var(--color-neutral-200);
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-1400);
-  font-family: var(--font-family-primary);
-  transition: border-color 0.2s;
-}
-
-.create-form input[type="text"]:focus {
-  outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
-}
-
-
-.create-form textarea {
-  width: 100%;
-  min-height: 36px;
-  padding: 6px 10px;
-  font-size: 13px;
-  border-radius: 4px;
-  border: 1px solid var(--color-neutral-200);
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-1400);
-  font-family: var(--font-family-primary);
-  resize: vertical;
-  line-height: 1.4;
-  transition: border-color 0.2s;
-}
-
-.create-form textarea:focus {
-  outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
-}
-.form-row select {
-  width: 100%;
-  height: 36px;
-  padding: 0 10px;
-  font-size: 13px;
-  border-radius: 4px;
-  border: 1px solid var(--color-neutral-200);
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-1400);
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 16px;
-  padding-right: 32px;
-
+  /* body/md/reg */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md);
+  line-height: var(--line-height-body-md); /* 142.857% */
 }
 
-textarea {
-  height: 60px;
-  width: 100%;
-  padding: 8px 12px;
-  font-size: var(--font-size-md);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-neutral-200);
-  background-color: var(--color-neutral-100);
-  resize: none;
-  color: var(--color-neutral-1400);
+/* States */
+/* .np-step.active{
+   border:1px solid var(--color-neutral-300); 
+   border-radius: var(--border-radius-sm);
+    } */
+.met-np-step.completed .met-np-step__connector{ background-color: var(--color-primary-800); }
 
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
-}
+.met-np-step.completed .met-np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
+.met-np-step.completed .met-np-step__icon svg{ visibility:hidden; }
+.met-np-step.active .met-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
+.met-np-step.active .met-np-step__connector{ background-color: var(--color-primary-800); }
+.met-np-step.active .met-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
 
-.forms-groups {
-  flex: 1 1 45%;
-  min-width: 200px;
-  margin-bottom: 0.25rem;
-}
+.met-np-step.active .met-np-step__title{ color: var(--color-neutral-1700);
 
-.button-group {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 30px;
-}
-
-.back {
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  
-  display: flex;
-  width: 140px;
-  padding: 8px 20px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  height:40px;
-  color: var(--color-primary-800);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md); 
-background-color: var(--color-primary-000);
-}
-
-.save-next {
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  
-  display: flex;
-  width: 164px;
-  padding: 8px 20px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  height:40px;
-  color: var(--color-neutral-white);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md); 
-background-color: var(--color-primary-800);
-}
-
-
-
-.delete-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(2px);
-}
-
-.delete-modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  width: 512px;
-  height: 212px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.delete-modal-header {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.delete-modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #151312;
-  margin: 0;
-}
-
-.delete-modal-body {
-  margin-bottom: 24px;
-  width: 512px;
-  height: 212px;
-
-}
-
-.delete-modal-body p {
-  color: var(--color-neutral-1000);
+  /* body/md/med */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-lg);
-  text-align: center;
-}
-
-.delete-modal-body h5 {
-  color: var(--color-neutral-1700);
-  text-align: center;
-
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-h5);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-heading-h5);
-
-}
-
-.warning-text {
-  color: #dc3545;
   font-weight: 500;
-  margin-top: 8px;
-  font-size: 14px;
+  line-height: var(--line-height-body-lg); /* 150% */
 }
 
-.delete-modal-footer {
+
+/* ===== Main area ===== */
+.met-np-main { 
+  border-radius: var(--border-radius-sm); 
+  position: relative; 
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 24px);
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding-bottom: var(--np-gap-bottom);
+}
+
+/* Make inner area a column so footer can stick to bottom */
+.met-np-main__inner {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.met-np-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.met-np-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 15px;
+  gap: 16px;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+}
+.met-np-form-section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 15px;
+}
+
+/* Section title above a full-bleed faint line */
+.met-np-section-header{
+  position:relative;
+  margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
+  padding:0 24px;   
+ 
+}
+.met-np-section-title{
+  color: var(--color-neutral-800);
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h6);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-heading-h6);
+text-transform: uppercase;
+}
+.met-np-section-header::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-5px;
+  height:1px;
+  background:var(--color-neutral-300);
+}
+
+/* Footer actions on a full-bleed line */
+.met-np-form-footer {
+  margin: 0 -24px;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between; /* Space between back and next buttons */
+  align-items: center;
+  border-top: 1px solid var(--color-neutral-300);
+  margin-top: auto;
+  margin-bottom: 34px;
+}
+
+.met-np-btn-group { 
   display: flex;
   gap: 12px;
-  justify-content: flex-end;
 }
 
-.delete-modal-cancel,
-.delete-modal-confirm {
-  padding: 10px 75px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
+/* Back button group - align to left */
+.met-np-btn-group--back {
+  margin-right: auto;
+}
+
+/* Next button group - align to right */
+.met-np-btn-group--next {
+  margin-left: auto;
+}
+
+/* Ensure the next button is on the right */
+.met-np-form-footer > .met-np-btn-group:last-child {
+  margin-left: auto;
+}
+/* Base Button Styles */
+/* Base button styles with no flash */
+.met-np-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  outline: none;
+  height: 40px;
+  padding: 8px 20px;
+  font-family: var(--type-font-family-primary);
+  font-size: var(--font-size-md);
   font-weight: 500;
+  line-height: var(--line-height-body-md);
+  border-radius: var(--border-radius-sm);
+  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 144px;
+  text-align: center;
 }
 
 
 
-.delete-modal-cancel {
-  width: 222px;
-  height: 40px;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-neutral-600);
-  color: var(--color-neutral-800);
+/* Active state with no transform */
+.met-np-btn:active {
+  transform: none !important;
+  transition: none !important;
+}
 
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-lg);
+.met-np-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.met-np-btn--primary { 
+  background-color: var(--color-primary-700);
+  color: white;
+}
+
+.met-np-btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-800);
+}
+
+.met-np-btn--primary:active:not(:disabled) {
+  background-color: var(--color-primary-900);
+}
+
+.met-np-btn--primary:disabled {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+}
+
+/* Ghost Button */
+.met-np-btn--ghost { 
+  background-color: var(--color-primary-000);
+  border: 1px solid var(--color-neutral-400);
+  color: var(--color-primary-800);
+}
+
+.met-np-btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-500);
+}
+
+.met-np-btn--ghost:active:not(:disabled) {
+  background-color: var(--color-neutral-200);
+}
+
+.met-np-btn--ghost:disabled {
+  background-color: transparent;
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-400);
+}
+
+/* responsive */
+@media (max-width: 1200px){
+  :root{ --np-gap-left:72px; --np-gap-right:72px; }
+}
+@media (max-width: 900px){
+  :root{ --np-gap-left:48px; --np-gap-right:48px; }
+}
+@media (max-width: 640px){
+  :root{
+    --np-gap-top:24px; --np-gap-bottom:15px;
+    --np-gap-left:16px; --np-gap-right:16px;
+    --np-rail-w:100%;
+  }
+  .met-np-grid{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .met-np-form{ gap:12px; }
 }
 
 
-.delete-modal-confirm {
-  width: 222px;
-  height: 40px;
-  border-radius: var(--border-radius-sm);
-  background-color: var(--color-error-400);
-  color: var(--color-neutral-white);
-
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--line-height-body-lg);
+/* --- tuneable sizes so math stays correct --- */
+:root{
+  --np-step-icon: 24px;      /* circle size */
+  --np-steps-pl: 16px;       /* left padding on .np-steps */
+  --np-conn-w: 2px;          /* SVG line width */
 }
 
-.delete-modal-confirm:hover {
-  background-color: #c22;
+/* Steps container (keep your existing look) */
+.met-np-steps{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-left: var(--np-steps-pl);
+  background-color: #f8f9fb;
+}
+
+/* Remove any old line rules if present */
+.met-np-steps::before,
+.met-np-step:not(:last-child)::after { background: none; }
+
+/* Vertical line is now handled by individual step connectors in JSX */
+
+/* Step row (keep your existing styles—just ensure the icon uses the same size) */
+.met-np-step{
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px 10px 0;
+  background-color: #f8f9fb;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all .2s ease;
+  z-index: 1;
+}
+
+.met-np-step__icon{
+  width: var(--np-step-icon);
+  height: var(--np-step-icon);
+  border-radius: 50%;
+  flex-shrink: 0;
 }

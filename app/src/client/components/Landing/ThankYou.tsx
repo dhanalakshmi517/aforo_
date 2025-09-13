@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./ThankYou.css";
 import visual from './visual.svg';
-import aforoWordmark from './logoaforo.svg';
+import SigninLogo from './signin.svg';
 import Footer from './Footer';
 
 const ThankYou: React.FC = () => {
@@ -11,25 +11,30 @@ const ThankYou: React.FC = () => {
       {/* Navbar */}
       <header className="navbar">
         <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="49" height="49" viewBox="0 0 49 49" fill="none">
-            <path d="M15.5193 16.6599C19.5627 9.65657 21.5844 6.15488 24.6169 6.15488C27.6495 6.15488 29.6712 9.65657 33.7146 16.6599L36.0838 20.7635C40.1272 27.7669 42.1489 31.2686 40.6326 33.8948C39.1163 36.5211 35.0729 36.5211 26.9861 36.5211H22.2477C14.1609 36.5211 10.1175 36.5211 8.60126 33.8948C7.08498 31.2686 9.10668 27.7669 13.1501 20.7635L15.5193 16.6599Z" fill="#2B7194" />
-            <g style={{ mixBlendMode: 'overlay' }}>
-              <path d="M18.5115 11.7605C16.3463 15.2249 14.1811 18.6892 12.0159 22.1535C12.3432 22.2829 12.6672 22.4214 13.0008 22.5773C16.0509 23.927 18.9823 26.5938 23.4574 29.1405C25.6723 30.3768 28.8584 31.3918 31.7915 30.8828C34.7161 30.4123 36.8659 29.0163 38.6721 27.5825C39.0747 27.2581 39.4405 26.9392 39.8299 26.5891C38.9514 25.334 38.0728 24.079 37.1943 22.8239C36.7982 23.023 36.4328 23.1879 36.0523 23.3486C34.3474 24.0766 32.6531 24.4272 31.4309 24.1901C30.2208 23.9578 29.3728 23.321 28.2405 22.2037C25.9975 19.9555 23.574 16.1893 19.8169 12.8558C19.3953 12.4824 18.9673 12.1208 18.5115 11.7605Z" fill="url(#paint0_linear_5076_290)" />
-            </g>
-            <defs>
-              <linearGradient id="paint0_linear_5076_290" x1="12.6899" y1="5.82884" x2="33.1529" y2="29.3558" gradientUnits="userSpaceOnUse">
-                <stop stopColor="white" />
-                <stop offset="1" stopColor="#989898" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <img src={aforoWordmark} alt="Aforo" className="logo-text" height={24} />
+        <svg xmlns="http://www.w3.org/2000/svg" width="41" height="37" viewBox="0 0 41 37" fill="none">
+  <path d="M18.7663 0.845831C16.9507 1.36458 13.9031 5.81715 12.6062 7.9786C16.4968 10.2481 20.0632 15.7598 23.6296 19.3262C27.196 22.8926 28.4928 22.5683 30.4381 22.5683C31.9944 22.5683 34.5449 21.2715 35.6256 20.623C33.6803 17.1647 29.1413 9.27546 26.5475 5.38486C23.3054 0.521615 21.0359 0.197398 18.7663 0.845831Z" fill="url(#paint0_linear_7865_40146)"/>
+  <path d="M39.8404 29.7011C39.5811 28.6636 37.4355 24.0267 36.8951 22.8379C35.3389 24.3941 33.7884 25.8639 32.7077 26.4042C24.9265 30.2948 17.4695 24.7832 12.9305 21.2168C9.29923 18.3637 7.87841 17.2181 7.1219 17.002C6.68962 17.7585 4.30629 22.309 2.23131 26.4589C-0.362425 31.6464 0.934441 33.9159 3.20396 35.2128C5.47347 36.5097 10.3367 36.8339 19.0906 36.8339H19.0906C27.8444 36.8339 33.3561 36.8339 36.9225 35.537C40.4889 34.2401 40.1646 30.998 39.8404 29.7011Z" fill="url(#paint1_linear_7865_40146)"/>
+  <defs>
+    <linearGradient id="paint0_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#00365A"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#00365A"/>
+    </linearGradient>
+  </defs>
+</svg>
+          <img src={SigninLogo} alt="Aforo" className="logo-text" height={24} />
         </div>
         <nav className="nav-links">
           <Link to="/">Home</Link>
+          <Link to="/about">About Us</Link>
           <Link to="/contact-sales">Contact Sales</Link>
+          <Link to="/pricing">Pricing</Link>
+          <Link to="/blog">Built for </Link>
+          <Link to="/careers">Resources</Link>
           <Link to="/signin" className="login-btn">Sign in</Link>
-          <Link to="/contact-sales" className="get-started-btn">Get Started</Link>
         </nav>
       </header>
 

@@ -1,0 +1,30 @@
+@import "../Variables/Variables.css";
+/* Default-only tile look (no hover/active/focus states) */
+.af-iconbtn {
+   
+  
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    background: var(--color-neutral-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-sm);
+  
+    /* soft elevation like your screenshot */
+    
+       
+  
+    cursor: pointer;                /* optional; remove if purely decorative */
+    -webkit-tap-highlight-color: transparent;
+    outline: none;                  /* no visible focus style since you asked “default only” */
+  }
+  
+  /* sizes (match your search/filter tiles) */
+  .af-iconbtn--sm { width: 34px; height: 34px; border-radius: 10px; }
+  .af-iconbtn--md { width: 40px; height: 40px; border-radius: 12px; }
+  .af-iconbtn--lg { width: 46px; height: 46px; border-radius: 14px; }
+  
+  .af-iconbtn__icon { line-height: 0; display: inline-flex; }
+  .af-iconbtn__icon svg { display: block; }
+  

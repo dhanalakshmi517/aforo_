@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import './ConfigurationTab.css';
-import { SelectField, InputField, TextareaField } from '../../Components/InputFields';
+import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
 
 /* ------------------------------------
  * Configuration field definitions
@@ -314,9 +314,23 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             'X-Organization-Id': authData?.organizationId?.toString() || ''
           };
 
-          const apiEndpoint = productType.replace(/_/g, '-').toLowerCase();
+          const endpointMap: Record<string,string> = {
+            API: 'api',
+            FlatFile: 'flatfile',
+            SQLResult: 'sql-result',
+            LLMToken: 'llm-token',
+          };
+          const apiEndpoint = endpointMap[productType as keyof typeof endpointMap] || productType.replace(/_/g,'-').toLowerCase();
           console.debug('Fetching config', productId, apiEndpoint);
-          const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}`, { headers });
+          let url = `http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}`;
+          let opts: RequestInit = { headers };
+          if (productType === ProductTypeEnum.SQLResult) {
+            // Ask backend to return only metadata / small payload
+            url += '?meta=1';
+          } else if (productType === ProductTypeEnum.LLMToken) {
+            url += '?meta=1'; // lightweight metadata only
+          }
+          const res = await fetch(url, opts);
           
           if (res.ok) {
             console.log('Fetched configuration details:', productId, productType);
@@ -419,6 +433,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 type="checkbox"
                 label={labelText}
                 checked={fieldValue === 'true'}
+                value={fieldValue}
                 onChange={(val: string) => {
                   const newValue = val === 'true' ? 'false' : 'true';
                   handleInputChange(field.label)(newValue);

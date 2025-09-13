@@ -1,23 +1,30 @@
+@import "../Variables/Variables.css";
 .review-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   max-width: 700px;
   margin: 0 auto;
   padding: 16px;
-  background: white;
+  background: var(--color-neutral-100);
 }
 
 .review-box {
-  background-color: #fafafa;
+  background-color: var(--color-neutral-100);
   border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border:1px solid var(--color-neutral-300);
 }
 
 .review-heading {
-  font-size: 14px;
-  font-weight: 600;
-  color: #555;
+  color: var(--color-neutral-1400);
+
+  /* body/md/thin */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 300;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
   margin-bottom: 12px;
 }
 
@@ -31,10 +38,26 @@
 
 .review-row:last-child {
   border-bottom: none;
+  justify-self: end;
+  margin-right: 30px; /* right column right-aligned */
+  color: var(--color-neutral-1400);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md); /* 142.857% */
 }
 
 .review-footer {
-  font-size: 12px;
-  color: #888;
+  color: var(--color-neutral-1400);
+
+  /* body/xs/thin */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-xs);
+  font-style: normal;
+  font-weight: 300;
+  line-height: var(--line-height-body-xs); /* 125% */
   padding-left: 4px;
 }

@@ -7,8 +7,39 @@ import { ProductType, EditProductFormProps } from './EditProduct/types';
 import CreateProduct from './NewProducts/NewProduct';
 import './Products.css';
 import { getProducts, createProduct as createProductApi, deleteProduct as deleteProductApi } from './api';
+import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+
+// Function to get a random background color for metric cards
+const getRandomBackgroundColor = (index: number) => {
+  const colors = [
+    'rgba(234, 212, 174, 0.15)', // Border blue
+    'rgba(174, 234, 196, 0.15)', // Border green
+    'rgba(175, 233, 227, 0.15)', // Border green
+    'rgba(175, 233, 227, 0.15)', // Border purple
+    'rgba(235, 220, 173, 0.15)', // Border amber
+    'rgba(230, 200, 178, 0.15)',
+    'rgba(252, 165, 165, 0.2)'
+  ];
+  return colors[index % colors.length];
+};
+
+// Function to get a random border color for metric cards
+const getRandomBorderColor = (index: number) => {
+  const colors = [
+   'rgba(234, 212, 174, 0.15)', // Border blue
+    'rgba(174, 234, 196, 0.15)', // Border green
+    'rgba(175, 233, 227, 0.15)', // Border green
+    'rgba(175, 233, 227, 0.15)', // Border purple
+    'rgba(235, 220, 173, 0.15)', // Border amber
+    'rgba(230, 200, 178, 0.15)',
+    'rgba(252, 165, 165, 0.2)'
+  ];
+  return colors[index % colors.length];
+};
 import styles from './Products.module.css';
+import PageToolbar from '../componenetsss/PageToolBar';
 import EmptyBox from './Componenets/empty.svg';
+import IconButton from '../componenetsss/IconButton';
 
 // Icon components
 const SuccessIcon = () => (
@@ -27,15 +58,20 @@ interface NotificationProps {
   message: string;
   type: 'success' | 'error';
   productName: string;
+  onClose: () => void;
 }
-
-const Notification: React.FC<NotificationProps> = ({ message, type, productName }: NotificationProps) => {
+ const Notification: React.FC<NotificationProps> = ({ message, type, productName, onClose }: NotificationProps) => {
   const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
   return (
     <div className={`notification ${type === 'error' ? 'error' : ''}`}>
       <div className="notification-icon">
         <Icon />
       </div>
+      <button className="notification-close" onClick={onClose} aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M12 4L4 12M4 4L12 12" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
       <div className="notification-text">
         <h5>{type === 'success' ? 'Product Deleted' : 'Failed to Delete Product'}</h5>
         <p className="notification-details">
@@ -74,11 +110,19 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onCancel, onConfirm, isDeleti
 interface Product {
   productId: string;
   productName: string;
+  productDescription?: string;
   productType: string;
   billable?: boolean;
   status: string;
   category: string;
-  createdOn?: string; 
+  createdOn?: string;
+  billableMetrics?: any[];
+  metrics?: Array<{
+    metricName: string;
+    unitOfMeasure: string;
+    aggregationFunction: string;
+    aggregationWindow: string;
+  }>;
 }
 
 interface ProductsProps {
@@ -95,6 +139,11 @@ interface NotificationState {
 }
 
 export default function Products({ showNewProductForm, setShowNewProductForm }: ProductsProps) {
+  // Prevent browser scroll for Products page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
   const location = useLocation();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +154,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [deleteProductName, setDeleteProductName] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [productQuery, setProductQuery] = useState<string>('');
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
   
@@ -196,7 +245,17 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     const fetchAndSetProducts = async () => {
       try {
         const list = await getProducts();
-        setProducts(list);
+        console.log('Products payload:', list);
+        // normalize billableMetrics -> metrics for UI
+        const normalized = list.map((p: any) => ({
+          ...p,
+          metrics: (p.billableMetrics || []).map((m: any) => ({
+            metricName: m.metricName || '',
+            unitOfMeasure: m.unitOfMeasure || ''
+          }))
+        }));
+        setProducts(normalized as any);
+        setError(null);
         setError(null);
       } catch (err) {
         setError('Failed to load products');
@@ -225,31 +284,29 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     }
   };
 
-  const confirmDelete = async () => {
-    if (deleteProductId === null) return;
-
+  const handleDeleteConfirm = async () => {
+    if (!deleteProductId) return;
+    
     setIsDeleting(true);
     try {
       await deleteProductApi(deleteProductId);
-
       setProducts(products.filter(p => p.productId !== deleteProductId));
+      setShowDeleteModal(false);
+      setDeleteProductId(null);
       setNotification({
         type: 'success',
-        message: 'Product deleted successfully.',
+        message: 'Product deleted successfully',
         productName: deleteProductName
       });
     } catch (err) {
-      console.error(err);
+      console.error('Failed to delete product:', err);
       setNotification({
         type: 'error',
-        message: 'Failed to delete product. Please try again.',
+        message: 'Failed to delete product',
         productName: deleteProductName
       });
     } finally {
       setIsDeleting(false);
-      setShowDeleteModal(false);
-      setDeleteProductId(null);
-      setDeleteProductName('');
     }
   };
 
@@ -266,6 +323,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             type={notification.type}
             message={notification.message}
             productName={notification.productName}
+            onClose={() => setNotification(null)}
           />
         </div>
       )}
@@ -273,10 +331,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       <div>
         {/* {renderBreadcrumb()} */}
         {showDeleteModal && (
-          <DeleteModal 
+          <ConfirmDeleteModal
+            isOpen={showDeleteModal}
+            productName={deleteProductName}
+            onConfirm={handleDeleteConfirm}
             onCancel={() => setShowDeleteModal(false)}
-            onConfirm={confirmDelete}
-            isDeleting={isDeleting}
           />
         )}
 
@@ -305,57 +364,20 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           {/* Main Content */}
           {!showCreateProduct && !isEditFormOpen && (
             <div className="products-main-content">
-              <div className="products-header" style={{ marginTop: '4px' }}>
-                <h2>Products</h2>
-                <div className="products-actions">
-                  <div className="products-search">
-                     {/* <svg
-                      className="search-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                    >
-                      <path
-                        d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      /> */}
-                    {/* </svg>  */}
-                    <input
-                      type="search"
-                      placeholder="Search for Products..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="products-search-input"
-                      disabled={products.length === 0}
-                    />
-                  </div>
-                  <button className={styles.samButton}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M2.5 5H17.5M5.83333 10H14.1667M8.33333 15H11.6667" stroke="#706C72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </button>
-                  {products.length > 0 && (
-                    <button
-                      onClick={() => {
-                        setShowCreateProduct(true);
-                        setShowNewProductForm(true);
-                      }}
-                      className={styles.newButton}
-                    >
-                      + New Product
-                    </button>
-                  )}
-                </div>
+              <div className="products-header" style={{ marginTop: 4 }}>
+                <PageToolbar
+                title="Products"
+                searchValue={productQuery}
+                onSearchChange={setProductQuery}
+                searchDisabled={products.length === 0}
+                showFilter={true}
+                primaryButton={{ text: 'New Product', onClick: () => { setShowCreateProduct(true); setShowNewProductForm(true); } }}
+                rightIcons={[{ type: 'bell' }, { type: 'settings' }]}
+                />
               </div>
-
               {/* Products Table */}
               <div className="products-table-wrapper">
-                  <table className="products-table">
+                <table className="products-table">
                   <thead>
                     <tr>
                       <th>Product Name </th>
@@ -369,33 +391,66 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   <tbody>
                     {products
                       .filter(product => 
-                        product?.productName?.toLowerCase()?.includes(searchTerm?.toLowerCase() || '')
+                        product?.productName?.toLowerCase()?.includes(productQuery?.toLowerCase() || '')
                       )
                       .map((product) => (
                       <tr key={product.productId}>
-                        <td>{product.productName}</td>
+                        <td>
+  <div className="product-name">
+    {product.productName}
+  </div>
+</td>
                                                 <td>
                           <span className={`product-type-badge--${product.productType?.toLowerCase() || 'default'}`}>
                             {getProductTypeName(product.productType || '')}
                           </span>
                         </td>
-                        <td>{/* Billable Metrics - Add content here if needed */}</td>
+                        <td className="metrics-cell">
+                          <div className="metrics-wrapper">
+                            {product.metrics && product.metrics.length > 0 ? (
+                              product.metrics.map((metric, index) => (
+                                <div key={index} className="metric-item" style={{ backgroundColor: getRandomBackgroundColor(index) }}>
+                                  <div className="metric-content">
+                                    <div className="metric-uom">{metric.unitOfMeasure}</div>
+                                    <div className="metric-name">{metric.metricName}</div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <span className="no-metrics">-</span>
+                            )}
+                          </div>
+                        </td>
                         <td>{/* Status badge */}
                         <span className={`product-status-badge status-${product.status.toLowerCase()}`}>{product.status.charAt(0) + product.status.slice(1).toLowerCase()}</span></td>
                         <td>{product.createdOn ?? 'N/A'}</td>
                         <td className="actions-cell">
                           <div className="product-action-buttons">
-                            <button 
-                              className="product-edit-button"
-                              onClick={() => {
-                                setEditingProduct(product);
-                                setIsEditFormOpen(true);
-                              }}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-  <path d="M7.00031 12.3334H13.0003M9.91764 1.41473C10.183 1.14934 10.543 1.00024 10.9183 1.00024C11.2936 1.00024 11.6536 1.14934 11.919 1.41473C12.1844 1.68013 12.3335 2.04008 12.3335 2.4154C12.3335 2.79072 12.1844 3.15067 11.919 3.41607L3.91231 11.4234C3.75371 11.582 3.55766 11.698 3.34231 11.7607L1.42764 12.3194C1.37028 12.3361 1.30947 12.3371 1.25158 12.3223C1.1937 12.3075 1.14086 12.2774 1.09861 12.2351C1.05635 12.1929 1.02624 12.14 1.01141 12.0821C0.996575 12.0242 0.997578 11.9634 1.01431 11.9061L1.57298 9.9914C1.63579 9.77629 1.75181 9.58048 1.91031 9.42207L9.91764 1.41473Z" stroke="#1D7AFC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-                            </button>
+                            {product.status.toLowerCase() === 'draft' ? (
+                              <button 
+                                className="product-view-button"
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                  setIsEditFormOpen(true);
+                                }}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                  <path d="M7.99967 1.33325C11.6816 1.33325 14.6663 4.31802 14.6663 7.99992C14.6663 11.6818 11.6816 14.6666 7.99967 14.6666C4.31778 14.6666 1.33301 11.6818 1.33301 7.99992H5.33301H10.6663M10.6663 7.99992L7.99967 10.6666M10.6663 7.99992L7.99967 5.33325" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            ) : (
+                              <button 
+                                className="product-edit-button"
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                  setIsEditFormOpen(true);
+                                }}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                  <path d="M7.00031 12.3334H13.0003M9.91764 1.41473C10.183 1.14934 10.543 1.00024 10.9183 1.00024C11.2936 1.00024 11.6536 1.14934 11.919 1.41473C12.1844 1.68013 12.3335 2.04008 12.3335 2.4154C12.3335 2.79072 12.1844 3.15067 11.919 3.41607L3.91231 11.4234C3.75371 11.582 3.55766 11.698 3.34231 11.7607L1.42764 12.3194C1.37028 12.3361 1.30947 12.3371 1.25158 12.3223C1.1937 12.3075 1.14086 12.2774 1.09861 12.2351C1.05635 12.1929 1.02624 12.140 1.01141 12.0821C0.996575 12.0242 0.997578 11.9634 1.01431 11.9061L1.57298 9.9914C1.63579 9.77629 1.75181 9.58048 1.91031 9.42207L9.91764 1.41473Z" stroke="#1D7AFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            )}
                             <button 
                               className="product-delete-button"
                               onClick={() => {
@@ -435,9 +490,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     )}
                   </tbody>
                 </table>
-                </div>
+              </div>
             </div>
-            
           )}
       </div>
     </>

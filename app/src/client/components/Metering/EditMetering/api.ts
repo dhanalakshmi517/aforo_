@@ -1,5 +1,6 @@
 // API functions specific to EditMetering module
 import type { Product } from '../api';
+import { getAuthHeaders } from '../../../utils/auth';
 export type { Product };
 // Provides helper to fetch a single billable metric by ID so that EditMetrics
 // can pre-populate its form.
@@ -36,7 +37,7 @@ export async function getBillableMetricById(
   try {
     const url = `${METRICS_BASE_URL}/billable-metrics/${metricId}`;
     console.debug('GET billable metric', url);
-    const res = await fetch(url);
+    const res = await fetch(url, { headers: getAuthHeaders() });
     if (!res.ok) {
       throw new Error(`Error ${res.status}`);
     }
@@ -57,7 +58,8 @@ export async function updateBillableMetric(
   const url = `${METRICS_BASE_URL}/billable-metrics/${metricId}`;
   const requestOptions = {
     method: 'PUT',
-    headers: { 
+    headers: {
+      ...getAuthHeaders(),
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
@@ -151,7 +153,7 @@ export async function updateBillableMetric(
 
 export async function getProducts(): Promise<Product[]> {
   try {
-    const response = await fetch(`${PRODUCTS_BASE_URL}/products`);
+    const response = await fetch(`${PRODUCTS_BASE_URL}/products`, { headers: getAuthHeaders() });
     if (!response.ok) {
       throw new Error(`API error with status ${response.status}`);
     }

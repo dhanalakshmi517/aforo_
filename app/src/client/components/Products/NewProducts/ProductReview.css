@@ -12,41 +12,48 @@
   gap: 16px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 700px) {
   .pr-grid {
     grid-template-columns: 1fr; /* always single column */
   }}
 /* Card */
 .pr-card {
+  width: 100%;
+  max-width: 585px;
   background: var(--color-neutral-200);
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
+  margin: 0; /* Remove auto margin that was centering it */
 }
 
 .pr-card__header {
-  padding: 10px 14px;
-background-color: var(--color-neutral-200);  border-bottom: 1px solid var(--color-neutral-300);
+  padding: 8px 12px;
+  background-color: var(--color-neutral-200);  
+  border-bottom: 0.6px solid var(--color-neutral-300);
 }
 
 .pr-card__title {
-  margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.6px;
   color: var(--color-neutral-1400);
-  font-weight: 700;
+
+  /* body/md/thin */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 300;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* Rows */
 .pr-card__body {
-  padding: 6px 0; /* rows supply their own padding */
+  padding: 4px 0; /* Reduced vertical padding */
 }
 
 .pr-row {
   display: grid;
-  grid-template-columns: 1.4fr 1fr; /* label : value ratio to mimic screenshot */
+  grid-template-columns: 1fr 2fr; /* Adjusted ratio to give more space to values */
   align-items: center;
-  padding: 10px 14px;
+  padding: 6px 12px; /* Reduced padding */
   border-bottom: 1px dashed var(--color-neutral-300);
 }
 
@@ -68,14 +75,15 @@ background-color: var(--color-neutral-200);  border-bottom: 1px solid var(--colo
 }
 
 .pr-row__value {
-  justify-self: end; /* right column right-aligned */
+  justify-self: end;
+  margin-right: 30px; /* right column right-aligned */
   color: var(--color-neutral-1400);
 
   /* body/md/reg */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: var(--line-height-body-md); /* 142.857% */}
 
 /* Subtle rounding on the outer card only; rows are flush like the reference */

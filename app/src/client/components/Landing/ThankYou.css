@@ -20,6 +20,7 @@
   }
   
   .thankyou h1 {
+  white-space: nowrap;
  
 /* heading/semibold/h1 */
 font-family: var(--font-family-primary);
@@ -29,7 +30,7 @@ font-weight: 800;
 line-height: 64px; /* 133.333% */
 margin-bottom: 12px;
 
-background: var(--gradient-blue, linear-gradient(180deg, #286584 0%, var(--primary-color-400, #5FB7E2) 100%));
+background: var(--gradient-blue, linear-gradient(260deg, #286584 27.05%, var(--primary-color-400, #5FB7E2) 117.36%));
 background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;

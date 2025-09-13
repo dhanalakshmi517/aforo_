@@ -1,16 +1,11 @@
 @import "../Variables/Variables.css";
 
-/* use your provided color specs */
-:root{
-  --surface-sidebar: #004069;   /* Variables.surfaceSidebar */
-  --border-border-1: #E9E9EE;   /* Variables.borderBorder1 */
-}
-
 .sidebar {
   width: 240px;
   height: 100vh;
-  background-color: var(--surface-sidebar);
-  border-right: 1px solid var(--border-border-1);
+  /* surface color defined in global variables */
+  background-color: var(--color-primary-900);
+  border-right: 0.4px solid var(--color-neutral-200);
 
   position: fixed;
   left: 0;
@@ -26,8 +21,9 @@
   display: flex;
   justify-content: left;
   align-items: center;
-  margin-bottom: 20px; 
+  margin-bottom: 32px; 
   margin-top: 22px;
+  margin-left: 15px;
 }
 
 .nav {
@@ -52,13 +48,15 @@
 .nav ul { list-style: none; padding: 0; margin: 0; }
 
 .nav-item {
+  height: 44px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 7px;
+  /* spacing between items should be 2px as per design */
+  margin-bottom: 2px;
   margin-right: 16px;
   margin-left: 16px;
 }
@@ -74,13 +72,14 @@
 }
 
 .nav-item:hover {
-  background-color: rgba(255,255,255,0.06);
+  background-color:var(--color-primary-800);
   border-radius: var(--border-radius-sm);
   color: var(--color-neutral-1000);
   font-weight: 600;
 }
 
 .nav-item.active {
+  height: 44px;
   border-radius: var(--border-radius-sm);
   position: relative;
   z-index: 1;
@@ -109,14 +108,20 @@
   justify-content: center;
   margin-right: 0px;
   color: var(--color-neutral-100);
-  margin-left: -7px;
 }
 
-.nav-item.active .icon-wrapper svg path { stroke-width: 1.5; }
+.nav-item .icon-wrapper svg path {
+  stroke-width: 1;
+}
+
+.nav-item.active .icon-wrapper svg path {
+  stroke-width: 1.5;
+}
 
 .tab-name {
   color: var(--color-neutral-100);
   font-family: var(--font-family-primary);
+  /* reduce text size to match design */
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;

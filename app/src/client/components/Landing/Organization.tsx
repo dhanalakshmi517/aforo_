@@ -3,7 +3,7 @@ import { createOrganization, fetchCountries, type OrganizationPayload } from "./
 import { useNavigate } from "react-router-dom";
 import CountrySelector from "../Common/CountrySelector";
 import "./Organization.css";
-import aforoWordmark from "./logoaforo.svg";
+import SigninLogo from "./signin.svg";
 
 interface Country {
   code: string;
@@ -286,11 +286,21 @@ const Organization: React.FC = () => {
         {/* Left copy */}
         <section className="org-copy">
           <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="47" height="43" viewBox="0 0 47 43" fill="none">
-              <path d="M21.9507 0.678484C19.8152 1.2886 16.2308 6.52545 14.7055 9.06761C19.2814 11.7369 23.476 18.2194 27.6705 22.4139C31.8651 26.6085 33.3904 26.2272 35.6783 26.2272C37.5087 26.2272 40.5084 24.7019 41.7795 23.9392C39.4916 19.8718 34.153 10.5929 31.1024 6.01702C27.2892 0.29716 24.6199 -0.0841636 21.9507 0.678484Z" fill="#1F3F50"/>
-              <path d="M46.7367 34.6163C46.4316 33.3961 45.0843 30.2946 44.4488 28.8964C42.6184 30.7268 39.6187 32.4555 38.3476 33.091C29.1958 37.6669 20.4254 31.1844 15.0868 26.9898C10.816 23.6342 7.96879 22.2868 7.07904 22.0326C6.5706 22.9224 4.94362 25.9221 2.50315 30.8031C-0.547436 36.9042 0.977859 39.5735 3.64712 41.0988C6.31639 42.6241 12.0362 43.0054 22.332 43.0054C32.6277 43.0054 39.1102 43.0054 43.3048 41.4801C47.4993 39.9548 47.118 36.1416 46.7367 34.6163Z" fill="#1F3F50"/>
-            </svg>
-            <img src={aforoWordmark} alt="Aforo" height={24} />
+          <svg xmlns="http://www.w3.org/2000/svg" width="41" height="37" viewBox="0 0 41 37" fill="none">
+  <path d="M18.7663 0.845831C16.9507 1.36458 13.9031 5.81715 12.6062 7.9786C16.4968 10.2481 20.0632 15.7598 23.6296 19.3262C27.196 22.8926 28.4928 22.5683 30.4381 22.5683C31.9944 22.5683 34.5449 21.2715 35.6256 20.623C33.6803 17.1647 29.1413 9.27546 26.5475 5.38486C23.3054 0.521615 21.0359 0.197398 18.7663 0.845831Z" fill="url(#paint0_linear_7865_40146)"/>
+  <path d="M39.8404 29.7011C39.5811 28.6636 37.4355 24.0267 36.8951 22.8379C35.3389 24.3941 33.7884 25.8639 32.7077 26.4042C24.9265 30.2948 17.4695 24.7832 12.9305 21.2168C9.29923 18.3637 7.87841 17.2181 7.1219 17.002C6.68962 17.7585 4.30629 22.309 2.23131 26.4589C-0.362425 31.6464 0.934441 33.9159 3.20396 35.2128C5.47347 36.5097 10.3367 36.8339 19.0906 36.8339H19.0906C27.8444 36.8339 33.3561 36.8339 36.9225 35.537C40.4889 34.2401 40.1646 30.998 39.8404 29.7011Z" fill="url(#paint1_linear_7865_40146)"/>
+  <defs>
+    <linearGradient id="paint0_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#00365A"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#00365A"/>
+    </linearGradient>
+  </defs>
+</svg>
+            <img src={SigninLogo} alt="Aforo" height={24} />
           </div>
           <h1 className="org-title">
             You Focus on the Product.
@@ -397,7 +407,7 @@ const Organization: React.FC = () => {
                     <option value="OTHER">Other</option>
                   </select>
                   {selectedRole === 'OTHER' && (
-                    <div className="other-role-input" style={{ marginTop: '8px', width: '100%' }}>
+                    <div className="org-field other-role-input" style={{ marginTop: '8px', width: '100%' }}>
                       <label htmlFor="otherRole" className="form-label">
                         Specify your role
                       </label>
@@ -461,16 +471,18 @@ const Organization: React.FC = () => {
                 )}
                 {errors.country && (<span className="error-msg">{errors.country}</span>)}
               </div>
-              <div className="org-field">
+              <div className="org-fields">
                 <label htmlFor="phone" className="form-label">Phone Number</label>
                 <div className="phone-input-container">
                   <div className="phone-input-wrapper">
                     <div className="country-code-display">
-                      {selectedCountry && (
+                      {selectedCountry ? (
                         <>
                           <span className={`fi fi-${selectedCountry.toLowerCase()}`} style={{marginRight: '8px'}}></span>
                           <span>{countries.find(c => c.code === selectedCountry)?.dialCode}</span>
                         </>
+                      ) : (
+                        <span className="dialcode-placeholder">+00</span>
                       )}
                     </div>
                     <input
@@ -519,13 +531,15 @@ const Organization: React.FC = () => {
                         }
                       }}
                       onKeyDown={(e) => {
-                        // Prevent backspace from deleting the country code and space
-                        const selectionStart = (e.target as HTMLInputElement).selectionStart || 0;
-                        const dialCode = selectedCountry ? 
-                          countries.find(c => c.code === selectedCountry)?.dialCode || '' : '';
-                        const dialCodeWithSpace = `${dialCode} `;
-                        
-                        if (e.key === 'Backspace' && selectionStart <= dialCodeWithSpace.length) {
+                        /*
+                          Protect the dial code displayed to the left of the input (rendered in a separate
+                          element) by preventing Backspace when the caret is at the very start (index 0).
+                          The input value itself does NOT include the dial code, so we should not compare
+                          against dialCode length here—doing so was blocking deletion of the first few
+                          user-typed digits.  
+                        */
+                        const selectionStart = (e.target as HTMLInputElement).selectionStart ?? 0;
+                        if (e.key === 'Backspace' && selectionStart === 0) {
                           e.preventDefault();
                         }
                       }}

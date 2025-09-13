@@ -1,460 +1,590 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { 
-  getProducts, 
-  Product, 
-  createBillableMetric, 
-  updateBillableMetric, 
-  BillableMetricPayload, 
-  BillableMetricDetails,
+import { useEffect, useState } from 'react';
+
+import TopBar from '../componenetsss/TopBar';
+import { InputField, TextareaField, SelectField } from '../componenetsss/Inputs';
+import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import SaveDraft from '../componenetsss/SaveDraft';
+
+import {
+  getProducts,
+  Product,
+  createBillableMetric,
+  updateBillableMetric,
+  BillableMetricPayload,
   finalizeBillableMetric
 } from './api';
+
 import UsageConditionForm from './UsageConditionForm';
 import AggregationFunctionSelect from './AggregationFunctionSelect';
 import AggregationWindowSelect from './AggregationWindowSelect';
-import './Usagemetric.css';
-import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 import Review from './Review';
 
-interface CreateUsageMetricProps {
-    onClose: () => void;
-}
+// Reuse the same CSS shell for np-* classes
+import './Usagemetric.css';
+
+type ActiveTab = 'metric' | 'conditions' | 'review';
 
 const steps = [
-    {
-        title: 'Define Metric & Aggregation',
-        desc: 'Give your metric a name, set its unit, and connect it to the product or event source it will measure.'
-    },
-    {
-        title: 'Usage Conditions',
-        desc: 'Define how usage is calculated — set thresholds, group data, and apply any rules needed for billing.'
-    },
-    {
-        title: 'Review & Confirm',
-        desc: 'Review your setup to make sure everything is correct before saving the metric.'
-    }
+  { id: 1, title: 'Define Metric & Aggregation', desc: 'Give your metric a name, set its unit, and connect it to the product or event source it will measure.' },
+  { id: 2, title: 'Usage Conditions',            desc: 'Define how usage is calculated — set thresholds, group data, and apply any rules needed for billing.' },
+  { id: 3, title: 'Review & Confirm',            desc: 'Review your setup to make sure everything is correct before saving the metric.' }
 ];
 
-const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }: CreateUsageMetricProps) => {
-    // form states
-    const [metricId, setMetricId] = useState<number | null>(null);
-    const [metricName, setMetricName] = useState('');
-    const [version, setVersion] = useState('');
-    const [unitOfMeasure, setUnitOfMeasure] = useState('');
-    const [description, setDescription] = useState('');
-    const [aggregationFunction, setAggregationFunction] = useState('');
-    const [aggregationWindow, setAggregationWindow] = useState('');
-    const [usageConditions, setUsageConditions] = useState<{ dimension: string; operator: string; value: string; }[]>([]);
-    const [billingCriteria, setBillingCriteria] = useState('');
-    const [currentStep, setCurrentStep] = useState(0);
-    const [showCancelModal, setShowCancelModal] = useState(false);
-    const [products, setProducts] = useState<Product[]>([]);
-    const [selectedProductId, setSelectedProductId] = useState<string>('');
-    const [selectedProductName, setSelectedProductName] = useState<string>('');
-    const [selectedProductType, setSelectedProductType] = useState<string>('');
+interface CreateUsageMetricProps { onClose: () => void; }
 
-    // Fetch products once on mount
-    useEffect(() => {
-        getProducts()
-            .then(setProducts)
-            .catch((err: unknown) => console.error('Failed to load products', err));
-    }, []);
+export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): JSX.Element {
+  // page class
+  useEffect(() => {
+    document.body.classList.add('create-product-page');
+    return () => document.body.classList.remove('create-product-page');
+  }, []);
 
-    const validateCurrentStep = (step: number): boolean => {
-        switch (step) {
-            case 0: // Step 1: Basic Info
-                if (!metricName.trim()) {
-                    alert('Please enter a Metric Name');
-                    return false;
-                }
-                if (!selectedProductId) {
-                    alert('Please select a Product');
-                    return false;
-                }
-                if (!unitOfMeasure) {
-                    alert('Please select a Unit of Measure');
-                    return false;
-                }
-                if (!aggregationFunction) {
-                    alert('Please select an Aggregation Function');
-                    return false;
-                }
-                return true;
-            
-            case 1: // Step 2: Usage Conditions
-                // Add any specific validation for usage conditions if needed
-                return true;
-                
-            case 2: // Step 3: Review
-                // Final validation before submission
-                if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !aggregationFunction) {
-                    alert('Please fill all required fields');
-                    return false;
-                }
-                return true;
-                
-            default:
-                return true;
+  // UI state mirroring NewProduct
+  const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('metric');
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // form states (unchanged semantics)
+  const [metricId, setMetricId] = useState<number | null>(null);
+  const [metricName, setMetricName] = useState('');
+  const [version, setVersion] = useState('');
+  const [unitOfMeasure, setUnitOfMeasure] = useState('');
+  const [description, setDescription] = useState('');
+  const [aggregationFunction, setAggregationFunction] = useState('');
+  const [aggregationWindow, setAggregationWindow] = useState('');
+  const [usageConditions, setUsageConditions] = useState<{ dimension: string; operator: string; value: string; }[]>([]);
+  const [billingCriteria, setBillingCriteria] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [selectedProductName, setSelectedProductName] = useState<string>('');
+  const [selectedProductType, setSelectedProductType] = useState<string>('');
+
+  // simple field errors holder (aligned with NewProduct pattern)
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // load products
+  useEffect(() => {
+    getProducts()
+      .then(setProducts)
+      .catch((err) => console.error('Failed to load products', err));
+  }, []);
+
+  // previous values tracker (kept in case you use it later for diffs)
+  const [previousValues, setPreviousValues] = useState<Partial<BillableMetricPayload>>({});
+
+  const gotoStep = (index: number) => {
+    setCurrentStep(index);
+    // map step → tab
+    const map: ActiveTab[] = ['metric', 'conditions', 'review'];
+    setActiveTab(map[index] || 'metric');
+  };
+
+  const validateCurrentStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (step === 0) {
+      if (!metricName.trim()) newErrors.metricName = 'Metric name is required';
+      if (!selectedProductId) newErrors.product = 'Product is required';
+      if (!unitOfMeasure) newErrors.unitOfMeasure = 'Unit of Measure is required';
+      if (!aggregationFunction) newErrors.aggregationFunction = 'Aggregation Function is required';
+    if (!aggregationWindow) newErrors.aggregationWindow = 'Aggregation Window is required';
+    }
+    if (step === 2) {
+      if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !aggregationFunction) {
+        newErrors.form = 'Please fill all required fields';
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const clean = (obj:any)=>{
+    const out:any={};
+    Object.entries(obj).forEach(([k,v])=>{
+      if (v===undefined||v===null) return;
+      if (typeof v=== 'string' && v.trim()==='') return;
+      if (Array.isArray(v) && v.length===0) return;
+      out[k]=v;
+    });
+    return out;
+  };
+
+  const buildPayload = (isDraft: boolean) => {
+    const payload: any = {};
+    if (metricId) {
+      // PUT-like body with present values
+      payload.metricName = metricName ?? '';
+      if (selectedProductId) payload.productId = Number(selectedProductId);
+      payload.version = version ?? '';
+      payload.unitOfMeasure = unitOfMeasure ?? '';
+      payload.description = description ?? '';
+    if (billingCriteria) payload.billingCriteria = billingCriteria;
+    if (usageConditions.length) payload.usageConditions = usageConditions;
+      if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
+      if (aggregationWindow)  payload.aggregationWindow  = aggregationWindow;
+      return clean(payload);
+    }
+
+    // New metric: selective for drafts, complete for final
+    if (isDraft) {
+      if (metricName.trim())         payload.metricName = metricName;
+      if (selectedProductId)         payload.productId = Number(selectedProductId);
+      if (version.trim())            payload.version = version;
+      if (unitOfMeasure.trim())      payload.unitOfMeasure = unitOfMeasure;
+      if (description.trim())        payload.description = description;
+      if (aggregationFunction)       payload.aggregationFunction = aggregationFunction;
+      if (aggregationWindow)         payload.aggregationWindow  = aggregationWindow;
+      if (billingCriteria)        payload.billingCriteria = billingCriteria;
+      return clean(payload);
+    }
+
+    // final save
+    payload.metricName = metricName.trim();
+    payload.productId = Number(selectedProductId);
+    payload.version = version.trim();
+    payload.unitOfMeasure = unitOfMeasure.trim();
+    payload.description = description.trim();
+  if (billingCriteria) payload.billingCriteria = billingCriteria;
+  if (usageConditions.length) payload.usageConditions = usageConditions;
+    payload.aggregationFunction = aggregationFunction;
+    payload.aggregationWindow = aggregationWindow;
+    return payload;
+  };
+
+  const saveOrUpdateMetric = async (isDraft = false, skipFinalize = false) => {
+    if (!isDraft && !validateCurrentStep(currentStep)) return false;
+
+    const payload = buildPayload(isDraft);
+    // If updating an existing metric but there are no changes, skip PUT to avoid server 500
+    if (metricId && Object.keys(payload).length === 0) {
+      // Only finalize if this is not a draft save and caller didn't opt-out
+      if (!isDraft && !skipFinalize) {
+        console.log('No changes detected, directly finalizing metricId', metricId);
+        const finalized = await finalizeBillableMetric(metricId);
+        if (!finalized) {
+          setErrors(prev => ({ ...prev, form: 'Failed to finalize metric' }));
+          return false;
         }
-    };
+      }
+      return true;
+    }
 
-    // Track previous values for comparison
-    const [previousValues, setPreviousValues] = useState<Partial<BillableMetricPayload>>({});
+    // Creating a new metric but no data – nothing to persist
+    if (!metricId && Object.keys(payload).length === 0) {
+      alert('No fields to save');
+      return false;
+    }
 
-    const saveOrUpdateMetric = async (isDraft: boolean = false) => {
-        // Only validate if not a draft save
-        if (!isDraft && !validateCurrentStep(currentStep)) {
-            return false;
+    try {
+      if (metricId) {
+        // update
+        console.log('PUT payload → updateBillableMetric', payload);
+        const success = await updateBillableMetric(metricId, payload);
+        if (!success) throw new Error('Failed to update metric');
+        setPreviousValues(prev => ({ ...prev, ...payload }));
+        if (!isDraft && !skipFinalize) {
+          console.log('Finalize call for metricId', metricId);
+          const finalized = await finalizeBillableMetric(metricId);
+          if (!finalized) throw new Error('Failed to finalize metric');
         }
-        
-        const payload: any = {};
-        
-        if (metricId) {
-            // For updates, include all required fields with their current values
-            // This ensures we don't accidentally clear required fields
-            if (metricName !== undefined) {
-                payload.metricName = metricName;
-            }
-            if (selectedProductId) {
-                payload.productId = Number(selectedProductId);
-            }
-            if (version !== undefined) {
-                payload.version = version;
-            }
-            if (unitOfMeasure !== undefined) {
-                payload.unitOfMeasure = unitOfMeasure;
-            }
-            if (description !== undefined) {
-                payload.description = description;
-            }
-            if (aggregationFunction) {
-                payload.aggregationFunction = aggregationFunction;
-            }
-            if (aggregationWindow) {
-                payload.aggregationWindow = aggregationWindow;
-            }
-            if (billingCriteria !== undefined) {
-                payload.billingCriteria = billingCriteria || '';
-            }
-            if (usageConditions) {
-                payload.usageConditions = usageConditions;
-            }
-        } else if (isDraft) {
-            // For draft saves, only include fields that have values
-            if (metricName && metricName.trim() !== '') payload.metricName = metricName;
-            if (selectedProductId) payload.productId = Number(selectedProductId);
-            if (version && version.trim() !== '') payload.version = version;
-            if (unitOfMeasure && unitOfMeasure.trim() !== '') payload.unitOfMeasure = unitOfMeasure;
-            if (description && description.trim() !== '') payload.description = description;
-            if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
-            if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
-            if (billingCriteria) payload.billingCriteria = billingCriteria;
-            if (usageConditions && usageConditions.length > 0) payload.usageConditions = usageConditions;
-        } else {
-            // For final save, include all required fields with their current values
-            if (metricName.trim() !== '') payload.metricName = metricName;
-            if (selectedProductId) payload.productId = Number(selectedProductId);
-            if (version.trim() !== '') payload.version = version;
-            if (unitOfMeasure.trim() !== '') payload.unitOfMeasure = unitOfMeasure;
-            if (description.trim() !== '') payload.description = description;
-            if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
-            if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
-            if (billingCriteria) payload.billingCriteria = billingCriteria;
-            if (usageConditions) payload.usageConditions = usageConditions;
+        return true;
+      } else {
+        // create
+        console.log('POST payload → createBillableMetric', payload);
+        const res = await createBillableMetric(payload);
+        if (!res.ok || !res.id) throw new Error('Failed to create metric');
+        setMetricId(res.id);
+        if (!isDraft && !skipFinalize) {
+          console.log('Finalize call for metricId', res.id);
+          const finalized = await finalizeBillableMetric(res.id);
+          if (!finalized) throw new Error('Failed to finalize metric');
         }
-        
-        console.log('Saving payload:', { metricId, payload }); // For debugging
+        setPreviousValues({
+          metricName,
+          productId: selectedProductId ? Number(selectedProductId) : undefined,
+          version,
+          unitOfMeasure,
+          description,
+          aggregationFunction,
+          aggregationWindow,
+          usageConditions
+        });
+        return true;
+      }
+    } catch (e) {
+      console.error('Error saving metric:', e);
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      // silently log backend error without showing inline message
+    console.error('Metric save failed:', msg);
+      return false;
+    }
+  };
 
-        try {
-            let result;
-            if (metricId) {
-                // Always use PUT for updates after the first save
-                console.log('Updating existing metric with ID:', metricId, 'Changes:', payload);
-                const success = await updateBillableMetric(metricId, payload);
-                if (!success) throw new Error('Failed to update metric');
-                result = { ok: true, id: metricId };
-                // Update previous values with the new values
-                setPreviousValues(prev => ({
-                    ...prev,
-                    ...payload
-                }));
-            } else {
-                // Only use POST for the very first save
-                if (Object.keys(payload).length === 0) {
-                    throw new Error('No fields to save');
-                }
-                console.log('Creating new metric');
-                const createResult = await createBillableMetric(payload);
-                console.log('Create metric result:', createResult);
-                if (!createResult.ok) throw new Error('Failed to create metric');
-                result = createResult;
-                // Save the metric ID for future updates
-                if (result.id) {
-                    console.log('Setting new metric ID:', result.id);
-                    setMetricId(result.id);
-                    // Update previous values after first save
-                    setPreviousValues({
-                        metricName,
-                        productId: selectedProductId ? Number(selectedProductId) : 0,
-                        version,
-                        unitOfMeasure,
-                        description,
-                        aggregationFunction,
-                        aggregationWindow,
-                        billingCriteria,
-                        usageConditions
-                    });
-                } else {
-                    console.warn('No metric ID returned from create operation');
-                }
-            }
+  // Footer handlers (mirroring NewProduct)
+  const handleSaveAndNext = async () => {
+    if (!validateCurrentStep(currentStep)) return;
+    // not a draft, only validate current
+    if (activeTab === 'metric') {
+      // Save as draft on the first step (no finalize yet)
+      setSaving(true);
+      const ok = await saveOrUpdateMetric(true);
+      setSaving(false);
+      if (!ok) return;
+      // move to conditions only if save succeeded
+      gotoStep(1);
+      return;
+    }
+    if (activeTab === 'conditions') {
+      // Persist all changes so far with a full PUT, but defer finalization until review
+      setSaving(true);
+      const ok = await saveOrUpdateMetric(false, true); // non-draft, skipFinalize = true
+      setSaving(false);
+      if (!ok) return;
+      gotoStep(2);
+      return;
+    }
+    if (activeTab === 'review') {
+      // Finalize metric without re-sending payload
+      if (!metricId) return; // safety guard
+      setSaving(true);
+      console.log('Finalize call for metricId', metricId);
+      const finalized = await finalizeBillableMetric(metricId);
+      setSaving(false);
+      if (finalized) onClose();
+      else alert('Finalize failed');
+    }
+  };
 
-            // Only finalize if not a draft
-            if (!isDraft && result.id) {
-                const finalized = await finalizeBillableMetric(result.id);
-                if (!finalized) {
-                    throw new Error('Failed to finalize metric');
-                }
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Error saving metric:', error);
-            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-            alert(`Failed to save metric: ${errorMessage}`);
-            return false;
-        }
-    };
+  const handleSaveDraft = async () => {
+    if (isDraftSaving) return false;
+    try {
+      setIsDraftSaving(true);
+      setIsDraftSaved(false);
+      const ok = await saveOrUpdateMetric(true);
+      if (ok) {
+        setIsDraftSaved(true);
+        setTimeout(() => setIsDraftSaved(false), 2500);
+      }
+      return ok;
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
 
-    const handleNext = async () => {
-        if (currentStep < steps.length - 1) {
-            // Only validate current step before moving to next
-            if (validateCurrentStep(currentStep)) {
-                setCurrentStep(prev => prev + 1);
-            }
-        } else {
-            // On final step, validate before saving
-            if (validateCurrentStep(currentStep)) {
-                const ok = await saveOrUpdateMetric(false);
-                if (ok) {
-                    onClose();
-                }
-            }
-        }
-    };
+  const productOptions = products.map(p => ({ label: p.productName, value: String(p.productId) }));
 
-    const handleBack = () => {
-        if (currentStep > 0) {
-            setCurrentStep((prev) => prev - 1);
-        } else {
-            onClose();
-        }
-    };
+  return (
+    <>
+      <TopBar
+        title="Create New Usage Metric"
+        onBack={() => setShowSavePrompt(true)}
+        cancel={{ onClick: () => setShowDeleteConfirm(true) }}
+        save={{
+          onClick: handleSaveDraft,
+          label: isDraftSaved ? 'Saved!' : 'Save as Draft',
+          saved: isDraftSaved,
+          saving: isDraftSaving,
+          labelWhenSaved: 'Saved!'
+        }}
+      />
 
-    // Handle saving as draft
-    const handleSaveDraft = async () => {
-        // For drafts, we don't require all fields to be filled
-        const success = await saveOrUpdateMetric(true);
-        if (success) {
-            alert(metricId ? 'Draft updated successfully!' : 'Draft saved successfully!');
-            
-            // Only reset form if it's a completely new draft (first save)
-            if (!metricId) {
-                // Don't reset the form fields here - we want to keep the entered values
-                // The metricId will be updated by saveOrUpdateMetric
-                setCurrentStep(0);
-            }
-        }
-    };
+      <div className="met-np-viewport">
+        <div className="met-np-card">
+          <div className="met-np-grid">
+            {/* LEFT rail */}
+            <aside className="met-np-rail">
+              <nav className="met-np-steps">
+                {steps.map((step, i) => {
+                  const isActive = i === currentStep;
+                  const isCompleted = i < currentStep;
+                  const showConnector = i < steps.length - 1;
+                  return (
+                    <button
+                      key={step.id}
+                      type="button"
+                      className={['met-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : ''].join(' ').trim()}
+                      onClick={() => gotoStep(i)}
+                    >
+                      <span className="met-np-step__bullet" aria-hidden="true">
+                        <span className="met-np-step__icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                            <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                          </svg>
+                        </span>
+                        {showConnector && <span className="met-np-step__connector" />}
+                      </span>
+                      <span className="met-np-step__text">
+                        <span className="met-np-step__title">{step.title}</span>
+                        <span className="met-np-step__desc">{step.desc}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </aside>
 
-    const renderStepContent = () => {
-        switch (currentStep) {
-            case 0:
-                return (
-                    <>
-                        <div className="form-row">
-                            <div className="forms-group">
-                                <InputField
-                                    label="Metric Name"
-                                    placeholder="Metric"
-                                    value={metricName}
-                                    onChange={setMetricName}
-                                />
-                            </div>
-                            <div className="forms-group">
-                                <SelectField
-                                    label="Product Name"
-                                    placeholder="Select Product"
-                                    value={selectedProductId}
-                                    onChange={(val: string)=>{
-                                        setSelectedProductId(val);
-                                        const prod = products.find(p => String(p.productId) === val);
-                                        setSelectedProductName(prod ? prod.productName : '');
-                                        setSelectedProductType(prod ? prod.productType : '');
-                                        setUnitOfMeasure('');
+            {/* MAIN */}
+            <main className="met-np-main">
+              <div className="met-np-main__inner">
+                <div className="met-np-body">
+                  <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
+                    <div className="met-np-form-section">
+                      {/* TAB: METRIC */}
+                      {activeTab === 'metric' && (
+                        <section>
+                          <div className="met-np-section-header">
+                            <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
+                          </div>
+
+                          <div className="met-np-grid-2">
+                            <InputField
+                              label="Metric Name"
+                              value={metricName}
+                              onChange={setMetricName}
+                              placeholder="eg. API Calls"
+                              error={errors.metricName}
+                            />
+
+                            <SelectField
+                              label="Product"
+                              placeholder="eg. Maps API"
+                              value={selectedProductId}
+                              onChange={(v: string) => {
+                                setSelectedProductId(v);
+                                const prod = products.find(p => String(p.productId) === v);
+                                setSelectedProductName(prod ? prod.productName : '');
+                                setSelectedProductType(prod ? prod.productType : '');
+                                setUnitOfMeasure('');
+                                if (errors.product) {
+                                  const { product, ...rest } = errors;
+                                  setErrors(rest);
+                                }
+                              }}
+                              options={productOptions}
+                              error={errors.product}
+                            />
+
+                            <InputField
+                              label="Version (optional)"
+                              value={version}
+                              onChange={setVersion}
+                              placeholder="eg. v2.0"
+                            />
+
+                            <TextareaField
+                              label="Description"
+                              value={description}
+                              onChange={setDescription}
+                              placeholder="eg. Number of API calls consumed per month"
+                            />
+
+                            {/* UOM */}
+                            <div className="met-np-field">
+                              <label className="met-np-label">Unit of Measure</label>
+                              {(() => {
+                                const map: Record<string, string[]> = {
+                                  API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
+                                  FLATFILE: ['FILE', 'ROW', 'RECORD', 'DELIVERY', 'MB'],
+                                  SQLRESULT: ['CELL', 'MB', 'ROW', 'QUERY_EXECUTION'],
+                                  LLMTOKEN: ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN']
+                                };
+                                const key = selectedProductType?.toUpperCase();
+                                const opts = map[key] || null;
+                                if (opts) {
+                                  return (
+                                    <SelectField
+                                      placeholder="Select unit (eg. calls, GB, hours)"
+                                      value={unitOfMeasure}
+                                      onChange={(v: string) => {
+                                        setUnitOfMeasure(v);
+                                        if (errors.unitOfMeasure) {
+                                          const { unitOfMeasure, ...rest } = errors;
+                                          setErrors(rest);
+                                        }
+                                      }}
+                                      options={opts.map(o => ({ label: o, value: o }))}
+                                      error={errors.unitOfMeasure}
+                                    />
+                                  );
+                                }
+                                return (
+                                  <InputField
+                                    placeholder="Unit"
+                                    value={unitOfMeasure}
+                                    onChange={(v: string) => {
+                                      setUnitOfMeasure(v);
+                                      if (errors.unitOfMeasure) {
+                                        const { unitOfMeasure, ...rest } = errors;
+                                        setErrors(rest);
+                                      }
                                     }}
-                                    options={products.map(p => ({ label: p.productName, value: String(p.productId) }))}
-                                />
+                                    error={errors.unitOfMeasure}
+                                  />
+                                );
+                              })()}
                             </div>
-                            <div className="forms-group">
-                                <InputField
-                                    label="Version (optional)"
-                                    placeholder="Version"
-                                    value={version}
-                                    onChange={setVersion}
-                                />
-                            </div>
-                            <div className="forms-group">
-                                <TextareaField
-                                    label="Description"
-                                    placeholder="Enter description"
-                                    value={description}
-                                    onChange={setDescription}
-                                />
-                            </div>
-                        </div>
-                        <div className="form-row">
-                            <div className="forms-groups">  
-                                <label>Unit of Measure</label>
-                                {(() => {
-                                    const optionsMap: Record<string, string[]> = {
-                                        API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
-                                        FLATFILE: ['FILE', 'ROW', 'RECORD','DELIVERY','MB'],
-                                        SQLRESULT: ['CELL','MB','ROW','QUERY_EXECUTION'],
-                                        LLMTOKEN: ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'],
-                                    };
-                                    const key = selectedProductType?.toUpperCase();
-                                    const opts = optionsMap[key] || null;
-                                    if (opts) {
-                                        return (
-                                            <SelectField
-                                                placeholder="Select Unit"
-                                                value={unitOfMeasure}
-                                                onChange={setUnitOfMeasure}
-                                                options={opts.map(o => ({ label: o, value: o }))}
-                                            />
-                                        );
-                                    }
-                                    return (
-                                        <InputField
-                                            placeholder="Unit"
-                                            value={unitOfMeasure}
-                                            onChange={setUnitOfMeasure}
-                                        />
-                                    );
-                                })()}
-                            </div>
-                            <div className="forms-groups">
-                                <label>Aggregation Function</label>
-                                <AggregationFunctionSelect productType={selectedProductType} unitOfMeasure={unitOfMeasure} value={aggregationFunction} onChange={setAggregationFunction} />
-                            </div>
-                            <div className="forms-groups">
-                                <label>Aggregation Window</label>
-                                <AggregationWindowSelect productType={selectedProductType} unitOfMeasure={unitOfMeasure} value={aggregationWindow} onChange={setAggregationWindow} />
-                            </div>
-                        </div>
-                    </>
-                );
-            case 1:
-                return <UsageConditionForm productType={selectedProductType} unitOfMeasure={unitOfMeasure} conditions={usageConditions} setConditions={setUsageConditions} billingCriteria={billingCriteria} onBillingCriteriaChange={setBillingCriteria} />;
-            case 2:
-                return (
-                    <Review
-                        metricName={metricName}
-                        productName={selectedProductName}
-                        description={description}
-                        version={version}
-                        unitOfMeasure={unitOfMeasure}
-                        aggregationFunction={aggregationFunction}
-                        aggregationWindow={aggregationWindow}
-                        usageConditions={usageConditions}
-                        billingCriteria={billingCriteria}
-                    />
-                );
-            default:
-                return <p>Coming soon...</p>;
-        }
-    };
 
-    return (
-        <div className="create-usage-metric metfront">
-            <div className="metric-header">
-                <h3 className="metric-title">Create New Usage Metric</h3>
-                <div className="metric-actions">
-                    <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                    <button className="btn save-draft" onClick={handleSaveDraft}>Save as Draft</button>
-                </div>
-            </div>
-            <div className="usage-metric-wrapper metfront">
-                <aside className="sidebars">
-                    {steps.map((step, index) => (
-                        <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>
-                            <div className="icon-wrappers">
-                                {index < currentStep ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                                        <path d="M7 12l3 3 6-6" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
-                                        <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
-                                    </svg>
-                                )}
-                                {index < steps.length - 1 && (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="2"
-                                        height="138"
-                                        viewBox="0 0 2 140"
-                                        fill="none"
-                                    >
-                                        <path
-                                            d="M1 128.8L1 1.8"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            style={{ stroke: index < currentStep ? 'var(--color-primary-800)' : '#BDBBBE' }}
-                                        />
-                                    </svg>
-                                )}
+                            {/* Aggregation Function */}
+                            <div className="met-np-field">
+                              <label className="met-np-label">Aggregation Function<span className="required">*</span></label>
+                              <AggregationFunctionSelect
+                                productType={selectedProductType}
+                                                                unitOfMeasure={unitOfMeasure}
+                                value={aggregationFunction}
+                                onChange={(v: string) => {
+                                  setAggregationFunction(v);
+                                  if (errors.aggregationFunction) {
+                                    const { aggregationFunction, ...rest } = errors;
+                                    setErrors(rest);
+                                  }
+                                }}
+                              />
+                              {errors.aggregationFunction && (
+                                <div className="np-error-message">{errors.aggregationFunction}</div>
+                              )}
                             </div>
-                            <div className="step-text">
-                                <span className="step-title">{step.title}</span>
-                                <span className="step-desc">{step.desc}</span>
+
+                            {/* Aggregation Window */}
+                            <div className="met-np-field">
+                              <label className="met-np-label">Aggregation Window<span className="required">*</span></label>
+                              <AggregationWindowSelect
+                                productType={selectedProductType}
+                                unitOfMeasure={unitOfMeasure}
+                                value={aggregationWindow}
+                                onChange={setAggregationWindow}
+                              />
                             </div>
-                        </div>
-                    ))}
-                </aside>
+                          </div>
+                        </section>
+                      )}
 
-                <div className="form-section">
-                    <div className="form-card">
-                        {renderStepContent()}
-                    </div>
-                    <div className="button-group">
-                        <button className="btn back" onClick={handleBack} disabled={currentStep === 0}>Back</button>
-                        <button className="btn save-next" onClick={handleNext}>
-                            {currentStep === steps.length - 1 ? 'Save' : 'Next'}
-                        </button>
-                    </div>
-                </div>
-            </div>
+                      {/* TAB: CONDITIONS */}
+                      {activeTab === 'conditions' && (
+                        <section>
+                          <div className="met-np-section-header">
+                            <h3 className="met-np-section-title">USAGE CONDITIONS</h3>
+                          </div>
+                          <UsageConditionForm
+                            productType={selectedProductType}
+                            unitOfMeasure={unitOfMeasure}
+                            conditions={usageConditions}
+                            setConditions={setUsageConditions}
+                            billingCriteria={billingCriteria}
+                            onBillingCriteriaChange={setBillingCriteria}
+                          />
+                        </section>
+                      )}
 
-            {showCancelModal && (
-                <div className="delete-modal-overlay">
-                    <div className="delete-modal-content">
-                        <div className="delete-modal-body">
-                            <h5>Are you sure you want to discard<br /> this metric?</h5>
-                            <p>Your progress will not be saved.</p>
-                        </div>
-                        <div className="delete-modal-footer">
-                            <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
-                            <button className="delete-modal-confirm" onClick={onClose}>Confirm</button>
-                        </div>
+                      {/* TAB: REVIEW */}
+                      {activeTab === 'review' && (
+                        <section>
+                          <div className="met-np-section-header">
+                            <h3 className="met-np-section-title">REVIEW & CONFIRM</h3>
+                          </div>
+                          <Review
+                            metricName={metricName}
+                            productName={selectedProductName}
+                            description={description}
+                            version={version}
+                            unitOfMeasure={unitOfMeasure}
+                            aggregationFunction={aggregationFunction}
+                            aggregationWindow={aggregationWindow}
+                            usageConditions={usageConditions}
+                            billingCriteria={billingCriteria}
+                          />
+                        </section>
+                      )}
                     </div>
+
+                    {/* FOOTER (mirrors NewProduct) */}
+                    <div className="met-np-form-footer">
+                      {errors.form && <div className="met-np-error-message">{errors.form}</div>}
+
+                      {activeTab === 'metric' && (
+                        <div className="met-np-btn-group met-np-btn-group--next">
+                          <button type="button" className="met-np-btn met-np-btn--primary" onClick={handleSaveAndNext}>
+                            Save & Next
+                          </button>
+                        </div>
+                      )}
+
+                      {activeTab === 'conditions' && (
+                        <>
+                          <div className="met-np-btn-group met-np-btn-group--back">
+                            <button type="button" className="met-np-btn met-np-btn--ghost" onClick={() => gotoStep(0)}>
+                              Back
+                            </button>
+                          </div>
+                          <div className="met-np-btn-group met-np-btn-group--next">
+                            <button type="button" className="met-np-btn np-btn--primary" onClick={handleSaveAndNext}>
+                              Save & Next
+                            </button>
+                          </div>
+                        </>
+                      )}
+
+                      {activeTab === 'review' && (
+                        <div className="met-np-btn-group">
+                          <button type="button" className="met-np-btn met-np-btn--ghost" onClick={() => gotoStep(1)}>
+                            Back
+                          </button>
+                          <button
+                            type="button"
+                            className="met-np-btn met-np-btn--primary"
+                            onClick={async () => {
+                              if (!metricId) return;
+                              setSaving(true);
+                              console.log('Finalize call for metricId', metricId);
+                              const finalized = await finalizeBillableMetric(metricId);
+                              setSaving(false);
+                              if (finalized) onClose();
+                              else alert('Finalize failed');
+                            }}
+                            disabled={saving}
+                          >
+                            {saving ? 'Submitting...' : 'Create Metric'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </form>
                 </div>
-            )}
+              </div>
+            </main>
+          </div>
+
+          {/* Save Draft confirmation modal (same behavior as NewProduct) */}
+          <SaveDraft
+            isOpen={showSavePrompt}
+            onClose={() => {
+              setShowSavePrompt(false);
+              onClose();
+            }}
+            onSave={async () => {
+              await handleSaveDraft();
+              onClose();
+            }}
+          />
         </div>
-    );
-};
+      </div>
 
-export default CreateUsageMetric;
+      {/* Delete confirmation modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        productName={metricName || 'this metric'}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          onClose();
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    </>
+  );
+}

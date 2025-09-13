@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField } from '../../componenetsss/Inputs';
 
 interface AggregationFunctionSelectProps {
   productType: string;
@@ -67,12 +68,12 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ p
     options = [value, ...options];
   }
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {options.map(opt => (
-        <option key={opt} value={opt}>{opt}</option>
-      ))}
-    </select>
+    <SelectField
+      value={value}
+      onChange={onChange}
+      options={[{ label: '--select--', value: '', disabled: true }, ...options.map(opt => ({ label: opt, value: opt }))]}
+
+    />
   );
 };
 
