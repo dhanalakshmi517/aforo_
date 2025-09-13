@@ -1,13 +1,13 @@
 .configuration-tab {
   padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 550px;
+  margin: 0 ;
   background-color: var(--color-neutral-white);
 }
 
 .configuration-fields {
-  margin-top: 24px;
-  padding: 20px;
+  margin-top: 16px;
+  padding: 12px;
   /* background: #f8f9fa; */
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -22,22 +22,28 @@
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  color: #495057;
+  color: var(--color-neutral-1700);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
 }
 
 .form-control {
-  width: 70%;
-  padding: 10px 12px;
+  width: 50%;
+  padding: 8px 12px;
   border: 1px solid var(--color-neutral-300);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -98,7 +104,7 @@ input[type='checkbox'] {
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .form-group label {

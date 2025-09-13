@@ -3,7 +3,7 @@
 // Usage: import and render <EditReview />. Styles in ProductReview.css
 
 import React from 'react';
-import '../NewProducts/ProductReview.css';
+import './EditReview.css';
 
 // Types
 interface ReviewRow {
@@ -73,17 +73,17 @@ const orderGeneral = (obj: Record<string, string>): [string, string][] => {
 
 const CardSection: React.FC<ReviewSection> = React.memo(({ title, rows }) => {
   return (
-    <section className="pr-card" aria-label={title}>
-      <header className="pr-card__header">
-        <h3 className="pr-card__title">{title}</h3>
+    <section className="edit-pr-card" aria-label={title}>
+      <header className="edit-pr-card__header">
+        <h3 className="edit-pr-card__title">{title}</h3>
       </header>
-      <div className="pr-card__body">
+      <div className="edit-pr-card__body">
         {rows.map((r, i) => (
-          <div className="pr-row" key={r.label + i}>
-            <div className="pr-row__label" title={r.label}>
+          <div className="edit-pr-row" key={r.label + i}>
+            <div className="edit-pr-row__label" title={r.label}>
               {r.label}
             </div>
-            <div className="pr-row__value" title={r.value}>
+            <div className="edit-pr-row__value" title={r.value}>
               {r.value}
             </div>
           </div>
@@ -111,8 +111,8 @@ const EditReview: React.FC<EditReviewProps> = ({ generalDetails, configuration }
   ];
 
   return (
-    <div className="pr-wrapper">
-      <div className="pr-grid">
+    <div className="edit-pr-wrapper">
+      <div className="edit-pr-grid">
         {sections.map((s) => (
           <CardSection key={s.title} {...s} />
         ))}

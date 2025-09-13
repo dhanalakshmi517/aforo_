@@ -11,14 +11,19 @@ const api = axios.create({
   withCredentials: false
 });
 
-// Add request interceptor for auth tokens if needed
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem('auth_token');
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
+// Attach auth headers to every request
+import { getAuthData } from '../client/utils/auth';
+api.interceptors.request.use((config) => {
+  const auth = getAuthData();
+  if (auth?.token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${auth.token}`,
+      'X-Organization-Id': auth.organizationId?.toString() || '',
+    } as any;
+  }
+  return config;
+});
 
 // Add response interceptor for error handling
 api.interceptors.response.use(

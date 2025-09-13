@@ -1,12 +1,16 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { InputField, TextareaField } from '../../Components/InputFields';
+import { InputField, TextareaField } from '../../componenetsss/Inputs';
 import SaveAsDraftModal from '../Componenets/SaveAsDraftModel';
-import DeleteConfirmModal from '../Componenets/DeleteConfirmModal';
+import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { ConfigurationTab } from './EditConfiguration';
 import EditReview from './EditReview';
+import TopBar from '../../componenetsss/TopBar';
 import './EditProduct.css';
+import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration, buildAuthHeaders } from './EditProductApi';
+import { finalizeProduct } from '../api';
+import { listAllProducts, getProducts } from '../api';
 
 // Minimal product type for local state (id only needed)
 interface Product {
@@ -53,23 +57,90 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     skuCode: '',
     description: ''
   });
+  // store existing products for uniqueness checks
+  const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
+
+  // Fetch existing products once on mount (for uniqueness checks)
+  useEffect(() => {
+    (async () => {
+      try {
+        let data: any[] = [];
+        try {
+          data = await listAllProducts();
+        } catch {
+          // fallback to authenticated endpoint
+          try {
+            data = await getProducts();
+          } catch {
+            data = [];
+          }
+        }
+        const mapped = data.map(p => ({
+          productName: (p as any).productName,
+          skuCode: ((p as any).internalSkuCode ?? (p as any).skuCode ?? '') as string,
+        }));
+        setExistingProducts(mapped);
+      } catch (e) {
+        console.error('Failed to fetch existing products', e);
+      }
+    })();
+  }, []);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [configuration, setConfiguration] = useState<Record<string, string>>({});
+  const [isDraft, setIsDraft] = useState(false);
   const [loading, setLoading] = useState(false);
   const configRef = useRef<import('./EditConfiguration').ConfigurationTabHandle>(null);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
+    const trimmed = value.trim();
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+
+    // Uniqueness checks similar to NewProduct component
+    if (field === 'productName') {
+      const duplicate = existingProducts.some(p => (p.productName || '').toLowerCase() === trimmed.toLowerCase() && p.skuCode !== formData.skuCode);
+      if (duplicate) {
+        setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
+      } else if (errors.productName === 'Must be unique') {
+        const { productName, ...rest } = errors;
+        setErrors(rest);
+      }
+    }
+    if (field === 'skuCode') {
+      const duplicate = existingProducts.some(p => (p.skuCode || '').toLowerCase() === trimmed.toLowerCase() && p.productName !== formData.productName);
+      if (duplicate) {
+        setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
+      } else if (errors.skuCode === 'Must be unique') {
+        const { skuCode, ...rest } = errors;
+        setErrors(rest);
+      }
+    }
+
+    // Clear specific error if other validations
+    if (errors[field] && errors[field] !== 'Must be unique') {
+      setErrors(prev => {
+        const { [field]: _, ...rest } = prev;
+        return rest;
+      });
     }
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
+    const lower = (s: string) => s.trim().toLowerCase();
+
+    // Required field checks
     if (!formData.productName.trim()) newErrors.productName = 'Product name is required';
     if (!formData.skuCode.trim()) newErrors.skuCode = 'SKU code is required';
+
+    // Uniqueness checks
+    if (formData.productName && existingProducts.some(p => lower(p.productName || '') === lower(formData.productName) && p.skuCode !== formData.skuCode)) {
+      newErrors.productName = 'Must be unique';
+    }
+    if (formData.skuCode && existingProducts.some(p => lower(p.skuCode || '') === lower(formData.skuCode) && p.productName !== formData.productName)) {
+      newErrors.skuCode = 'Must be unique';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,19 +155,40 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     navigate('/get-started/products');
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     if (draftStatus === 'saving') return;
-    setDraftStatus('saving');
-    // UI-only simulation
-    setTimeout(() => {
+    try {
+      setDraftStatus('saving');
+      if (!productId) {
+        alert('Product ID missing – cannot save draft');
+        setDraftStatus('idle');
+        return;
+      }
+      const draftPayload = {
+        productName: formData.productName,
+        version: formData.version,
+        internalSkuCode: formData.skuCode,
+        productDescription: formData.description,
+        status: 'DRAFT' as const,
+      };
+      await updateGeneralDetails(productId, draftPayload as any);
+      // If currently on configuration tab also persist configuration
+      if (activeTab === 'configuration') {
+        await updateConfiguration(productId, configuration.productType, configuration);
+      }
       setDraftStatus('saved');
+      // auto reset label back to normal after 4 s
       setTimeout(() => setDraftStatus('idle'), 4000);
-    }, 4000);
+    } catch (err) {
+      console.error('Save draft failed', err);
+      alert('Failed to save draft. Please try again.');
+      setDraftStatus('idle');
+    }
   };
 
-  const handleConfigChange = (config: Record<string, string>) => {
+  const handleConfigChange = React.useCallback((config: Record<string, string>) => {
     setConfiguration(prev => ({ ...prev, ...config }));
-  };
+  }, []);
 
   const handleProductTypeChange = (type: string) => {
     setConfiguration(prev => ({ ...prev, productType: type }));
@@ -128,12 +220,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           throw new Error('No authentication token found');
         }
 
-        const headers = {
-          'Authorization': `Bearer ${authData.token}`,
-          'Content-Type': 'application/json',
-          'X-Organization-Id': authData?.organizationId?.toString() || ''
-        };
-
         const updatePayload = {
           productName: formData.productName,
           version: formData.version,
@@ -141,15 +227,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           productDescription: formData.description
         };
 
-        const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(updatePayload)
-        });
-
-        if (!res.ok) {
-          throw new Error('Failed to update product');
-        }
+        await updateGeneralDetails(productId!, updatePayload);
 
         // Only move to next step if API call succeeds
         goToStep(1);
@@ -169,7 +247,20 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
       return;
     }
     if (activeTab === 'review') {
-      onClose(); // finish without API
+      if (isDraft && productId) {
+        try {
+          setLoading(true);
+          await finalizeProduct(productId);
+          onClose();
+        } catch (err) {
+          console.error('Finalize failed', err);
+          alert('Failed to finalize product. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        onClose();
+      }
     }
   };
 
@@ -181,27 +272,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
       const { getAuthData } = await import('../../../utils/auth');
       const authData = getAuthData();
       if (!authData?.token) throw new Error('No authentication token');
-      const headers: Record<string,string> = {
-        'Authorization': `Bearer ${authData.token}`,
-        'Content-Type': 'application/json',
-        'X-Organization-Id': authData?.organizationId?.toString() || ''
-      };
-      // map
-      const endpointMap: Record<string,string> = {
-        API: 'api',
-        FlatFile: 'flatfile',
-        SQLResult: 'sql-result',
-        LLMToken: 'llm-token'
-      };
-      const endpoint = endpointMap[configuration.productType ?? ''] || (configuration.productType || '').toLowerCase();
-      if (!endpoint) return false;
-      const res = await fetch(
-        `http://54.238.204.246:8080/api/products/${productId}/${endpoint}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(configuration)
-      });
-      if (!res.ok) throw new Error('Failed to update configuration');
+      await updateConfiguration(productId, configuration.productType, configuration);
       return true;
     } catch (err) {
       console.error('Config update failed', err);
@@ -224,22 +295,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
         setLoading(true);
         
         // Import auth utilities and create authenticated request
-        const { getAuthData } = await import('../../../utils/auth');
-        const authData = getAuthData();
-        
-        if (!authData?.token) {
-          throw new Error('No authentication token found');
-        }
-
-        const headers = {
-          'Authorization': `Bearer ${authData.token}`,
-          'Content-Type': 'application/json',
-          'X-Organization-Id': authData?.organizationId?.toString() || ''
-        };
-
-        const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}`, { headers });
-        if (!res.ok) throw new Error('Failed to fetch product');
-        const data = await res.json();
+        const data = await fetchGeneralDetails(productId);
         console.log('Fetched general product details:', data);
         
         setFormData(prev => ({
@@ -249,6 +305,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           skuCode: data.internalSkuCode ?? '',
           description: data.productDescription ?? ''
         }));
+        setIsDraft((data.status ?? '').toUpperCase() === 'DRAFT');
         
         // Set product type for configuration component to fetch its data
         if (data.productType) {
@@ -257,10 +314,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
         } else {
           // Fallback: probe known configuration endpoints to infer type
           const typeMap: Record<string,string> = { API:'api', FlatFile:'flatfile', SQLResult:'sql-result', LLMToken:'llm-token' };
+          const hdrs = await (await import('./EditProductApi')).buildAuthHeaders();
           for (const [key, slug] of Object.entries(typeMap)) {
             try {
               const probeRes = await fetch(
-                `http://54.238.204.246:8080/api/products/${productId}/${slug}`, { method: 'HEAD', headers });
+                `http://54.238.204.246:8080/api/products/${productId}/${slug}`, { method: 'HEAD', headers: hdrs });
               if (probeRes.ok) {
                 console.log('Inferred productType via probe:', key);
                 setProductType(key);
@@ -286,152 +344,147 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
   }
 
   return (
-    <div className="edit-product-create-overlay">
-      {/* Header */}
-      <div className="edit-product-header">
-        <div className="edit-header-title-container">
-          <h2>Edit Product</h2>
-        </div>
-        <div className="edit-product-header-buttons">
-          <button type="button" className="edit-product-cancel-btn" onClick={handleCancel}>
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="edit-product-save-draft-btn"
-            onClick={handleSaveDraft}
-            disabled={draftStatus === 'saving'}
-          >
-            {draftStatus === 'saving' ? 'Saving...' : draftStatus === 'saved' ? 'Saved' : 'Save as Draft'}
-          </button>
-        </div>
-      </div>
+    <>
+      <TopBar
+        title={productId ? 'Edit Product' : 'Create New Product'}
+        onBack={onClose}
+        cancel={{
+          label: 'Cancel',
+          onClick: handleCancel
+        }}
+        save={{
+          label: draftStatus === 'saved' ? 'Saved as Draft' : 'Save as Draft',
+          labelWhenSaved: 'Saved as Draft',
+          saved: draftStatus === 'saved',
+          saving: draftStatus === 'saving',
+          disabled: loading,
+          onClick: handleSaveDraft
+        }}
+      />
+      <div className="edit-np-viewport">
 
-      <div className="edit-product-create-wrapper">
-        <button
-          className="edit-close-button"
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            color: '#666',
-            zIndex: 1000
-          }}
-          aria-label="Close"
-        >
-          ×
-        </button>
-
-        <div className="edit-product-main-content">
+      <div className="edit-np-card">
+        <div className="edit-np-grid">
           {/* Sidebar */}
-          <aside className="edit-product-sidebar">
-            {steps.map((step, index) => {
-              const isActive = index === currentStep;
-              const isCompleted = index < currentStep;
-              return (
-                <div
-                  key={step.id}
-                  className={`edit-product-step ${isActive ? 'edit-active' : ''} ${isCompleted ? 'edit-completed' : ''}`}
-                  onClick={() => goToStep(index)}
-                >
-                  <div className="edit-product-step-text">
-                    <span className="edit-product-step-title">{step.title}</span>
-                    <span className="edit-product-step-desc">{step.desc}</span>
+          <aside className="edit-np-rail">
+            <div className="edit-np-steps">
+              {steps.map((step, index) => {
+                const isActive = index === currentStep;
+                const isCompleted = index < currentStep;
+                return (
+                  <div
+                    key={step.id}
+                    className={`edit-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                    onClick={() => goToStep(index)}
+                  >
+                    <div className="edit-np-step__title">{step.title}</div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </aside>
 
           {/* Main Content */}
-          <div className="edit-product-content">
-            <div className="edit-product-form-container">
-              <div className="edit-product-form-section">
-                {/* ---------- GENERAL DETAILS ---------- */}
-                {activeTab === 'general' && (
-                  <div>
-                    <h3>GENERAL DETAILS</h3>
-                    <div className="edit-form-row">
-                      <div className="edit-forms-group">
-                        <label>Product Name</label>
-                        <InputField
-                          value={formData.productName}
-                          onChange={(val: string) => handleInputChange('productName', val)}
-                          placeholder="eg. Google Maps API"
-                          error={errors.productName}
-                        />
-                      </div>
-                      <div className="edit-forms-group">
-                        <label>Version</label>
-                        <InputField
-                          value={formData.version}
-                          onChange={(val: string) => handleInputChange('version', val)}
-                          placeholder="eg., 2.3-VOS"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="edit-forms-group">
-                      <label>SKU Code</label>
+          <div className="edit-np-content">
+            <div className="edit-np-form">
+              {/* ---------- GENERAL DETAILS ---------- */}
+              {activeTab === 'general' && (
+                <div className="edit-np-section">
+                  {/* <h3 className="edit-np-section-title">GENERAL DETAILS</h3> */}
+                  <div className="edit-np-form-row">
+                    <div className="edit-np-form-group">
+                      <label className="edit-np-label">Product Name</label>
                       <InputField
-                        value={formData.skuCode}
-                        onChange={(val: string) => handleInputChange('skuCode', val)}
-                        placeholder="Enter SKU code"
-                        error={errors.skuCode}
+                        value={formData.productName}
+                        onChange={(val: string) => handleInputChange('productName', val)}
+                        placeholder="eg. Google Maps API"
+                        error={errors.productName}
                       />
                     </div>
-
-                    <div className="edit-forms-group">
-                      <label>Description</label>
-                      <TextareaField
-                        value={formData.description}
-                        onChange={(val: string) => handleInputChange('description', val)}
-                        placeholder="Enter product description"
-                        error={errors.description}
+                    <div className="edit-np-form-group">
+                      <label className="edit-np-label">Version</label>
+                      <InputField
+                        value={formData.version}
+                        onChange={(val: string) => handleInputChange('version', val)}
+                        placeholder="eg., 2.3-VOS"
                       />
                     </div>
                   </div>
-                )}
+
+                  <div className="edit-np-form-group">
+                    <label className="edit-np-label">SKU Code</label>
+                    <InputField
+                      value={formData.skuCode}
+                      onChange={(val: string) => handleInputChange('skuCode', val)}
+                      placeholder="SKU-96"
+                      error={errors.skuCode}
+                    />
+                  </div>
+
+                  <div className="edit-np-form-group">
+                    <label className="edit-np-label">Description</label>
+                    <TextareaField
+                      value={formData.description}
+                      onChange={(val: string) => handleInputChange('description', val)}
+                      placeholder="Enter product description"
+                      error={errors.description}
+                    />
+                  </div>
+                </div>
+              )}
 
                 {/* ---------- CONFIGURATION ---------- */}
                 {activeTab === 'configuration' && (
-                  <div className="edit-configuration-tab-container">
-                    <h3>CONFIGURATION</h3>
-                    <ConfigurationTab
-                      initialProductType={productType}
-                      onConfigChange={handleConfigChange}
-                      onProductTypeChange={handleProductTypeChange}
-                      ref={configRef}
-                      productId={productId ?? formData.skuCode}
-                      onSubmit={submitConfig}
-                    />
+                  <div className="edit-np-section">
+                    {/* <h3 className="edit-np-section-title">CONFIGURATION</h3> */}
+                    <div className="edit-np-configuration-tab">
+                      <ConfigurationTab
+                        initialProductType={productType}
+                        onConfigChange={handleConfigChange}
+                        onProductTypeChange={handleProductTypeChange}
+                        ref={configRef}
+                        productId={productId ?? formData.skuCode}
+                        onSubmit={submitConfig}
+                      />
+                    </div>
                   </div>
                 )}
 
                 {/* ---------- REVIEW ---------- */}
                 {activeTab === 'review' && (
-                  <div>
-                    <h3>REVIEW &amp; CONFIRM</h3>
-                    <EditReview generalDetails={formData} configuration={configuration} />
+                  <div className="edit-np-section">
+                    {/* <h3 className="edit-np-section-title">REVIEW &amp; CONFIRM</h3> */}
+                    <div className="edit-np-review-container">
+                      <EditReview generalDetails={formData} configuration={configuration} />
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Footer Buttons */}
-              <div className="edit-button-group">
-                {activeTab !== 'general' && (
-                  <button type="button" className="edit-product-cancel-btn" onClick={handlePreviousStep}>
-                    Back
+              <div className="edit-np-form-footer">
+                <div className="edit-np-btn-group edit-np-btn-group--back">
+                  {activeTab !== 'general' && (
+                    <button
+                      type="button"
+                      className="np-btn np-btn--ghost"
+                      onClick={handlePreviousStep}
+                    >
+                      Back
+                    </button>
+                  )}
+                </div>
+
+                <div className="edit-np-btn-group edit-np-btn-group--next">
+                  <button
+                    type="button"
+                    className={`np-btn np-btn--primary ${loading ? 'np-btn--loading' : ''}`}
+                    onClick={handleNextStep}
+                    disabled={loading}
+                  >
+                    {loading ? 'Saving...' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Update Product') : 'Next'}
                   </button>
-                )}
-                <button type="button" className="edit-product-save-next-btn" onClick={handleNextStep}>
-                  {activeTab === 'review' ? 'Finish' : 'Next'}
-                </button>
+                </div>
               </div>
             </div>
           </div>
@@ -449,15 +502,17 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           }}
         />
 
-        <DeleteConfirmModal
+        <ConfirmDeleteModal
           isOpen={showDeleteConfirm}
           productName={formData.productName || 'this product'}
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
         />
       </div>
-    </div>
+    </> 
   );
 };
 
 export default EditProduct;
+
+

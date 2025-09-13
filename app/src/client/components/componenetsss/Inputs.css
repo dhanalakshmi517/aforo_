@@ -1,0 +1,206 @@
+@import "../Variables/Variables.css";
+
+/* ---------- Tokens ---------- */
+:root {
+  --if-border: rgba(0,0,0,0.15);
+  --if-border-hover: rgba(0,0,0,0.25);
+  --if-border-focus: #3b82f6;
+  --if-border-error: #ef4444;
+  --if-bg: #ffffff;
+  --if-bg-subtle: #f8f8fb;
+  --if-item-hover: #f5f6fa;
+  --if-bg-disabled: #f5f5f5;
+  --if-text: #111827;
+  --if-text-muted: #6b7280;
+  --if-text-error: #b91c1c;
+  --if-radius: 12px;
+  --if-radius-sm: 10px;
+  --if-padding-y: 10px;
+  --if-padding-x: 12px;
+  --if-font: 14px;
+  --if-ring: 3px;
+  --if-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* ---------- Field layout ---------- */
+.if-field {
+  position: relative;               /* for dropdown menu positioning */
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* spacing between label and control */
+  width: 456px;
+  margin-bottom: 20px; /* space after each field */
+}
+
+.if-label {
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  user-select: none;
+}
+
+/* ---------- DEFAULT (base) ---------- */
+.if-control {
+  width: 456px;
+  height:40px;
+  padding:8px 12px;
+  font-size: var(--font-size-md);
+  color: var(--color-neutral-1700);
+  background: var(--color-neutral-white) !important;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  box-shadow: 0 0 0 0 rgba(0,0,0,0);
+}
+
+
+/* Select-specific sizing */
+.if-select {
+    /* override width or height here */
+    width: 456px;       /* example */
+    height: 40px;  
+    padding: 8px 12px;
+    /* fixed height for dropdown */
+  }
+  
+  /* Textarea-specific sizing */
+  .if-textarea {
+    resize: vertical;
+    min-height: 90px;   /* minimum height */
+    line-height: 1.45;
+    width: 456px;       /* custom width */
+    height: 90px;      /* fixed starting height */
+  }
+
+/* ---------- HOVER ---------- */
+.if-control:hover:not(.is-error):not(.is-disabled):not(:disabled) {
+  border-color: var(--color-neutral-200);
+  background: var(--color-neutral-100);
+}
+
+/* ---------- WRITING / FOCUS ---------- */
+.if-control:focus:not(.is-error):not(.is-disabled):not(:disabled),
+.if-control:focus-visible:not(.is-error):not(.is-disabled):not(:disabled),
+.if-control.is-writing:not(.is-error):not(.is-disabled):not(:disabled) {
+  border-color: var(--color-primary-600);
+  background-color: var(--color-neutral-white);
+}
+
+/* ---------- ERROR ---------- */
+.if-control.is-error {
+  border-color: var(--color-error-200);
+  background-color: var(--color-error-100);
+}
+
+/* ---------- DISABLED ---------- */
+.if-control.is-disabled,
+.if-control:disabled {
+  color: var(--color-neutral-200);
+  background: var(--color-neutral-200);
+  cursor: not-allowed;
+  border-color: var(--color-neutral-200);
+}
+
+/* Helper + error text */
+.if-help { font-size: 12px; color: var(--if-text-muted); }
+.if-error { font-size: 12px; color: var(--if-text-error); margin-top: 2px; }
+
+/* ---------- Select (native caret) ---------- */
+.if-select {
+  appearance: auto;
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+  background-image: none;
+  padding-right: 12px;
+  padding: 8px 12px;
+}
+.if-select:focus,
+.if-select:focus-visible { outline: none; }
+
+/* ---------- Textarea ---------- */
+.if-textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
+
+/* ========== Custom Dropdown ========== */
+.dd-wrap {
+  /* host for trigger + menu */
+  position: relative; /* Ensure dropdown menu can be absolutely positioned */
+}
+
+.dd-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--if-bg-subtle);
+  cursor: pointer;
+  text-align: left;
+}
+
+.dd-placeholder { color: var(--if-text-muted); }
+.dd-value { display: inline-flex; align-items: center; gap: 8px; }
+
+.dd-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dd-caret { display: inline-flex; margin-left: 8px; transition: transform .15s ease; opacity: 0.8; }
+.dd-caret.rot { transform: rotate(180deg); }
+
+/* Menu container (like your mock) */
+.dd-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--if-bg);
+  border: 1px solid var(--if-border);
+  border-radius: var(--if-radius);
+  box-shadow: var(--if-shadow);
+  padding: 8px;
+}
+
+/* Menu items (soft rounded “pills”) */
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--if-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+}
+.dd-item + .dd-item { margin-top: 6px; }
+
+.dd-item:hover:not(.is-disabled),
+.dd-item.is-active:not(.is-disabled) {
+  background: var(--if-item-hover);
+  border-color: rgba(0,0,0,0.04);
+}
+
+.dd-item.is-selected .dd-item-label { font-weight: 600; }
+
+.dd-item.is-disabled {
+  color: var(--if-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.dd-item-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+.dd-item-label { line-height: 1; }

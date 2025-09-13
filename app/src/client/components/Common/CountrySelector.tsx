@@ -85,7 +85,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
             <img 
               src={`https://flagcdn.com/16x12/${selectedCountry.code.toLowerCase()}.png`} 
               alt={selectedCountry.name}
-              className="w-4 h-3 mr-2"
+              style={{ width: '20px', height: '15px', marginRight: '8px', objectFit: 'cover' }}
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
@@ -153,7 +153,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: #F5F4F5;
+          background: white;
           transition: border-color 0.2s ease;
           min-height: 40px;
         }
@@ -196,7 +196,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           gap: 8px;
         }
         .dropdown-item:hover {
-          background-color: #f8fafc;
+          background-color: white;
         }
         .chevron {
           margin-left: 8px;

@@ -1,0 +1,138 @@
+/* ---------------- Layout variables ---------------- */
+:root {
+    /* Outer gaps around the card */
+    --af-gap-left: 170px;
+    --af-gap-right: 170px;
+    --af-gap-top: 90px;
+    --af-gap-bottom: 28px;
+  
+    /* Card styling */
+    --af-radius: 12px;
+    --af-card-bg: #ffffff;
+    --af-card-border: rgba(0, 0, 0, 0.08);
+    --af-card-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  
+    /* Left rail */
+    --af-rail-w: 176px;
+    --af-rail-bg: #e9e9ee;
+  
+    /* Inner separators in main area */
+    --af-rule: #f2f3f7;
+    --af-rule-offset: 32px;
+  }
+  
+  /* ---------------- Outer viewport (applies gaps) ---------------- */
+  .af-skel-viewport {
+    padding: var(--af-gap-top) var(--af-gap-right) var(--af-gap-bottom)
+      var(--af-gap-left);
+    box-sizing: border-box;
+    width: 100%;
+  }
+  
+  /* ---------------- Card ---------------- */
+  .af-skel-card {
+    background: var(--af-card-bg);
+    border: 1px solid var(--af-card-border);
+    border-radius: var(--af-radius);
+    box-shadow: var(--af-card-shadow);
+    overflow: hidden;
+    width: 100%;
+    min-height: 360px;     /* establishes height so children can stretch */
+    position: relative;
+  }
+  
+  /* Grid MUST fill card height so rail reaches bottom */
+  .af-skel-grid {
+    display: grid;
+    grid-template-columns: var(--af-rail-w) 1fr;
+    min-height: inherit;   /* inherit from .af-skel-card */
+    height: 100%;
+  }
+  
+  /* Left rail */
+  .af-skel-rail {
+    background: var(--af-rail-bg);
+    height: 100%;
+    align-self: stretch;
+  }
+  
+  /* Main white area */
+  .af-skel-main {
+    position: relative;
+    background: #fff;
+    height: 100%;
+  }
+  
+  /* Content wrappers (sit above faint rules) */
+  .af-skel-rail__content {
+    padding: 24px 16px;
+  }
+  
+  .af-skel-main__content {
+    position: relative;
+    z-index: 1;
+    padding: 24px;
+  }
+  
+  /* Sidebar inside skeleton */
+  .af-skel-main .product-sidebar {
+    border-right: 1px solid var(--af-rule);
+  }
+  /* Header inside skeleton or standalone */
+  .af-skel-main .product-header {
+    border-bottom: 1px solid var(--af-rule);
+    margin-bottom: 24px;
+  }
+  /* Stand-alone product header */
+  .product-header {
+    border-bottom: 1px solid var(--af-rule);
+  }
+  /* Stand-alone product sidebar */
+  .product-sidebar {
+    border-right: 1px solid var(--af-rule);
+
+  }
+
+  /* Form container inside main pane */
+  .af-skel-main .product-form-container {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    padding: 32px;
+  }
+  /* Faint horizontal rules */
+  .af-skel-rule {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--af-rule);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .af-skel-rule--top { top: var(--af-rule-offset); }
+  .af-skel-rule--bottom { bottom: var(--af-rule-offset); }
+  
+  /* ---------------- Responsiveness ---------------- */
+  @media (max-width: 1200px) {
+    :root { --af-gap-left: 72px; --af-gap-right: 72px; }
+  }
+  @media (max-width: 900px) {
+    :root { --af-gap-left: 48px; --af-gap-right: 48px; }
+  }
+  @media (max-width: 640px) {
+    :root {
+      --af-gap-top: 24px;
+      --af-gap-bottom: 20px;
+      --af-gap-left: 16px;
+      --af-gap-right: 16px;
+      --af-rail-w: 100%;
+      --af-rule-offset: 20px;
+    }
+    .af-skel-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: 88px 1fr; /* rail stacked on top */
+    }
+  }
+  

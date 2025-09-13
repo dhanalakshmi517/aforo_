@@ -1,6 +1,7 @@
 // EditAggregationWindow.tsx
 
 import React from 'react';
+import { SelectField, SelectOption } from '../../componenetsss/Inputs';
 
 interface EditAggregationWindowProps {
   productType: string;
@@ -104,16 +105,16 @@ const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
     options = [value, ...options];
   }
 
+  // convert to SelectOption objects for SelectField component
+  const selectOptions: SelectOption[] = options.map((opt) => ({ label: opt, value: opt }));
+
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
-    </select>
+    <SelectField
+      value={value}
+      onChange={onChange}
+      options={selectOptions}
+      placeholderOption="--select--"
+    />
   );
 };
-
 export default EditAggregationWindow;

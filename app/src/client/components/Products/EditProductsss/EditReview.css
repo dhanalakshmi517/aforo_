@@ -1,0 +1,93 @@
+editreview-create 
+
+/* 
+.pr-wrapper {
+  width: 100%;
+  padding: 16px;
+  background: var(--color-neutral-200);
+} */
+
+.edit-pr-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  @media (min-width: 700px) {
+    .edit-pr-grid {
+      grid-template-columns: 1fr; /* always single column */
+    }}
+  /* Card */
+  .edit-pr-card {
+    width: 100%;
+    max-width: 585px;
+    background: var(--color-neutral-200);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin: 0; /* Remove auto margin that was centering it */
+    margin-left: 30px;
+    margin-top: 30px;
+
+  }
+  
+  .edit-pr-card__header {
+    padding: 8px 12px;
+    background-color: var(--color-neutral-200);  
+    border-bottom: 0.6px solid var(--color-neutral-300);
+  }
+  
+  .edit-pr-card__title {
+    color: var(--color-neutral-1400);
+  
+    /* body/md/thin */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 300;
+    line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  }
+  
+  /* Rows */
+  .edit-pr-card__body {
+    padding: 4px 0; /* Reduced vertical padding */
+  }
+  
+  .edit-pr-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Adjusted ratio to give more space to values */
+    align-items: center;
+    padding: 6px 12px; /* Reduced padding */
+    border-bottom: 1px dashed var(--color-neutral-300);
+  }
+  
+  .edit-pr-row:last-child {
+    border-bottom: none;
+  }
+  
+  .edit-pr-row__label {
+    color: var(--color-neutral-1400);
+  
+    /* body/md/reg */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--line-height-body-md); /* 142.857% */  white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .edit-pr-row__value {
+    justify-self: end;
+    margin-right: 30px; /* right column right-aligned */
+    color: var(--color-neutral-1400);
+  
+    /* body/md/reg */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-md); /* 142.857% */}
+  
+  /* Subtle rounding on the outer card only; rows are flush like the reference */

@@ -1,4 +1,5 @@
-import { FormData, ProductType } from './types';
+
+import { FormData, ProductType, ConfigurationData } from './types';
 import { authFetch } from '../../../utils/authFetch';
 import { normalizeProductType } from './utils';
 
@@ -25,69 +26,106 @@ export const fetchProductData = async (
     console.log('Config Data Response:', configData);
 
     // Map API response fields to FormData structure
-    const mappedData: FormData = {
-      productName: generalData.productName,
+    return {
+      productName: generalData.productName || '',
       productType: generalData.productType || ProductType.API,
       version: generalData.version || '1.0',
-      description: generalData.description,
+      description: generalData.description || '',
       tags: generalData.tags || {},
       category: generalData.category || 'INTERNAL',
-      visibility: generalData.visibility,
+      visibility: generalData.visibility ?? true,
       status: generalData.status || 'DRAFT',
-      internalSkuCode: generalData.internalSkuCode,
-      uom: generalData.uom,
-      effectiveStartDate: generalData.effectiveStartDate,
-      effectiveEndDate: generalData.effectiveEndDate,
-      billable: generalData.billable,
+      internalSkuCode: generalData.internalSkuCode || '',
+      uom: generalData.uom || '',
+      effectiveStartDate: generalData.effectiveStartDate || new Date().toISOString(),
+      effectiveEndDate: generalData.effectiveEndDate || new Date().toISOString(),
+      billable: generalData.billable ?? true,
       linkedRatePlans: generalData.linkedRatePlans || [],
       labels: generalData.labels || {},
-      auditLogId: generalData.auditLogId,
-      configuration: {
-        productType: productType,
-        ...configData,
-        ...(productType === ProductType.API ? {
-          endpointUrl: configData.endpointUrl || '',
-          authType: configData.authType || '',
-          payloadSizeMetric: configData.payloadSizeMetric || '',
-          rateLimitPolicy: configData.rateLimitPolicy || '',
-          meteringGranularity: configData.meteringGranularity || '',
-          grouping: configData.grouping || '',
-          latencyClass: configData.latencyClass || '',
-          cachingFlag: configData.cachingFlag || false
-        } : {}),
-        ...(productType === ProductType.FLATFILE ? {
-          size: configData.size || '',
-          format: configData.format || '',
-          deliveryFrequency: configData.deliveryFrequency || '',
-          accessMethod: configData.accessMethod || '',
-          compressionFormat: configData.compressionFormat || '',
-          fileNamingConvention: configData.fileNamingConvention || '',
-          retentionPolicy: configData.retentionPolicy || ''
-        } : {}),
-        ...(productType === ProductType.SQLRESULT ? {
-          queryTemplate: configData.queryTemplate || '',
-          dbType: configData.dbType || '',
-          freshness: configData.freshness || '',
-          executionFrequency: configData.executionFrequency || '',
-          joinComplexity: configData.joinComplexity || '',
-          expectedRowRange: configData.expectedRowRange || '',
-          resultSize: configData.resultSize || '',
-          cached: configData.cached || false
-        } : {}),
-        ...(productType === ProductType.LLMTOKEN ? {
-          tokenProvider: configData.tokenProvider || '',
-          modelName: configData.modelName || '',
-          tokenUnitCost: configData.tokenUnitCost || '',
-          calculationMethod: configData.calculationMethod || '',
-          quota: configData.quota || '',
-          inferencePriority: configData.inferencePriority || '',
-          computeTier: configData.computeTier || '',
-          promptTemplate: configData.promptTemplate || ''
-        } : {})
-      }
-    };
+      auditLogId: generalData.auditLogId || 0,
+      configuration: (() => {
+        // Helper function to filter out null/undefined values
+        const cleanConfig = (obj: Record<string, any>): Record<string, any> => {
+          return Object.entries(obj).reduce((acc, [key, value]) => {
+            if (value !== null && value !== undefined) {
+              acc[key] = value;
+            }
+            return acc;
+          }, {} as Record<string, any>);
+        };
 
-    return mappedData;
+        // Base configuration with common fields
+        const baseConfig: ConfigurationData = {
+          billingPeriod: configData.billingPeriod,
+          trialPeriod: configData.trialPeriod,
+          gracePeriod: configData.gracePeriod,
+          setupFee: configData.setupFee,
+          recurringFee: configData.recurringFee,
+          currency: configData.currency,
+          ...cleanConfig(configData)
+        };
+        
+        // Add product type specific fields based on the product type
+
+        // Type-specific configurations
+        switch (productType) {
+          case ProductType.API:
+            return cleanConfig({
+              ...baseConfig,
+              endpointUrl: configData.endpointUrl,
+              authType: configData.authType,
+              payloadSizeMetric: configData.payloadSizeMetric,
+              rateLimitPolicy: configData.rateLimitPolicy,
+              meteringGranularity: configData.meteringGranularity,
+              grouping: configData.grouping,
+              latencyClass: configData.latencyClass,
+              cachingFlag: configData.cachingFlag,
+              method: configData.method
+            });
+          
+          case ProductType.FLATFILE:
+            return cleanConfig({
+              ...baseConfig,
+              size: configData.size,
+              format: configData.format,
+              deliveryFrequency: configData.deliveryFrequency,
+              accessMethod: configData.accessMethod,
+              compressionFormat: configData.compressionFormat,
+              fileNamingConvention: configData.fileNamingConvention,
+              retentionPolicy: configData.retentionPolicy
+            });
+          
+          case ProductType.SQLRESULT:
+            return cleanConfig({
+              ...baseConfig,
+              queryTemplate: configData.queryTemplate,
+              dbType: configData.dbType,
+              freshness: configData.freshness,
+              executionFrequency: configData.executionFrequency,
+              joinComplexity: configData.joinComplexity,
+              expectedRowRange: configData.expectedRowRange,
+              resultSize: configData.resultSize,
+              cached: configData.cached
+            });
+          
+          case ProductType.LLMTOKEN:
+            return cleanConfig({
+              ...baseConfig,
+              tokenProvider: configData.tokenProvider,
+              modelName: configData.modelName,
+              tokenUnitCost: configData.tokenUnitCost,
+              calculationMethod: configData.calculationMethod,
+              quota: configData.quota,
+              inferencePriority: configData.inferencePriority,
+              computeTier: configData.computeTier,
+              promptTemplate: configData.promptTemplate
+            });
+          
+          default:
+            return baseConfig;
+        }
+      })()
+    };
   } catch (error) {
     console.error('Error fetching product data:', error);
     throw error;

@@ -29,31 +29,6 @@ interface ProductReviewProps {
   configuration: Record<string, string>;
 }
 
-/*  {
-    title: "GENERAL DETAILS",
-    rows: [
-      { label: "Product  Name", value: "Entered Value" },
-      { label: "Version", value: "Entered Value" },
-      { label: "Product  Description", value: "Entered Value" },
-      { label: "Internal SKU Code", value: "Entered Value" },
-    ],
-  },
-  {
-    title: "PRODUCT METADATA",
-    rows: [
-      { label: "Internal SKU Code", value: "Entered Value" },
-      { label: "UOM", value: "Entered Value" },
-      { label: "Effective Start Date", value: "Selected Date" },
-      { label: "Effective End Date", value: "Selected Date" },
-      { label: "Is Billable?", value: "Selected" },
-      { label: "Linked Rate Plan(s)", value: "Selected Option" },
-      { label: "Labels / Metadata", value: "Entered Value" },
-      { label: "Audit Log ID", value: "Entered Value" },
-      { label: "Status", value: "Selected Option" },
-    ],
-  },
-*/
-
 const CardSection: React.FC<ReviewSection> = ({ title, rows }: ReviewSection) => {
   return (
     <section className="pr-card" aria-label={title}>
@@ -62,7 +37,7 @@ const CardSection: React.FC<ReviewSection> = ({ title, rows }: ReviewSection) =>
       </header>
       <div className="pr-card__body">
         {rows.map((r, i) => (
-          <div className="pr-row" key={r.label + i}>
+          <div className="pr-row" key={`${r.label}-${i}`}>
             <div className="pr-row__label" title={r.label}>
               {r.label}
             </div>
@@ -76,11 +51,15 @@ const CardSection: React.FC<ReviewSection> = ({ title, rows }: ReviewSection) =>
   );
 };
 
-const ProductReview: React.FC<ProductReviewProps> = ({ generalDetails, configuration }: ProductReviewProps) => {
+const ProductReview: React.FC<ProductReviewProps> = ({
+  generalDetails,
+  configuration,
+}) => {
   const generalRows: ReviewRow[] = Object.entries(generalDetails).map(([k, v]) => ({
     label: prettify(k),
     value: v || '-'
   }));
+  
   const configRows: ReviewRow[] = Object.entries(configuration).map(([k, v]) => ({
     label: prettify(k),
     value: v || '-'
@@ -92,14 +71,14 @@ const ProductReview: React.FC<ProductReviewProps> = ({ generalDetails, configura
   ];
 
   return (
-    <div className="pr-wrapper">
-      <div className="pr-grid">
-        {sections.map((s) => (
-          <CardSection key={s.title} {...s} />)
-        )}
-      </div>
+    <div className="pr-grid">
+      {sections.map((section) => (
+        <CardSection key={section.title} {...section} />
+      ))}
     </div>
   );
 };
 
 export default ProductReview;
+
+

@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField, InputField } from '../componenetsss/Inputs';
 
 interface AggregationFunctionSelectProps {
   productType: string;
@@ -19,9 +20,12 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ p
   // If either field is not yet selected, show a disabled placeholder dropdown so the layout remains consistent
   if (!productType || !unitOfMeasure) {
     return (
-      <select className="select-field" value="" disabled>
-        <option value="">-- select product/unit first --</option>
-      </select>
+      <SelectField
+        value=""
+        onChange={() => {}}
+        options={[{ label: '-- select product/unit first --', value: '', disabled: true }]}
+        disabled
+      />
     );
   }
 
@@ -71,23 +75,21 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ p
 
   if (options) {
     return (
-      <select className="select-field" value={value} onChange={e => onChange(e.target.value)}>
-        <option value="">--select--</option>
-        {options.map(opt => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
+      <SelectField
+        value={value}
+        onChange={onChange}
+        options={options.map(opt=>({label:opt,value:opt}))}
+        placeholderOption="--select--"
+      />
     );
   }
 
   // fallback: free text
   return (
-    <input
-      type="text"
-      className="input-field"
-      placeholder="Aggregation Function"
+    <InputField
       value={value}
-      onChange={e => onChange(e.target.value)}
+      onChange={onChange}
+      placeholder="Aggregation Function"
     />
   );
 };
