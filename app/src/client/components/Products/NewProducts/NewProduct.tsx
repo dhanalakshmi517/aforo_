@@ -16,11 +16,14 @@ const steps = [
   { id: 3, title: 'Review & Confirm', desc: 'Validate all details before finalizing.' },
 ];
 
+
 interface NewProductProps {
   onClose: () => void;
+  /** Optional callback invoked when a product is successfully created (after step-1 API call). */
+  onSubmit?: (created: any) => void;
 }
 
-const NewProduct: React.FC<NewProductProps> = ({ onClose }: NewProductProps) => {
+const NewProduct: React.FC<NewProductProps> = ({ onClose, onSubmit }) => {
   useEffect(() => {
     document.body.classList.add('create-product-page');
     return () => {
@@ -136,7 +139,7 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }: NewProductProps) => 
 
   const handleConfirmDelete = () => {
     setShowDeleteConfirm(false);
-    onClose(); // close overlay immediately
+    onClose();
     navigate('/get-started/products');
   };
 
@@ -238,6 +241,8 @@ const NewProduct: React.FC<NewProductProps> = ({ onClose }: NewProductProps) => 
         const result = await createProduct(payload);
         console.log('Product created successfully:', result);
         setCreatedProductId(result?.productId?.toString() || formData.skuCode);
+        // Notify parent list so it can append the new product
+        onSubmit?.(result);
         // Only proceed to next step if submission is successful
         setCurrentStep(1);
         setActiveTab('configuration');

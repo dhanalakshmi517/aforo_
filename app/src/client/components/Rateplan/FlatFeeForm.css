@@ -27,7 +27,13 @@
 }
 
 /* One field group */
-.form-section{ display: flex; flex-direction: column; gap: 8px; }
+.form-section{ 
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start;
+  gap: 4px;
+  align-self: stretch;
+}
 
 /* Label = body/bold/md */
 .form-section label,
@@ -38,6 +44,11 @@
   font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-body-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  align-self: stretch;
 }
 
 /* Inputs (match UsageBased styles) */
@@ -46,10 +57,15 @@
   width: 100%;
   height: 40px;
   padding: 8px 12px;
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--border-radius-sm);
-  background-color: var(--color-neutral-100);
+  border-radius: 8px;
+  border: 1px solid var(--border-border-3, #BFBECE);
+  background: var(--surface-layer-4, #FFF);
   color: var(--color-neutral-1400);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  box-sizing: border-box;
 
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
@@ -60,7 +76,7 @@
 .form-section input:focus,
 .ff-label input:focus{
   outline: none;
-  border-color: var(--color-neutral-300);
+  border: 2px solid var(--primary-primary-6, #7C3AED);
 }
 
 /* Placeholder look */
@@ -127,6 +143,11 @@
   font-style: italic;
   font-weight: 200;
   line-height: var(--line-height-body-lg);
+}
+
+.note-title {
+  font-weight: bold;
+  font-style: normal;
 }
 
 /* Responsive parity with UsageBased */

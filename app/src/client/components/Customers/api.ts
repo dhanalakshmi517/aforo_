@@ -27,7 +27,23 @@ async function handleApiResponse(res: Response): Promise<any> {
     throw new Error(errorMessage);
   }
   
-  return res.json();
+  // Check if response has content before parsing JSON
+  const contentLength = res.headers.get('content-length');
+  const contentType = res.headers.get('content-type');
+  
+  // If no content or content-length is 0, return null instead of parsing JSON
+  if (contentLength === '0' || (!contentType?.includes('application/json') && !contentLength)) {
+    return null;
+  }
+  
+  // Try to parse JSON, but handle empty responses gracefully
+  try {
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  } catch (error) {
+    // If JSON parsing fails, return null for successful responses
+    return null;
+  }
 }
 
 /**
@@ -116,6 +132,59 @@ export async function confirmCustomer(customerId: number | string) {
   });
   
   return handleApiResponse(res);
+}
+
+/**
+ * Create new customer with authentication
+ */
+export async function createCustomer(payload: Record<string, unknown> | FormData) {
+  if (!isAuthenticated()) {
+    throw new Error('Not authenticated');
+  }
+  
+  const isFormData = payload instanceof FormData;
+  const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
+  
+  // Remove Content-Type for FormData to let browser set it with boundary
+  if (isFormData && headers['Content-Type']) {
+    delete headers['Content-Type'];
+  }
+  
+  const bodyInit: BodyInit | undefined = isFormData ? (payload as FormData) : JSON.stringify(payload);
+  
+  const res = await fetch(`${BASE_URL}/customers`, {
+    method: 'POST',
+    headers,
+    body: bodyInit,
+  });
+  
+  return handleApiResponse(res);
+}
+
+/**
+ * Check if email already exists for the organization
+ */
+export async function checkEmailExists(email: string): Promise<boolean> {
+  if (!isAuthenticated()) {
+    throw new Error('Not authenticated');
+  }
+  
+  try {
+    console.log('Fetching all customers to check email existence');
+    // Get all customers and check if email exists
+    const customers = await getCustomers();
+    console.log('Retrieved customers:', customers);
+    
+    const emailExists = customers.some(customer => 
+      customer.primaryEmail?.toLowerCase() === email.toLowerCase()
+    );
+    
+    console.log(`Email ${email} exists:`, emailExists);
+    return emailExists;
+  } catch (error) {
+    console.error('Error checking email:', error);
+    return false; // Assume email doesn't exist on error
+  }
 }
 
 export async function deleteCustomer(customerId: number | string): Promise<void> {

@@ -1,0 +1,203 @@
+.rate-plan-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 0 20px 0 28px; /* right padding ensures room for right divider */
+  box-sizing: border-box;
+  background: var(--color-neutral-white, #fff);
+}
+
+.rate-plan-header h2 {
+  margin: 0;
+  padding: 0;
+  font-family: 'IBM Plex Sans', var(--font-family-primary, sans-serif);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+  color: var(--color-neutral-1700, #1A2126);
+  flex: 1 1 auto;
+}
+
+/* Renamed to avoid conflicts with RatePlan.css */
+.ph-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  margin-left: 8px;   /* slight nudge left so the right divider has room */
+}
+
+/* ===================== Search control ===================== */
+.rp-header-search {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px 8px 8px;
+  gap: 8px;
+  width: 180px;
+  height: 36px;
+  border-radius: var(--border-radius-sm, 8px);
+  border: 1px solid var(--border-border-2, #D5D4DF);
+  background: var(--surface-layer-4, #FFF);
+  box-sizing: border-box;
+  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+.rp-header-search:hover { background: var(--surface-layer-3, #F8F7FA); border-color: var(--border-border-1, #E9E9EE); }
+.rp-header-search.is-active,
+.rp-header-search:focus-within,
+.rp-header-search:active { background:#FFF; border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; }
+.rp-header-search.has-value { width:180px; height:36px; background:#FFF; border-color:#D5D4DF; }
+.rp-header-search.has-value:hover { background:#FFF; border-color:#D5D4DF; }
+.rp-header-search.has-value.is-active { border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; background:#FFF; }
+.rp-header-search.is-disabled { width:180px; height:36px; background:#F8F7FA; border-color:#D5D4DF; cursor:not-allowed; box-shadow:none; }
+.rp-header-search.is-disabled:hover,
+.rp-header-search.is-disabled.is-active,
+.rp-header-search.is-disabled:focus-within { background:#F8F7FA; border-color:#D5D4DF; box-shadow:none; }
+.rp-header-search.is-disabled, .rp-header-search.is-disabled * { pointer-events:none !important; }
+
+.rp-search-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; flex-shrink:0; }
+.rp-header-search.is-disabled .rp-search-icon { color: var(--text-disabled-1, #D5D4DF); }
+
+.rp-search-input {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  flex: 1 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
+  color: var(--text-text-darkest, #1A2126);
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+}
+.rp-header-search.has-value .rp-search-input { width: auto; flex: 1 0 0; }
+.rp-search-input::placeholder { color: var(--text-placeholder, #C3C2D0); }
+.rp-header-search.is-disabled .rp-search-input,
+.rp-header-search.is-disabled .rp-search-input::placeholder { color: var(--text-disabled-1, #D5D4DF); }
+
+/* Clear (X) */
+.rp-clear-btn {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0 0 0 4px;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-disabled-1, #B8BCC6);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.rp-clear-btn:hover {
+  color: var(--text-text-darkest, #1A2126);
+}
+
+/* Ensure the search input has enough padding on the right for the clear button */
+.rp-header-search {
+  position: relative;
+  padding-right: 32px; /* Make room for the clear button */
+}
+
+/* Position the clear button absolutely within the search container */
+.rp-header-search .rp-clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+/* Adjust input padding when there's a value to prevent text overlap */
+.rp-header-search.has-value .rp-search-input {
+  padding-right: 24px;
+}
+
+/* ================= Filter button ================= */
+.rp-filter-btn {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-layer-4, #FFF);
+  color: #373B40;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
+}
+.rp-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent; box-shadow: none; }
+.rp-filter-btn.is-selected { border: 1px solid #004B80; background: #E1F4FB; color: #004B80; box-shadow: none; }
+.rp-filter-btn.is-disabled,
+.rp-filter-btn:disabled { background:#F8F7FA; border:1px solid transparent; color:#D5D4DF; cursor:not-allowed; box-shadow:none; pointer-events:none; }
+
+/* ================= Header Divider ================= */
+.header-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2px;
+  height: 33px;
+  flex-shrink: 0;
+}
+.header-divider svg { width: 2px; height: 34px; stroke-width: 1px; stroke: var(--border-border-1, #E9E9EE); }
+
+/* ================= Settings / Notifications ================= */
+.rp-settings-btn,
+.rp-notification-btn {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-layer-4, #FFF);
+  color: #373B40;
+  background-clip: padding-box;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+.rp-settings-icon,
+.rp-notification-btn svg { width: 16px; height: 16px; }
+
+/* ================= Primary CTA ===================== */
+.new-rate-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  min-width: 164px;
+  height: 40px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm, 8px);
+  border: none;
+  background: var(--surface-primary-button-active, #025A94);
+  color: var(--text-primary-button-default, #E1F4FB);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-lg, 16px);
+  font-weight: 500;
+  line-height: var(--line-height-body-lg, 24px);
+  cursor: pointer;
+}
+.new-rate-button:hover { filter: brightness(0.97); }
+.new-rate-button svg { width: 16px; height: 16px; }

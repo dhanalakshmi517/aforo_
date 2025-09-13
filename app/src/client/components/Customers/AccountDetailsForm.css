@@ -1,67 +1,86 @@
 .account-details-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .acc-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  
-  .acc-form-group label {
-    font-weight: 400;
-    color: #555;
-  }
-  
-  .acc-form-group input,
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.acc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.acc-form-group label {
+  font-weight: 400;
+  color: #555;
+}
+
+.acc-form-group input,
 .acc-form-group .select-field {
-    padding: 8px 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-  }
-  
-  .acc-form-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: nowrap; /* keep items on one line */
-  }
-  
-  .acc-form-row .acc-form-group {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  
-  .additional-email {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .add-email-btn {
-    background: none;
-    border: none;
-    color: #0066cc;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  
-  .info-icon {
-    font-size: 12px;
-    color: #888;
-  }
-  
-  .email-list {
-    margin-top: 4px;
-    padding-left: 18px;
-    font-size: 13px;
-  }
-  
-  .address-section1 {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* --- ROW LAYOUT: let left grow, clamp the right (country) --- */
+.acc-form-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;        /* stay on one line */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* critical: allow flex children to actually shrink */
+.acc-form-row .acc-form-group {
+  flex: 1 1 0;              /* fluid column */
+  min-width: 0;             /* prevents overflow from long content */
+}
+
+/* country column gets a fixed, safe width */
+.acc-form-row .acc-form-group.acc-country {
+  flex: 0 0 220px;
+  max-width: 220px;
+  min-width: 180px;         /* small guardrail for narrower viewports */
+}
+
+/* ensure selects inherit container width */
+.acc-form-row .acc-form-group .select-field {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.additional-email {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-email-btn {
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-icon {
+  font-size: 12px;
+  color: #888;
+}
+
+.email-list {
+  margin-top: 4px;
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+.address-section1 {
   background: white;
   border: 1px solid #eee;
   padding: 16px;
@@ -71,55 +90,55 @@
 .address-section1.disabled {
   background: #f5f5f5;
 }
-  .address-section {
-    background: white;
-    border: 1px solid #eee;
-    padding: 16px;
-    border-radius: 8px;
-  }
-  
-  .address-section h4 {
-    margin: 0 0 10px;
-    font-size: 15px;
-    color: #333;
-  }
-  
-  .checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-  }
 
-  .checkbox-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-  }
+.address-section {
+  background: white;
+  border: 1px solid #eee;
+  padding: 16px;
+  border-radius: 8px;
+}
 
-  .checkbox-label {
-    cursor: pointer;
-  }
+.address-section h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #333;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.checkbox-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  cursor: pointer;
+}
 
 /* Override fixed widths from global input styles */
-.account-details-form .input-field,
+.account-details-form .input-field {
+  width: 100% !important;
+}
+
 .account-details-form .select-field {
   width: 100% !important;
 }
 
-/* Wider columns on large screens */
+/* Wider columns on large screens (left column simply grows) */
 @media (min-width: 1024px) {
-  .acc-form-row .acc-form-group {
-    flex: 1 1 340px;
-  }
+  .acc-form-row .acc-form-group { flex-basis: 0; }
 }
 @media (min-width: 1440px) {
-  .acc-form-row .acc-form-group {
-    flex: 1 1 420px;
-  }
+  .acc-form-row .acc-form-group { flex-basis: 0; }
 }
 
 /* Field validation errors */
@@ -128,6 +147,5 @@
   font-size: var(--font-size-sm);
   font-weight: 400;
   font-family: var(--font-family-primary);
-  
   margin-top: 2px;
 }

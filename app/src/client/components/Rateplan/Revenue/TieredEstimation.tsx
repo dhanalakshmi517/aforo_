@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './EstimateRevenue.css';
+import { getRatePlanData } from '../utils/sessionStorage';
 
 interface Tier {
   usageStart: number;
@@ -10,7 +11,7 @@ interface Tier {
 
 function parseTieredTiers(): Tier[] {
   try {
-    const arr = JSON.parse(localStorage.getItem('tieredTiers') || '[]');
+    const arr = JSON.parse(getRatePlanData('TIERED_TIERS') || '[]');
     return Array.isArray(arr)
       ? arr.map((t: any) => ({
           usageStart: Number(t.from || 0),
@@ -30,16 +31,16 @@ const TieredEstimation: React.FC = () => {
   const [showCalc, setShowCalc] = useState(false);
 
   const tiers = parseTieredTiers();
-  const overageRate = Number(localStorage.getItem('tieredOverage') || 0);
-  const graceBuffer = Number(localStorage.getItem('tieredGrace') || 0);
+  const overageRate = Number(getRatePlanData('TIERED_OVERAGE') || 0);
+  const graceBuffer = Number(getRatePlanData('TIERED_GRACE') || 0);
 
   // extras
-  const setupFee = Number(localStorage.getItem('setupFee') || 0);
-  const discountPercent = Number(localStorage.getItem('discountPercent') || 0);
-  const discountFlat = Number(localStorage.getItem('discountFlat') || 0);
-  const freemiumUnits = Number(localStorage.getItem('freemiumUnits') || 0);
-  const minimumUsage = Number(localStorage.getItem('minimumUsage') || 0);
-  const minimumCharge = Number(localStorage.getItem('minimumCharge') || 0);
+  const setupFee = Number(getRatePlanData('SETUP_FEE') || 0);
+  const discountPercent = Number(getRatePlanData('DISCOUNT_PERCENT') || 0);
+  const discountFlat = Number(getRatePlanData('DISCOUNT_FLAT') || 0);
+  const freemiumUnits = Number(getRatePlanData('FREEMIUM_UNITS') || 0);
+  const minimumUsage = Number(getRatePlanData('MINIMUM_USAGE') || 0);
+  const minimumCharge = Number(getRatePlanData('MINIMUM_CHARGE') || 0);
 
   const [incSetup, setIncSetup] = useState(false);
   const [incDiscount, setIncDiscount] = useState(false);
@@ -101,9 +102,7 @@ const TieredEstimation: React.FC = () => {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => navigate(-1)}>
-        ← Back
-      </div>
+      <h2 style={{ margin: 0 }}>Estimate revenue</h2>
       <div className="estimate-container">
         <div className="input-section">
           <div className="input-group">

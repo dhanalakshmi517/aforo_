@@ -6,11 +6,15 @@
 :root{
   --af-gutter: 120px;      /* header side gutters */
   --af-border-1: #EFF0F0;  /* Variables.borderBorder1 */
+  --field-pl: 14px;        /* unified left padding so text never shifts */
+
+  /* ⬇️ NEW: content gutter between stepper and form */
+  --content-gutter: 24px;
 }
 
 .align-under-back{
-  margin-left: calc(-1 * var(--af-gutter) + 12px);
-  margin-right: calc(-1 * var(--af-gutter) + 12px);
+  margin-left: var(--af-gutter);
+  margin-right: var(--af-gutter);
   margin-top: 40px;
   padding-left: 0;
   padding-right: 0;
@@ -20,7 +24,7 @@
 /* ====== WRAPPER ====== */
 .price-plan-wrapper{
   display:flex;
-  gap:0;
+  gap:0; /* keep header flush with stepper */
   font-family: var(--font-family-primary);
   background-color: var(--color-neutral-white);
   min-height:600px;
@@ -35,22 +39,24 @@
 
 /* ====== STEPPER (left column) ====== */
 .price-plan-sidebars{
-  width:300px;
-  background-color:var(--color-neutral-100);
-  padding:24px 16px;
-  border-right:1.5px solid var(--color-neutral-200);
-  box-sizing:border-box;
+  border-right: 1px solid var(--border-border-2, #D5D4DF);
+  background: var(--surface-layer-3, #F8F7FA);
+  display: flex;
+  width: 240px;
+  align-items: flex-start;
+  gap: 4px;
+  align-self: stretch;
+  flex-direction: column;
+  padding: 24px 16px;
+  box-sizing: border-box;
 }
 
-/* PROGRESS ITEMS CLICKABLE (unlocked) */
 .step-item{ display:flex; align-items:flex-start; margin-bottom:25px; cursor:pointer; }
 .icon-wrappers{ margin-left:-6px; position:relative; display:flex; flex-direction:column; align-items:center; margin-right:12px; }
 .icon-wrappers svg:first-child{ width:24px; height:24px; flex-shrink:0; }
-.connector{ position:absolute; top:24px; left:11px; width:2px; height:50px; background:transparent; }
-.step-0{height:80px;} .step-1{height:70px;} .step-2{height:80px;} .step-3{height:100px;}
 .step-text{ max-width:180px; }
-.step-title{ color:var(--color-neutral-800); font-family:var(--font-family-primary); font-size:var(--font-size-lg); font-weight:600; line-height:var(--line-height-body-lg); display:block; margin-bottom:2px; }
-.step-desc{ color:var(--color-neutral-800); font-family:var(--font-family-primary); font-size:var(--font-size-md); font-weight:400; line-height:var(--line-height-body-md); display:block; }
+.step-title{ color:var(--color-neutral-800); font-size:var(--font-size-lg); font-weight:600; line-height:var(--line-height-body-lg); display:block; margin-bottom:2px; }
+.step-desc{ color:var(--color-neutral-800); font-size:var(--font-size-md); font-weight:400; line-height:var(--line-height-body-md); display:block; }
 .step-item.active .icon-wrappers svg circle:first-child{ stroke:var(--color-primary-800); }
 .step-item.active .icon-wrappers svg circle:last-child{ fill:var(--color-primary-800); stroke-width:3; }
 .step-item.active .step-title{ color:var(--color-neutral-1700); }
@@ -60,7 +66,8 @@
   flex:1 1 auto;
   background:transparent;
   border:none;
-  padding:0;
+  padding-top:24px;                      /* match sidebar top padding */
+  padding-left: var(--content-gutter);   /* ⬅️ ADD GUTTER FOR CONTENT */
   display:flex;
   flex-direction:column;
   min-width:0;
@@ -74,16 +81,19 @@
   display:flex;
   align-items:center;
   background:var(--color-neutral-white);
-  border-left:1px solid var(--af-border-1);
+
+  /* rely on sidebar's right border for the central divider */
+  border-left:none;
   border-right:1px solid var(--af-border-1);
   border-top:1px solid var(--af-border-1);
   border-bottom:1px solid var(--af-border-1);
+
   padding:0;
-  margin:0;
+  margin: -1px 0 0 calc(-1 * var(--content-gutter)); /* ⬅️ OFFSET HEADER ONLY */
 }
 .section-title{
   margin:0;
-  padding:0 16px;
+  padding:0 32px;
   color:#706C72;
   font-size:18px;
   line-height:24px;
@@ -93,22 +103,76 @@
 /* Form card */
 .form-card{
   background:transparent;
-  padding:16px 16px 120px 16px; /* 16px gap from header bottom to first field */
+  /*           T     R      B      L  */
+  padding:16px 32px 120px 32px; /* the column gutter now provides the left spacing */
   margin:0;
   width:100%;
+  border-left:none;                     /* keep single vertical divider from sidebar */
   border-right:1px solid var(--af-border-1);
   border-bottom:1px solid var(--af-border-1);
-  border-left:1px solid var(--af-border-1);
   border-top:none;
   box-sizing:border-box;
   flex:1 1 auto;
   overflow-y:auto;
 }
 
-/* spacing between fields = 20px */
 .create-form{ margin-bottom:20px; }
 
-/* inline error for step areas */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-row .create-form {
+  flex: 1;
+}
+
+/* ============================================================
+   ANTI-JUMP PATCH
+   ============================================================ */
+.create-price-plan .form-card .create-form :is(input, textarea, select){
+  padding-left: var(--field-pl) !important;
+  text-indent: 0 !important;
+  background-origin: content-box;
+  background-repeat: no-repeat;
+  background-position: right 12px center !important;
+  border-left-width: 1px !important;
+  border-right-width: 1px !important;
+  border-top-width: 1px !important;
+  border-bottom-width: 1px !important;
+  box-shadow: none !important;
+}
+
+.create-price-plan .form-card [role="combobox"],
+.create-price-plan .form-card .select-trigger,
+.create-price-plan .form-card .Select__control{
+  padding-left: var(--field-pl) !important;
+  text-indent: 0 !important;
+  background-position: right 12px center !important;
+  box-shadow: none !important;
+}
+
+.create-price-plan .form-card .create-form.error :is(input, textarea, select),
+.create-price-plan .form-card .create-form .error :is(input, textarea, select),
+.create-price-plan .form-card .create-form .invalid :is(input, textarea, select),
+.create-price-plan .form-card :is(input, textarea, select)[aria-invalid="true"],
+.create-price-plan .form-card [role="combobox"][aria-invalid="true"],
+.create-price-plan .form-card .select-trigger.error,
+.create-price-plan .form-card .Select__control--is-invalid{
+  padding-left: var(--field-pl) !important;
+  text-indent: 0 !important;
+  background-image: none !important;
+  background-position: right 12px center !important;
+  border-width: 1px !important;
+}
+
+.create-price-plan .form-card .input-prefix,
+.create-price-plan .form-card .field-icon--error,
+.create-price-plan .form-card .error-icon{
+  display: none !important;
+}
+
 .inline-page-error{
   color: var(--color-semantic-danger-700, #B42318);
   font-size: 12px;
@@ -122,10 +186,11 @@
   position:sticky;
   bottom:0;
   display:flex;
-  justify-content:flex-end;
+  align-items:center;
+  justify-content: space-between;
   background:var(--color-neutral-white);
   border-top:1px solid var(--color-neutral-200);
-  padding:16px 12px 16px 0;
+  padding:16px 32px;
   gap:16px;
 }
 .btn{
@@ -157,13 +222,27 @@
     padding-left: 16px;
     padding-right: 16px;
   }
-  .price-plan-wrapper{ flex-direction:column; }
+  .price-plan-wrapper{ flex-direction:column; gap:12px; }
   .price-plan-sidebars{
     width:100%;
     border-right:none;
     border-bottom:1.5px solid var(--color-neutral-200);
     display:flex;
     justify-content:center;
+  }
+
+  /* stacked layout: remove the left gutter and restore a boxed card */
+  .price-plan-section{
+    padding-top: 0;
+    padding-left: 0;                 /* no gutter on small screens */
+  }
+  .section-header{
+    margin-top:0;
+    margin-left:0;                   /* no offset needed */
+    border-left:1px solid var(--af-border-1);
+  }
+  .form-card{
+    border-left:1px solid var(--af-border-1);
   }
 }
 @media (max-width: 768px){

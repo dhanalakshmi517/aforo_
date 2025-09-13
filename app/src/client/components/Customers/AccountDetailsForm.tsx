@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { InputField, SelectField } from '../Components/InputFields';
+import { checkEmailExists } from './api';
 import './AccountDetailsForm.css';
 
 export interface AccountDetailsData {
@@ -25,9 +26,10 @@ interface Props {
   data?: AccountDetailsData;
   onChange?: (data: AccountDetailsData) => void;
   errors?: { [key: string]: string };
+  onEmailBlur?: (email: string) => void;
 }
 
-const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) => {
+const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEmailBlur }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
@@ -60,7 +62,9 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setCountryOptions(data.map((c: { code: string; name: string }) => ({ label: c.name, value: c.code })));
+          setCountryOptions(
+            data.map((c: { code: string; name: string }) => ({ label: c.name, value: c.code }))
+          );
         }
       })
       .catch((err) => console.error('Failed to load countries', err));
@@ -69,7 +73,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
   // Notify parent on state change
   useEffect(() => {
     if (!onChange) return;
-    const data: AccountDetailsData = {
+    const payload: AccountDetailsData = {
       phoneNumber,
       primaryEmail,
       additionalEmailRecipients: additionalEmails.filter(Boolean),
@@ -87,7 +91,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
       billingPostalCode: billingAddress.zip,
       billingCountry: billingAddress.country,
     };
-    onChange(data);
+    onChange(payload);
   }, [phoneNumber, primaryEmail, additionalEmails, billingAddress, customerAddress, sameAsBilling, onChange]);
 
   const Checkbox: React.FC<{ checked: boolean; onToggle: () => void }> = ({ checked, onToggle }) => (
@@ -138,7 +142,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
     });
   }, []);
 
-  // propagate state to parent
+  // propagate state to parent (dup retained to match your original logic)
   useEffect(() => {
     if (!onChange) return;
     onChange({
@@ -195,7 +199,6 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           value={phoneNumber}
           placeholder="e.g., +1234567890"
           onChange={(val) => {
-            // allow optional leading + followed by digits
             if (/^\+?\d*$/.test(val)) setPhoneNumber(val);
           }}
           type="tel"
@@ -211,8 +214,9 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
           value={primaryEmail}
           placeholder="e.g., johndoe@example.com"
           type="email"
-          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          pattern="[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$"
           onChange={setPrimaryEmail}
+          onBlur={() => onEmailBlur && onEmailBlur(primaryEmail)}
         />
         {errors.primaryEmail && <span className="field-error">{errors.primaryEmail}</span>}
       </div>
@@ -226,7 +230,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
               type="email"
               placeholder="e.g., johndoe@example.com"
               value={email}
-              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              pattern="[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$"
               onChange={(val) => updateAdditionalEmail(idx, val)}
             />
             {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
@@ -296,7 +300,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
             />
             {errors.billingPostalCode && <span className="field-error">{errors.billingPostalCode}</span>}
           </div>
-          <div className="acc-form-group">
+          <div className="acc-form-group acc-country">
             <label>Country</label>
             <SelectField
               value={billingAddress.country}
@@ -310,15 +314,15 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
         </div>
       </div>
 
-    {/* Same as Billing Checkbox */}
-    <div className="checkbox-row">
-      <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
-      <span className="checkbox-label" onClick={handleToggleSame}>
-        Billing address is same as customer address
-      </span>
-    </div>
+      {/* Same as Billing Checkbox */}
+      <div className="checkbox-row">
+        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
+        <span className="checkbox-label" onClick={handleToggleSame}>
+          Billing address is same as customer address
+        </span>
+      </div>
 
-    {/* Customer Address */}
+      {/* Customer Address */}
       <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
         <h4>Customer Address</h4>
         <div className="acc-form-group">
@@ -384,7 +388,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {} }) =>
             />
             {errors.customerPostalCode && <span className="field-error">{errors.customerPostalCode}</span>}
           </div>
-          <div className="acc-form-group">
+          <div className="acc-form-group acc-country">
             <label>Country</label>
             <SelectField
               value={customerAddress.country}

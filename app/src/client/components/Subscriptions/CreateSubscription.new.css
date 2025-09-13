@@ -47,6 +47,20 @@
   position: relative;
 }
 
+.rateplan-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 4px;
+  flex: 1 0 0;
+  color: var(--text-text-dark, #75797E);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-xs, 10px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-xs, 16px);
+}
+
 .form-card {
   max-width: 100%;
   height: 100%;
@@ -58,4 +72,3 @@
   margin-bottom: 25px;
   cursor: pointer;
 }
-

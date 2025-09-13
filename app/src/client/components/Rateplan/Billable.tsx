@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Billable.css';
+import { setRatePlanData } from './utils/sessionStorage';
 
 interface Metric {
   id: number;
@@ -101,10 +102,10 @@ const Billable: React.FC<BillableProps> = ({ productName, selectedMetricId, onSe
               onChange={() => {
                 onSelectMetric(metric.id);
                 // Persist details for review step
-                localStorage.setItem('billableMetricName', metric.title);
-                localStorage.setItem('billableMetricDescription', metric.subtitle || '');
-                if (metric.unit) localStorage.setItem('billableMetricUnit', metric.unit);
-                if (metric.aggregation) localStorage.setItem('billableMetricAggregation', metric.aggregation);
+                setRatePlanData('BILLABLE_METRIC_NAME', metric.title);
+                setRatePlanData('BILLABLE_METRIC_DESCRIPTION', metric.subtitle || '');
+                if (metric.unit) setRatePlanData('BILLABLE_METRIC_UNIT', metric.unit);
+                if (metric.aggregation) setRatePlanData('BILLABLE_METRIC_AGGREGATION', metric.aggregation);
               }}
               className="hidden"
             />

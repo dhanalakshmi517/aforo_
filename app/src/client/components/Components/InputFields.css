@@ -39,7 +39,8 @@
 .com-input-field,
 .com-textarea-field,
 .com-select-field {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 40px;
   padding: 8px 12px;
   border: 1px solid var(--color-neutral-300);
@@ -61,13 +62,13 @@
 
 .com-textarea-field {
   min-height: 80px;
-  width:500px;
+  width: 100%;
+  max-width: 500px;
   height: auto;
   resize: vertical;
   padding: 8px 12px;
   line-height: 1.5;
   background-color: var(--color-neutral-100);
-  min-width: 100%;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid var(--color-neutral-300);
   border-radius: 4px;

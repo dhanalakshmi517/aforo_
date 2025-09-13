@@ -1,11 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { saveStairStepPricing } from './api';
+import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
 import './StairStep.css';
+
+export interface StairStepHandle { save: (ratePlanId: number) => Promise<void>; }
+
+interface StairStepProps {
+  validationErrors?: Record<string, string>;
+}
 
 interface Stair { from: string; to: string; cost: string; isUnlimited?: boolean; }
 type RowError = { from?: string; to?: string; cost?: string };
 type RowTouched = { from: boolean; to: boolean; cost: boolean };
 
-const StairStep: React.FC = () => {
+const StairStep = forwardRef<StairStepHandle, StairStepProps>(({ validationErrors = {} }, ref) => {
   const [stairs, setStairs] = useState<Stair[]>([{ from: '', to: '', cost: '' }]);
   const [touched, setTouched] = useState<RowTouched[]>([{ from:false, to:false, cost:false }]);
   const [rowErrors, setRowErrors] = useState<RowError[]>([{}]);
@@ -18,9 +26,9 @@ const StairStep: React.FC = () => {
   const [mustHaveOneError, setMustHaveOneError] = useState<string | null>(null);
   const [overageError, setOverageError] = useState<string | null>(null);
 
-  useEffect(() => { localStorage.setItem('stairTiers', JSON.stringify(stairs)); }, [stairs]);
-  useEffect(() => { localStorage.setItem('stairOverage', overageCharge); }, [overageCharge]);
-  useEffect(() => { localStorage.setItem('stairGrace', graceBuffer); }, [graceBuffer]);
+  useEffect(() => { setRatePlanData('STAIR_TIERS', JSON.stringify(stairs)); }, [stairs]);
+  useEffect(() => { setRatePlanData('STAIR_OVERAGE', overageCharge); }, [overageCharge]);
+  useEffect(() => { setRatePlanData('STAIR_GRACE', graceBuffer); }, [graceBuffer]);
 
   const ensureArrays = (len:number) => {
     setTouched(prev => { const n=[...prev]; while(n.length<len) n.push({from:false,to:false,cost:false}); return n.slice(0,len);});
@@ -94,6 +102,21 @@ const StairStep: React.FC = () => {
   };
 
   const last = stairs.length-1;
+
+  useImperativeHandle(ref, () => ({
+    save: async (ratePlanId: number) => {
+      const payload = {
+        tiers: stairs.map(stair => ({
+          usageStart: Number(stair.from) || 0,
+          usageEnd: stair.isUnlimited ? null : (Number(stair.to) || 0),
+          flatCost: Number(stair.cost) || 0,
+        })),
+        overageUnitRate: Number(overageCharge) || 0,
+        graceBuffer: Number(graceBuffer) || 0,
+      };
+      await saveStairStepPricing(ratePlanId, payload);
+    },
+  }));
 
   return (
     <div className="stair-container">
@@ -177,6 +200,14 @@ const StairStep: React.FC = () => {
                 placeholder="Enter overage charge"
               />
               {overageTouched && overageError && <span className="error-text">{overageError}</span>}
+              {validationErrors.stairOverage && (
+                <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {validationErrors.stairOverage}
+                </div>
+              )}
             </label>
 
             <label className="extra-label">
@@ -193,6 +224,16 @@ const StairStep: React.FC = () => {
         )}
 
         <button className="add-stair-btn" onClick={addStair}>+ Add Stair</button>
+        
+        {/* Display validation errors from parent component */}
+        {validationErrors.stairTiers && (
+          <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {validationErrors.stairTiers}
+          </div>
+        )}
       </div>
 
       <div className="stair-example-section">
@@ -212,6 +253,6 @@ const StairStep: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default StairStep;
