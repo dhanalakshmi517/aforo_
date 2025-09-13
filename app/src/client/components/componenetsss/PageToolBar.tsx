@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./PageToolbar.module.css";
+import styles from "./PageToolBar.module.css";
 
 type Size = number | string;
 
