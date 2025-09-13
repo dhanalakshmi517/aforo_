@@ -6,6 +6,7 @@ import EditAggregationFunction from './EditAggregationFunction';
 import EditAggregationWindow from './EditAggregationWindow';
 import './EditMetrics.css';
 import EditReview from './Review';
+import TopBar from '../../TopBar/TopBar';
 
 interface EditMetricsProps {
     onClose: () => void;
@@ -381,16 +382,20 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     };
 
     return (
-        <div className="create-usage-metric metfront">
-            <div className="metric-header">
-                <h3 className="metric-title">Edit Usage Metric</h3>
-                <div className="metric-actions">
-                    <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                    <button className="btn save-draft" onClick={handleSaveDraft}>Save as Draft</button>
-                </div>
-            </div>
+        <div className="create-usage-metric metfront" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <TopBar
+                title="Edit Usage Metric"
+                cancel={{
+                    label: "Cancel",
+                    onClick: () => setShowCancelModal(true)
+                }}
+                save={{
+                    label: "Save as Draft",
+                    onClick: handleSaveDraft
+                }}
+            />
 
-            <div className="usage-metric-wrapper metfront">
+            <div className="usage-metric-wrapper metfront" style={{ flex: 1 }}>
                 <aside className="sidebars">
                     {steps.map((step, index) => (
                         <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>

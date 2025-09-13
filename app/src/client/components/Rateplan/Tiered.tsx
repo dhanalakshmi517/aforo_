@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { saveTieredPricing } from './api';
+import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
 import './Tiered.css';
+
+export interface TieredHandle { save: (ratePlanId: number) => Promise<any>; }
 
 interface Tier {
   from: string;
@@ -18,16 +22,18 @@ interface TieredProps {
   onChange?: (index: number, field: keyof Tier, value: string) => void;
   noUpperLimit?: boolean;
   setNoUpperLimit?: (val: boolean) => void;
+  validationErrors?: Record<string, string>;
 }
 
-const Tiered: React.FC<TieredProps> = ({
+const Tiered = forwardRef<TieredHandle, TieredProps>(({
   tiers: externalTiers,
   onAddTier,
   onDeleteTier,
   onChange,
   noUpperLimit: externalUnlimited,
   setNoUpperLimit,
-}) => {
+  validationErrors = {},
+}, ref) => {
   const [tiers, setTiers] = useState<Tier[]>(externalTiers ?? [
     { from: '', to: '', price: '' },
   ]);
@@ -43,11 +49,13 @@ const Tiered: React.FC<TieredProps> = ({
 
   // Persist values so Review can consume
   useEffect(() => {
-    localStorage.setItem('tieredTiers', JSON.stringify(tiers));
+    // Save tiers to session storage whenever they change
+    setRatePlanData('TIERED_TIERS', JSON.stringify(tiers));
   }, [tiers]);
 
   useEffect(() => {
-    localStorage.setItem('tieredOverage', overageCharge);
+    // Save overage to session storage whenever it changes
+    setRatePlanData('TIERED_OVERAGE', overageCharge);
   }, [overageCharge]);
 
   useEffect(() => {
@@ -152,6 +160,30 @@ const Tiered: React.FC<TieredProps> = ({
     setTiers(updated);
   };
 
+  useImperativeHandle(ref, () => ({
+    save: async (ratePlanId: number) => {
+      console.log("📝 Tiered Component: Preparing payload with current state...");
+      console.log("📝 Current tiers:", tiers);
+      console.log("📝 Current overage charge:", overageCharge);
+      console.log("📝 Current grace buffer:", graceBuffer);
+      
+      const payload = {
+        tiers: tiers.map(tier => ({
+          startRange: Number(tier.from) || 0,
+          endRange: tier.isUnlimited ? null : (Number(tier.to) || 0),
+          unitPrice: Number(tier.price) || 0,
+        })),
+        overageUnitRate: Number(overageCharge) || 0,
+        graceBuffer: Number(graceBuffer) || 0,
+      };
+      
+      console.log("📝 Final tiered payload:", payload);
+      const result = await saveTieredPricing(ratePlanId, payload);
+      console.log("✅ Tiered Component: Backend response:", result?.data || "");
+      return result;
+    },
+  }));
+
   return (
     <div className="tiered-container">
       <div className="tiered-input-section">
@@ -242,6 +274,14 @@ const Tiered: React.FC<TieredProps> = ({
                 placeholder="Enter overage charge"
               />
               {overageTouched && overageError && <span className="error-text">{overageError}</span>}
+              {validationErrors.tieredOverage && (
+                <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {validationErrors.tieredOverage}
+                </div>
+              )}
             </label>
             <label>
               Grace Buffer (optional)
@@ -257,6 +297,16 @@ const Tiered: React.FC<TieredProps> = ({
         )}
 
         <button className="tiered-add-btn" onClick={handleAddTier}>+ Add Volume Tier</button>
+        
+        {/* Display validation errors from parent component */}
+        {validationErrors.tieredTiers && (
+          <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {validationErrors.tieredTiers}
+          </div>
+        )}
       </div>
 
       <div className="tiered-example-section">
@@ -279,5 +329,5 @@ const Tiered: React.FC<TieredProps> = ({
       </div>
     </div>
   );
-};
+});
 export default Tiered;

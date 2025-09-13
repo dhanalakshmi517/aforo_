@@ -15,6 +15,7 @@ import AggregationWindowSelect from './AggregationWindowSelect';
 import './Usagemetric.css';
 import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 import Review from './Review';
+import TopBar from '../TopBar/TopBar';
 
 interface CreateUsageMetricProps {
     onClose: () => void;
@@ -377,15 +378,19 @@ const CreateUsageMetric: React.FC<CreateUsageMetricProps> = ({ onClose }: Create
     };
 
     return (
-        <div className="create-usage-metric metfront">
-            <div className="metric-header">
-                <h3 className="metric-title">Create New Usage Metric</h3>
-                <div className="metric-actions">
-                    <button className="btn cancel" onClick={() => setShowCancelModal(true)}>Cancel</button>
-                    <button className="btn save-draft" onClick={handleSaveDraft}>Save as Draft</button>
-                </div>
-            </div>
-            <div className="usage-metric-wrapper metfront">
+        <div className="create-usage-metric metfront" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <TopBar
+                title="Create New Usage Metric"
+                cancel={{
+                    label: "Cancel",
+                    onClick: () => setShowCancelModal(true)
+                }}
+                save={{
+                    label: "Save as Draft",
+                    onClick: handleSaveDraft
+                }}
+            />
+            <div className="usage-metric-wrapper metfront" style={{ flex: 1 }}>
                 <aside className="sidebars">
                     {steps.map((step, index) => (
                         <div key={index} className={`met-step ${index === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(index)}>

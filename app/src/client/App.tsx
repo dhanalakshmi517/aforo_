@@ -156,7 +156,7 @@ export default function App() {
           }
         />
         <Route
-          path="/"
+          path="/*"
           element={
             user ? (
               <Navigate to="/get-started" replace />
@@ -256,6 +256,58 @@ export default function App() {
                     />
                   </div>
                 </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Estimation Routes */}
+        <Route
+          path="/get-started/rate-plans/estimate-revenue"
+          element={
+            <ProtectedRoute>
+              <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <EstimateRevenue />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/get-started/rate-plans/usage-estimation"
+          element={
+            <ProtectedRoute>
+              <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <UsageEstimation />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/get-started/rate-plans/volume-estimation"
+          element={
+            <ProtectedRoute>
+              <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <VolumeEstimation />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/get-started/rate-plans/tiered-estimation"
+          element={
+            <ProtectedRoute>
+              <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <TieredEstimation />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/get-started/rate-plans/stair-estimation"
+          element={
+            <ProtectedRoute>
+              <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <StairEstimation />
               </div>
             </ProtectedRoute>
           }
