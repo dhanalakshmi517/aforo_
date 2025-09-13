@@ -1,5 +1,5 @@
 import * as React from "react";
-import "./inputs.css";
+import "./Inputs.css";
 
 /** ---------- Shared Types ---------- */
 export type CommonProps = {
