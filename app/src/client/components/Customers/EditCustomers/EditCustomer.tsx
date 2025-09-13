@@ -7,6 +7,7 @@ import { AccountDetailsData } from './EditAccount';
 import EditAccount from './EditAccount';
 import { InputField, SelectField } from '../../Components/InputFields';
 import './EditCustomer.css';
+import TopBar from '../../TopBar/TopBar'; // use the shared header
 
 const steps = [
   { title: 'Customer Details' },
@@ -20,13 +21,13 @@ const EditCustomer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Step 0: Customer info
+  // Step 0
   const [customerName, setCustomerName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [companyType, setCompanyType] = useState('');
   const [companyLogo, setCompanyLogo] = useState<File | null>(null);
 
-  // Step 1: Account details
+  // Step 1
   const [accountDetails, setAccountDetails] = useState<AccountDetailsData | null>(null);
 
   // Step control & validation
@@ -62,9 +63,7 @@ const EditCustomer: React.FC = () => {
         };
         setAccountDetails(account);
       })
-      .catch((err: unknown) => {
-        console.error('Failed to fetch customer', err);
-      })
+      .catch((err: unknown) => console.error('Failed to fetch customer', err))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -89,7 +88,6 @@ const EditCustomer: React.FC = () => {
       setAccountErrors(newAccErrs);
       if (Object.keys(newAccErrs).length) return;
 
-      // auto-save draft before moving to Review step
       try {
         const patchPayload: Record<string, any> = {
           companyName,
@@ -101,7 +99,7 @@ const EditCustomer: React.FC = () => {
       } catch (err) {
         console.error('Failed to save draft', err);
         alert('Could not save draft before review');
-        return; // prevent navigation if save fails
+        return;
       }
     }
 
@@ -115,9 +113,9 @@ const EditCustomer: React.FC = () => {
       };
       try {
         await updateCustomer(id!, payload);
-        // call confirm API to finalize changes
         await confirmCustomer(id!);
         alert('Customer confirmed successfully');
+        navigate(-1);
       } catch (err) {
         console.error('Failed to update', err);
         alert('Failed to save changes');
@@ -129,25 +127,21 @@ const EditCustomer: React.FC = () => {
 
   const handleBack = () => {
     if (currentStep > 0) setCurrentStep((prev) => prev - 1);
+    else navigate(-1);
   };
 
-  // Save current form as draft
   const handleSaveDraft = async () => {
-    // reset validation errors so "required" messages are not shown for draft saves
-    setErrors({});
-    setAccountErrors({});
     if (!id) return;
     const draftPayload: Record<string, any> = {
       companyName,
       customerName,
       companyType,
       ...(accountDetails ?? {}),
-          };
+    };
     try {
       setIsSubmitting(true);
       await updateCustomer(id, draftPayload);
       alert('Draft saved');
-      navigate(-1);
     } catch (err) {
       console.error(err);
       alert('Failed to save draft');
@@ -168,7 +162,7 @@ const EditCustomer: React.FC = () => {
                 placeholder="Enter company name"
                 onChange={(val: string) => {
                   setCompanyName(val);
-                  if (errors.companyName) setErrors((prev) => ({ ...prev, companyName: '' }));
+                  if (errors.companyName) setErrors((p) => ({ ...p, companyName: '' }));
                 }}
               />
               {errors.companyName && <span className="field-error">{errors.companyName}</span>}
@@ -181,53 +175,10 @@ const EditCustomer: React.FC = () => {
                 placeholder="Enter customer name"
                 onChange={(val: string) => {
                   setCustomerName(val);
-                  if (errors.customerName) setErrors((prev) => ({ ...prev, customerName: '' }));
+                  if (errors.customerName) setErrors((p) => ({ ...p, customerName: '' }));
                 }}
               />
               {errors.customerName && <span className="field-error">{errors.customerName}</span>}
-            </div>
-             {/* Company Logo (Upload) */}
-             <div className="sub-create-form">
-              <label>Company Logo</label>
-      
-              <div className="upload-field">
-                <div className="logo-box" onClick={() => document.getElementById('companyLogoInput')?.click()}>
-                  {/* user/avatar circle icon */}
-                  <svg className="logo-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="7.5" r="3.5" stroke="#8C8A8F" strokeWidth="1.5"/>
-                    <path d="M5 20c0-3.5 3.134-6 7-6s7 2.5 7 6" stroke="#8C8A8F" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-      
-                  <span className="logo-placeholder">
-                    {companyLogo ? companyLogo.name : 'Upload Company Logo'}
-                  </span>  </div>
-
-                <input
-                  id="companyLogoInput"
-                  type="file"
-                  accept="image/*"
-                  className="company-logo-input"
-                  onChange={(e) => {
-                    const file = e.target.files && e.target.files[0];
-                    setCompanyLogo(file ?? null);
-                  }}
-                  style={{ display: 'none' }}
-                />
-       </div>
-      
-              {companyLogo && (
-                <div className="file-hint">
-                  Selected: <strong>{companyLogo.name}</strong>
-                  <button
-                    type="button"
-                    className="clear-file"
-                    onClick={() => setCompanyLogo(null)}
-                    aria-label="Clear selected file"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
             </div>
 
             <div className="sub-create-form">
@@ -236,7 +187,7 @@ const EditCustomer: React.FC = () => {
                 value={companyType}
                 onChange={(val: string) => {
                   setCompanyType(val);
-                  if (errors.companyType) setErrors((prev) => ({ ...prev, companyType: '' }));
+                  if (errors.companyType) setErrors((p) => ({ ...p, companyType: '' }));
                 }}
                 options={[
                   { label: 'Individual', value: 'INDIVIDUAL' },
@@ -247,7 +198,6 @@ const EditCustomer: React.FC = () => {
             </div>
           </>
         );
-
       case 1:
         return (
           <EditAccount
@@ -256,7 +206,6 @@ const EditCustomer: React.FC = () => {
             errors={accountErrors}
           />
         );
-
       case 2:
         return (
           <EditReview
@@ -266,9 +215,8 @@ const EditCustomer: React.FC = () => {
             accountDetails={accountDetails}
           />
         );
-
       default:
-        return <p>Coming soon...</p>;
+        return null;
     }
   };
 
@@ -276,60 +224,56 @@ const EditCustomer: React.FC = () => {
 
   return (
     <>
-      <div className="sub-header">
-        <h2>Edit Customer</h2>
-        <div className="header-actions">
-          <button
-            className="btn cancel"
-            onClick={() => navigate(-1)}
-            disabled={isSubmitting || loading}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn save-draft"
-            onClick={handleSaveDraft}
-            disabled={isSubmitting || loading}
-          >
-            Save as Draft
-          </button>
-        </div>
-      </div>
-      <hr className="sub-header-divider" />
+      <TopBar
+        title="Edit Customer"
+        onBack={handleBack}
+        cancel={{ label: 'Cancel', onClick: () => navigate(-1) }}
+        save={{
+          label: 'Save as Draft',
+          saving: isSubmitting,
+          disabled: isSubmitting || loading,
+          onClick: handleSaveDraft,
+        }}
+      />
 
       <div className="edit-customer-container">
-      <div className="cus-wrapper">
-        <aside className="cus-sidebar">
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className={`edit-step-item ${index === currentStep ? 'active' : ''}`}
-              onClick={() => setCurrentStep(index)}
-            >
-              <div className="edit-step-text">
-                <span className="edit-step-title">{step.title}</span>
-              </div>
-            </div>
-          ))}
-        </aside>
+        <div className="cus-wrapper">
+          {/* ── PROGRESS RAIL (same pattern as Edit Subscription) ── */}
+          <aside className="side-progress" aria-label="Progress">
+            {steps.map((s, i) => {
+              const isActive = i === currentStep;
+              return (
+                <button
+                  key={s.title}
+                  type="button"
+                  className={`side-step ${isActive ? 'is-active' : 'is-inactive'}`}
+                  onClick={() => setCurrentStep(i)}
+                  aria-current={isActive ? 'step' : undefined}
+                >
+                  <span className="side-step__label">{s.title}</span>
+                </button>
+              );
+            })}
+          </aside>
 
-        <div className="form-section">
-          <div className="form-card">
-            <h4 className="form-section-heading">{steps[currentStep].title.toUpperCase()}</h4>
-            <hr className="form-section-divider" />
-            {renderStepContent()}
+          {/* ── FORM COLUMN ── */}
+          <div className="form-section">
+            <div className="form-card">
+              <h4 className="form-section-heading">{steps[currentStep].title.toUpperCase()}</h4>
+              <hr className="form-section-divider" />
+              {renderStepContent()}
+            </div>
+            <div className="button-group">
+              <button className="back" onClick={handleBack} disabled={currentStep === 0}>
+                Back
+              </button>
+              <button className="save-next" onClick={handleNext}>
+                {currentStep === steps.length - 1 ? 'Save Changes' : 'Next'}
+              </button>
+            </div>
           </div>
-          <div className="button-group">
-            <button className="back" onClick={handleBack} disabled={currentStep === 0}>
-              Back
-            </button>
-            <button className="save-next" onClick={handleNext}>
-              {currentStep === steps.length - 1 ? 'Save Changes' : 'Next'}
-            </button>
-          </div>
-        </div>{/* form-section */}
-      </div>{/* cus-wrapper */}
-    </div>{/* edit-customer-container */}
+        </div>
+      </div>
     </>
   );
 };

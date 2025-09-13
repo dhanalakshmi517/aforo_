@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { saveVolumePricing } from './api';
+import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
 import './Tiered.css';
+
+export interface VolumeHandle { save: (ratePlanId: number) => Promise<void>; }
 
 interface Tier {
   from: number;
@@ -22,9 +26,10 @@ interface VolumeProps {
   setOverageUnitRate: (val: number) => void;
   graceBuffer: number;
   setGraceBuffer: (val: number) => void;
+  validationErrors?: Record<string, string>;
 }
 
-const Volume: React.FC<VolumeProps> = ({
+const Volume = forwardRef<VolumeHandle, VolumeProps>(({
   tiers,
   onAddTier,
   onDeleteTier,
@@ -35,7 +40,8 @@ const Volume: React.FC<VolumeProps> = ({
   setOverageUnitRate,
   graceBuffer,
   setGraceBuffer,
-}) => {
+  validationErrors = {},
+}, ref) => {
   const [tierErrors, setTierErrors] = useState<TierError[]>([]);
   const [tierTouched, setTierTouched] = useState<TierTouched[]>([]);
   const [overageError, setOverageError] = useState<string | null>(null);
@@ -102,6 +108,16 @@ const Volume: React.FC<VolumeProps> = ({
     }
   }, [tiers, noUpperLimit, overageUnitRate]);
 
+  useEffect(() => {
+    // Save tiers to session storage whenever they change
+    setRatePlanData('VOLUME_TIERS', JSON.stringify(tiers));
+  }, [tiers]);
+
+  useEffect(() => {
+    // Save overage to session storage whenever it changes
+    setRatePlanData('VOLUME_OVERAGE', overageUnitRate.toString());
+  }, [overageUnitRate]);
+
   const markTouched = (index: number, field: keyof TierTouched) => {
     setTierTouched(prev => {
       const newTouched = [...prev];
@@ -119,6 +135,21 @@ const Volume: React.FC<VolumeProps> = ({
     onChange(index, 'isUnlimited', String(checked) as unknown as any);
     onChange(index, 'to', val);
   };
+
+  useImperativeHandle(ref, () => ({
+    save: async (ratePlanId: number) => {
+      const payload = {
+        tiers: tiers.map(tier => ({
+          usageStart: tier.from,
+          usageEnd: tier.isUnlimited ? null : tier.to,
+          unitPrice: tier.price,
+        })),
+        overageUnitRate,
+        graceBuffer,
+      };
+      await saveVolumePricing(ratePlanId, payload);
+    },
+  }));
 
   return (
     <div className="tiered-container">
@@ -228,6 +259,14 @@ const Volume: React.FC<VolumeProps> = ({
                 onBlur={() => setOverageTouched(true)}
               />
               {overageTouched && overageError && <span className="error-text">{overageError}</span>}
+              {validationErrors.volumeOverage && (
+                <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {validationErrors.volumeOverage}
+                </div>
+              )}
             </label>
             <label>
               Grace Buffer (optional)
@@ -245,6 +284,16 @@ const Volume: React.FC<VolumeProps> = ({
         <button className="tiered-add-btn" onClick={onAddTier}>
           + Add Volume Tier
         </button>
+        
+        {/* Display validation errors from parent component */}
+        {validationErrors.volumeTiers && (
+          <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {validationErrors.volumeTiers}
+          </div>
+        )}
       </div>
 
       <div className="tiered-example-section">
@@ -267,6 +316,6 @@ const Volume: React.FC<VolumeProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default Volume;

@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './EstimateRevenue.css';
+import { getRatePlanData } from '../utils/sessionStorage';
 
 const StairEstimation: React.FC = () => {
-  const navigate = useNavigate();
-
   const [usage, setUsage] = useState('');
   // read saved pricing model details
-  const storedStairs = JSON.parse(localStorage.getItem('stairTiers') || '[]');
-  const overageRate = Number(localStorage.getItem('stairOverage') || 0);
-  const setupFee = Number(localStorage.getItem('setupFee') || 0);
-  const discountPercent = Number(localStorage.getItem('discountPercent') || 0);
-  const discountFlat = Number(localStorage.getItem('discountFlat') || 0);
-  const freemiumUnits = Number(localStorage.getItem('freemiumUnits') || 0);
-  const minimumUsage = Number(localStorage.getItem('minimumUsage') || 0);
-  const minimumCharge = Number(localStorage.getItem('minimumCharge') || 0);
+  const storedStairs = JSON.parse(getRatePlanData('STAIR_TIERS') || '[]');
+  const overageRate = Number(getRatePlanData('STAIR_OVERAGE') || 0);
+  const setupFee = Number(getRatePlanData('SETUP_FEE') || 0);
+  const discountPercent = Number(getRatePlanData('DISCOUNT_PERCENT') || 0);
+  const discountFlat = Number(getRatePlanData('DISCOUNT_FLAT') || 0);
+  const freemiumUnits = Number(getRatePlanData('FREEMIUM_UNITS') || 0);
+  const minimumUsage = Number(getRatePlanData('MINIMUM_USAGE') || 0);
+  const minimumCharge = Number(getRatePlanData('MINIMUM_CHARGE') || 0);
 
   const [includeSetup, setIncludeSetup] = useState(false);
   const [includeDiscount, setIncludeDiscount] = useState(false);
@@ -65,12 +63,7 @@ const StairEstimation: React.FC = () => {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate(-1)}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 20 20">
-          <path d="M10.0013 15.8337L4.16797 10.0003M4.16797 10.0003L10.0013 4.16699M4.16797 10.0003H15.8346" stroke="#706C72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <h2 style={{ margin: 0 }}>Estimate revenue</h2>
-      </div>
+      <h2 style={{ margin: 0 }}>Estimate revenue</h2>
 
       <div className="estimate-container">
         <div className="input-section">
