@@ -1,4 +1,5 @@
 @import "../../Variables/Variables.css";
+
 .edit-flat-fee-container {
   display: flex;
   flex-wrap: nowrap;
@@ -15,6 +16,7 @@
   font-family: var(--font-family-primary);
 }
 
+/* left column with the form fields */
 .edit-form-sections {
   flex: 1 1 60%;
   min-width: 200px;
@@ -23,14 +25,20 @@
   gap: 16px;
 }
 
+/* === per-field container: matches your spec === */
 .edit-form-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   align-self: stretch;
+
+  /* cap the field block width so the input doesn't grow too wide */
+  max-width: 440px;              /* ⬅️ key change */
+  width: 100%;
 }
 
+/* label style */
 .edit-form-section label {
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
@@ -38,39 +46,39 @@
   font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-body-md);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  align-self: stretch;
 }
 
+/* input style: matches your inner layout spec */
 .edit-form-section input {
-  width: 100%;
-  height: 40px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-border-3, #BFBECE);
-  background: var(--surface-layer-4, #FFF);
-  color: var(--color-neutral-1400);
   display: flex;
+  padding: 8px 12px;
   align-items: center;
   gap: 8px;
   align-self: stretch;
+
+  width: 100%;
+  max-width: 440px;              /* ⬅️ cap the input itself too */
+  height: 36px;                  /* ⬅️ figma shows 36px */
   box-sizing: border-box;
 
+  border-radius: var(--border-radius-sm, 8px);
+  border: 1px solid var(--border-border-2, #D5D4DF);
+  background: var(--surface-layer-4, #FFF);
+
+  color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-md);
 }
 
+/* focus state */
 .edit-form-section input:focus {
   outline: none;
   border: 2px solid var(--primary-primary-6, #7C3AED);
 }
 
+/* placeholder */
 .edit-form-section input::placeholder {
   color: var(--color-text-placeholder, #B3B9BF);
   font-family: var(--font-family-primary);
@@ -81,18 +89,7 @@
 }
 
 /* Validation feedback (red) */
-.error-input{
-  border-color: var(--color-danger-700, #E34935) !important;
-}
-.error-text{
-  color: var(--color-danger-700, #E34935);
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
-}
+.error-input { border-color: var(--color-danger-700, #E34935) !important; }
+.error-text  { color: var(--color-danger-700, #E34935); font-size: 12px; margin-top: 4px; display: block; }
 
-.optional {
-  color: #888;
-  font-size: 12px;
-}
-
+.optional { color: #888; font-size: 12px; }

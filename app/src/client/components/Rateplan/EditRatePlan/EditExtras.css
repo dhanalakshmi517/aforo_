@@ -1,93 +1,25 @@
 @import "../../Variables/Variables.css";
 
-/* Container (if you wrap with .extras-container somewhere, it’s ready) */
+/* Match Extras look & spacing */
 .extras-container {
-  overflow-x: hidden;
+  overflow: visible;
   width: 100%;
   margin: 0 auto;
   padding: 24px;
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
-  font-family: sans-serif;
-}
-
-.dropdown-group {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background-color: var(--color-neutral-white);
-  border-bottom: 1px solid var(--color-neutral-200);
-}
-
-/* --- Header row --- */
-.header-icon-btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:none;
-  border-radius:var(--border-radius-sm);
-  background-color:var(--color-primary-000);
-  cursor:pointer;
-  margin-right:8px;
-}
-.header-icon-btn svg{width:24px;height:24px;}
-.header-icon{display:none;}
-
-.description-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.icon-btn{
-  width:60px;
-  height:48px;
-  border:none;
-  background:transparent;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-
-.description{
-  color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
-  margin-left:10px;
+  box-sizing: border-box;
 }
 
-.dropdown-group select {
-  border-bottom: 1px solid var(--color-neutral-200);
-  background-color: var(--color-neutral-white);
-  color: var(--color-neutral-1400);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 600;
-  min-height: 36px
-}
-.dropdown-group select:invalid { color: #888; }
-
-/* --- Sections --- */
 .section {
   border-bottom: 1px solid var(--color-neutral-200);
   margin-bottom: 12px;
-  width: 100%;
-  color: var(--color-neutral-1700);
   background-color: var(--color-neutral-white);
-  padding: 18px 10px;
-  font-family: var(--font-family-primary);
-  font-size: var(--font-body-lg);
-  font-style: normal;
+  padding: 16px 16px 16px 40px; /* same left indent as Extras */
+  color: var(--color-neutral-1700);
   font-weight: 600;
-  line-height: var(--line-height-body-lg);
 }
-
-.header-label{white-space:nowrap;}
 
 .section-header {
   display: flex;
@@ -96,9 +28,69 @@
   padding: 12px 16px;
   background-color: var(--color-neutral-white);
   cursor: pointer;
-  margin-top: -20px;
+  margin-top: 0;
 }
 
+.header-label { white-space: nowrap; }
+
+/* same chip styles as Extras */
+.extras-icon-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-secondary-100);
+  color: var(--color-secondary-700);
+  margin-right: 8px;
+}
+.extras-icon-btn svg { width: 24px; height: 24px; }
+
+.dropdown-icon {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+.section-header .dropdown-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: #726E6C;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Description row aligned under the header text */
+.description-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 68px; /* 48 icon + 8 gap + 12 header padding */
+}
+.icon-btn {
+  width: 60px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.description {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  margin-left: 0;
+}
+
+/* Body fields — EXACTLY like Extras */
 .section-content {
   padding: 16px;
   background-color: var(--color-neutral-white);
@@ -106,100 +98,46 @@
   flex-direction: column;
   gap: 10px;
 }
-
-.section-content label{
+.section-content label {
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: var(--line-height-body-md);
 }
-
-/* Base control styling */
 .section-content input,
 .section-content textarea {
   padding: 8px;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-md);
+  width: 80%;                 /* MATCH Extras width */
+  background-color: var(--color-neutral-100);
+}
+.section-content textarea { resize: vertical; }
+.section-content select {
+  width: 80%;                 /* MATCH Extras width */
+  padding: 6px 10px;
+  height: 36px;
   background-color: var(--color-neutral-100);
 }
 
-/* Utility to match the Edit form spec (compact controls) */
-.extras-w-440 { width: 440px !important; max-width: 100%; }
-
-/* Textarea base */
-.section-content textarea {
-  resize: vertical;
-  background-color: var(--color-neutral-100);
-}
-
-/* Selects */
-.section-content select{
-  padding:6px 10px;
-  height:36px;
-  background-color: var(--color-neutral-100);
-}
-
-/* Optional text */
 .optional {
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-md);
 }
 
-/* Dropdown caret */
-.dropdown-icon {
-  margin-left:auto;
-  margin-bottom:0px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  margin-top: 20px;
-}
-.section-header .dropdown-icon svg {
-  stroke: #726E6C;
-  width: 20px;
-  height: 20px;
-  user-select: none;
-  pointer-events: none;
-  margin-bottom: 40px;
-}
-
-/* Dates still use their compact width */
-.date-range {
-  display: flex;
-  gap: 20px;
-  align-items: flex-end;
-}
+/* Dates — match Extras size */
+.date-range { display: flex; gap: 20px; align-items: flex-end; }
 .date-input {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
-  font-size: var(--fontsize-md);
-  font-style: normal;
+  font-size: var(--font-size-md);
   font-weight: 400;
   line-height: var(--line-height-body-md);
 }
-.date-input input[type="date"] {
-  width: 230px;
-  padding: 8px 10px;
-  font-size: 14px;
-}
-
-/* Optional custom dropdown hook-ups */
-.custom-dropdown-container { position: relative; }
-.custom-dropdown {
-  padding:8px 10px;
-  background-color: var(--color-neutral-white);
-  border-radius: var(--border-radius-sm);
-  width: 100%;
-}
+.date-input input[type="date"] { width: 300px; padding: 8px 10px; font-size: 14px; }

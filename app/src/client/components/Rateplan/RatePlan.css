@@ -19,7 +19,7 @@
   --surface-sidebar: #004069;
   --border-1: #E9E9EE;
 
-  --text-dark: #6B6F76;
+  --text-dark: #6B6F76; /* spec grey for body copy */
 }
 
 /* =========================================================
@@ -95,7 +95,7 @@
   margin: 0;
 }
 
-/* ⬇️ FIX: remove extra padding that created a second right gutter */
+/* ⬇️ remove extra padding that created a second right gutter */
 .create-plan-body {
   padding: 0;
   box-sizing: border-box;
@@ -140,7 +140,6 @@
   height: 33px;
   flex-shrink: 0;
 }
-
 .header-divider svg {
   width: 2px;
   height: 34px;
@@ -162,7 +161,7 @@
 .new-rate-button:hover { filter: brightness(0.98); }
 
 /* =========================================================
-   EMPTY STATE
+   EMPTY STATE (default)
    ========================================================= */
 .pp-empty-area {
   width: 100%;
@@ -173,7 +172,9 @@
 }
 
 .rate-empty {
-  width: 306px;
+  /* previously width: 306px; — too narrow for the in-table case */
+  width: 100%;
+  max-width: 720px;                 /* lock text measure to match design */
   min-height: 288px;
   display: flex;
   flex-direction: column;
@@ -187,13 +188,15 @@
   display: block;
 }
 
+/* ⬇️ Typography as per spec so it doesn't inherit 14px from table cells */
 .rate-empty-text {
   margin: 0;
   text-align: center;
   font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
-  color: #1A2126;
-  font-size: 18px;
-  line-height: 26px;
+  color: var(--text-dark);          /* #6B6F76 */
+  font-size: 20px;                  /* spec: reads like the design */
+  line-height: 30px;
+  font-weight: 400;
 }
 
 .empty-new-rate-btn {
@@ -247,7 +250,7 @@
   padding: 8px 16px;
   text-align: left;
   border-bottom: 1px solid #EEE;
-  font-size: 14px;
+  font-size: 14px;                 /* table reset */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -298,27 +301,18 @@
   font-weight: 700;
   line-height: var(--line-height-body-sm, 18px);
 
-  text-transform:none;           /* ensure NOT uppercase */
+  text-transform:none;
   letter-spacing: normal;
 
   color:#0F172A;
   background:#EDEFF2;
 }
-.status-badge.active{
-  background:#E6F7EA;
-  color: var(--text-status-parrot-green, #107A3E); /* per spec */
-}
-.status-badge.draft{
-  background:#EEEAF7;
-  color:#5D41A3;
-}
-.status-badge.staged{
-  background:#E6F2FB;
-  color:#2676B8;
-}
+.status-badge.active{ background:#E6F7EA; color: var(--text-status-parrot-green, #107A3E); }
+.status-badge.draft{ background:#EEEAF7; color:#5D41A3; }
+.status-badge.staged{ background:#E6F2FB; color:#2676B8; }
 
 /* =========================================================
-   Row Action Buttons (with strong specificity)
+   Row Action Buttons
    ========================================================= */
 .action-buttons{
   display:inline-flex;
@@ -326,35 +320,27 @@
   align-items:center;
   justify-content:center;
 }
-
-/* EDIT button */
 .action-buttons .edit-button{
   display: flex;
   padding: 6px;
   justify-content: center;
   align-items: center;
   gap: 5px;
-
   border-radius: var(--border-radius-sm, 8px);
   background: var(--surface-information, #F5F9FF);
-
   border: none;
   cursor: pointer;
   width: 28px;
   height: 28px;
 }
-
-/* DRAFT / RESUME button */
 .action-buttons .resume-button{
   display: flex;
   padding: 6px;
   justify-content: center;
   align-items: center;
   gap: 5px;
-
   border-radius: var(--border-radius-sm, 8px);
   background: var(--multi-colors-all-grey-pale, #ECECEC);
-
   border: none;
   cursor: pointer;
   width: 28px;
@@ -362,18 +348,14 @@
   color: var(--resume-chip-fg);
 }
 .action-buttons .resume-button svg { width:16px; height:16px; display:block; }
-
-/* DELETE button */
 .action-buttons .delete-button{
   display: flex;
   padding: 6px;
   justify-content: center;
   align-items: center;
   gap: 5px;
-
   border-radius: var(--border-radius-sm, 8px);
   background: var(--surface-error, #FFEDE9);
-
   border: none;
   cursor: pointer;
   width: 28px;
@@ -417,7 +399,6 @@
   :root { --header-gutter: 24px; }
   .create-plan-header { padding: 16px var(--header-gutter); }
   .plan-header-actions { right: 12px; }
-  /* ⬇️ keep body padding at 0 on tablets too */
   .create-plan-body { padding: 0; }
   .rp-header-search { min-width: 180px; width: 180px; }
 }
@@ -436,13 +417,45 @@
     padding: 16px 20px;
     gap: 12px;
   }
-  .header-left {
-    width: 100%;
-  }
-  .plan-header-actions { 
-    width: 100%;
-    justify-content: flex-start; 
-  }
-  /* ⬇️ no extra body padding on mobile either; child component handles its own padding */
+  .header-left { width: 100%; }
+  .plan-header-actions { width: 100%; justify-content: flex-start; }
   .create-plan-body { padding: 0; }
+}
+
+/* =========================================================
+   Empty state when rendered inside the table
+   ========================================================= */
+.pp-empty-row td {
+  border-bottom: none;
+  padding: 72px 0;                    /* room for artwork + copy */
+  text-align: center;
+  background: var(--color-neutral-white);
+}
+.pp-empty-area.in-table {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.pp-empty-row .rate-empty {
+  max-width: 720px;                   /* keep the same measure inside table */
+  width: 100%;
+  margin: 0 auto;
+}
+.pp-empty-row .rate-empty-illustration svg {
+  width: 160px;
+  height: 160px;
+}
+.pp-empty-row .rate-empty-text {
+  font-size: 20px;                    /* override td’s 14px */
+  line-height: 30px;
+  color: var(--text-dark);
+  font-weight: 400;
+  margin: 0;
+}
+.pp-empty-row .empty-new-rate-btn {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  font-weight: 600;
 }
