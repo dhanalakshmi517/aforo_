@@ -26,12 +26,13 @@ interface Props {
   data?: AccountDetailsData;
   onChange?: (data: AccountDetailsData) => void;
   errors?: { [key: string]: string };
-  onEmailBlur?: (email: string) => void;
+  onEmailBlur?: (email: string) => void; // kept for backward-compat (optional)
 }
 
 const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEmailBlur }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
+  const [primaryEmailError, setPrimaryEmailError] = useState<string>(''); // ⬅ local inline error
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
 
   const [billingAddress, setBillingAddress] = useState({
@@ -53,7 +54,6 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
   });
 
   const [sameAsBilling, setSameAsBilling] = useState(false);
-
   const [countryOptions, setCountryOptions] = useState<{ label: string; value: string }[]>([]);
 
   // fetch country list once
@@ -179,6 +179,38 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
     setAdditionalEmails(updated);
   };
 
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  // Run inline validation on blur using API
+  const handlePrimaryEmailBlur = async () => {
+    onEmailBlur && onEmailBlur(primaryEmail); // keep old behavior if parent still listens
+
+    // Clear when empty / invalid format
+    if (!primaryEmail || !emailRegex.test(primaryEmail)) {
+      setPrimaryEmailError('');
+      return;
+    }
+
+    try {
+      const exists = await checkEmailExists(primaryEmail);
+      if (exists) {
+        setPrimaryEmailError('This email is already registered in your organization.');
+      } else {
+        setPrimaryEmailError('');
+      }
+    } catch (err) {
+      // On error, don't block the user with a false positive
+      setPrimaryEmailError('');
+      console.error('Failed to validate email uniqueness', err);
+    }
+  };
+
+  // Clear local error while typing
+  const handlePrimaryEmailChange = (val: string) => {
+    setPrimaryEmail(val);
+    if (primaryEmailError) setPrimaryEmailError('');
+  };
+
   // Toggle billing same as customer
   const handleToggleSame = () => {
     const newVal = !sameAsBilling;
@@ -214,11 +246,14 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
           value={primaryEmail}
           placeholder="e.g., johndoe@example.com"
           type="email"
-          pattern="[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$"
-          onChange={setPrimaryEmail}
-          onBlur={() => onEmailBlur && onEmailBlur(primaryEmail)}
+          pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
+          onChange={handlePrimaryEmailChange}
+          onBlur={handlePrimaryEmailBlur}
+          error={errors.primaryEmail || primaryEmailError}  /* ⬅ show inline error */
         />
-        {errors.primaryEmail && <span className="field-error">{errors.primaryEmail}</span>}
+        {/* If you prefer separate placement, you could also keep this line.
+            The `error` prop above already displays it under the field. */}
+        {/* {primaryEmailError && <span className="field-error">{primaryEmailError}</span>} */}
       </div>
 
       {/* Secondary Email IDs */}
@@ -230,7 +265,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
               type="email"
               placeholder="e.g., johndoe@example.com"
               value={email}
-              pattern="[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$"
+              pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
               onChange={(val) => updateAdditionalEmail(idx, val)}
             />
             {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}

@@ -15,14 +15,30 @@
   color: #555;
 }
 
+/* Match component class names so inputs & selects look identical */
 .acc-form-group input,
-.acc-form-group .select-field {
+.acc-form-group .com-select-field {
   padding: 8px 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
+  font-weight: 400;                             /* ⬅ ensure not bold */
+  font-family: var(--font-family-primary, inherit);
+  line-height: 1.4;
+  height: 40px;                                  /* consistent control height */
+  background-color: var(--color-neutral-100, #F6F7F9);  /* ⬅ same bg as inputs */
+  color: var(--color-neutral-1400, #1A2126);
   box-sizing: border-box;
   width: 100%;
+}
+
+/* If you ever need to kill native bold in some browsers */
+.acc-form-group .com-select-field {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* optional: space for native arrow */
+  padding-right: 28px;
 }
 
 /* --- ROW LAYOUT: let left grow, clamp the right (country) --- */
@@ -48,7 +64,7 @@
 }
 
 /* ensure selects inherit container width */
-.acc-form-row .acc-form-group .select-field {
+.acc-form-row .acc-form-group .com-select-field {
   width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -124,12 +140,12 @@
   cursor: pointer;
 }
 
-/* Override fixed widths from global input styles */
-.account-details-form .input-field {
+/* Override fixed widths from global input styles (match component classnames) */
+.account-details-form .com-input-field {
   width: 100% !important;
 }
 
-.account-details-form .select-field {
+.account-details-form .com-select-field {
   width: 100% !important;
 }
 
