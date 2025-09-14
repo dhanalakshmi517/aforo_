@@ -5,31 +5,29 @@ import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/Landing/SignIn';
-// Define User type based on your application's requirements
+
+// ========= Mock Wasp auth pieces (restore these) =========
 interface User {
   id: string;
   lastActiveTimestamp?: Date;
-  // Add other user properties as needed
 }
-
-// Mock implementations for Wasp-specific functions
 const useAuth = () => {
-  // This is a mock implementation - replace with actual Wasp auth hook
   return {
     data: null as User | null,
     isLoading: false
   };
 };
-
 const updateCurrentUserLastActiveTimestamp = async (update: { lastActiveTimestamp: Date }) => {
-  // This is a mock implementation - replace with actual Wasp operation
   console.log('Updating last active timestamp:', update.lastActiveTimestamp);
 };
+// =========================================================
+
 import { cn } from './cn';
 import Landing from './components/Landing/Landing';
 import Organization from './components/Landing/Organization';
 import { ProtectedRoute } from './components/Common/ProtectedRoute';
 import SideNavbar from './components/SideNavbar/SideNavbar';
+
 const customersLoader = () => import('./components/Customers/Customers');
 const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
 const editCustomerLoader = () => import('./components/Customers/EditCustomers/EditCustomer');
@@ -50,24 +48,21 @@ import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
 import TieredEstimation from './components/Rateplan/Revenue/TieredEstimation';
 import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
+
 const ratePlansLoader = () => import('./components/Rateplan/RatePlans');
 const RatePlans = React.lazy(ratePlansLoader) as React.ComponentType<any>;
 const editPlanLoader = () => import('./components/Rateplan/EditRatePlan/EditRatePlan');
 const EditPlan = React.lazy(editPlanLoader) as React.ComponentType<any>;
+
 import LoginPage from '../auth/LoginPage';
 import ThankYou from './components/Landing/ThankYou';
 
-/**
- * use this component to wrap all child components
- * this is useful for templates, themes, and context
- */
 export default function App() {
   const navigate = useNavigate();
   const { data: user, isLoading: isAuthLoading } = useAuth();
   const location = useLocation();
 
   const isNewProductPage = location.pathname === '/get-started/products/new';
-  const isAuthRoute = ['/signin', '/login', '/contact-sales', '/thank-you', '/'].includes(location.pathname);
 
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
@@ -89,32 +84,25 @@ export default function App() {
       setShowSidebar(shouldShow);
       setHideBreadcrumb(shouldHideBreadcrumb);
     };
-
-    // @ts-ignore - CustomEvent type issue
+    // @ts-ignore
     window.addEventListener('toggleSidebar', handleToggleSidebar);
-
     return () => {
-      // @ts-ignore - CustomEvent type issue
+      // @ts-ignore
       window.removeEventListener('toggleSidebar', handleToggleSidebar);
     };
   }, []);
 
+  // Update last active timestamp (uses restored mock)
   useEffect(() => {
     if (user) {
       const now = new Date();
-      // Create an object with the required properties
-      const userUpdate = {
-        lastActiveTimestamp: now
-      };
-      
-      // Only update if lastActiveTimestamp exists and is older than 5 minutes
+      const userUpdate = { lastActiveTimestamp: now };
       if (user.lastActiveTimestamp) {
         const lastActive = new Date(user.lastActiveTimestamp);
         if (now.getTime() - lastActive.getTime() > 5 * 60 * 1000) {
           updateCurrentUserLastActiveTimestamp(userUpdate).catch(console.error);
         }
       } else {
-        // If no lastActiveTimestamp, update it
         updateCurrentUserLastActiveTimestamp(userUpdate).catch(console.error);
       }
     }
@@ -135,7 +123,6 @@ export default function App() {
   useEffect(() => {
     const isEditingPlan = /\/get-started\/rate-plans\/\d+\/edit$/.test(location.pathname);
     const isEditingCustomer = /\/get-started\/customers\/\d+\/edit$/.test(location.pathname);
-
     if (
       showCreatePlan ||
       showNewProductForm ||
@@ -160,270 +147,293 @@ export default function App() {
     location.pathname
   ]);
 
-  // Prefetch heavy modules in background after initial render
+  // Prefetch heavy modules (also edit screen)
   useEffect(() => {
     productsLoader();
     customersLoader();
     meteringLoader();
     subscriptionsLoader();
     ratePlansLoader();
+    editPlanLoader();
   }, []);
-
 
   return (
     <div className="min-h-screen bg-white">
       <CookieConsentBanner />
-      {/* Use minimal fallback only when no token in storage */}
-      <Suspense fallback={!localStorage.getItem('aforo_auth_token') ? (<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>) : null}>
+      <Suspense
+        fallback={
+          !localStorage.getItem('aforo_auth_token') ? (
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : null
+        }
+      >
         <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/signin"
-          element={user ? <Navigate to="/get-started" replace /> : <SignIn />}
-        />
-        <Route
-          path="/contact-sales"
-          element={
-            <div className="min-h-screen">
-              <Organization />
-            </div>
-          }
-        />
-        <Route
-          path="/thank-you"
-          element={
-            <div className="min-h-screen">
-              <ThankYou />
-            </div>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            user ? (
-              <Navigate to="/get-started" replace />
-            ) : (
-              <div className="min-h-screen">
-                <Landing />
-              </div>
-            )
-          }
-        />
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signin" element={user ? <Navigate to="/get-started" replace /> : <SignIn />} />
+          <Route path="/contact-sales" element={<div className="min-h-screen"><Organization /></div>} />
+          <Route path="/thank-you" element={<div className="min-h-screen"><ThankYou /></div>} />
+          <Route
+            path="/"
+            element={user ? <Navigate to="/get-started" replace /> : <div className="min-h-screen"><Landing /></div>}
+          />
 
-        {/* Dashboards */
-        <Route path="/get-started/dashboards" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <SideNavbar
-                  activeTab={currentTab}
-                  onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
-                  }}
-                  hidden={!showSidebar}
-                />
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <SkeletonForm />
+          {/* Dashboards */}
+          <Route
+            path="/get-started/dashboards"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <SkeletonForm />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />}
+              </ProtectedRoute>
+            }
+          />
 
-       
-        {/* Rate Plans */}
-        <Route path="/get-started/rate-plans" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <SideNavbar
-                  activeTab={currentTab}
-                  onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
-                  }}
-                  hidden={!showSidebar}
-                />
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <RatePlans
-                    ratePlans={ratePlans}
-                    setRatePlans={setRatePlans}
-                    showCreatePlan={showCreatePlan}
-                    setShowCreatePlan={setShowCreatePlan}
-                  />
+          {/* Rate Plans list */}
+          <Route
+            path="/get-started/rate-plans"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <RatePlans
+                        ratePlans={ratePlans}
+                        setRatePlans={setRatePlans}
+                        showCreatePlan={showCreatePlan}
+                        setShowCreatePlan={setShowCreatePlan}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/get-started/products" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                {!isNewProductPage && (
-                  <SideNavbar
-                    activeTab={currentTab}
-                    onTabClick={(tab) => {
-                      const slug =
-                        tab === 'Billable Metrics'
-                          ? 'metering'
-                          : tab === 'Purchases'
-                          ? 'subscriptions'
-                          : tab === 'Data Ingetion'
-                          ? 'data-ingetion'
-                          : tab.toLowerCase().replace(/\s+/g, '-');
-                      navigate(`/get-started/${slug}`);
-                    }}
-                    hidden={!showSidebar}
-                  />
-                )}
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <Products
-                    showNewProductForm={showNewProductForm}
-                    setShowNewProductForm={setShowNewProductForm}
-                  />
-                </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/get-started/products/new" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <NewProduct onClose={() => navigate('/get-started/products')} />
-                </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
-        
-        {/* Billable Metrics */}
-        <Route path="/get-started/metering" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <SideNavbar
-                  activeTab={currentTab}
-                  onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
-                  }}
-                  hidden={!showSidebar}
-                />
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <Metering
-                    showNewUsageMetricForm={showNewUsageMetricForm}
-                    setShowNewUsageMetricForm={setShowNewUsageMetricForm}
-                    setHideSidebarOnEditMetric={setHideSidebarOnEditMetric}
-                  />
-                </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Purchases / Subscriptions */}
-        <Route path="/get-started/subscriptions" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <SideNavbar
-                  activeTab={currentTab}
-                  onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
-                  }}
-                  hidden={!showSidebar}
-                />
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <Subscriptions
-                    showNewSubscriptionForm={showNewSubscriptionForm}
-                    setShowNewSubscriptionForm={setShowNewSubscriptionForm}
-                  />
+          {/* NEW: Rate Plan Edit route */}
+          <Route
+            path="/get-started/rate-plans/:id/edit"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <EditPlan />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/get-started/customers" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <SideNavbar
-                  activeTab={currentTab}
-                  onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
-                  }}
-                  hidden={!showSidebar}
-                />
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <Customers
-                    showNewCustomerForm={showNewCustomerForm}
-                    setShowNewCustomerForm={setShowNewCustomerForm}
-                  />
+          {/* Products */}
+          <Route
+            path="/get-started/products"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    {!isNewProductPage && (
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={(tab) => {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }}
+                        hidden={!showSidebar}
+                      />
+                    )}
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <Products
+                        showNewProductForm={showNewProductForm}
+                        setShowNewProductForm={setShowNewProductForm}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/get-started/customers/:id/edit" element={
-          <ProtectedRoute>
-            <div className="flex flex-col">
-              <div className="flex-1">
-                <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                  <EditCustomer />
-                </div>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<Navigate to="/get-started" replace />} />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Add other protected routes similarly */}
+          <Route
+            path="/get-started/products/new"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <NewProduct onClose={() => navigate('/get-started/products')} />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Metering */}
+          <Route
+            path="/get-started/metering"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <Metering
+                        showNewUsageMetricForm={showNewUsageMetricForm}
+                        setShowNewUsageMetricForm={setShowNewUsageMetricForm}
+                        setHideSidebarOnEditMetric={setHideSidebarOnEditMetric}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Subscriptions */}
+          <Route
+            path="/get-started/subscriptions"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <Subscriptions
+                        showNewSubscriptionForm={showNewSubscriptionForm}
+                        setShowNewSubscriptionForm={setShowNewSubscriptionForm}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Customers */}
+          <Route
+            path="/get-started/customers"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <Customers
+                        showNewCustomerForm={showNewCustomerForm}
+                        setShowNewCustomerForm={setShowNewCustomerForm}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/get-started/customers/:id/edit"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <EditCustomer />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/get-started" replace />} />
         </Routes>
       </Suspense>
     </div>
