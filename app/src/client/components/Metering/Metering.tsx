@@ -4,6 +4,7 @@ import EditMetrics from "./EditMetering/EditMetrics";
 import "../Rateplan/RatePlan.css";
 import "./Metering.css";
 import "../Products/Products.css";
+import PageHeader from "../PageHeader/PageHeader";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import UsageEmptyImg from "./usage.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
@@ -151,20 +152,15 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   );
 
   return (
-    <div className="rate-plan-container metering-page">
-      <nav className="metering-breadcrumb-nav">
-        <div className="metering-breadcrumb">
-          <span>Usage Metrics</span>
-        </div>
-      </nav>
-      <div className="rate-plan-header">
-        <h2>Usage Metrics</h2>
-        <div className="header-actions">
-          {/* <Search onSearch={setSearchQuery} /> */}
-          <button className="new-rate-button" onClick={() => setShowNewUsageMetricForm(true)}>+ New Usage Metric</button>
-      
-        </div>
-      </div>
+    <div className="rate-plan-container">
+     
+      <PageHeader
+        title="Usage Metrics"
+        searchTerm={searchQuery}
+        onSearchTermChange={setSearchQuery}
+        primaryLabel="New Usage Metric"
+        onPrimaryClick={() => setShowNewUsageMetricForm(true)}
+      />
       <div className="products-table-wrapper">
         <table className="products-table">
         <thead>
