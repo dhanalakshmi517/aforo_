@@ -5,6 +5,7 @@ import PageHeader from '../PageHeader/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
 import TopBar from '../TopBar/TopBar';
+import SaveDraft from '../componenetsss/SaveDraft'; // ⬅️ NEW: use the Save-as-Draft modal
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -79,7 +80,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   ratePlans,
   setRatePlans: setRatePlansFromParent
 }) => {
-  const createPlanRef = useRef<{ back: () => boolean }>(null);
+  const createPlanRef = useRef<{ back: () => boolean; getRatePlanId: () => number | null }>(null);
   const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<void>)>(null);
   const [draftSaving, setDraftSaving] = useState(false);
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
       setShowCreatePlan(true);
       localStorage.removeItem('ratePlanWizardOpen');
     }
-  }, []);
+  }, []); // eslint-disable-line
 
   // Local state (mirrors parent if provided)
   const [ratePlansState, setRatePlansState] = useState<RatePlan[]>(ratePlans || []);
@@ -127,11 +128,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
     loadRatePlans();
   }, [loadRatePlans]);
 
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // list-table delete dialog (unchanged)
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
+
+  // ⬇️ NEW: Save-as-Draft modal used by Back & top-right Delete while in wizard
+  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
 
   const handleEdit = (id: number) => {
     const plan = ratePlansState.find((p) => p.ratePlanId === id);
@@ -206,7 +209,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
           <span className="pill-icon" aria-hidden="true">
             {/* Designer SVG: POSTPAID */}
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126ZM7.0002 9.9924C6.60126 9.9924 6.26053 9.85113 5.978 9.5686C5.69533 9.28606 5.554 8.94533 5.554 8.5464C5.554 8.14733 5.69533 7.80653 5.978 7.524C6.26053 7.24146 6.60126 7.1002 7.0002 7.1002C7.39913 7.1002 7.73986 7.24146 8.0224 7.524C8.30506 7.80653 8.44639 8.14733 8.44639 8.5464C8.44639 8.94533 8.30506 9.28606 8.0224 9.5686C7.73986 9.85113 7.39913 9.9924 7.0002 9.9924ZM4.77721 2.74884C4.94689 3.08684 5.29273 3.3002 5.67093 3.3002H8.33486C8.7142 3.3002 9.06089 3.08555 9.23 2.74598L9.7562 1.68935C9.82241 1.55639 9.7257 1.4002 9.57717 1.4002H4.42438C4.27556 1.4002 4.17887 1.55693 4.24564 1.68992L4.77721 2.74884ZM4.2126 12.6002H9.7878C10.5735 12.6002 11.2387 12.3266 11.7832 11.7794C12.3279 11.2322 12.6002 10.5683 12.6002 9.7878C12.6002 9.45753 12.5435 9.13733 12.4302 8.8272C12.3169 8.51693 12.1551 8.23666 11.9448 7.9864L9.34306 4.86048C9.15307 4.63221 8.87144 4.5002 8.57445 4.5002H5.44359C5.14795 4.5002 4.86746 4.63102 4.67745 4.85752L2.0632 7.974C1.85293 8.22426 1.68986 8.5066 1.574 8.821C1.45813 9.13526 1.4002 9.45753 1.4002 9.7878C1.4002 10.5683 1.6738 11.2322 2.221 11.7794C2.7682 12.3266 3.43206 12.6002 4.2126 12.6002Z" fill="var(--icon-color-darkest, #1A2126)"/>
+              <path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126ZM7.0002 9.9924C6.60126 9.9924 6.26053 9.85113 5.978 9.5686C5.69533 9.28606 5.554 8.94533 5.554 8.5464C5.554 8.14733 5.69533 7.80653 5.978 7.524C6.26053 7.24146 6.60126 7.1002 7.0002 7.1002C7.39913 7.1002 7.73986 7.24146 8.0224 7.524C8.30506 7.80653 8.44639 8.14733 8.44639 8.5464C8.44639 8.94533 8.30506 9.28606 8.0224 9.5686C7.73986 9.85113 7.39913 9.9924 7.0002 9.9924ZM4.77721 2.74884C4.94689 3.08684 5.29273 3.3002 5.67093 3.3002H8.33486C8.7142 3.3002 9.06089 3.08555 9.23 2.74598L9.7562 1.68935C9.82241 1.55639 9.7257 1.4002 9.57717 1.4002H4.42438C4.27556 1.4002 4.17887 1.55693 4.24564 1.68992L4.77721 2.74884Z" fill="var(--icon-color-darkest, #1A2126)"/>
             </svg>
           </span>
           Post-paid
@@ -257,15 +260,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
           <TopBar
             title="Create New Rate Plan"
             onBack={() => {
-              if (createPlanRef.current && createPlanRef.current.back()) {
-                return;
-              }
-              setShowCreatePlan(false);
-              navigate('/get-started/rate-plans');
+              // Always open the Save-as-Draft modal on back
+              setShowSaveDraftModal(true);
             }}
             cancel={{
-              label: "Cancel",
-              onClick: () => setShowCancelModal(true)
+              label: "Delete",
+              // Open the same Save-as-Draft modal (Design: No, Delete | Yes, Save as Draft)
+              onClick: () => setShowSaveDraftModal(true)
             }}
             save={{
               label: "Save as Draft",
@@ -292,32 +293,43 @@ const RatePlans: React.FC<RatePlansProps> = ({
             />
           </div>
 
-          {showCancelModal && (
-            <div className="rate-delete-modal-overlay">
-              <div className="rate-delete-modal-content">
-                <div className="rate-delete-modal-body">
-                  <h5>
-                    Are you sure you want to cancel <br /> creating this rate plan?
-                  </h5>
-                  <p>This action cannot be undone.</p>
-                </div>
-                <div className="rate-delete-modal-footer">
-                  <button className="rate-delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
-                  <button
-                    className="rate-delete-modal-confirm"
-                    onClick={async () => {
-                      setShowCancelModal(false);
-                      setShowCreatePlan(false);
-                      await loadRatePlans();
-                      navigate('/get-started/rate-plans');
-                    }}
-                  >
-                    Confirm
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* ======= Save-as-Draft Modal (Back/Delete in wizard) ======= */}
+          <SaveDraft
+            isOpen={showSaveDraftModal}
+            onClose={async () => {
+              // "No, Delete" clicked
+              setShowSaveDraftModal(false);
+
+              const currentId = createPlanRef.current?.getRatePlanId();
+              if (currentId) {
+                try {
+                  await deleteRatePlan(currentId);
+                } catch (e) {
+                  console.error('Failed to delete current wizard rate plan', e);
+                }
+              }
+              setShowCreatePlan(false);
+              await loadRatePlans();
+              navigate('/get-started/rate-plans');
+            }}
+            onSave={async () => {
+              // "Yes, Save as Draft" clicked
+              try {
+                if (saveDraftFn) {
+                  setDraftSaving(true);
+                  await saveDraftFn(); // calls the same APIs as the top-right "Save as Draft"
+                  setDraftSaving(false);
+                }
+              } catch (e) {
+                console.error('Save as draft (from modal) failed', e);
+              } finally {
+                setShowSaveDraftModal(false);
+                setShowCreatePlan(false);
+                await loadRatePlans();
+                navigate('/get-started/rate-plans');
+              }
+            }}
+          />
         </div>
       ) : (
         <div className="rate-plan-container">
@@ -469,6 +481,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             )}
           </table>
 
+          {/* List page delete confirm modal (unchanged) */}
           {showDeleteModal && (
             <div className="rate-delete-modal-overlay">
               <div className="rate-delete-modal-content">
