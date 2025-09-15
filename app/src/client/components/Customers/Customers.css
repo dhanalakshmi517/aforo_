@@ -31,7 +31,8 @@
   table-layout: fixed;
   padding: 0;
   font-size: var(--font-size-lg);
-  }
+}
+
 .customers-table th,
 .customers-table td {
   padding: 12px 16px;
@@ -39,6 +40,7 @@
   border-bottom: 1px solid var(--color-neutral-200);
   word-wrap: break-word;
 }
+
 .customers-table td {
   padding: 18px 16px;
   overflow: hidden;
@@ -49,14 +51,15 @@
   font-weight: 400;
   line-height: var(--line-height-body-sm);
 }
+
 .customers-table th {
-  border-radius: 0; /* reset default for all header cells */
+  border-radius: 0; /* keep: reset default for all header cells */
   background-color: var(--color-neutral-100);
   height: 28px;
   padding: 4px 16px;
   text-align: left;
   position: sticky;
-  border-bottom: none;
+  border-bottom: none; /* keep: pushed change */
   top: 0;
   z-index: 1;
   color: var(--color-neutral-1000);
@@ -64,19 +67,16 @@
   font-size: var(--font-size-sm);
   font-style: normal;
   font-weight: 500;
-    line-height: var(--line-height-body-sm);
+  line-height: var(--line-height-body-sm);
 }
+
 .customers-table tbody tr:hover {
   background-color: var(--grey-100);
 }
 
-/* Column widths */
-.customers-table th:first-child {
-  border-top-left-radius: var(--border-radius-sm);
-}
-.customers-table th:last-child {
-  border-top-right-radius: var(--border-radius-sm);
-}
+/* Column widths + rounded top corners for first/last header cell */
+.customers-table th:first-child { border-top-left-radius: var(--border-radius-sm); }
+.customers-table th:last-child  { border-top-right-radius: var(--border-radius-sm); }
 
 .customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 30%; }
 .customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 20%; }
@@ -84,9 +84,48 @@
 .customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 20%; }
 .customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 15%; }
 
-/* Name cell with logo */
+/* ---------------------- Name + Avatar ---------------------- */
 .name-cell { text-align: left; display: flex; align-items: center; }
-.customer-logo { width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-right: 12px; }
+
+/* Our avatar container (36x36 circle) */
+.customer-logo {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  margin-right: 12px;
+  border-radius: 36px;
+  background: #DCDDE1; /* placeholder */
+  overflow: hidden;
+  position: relative;
+}
+
+/* The actual image fills and crops correctly */
+.customer-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;         /* ensures any PNG/JPG fits the circle */
+  display: block;
+  border-radius: inherit;
+}
+
+/* Initials fallback (shown only when no image) */
+.customer-logo .avatar-initials {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: #ffffff;
+  background: #C7CBD1;
+  border-radius: inherit;
+}
+
+/* Toggle visibility depending on whether we have an image */
+.customer-logo.has-image .avatar-initials { display: none; }
+.customer-logo.no-image  .customer-logo-img  { display: none; }
+
 .name-email { display: flex; flex-direction: column; }
 .name {
   color: var(--color-neutral-1400);
@@ -103,21 +142,22 @@
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-sm);
+  white-space: normal;
+  word-break: break-all;
 }
-.email { white-space: normal; word-break: break-all; }
 
-/* Action buttons cell */
+/* ---------------------- Actions ---------------------- */
 .action-buttons { display: flex; gap: 8px; justify-content: center; }
 .action-buttons button { background: transparent; border: none; padding: 0; cursor: pointer; }
 
-/* Table wrapper panel */
+/* ---------------------- Table wrapper panel ---------------------- */
 .customers-table-wrapper {
   margin-left: 256px;
   width: calc(100% - 256px);
   padding: 12px;
   margin-top: 12px;
   background-color: var(--color-neutral-white);
-    min-height: calc(100vh - 126px);
+  min-height: calc(100vh - 126px);  /* keep: pushed change */
   flex: 1;
   overflow-y: auto;
   scrollbar-width: none;
@@ -130,7 +170,7 @@
 /* Borders & alignment tweaks */
 .customers-table tbody tr { border-top: 1px solid var(--color-neutral-200); }
 .customers-table th:first-child, .customers-table td:first-child { padding-left: 0; }
-.customers-table th:last-child, .customers-table td:last-child { padding-right: 0; }
+.customers-table th:last-child,  .customers-table td:last-child  { padding-right: 0; }
 .customers-table td.actions-cell, .customers-table th.actions-cell { text-align: center; }
 
 /* Info icon in headers */

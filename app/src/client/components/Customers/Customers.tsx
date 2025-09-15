@@ -6,7 +6,7 @@ import PageHeader from "../PageHeader/PageHeader";
 import CreateCustomer from "./CreateCustomer";
 import SuccessToast from "./SuccessToast";
 import { getCustomers, deleteCustomer } from "./api";
-import { isAuthenticated } from "../../utils/auth";
+import { getAuthHeaders, isAuthenticated } from "../../utils/auth"; // <-- use the real auth headers
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -41,7 +41,7 @@ const Notification: React.FC<NotificationState> = ({ type, message }) => {
   );
 };
 
-// Reusable status badge (parity with RatePlans)
+// Reusable status badge
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const normalized = (status || "").toLowerCase();
   const variant = normalized.includes("active") ? "active" : normalized.includes("draft") ? "draft" : "default";
@@ -81,6 +81,9 @@ export interface Customer {
   billingState?: string;
   billingPostalCode?: string;
   billingCountry?: string;
+
+  // transient
+  __resolvedLogoSrc?: string | null;
 }
 
 interface CustomersProps {
@@ -103,6 +106,53 @@ const formatDateStr = (iso?: string) => {
   return iso;
 };
 
+/** Host that serves static uploads; the API lives under /v1/api */
+const FILE_HOST = "http://43.206.110.213:8081";
+
+/** Normalize and absolutize the stored upload path */
+const absolutizeUpload = (path: string) => {
+  const clean = path.replace(/\\/g, "/").trim();
+  if (/^https?:\/\//i.test(clean)) return clean;
+  return `${FILE_HOST}${clean.startsWith("/") ? "" : "/"}${clean}`;
+};
+
+/**
+ * Workaround for protected uploads:
+ * - We fetch the image ourselves with the SAME auth headers used by the API.
+ * - Convert to a blob URL and use that as <img src>.
+ * - If it fails, return null (the UI will show initials fallback).
+ */
+const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
+  if (!uploadPath) return null;
+  const url = encodeURI(absolutizeUpload(uploadPath));
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        ...getAuthHeaders(),     // <-- this is the fix: send Bearer token / cookies
+        Accept: "image/*",
+      },
+      credentials: "include",     // include session cookie if your backend uses it
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    // Some servers send application/octet-stream, that's fine – just make a blob URL
+    return URL.createObjectURL(blob);
+  } catch {
+    return null;
+  }
+};
+
+const initialsFrom = (name?: string) =>
+  (name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]!.toUpperCase())
+    .join("") || "•";
+
 const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCustomerForm }) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -124,6 +174,17 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     }
   }, [navigate]);
 
+  // revoke blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      customers.forEach((c) => {
+        if (c.__resolvedLogoSrc && c.__resolvedLogoSrc.startsWith("blob:")) {
+          URL.revokeObjectURL(c.__resolvedLogoSrc);
+        }
+      });
+    };
+  }, [customers]);
+
   const handleDeleteClick = (id?: number, name?: string) => {
     if (id == null) return;
     setDeleteId(id);
@@ -135,29 +196,32 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     if (deleteId == null) return;
     setIsDeleting(true);
     try {
-      console.log('Attempting to delete customer with ID:', deleteId);
       await deleteCustomer(deleteId);
-      console.log('Delete API call successful, updating UI state');
       setCustomers(prev => prev.filter(c => (c.customerId ?? c.id) !== deleteId));
       setShowDeleteModal(false);
       setToastMessage(`The customer "${pendingName.current}" was successfully deleted.`);
       setShowSuccessToast(true);
-    } catch (err: any) {
-      console.error('Delete customer failed:', err);
-      console.error('Error message:', err.message);
-      console.error('Error details:', err);
+    } catch {
       setNotification({ type: "error", message: `Failed to delete the customer "${pendingName.current}". Please try again.` });
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const fetchCustomers = async () => {
+  const fetchCustomersAndLogos = async () => {
     if (!isAuthenticated()) return;
     try {
       setLoading(true);
       const data = await getCustomers();
-      setCustomers(data);
+
+      const withLogos: Customer[] = await Promise.all(
+        (data || []).map(async (c: Customer) => ({
+          ...c,
+          __resolvedLogoSrc: await resolveLogoSrc(c.companyLogoUrl),
+        }))
+      );
+
+      setCustomers(withLogos);
     } catch (err: any) {
       if (err.message?.includes("Session expired") || err.message?.includes("Not authenticated")) return;
       setErrorMsg(err.message || "Failed to load customers");
@@ -166,8 +230,8 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     }
   };
 
-  useEffect(() => { fetchCustomers(); }, []);
-  useEffect(() => { if (!showNewCustomerForm) fetchCustomers(); }, [showNewCustomerForm]);
+  useEffect(() => { fetchCustomersAndLogos(); }, []);
+  useEffect(() => { if (!showNewCustomerForm) fetchCustomersAndLogos(); }, [showNewCustomerForm]);
 
   const handleNewCustomer = () => setShowNewCustomerForm(true);
   const handleCloseForm = () => setShowNewCustomerForm(false);
@@ -193,7 +257,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             onSearchTermChange={setSearchTerm}
             primaryLabel="New Customer"
             onPrimaryClick={handleNewCustomer}
-            onFilterClick={() => { /* hook up real filter later */ }}
+            onFilterClick={() => {}}
             searchDisabled={searchDisabled}
           />
 
@@ -218,73 +282,81 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                 {customers.length === 0 && !loading && !errorMsg && (
                   <tr><td colSpan={5}>No customers found</td></tr>
                 )}
-                {filteredCustomers.map((customer) => (
-                  <tr key={customer.customerId ?? customer.id}>
-                    <td className="name-cell">
-                      {customer.companyLogoUrl && (
-                        <img
-                          src={customer.companyLogoUrl.startsWith('http') ? customer.companyLogoUrl : `http://43.206.110.213:8081${customer.companyLogoUrl}`}
-                          alt={`${customer.customerName ?? customer.companyName} logo`}
-                          className="customer-logo"
-                        />
-                      )}
-                      <div className="name-email">
-                        <div className="name">{customer.customerName ?? customer.companyName}</div>
-                        <div className="email">{customer.primaryEmail ?? "-"}</div>
-                      </div>
-                    </td>
-                    <td>{customer.companyType}</td>
-                    <td><StatusBadge status={customer.status} /></td>
-                    <td>{formatDateStr(customer.createdOn)}</td>
-                    <td>
-                      <div className="action-buttons">
-                        {customer.status?.toLowerCase() === 'draft' ? (
-                          <Link
-                            to={`/get-started/customers/${customer.customerId ?? customer.id}/edit`}
-                            className="resume-button"
-                            title="Resume Draft"
-                            aria-label="Resume Draft"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-                              <path d="M11.75 3.25a5.5 5.5 0 1 1-7.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M5.25 8h5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M8.5 6l2.25 2-2.25 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </Link>
-                        ) : (
-                          <Link
-                            to={`/get-started/customers/${customer.customerId ?? customer.id}/edit`}
-                            className="edit-button"
-                            title="Edit"
-                            aria-label="Edit"
+
+                {filteredCustomers.map((customer) => {
+                  const id = customer.customerId ?? customer.id;
+                  const displayName = customer.customerName ?? customer.companyName;
+                  const initials = initialsFrom(displayName);
+                  const imgSrc = customer.__resolvedLogoSrc ?? null;
+
+                  return (
+                    <tr key={id}>
+                      <td className="name-cell">
+                        <div className={`customer-logo${imgSrc ? " has-image" : " no-image"}`} aria-label={`${displayName} logo`} role="img">
+                          {imgSrc ? (
+                            <img className="customer-logo-img" src={imgSrc} alt="" />
+                          ) : null}
+                          <span className="avatar-initials">{initials}</span>
+                        </div>
+
+                        <div className="name-email">
+                          <div className="name">{displayName}</div>
+                          <div className="email">{customer.primaryEmail ?? "-"}</div>
+                        </div>
+                      </td>
+                      <td>{customer.companyType}</td>
+                      <td><StatusBadge status={customer.status} /></td>
+                      <td>{formatDateStr(customer.createdOn)}</td>
+                      <td>
+                        <div className="action-buttons">
+                          {customer.status?.toLowerCase() === 'draft' ? (
+                            <Link
+                              to={`/get-started/customers/${id}/edit`}
+                              className="resume-button"
+                              title="Resume Draft"
+                              aria-label="Resume Draft"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+                                <path d="M11.75 3.25a5.5 5.5 0 1 1-7.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M5.25 8h5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M8.5 6l2.25 2-2.25 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </Link>
+                          ) : (
+                            <Link
+                              to={`/get-started/customers/${id}/edit`}
+                              className="edit-button"
+                              title="Edit"
+                              aria-label="Edit"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path
+                                  d="M7.99933 13.3332H13.9993M10.9167 2.41449C11.1821 2.1491 11.542 2 11.9173 2C12.2927 2 12.6526 2.1491 12.918 2.41449C13.1834 2.67988 13.3325 3.03983 13.3325 3.41516C13.3325 3.79048 13.1834 4.15043 12.918 4.41582L4.91133 12.4232C4.75273 12.5818 4.55668 12.6978 4.34133 12.7605L2.42667 13.3192C2.3693 13.3359 2.30849 13.3369 2.25061 13.3221C2.19272 13.3072 2.13988 13.2771 2.09763 13.2349C2.05538 13.1926 2.02526 13.1398 2.01043 13.0819C1.9956 13.024 1.9966 12.9632 2.01333 12.9058L2.572 10.9912C2.63481 10.776 2.75083 10.5802 2.90933 10.4218L10.9167 2.41449Z"
+                                  stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+                                />
+                              </svg>
+                            </Link>
+                          )}
+                          <button
+                            className="delete-button"
+                            title="Delete"
+                            aria-label="Delete"
+                            onClick={() =>
+                              handleDeleteClick(id!, displayName)
+                            }
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                               <path
-                                d="M7.99933 13.3332H13.9993M10.9167 2.41449C11.1821 2.1491 11.542 2 11.9173 2C12.2927 2 12.6526 2.1491 12.918 2.41449C13.1834 2.67988 13.3325 3.03983 13.3325 3.41516C13.3325 3.79048 13.1834 4.15043 12.918 4.41582L4.91133 12.4232C4.75273 12.5818 4.55668 12.6978 4.34133 12.7605L2.42667 13.3192C2.3693 13.3359 2.30849 13.3369 2.25061 13.3221C2.19272 13.3072 2.13988 13.2771 2.09763 13.2349C2.05538 13.1926 2.02526 13.1398 2.01043 13.0819C1.9956 13.024 1.9966 12.9632 2.01333 12.9058L2.572 10.9912C2.63481 10.776 2.75083 10.5802 2.90933 10.4218L10.9167 2.41449Z"
-                                stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+                                d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335"
+                                stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
                               />
                             </svg>
-                          </Link>
-                        )}
-                        <button
-                          className="delete-button"
-                          title="Delete"
-                          aria-label="Delete"
-                          onClick={() =>
-                            handleDeleteClick((customer.customerId ?? customer.id)!, customer.customerName ?? customer.companyName)
-                          }
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path
-                              d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335"
-                              stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

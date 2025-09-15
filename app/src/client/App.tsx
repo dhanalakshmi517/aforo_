@@ -29,8 +29,10 @@ import SideNavbar from './components/SideNavbar/SideNavbar';
 
 const customersLoader = () => import('./components/Customers/Customers');
 const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
+
 const editCustomerLoader = () => import('./components/Customers/EditCustomers/EditCustomer');
 const EditCustomer = React.lazy(editCustomerLoader) as React.ComponentType<any>;
+
 const productsLoader = () => import('./components/Products/Products');
 const Products = React.lazy(productsLoader) as React.ComponentType<any>;
 const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
@@ -152,12 +154,21 @@ export default function App() {
     subscriptionsLoader();
     ratePlansLoader();
     editPlanLoader();
+    editCustomerLoader(); // NEW: prefetch edit customer chunk so it’s ready
   }, []);
+
+  // Small reusable spinner for route-level Suspense
+  const RouteSpinner = (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white">
       <CookieConsentBanner />
       <Suspense
+        // Keep your existing behavior, BUT we add a route-level fallback below for edit screens
         fallback={
           !localStorage.getItem('aforo_auth_token') ? (
             <div className="flex items-center justify-center min-h-screen">
@@ -363,7 +374,8 @@ export default function App() {
             }
           />
 
-          {/* Subscriptions */}
+          {/* Subscriptions */
+          }
           <Route
             path="/get-started/subscriptions"
             element={
@@ -431,6 +443,7 @@ export default function App() {
             }
           />
 
+          {/* Customer Edit */}
           <Route
             path="/get-started/customers/:id/edit"
             element={
@@ -438,7 +451,10 @@ export default function App() {
                 <div className="flex flex-col">
                   <div className="flex-1">
                     <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                      <EditCustomer />
+                      {/* NEW: route-level Suspense so we always show a loader while chunk loads */}
+                      <Suspense fallback={RouteSpinner}>
+                        <EditCustomer />
+                      </Suspense>
                     </div>
                   </div>
                 </div>

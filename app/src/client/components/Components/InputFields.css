@@ -1,0 +1,93 @@
+/* --- Shared form group + labels --- */
+.com-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .com-form-label {
+    font-weight: 500;
+    color: #374151; /* neutral-700 */
+    font-size: 14px;
+  }
+  
+  .com-form-label.label-error {
+    color: #E34935;
+  }
+  
+  /* --- Text inputs and selects (uniform look) --- */
+  .com-input-field,
+  .com-select-field {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #DDE0E6;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    color: #111827;
+    background-color: #fff;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  
+  /* Defensive: style any plain <select> placed in our groups the same way */
+  .com-form-group select:not(.com-select-field),
+  .acc-form-group  select:not(.com-select-field) {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 36px 10px 12px; /* room for chevron */
+    border: 1px solid #DDE0E6;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    color: #111827;
+    background-color: #fff;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  
+    /* remove native arrows and add our own */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239899A5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+  }
+  
+  /* Apply the same chevron to .com-select-field */
+  .com-select-field {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239899A5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+    padding-right: 36px;
+  }
+  
+  /* Focus & error states */
+  .com-input-field:focus,
+  .com-select-field:focus,
+  .com-form-group select:not(.com-select-field):focus,
+  .acc-form-group  select:not(.com-select-field):focus {
+    outline: none;
+    border-color: #1D7AFC;
+    box-shadow: 0 0 0 3px rgba(29, 122, 252, 0.15);
+  }
+  
+  .com-input-field.error,
+  .com-select-field.error,
+  .com-form-group select.error,
+  .acc-form-group  select.error {
+    border-color: #E34935;
+  }
+  
+  .error-message {
+    color: #E34935;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
