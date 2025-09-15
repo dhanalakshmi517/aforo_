@@ -43,7 +43,22 @@ body {
   
 
 }
+.rate-plan-product-container {
+  padding: 0;
+  width: calc(100% - 256px - 10px);
+  max-width: none;
+  box-sizing: border-box;
+  margin-left: 256px;
+  padding-right: 10px;
+  background: none;
+  box-shadow: none;
+}
 
+
+@media (max-width: 991px) { .rate-plan-product-container { margin-left: 0; width: 100%; } }
+@media (max-width: 768px) {
+  .rate-plan-product-container { width: 100%; margin-left: 0; }
+}
 .products-table th:first-child {
   border-top-left-radius: var(--border-radius-sm);
   border-bottom-left-radius: var(--border-radius-sm);
@@ -662,6 +677,15 @@ body.products-page {
 
 @media (max-width: 767px) {
   .products-empty-state { margin: 40px auto 0; }
+}
+
+/* Adjust table wrapper bottom spacing and flex behaviour */
+.products-table-wrapper {
+  flex: 1 1 auto;          /* let it stretch */
+  margin-top: 8px;          /* reduced gap to PageHeader */
+  height: auto;            /* no fixed height so bottom padding visible */
+  min-height: calc(100vh - 110px);
+  padding-bottom: 12px;    /* bottom gap */
 }
 
 /* Small screens: table uses full width */

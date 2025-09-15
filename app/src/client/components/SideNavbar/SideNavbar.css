@@ -1,7 +1,7 @@
 @import "../Variables/Variables.css";
 
 .sidebar {
-  width: 240px;
+  width: 15rem;
   height: 100vh;
   /* surface color defined in global variables */
   background-color: var(--color-primary-900);
