@@ -8,6 +8,7 @@ interface BaseInputProps {
   placeholder?: string;
   onChange: (val: string) => void;
   onBlur?: () => void;
+  onFocus?: () => void;                 // ⬅️ ADDED
   /** Pass `true` or a string for error. True shows "This field is required" */
   error?: string | boolean;
   className?: string;
@@ -45,13 +46,16 @@ export const InputField: React.FC<InputProps> = (props) => {
     placeholder,
     onChange,
     onBlur,
+    onFocus,                              // ⬅️ ADDED
     type = 'text',
     error,
     className = '',
     autoComplete,
     ...rest
   } = props as BaseInputProps & { type?: string; checked?: boolean; autoComplete?: string };
+
   const errorMessage = error === true ? "This field is required" : error;
+
   return (
     <div className="com-form-group">
       {label && (
@@ -75,6 +79,7 @@ export const InputField: React.FC<InputProps> = (props) => {
         aria-label={label || placeholder || type}
         className={`com-input-field ${error ? "error" : ""} ${className}`.trim()}
         onBlur={onBlur}
+        onFocus={onFocus}                   // ⬅️ FORWARDED
         autoComplete={autoComplete}
       />
       {error && <div className="error-message">{errorMessage}</div>}
@@ -89,6 +94,7 @@ interface TextareaProps {
   placeholder?: string;
   onChange: (val: string) => void;
   onBlur?: () => void;
+  onFocus?: () => void;                    // ⬅️ ADDED (optional, for consistency)
   error?: string | boolean;
 }
 
@@ -98,6 +104,7 @@ export const TextareaField: React.FC<TextareaProps> = ({
   placeholder,
   onChange,
   onBlur,
+  onFocus,                                  // ⬅️ ADDED
   error,
 }) => {
   const errorMessage = error === true ? "This field is required" : error;
@@ -115,6 +122,7 @@ export const TextareaField: React.FC<TextareaProps> = ({
         aria-label={label || placeholder || "textarea"}
         className={`com-textarea-field ${error ? "error" : ""}`}
         onBlur={onBlur}
+        onFocus={onFocus}                   // ⬅️ FORWARDED
       />
       {error && <div className="error-message">{errorMessage}</div>}
     </div>
@@ -127,6 +135,7 @@ interface SelectProps {
   value: string;
   onChange: (val: string) => void;
   onBlur?: () => void;
+  onFocus?: () => void;                    // ⬅️ ADDED (optional, for consistency)
   options?: { label: string; value: string }[];
   disabled?: boolean;
   required?: boolean;
@@ -139,6 +148,7 @@ export const SelectField: React.FC<SelectProps> = ({
   value,
   onChange,
   onBlur,
+  onFocus,                                   // ⬅️ ADDED
   options = [],
   disabled = false,
   required = false,
@@ -157,6 +167,7 @@ export const SelectField: React.FC<SelectProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
+        onFocus={onFocus}                    // ⬅️ FORWARDED
         aria-label={label || "select"}
         className={`com-select-field ${error ? "error" : ""}`}
         disabled={disabled}

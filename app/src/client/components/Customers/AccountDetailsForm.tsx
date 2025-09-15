@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { InputField, SelectField } from '../Components/InputFields';
 import { checkEmailExists } from './api';
 import './AccountDetailsForm.css';
@@ -26,13 +26,13 @@ interface Props {
   data?: AccountDetailsData;
   onChange?: (data: AccountDetailsData) => void;
   errors?: { [key: string]: string };
-  onEmailBlur?: (email: string) => void; // kept for backward-compat (optional)
+  onEmailBlur?: (email: string) => void; // optional legacy hook
 }
 
 const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEmailBlur }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
-  const [primaryEmailError, setPrimaryEmailError] = useState<string>(''); // ⬅ local inline error
+  const [primaryEmailError, setPrimaryEmailError] = useState<string>(''); // inline error for email
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
 
   const [billingAddress, setBillingAddress] = useState({
@@ -69,30 +69,6 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
       })
       .catch((err) => console.error('Failed to load countries', err));
   }, []);
-
-  // Notify parent on state change
-  useEffect(() => {
-    if (!onChange) return;
-    const payload: AccountDetailsData = {
-      phoneNumber,
-      primaryEmail,
-      additionalEmailRecipients: additionalEmails.filter(Boolean),
-      billingSameAsCustomer: sameAsBilling,
-      customerAddressLine1: customerAddress.line1,
-      customerAddressLine2: customerAddress.line2,
-      customerCity: customerAddress.city,
-      customerState: customerAddress.state,
-      customerPostalCode: customerAddress.zip,
-      customerCountry: customerAddress.country,
-      billingAddressLine1: billingAddress.line1,
-      billingAddressLine2: billingAddress.line2,
-      billingCity: billingAddress.city,
-      billingState: billingAddress.state,
-      billingPostalCode: billingAddress.zip,
-      billingCountry: billingAddress.country,
-    };
-    onChange(payload);
-  }, [phoneNumber, primaryEmail, additionalEmails, billingAddress, customerAddress, sameAsBilling, onChange]);
 
   const Checkbox: React.FC<{ checked: boolean; onToggle: () => void }> = ({ checked, onToggle }) => (
     <button type="button" className="checkbox-btn" onClick={onToggle} aria-label="Toggle same as billing">
@@ -140,30 +116,7 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
       zip: data.billingPostalCode || '',
       country: data.billingCountry || '',
     });
-  }, []);
-
-  // propagate state to parent (dup retained to match your original logic)
-  useEffect(() => {
-    if (!onChange) return;
-    onChange({
-      phoneNumber,
-      primaryEmail,
-      additionalEmailRecipients: additionalEmails,
-      billingSameAsCustomer: sameAsBilling,
-      customerAddressLine1: customerAddress.line1,
-      customerAddressLine2: customerAddress.line2,
-      customerCity: customerAddress.city,
-      customerState: customerAddress.state,
-      customerPostalCode: customerAddress.zip,
-      customerCountry: customerAddress.country,
-      billingAddressLine1: billingAddress.line1,
-      billingAddressLine2: billingAddress.line2,
-      billingCity: billingAddress.city,
-      billingState: billingAddress.state,
-      billingPostalCode: billingAddress.zip,
-      billingCountry: billingAddress.country,
-    });
-  }, [onChange, phoneNumber, primaryEmail, additionalEmails, sameAsBilling, customerAddress, billingAddress]);
+  }, []); // mount only
 
   const handleCustomerChange = (field: string, value: string) => {
     setCustomerAddress({ ...customerAddress, [field]: value });
@@ -181,33 +134,43 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
 
   const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 
-  // Run inline validation on blur using API
+  // Run inline validation on blur using API (primary email only)
   const handlePrimaryEmailBlur = async () => {
-    onEmailBlur && onEmailBlur(primaryEmail); // keep old behavior if parent still listens
+    onEmailBlur && onEmailBlur(primaryEmail);
 
-    // Clear when empty / invalid format
-    if (!primaryEmail || !emailRegex.test(primaryEmail)) {
-      setPrimaryEmailError('');
+    const value = primaryEmail.trim();
+
+    if (!value) {
+      setPrimaryEmailError('This is a required field');
+      return;
+    }
+    if (!emailRegex.test(value)) {
+      setPrimaryEmailError('Enter a valid email address');
       return;
     }
 
     try {
-      const exists = await checkEmailExists(primaryEmail);
+      const exists = await checkEmailExists(value);
       if (exists) {
         setPrimaryEmailError('This email is already registered in your organization.');
       } else {
         setPrimaryEmailError('');
       }
     } catch (err) {
-      // On error, don't block the user with a false positive
       setPrimaryEmailError('');
       console.error('Failed to validate email uniqueness', err);
     }
   };
 
-  // Clear local error while typing
   const handlePrimaryEmailChange = (val: string) => {
+    const valueChanged = val !== primaryEmail;
     setPrimaryEmail(val);
+    if (valueChanged && primaryEmailError) {
+      setPrimaryEmailError('');
+    }
+  };
+
+  const handlePrimaryEmailFocus = () => {
     if (primaryEmailError) setPrimaryEmailError('');
   };
 
@@ -221,6 +184,44 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
       setCustomerAddress({ line1: '', line2: '', city: '', state: '', zip: '', country: '' });
     }
   };
+
+  /** ---------- SINGLE, DEDUPED parent notify ---------- */
+  const payload = useMemo<AccountDetailsData>(() => ({
+    phoneNumber,
+    primaryEmail,
+    additionalEmailRecipients: additionalEmails.filter(Boolean),
+    billingSameAsCustomer: sameAsBilling,
+    customerAddressLine1: customerAddress.line1,
+    customerAddressLine2: customerAddress.line2,
+    customerCity: customerAddress.city,
+    customerState: customerAddress.state,
+    customerPostalCode: customerAddress.zip,
+    customerCountry: customerAddress.country,
+    billingAddressLine1: billingAddress.line1,
+    billingAddressLine2: billingAddress.line2,
+    billingCity: billingAddress.city,
+    billingState: billingAddress.state,
+    billingPostalCode: billingAddress.zip,
+    billingCountry: billingAddress.country,
+  }), [
+    phoneNumber,
+    primaryEmail,
+    additionalEmails,
+    sameAsBilling,
+    customerAddress,
+    billingAddress
+  ]);
+
+  const lastSentRef = useRef<string>('');
+  useEffect(() => {
+    if (!onChange) return;
+    const serialized = JSON.stringify(payload);
+    if (serialized !== lastSentRef.current) {
+      lastSentRef.current = serialized;
+      onChange(payload);
+    }
+  }, [payload, onChange]);
+  /** ----------------------------------------------- */
 
   return (
     <div className="account-details-form">
@@ -249,11 +250,9 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
           pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
           onChange={handlePrimaryEmailChange}
           onBlur={handlePrimaryEmailBlur}
-          error={errors.primaryEmail || primaryEmailError}  /* ⬅ show inline error */
+          onFocus={handlePrimaryEmailFocus}
+          error={errors.primaryEmail || primaryEmailError}
         />
-        {/* If you prefer separate placement, you could also keep this line.
-            The `error` prop above already displays it under the field. */}
-        {/* {primaryEmailError && <span className="field-error">{primaryEmailError}</span>} */}
       </div>
 
       {/* Secondary Email IDs */}
@@ -268,7 +267,6 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
               pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
               onChange={(val) => updateAdditionalEmail(idx, val)}
             />
-            {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
           </div>
         ))}
         <button type="button" className="add-email-btn" onClick={addEmailField}>+ Add</button>
