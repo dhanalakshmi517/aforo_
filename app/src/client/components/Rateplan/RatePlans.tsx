@@ -350,15 +350,16 @@ const RatePlans: React.FC<RatePlansProps> = ({
           />
 
           {/* ======= TABLE (always render header) ======= */}
-          <table className="pp-rate-table">
-            <colgroup>
-              <col className="col-rateplan-name" />
-              <col className="col-product" />
-              <col className="col-payment" />
-              <col className="col-created" />
-              <col className="col-status" />
-              <col className="col-actions" />
-            </colgroup>
+          <div className="products-table-wrapper">
+            <table className="products-table">
+              <colgroup>
+                <col className="col-rateplan-name" />
+                <col className="col-product" />
+                <col className="col-payment" />
+                <col className="col-created" />
+                <col className="col-status" />
+                <col className="col-actions" />
+              </colgroup>
             <thead>
               <tr>
                 <th>Rate Plan Name</th>
@@ -478,8 +479,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   </td>
                 </tr>
               </tbody>
+              
             )}
           </table>
+          </div>
 
           {/* List page delete confirm modal (unchanged) */}
           {showDeleteModal && (
