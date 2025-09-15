@@ -29,7 +29,7 @@ const steps = [
   { title: "Review & confirm", desc: "Check and Finalize details." },
 ];
 
-const CreatePricePlan = React.forwardRef<{ back: () => boolean }, CreatePricePlanProps>(
+const CreatePricePlan = React.forwardRef<{ back: () => boolean; getRatePlanId: () => number | null }, CreatePricePlanProps>(
   ({ onClose, registerSaveDraft }, ref) => {
     const navigate = useNavigate();
     const pricingRef = React.useRef<PricingHandle>(null);
@@ -91,8 +91,9 @@ const CreatePricePlan = React.forwardRef<{ back: () => boolean }, CreatePricePla
           }
           return false;
         },
+        getRatePlanId: () => ratePlanId,
       }),
-      [currentStep]
+      [currentStep, ratePlanId]
     );
 
     const validateStep0 = (): boolean => {
@@ -262,6 +263,7 @@ const CreatePricePlan = React.forwardRef<{ back: () => boolean }, CreatePricePla
       extrasRef,
       setDraftSaving,
       setRatePlanId,
+      currentStep
     ]);
 
     useEffect(() => {
