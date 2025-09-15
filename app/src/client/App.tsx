@@ -22,7 +22,6 @@ const updateCurrentUserLastActiveTimestamp = async (update: { lastActiveTimestam
 };
 // =========================================================
 
-import { cn } from './cn';
 import Landing from './components/Landing/Landing';
 import Organization from './components/Landing/Organization';
 import { ProtectedRoute } from './components/Common/ProtectedRoute';
@@ -39,8 +38,6 @@ const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
 const meteringLoader = () => import('./components/Metering/Metering');
 const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
-const skeletonLoader = () => import('./components/componenetsss/SkeletonForm');
-const SkeletonForm = React.lazy(skeletonLoader) as React.ComponentType<any>;
 const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
 import DataIngestion from './components/DataIngestion/DataIngestion';
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
@@ -180,33 +177,50 @@ export default function App() {
             element={user ? <Navigate to="/get-started" replace /> : <div className="min-h-screen"><Landing /></div>}
           />
 
-          {/* Dashboards */}
+          {/* ✅ Get Started landing — ONLY sidebar */}
+          <Route
+            path="/get-started"
+            element={
+              <ProtectedRoute>
+                <SideNavbar
+                  activeTab={currentTab}
+                  onTabClick={(tab) => {
+                    const slug =
+                      tab === 'Billable Metrics'
+                        ? 'metering'
+                        : tab === 'Purchases'
+                        ? 'subscriptions'
+                        : tab === 'Data Ingetion'
+                        ? 'data-ingetion'
+                        : tab.toLowerCase().replace(/\s+/g, '-');
+                    navigate(`/get-started/${slug}`);
+                  }}
+                  hidden={!showSidebar}
+                />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Dashboards — ONLY sidebar */}
           <Route
             path="/get-started/dashboards"
             element={
               <ProtectedRoute>
-                <div className="flex flex-col">
-                  <div className="flex-1">
-                    <SideNavbar
-                      activeTab={currentTab}
-                      onTabClick={(tab) => {
-                        const slug =
-                          tab === 'Billable Metrics'
-                            ? 'metering'
-                            : tab === 'Purchases'
-                            ? 'subscriptions'
-                            : tab === 'Data Ingetion'
-                            ? 'data-ingetion'
-                            : tab.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/get-started/${slug}`);
-                      }}
-                      hidden={!showSidebar}
-                    />
-                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                      <SkeletonForm />
-                    </div>
-                  </div>
-                </div>
+                <SideNavbar
+                  activeTab={currentTab}
+                  onTabClick={(tab) => {
+                    const slug =
+                      tab === 'Billable Metrics'
+                        ? 'metering'
+                        : tab === 'Purchases'
+                        ? 'subscriptions'
+                        : tab === 'Data Ingetion'
+                        ? 'data-ingetion'
+                        : tab.toLowerCase().replace(/\s+/g, '-');
+                    navigate(`/get-started/${slug}`);
+                  }}
+                  hidden={!showSidebar}
+                />
               </ProtectedRoute>
             }
           />
@@ -247,7 +261,7 @@ export default function App() {
             }
           />
 
-          {/* NEW: Rate Plan Edit route */}
+          {/* Rate Plan Edit */}
           <Route
             path="/get-started/rate-plans/:id/edit"
             element={
