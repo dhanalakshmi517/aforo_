@@ -381,8 +381,7 @@ line-height: var(--line-height-body-lg);
   overflow-y: auto; /* enable scroll inside wrapper */
   scrollbar-width: none; /* Firefox hide scrollbar */
   /* align with sidebar width */
-  margin-left: 256px;
-  width: calc(100% - 276px);
+  width:100%;
   margin-right: 20px;
   margin-bottom: 20px; /* constant viewport gap */
   background-color: var(--color-neutral-white);
