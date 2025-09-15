@@ -11,17 +11,9 @@
   border-radius: var(--border-radius-md);
 }
 
-/* Align shared PageHeader with fixed sidebar */
-.customers-container > .rate-plan-header {
-  margin-left: 256px;
-  width: calc(100% - 256px);
-}
-@media (max-width: 991px) {
-  .customers-container > .rate-plan-header {
-    margin-left: 0;
-    width: 100%;
-  }
-}
+/* Align header with fixed sidebar */
+.customers-container > .rate-plan-header { margin-left: 256px; width: calc(100% - 256px); }
+@media (max-width: 991px) { .customers-container > .rate-plan-header { margin-left: 0; width: 100%; } }
 
 /* ---------------------- Table ---------------------- */
 .customers-table {
@@ -39,6 +31,7 @@
   text-align: left;
   border-bottom: 1px solid var(--color-neutral-200);
   word-wrap: break-word;
+  vertical-align: top;  /* keep multi-line cells aligned */
 }
 
 .customers-table td {
@@ -53,13 +46,11 @@
 }
 
 .customers-table th {
-  border-radius: 0; /* keep: reset default for all header cells */
+  border-radius: 0;
   background-color: var(--color-neutral-100);
   height: 28px;
   padding: 4px 16px;
-  text-align: left;
   position: sticky;
-  border-bottom: none; /* keep: pushed change */
   top: 0;
   z-index: 1;
   color: var(--color-neutral-1000);
@@ -70,80 +61,64 @@
   line-height: var(--line-height-body-sm);
 }
 
-.customers-table tbody tr:hover {
-  background-color: var(--grey-100);
-}
+.customers-table tbody tr:hover { background-color: var(--grey-100); }
 
-/* Column widths + rounded top corners for first/last header cell */
+/* Column widths: Company | Customer | Status | Created | Actions */
 .customers-table th:first-child { border-top-left-radius: var(--border-radius-sm); }
 .customers-table th:last-child  { border-top-right-radius: var(--border-radius-sm); }
 
 .customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 30%; }
-.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 20%; }
+.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 25%; }
 .customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 15%; }
 .customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 20%; }
-.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 15%; }
+.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 10%; }
 
-/* ---------------------- Name + Avatar ---------------------- */
-.name-cell { text-align: left; display: flex; align-items: center; }
+/* ---------------------- Company (column 1) ---------------------- */
+.name-cell { /* keep as table-cell */ }
+.cell-flex { display: flex; align-items: center; }
 
-/* Our avatar container (36x36 circle) */
 .customer-logo {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
-  margin-right: 12px;
-  border-radius: 36px;
-  background: #DCDDE1; /* placeholder */
-  overflow: hidden;
-  position: relative;
+  width: 36px; height: 36px; flex: 0 0 36px; margin-right: 12px;
+  border-radius: 36px; background: #DCDDE1; overflow: hidden; position: relative;
 }
-
-/* The actual image fills and crops correctly */
-.customer-logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;         /* ensures any PNG/JPG fits the circle */
-  display: block;
-  border-radius: inherit;
-}
-
-/* Initials fallback (shown only when no image) */
+.customer-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
 .customer-logo .avatar-initials {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 12px;
-  color: #ffffff;
-  background: #C7CBD1;
-  border-radius: inherit;
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 12px; color: #fff; background: #C7CBD1; border-radius: inherit;
 }
-
-/* Toggle visibility depending on whether we have an image */
 .customer-logo.has-image .avatar-initials { display: none; }
 .customer-logo.no-image  .customer-logo-img  { display: none; }
 
-.name-email { display: flex; flex-direction: column; }
-.name {
-  color: var(--color-neutral-1400);
+.company-block { display: flex; flex-direction: column; align-self: stretch; }
+.company-name {
+  color: var(--text-text-darkest, #1A2126);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal; font-weight: 500; line-height: var(--line-height-body-md, 20px);
+}
+.company-type {
+  color: var(--text-text-dark, #75797E);
   font-family: var(--type-font-family-primary, "IBM Plex Sans");
   font-size: var(--fontsize-body-sm, 12px);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-sm, 18px);
+  font-style: normal; font-weight: 400; line-height: var(--line-height-body-sm, 18px);
 }
-.email {
-  color: var(--color-neutral-800);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-sm);
-  white-space: normal;
-  word-break: break-all;
+
+/* ---------------------- Customer (column 2) ---------------------- */
+.customer-cell { /* keep as table-cell */ }
+.cell-stack { display: flex; flex-direction: column; align-self: stretch; }
+
+.person-name {
+  color: var(--text-text-darkest, #1A2126);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal; font-weight: 500; line-height: var(--line-height-body-md, 20px);
+}
+.person-email {
+  color: var(--text-text-dark, #75797E);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-sm, 12px);
+  font-style: normal; font-weight: 400; line-height: var(--line-height-body-sm, 18px);
+  white-space: normal; word-break: break-all;
 }
 
 /* ---------------------- Actions ---------------------- */
@@ -157,7 +132,7 @@
   padding: 12px;
   margin-top: 12px;
   background-color: var(--color-neutral-white);
-  min-height: calc(100vh - 126px);  /* keep: pushed change */
+  min-height: calc(100vh - 126px);
   flex: 1;
   overflow-y: auto;
   scrollbar-width: none;
@@ -174,8 +149,4 @@
 .customers-table td.actions-cell, .customers-table th.actions-cell { text-align: center; }
 
 /* Info icon in headers */
-.customers-table th svg {
-  vertical-align: middle;
-  transform: translateY(-1px);
-  margin-left: 4px;
-}
+.customers-table th svg { vertical-align: middle; transform: translateY(-1px); margin-left: 4px; }
