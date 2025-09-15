@@ -85,6 +85,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [draftSaving, setDraftSaving] = useState(false);
   const navigate = useNavigate();
 
+  // Prevent browser window scroll on Rate Plans page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   // Auto-open wizard when coming back from estimator screens
   useEffect(() => {
     if (localStorage.getItem('ratePlanWizardOpen') === 'true') {

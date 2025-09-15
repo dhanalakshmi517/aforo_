@@ -81,6 +81,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     setHideSidebarOnEditMetric(showEditMetricForm);
   }, [showEditMetricForm, setHideSidebarOnEditMetric]);
 
+  // Prevent browser window scroll on Metering page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   // open confirmation modal
   const handleDeleteClick = (metric: Metric) => {
     setDeleteMetricId(metric.id);

@@ -6,6 +6,7 @@ import EditProduct from './EditProductsss/EditProduct';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
 import CreateProduct from './NewProducts/NewProduct';
 import './Products.css';
+import '../Rateplan/RatePlan.css';
 import { getProducts, createProduct as createProductApi, deleteProduct as deleteProductApi, getBillableMetrics } from './api';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 
@@ -369,7 +370,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
         {/* Main Content */}
         {!showCreateProduct && !isEditFormOpen && (
-                      <div className="rate-plan-container">
+                      <div className="rate-plan-product-container">
 
             <PageHeader
               title="Products"

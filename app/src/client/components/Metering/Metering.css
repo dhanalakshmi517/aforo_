@@ -169,6 +169,7 @@ body {
   background-color: var(--color-neutral-100);
   color: var(--color-neutral-1000);
   height: 28px;
+  border-radius: var(--border-radius-sm);
 }
 
 

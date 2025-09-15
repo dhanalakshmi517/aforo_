@@ -106,10 +106,11 @@
    ========================================================= */
 .rate-plan-container {
   padding: 0;
-  width: calc(100% - 256px);
+  width: calc(100% - 256px - 5px);
   max-width: none;
   box-sizing: border-box;
   margin-left: 256px;
+  padding-right: 10px;
   background: none;
   box-shadow: none;
 }
