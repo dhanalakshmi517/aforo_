@@ -144,6 +144,10 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+
+  // NEW: resume draft payload
+  const [resumeDraft, setResumeDraft] = useState<Customer | null>(null);
+
   const pendingName = useRef("");
   const navigate = useNavigate();
 
@@ -210,8 +214,20 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   useEffect(() => { fetchCustomersAndLogos(); }, []);
   useEffect(() => { if (!showNewCustomerForm) fetchCustomersAndLogos(); }, [showNewCustomerForm]);
 
-  const handleNewCustomer = () => setShowNewCustomerForm(true);
-  const handleCloseForm = () => setShowNewCustomerForm(false);
+  const handleNewCustomer = () => {
+    setResumeDraft(null);
+    setShowNewCustomerForm(true);
+  };
+  const handleCloseForm = () => {
+    setShowNewCustomerForm(false);
+    setResumeDraft(null); // reset so next "New Customer" is clean
+  };
+
+  // NEW: Resume Draft → open Create flow with prefill
+  const handleResumeDraft = (c: Customer) => {
+    setResumeDraft(c);
+    setShowNewCustomerForm(true);
+  };
 
   const filteredCustomers = customers.filter(c => {
     const term = searchTerm.toLowerCase();
@@ -304,13 +320,20 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                       <td className="actions-cell">
                         <div className="action-buttons">
                           {customer.status?.toLowerCase() === "draft" ? (
-                            <Link to={`/get-started/customers/${id}/edit`} className="resume-button" title="Resume Draft" aria-label="Resume Draft">
+                            // UPDATED: open Create flow with prefill instead of Edit route
+                            <button
+                              type="button"
+                              className="resume-button"
+                              title="Resume Draft"
+                              aria-label="Resume Draft"
+                              onClick={() => handleResumeDraft(customer)}
+                            >
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
                                 <path d="M11.75 3.25a5.5 5.5 0 1 1-7.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="M5.25 8h5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="M8.5 6l2.25 2-2.25 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
-                            </Link>
+                            </button>
                           ) : (
                             <Link to={`/get-started/customers/${id}/edit`} className="edit-button" title="Edit" aria-label="Edit">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -318,7 +341,12 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                               </svg>
                             </Link>
                           )}
-                          <button className="delete-button" title="Delete" aria-label="Delete" onClick={() => handleDeleteClick(id!, companyTitle)}>
+                          <button
+                            className="delete-button"
+                            title="Delete"
+                            aria-label="Delete"
+                            onClick={() => handleDeleteClick(id!, companyTitle)}
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                               <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -333,7 +361,32 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
           </div>
         </>
       ) : (
-        <CreateCustomer onClose={handleCloseForm} />
+        <CreateCustomer
+          onClose={handleCloseForm}
+          // NEW: pass draft to prefill Create flow when resuming
+          draftCustomer={resumeDraft ?? undefined}
+          initialLogoUrl={resumeDraft?.__resolvedLogoSrc ?? null}
+        />
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="rate-delete-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cust-delete-title">
+          <div className="rate-delete-modal-content">
+            <div className="rate-delete-modal-body">
+              <h5 id="cust-delete-title">Delete this customer?</h5>
+              <p>This action cannot be undone.</p>
+            </div>
+            <div className="rate-delete-modal-footer">
+              <button className="rate-delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </button>
+              <button className="rate-delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {notification && <Notification type={notification.type} message={notification.message} />}
@@ -344,3 +397,4 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   );
 };
 export default Customers;
+

@@ -28,7 +28,6 @@ interface Props {
 }
 
 const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
-  // copy props only once when form is opened
   const [initialized, setInitialized] = useState(false);
 
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -53,6 +52,19 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
   const [sameAsBilling, setSameAsBilling] = useState(false);
   const [countryOptions, setCountryOptions] = useState<{ label: string; value: string }[]>([]);
 
+  // local inline errors (cleared on valid input)
+  const [localErr, setLocalErr] = useState<{ [k: string]: string }>({});
+
+  const setErr = (k: string, msg: string) => setLocalErr((p) => ({ ...p, [k]: msg }));
+  const clearErr = (k: string) =>
+    setLocalErr((p) => {
+      const n = { ...p };
+      delete n[k];
+      return n;
+    });
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
   // Fetch country list once
   useEffect(() => {
     fetch('http://43.206.110.213:8081/v1/api/meta/countries')
@@ -67,7 +79,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
       .catch((err) => console.error('Failed to load countries', err));
   }, []);
 
-  // Sync incoming props to local state (only first time)
+  // Sync props -> local state (once)
   useEffect(() => {
     if (!data || initialized) return;
     setPhoneNumber(data.phoneNumber || '');
@@ -135,19 +147,20 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
   const handleBillingChange = (field: string, value: string) => {
     const updated = { ...billingAddress, [field]: value };
     setBillingAddress(updated);
-    if (sameAsBilling) {
-      setCustomerAddress(updated);
-    }
+    if (sameAsBilling) setCustomerAddress(updated);
+
+    // inline validations
+    if (!value.trim()) setErr(`billing_${field}`, 'This is a required field');
+    else clearErr(`billing_${field}`);
   };
 
   const handleCustomerChange = (field: string, value: string) => {
     setCustomerAddress({ ...customerAddress, [field]: value });
+    if (!value.trim()) setErr(`customer_${field}`, 'This is a required field');
+    else clearErr(`customer_${field}`);
   };
 
-  const addEmailField = () => {
-    setAdditionalEmails([...additionalEmails, '']);
-  };
-
+  const addEmailField = () => setAdditionalEmails([...additionalEmails, '']);
   const updateAdditionalEmail = (index: number, value: string) => {
     const updated = [...additionalEmails];
     updated[index] = value;
@@ -159,6 +172,8 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
     setSameAsBilling(newVal);
     if (newVal) {
       setCustomerAddress({ ...billingAddress });
+      // clear customer address errors when disabled
+      ['line1','line2','city','state','zip','country'].forEach((f) => clearErr(`customer_${f}`));
     } else {
       setCustomerAddress({ line1: '', line2: '', city: '', state: '', zip: '', country: '' });
     }
@@ -172,12 +187,21 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           label="Customer Phone Number"
           value={phoneNumber}
           placeholder="e.g., +1234567890"
-          onChange={(val) => /^\+?\d*$/.test(val) && setPhoneNumber(val)}
+          onChange={(val) => {
+            if (/^\+?\d*$/.test(val)) {
+              setPhoneNumber(val);
+              if (!val.trim()) setErr('phoneNumber', 'This is a required field');
+              else clearErr('phoneNumber');
+            }
+          }}
+          onBlur={() => {
+            if (!phoneNumber.trim()) setErr('phoneNumber', 'This is a required field');
+          }}
           type="tel"
           inputMode="tel"
           pattern="[+0-9]*"
+          error={localErr.phoneNumber || errors.phoneNumber}
         />
-        {errors.phoneNumber && <span className="field-error">{errors.phoneNumber}</span>}
       </div>
 
       <div className="acc-form-group">
@@ -186,10 +210,19 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           value={primaryEmail}
           placeholder="e.g., johndoe@example.com"
           type="email"
-          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-          onChange={setPrimaryEmail}
+          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+          onChange={(val) => {
+            setPrimaryEmail(val);
+            if (!val.trim()) setErr('primaryEmail', 'This is a required field');
+            else if (!emailRegex.test(val)) setErr('primaryEmail', 'Enter a valid email address');
+            else clearErr('primaryEmail');
+          }}
+          onBlur={() => {
+            if (!primaryEmail.trim()) setErr('primaryEmail', 'This is a required field');
+            else if (!emailRegex.test(primaryEmail)) setErr('primaryEmail', 'Enter a valid email address');
+          }}
+          error={localErr.primaryEmail || errors.primaryEmail}
         />
-        {errors.primaryEmail && <span className="field-error">{errors.primaryEmail}</span>}
       </div>
 
       {/* Secondary Email IDs */}
@@ -201,22 +234,23 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="email"
               placeholder="e.g., johndoe@example.com"
               value={email}
-              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
               onChange={(val) => updateAdditionalEmail(idx, val)}
             />
           </div>
         ))}
         <button type="button" className="add-email-btn" onClick={addEmailField}>+ Add Additional Email Recipients</button>
       </div>
-{/* Same as Billing Checkbox */}
-    <div className="checkbox-row">
-      <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
-      <span className="checkbox-label" onClick={handleToggleSame}>
-        Billing address is same as customer address
-      </span>
-    </div>
 
-    {/* Customer Address */}
+      {/* Same as Billing */}
+      <div className="checkbox-row">
+        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
+        <span className="checkbox-label" onClick={handleToggleSame}>
+          Billing address is same as customer address
+        </span>
+      </div>
+
+      {/* Customer Address */}
       <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
         <h4>Customer Address</h4>
         <div className="acc-form-group">
@@ -226,10 +260,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={customerAddress.line1}
             onChange={(e) => handleCustomerChange('line1', e.target.value)}
+            onBlur={() => !sameAsBilling && !customerAddress.line1.trim() ? setErr('customer_line1', 'This is a required field') : null}
             disabled={sameAsBilling}
             required
           />
-          {errors.customerAddressLine1 && <span className="field-error">{errors.customerAddressLine1}</span>}
+          {(localErr.customer_line1 || errors.customerAddressLine1) && <span className="field-error">{localErr.customer_line1 || errors.customerAddressLine1}</span>}
         </div>
         <div className="acc-form-group">
           <label>Customer Address Line 2</label>
@@ -238,10 +273,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={customerAddress.line2}
             onChange={(e) => handleCustomerChange('line2', e.target.value)}
+            onBlur={() => !sameAsBilling && !customerAddress.line2.trim() ? setErr('customer_line2', 'This is a required field') : null}
             disabled={sameAsBilling}
             required
           />
-          {errors.customerAddressLine2 && <span className="field-error">{errors.customerAddressLine2}</span>}
+          {(localErr.customer_line2 || errors.customerAddressLine2) && <span className="field-error">{localErr.customer_line2 || errors.customerAddressLine2}</span>}
         </div>
         <div className="acc-form-row">
           <div className="acc-form-group">
@@ -250,11 +286,12 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="text"
               value={customerAddress.city}
               onChange={(e) => handleCustomerChange('city', e.target.value)}
+              onBlur={() => !sameAsBilling && !customerAddress.city.trim() ? setErr('customer_city', 'This is a required field') : null}
               placeholder="City"
               required
               disabled={sameAsBilling}
             />
-            {errors.customerCity && <span className="field-error">{errors.customerCity}</span>}
+            {(localErr.customer_city || errors.customerCity) && <span className="field-error">{localErr.customer_city || errors.customerCity}</span>}
           </div>
           <div className="acc-form-group">
             <label>State/Province/Region</label>
@@ -262,11 +299,12 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="text"
               value={customerAddress.state}
               onChange={(e) => handleCustomerChange('state', e.target.value)}
+              onBlur={() => !sameAsBilling && !customerAddress.state.trim() ? setErr('customer_state', 'This is a required field') : null}
               placeholder="State/Province/Region"
               required
               disabled={sameAsBilling}
             />
-            {errors.customerState && <span className="field-error">{errors.customerState}</span>}
+            {(localErr.customer_state || errors.customerState) && <span className="field-error">{localErr.customer_state || errors.customerState}</span>}
           </div>
         </div>
         <div className="acc-form-row">
@@ -276,11 +314,12 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="text"
               value={customerAddress.zip}
               onChange={(e) => handleCustomerChange('zip', e.target.value)}
+              onBlur={() => !sameAsBilling && !customerAddress.zip.trim() ? setErr('customer_zip', 'This is a required field') : null}
               placeholder="ZIP/Postal Code"
               required
               disabled={sameAsBilling}
             />
-            {errors.customerPostalCode && <span className="field-error">{errors.customerPostalCode}</span>}
+            {(localErr.customer_zip || errors.customerPostalCode) && <span className="field-error">{localErr.customer_zip || errors.customerPostalCode}</span>}
           </div>
           <div className="acc-form-group">
             <label>Country</label>
@@ -289,10 +328,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               required
               placeholder="Select Country"
               onChange={(val) => handleCustomerChange('country', val)}
+              onBlur={() => !sameAsBilling && !customerAddress.country.trim() ? setErr('customer_country', 'This is a required field') : null}
               options={countryOptions}
               disabled={sameAsBilling}
+              error={localErr.customer_country || errors.customerCountry}
             />
-            {errors.customerCountry && <span className="field-error">{errors.customerCountry}</span>}
           </div>
         </div>
       </div>
@@ -307,9 +347,10 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={billingAddress.line1}
             onChange={(e) => handleBillingChange('line1', e.target.value)}
+            onBlur={() => !billingAddress.line1.trim() ? setErr('billing_line1', 'This is a required field') : null}
             required
           />
-          {errors.billingAddressLine1 && <span className="field-error">{errors.billingAddressLine1}</span>}
+          {(localErr.billing_line1 || errors.billingAddressLine1) && <span className="field-error">{localErr.billing_line1 || errors.billingAddressLine1}</span>}
         </div>
         <div className="acc-form-group">
           <label>Billing Address Line 2</label>
@@ -318,9 +359,10 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={billingAddress.line2}
             onChange={(e) => handleBillingChange('line2', e.target.value)}
+            onBlur={() => !billingAddress.line2.trim() ? setErr('billing_line2', 'This is a required field') : null}
             required
           />
-          {errors.billingAddressLine2 && <span className="field-error">{errors.billingAddressLine2}</span>}
+          {(localErr.billing_line2 || errors.billingAddressLine2) && <span className="field-error">{localErr.billing_line2 || errors.billingAddressLine2}</span>}
         </div>
         <div className="acc-form-row">
           <div className="acc-form-group">
@@ -329,10 +371,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="text"
               value={billingAddress.city}
               onChange={(e) => handleBillingChange('city', e.target.value)}
+              onBlur={() => !billingAddress.city.trim() ? setErr('billing_city', 'This is a required field') : null}
               placeholder="City"
               required
             />
-            {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
+            {(localErr.billing_city || errors.billingCity) && <span className="field-error">{localErr.billing_city || errors.billingCity}</span>}
           </div>
           <div className="acc-form-group">
             <label>State/Province/Region</label>
@@ -340,10 +383,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="text"
               value={billingAddress.state}
               onChange={(e) => handleBillingChange('state', e.target.value)}
+              onBlur={() => !billingAddress.state.trim() ? setErr('billing_state', 'This is a required field') : null}
               placeholder="State/Province/Region"
               required
             />
-            {errors.billingState && <span className="field-error">{errors.billingState}</span>}
+            {(localErr.billing_state || errors.billingState) && <span className="field-error">{localErr.billing_state || errors.billingState}</span>}
           </div>
         </div>
         <div className="acc-form-row">
@@ -353,10 +397,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="text"
               value={billingAddress.zip}
               onChange={(e) => handleBillingChange('zip', e.target.value)}
+              onBlur={() => !billingAddress.zip.trim() ? setErr('billing_zip', 'This is a required field') : null}
               placeholder="ZIP/Postal Code"
               required
             />
-            {errors.billingPostalCode && <span className="field-error">{errors.billingPostalCode}</span>}
+            {(localErr.billing_zip || errors.billingPostalCode) && <span className="field-error">{localErr.billing_zip || errors.billingPostalCode}</span>}
           </div>
           <div className="acc-form-group">
             <label>Country</label>
@@ -365,13 +410,13 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               required
               placeholder="Select Country"
               onChange={(val) => handleBillingChange('country', val)}
+              onBlur={() => !billingAddress.country.trim() ? setErr('billing_country', 'This is a required field') : null}
               options={countryOptions}
+              error={localErr.billing_country || errors.billingCountry}
             />
-            {errors.billingCountry && <span className="field-error">{errors.billingCountry}</span>}
           </div>
         </div>
       </div>
-
     </div>
  );
 };

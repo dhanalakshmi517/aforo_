@@ -8,89 +8,60 @@ const BASE_URL = "http://43.206.110.213:8081/v1/api";
  */
 async function handleApiResponse(res: Response): Promise<any> {
   if (res.status === 401) {
-    // Unauthorized - clear auth data and redirect to login
     logout();
     throw new Error('Session expired. Please login again.');
   }
-  
   if (!res.ok) {
     let errorMessage = `API error ${res.status}`;
     try {
       const errorData = await res.json();
-      if (errorData?.message) {
-        errorMessage = errorData.message;
-      }
+      if (errorData?.message) errorMessage = errorData.message;
     } catch {
-      // If response is not JSON, use status text
       errorMessage = res.statusText || errorMessage;
     }
     throw new Error(errorMessage);
   }
-  
-  // Check if response has content before parsing JSON
+
   const contentLength = res.headers.get('content-length');
   const contentType = res.headers.get('content-type');
-  
-  // If no content or content-length is 0, return null instead of parsing JSON
   if (contentLength === '0' || (!contentType?.includes('application/json') && !contentLength)) {
     return null;
   }
-  
-  // Try to parse JSON, but handle empty responses gracefully
   try {
     const text = await res.text();
     return text ? JSON.parse(text) : null;
-  } catch (error) {
-    // If JSON parsing fails, return null for successful responses
+  } catch {
     return null;
   }
 }
 
-/**
- * Fetch customers list from backend with authentication.
- * Only returns customers for the authenticated organization.
- */
+/** Get all customers */
 export async function getCustomers(): Promise<Customer[]> {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
   const res = await fetch(`${BASE_URL}/customers`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
-  
   const data = await handleApiResponse(res);
   return data as Customer[];
 }
 
-/**
- * Fetch a single customer by id with authentication
- */
+/** Get one customer */
 export async function getCustomer(customerId: number | string): Promise<Customer> {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
-  
   const data = await handleApiResponse(res);
   return data as Customer;
 }
 
-/**
- * Update existing customer with authentication
- */
+/** Update customer (PATCH) */
 export async function updateCustomer(customerId: number | string, payload: Record<string, unknown> | FormData) {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
+
   const isFormData = payload instanceof FormData;
-  // remove blank values that backend may reject (e.g., enum fields)
   const sanitized = isFormData
     ? payload
     : Object.fromEntries(
@@ -98,105 +69,98 @@ export async function updateCustomer(customerId: number | string, payload: Recor
           ([, v]) => v !== '' && v !== null && v !== undefined,
         ),
       );
-  // backend rule: customerCountry required when phoneNumber present. If missing, drop phoneNumber for draft saves.
-  if (!('customerCountry' in sanitized) || !sanitized.customerCountry) {
+
+  if (!(sanitized as any).customerCountry) {
     delete (sanitized as Record<string, unknown>).phoneNumber;
   }
-  
-  const bodyInit: BodyInit | undefined = isFormData ? (sanitized as FormData) : JSON.stringify(sanitized);
+
   const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  
-  // Remove Content-Type for FormData to let browser set it with boundary
-  if (isFormData && headers['Content-Type']) {
-    delete headers['Content-Type'];
-  }
-  
+  if (isFormData && headers['Content-Type']) delete headers['Content-Type'];
+
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
     method: 'PATCH',
     headers,
-    body: bodyInit,
+    body: isFormData ? (sanitized as FormData) : JSON.stringify(sanitized),
   });
-  
+
   return handleApiResponse(res);
 }
 
-// Confirm customer with authentication
+/** Confirm customer */
 export async function confirmCustomer(customerId: number | string) {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}/confirm`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
-  
   return handleApiResponse(res);
 }
 
-/**
- * Create new customer with authentication
- */
+/** Create customer (POST) */
 export async function createCustomer(payload: Record<string, unknown> | FormData) {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
+
   const isFormData = payload instanceof FormData;
   const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  
-  // Remove Content-Type for FormData to let browser set it with boundary
-  if (isFormData && headers['Content-Type']) {
-    delete headers['Content-Type'];
-  }
-  
-  const bodyInit: BodyInit | undefined = isFormData ? (payload as FormData) : JSON.stringify(payload);
-  
+  if (isFormData && headers['Content-Type']) delete headers['Content-Type'];
+
   const res = await fetch(`${BASE_URL}/customers`, {
     method: 'POST',
     headers,
-    body: bodyInit,
+    body: isFormData ? (payload as FormData) : JSON.stringify(payload),
   });
-  
+
   return handleApiResponse(res);
 }
 
-/**
- * Check if email already exists for the organization
- */
+/** Email existence check */
 export async function checkEmailExists(email: string): Promise<boolean> {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
   try {
-    console.log('Fetching all customers to check email existence');
-    // Get all customers and check if email exists
     const customers = await getCustomers();
-    console.log('Retrieved customers:', customers);
-    
-    const emailExists = customers.some(customer => 
-      customer.primaryEmail?.toLowerCase() === email.toLowerCase()
-    );
-    
-    console.log(`Email ${email} exists:`, emailExists);
-    return emailExists;
+    return customers.some(c => (c as any).primaryEmail?.toLowerCase() === email.toLowerCase());
   } catch (error) {
     console.error('Error checking email:', error);
-    return false; // Assume email doesn't exist on error
+    return false;
   }
 }
 
+/** Delete customer */
 export async function deleteCustomer(customerId: number | string): Promise<void> {
-  if (!isAuthenticated()) {
-    throw new Error('Not authenticated');
-  }
-  
+  if (!isAuthenticated()) throw new Error('Not authenticated');
   const url = `${BASE_URL}/customers/${encodeURIComponent(customerId)}`;
-  const res = await fetch(url, { 
+  const res = await fetch(url, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
-  
   await handleApiResponse(res);
+}
+
+/* ─────────────── NEW: Logo endpoints ─────────────── */
+
+/** PATCH /v1/api/customers/{customerId}/logo */
+export async function updateCustomerLogo(customerId: number | string, file: File) {
+  if (!isAuthenticated()) throw new Error('Not authenticated');
+  const fd = new FormData();
+  // backend expects 'companyLogo' (same as Create)
+  fd.append('companyLogo', file, file.name);
+
+  const headers = getAuthHeaders();
+  if (headers['Content-Type']) delete headers['Content-Type']; // let browser set boundary
+
+  const res = await fetch(
+    `${BASE_URL}/customers/${encodeURIComponent(customerId)}/logo`,
+    { method: 'PATCH', headers, body: fd }
+  );
+  return handleApiResponse(res);
+}
+
+/** DELETE /v1/api/customers/{customerId}/logo */
+export async function deleteCustomerLogo(customerId: number | string) {
+  if (!isAuthenticated()) throw new Error('Not authenticated');
+  const res = await fetch(
+    `${BASE_URL}/customers/${encodeURIComponent(customerId)}/logo`,
+    { method: 'DELETE', headers: getAuthHeaders() }
+  );
+  return handleApiResponse(res);
 }

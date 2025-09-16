@@ -1,15 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import CustomerReview from './CustomerReview';
-import { createCustomer, updateCustomer, confirmCustomer, checkEmailExists } from './api';
+import {
+  createCustomer,
+  updateCustomer,
+  confirmCustomer,
+  checkEmailExists,
+  deleteCustomer,
+} from './api';
+import type { Customer } from './Customers';
 import { AccountDetailsData } from './AccountDetailsForm';
 import AccountDetailsForm from './AccountDetailsForm';
 import './CustomerForm.css';
 import LogoUploader from './LogoUploader';
 import buttonStyles from '../NewProductForm/GeneralDetails.module.css';
 import TopBar from '../TopBar/TopBar';
+import SaveDraft from '../componenetsss/SaveDraft';
 
 interface CreateCustomerProps {
   onClose: () => void;
+  /** When resuming a draft from the list, prefill with this data */
+  draftCustomer?: Partial<Customer>;
+  /** Optional pre-resolved image URL to preview the existing logo */
+  initialLogoUrl?: string | null;
 }
 
 const steps = [
@@ -18,7 +30,7 @@ const steps = [
   { title: 'Review & Confirm', desc: 'Double-check everything before saving.' },
 ];
 
-const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
+const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer, initialLogoUrl = null }) => {
   const [customerName, setCustomerName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [companyType, setCompanyType] = useState('');
@@ -30,15 +42,52 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
+
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [isDraft, setIsDraft] = useState(false);
+
   const [emailCheckTimeout, setEmailCheckTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     document.body.classList.add('create-customer-page');
     return () => { document.body.classList.remove('create-customer-page'); };
   }, []);
+
+  // Prefill when resuming a draft
+  useEffect(() => {
+    if (!draftCustomer) return;
+
+    setCompanyName(draftCustomer.companyName ?? '');
+    setCustomerName(draftCustomer.customerName ?? '');
+    setCompanyType(draftCustomer.companyType ?? '');
+
+    const acc: AccountDetailsData = {
+      phoneNumber: draftCustomer.phoneNumber ?? '',
+      primaryEmail: draftCustomer.primaryEmail ?? '',
+      additionalEmailRecipients: draftCustomer.additionalEmailRecipients ?? [],
+      billingSameAsCustomer: draftCustomer.billingSameAsCustomer ?? false,
+      customerAddressLine1: draftCustomer.customerAddressLine1 ?? '',
+      customerAddressLine2: draftCustomer.customerAddressLine2 ?? '',
+      customerCity: draftCustomer.customerCity ?? '',
+      customerState: draftCustomer.customerState ?? '',
+      customerPostalCode: draftCustomer.customerPostalCode ?? '',
+      customerCountry: draftCustomer.customerCountry ?? '',
+      billingAddressLine1: draftCustomer.billingAddressLine1 ?? '',
+      billingAddressLine2: draftCustomer.billingAddressLine2 ?? '',
+      billingCity: draftCustomer.billingCity ?? '',
+      billingState: draftCustomer.billingState ?? '',
+      billingPostalCode: draftCustomer.billingPostalCode ?? '',
+      billingCountry: draftCustomer.billingCountry ?? '',
+    };
+    setAccountDetails(acc);
+
+    const id = draftCustomer.customerId ?? draftCustomer.id ?? null;
+    if (id != null) setCustomerId(id);
+    setIsDraft(true);
+  }, [draftCustomer]);
 
   useEffect(() => {
     const next = { ...errors };
@@ -56,10 +105,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
         setAccountErrors(prev => ({ ...prev, primaryEmail: 'This email address is already registered' }));
       } else {
         setAccountErrors(prev => {
-          const n = { ...prev }; if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail; return n;
+          const n = { ...prev };
+          if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail;
+          return n;
         });
       }
-    } catch { /* swallow */ }
+    } catch { /* ignore */ }
   }, []);
 
   const handleEmailBlur = useCallback(async (email: string) => {
@@ -67,8 +118,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
     try {
       const exists = await checkEmailExists(email);
       if (exists) setAccountErrors(prev => ({ ...prev, primaryEmail: 'This email address is already registered' }));
-      else setAccountErrors(prev => { const n = { ...prev }; if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail; return n; });
-    } catch { /* swallow */ }
+      else setAccountErrors(prev => {
+        const n = { ...prev };
+        if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail;
+        return n;
+      });
+    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {
@@ -104,7 +159,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
     setAccountErrors(n);
   }, [accountDetails]); // eslint-disable-line
 
-  const handleHeaderBack = () => setCurrentStep(s => (s > 0 ? s - 1 : 0));
+  const handleHeaderBack = () => setShowSaveDraftModal(true);
   const handleBack = () => (currentStep === 0 ? onClose() : setCurrentStep(s => s - 1));
 
   const validateStep = async (s: number): Promise<boolean> => {
@@ -124,8 +179,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
       else {
         try { if (await checkEmailExists(accountDetails.primaryEmail)) n.primaryEmail = 'This email address is already registered'; } catch {}
       }
-      ['billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
-       'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
+      [
+        'billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
+        'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
       ].forEach(k => {
         // @ts-ignore
         if (!accountDetails?.[k]?.trim()) n[k] = `${k.replace(/([A-Z])/g,' $1')} is required`;
@@ -246,6 +302,41 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
     if (draftSaved) setDraftSaved(false);
   };
 
+  // SaveDraft modal (back arrow) — delete flow
+  const handleSaveDraft_NoDelete = async () => {
+    try {
+      if (customerId != null) {
+        await deleteCustomer(customerId);
+      }
+    } catch (e) {
+      console.error('Error deleting on back modal:', e);
+    } finally {
+      setShowSaveDraftModal(false);
+      onClose();
+    }
+  };
+
+  // SaveDraft modal (back arrow) — SAVE AS DRAFT flow
+  const handleSaveDraft_Save = async () => {
+    await handleSaveDraft();
+    setShowSaveDraftModal(false);
+    onClose();
+  };
+
+  // Top-right Delete confirmation
+  const handleConfirmDelete = async () => {
+    try {
+      if (customerId != null) {
+        await deleteCustomer(customerId);
+      }
+    } catch (e) {
+      console.error('Error deleting customer:', e);
+    } finally {
+      setShowDeleteModal(false);
+      onClose();
+    }
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -265,7 +356,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
 
             <div className="sub-create-form">
               <label style={{ display: 'none' }}>Company Logo</label>
-              <LogoUploader logo={companyLogo} logoUrl={null} onChange={(file)=>setCompanyLogo(file)} />
+              <LogoUploader logo={companyLogo} logoUrl={initialLogoUrl} onChange={(file)=>setCompanyLogo(file)} />
             </div>
 
             <div className="sub-create-form">
@@ -296,7 +387,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
           </>
         );
       case 1:
-        return <AccountDetailsForm data={accountDetails ?? undefined} onChange={handleAccountDetailsChange} errors={accountErrors} onEmailBlur={handleEmailBlur} />;
+        return <AccountDetailsForm data={accountDetails ?? undefined} onChange={setAccountDetails} errors={accountErrors} onEmailBlur={handleEmailBlur} />;
       case 2:
         return <CustomerReview customerName={customerName} companyName={companyName} companyType={companyType} accountDetails={accountDetails} />;
       default:
@@ -304,63 +395,67 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
     }
   };
 
+  // Build the dynamic title with the actual name inside curly quotes
+  const modalName = (customerName || draftCustomer?.customerName || companyName || draftCustomer?.companyName || '').trim() || 'this customer';
+  const deleteModalTitle = `Are you sure you want to delete the product “${modalName}”?`;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBar
         title="Create New Customer"
         onBack={handleHeaderBack}
-        cancel={{ label: "Cancel", onClick: () => setShowCancelModal(true) }}
+        cancel={{ onClick: () => setShowDeleteModal(true) }}
         save={{ label: "Save as Draft", saving: isSavingDraft, saved: draftSaved, disabled: isSubmitting, onClick: handleSaveDraft }}
       />
 
-      {/* CARD WRAPPER (adds border + radius and keeps sidebar/content together) */}
       <div className="create-customer-layout" style={{ flex: 1 }}>
-        {/* Sidebar */}
         <aside className="progress-sidebar">
           <div className="progress-container">
-            {steps.map((step, i) => (
-              <div key={i} className={`progress-step-item ${i === currentStep ? 'active' : ''}`} onClick={() => setCurrentStep(i)}>
-                <div className="progress-icon-wrapper">
-                  {i < currentStep ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                      <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
-                      <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
-                    </svg>
-                  )}
+            {steps.map((step, i) => {
+              const isActive = i === currentStep;
+              const isCompleted = i < currentStep;
+              return (
+                <div
+                  key={i}
+                  className={`progress-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                  onClick={() => setCurrentStep(i)}
+                >
+                  <div className="progress-icon-wrapper">
+                    {isCompleted ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
+                        <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
+                        <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="progress-step-text">
+                    <span className="progress-step-title">{step.title}</span>
+                    <span className="progress-step-desc">{step.desc}</span>
+                  </div>
                 </div>
-                <div className="progress-step-text">
-                  <span className="progress-step-title">{step.title}</span>
-                  <span className="progress-step-desc">{step.desc}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </aside>
 
-        {/* Main column */}
         <div className="main-content-area">
-          {/* Sub-header row (spec: 16px padding) */}
           <div className="section-header">
             <div className="section-title">{steps[currentStep].title.toUpperCase()}</div>
           </div>
 
-          {/* Scrollable content area */}
           <div className="form-content-wrapper">
-            {/* Form column (spec width 897) */}
             <div className="form-card">
-              {/* Inner column for fields (spec width 512, 24 padding, 20 gaps handled in CSS) */}
               <div className="form-content">
                 {renderStepContent()}
               </div>
             </div>
           </div>
 
-          {/* Footer (spec: top border only, 72px height, rounded card corners live on wrapper) */}
           <div className="form-footer">
             <div className="footer-button-group">
               <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
@@ -372,20 +467,39 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {showCancelModal && (
-        <div className="rate-delete-modal-overlay">
+      {showDeleteModal && (
+        <div className="rate-delete-modal-overlay" role="dialog" aria-modal="true">
           <div className="rate-delete-modal-content">
             <div className="rate-delete-modal-body">
-              <h5>Are you sure you want to cancel <br /> creating this customer?</h5>
+              <h5>{deleteModalTitle}</h5>
               <p>This action cannot be undone.</p>
             </div>
             <div className="rate-delete-modal-footer">
-              <button className="rate-delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
-              <button className="rate-delete-modal-confirm" onClick={onClose}>Confirm</button>
+              {/* Left button: Discard (light-blue) just closes modal */}
+              <button
+                className="rate-delete-modal-cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Discard
+              </button>
+
+              {/* Right button: Delete (destructive) confirms */}
+              <button
+                className="rate-delete-modal-confirm"
+                onClick={handleConfirmDelete}
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      <SaveDraft
+        isOpen={showSaveDraftModal}
+        onClose={handleSaveDraft_NoDelete}   // "Discard" (do not save)
+        onSave={handleSaveDraft_Save}        // "Save as Draft"
+      />
     </div>
   );
 };

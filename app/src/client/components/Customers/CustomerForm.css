@@ -3,8 +3,17 @@
 /* PAGE BG */
 body.create-customer-page { background: #fff; }
 
-/* One place to control horizontal inset for the whole content column */
-:root { --content-pad-x: 24px; }
+/* Global spacing + stepper geometry variables */
+:root{
+  --content-pad-x: 24px;
+
+  /* stepper geometry (keep these synced with your icon size) */
+  --wizard-step-inset: 12px;    /* consistent left inset for every step row */
+  --wizard-dot-size: 24px;
+  --wizard-dot-half: 12px;
+  /* x-position where the vertical connector must run so it’s dead-center under the dot */
+  --wizard-connector-x: calc(var(--wizard-step-inset) + var(--wizard-dot-half));
+}
 
 /* ───────────────── CARD WRAPPER ───────────────── */
 .create-customer-layout{
@@ -36,27 +45,75 @@ body.create-customer-page { background: #fff; }
   gap: 24px;
   padding: 24px;
   flex: 1 1 auto;
+  position: relative; /* stacking context for connectors */
 }
+
+/* Step row */
 .progress-step-item{
+  position: relative;                 /* host for ::before connector */
   display:flex;
   align-items:flex-start;
   gap:12px;
-  padding:16px 0;
+  padding:16px 0 16px var(--wizard-step-inset); /* ← consistent left inset */
   width:100%;
   border-bottom: 1px solid rgba(213,212,223,0.35);
   cursor:pointer;
+  min-height: 70px;                   /* ensure room for the connector */
 }
-.progress-step-item:last-child{ border-bottom: none; }
+
+/* Active highlight card — keep same left inset so the connector stays aligned */
 .progress-step-item.active{
   background: rgba(2, 90, 148, 0.06);
   border-radius: 8px;
-  padding:16px 12px;
-  margin:0 -12px;
+  padding:16px 12px 16px var(--wizard-step-inset);
+  /* Keep the step in its original horizontal position so the connector stays centered. */
+  /* Extend the highlight box slightly to the right only for visual bleed. */
+  margin-right:-12px;
 }
-.progress-icon-wrapper{ flex-shrink:0; }
+
+.progress-step-item:last-child{ border-bottom: none; }
+
+.progress-icon-wrapper{
+  width: var(--wizard-dot-size);
+  height: var(--wizard-dot-size);
+  position: relative;
+  z-index: 2;                         /* keep dots above the connector */
+  flex-shrink: 0;
+}
+
 .progress-step-text{ display:flex; flex-direction:column; gap:4px; }
 .progress-step-title{ font-weight:600; font-size:14px; color:#1A1A1A; }
 .progress-step-desc{ font-size:12px; color:#666; line-height:1.4; }
+
+/* ─────────── Vertical connector between step dots ─────────── */
+/* Drawn for every item except the last one */
+.progress-step-item::before{
+  content: "";
+  position: absolute;
+  /* shift 1px left so the 2-px line is perfectly centered under the 24-px dot */
+  left: calc(var(--wizard-connector-x) - 1px);
+  top: var(--wizard-dot-size);
+  width: 2px;
+  /* extend 1px further to account for sub-pixel rounding so it visually touches the next circle */
+  height: calc(100% + var(--wizard-dot-half) + 4px);
+  background: #D6D5D7;                 /* base/inactive line color */
+  z-index: 1;
+  pointer-events: none;
+}
+.progress-step-item:last-child::before{ display: none; }
+
+/* Completed steps paint their connector segment with active color */
+.progress-step-item.completed::before{
+  background: var(--color-primary-800);
+}
+
+/* Active dot visual to match product wizard */
+.progress-step-item.active svg circle:first-of-type{
+  stroke: var(--color-primary-800) !important;
+}
+.progress-step-item.active svg circle:last-of-type{
+  fill: var(--color-primary-800) !important;
+}
 
 /* ───────────────── MAIN COLUMN ───────────────── */
 .main-content-area{
@@ -65,20 +122,16 @@ body.create-customer-page { background: #fff; }
   flex-direction: column;
   min-width:0;
   background:#FFF;
-
-  /* ✅ give the content breathing room from the top edge */
   padding: 16px var(--content-pad-x) 0;   /* top 16, L/R 24, bottom 0 */
 }
 
 /* Sub-header — horizontal spacing comes from the container above */
 .section-header{
   display:flex;
-  padding: 0 0 12px;                      /* keep a little space below the title */
+  padding: 0 0 12px;
   align-items:center;
   gap:4px;
   align-self:stretch;
-
-  /* ✅ remove the rule that shows at the far right end */
   border-bottom: 0;
 }
 .section-title{
@@ -100,8 +153,8 @@ body.create-customer-page { background: #fff; }
 .form-card{
   width: 897px;
   max-width: 100%;
-  padding: 0 0 24px;                      /* horizontal inset handled by container */
-  margin-top: 16px;                        /* space between header and fields */
+  padding: 0 0 24px;
+  margin-top: 16px;
   box-sizing: border-box;
 }
 
@@ -123,7 +176,7 @@ body.create-customer-page { background: #fff; }
   background: #FFF;
   border-radius: 0 0 12px 12px;
   height: 72px;
-  padding: 16px 0;                        /* L/R via container */
+  padding: 16px 0;
   display:flex;
   align-items: center;
 }
@@ -229,4 +282,77 @@ body.create-customer-page { background: #fff; }
   .main-content-area{ padding: 16px var(--content-pad-x) 0; }
   .form-card{ margin-top: 16px; padding: 0 0 16px; }
   .sub-create-form{ max-width: 100%; }
+}
+
+/* ───────────────── Delete confirmation modal (updated) ───────────────── */
+.rate-delete-modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 15, 19, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rate-delete-modal-content{
+  width: 520px;
+  max-width: calc(100% - 32px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(16, 15, 19, 0.2);
+  overflow: hidden;
+}
+.rate-delete-modal-body{
+  padding: 24px;
+  border-bottom: 1px solid var(--border-border-1, #E9E9EE);
+}
+.rate-delete-modal-body h5{
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+}
+.rate-delete-modal-body p{
+  margin: 0;
+  color: #6B7280;
+  font-size: 14px;
+}
+.rate-delete-modal-footer{
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  justify-content: flex-end;
+}
+
+/* LEFT button → “Discard” (light blue) */
+.rate-delete-modal-footer .rate-delete-modal-cancel{
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-secondary-button-active-2, #E1F4FB);
+  display: flex;
+  height: 40px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex: 1 0 0;
+  border: none;
+  color: var(--color-primary-800, #1D7AFC);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* RIGHT button → “Delete” (destructive) */
+.rate-delete-modal-footer .rate-delete-modal-confirm{
+  min-width: 120px;
+  height: 40px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm, 8px);
+  border: none;
+  background: #E34935;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rate-delete-modal-footer .rate-delete-modal-confirm:hover{
+  filter: brightness(0.95);
 }
