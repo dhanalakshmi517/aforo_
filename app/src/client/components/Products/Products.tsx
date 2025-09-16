@@ -142,6 +142,41 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const location = useLocation();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Reusable function to fetch products along with their billable metrics
+  const fetchProducts = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const list = await getProducts();
+      const productsWithMetrics = await Promise.all(
+        list.map(async (product) => {
+          try {
+            const metrics = await getBillableMetrics(product.productId);
+            return {
+              ...product,
+              metrics: metrics.map(m => ({
+                metricName: m.metricName || '',
+                unitOfMeasure: m.unitOfMeasure,
+                aggregationFunction: m.aggregationFunction,
+                aggregationWindow: m.aggregationWindow
+              }))
+            };
+          } catch (error) {
+            console.error(`Error fetching metrics for product ${product.productId}:`, error);
+            return { ...product, metrics: [] };
+          }
+        })
+      );
+
+      setProducts(productsWithMetrics);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load products');
+      console.error('Error fetching products:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -150,6 +185,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [deleteProductName, setDeleteProductName] = useState<string>('');
   const [productQuery, setProductQuery] = useState<string>('');
+  // products filtered by search term
+  const filteredProducts = products.filter(p => p.productName?.toLowerCase().includes(productQuery.toLowerCase()));
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
 
@@ -236,51 +273,17 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   //   return null;
   // };
 
+  // Initial fetch on component mount
   useEffect(() => {
-    const fetchAndSetProducts = async () => {
-      try {
-        const list = await getProducts();
-
-        // Fetch billable metrics for each product
-        const productsWithMetrics = await Promise.all(
-          list.map(async (product) => {
-            try {
-              const metrics = await getBillableMetrics(product.productId);
-              return {
-                ...product,
-                metrics: metrics.map(m => ({
-                  metricName: m.metricName || '',
-                  unitOfMeasure: m.unitOfMeasure,
-                  aggregationFunction: m.aggregationFunction,
-                  aggregationWindow: m.aggregationWindow
-                }))
-              };
-            } catch (error) {
-              console.error(`Error fetching metrics for product ${product.productId}:`, error);
-              return { ...product, metrics: [] };
-            }
-          })
-        );
-
-        setProducts(productsWithMetrics);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load products');
-        console.error('Error fetching products:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAndSetProducts();
-  }, []);
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleNewProductSubmit = async (formData: ProductFormData) => {
     setShowNewProductForm(false);
     try {
-      const created = await createProductApi(formData);
-
-      setProducts([...products, created]);
+      await createProductApi(formData);
+      // Refresh list so that we always have latest with metrics
+      await fetchProducts();
       setShowCreateProduct(false);
       if (setShowNewProductForm) {
         setShowNewProductForm(false);
@@ -297,7 +300,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setIsDeleting(true);
     try {
       await deleteProductApi(deleteProductId);
-      setProducts(products.filter(p => p.productId !== deleteProductId));
+      // Refresh the list after successful delete
+      await fetchProducts();
       setShowDeleteModal(false);
       setDeleteProductId(null);
       setNotification({
@@ -360,9 +364,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               productId={editingProduct?.productId.toString() || ''}
               onClose={() => {
                 setIsEditFormOpen(false);
-                // Refresh the products list after save by setting a new empty array
-                // This will trigger a re-render and fetch the updated products
-                setProducts([]);
+                // Refresh the products list after save
+                fetchProducts();
               }}
             />
           </div>
@@ -399,11 +402,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   </tr>
                 </thead>
                 <tbody>
-                  {products
-                    .filter(product =>
-                      product?.productName?.toLowerCase()?.includes(productQuery?.toLowerCase() || '')
-                    )
-                    .map((product) => (
+                  {filteredProducts.map((product) => (
                       <tr key={product.productId}>
                         <td>
                           <div className="product-name">
@@ -478,7 +477,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
                       </tr>
                     ))}
-                  {products.length === 0 && (
+                  {filteredProducts.length === 0 && (
                     <tr>
                       <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                         <div className="products-empty-state">

@@ -75,7 +75,6 @@
 /* focus state */
 .edit-form-section input:focus {
   outline: none;
-  border: 2px solid var(--primary-primary-6, #7C3AED);
 }
 
 /* placeholder */

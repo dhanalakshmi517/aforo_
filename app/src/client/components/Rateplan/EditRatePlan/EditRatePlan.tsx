@@ -1,16 +1,39 @@
-import React, { useMemo, useState } from 'react';
-import { fetchProducts, updateRatePlan, RatePlanRequest, fetchRatePlan } from '../api';
+import * as React from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import TopBar from '../../componenetsss/TopBar';
+import SaveDraft from '../../componenetsss/SaveDraft';
+import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
+
+import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
+
 import EditPricing from './EditPricing';
 import EditExtras from './EditExtras';
 import EditReview from './EditReview';
-import './EditRatePlan.css';
 
-const steps = ['Plan Details', 'Pricing Model Setup', 'Extras', 'Review & Confirm'];
+import {
+  fetchProducts,
+  fetchRatePlan,
+  updateRatePlan,
+  RatePlanRequest,
+} from '../api';
+
+import './EditRatePlan.css';              // your rate-plan specific styles (optional)
+import '../../Products/EditProductsss/EditProduct.css'; // reuse np/edit-np layout styles if needed
+
+type ActiveTab = 'details' | 'pricing' | 'extras' | 'review';
 
 interface EditRatePlanProps {
   onClose?: () => void;
 }
+
+const steps = [
+  { id: 1, title: 'Plan Details', desc: 'Define the basic information and structure of your plan.' },
+  { id: 2, title: 'Pricing Model Setup', desc: 'Configure how pricing will work for this plan.' },
+  { id: 3, title: 'Extras', desc: 'Add optional features or benefits to enhance your plan.' },
+  { id: 4, title: 'Review & Confirm', desc: 'Check and finalize details.' },
+];
 
 const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const navigate = useNavigate();
@@ -20,19 +43,15 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   //   location.state = { plan: {...} }  OR  location.state = { ...fields }
   const raw = (location.state || {}) as any;
   const ratePlanId: number | undefined = raw?.plan?.ratePlanId ?? raw.ratePlanId;
+
   const initial = useMemo(() => {
     const p = raw?.plan ?? raw ?? {};
     return {
-      ratePlanName:
-        p.ratePlanName ?? raw.ratePlanName ?? '',
-      description:
-        p.description ?? raw.description ?? '',
-      billingFrequency:
-        p.billingFrequency ?? raw.billingFrequency ?? '',
-      productName:
-        p.productName ?? p.product?.productName ?? raw.productName ?? raw.product?.productName ?? '',
-      paymentType:
-        p.paymentType ?? raw.paymentType ?? '',
+      ratePlanName: p.ratePlanName ?? raw.ratePlanName ?? '',
+      description: p.description ?? raw.description ?? '',
+      billingFrequency: p.billingFrequency ?? raw.billingFrequency ?? '',
+      productName: p.productName ?? p.product?.productName ?? raw.productName ?? raw.product?.productName ?? '',
+      paymentType: p.paymentType ?? raw.paymentType ?? '',
     };
   }, [raw]);
 
@@ -41,32 +60,62 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     else navigate('/get-started/rate-plans');
   };
 
-  // Controlled form state (pre-filled from initial)
+  // ---- Wizard & tab
+  const [currentStep, setCurrentStep] = useState(0);
+  const activeTab: ActiveTab =
+    currentStep === 0 ? 'details' :
+    currentStep === 1 ? 'pricing' :
+    currentStep === 2 ? 'extras' :
+    'review';
+
+  // ---- UI state: modals & saving flags
+  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [loading, setLoading] = useState(false);
+
+  // ---- Form state
   const [ratePlanName, setRatePlanName] = useState<string>(initial.ratePlanName);
   const [description, setDescription] = useState<string>(initial.description);
   const [billingFrequency, setBillingFrequency] = useState<string>(initial.billingFrequency);
   const [selectedProductName, setSelectedProductName] = useState<string>(initial.productName);
   const [paymentType, setPaymentType] = useState<string>(initial.paymentType);
 
-  // Load existing plan details on mount
-  React.useEffect(() => {
-    const load = async () => {
+  // ---- Products for dropdown
+  const [products, setProducts] = useState<Array<{ productId: number; productName: string }>>([]);
+  const [productError, setProductError] = useState<string>('');
+
+  // ---- Errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Prefetch products & plan details
+  useEffect(() => {
+    document.body.classList.add('edit-product-page'); // reuse page background/layout
+    (async () => {
+      try {
+        const prods = await fetchProducts();
+        setProducts(prods.map((p: any) => ({ productId: Number(p.productId), productName: p.productName })));
+      } catch {
+        setProductError('Failed to load products');
+      }
+    })();
+
+    const loadPlan = async () => {
       if (!ratePlanId) return;
       try {
         const plan = await fetchRatePlan(ratePlanId);
-        setPlanData(plan);
         setRatePlanName(plan.ratePlanName || '');
         setDescription(plan.description || '');
         setBillingFrequency(plan.billingFrequency || '');
         setPaymentType(plan.paymentType || '');
         setSelectedProductName(plan.productName || plan.product?.productName || '');
-        // pricing model guess
+        // prime localStorage for subforms (same as your original)
         if (plan.flatFeeAmount) localStorage.setItem('pricingModel','Flat Fee');
         else if (plan.volumePricing) localStorage.setItem('pricingModel','Volume-Based');
         else if (plan.tieredPricing) localStorage.setItem('pricingModel','Tiered Pricing');
         else if (plan.stairStepPricing) localStorage.setItem('pricingModel','Stairstep');
         else if (plan.perUnitAmount) localStorage.setItem('pricingModel','Usage-Based');
-        // Pricing payloads to localStorage so sub-forms show data
+
         if (plan.volumePricing?.tiers) {
           localStorage.setItem('volumeTiers', JSON.stringify(plan.volumePricing.tiers.map((t:any)=>({from:t.usageStart,to:t.usageEnd,price:t.unitPrice}))));
           localStorage.setItem('volumeOverage', String(plan.volumePricing.overageUnitRate||''));
@@ -85,7 +134,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         if (plan.perUnitAmount) {
           localStorage.setItem('usagePerUnit', String(plan.perUnitAmount));
         }
-        // Extras
         if (plan.setupFee) {
           localStorage.setItem('setupFee', String(plan.setupFee.setupFee));
           localStorage.setItem('setupApplicationTiming', String(plan.setupFee.applicationTiming));
@@ -110,42 +158,42 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           localStorage.setItem('freeStart', plan.freemium.startDate||'');
           localStorage.setItem('freeEnd', plan.freemium.endDate||'');
         }
-      } catch(e){ console.error('Failed to fetch plan',e); }
+      } catch (e) {
+        console.error('Failed to fetch plan', e);
+      }
     };
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadPlan();
+
+    return () => {
+      document.body.classList.remove('edit-product-page');
+    };
   }, [ratePlanId]);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [planData,setPlanData] = useState<any>(null);
-  const [saving, setSaving] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
+  const goToStep = (index: number) => setCurrentStep(index);
 
-  const handleNext = async () => {
-    // Before moving forward, persist basic info when on first step
-    if (currentStep === 0 && ratePlanId) {
-      const ok = await persistPlan(false);
-      if (!ok) return; // abort navigation on error
-    }
-
-    if (currentStep < steps.length - 1) setCurrentStep((prev) => prev + 1);
+  // ------ Validation (details step)
+  const validateDetails = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!ratePlanName.trim()) e.ratePlanName = 'This is a required field';
+    if (!billingFrequency) e.billingFrequency = 'This is a required field';
+    if (!selectedProductName) e.selectedProductName = 'This is a required field';
+    if (!paymentType) e.paymentType = 'This is a required field';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const persistPlan = async (isDraft:boolean): Promise<boolean> => {
+  // ------ Persist top (details) portion
+  const persistPlan = async (isDraft: boolean): Promise<boolean> => {
     if (!ratePlanId) return true; // nothing to save if id missing
     try {
-      setSaving(true);
-      // map product name to id
-      let productId: number | undefined = undefined;
-      if (selectedProductName) {
-        try {
-          const prods = await fetchProducts();
-          const p = prods.find(pr => pr.productName === selectedProductName);
-          productId = p?.productId ? Number(p.productId) : undefined;
-        } catch (e) {
-          console.error('Failed to fetch products', e);
-        }
+      setLoading(true);
+      // map product name to id (optional — backend may accept productName as well)
+      let productId: number | undefined;
+      if (selectedProductName && !productError) {
+        const p = products.find(pr => pr.productName === selectedProductName);
+        productId = p?.productId ? Number(p.productId) : undefined;
       }
+
       const payload: Partial<Omit<RatePlanRequest,'billableMetricId'>> = {
         ratePlanName,
         description,
@@ -154,216 +202,277 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         productId,
         productName: productId ? undefined : selectedProductName || undefined,
       };
-      if (isDraft) {
-        (payload as any).status = 'DRAFT';
-      }
+      if (isDraft) (payload as any).status = 'DRAFT';
+
       await updateRatePlan(ratePlanId, payload);
       return true;
-    } catch (err:any) {
+    } catch (err: any) {
       alert(err?.message || 'Failed to save rate plan');
       return false;
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) setCurrentStep((prev) => prev - 1);
-    else close();
+  // ------ Save Draft (TopBar)
+  const handleSaveDraft = async () => {
+    if (draftStatus === 'saving') return;
+    if (!validateDetails()) return;
+
+    try {
+      setDraftStatus('saving');
+      const ok = await persistPlan(true);
+      if (!ok) { setDraftStatus('idle'); return; }
+      setDraftStatus('saved');
+      setTimeout(() => setDraftStatus('idle'), 4000);
+    } catch (e) {
+      console.error('Save draft failed', e);
+      alert('Failed to save draft. Please try again.');
+      setDraftStatus('idle');
+    }
   };
 
-  // Static options (example). We’ll still show whatever is already set even if it isn't in this list.
-  const productOptions = ['Product A', 'Product B', 'Product C'];
+  // ------ Footer navigation
+  const handleNextStep = async () => {
+    if (activeTab === 'details') {
+      if (!validateDetails()) return;
+      const ok = await persistPlan(false);
+      if (!ok) return;
+      goToStep(1);
+      return;
+    }
+    if (activeTab === 'pricing') {
+      // Pricing form (EditPricing) can persist on its own button actions
+      goToStep(2);
+      return;
+    }
+    if (activeTab === 'extras') {
+      // Extras form (EditExtras) can persist on its own button actions
+      goToStep(3);
+      return;
+    }
+    if (activeTab === 'review') {
+      // Final save of details (if any pending), then exit
+      const ok = await persistPlan(false);
+      if (ok) navigate('/get-started/rate-plans');
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 0) goToStep(currentStep - 1);
+    else setShowSaveDraftModal(true);
+  };
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
+    switch (activeTab) {
+      case 'details':
         return (
-          <>
-            <div className="erp-form-row">
-              <label className="erp-field-label">Rate Plan Name</label>
-              <input
-                className="erp-input erp-w-440"
-                type="text"
-                value={ratePlanName}
-                onChange={(e) => setRatePlanName(e.target.value)}
-                placeholder="Rate Plan Name"
-              />
-            </div>
-
-            <div className="erp-form-row">
-              <label className="erp-field-label">Rate Plan Description</label>
-              <textarea
-                className="erp-textarea erp-w-440"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Placeholder Placeholder Placeholder"
-              />
-            </div>
-
-            <div className="erp-three-col">
-              <div className="erp-form-row">
-                <label className="erp-field-label">Billing Frequency</label>
-                <select
-                  className="erp-select erp-w-440"
+          <div className="edit-np-section">
+            <div className="edit-np-form-row">
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Rate Plan Name</label>
+                <InputField
+                  value={ratePlanName}
+                  onChange={setRatePlanName}
+                  placeholder="e.g., Pro Plan, Enterprise Plan"
+                  error={errors.ratePlanName}
+                />
+              </div>
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Billing Frequency</label>
+                <SelectField
                   value={billingFrequency}
-                  onChange={(e) => setBillingFrequency(e.target.value)}
-                >
-                  <option value="">--select--</option>
-                  <option value="MONTHLY">Monthly</option>
-                  <option value="YEARLY">Yearly</option>
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="DAILY">Daily</option>
-                  <option value="HOURLY">Hourly</option>
-                </select>
-              </div>
-
-              <div className="erp-form-row">
-                <label className="erp-field-label">Select Product Name</label>
-                <select
-                  className="erp-select erp-w-440"
-                  value={selectedProductName}
-                  onChange={(e) => setSelectedProductName(
-                    e.target.options[e.target.selectedIndex].text
-                  )}
-                >
-                  <option value="">--select--</option>
-
-                  {/* Ensure the current product (from the plan) is available even if not in the static list */}
-                  {selectedProductName &&
-                    !productOptions.includes(selectedProductName) && (
-                      <option value={selectedProductName}>{selectedProductName}</option>
-                    )}
-
-                  {productOptions.map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="erp-form-row">
-                <label className="erp-field-label">Payment Type</label>
-                <select
-                  className="erp-select erp-w-440"
-                  value={paymentType}
-                  onChange={(e) => setPaymentType(e.target.value)}
-                >
-                  <option value="">--select--</option>
-                  <option value="POSTPAID">Post-Paid</option>
-                  <option value="PREPAID">Pre-Paid</option>
-                </select>
+                  onChange={setBillingFrequency}
+                  placeholder="Select billing cycle"
+                  options={[
+                    { label: 'Monthly', value: 'MONTHLY' },
+                    { label: 'Yearly', value: 'YEARLY' },
+                    { label: 'Weekly', value: 'WEEKLY' },
+                    { label: 'Daily', value: 'DAILY' },
+                    { label: 'Hourly', value: 'HOURLY' },
+                  ]}
+                  error={errors.billingFrequency}
+                />
               </div>
             </div>
-          </>
+
+            <div className="edit-np-form-row">
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Select Product</label>
+                <SelectField
+                  value={selectedProductName}
+                  onChange={setSelectedProductName}
+                  placeholder={productError ? 'Failed to load products' : 'Select Product'}
+                  options={
+                    productError
+                      ? []
+                      : products.map((p) => ({ label: p.productName, value: p.productName }))
+                  }
+                  error={errors.selectedProductName}
+                />
+              </div>
+
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Payment Type</label>
+                <SelectField
+                  value={paymentType}
+                  onChange={setPaymentType}
+                  placeholder="Select payment method"
+                  options={[
+                    { label: 'Post-Paid', value: 'POSTPAID' },
+                    { label: 'Pre-Paid', value: 'PREPAID' },
+                  ]}
+                  error={errors.paymentType}
+                />
+              </div>
+            </div>
+
+            <div className="edit-np-form-group">
+              <label className="edit-np-label">Rate Plan Description</label>
+              <TextareaField
+                value={description}
+                onChange={setDescription}
+                placeholder="Describe who this plan is for, limits, and benefits..."
+              />
+            </div>
+          </div>
         );
-      case 1:
-        return <EditPricing ratePlanId={ratePlanId} />;
-      case 2:
-        return <EditExtras ratePlanId={ratePlanId} noUpperLimit={false} />;
-      case 3:
-        return <EditReview />;
+
+      case 'pricing':
+        return (
+          <div className="edit-np-section">
+            <div className="edit-np-configuration-tab">
+              <EditPricing ratePlanId={ratePlanId} />
+            </div>
+          </div>
+        );
+
+      case 'extras':
+        return (
+          <div className="edit-np-section">
+            <div className="edit-np-configuration-tab">
+              <EditExtras ratePlanId={ratePlanId} noUpperLimit={false} />
+            </div>
+          </div>
+        );
+
+      case 'review':
+        return (
+          <div className="edit-np-section">
+            <div className="edit-np-review-container">
+              <EditReview />
+            </div>
+          </div>
+        );
+
       default:
         return <p>Coming soon...</p>;
     }
   };
 
   return (
-    <div className="erp-page">
-      {/* Top bar */}
-      <div className="erp-topbar">
-        <button className="erp-back-btn" onClick={handleBack} aria-label="Back">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 15.833L4.167 10M4.167 10L10 4.167M4.167 10H15.833"
-              stroke="#706C72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+    <>
+      <TopBar
+        title={ratePlanId ? 'Edit Rate Plan' : 'Create Rate Plan'}
+        onBack={() => setShowSaveDraftModal(true)}
+        cancel={{
+          label: 'Cancel',
+          onClick: () => setShowDeleteConfirm(true),
+        }}
+        save={{
+          label: draftStatus === 'saved' ? 'Saved as Draft' : 'Save as Draft',
+          labelWhenSaved: 'Saved as Draft',
+          saved: draftStatus === 'saved',
+          saving: draftStatus === 'saving',
+          disabled: loading,
+          onClick: handleSaveDraft,
+        }}
+      />
 
-        <h2 className="erp-title">Edit “{ratePlanName || initial.ratePlanName || ''}”</h2>
+      <div className="edit-np-viewport">
+        <div className="edit-np-card">
+          <div className="edit-np-grid">
+            {/* Sidebar */}
+            <aside className="edit-np-rail">
+              <div className="edit-np-steps">
+                {steps.map((step, index) => {
+                  const isActive = index === currentStep;
+                  const isCompleted = index < currentStep;
+                  return (
+                    <div
+                      key={step.id}
+                      className={`edit-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                      onClick={() => goToStep(index)}
+                      role="button"
+                    >
+                      <div className="edit-np-step__title">{step.title}</div>
+                      {/* optional desc: <div className="edit-np-step__desc">{step.desc}</div> */}
+                    </div>
+                  );
+                })}
+              </div>
+            </aside>
 
-        <div className="erp-top-actions">
-          <button className="erp-btn erp-btn-cancel erp-btn-top-cancel" onClick={close}>
-            Cancel
-          </button>
-          <button
-            className="erp-btn erp-btn-outline erp-btn-top"
-            disabled={saving}
-            onClick={async () => {
-              await persistPlan(true);
-            }}
-          >
-            {saving ? 'Saving...' : 'Save as Draft'}
-          </button>
+            {/* Main Content */}
+            <div className="edit-np-content">
+              <div className="edit-np-form">
+                {renderStepContent()}
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="edit-np-form-footer">
+                <div className="edit-np-btn-group edit-np-btn-group--back">
+                  {currentStep > 0 && (
+                    <button
+                      type="button"
+                      className="np-btn np-btn--ghost"
+                      onClick={handlePreviousStep}
+                      disabled={loading}
+                    >
+                      Back
+                    </button>
+                  )}
+                </div>
+
+                <div className="edit-np-btn-group edit-np-btn-group--next">
+                  <button
+                    type="button"
+                    className={`np-btn np-btn--primary ${loading ? 'np-btn--loading' : ''}`}
+                    onClick={handleNextStep}
+                    disabled={loading}
+                  >
+                    {loading
+                      ? 'Saving...'
+                      : activeTab === 'review'
+                      ? 'Update Rate Plan'
+                      : 'Next'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Save Draft confirmation modal (leave flow) */}
+        <SaveDraft
+          isOpen={showSaveDraftModal}
+          onClose={() => setShowSaveDraftModal(false)}
+          onSave={async () => {
+            await handleSaveDraft();
+            setShowSaveDraftModal(false);
+            close();
+          }}
+        />
+
+        {/* Discard / Cancel confirmation */}
+        <ConfirmDeleteModal
+          isOpen={showDeleteConfirm}
+          productName={ratePlanName || 'this rate plan'}
+          onConfirm={close}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
       </div>
-
-      {/* Wrapper (full width, fixed bottom gap) */}
-      <div className="erp-wrapper">
-        {/* Sidebar */}
-        <aside className="erp-side">
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className={`erp-step ${index === currentStep ? 'active' : ''}`}
-              onClick={() => setCurrentStep(index)}
-              role="button"
-            >
-              <span className="erp-step-dot" />
-              <span className="erp-step-text">{step}</span>
-            </div>
-          ))}
-        </aside>
-
-        {/* Right section */}
-        <div className="erp-section">
-          <div className="erp-section-header">
-            <div className="erp-section-title">{steps[currentStep]}</div>
-          </div>
-
-          <div className="erp-form-card">{renderStepContent()}</div>
-
-          {/* Footer actions (sticky inside card) */}
-          <div className="erp-actions">
-            <button className="erp-btn erp-btn-ghost erp-btn-cta" onClick={handleBack}>
-              Back
-            </button>
-            <button
-              className="erp-btn erp-btn-primary erp-btn-cta"
-              onClick={async () => {
-                if (currentStep === steps.length - 1 && ratePlanId) {
-                  const ok = await persistPlan(false);
-                  if (ok) navigate('/get-started/rate-plans');
-                } else {
-                  handleNext();
-                }
-              }}
-            >
-              {currentStep === steps.length - 1 && ratePlanId ? 'Update Rate Plan' : 'Save & Next'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {showCancelModal && (
-        <div className="erp-modal-overlay">
-          <div className="erp-modal">
-            <div className="erp-modal-body">
-              <h5>Discard changes?</h5>
-              <p>Your progress will not be saved.</p>
-            </div>
-            <div className="erp-modal-footer">
-              <button className="erp-btn erp-btn-ghost" onClick={() => setShowCancelModal(false)}>
-                Back
-              </button>
-              <button className="erp-btn erp-btn-primary" onClick={close}>
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

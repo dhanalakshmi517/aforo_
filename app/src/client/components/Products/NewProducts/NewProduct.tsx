@@ -8,7 +8,7 @@ import ConfirmDeleteModal from "../../componenetsss/ConfirmDeleteModal";
 import { ConfigurationTab } from "./ConfigurationTab";
 import ProductReview from "./ProductReview";
 import SaveDraft from "../../componenetsss/SaveDraft";
-import { createProduct, updateProduct, finalizeProduct, ProductPayload, listAllProducts, getProducts } from "../api";
+import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
 
 import "./NewProduct.css";
 
@@ -426,7 +426,7 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
                             <h3 className="np-section-title">GENERAL DETAILS</h3>
                           </div>
 
-                          <div className="np-grid-2">
+                          <div className="np-grid ">
                             <InputField
                               label="Product Name"
                               value={formData.productName}
@@ -559,46 +559,50 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
                       )}
 
                       {activeTab === "review" && (
-                        <div className="np-btn-group">
-                          <button
-                            type="button"
-                            className="np-btn np-btn--ghost"
-                            onClick={() => gotoStep(1)}
-                          >
-                            Back
-                          </button>
-                          <button 
-                            type="button" 
-                            className="np-btn np-btn--primary"
-                            onClick={() => {
-                              if (!createdProductId) {
-                                console.error('No product ID available for finalization');
-                                return;
-                              }
-                              setSaving(true);
-                              finalizeProduct(createdProductId)
-                                .then(response => {
-                                  if (response.success) {
-                                    console.log('Product created and finalized successfully!');
-                                    onClose();
-                                  } else {
-                                    throw new Error(response.message || 'Failed to finalize product');
-                                  }
-                                })
-                                .catch(error => {
-                                  console.error('Error finalizing product:', error);
-                                  const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-                                  console.error('Failed to finalize product:', errorMessage);
-                                })
-                                .finally(() => {
-                                  setSaving(false);
-                                });
-                            }}
-                            disabled={saving}
-                          >
-                            {saving ? 'Submitting...' : 'Create Product'}
-                          </button>
-                        </div>
+                        <>
+                          <div className="np-btn-group np-btn-group--back">
+                            <button
+                              type="button"
+                              className="np-btn np-btn--ghost"
+                              onClick={() => gotoStep(1)}
+                            >
+                              Back
+                            </button>
+                          </div>
+                          <div className="np-btn-group np-btn-group--next">
+                            <button 
+                              type="button" 
+                              className="np-btn np-btn--primary"
+                              onClick={() => {
+                                if (!createdProductId) {
+                                  console.error('No product ID available for finalization');
+                                  return;
+                                }
+                                setSaving(true);
+                                finalizeProduct(createdProductId)
+                                  .then(response => {
+                                    if (response.success) {
+                                      console.log('Product created and finalized successfully!');
+                                      onClose();
+                                    } else {
+                                      throw new Error(response.message || 'Failed to finalize product');
+                                    }
+                                  })
+                                  .catch(error => {
+                                    console.error('Error finalizing product:', error);
+                                    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+                                    console.error('Failed to finalize product:', errorMessage);
+                                  })
+                                  .finally(() => {
+                                    setSaving(false);
+                                  });
+                              }}
+                              disabled={saving}
+                            >
+                              {saving ? 'Submitting...' : 'Create Product'}
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
                   </form>
@@ -610,9 +614,17 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
       {/* Save Draft confirmation modal */}
       <SaveDraft
         isOpen={showSavePrompt}
-        onClose={() => {
+        onClose={async () => {
           setShowSavePrompt(false);
-          onClose();
+          try {
+            if (createdProductId) {
+              await deleteProduct(createdProductId);
+            }
+          } catch (e) {
+            console.error('Failed to delete product on discard', e);
+          } finally {
+            onClose();
+          }
         }}
         onSave={async () => {
           await handleSaveDraft();
@@ -626,10 +638,17 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
       <ConfirmDeleteModal
         isOpen={showDeleteConfirm} 
         productName={formData.productName || "this product"}
-        onConfirm={() => {
-          // TODO: Implement delete API call if needed
-          setShowDeleteConfirm(false);
-          onClose();
+        onConfirm={async () => {
+          try {
+            if (createdProductId) {
+              await deleteProduct(createdProductId);
+            }
+          } catch (e) {
+            console.error('Failed to delete product', e);
+          } finally {
+            setShowDeleteConfirm(false);
+            onClose();
+          }
         }}
         onCancel={() => setShowDeleteConfirm(false)}
       />

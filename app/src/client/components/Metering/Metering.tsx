@@ -6,6 +6,7 @@ import "./Metering.css";
 import "../Products/Products.css";
 import PageHeader from "../PageHeader/PageHeader";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import { useToast } from '../componenetsss/ToastProvider';
 import UsageEmptyImg from "./usage.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
@@ -72,7 +73,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const [deleteMetricId, setDeleteMetricId] = useState<number | null>(null);
   const [deleteMetricName, setDeleteMetricName] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [notification, setNotification] = useState<NotificationState | null>(null);
+  // toast handled via context
+  const { showToast } = useToast();
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [showEditMetricForm, setShowEditMetricForm] = useState(false);
 
@@ -102,10 +104,18 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     try {
       await deleteUsageMetric(deleteMetricId);
       setMetrics(prev => prev.filter(m => m.id !== deleteMetricId));
-      setNotification({ message: 'Deleted', type: 'success', productName: deleteMetricName });
+      showToast({
+        kind: 'success',
+        title: 'Metric Deleted',
+        message: `The metric “${deleteMetricName}” was successfully deleted.`
+      });
     } catch (err) {
       console.error(err);
-      setNotification({ message: 'Failed to delete', type: 'error', productName: deleteMetricName });
+      showToast({
+        kind: 'error',
+        title: 'Failed to Delete',
+        message: `Failed to delete the metric “${deleteMetricName}”. Please try again.`
+      });
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);
@@ -166,8 +176,9 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         title="Usage Metrics"
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
-        primaryLabel="New Usage Metric"
+        primaryLabel="+New Usage Metric"
         onPrimaryClick={() => setShowNewUsageMetricForm(true)}
+        showPrimary={metrics.length > 0}
       />
       <div className="products-table-wrapper">
         <table className="products-table">
@@ -249,10 +260,6 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         />
       )}
 
-      {/* Notification */}
-      {notification && (
-        <ToastNotification message={notification.message} type={notification.type} productName={notification.productName} />
-      )}
 
     </div>
   );

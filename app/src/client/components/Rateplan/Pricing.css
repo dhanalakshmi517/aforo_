@@ -23,7 +23,7 @@
   padding:8px 36px 8px 12px;
   border:1px solid var(--af-border-1);
   border-radius:8px;
-  background-color:var(--af-surface-0);
+  background-color:var(--color-neutral-white);
   box-sizing:border-box;
 
   font-family:var(--font-family-primary);

@@ -48,7 +48,7 @@ html, body, #root{
   border-radius: var(--border-radius-lg);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
+  height: calc(100vh - 20px);
   overflow: hidden;
 }
 
@@ -322,6 +322,7 @@ text-transform: uppercase;
 .edit-np-content {
   max-height: 75vh;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--color-neutral-400) transparent;
 
@@ -349,11 +350,11 @@ text-transform: uppercase;
 .edit-np-form-footer {
   position: absolute;
   bottom: 24px;
-  left: 24px;
+  left: 324px; /* 300px rail + 24px card padding */
   right: 24px;
   padding: 16px 0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   /* border-top: 1px solid var(--color-neutral-300); */
 }
@@ -365,7 +366,7 @@ text-transform: uppercase;
 
 /* Back button group - align to left */
 .edit-np-btn-group--back {
-  margin-right: 12px;
+  margin-right: 12px; /* reset so it sits next to content */
 }
 
 

@@ -1,157 +1,18 @@
+// Base color
+$brand-primary: rgba(89, 46, 18, 100);
+
 // GREY COLORS MAP
-// Font Family
-
-
-$font-family-primary: 'dm-sans', sans-serif;
-
 $grey-colors: (
   white: rgba(255, 255, 255, 1),
   100: rgba(245, 244, 245, 1),
   200: rgba(234, 233, 234, 1),
-  300: rgba(214, 213, 215, 1),
-  400: rgba(193, 191, 194, 1),
-  500: rgba(173, 171, 174, 1),
-  600: rgba(152, 149, 154, 1),
-  700: rgba(132, 128, 134, 1),
-  800: rgba(112, 108, 114, 1),
-  900: rgba(90, 86, 93, 1),
-  1000: rgba(71, 66, 74, 1),
-  1100: rgba(49, 44, 53, 1),
-  1200: rgba(39, 35, 42, 1),
-  1300: rgba(35, 31, 37, 1),
-  1400: rgba(30, 26, 32, 1),
-  1500: rgba(30, 26, 32, 1),
-  1600: rgba(27, 24, 22, 1),
-  1700: rgba(21, 19, 18, 1),
   black: rgba(18, 18, 19, 1)
 );
 
-// GREY COLOR GETTER
-@function grey($level) {
-  @return map-get($grey-colors, $level);
-}
-
-// EXAMPLE USAGE:
-// color: grey(400);
-// ------------------------------
-// FONT WEIGHTS
-// ------------------------------
-$font-weight-light: 300;
-$font-weight-regular: 400;
-$font-weight-semibold: 600;
-$font-weight-bold: 700;
-
-// ------------------------------
-// SCALE (Spacing Tokens)
-// ------------------------------
-$scale: (
-  0: 0px,
-  25: 1px,
-  50: 2px,
-  100: 4px,
-  150: 6px,
-  200: 8px,
-  300: 12px,
-  400: 16px,
-  500: 20px,
-  600: 24px,
-  700: 28px,
-  800: 32px,
-  900: 36px
-);
-
-// ------------------------------
-// FONT SIZES
-// ------------------------------
-$font-sizes: (
-  xs: 0.625rem,
-  sm: 0.75rem,
-  md: 0.875rem,
-  lg: 1rem,
-  h6: 1.125rem,
-  h5: 1.25rem,
-  h4: 1.375rem,
-  h3: 1.625rem,
-  h2: 1.75rem,
-  h1: 2rem
-);
-
-// ------------------------------
-// LINE HEIGHTS
-// ------------------------------
-$line-heights: (
-  body-xs: 1rem,
-  body-sm: 1.125rem,
-  body-md: 1.25rem,
-  body-lg: 1.5rem,
-  heading-h6: 1.5rem,
-  heading-h5: 1.75rem,
-  heading-h4: 2rem,
-  heading-h3: 2.25rem,
-  heading-h2: 2.25rem,
-  heading-h1: 2.5rem
-);
-
-// ------------------------------
-// SPACING SCALE
-// ------------------------------
-$spacing: (
-  3xs: 0.125rem,
-  2xs: 0.25rem,
-  xs: 0.5rem,
-  sm: 1rem,
-  md: 1.25rem,
-  lg: 1.5rem,
-  xl: 1.75rem,
-  2xl: 2rem,
-  3xl: 2.25rem
-);
-
-// ------------------------------
-// PARAGRAPH SPACING
-// ------------------------------
-$paragraph-spacing-body: (
-  sm: 0.875rem,
-  md: 1rem,
-  lg: 1.25rem
-);
-
-$paragraph-spacing-heading: (
-  h1: 3rem,
-  h2: 2.5rem,
-  h3: 2.25rem,
-  h4: 2rem,
-  h5: 1.75rem,
-  h6: 1.5rem
-);
-
-// ------------------------------
-// PRIMARY COLOR SHADES
-// ------------------------------
+// PRIMARY COLORS MAP (linked to $brand-primary)
 $primary-colors: (
-  000: rgba(235, 246, 251, 1),
-  100: rgba(215, 237, 248, 1),
-  200: rgba(181, 219, 239, 1),
-  300: rgba(136, 200, 232, 1),
-  400: rgba(95, 183, 226, 1),
-  500: rgba(55, 165, 219, 1),
-  600: rgba(52, 150, 199, 1),
-  700: rgba(48, 136, 180, 1),
-  800: rgba(45, 124, 164, 1),
-  900: rgba(43, 113, 148, 1),
-  1000: rgba(40, 101, 132, 1),
-  1100: rgba(35, 84, 108, 1)
+  500: $brand-primary, // ✅ reference base color
+  600: darken($brand-primary, 5%),
+  700: darken($brand-primary, 10%),
+  400: lighten($brand-primary, 5%)
 );
-
-
-// Border Radius Scale
-$border-radius-none: 0.25rem;
-$border-radius-sm: 0.5rem;
-$border-radius-md: 0.75rem;
-$border-radius-lg: 1rem;
-
-// Border Width Scale
-$border-width-none: 0px;
-$border-width-sm: 1px;
-$border-width-md: 2px;
-$border-width-lg: 4px;
