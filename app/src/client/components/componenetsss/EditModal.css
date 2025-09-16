@@ -1,0 +1,120 @@
+@import "../Variables/Variables.css";
+
+/* Backdrop */
+.editmodal__overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Outer layout — specs */
+.editmodal__container{
+  position: relative;
+  border-radius: var(--border-radius-md, 12px);
+  background: var(--surface-layer-4, #FFF);
+
+  display: flex;
+  width: 554px;
+  padding: 44px 24px 24px 24px;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+
+  box-shadow: 0 8px 24px rgba(16,24,40,.12);
+}
+
+/* Title — specs */
+.editmodal__title{
+  width: 100%;
+  margin: 0;
+  color: var(--text-text-darkest, #1A2126);
+  text-align: center;
+
+  font-family: var(--type-font-family-primary, "IBM Plex Sans", var(--font-family-primary, system-ui, -apple-system, Segoe UI, Inter, Roboto, sans-serif));
+  font-size: var(--fontsize-heading-h5, 20px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h5, 28px);
+}
+
+/* X button — specs */
+.editmodal__close{
+  position: absolute;
+  right: 12px;
+  top: 12px;
+
+  display: flex;
+  padding: 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  background: transparent;
+  cursor: pointer;
+}
+.editmodal__close:hover{ background: var(--surface-layer-2, #F5F5F7); }
+
+/* Body text — specs */
+.editmodal__desc{
+  align-self: stretch;
+  margin: 0;
+  color: var(--text-text-dark, #75797E);
+  text-align: center;
+
+  font-family: var(--type-font-family-primary, "IBM Plex Sans", var(--font-family-primary, Inter, system-ui, sans-serif));
+  font-size: var(--fontsize-body-lg, 16px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg, 24px);
+}
+
+/* Buttons row */
+.editmodal__actions{
+  display: flex;
+  width: 100%;
+  gap: 12px;
+}
+
+/* Buttons base */
+.editmodal__btn{
+  display: flex;
+  height: 40px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex: 1 0 0;
+
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans", var(--font-family-primary, Inter, system-ui, sans-serif));
+  font-size: var(--fontsize-body-lg, 16px);
+  line-height: var(--line-height-body-lg, 24px);
+  cursor: pointer;
+}
+
+/* Cancel — specs */
+.editmodal__btn--cancel{
+  background: var(--surface-error, #FFEDE9);
+  color: var(--color-error-400, #E34935);
+}
+.editmodal__btn--cancel:hover{ filter: brightness(.98); }
+
+/* Primary — specs */
+.editmodal__btn--primary{
+  background: var(--surface-primary-button-active, #025A94);
+  color: #FFF;
+}
+.editmodal__btn--primary:hover{ filter: brightness(1.03); }
+
+/* Disabled */
+.editmodal__btn:disabled{
+  opacity: .6;
+  cursor: not-allowed;
+}

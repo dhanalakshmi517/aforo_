@@ -3,8 +3,8 @@
 /* ===== Layout wrapper ===== */
 .cus-wrapper{
   display:grid;
-  grid-template-columns:260px 1fr; /* sidebar + content */
-  column-gap:0;                    /* no gap between rail and form */
+  grid-template-columns:260px 1fr;
+  column-gap:0;
   width:auto;
   margin:24px 7.5rem 55px;
   border:1px solid var(--color-neutral-200);
@@ -18,7 +18,7 @@
 .side-progress{
   display:flex;
   width:100%;
-  padding:24px 0 24px 16px; /* right padding = 0 so it “kisses” the form column */
+  padding:24px 0 24px 16px;
   flex-direction:column;
   align-items:flex-start;
   gap:4px;
@@ -27,7 +27,6 @@
   background:#FFF;
   box-sizing:border-box;
 }
-
 .side-step{
   display:flex;
   width:100%;
@@ -39,13 +38,12 @@
   border:none;
   cursor:pointer;
   text-align:left;
-  border-left:2px solid transparent; /* indicator */
+  border-left:2px solid transparent;
   padding-left:12px;
   box-sizing:border-box;
   margin-bottom:44px;
 }
 .side-step:last-child{ margin-bottom:0; }
-
 .side-step__label{
   color:var(--text-text-darkest,#1A2126);
   font-family:var(--type-font-family-primary,"IBM Plex Sans","Inter",sans-serif);
@@ -60,30 +58,20 @@
 /* ===== FORM AREA ===== */
 .form-section{
   min-width:0;
-  /* >>> NUDGE FURTHER RIGHT (+4px from 24px -> 28px) */
   padding:30px 40px 120px 28px !important;
   box-sizing:border-box;
   background:transparent;
 }
-
-/* Stronger overrides so other shorthands don’t re-add spacing */
-.cus-wrapper .form-section{
-  margin-left:0 !important;
-  padding-left:28px !important;         /* keep the 28px gutter */
-}
-.cus-wrapper .form-section .form-card{
-  margin-left:0 !important;
-  padding-left:0 !important;            /* card itself stays flush inside the section */
-}
+.cus-wrapper .form-section{ margin-left:0 !important; padding-left:28px !important; }
+.cus-wrapper .form-section .form-card{ margin-left:0 !important; padding-left:0 !important; }
 
 .form-card{
-  padding:0 40px 24px 0 !important;     /* left = 0; right/bottom as before */
+  padding:0 40px 24px 0 !important;
   max-width:none !important;
   width:100% !important;
   margin:0 !important;
   box-sizing:border-box;
 }
-
 .form-section-heading{
   margin:0 0 10px;
   color:var(--color-neutral-1200);
@@ -101,8 +89,19 @@
 /* Inputs / rows */
 .sub-create-form{
   width:100%;
-  max-width:464px;
+  max-width:464px; /* match Create page column width */
   box-sizing:border-box;
+}
+
+/* ✅ Label style (used for “Company Logo” as well) */
+.com-form-label{
+  color:var(--color-neutral-1000);
+  font-family:var(--font-family-primary);
+  font-size:var(--font-size-sm);
+  font-weight:500;
+  line-height:1.4;
+  margin-bottom:6px;
+  display:block;
 }
 
 /* Error text */
@@ -120,6 +119,37 @@
   margin-top:24px;
 }
 
+/* ====== Logo Uploader (copied from Create) ====== */
+.logo-box{
+  width: 100%;
+  max-width: 100%;
+  height: 36px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 12px;
+  background: var(--surface-layer-4, #FFF);
+  border: 1px solid var(--border-border-2, #D5D4DF);
+  border-radius: var(--border-radius-sm, 8px);
+  cursor:pointer;
+  transition:border-color .2s ease, background .2s ease;
+}
+.logo-box:hover{ border-color: var(--color-neutral-300); }
+
+/* Small action row under the logo (for Remove) */
+.logo-actions{
+  margin-top:8px;
+}
+.logo-remove-btn{
+  border:none;
+  background: rgba(255, 86, 48, 0.12);
+  color:#FF5630;
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
 /* Mobile */
 @media (max-width:768px){
   .cus-wrapper{
@@ -134,7 +164,7 @@
     padding:16px;
   }
   .form-section{
-    padding:20px 16px 100px 16px !important; /* mobile keeps 16px gutter */
+    padding:20px 16px 100px 16px !important;
   }
   .form-card{
     padding:0 16px 16px 0 !important;

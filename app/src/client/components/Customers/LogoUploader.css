@@ -1,14 +1,93 @@
-.logo-uploader{border-radius:8px;border:1px solid #E9E9EE;background:#FFF;display:flex;padding:8px 12px;align-items:center;gap:8px;cursor:pointer;}
-.logo-avatar-placeholder{width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.logo-placeholder-text{overflow:hidden;color:#C3C2D0;text-overflow:ellipsis;font-family:"IBM Plex Sans",sans-serif;font-size:14px;font-weight:400;line-height:20px;display:-webkit-box;
-  -webkit-line-clamp:1;
-  line-clamp:1;-webkit-line-clamp:1;-webkit-box-orient:vertical;flex:1 0 0;}
-.logo-add-btn{border-radius:8px;background:#E1F4FB;display:flex;height:30px;padding:4px 16px;align-items:center;gap:4px;border:none;color:#025A94;font-weight:600;}
-.logo-add-btn svg{flex-shrink:0;}
+/* Shared container – large, like Create screen */
+.logo-uploader{
+  border: 1px solid #E9E9EE;
+  background: #FFF;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;        /* roomy like the spec */
+  cursor: pointer;
+  box-sizing: border-box;
+}
 
-.uploaded{padding:8px 12px;}
-.logo-preview{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.logo-action-buttons{display:flex;gap:8px;margin-left:auto;}
-.logo-edit-btn,.logo-remove-btn{display:flex;padding:4px 16px;align-items:center;gap:4px;border:none;border-radius:8px;font-size:14px;cursor:pointer;}
-.logo-edit-btn{background:#F5F9FF;color:#025A94;}
-.logo-remove-btn{background:#FFEFEF;color:#E34935;}
+/* ADD state visuals (upload prompt) */
+.logo-uploader.is-add-state .logo-avatar-placeholder{
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.logo-uploader.is-add-state .logo-avatar-placeholder svg{
+  width: 56px;
+  height: 56px;
+}
+
+.logo-placeholder-text{
+  color: #C3C2D0;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  flex: 1 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logo-add-btn{
+  height: 30px;
+  padding: 4px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #E1F4FB;      /* light blue pill */
+  color: #025A94;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.logo-add-btn svg{ flex-shrink: 0; }
+
+/* PREVIEW state visuals (image + edit/remove) */
+.logo-uploader.is-preview-state .logo-preview{
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.logo-action-buttons{
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.logo-edit-btn,
+.logo-remove-btn{
+  height: 30px;
+  padding: 4px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.logo-edit-btn{
+  background: #F5F9FF;
+  color: #025A94;
+}
+.logo-remove-btn{
+  background: #FFEFEF;
+  color: #E34935;
+}
+
+/* Safety: never show the native file input if some global rule overrides [hidden] */
+.logo-uploader input[type="file"]{
+  display: none !important;
+}

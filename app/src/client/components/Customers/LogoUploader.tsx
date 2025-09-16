@@ -1,40 +1,66 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import './LogoUploader.css';
 
 interface LogoUploaderProps {
   /** selected file (null if none) */
   logo: File | null;
-  logoUrl: string | null; // preview URL (object url or server url)
+  /** preview URL from server or an object URL */
+  logoUrl: string | null;
+  /** fires with a new file or null when removing */
   onChange: (file: File | null) => void;
-  /** if customer already exists supply id so edit/remove can trigger api */
+  /** optional hooks if parent wants to react */
   onEdit?: () => void;
   onRemove?: () => void;
 }
 
-const LogoUploader: React.FC<LogoUploaderProps> = ({ logo, logoUrl, onChange, onEdit, onRemove }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+const isTruthyUrl = (v: unknown): v is string =>
+  typeof v === 'string' && v.trim() !== '' && v !== 'null' && v !== 'undefined';
 
-  const handleSelect = () => {
-    inputRef.current?.click();
-  };
+const LogoUploader: React.FC<LogoUploaderProps> = ({
+  logo,
+  logoUrl,
+  onChange,
+  onEdit,
+  onRemove,
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [imgError, setImgError] = useState(false);
+
+  const openPicker = () => inputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0] ?? null;
     if (!file) return;
-    // basic image type check
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file.');
       return;
     }
+    setImgError(false);          // reset any previous image error
     onChange(file);
+    onEdit?.();
   };
 
-  if (!logo) {
-    // initial add state
+  // Treat only a valid non-empty URL (and not errored) as “has image”
+  const validUrl = isTruthyUrl(logoUrl) ? logoUrl : null;
+  const hasImage = !!logo || (!!validUrl && !imgError);
+
+  const previewSrc = useMemo(() => {
+    if (logo) return URL.createObjectURL(logo);
+    return validUrl ?? '';
+  }, [logo, validUrl]);
+
+  // ─────────── ADD STATE ───────────
+  if (!hasImage) {
     return (
-      <div className="logo-uploader" onClick={handleSelect} role="button" tabIndex={0}>
+      <div
+        className="logo-uploader is-add-state"
+        onClick={openPicker}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && openPicker()}
+        role="button"
+        tabIndex={0}
+      >
         <div className="logo-avatar-placeholder" aria-hidden="true">
-          {/* placeholder svg */}
+          {/* 56px avatar placeholder; scaled by CSS */}
           <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="27.475" fill="#F8F7FA" />
             <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="27.475" stroke="#BFBECE" strokeWidth="1.05" />
@@ -42,27 +68,66 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({ logo, logoUrl, onChange, on
             <path d="M28 43.4C34.1856 43.4 39.2 40.5794 39.2 37.1C39.2 33.6206 34.1856 30.8 28 30.8C21.8144 30.8 16.8 33.6206 16.8 37.1C16.8 40.5794 21.8144 43.4 28 43.4Z" stroke="#909599" strokeWidth="2.1" />
           </svg>
         </div>
+
         <span className="logo-placeholder-text">Upload Company Logo</span>
-        <button type="button" className="logo-add-btn">
+
+        <button
+          type="button"
+          className="logo-add-btn"
+          onClick={(e) => { e.stopPropagation(); openPicker(); }}
+        >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M2.917 7h8.167M7 2.917v8.167" stroke="#025A94" strokeWidth="0.88" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Add
         </button>
-        <input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+
+        {/* hide native input defensively */}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          aria-hidden="true"
+          tabIndex={-1}
+          onChange={handleFileChange}
+        />
       </div>
     );
   }
 
-  // after upload
+  // ─────────── PREVIEW STATE ───────────
   return (
-    <div className="logo-uploader uploaded">
-      <img src={logoUrl || URL.createObjectURL(logo)} alt="Company logo" className="logo-preview" />
-      <div className="logo-action-buttons">
-        <button type="button" className="logo-edit-btn" onClick={handleSelect}>Edit</button>
-        <button type="button" className="logo-remove-btn" onClick={() => { onChange(null); onRemove?.(); }}>Remove</button>
+    <div className="logo-uploader is-preview-state" onClick={openPicker} role="button" tabIndex={0}>
+      <img
+        src={previewSrc}
+        alt="Company logo"
+        className="logo-preview"
+        onError={() => setImgError(true)}   // if broken -> next render falls back to Add state
+      />
+
+      <div className="logo-action-buttons" onClick={(e) => e.stopPropagation()}>
+        <button type="button" className="logo-edit-btn" onClick={openPicker}>
+          Edit
+        </button>
+        <button
+          type="button"
+          className="logo-remove-btn"
+          onClick={() => { onChange(null); onRemove?.(); setImgError(false); }}
+        >
+          Remove
+        </button>
       </div>
-      <input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={handleFileChange}
+      />
     </div>
   );
 };
