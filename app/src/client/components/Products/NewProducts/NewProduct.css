@@ -48,7 +48,7 @@ html, body, #root{
   border-radius: var(--border-radius-lg);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
+  height: calc(100vh - 20px);
   overflow: hidden;
 }
 
@@ -243,7 +243,7 @@ margin-bottom: 2px;
   background: #fff;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 24px);
+  height: calc(100% - 20px);
   min-height: 0;
   width: 100%;
   max-width: 100%;
@@ -365,7 +365,7 @@ text-transform: uppercase;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 144px;
+  width: 144px auto;
   text-align: center;
 }
 
@@ -430,6 +430,13 @@ text-transform: uppercase;
 @media (max-width: 900px){
   :root{ --np-gap-left:48px; --np-gap-right:48px; }
 }
+/* Override grid inside form sections to stack fields vertically */
+.np-form .np-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @media (max-width: 640px){
   :root{
     --np-gap-top:24px; --np-gap-bottom:15px;

@@ -13,7 +13,6 @@
 }
 
 .section {
-  border-bottom: 1px solid var(--color-neutral-200);
   margin-bottom: 12px;
   background-color: var(--color-neutral-white);
   padding: 16px 16px 16px 40px; /* same left indent as Extras */
@@ -112,7 +111,7 @@
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-md);
   width: 80%;                 /* MATCH Extras width */
-  background-color: var(--color-neutral-100);
+  background-color: var(--color-neutral-white);
 }
 .section-content textarea { resize: vertical; }
 .section-content select {
@@ -139,5 +138,6 @@
   font-size: var(--font-size-md);
   font-weight: 400;
   line-height: var(--line-height-body-md);
+  background-color: var(--color-neutral-white);
 }
 .date-input input[type="date"] { width: 300px; padding: 8px 10px; font-size: 14px; }

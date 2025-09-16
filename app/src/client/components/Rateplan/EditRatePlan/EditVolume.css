@@ -54,6 +54,7 @@
   padding: 8px;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-white);
 }
 
 .edit-volume-input-large {
@@ -61,6 +62,7 @@
   padding: 8px;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-white);
 }
 
 .edit-volume-delete-btn {
@@ -167,8 +169,9 @@
 .edit-volume-input-extra {
   width: 350px !important;
   padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-white);
   font-size: 14px;
   margin-top: 4px;
 }

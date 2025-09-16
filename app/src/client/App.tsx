@@ -5,6 +5,7 @@ import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/Landing/SignIn';
+import { ToastProvider } from './components/componenetsss/ToastProvider';
 
 // ========= Mock Wasp auth pieces (restore these) =========
 interface User {
@@ -165,6 +166,7 @@ export default function App() {
   );
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-white">
       <CookieConsentBanner />
       <Suspense
@@ -467,5 +469,6 @@ export default function App() {
         </Routes>
       </Suspense>
     </div>
+    </ToastProvider>
   );
 }

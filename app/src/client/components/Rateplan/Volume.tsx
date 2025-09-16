@@ -2,6 +2,7 @@ import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'rea
 import { saveVolumePricing } from './api';
 import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
 import './Tiered.css';
+import './Volume.css';
 
 export interface VolumeHandle { save: (ratePlanId: number) => Promise<void>; }
 
@@ -252,7 +253,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
               Overage Charge
               <input
                 type="text"
-                className={`tiered-input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
+                className={`volume-input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                 placeholder="Enter overage charge"
                 value={overageUnitRate}
                 onChange={(e) => setOverageUnitRate(parseFloat(e.target.value) || 0)}
@@ -272,7 +273,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
               Grace Buffer (optional)
               <input
                 type="text"
-                className="tiered-input-extra"
+                className="volume-input-extra"
                 placeholder="Enter grace buffer"
                 value={graceBuffer}
                 onChange={(e) => setGraceBuffer(parseFloat(e.target.value) || 0)}

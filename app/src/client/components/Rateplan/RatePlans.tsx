@@ -346,7 +346,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             title="Rate Plans"
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            primaryLabel="New Rate Plan"
+            primaryLabel="+New Rate Plan"
             onPrimaryClick={() => {
               setShowCreatePlan(true);
               navigate('/get-started/rate-plans');
@@ -354,7 +354,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             onFilterClick={() => {
               /* TODO: open filters */
             }}
-            showPrimary={true}
+            showPrimary={hasRows}
           />
 
           {/* ======= TABLE (always render header) ======= */}
@@ -467,8 +467,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
                           </svg>
                         </div>
 
-                        <p className="rate-empty-text">
-                          No Rate Plan created yet. Click ‘New Rate Plan’
+                        <p className="products-empty-state-text">
+                          No Rate Plan created yet. Click ‘New Rate Plan’<br />
                           to create your First Rate Plan.
                         </p>
 

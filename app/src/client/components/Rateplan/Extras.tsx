@@ -9,6 +9,7 @@ import {
   MinimumCommitmentPayload
 } from './api';
 import './Extras.css';
+import { InputField, SelectField, TextareaField } from '../componenetsss/Inputs';
 import { clearExtrasLocalStorage } from './utils/localStorageExtras';
 import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
 
@@ -254,39 +255,37 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
             <label>
               Enter one-time Setup Fee <span className="optional">(optional)</span>
             </label>
-            <input
+            <InputField
               type="number"
               value={setupFeePayload.setupFee || ''}
-              onChange={e => {
-                const val = e.target.value;
+              onChange={(val) => {
+                const v = val;
                 setSetupFeePayload({
                   ...setupFeePayload,
-                  setupFee: val.trim() === '' ? 0 : Number(val),
+                  setupFee: v.trim() === '' ? 0 : Number(v),
                 });
               }}
               placeholder="$0"
             />
 
             <label>Application Timing</label>
-            <input
+            <InputField
               type="number"
               value={setupFeePayload.applicationTiming || ''}
-              onChange={e => {
-                const val = e.target.value;
+              onChange={(val) => {
+                const v = val;
                 setSetupFeePayload({
                   ...setupFeePayload,
-                  applicationTiming: val.trim() === '' ? 0 : Number(val),
+                  applicationTiming: v.trim() === '' ? 0 : Number(v),
                 });
               }}
               placeholder="0"
             />
 
             <label>Invoice Description</label>
-            <textarea
+            <TextareaField
               value={setupFeePayload.invoiceDescription}
-              onChange={e =>
-                setSetupFeePayload({ ...setupFeePayload, invoiceDescription: e.target.value })
-              }
+              onChange={(val) => setSetupFeePayload({ ...setupFeePayload, invoiceDescription: val })}
               placeholder="Invoice Description"
             />
 
@@ -332,46 +331,39 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
         {activeSections.includes('discounts') && (
           <div className="section-content">
             <label>Discount Type</label>
-            <select
+            <SelectField
               value={discountForm.discountType}
-              onChange={e =>
-                setDiscountForm({ ...discountForm, discountType: e.target.value as 'PERCENTAGE' | 'FLAT' })
+              onChange={(val) =>
+                setDiscountForm({ ...discountForm, discountType: val as 'PERCENTAGE' | 'FLAT' })
               }
-            >
-              <option value="">--Select--</option>
-              <option value="PERCENTAGE">PERCENTAGE</option>
-              <option value="FLAT">FLAT</option>
-            </select>
+              options={[
+                { label: '--Select--', value: '' },
+                { label: 'PERCENTAGE', value: 'PERCENTAGE' },
+                { label: 'FLAT', value: 'FLAT' },
+              ]}
+            />
 
             <label>Enter % discount</label>
-            <input
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*"
+            <InputField
+              type="number"
               value={discountForm.percentageDiscountStr}
-              onChange={e =>
-                setDiscountForm({ ...discountForm, percentageDiscountStr: e.target.value })
-              }
+              onChange={(val)=> setDiscountForm({ ...discountForm, percentageDiscountStr: val })}
               placeholder="0"
             />
 
             <label>Enter Flat Discount Amount</label>
-            <input
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*"
+            <InputField
+              type="number"
               value={discountForm.flatDiscountAmountStr}
-              onChange={e =>
-                setDiscountForm({ ...discountForm, flatDiscountAmountStr: e.target.value })
-              }
+              onChange={(val)=> setDiscountForm({ ...discountForm, flatDiscountAmountStr: val })}
               placeholder="0"
             />
 
             <label>Eligibility</label>
-            <input
+            <InputField
               type="text"
               value={discountForm.eligibility}
-              onChange={e => setDiscountForm({ ...discountForm, eligibility: e.target.value })}
+              onChange={(val)=> setDiscountForm({ ...discountForm, eligibility: val })}
               placeholder="e.g. new users"
             />
 
@@ -379,18 +371,18 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input
+                <InputField
                   type="date"
                   value={discountForm.startDate}
-                  onChange={e => setDiscountForm({ ...discountForm, startDate: e.target.value })}
+                  onChange={(val)=> setDiscountForm({ ...discountForm, startDate: val })}
                 />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input
+                <InputField
                   type="date"
                   value={discountForm.endDate}
-                  onChange={e => setDiscountForm({ ...discountForm, endDate: e.target.value })}
+                  onChange={(val)=> setDiscountForm({ ...discountForm, endDate: val })}
                 />
               </div>
             </div>
@@ -447,29 +439,29 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
         {activeSections.includes('freemium') && (
           <div className="section-content">
             <label>Freemium Type</label>
-            <select
+            <SelectField
               value={freemiumType}
-              onChange={e => {
-                const type = e.target.value as 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
+              onChange={(val)=>{
+                const type = val as 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
                 setFreemiumType(type);
-                // @ts-ignore keep payload aligned with display select
+                // @ts-ignore
                 setFreemiumPayload({ ...freemiumPayload, freemiumType: type });
               }}
-            >
-              <option value="">--Select--</option>
-              <option value="FREE_UNITS">Free Units</option>
-              <option value="FREE_TRIAL_DURATION">Free Trial Duration</option>
-              <option value="FREE_UNITS_PER_DURATION">Free Units for Duration</option>
-            </select>
+              options={[
+                { label: '--Select--', value: '' },
+                { label: 'Free Units', value: 'FREE_UNITS' },
+                { label: 'Free Trial Duration', value: 'FREE_TRIAL_DURATION' },
+                { label: 'Free Units for Duration', value: 'FREE_UNITS_PER_DURATION' },
+              ]}
+            />
 
             {(freemiumType === 'FREE_UNITS' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
                 <label>Select Free Units</label>
-                <input
+                <InputField
                   type="number"
                   value={freemiumPayload.freeUnits === 0 ? '' : freemiumPayload.freeUnits}
-                  onChange={e => {
-                    const val = e.target.value;
+                  onChange={(val)=>{
                     setFreemiumPayload({
                       ...freemiumPayload,
                       freeUnits: val.trim() === '' ? 0 : Number(val),
@@ -483,11 +475,10 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
             {(freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
                 <label>Select Free Trial Duration</label>
-                <input
+                <InputField
                   type="number"
                   value={freemiumPayload.freeTrialDuration === 0 ? '' : freemiumPayload.freeTrialDuration}
-                  onChange={e => {
-                    const val = e.target.value;
+                  onChange={(val)=>{
                     setFreemiumPayload({
                       ...freemiumPayload,
                       freeTrialDuration: val.trim() === '' ? 0 : Number(val),
@@ -501,18 +492,18 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input
+                <InputField
                   type="date"
                   value={freemiumPayload.startDate}
-                  onChange={e => setFreemiumPayload({ ...freemiumPayload, startDate: e.target.value })}
+                  onChange={(val)=> setFreemiumPayload({ ...freemiumPayload, startDate: val })}
                 />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input
+                <InputField
                   type="date"
                   value={freemiumPayload.endDate}
-                  onChange={e => setFreemiumPayload({ ...freemiumPayload, endDate: e.target.value })}
+                  onChange={(val)=> setFreemiumPayload({ ...freemiumPayload, endDate: val })}
                 />
               </div>
             </div>
@@ -557,25 +548,25 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
         {activeSections.includes('commitment') && (
           <div className="section-content">
             <label>Minimum Usage</label>
-            <input
-              type="text"
+            <InputField
+              type="number"
               placeholder="Enter usage"
               value={minimumUsage.replace(/^0+(?=\d)/, '')}
-              onChange={e => {
-                setMinimumUsage(e.target.value.replace(/^0+(?=\d)/, ''));
-                if (e.target.value) setMinimumCharge('');
+              onChange={(val)=>{
+                setMinimumUsage(val.replace(/^0+(?=\d)/, ''));
+                if (val) setMinimumCharge('');
               }}
               disabled={!!minimumCharge}
             />
 
             <label>Minimum Charge</label>
-            <input
-              type="text"
+            <InputField
+              type="number"
               placeholder="Enter charge"
               value={minimumCharge.replace(/^0+(?=\d)/, '')}
-              onChange={e => {
-                setMinimumCharge(e.target.value.replace(/^0+(?=\d)/, ''));
-                if (e.target.value) setMinimumUsage('');
+              onChange={(val)=>{
+                setMinimumCharge(val.replace(/^0+(?=\d)/, ''));
+                if (val) setMinimumUsage('');
               }}
               disabled={!!minimumUsage}
             />

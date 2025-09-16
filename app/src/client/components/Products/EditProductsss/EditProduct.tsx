@@ -2,14 +2,14 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputField, TextareaField } from '../../componenetsss/Inputs';
-import SaveAsDraftModal from '../Componenets/SaveAsDraftModel';
+import SaveDraft from '../../componenetsss/SaveDraft';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { ConfigurationTab } from './EditConfiguration';
 import EditReview from './EditReview';
 import TopBar from '../../componenetsss/TopBar';
 import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration, buildAuthHeaders } from './EditProductApi';
-import { finalizeProduct } from '../api';
+import { finalizeProduct, deleteProduct } from '../api';
 import { listAllProducts, getProducts } from '../api';
 
 // Minimal product type for local state (id only needed)
@@ -149,8 +149,15 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     setShowDeleteConfirm(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     setShowDeleteConfirm(false);
+    if (productId) {
+      try {
+        await deleteProduct(productId);
+      } catch (e) {
+        console.error('Failed to delete product', e);
+      }
+    }
     onClose();
     navigate('/get-started/products');
   };
@@ -347,7 +354,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     <>
       <TopBar
         title={productId ? 'Edit Product' : 'Create New Product'}
-        onBack={onClose}
+        onBack={() => setShowSaveDraftModal(true)}
         cancel={{
           label: 'Cancel',
           onClick: handleCancel
@@ -490,13 +497,20 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           </div>
         </div>
 
-        <SaveAsDraftModal
+        <SaveDraft
           isOpen={showSaveDraftModal}
-          onSave={() => {
+          onClose={async () => {
             setShowSaveDraftModal(false);
-            onClose();
+            if (productId) {
+              try {
+                await deleteProduct(productId);
+              } catch (e) {
+                console.error('Failed to delete product draft', e);
+              }
+            }
           }}
-          onDelete={() => {
+          onSave={async () => {
+            await handleSaveDraft();
             setShowSaveDraftModal(false);
             onClose();
           }}

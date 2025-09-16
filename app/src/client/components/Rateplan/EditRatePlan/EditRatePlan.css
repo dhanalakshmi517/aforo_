@@ -170,7 +170,7 @@
 .erp-select,
 .erp-textarea {
   width: 100%;
-  background: var(--color-neutral-100);
+  background: var(--color-neutral-white);
   color: var(--color-neutral-1400);
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
