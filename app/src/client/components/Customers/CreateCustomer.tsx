@@ -533,8 +533,15 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
           <div className="form-footer">
             <div className="footer-button-group">
-              <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
-              <button className={buttonStyles.buttonPrimary} onClick={handleNext} disabled={isSubmitting}>
+              {currentStep > 0 && (
+                <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
+              )}
+              <button
+                className={buttonStyles.buttonPrimary}
+                onClick={handleNext}
+                disabled={isSubmitting}
+                style={currentStep === 0 ? { marginLeft: 'auto' } : undefined}
+              >
                 {currentStep === steps.length - 1 ? 'Create Customer' : 'Save & Next'}
               </button>
             </div>
