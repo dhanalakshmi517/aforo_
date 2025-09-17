@@ -4,26 +4,28 @@ import { Api, Product, RatePlan, Customer } from './api';
 import './CreateSubscription.new.css';
 import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 import TopBar from '../TopBar/TopBar';
-
 import { Subscription as SubscriptionType } from './api';
+import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import SaveDraft from '../componenetsss/SaveDraft';
 
 interface CreateSubscriptionProps {
   onClose: () => void;
   onCreateSuccess: (sub: SubscriptionType) => void;
+  onRefresh?: () => void;
+  draftData?: SubscriptionType;
 }
 
 const steps = [
-  {
-    title: 'Subscription Details',
-    desc: 'Set up the core information like plan type, and pricing model for this subscription.',
-  },
-  {
-    title: 'Review & Confirm',
-    desc: 'Review the final pricing and details based on the information you\'ve entered.',
-  },
+  { title: 'Purchase Details', desc: 'Provide purchase-related details' },
+  { title: 'Review & Confirm', desc: 'Check and finalize details' },
 ];
 
-const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCreateSuccess }) => {
+const CreateSubscription: React.FC<CreateSubscriptionProps> = ({
+  onClose,
+  onCreateSuccess,
+  onRefresh,
+  draftData
+}) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
@@ -39,20 +41,22 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
 
   const [currentStep, setCurrentStep] = useState(0);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [savingDraft, setSavingDraft] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
-  const [errors, setErrors] = useState<Record<string,string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // helper to remove a specific field error
+  const sectionHeading = steps[currentStep].title;
+
   const clearError = (field: string) => {
     setErrors(prev => {
-      const { [field]: _removed, ...rest } = prev;
+      const { [field]: _remove, ...rest } = prev;
       return rest;
     });
   };
 
-  // Load data (with Bearer attached via Api)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,12 +75,36 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (draftData) {
+      setSelectedCustomerId(draftData.customerId);
+      setSelectedProductId(draftData.productId);
+      setSelectedRatePlanId(draftData.ratePlanId);
+      setPaymentType(draftData.paymentType as 'PREPAID' | 'POSTPAID');
+      setPlanDescription(draftData.adminNotes || '');
+      setSubscriptionId(draftData.subscriptionId);
+
+      if (customers.length > 0) {
+        const customer = customers.find(c => c.customerId === draftData.customerId);
+        setSelectedCustomerName(customer?.customerName || '');
+      }
+      if (products.length > 0) {
+        const product = products.find(p => p.productId === draftData.productId);
+        setSelectedProductName(product?.productName || '');
+      }
+      if (ratePlans.length > 0) {
+        const ratePlan = ratePlans.find(rp => rp.ratePlanId === draftData.ratePlanId);
+        setSelectedRatePlanName(ratePlan?.ratePlanName || '');
+      }
+    }
+  }, [draftData, customers, products, ratePlans]);
+
   const validateStep0 = (): boolean => {
-    const e: Record<string,string> = {};
-    if (!selectedCustomerId) e.customerId = "This field is required";
-    if (!selectedProductId) e.productId = "This field is required";
-    if (!selectedRatePlanId) e.ratePlanId = "This field is required";
-    if (!paymentType) e.paymentType = "This field is required";
+    const e: Record<string, string> = {};
+    if (!selectedCustomerId) e.customerId = 'This is required field';
+    if (!selectedProductId) e.productId = 'This is required field';
+    if (!selectedRatePlanId) e.ratePlanId = 'This is required field';
+    if (!paymentType) e.paymentType = 'This is required field';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -91,8 +119,10 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
         ratePlanId: selectedRatePlanId || 0,
         paymentType: paymentType || 'PREPAID',
         adminNotes: planDescription,
-        status: 'DRAFT'
+        status: 'DRAFT',
+        isDraft: true,
       } as any;
+      console.log('Saving DRAFT subscription with payload:', payload);
       let resp: SubscriptionType;
       if (subscriptionId) {
         resp = await Api.updateSubscriptionDraft(subscriptionId, payload as any);
@@ -100,7 +130,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
         resp = await Api.createSubscriptionDraft(payload as any);
         setSubscriptionId(resp.subscriptionId);
       }
-      console.log('Draft saved', resp);
+      console.log('Draft save response:', resp);
       setSubmissionStatus('success');
     } catch (e) {
       console.error('Failed to save draft', e);
@@ -113,22 +143,58 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
   const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       if (!validateStep0()) return;
-      setCurrentStep((prev) => prev + 1);
+      
+      // Create draft subscription when moving to Review & Confirm step
+      if (!subscriptionId) {
+        try {
+          const payload = {
+            customerId: selectedCustomerId || 0,
+            productId: selectedProductId || 0,
+            ratePlanId: selectedRatePlanId || 0,
+            paymentType: (paymentType || 'PREPAID') as 'PREPAID' | 'POSTPAID',
+            adminNotes: planDescription,
+            status: 'DRAFT',
+            isDraft: true,
+          };
+          console.log('Creating DRAFT subscription for review:', payload);
+          const resp = await Api.createSubscriptionDraft(payload as any);
+          console.log('Draft creation response:', resp);
+          setSubscriptionId(resp.subscriptionId);
+        } catch (e) {
+          console.error('Failed to create draft subscription', e);
+          return;
+        }
+      }
+      
+      setCurrentStep(prev => prev + 1);
       return;
     }
 
-    // We are on the final Review step – create the subscription
+    // Final step - Create Purchase (confirm the draft)
     try {
-      const payload = {
-        customerId: selectedCustomerId || 0,
-        productId: selectedProductId || 0,
-        ratePlanId: selectedRatePlanId || 0,
-        paymentType: (paymentType || 'PREPAID') as 'PREPAID' | 'POSTPAID',
-        adminNotes: planDescription,
-      };
-      console.log('Creating subscription payload', payload);
-      const resp: SubscriptionType = await Api.createSubscription(payload);
-      console.log('Subscription created successfully', resp);
+      let resp: SubscriptionType;
+      
+      if (subscriptionId) {
+        // Confirm the draft subscription to make it active
+        console.log('Confirming draft subscription:', subscriptionId);
+        resp = await Api.confirmSubscription(subscriptionId);
+        console.log('Confirmation response:', resp);
+      } else {
+        // Fallback: create active subscription directly (shouldn't happen with new flow)
+        const payload = {
+          customerId: selectedCustomerId || 0,
+          productId: selectedProductId || 0,
+          ratePlanId: selectedRatePlanId || 0,
+          paymentType: (paymentType || 'PREPAID') as 'PREPAID' | 'POSTPAID',
+          adminNotes: planDescription,
+          status: 'ACTIVE',
+          isDraft: false,
+        };
+        console.log('Creating new ACTIVE subscription with payload:', payload);
+        resp = await Api.createSubscription(payload);
+        console.log('Creation response:', resp);
+      }
+      
       setSubmissionStatus('success');
       onCreateSuccess(resp);
       onClose();
@@ -138,12 +204,47 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
     }
   };
 
+  const handleHeaderBack = () => setShowSaveDraftModal(true);
+  
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-    } else {
-      onClose();
+    if (currentStep > 0) setCurrentStep(prev => prev - 1);
+    else onClose();
+  };
+
+  const handleDelete = async () => {
+    if (!subscriptionId) {
+      console.error('No subscription ID to delete');
+      return;
     }
+    try {
+      await Api.deleteSubscription(subscriptionId);
+      setShowDeleteModal(false);
+      if (onRefresh) onRefresh();
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete subscription', error);
+    }
+  };
+
+  // SaveDraft modal (back arrow) — delete flow
+  const handleSaveDraft_NoDelete = async () => {
+    try {
+      if (subscriptionId != null) {
+        await Api.deleteSubscription(subscriptionId);
+      }
+      setShowSaveDraftModal(false);
+      if (onRefresh) onRefresh();
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete subscription', error);
+    }
+  };
+
+  // SaveDraft modal (back arrow) — SAVE AS DRAFT flow
+  const handleSaveDraft_Save = async () => {
+    await saveDraft();
+    setShowSaveDraftModal(false);
+    onClose();
   };
 
   const renderStepContent = () => {
@@ -162,14 +263,16 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
                   const cust = customers.find(c => c.customerId === id);
                   setSelectedCustomerName(cust?.customerName || '');
                 }}
+                onFocus={() => clearError('customerId')}
                 error={errors.customerId}
                 options={customers.map(c => ({ label: c.customerName, value: c.customerId.toString() }))}
               />
             </div>
 
-            <SelectField
-              label="Product"
-              value={selectedProductId?.toString() || ''}
+            <div className="sub-create-form">
+              <SelectField
+                label="Product"
+                value={selectedProductId?.toString() || ''}
                 onChange={(val) => {
                   const id = Number(val);
                   setSelectedProductId(id);
@@ -179,28 +282,26 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
                   setSelectedRatePlanName('');
                   setSelectedRatePlanId(null);
                 }}
+                onFocus={() => clearError('productId')}
                 error={errors.productId}
-              options={products.map(p => ({ label: p.productName, value: p.productId.toString() }))}
-            />
+                options={products.map(p => ({ label: p.productName, value: p.productId.toString() }))}
+              />
+            </div>
+
             <div className="product-note">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <g clipPath="url(#clip0_7837_33153)">
                   <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </g>
-                <defs>
-                  <clipPath id="clip0_7837_33153">
-                    <rect width="12" height="12" fill="white"/>
-                  </clipPath>
-                </defs>
+                <defs><clipPath id="clip0_7837_33153"><rect width="12" height="12" fill="white"/></clipPath></defs>
               </svg>
-              <span>
-                Select a product to view its associated rate plans.
-              </span>
+              <span>Select a product to view its associated rate plans.</span>
             </div>
 
-            <SelectField
-              label="Rate Plan"
-              value={selectedRatePlanId?.toString() || ''}
+            <div className="sub-create-form">
+              <SelectField
+                label="Rate Plan"
+                value={selectedRatePlanId?.toString() || ''}
                 onChange={(val) => {
                   const id = Number(val);
                   setSelectedRatePlanId(id);
@@ -208,42 +309,46 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
                   const rp = ratePlans.find(r => r.ratePlanId === id);
                   setSelectedRatePlanName(rp?.ratePlanName || '');
                 }}
+                onFocus={() => clearError('ratePlanId')}
                 error={errors.ratePlanId}
-              options={ratePlans.map(rp => ({ label: rp.ratePlanName, value: rp.ratePlanId.toString() }))}
-            />
+                options={ratePlans.map(rp => ({ label: rp.ratePlanName, value: rp.ratePlanId.toString() }))}
+              />
+            </div>
+
             <div className="rateplan-note">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <g clipPath="url(#clip0_7837_33153)">
                   <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </g>
-                <defs>
-                  <clipPath id="clip0_7837_33153">
-                    <rect width="12" height="12" fill="white"/>
-                  </clipPath>
-                </defs>
+                <defs><clipPath id="clip0_7837_33153"><rect width="12" height="12" fill="white"/></clipPath></defs>
               </svg>
-              <span>
-                Select a rate plan associated with the chosen product. Changing the product will reset this selection.
-              </span>
+              <span>Select a rate plan associated with the chosen product. Changing the product will reset this selection.</span>
             </div>
 
-            <SelectField
-              label="Payment Type"
-              value={paymentType}
-              onChange={(val) => { setPaymentType(val as 'PREPAID' | 'POSTPAID'); clearError('paymentType'); }}
-              error={errors.paymentType}
-              options={[
-                { label: 'Post-Paid', value: 'POSTPAID' },
-                { label: 'Pre-Paid', value: 'PREPAID' }
-              ]}
-            />
+            <div className="sub-create-form">
+              <SelectField
+                label="Payment Type"
+                value={paymentType}
+                onChange={(val) => { setPaymentType(val as 'PREPAID' | 'POSTPAID'); clearError('paymentType'); }}
+                onFocus={() => clearError('paymentType')}
+                error={errors.paymentType}
+                options={[
+                  { label: 'Post-Paid', value: 'POSTPAID' },
+                  { label: 'Pre-Paid', value: 'PREPAID' }
+                ]}
+              />
+            </div>
 
-            <TextareaField
-              label="Admin Notes"
-              placeholder="Enter admin notes"
-              value={planDescription}
-              onChange={setPlanDescription}
-            />
+            <div className="sub-create-form">
+              <TextareaField
+                label="Admin Notes"
+                placeholder="Enter admin notes"
+                value={planDescription}
+                onChange={setPlanDescription}
+                onFocus={() => clearError('adminNotes')}
+                error={errors.adminNotes}
+              />
+            </div>
           </>
         );
       case 1:
@@ -261,26 +366,17 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
     }
   };
 
-  const canSaveNext =
-    selectedCustomerId &&
-    selectedProductId &&
-    selectedRatePlanId &&
-    (paymentType === 'PREPAID' || paymentType === 'POSTPAID');
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      {/* ✅ FIX: pass onBack so TopBar renders the back button */}
       <TopBar
-        title="Create New Subscription"
+        title="Create New Purchase"
+        onBack={handleHeaderBack}
         cancel={{
-          label: "Cancel",
-          onClick: () => setShowCancelModal(true)
+          label: subscriptionId ? 'Delete' : 'Cancel',
+          onClick: subscriptionId ? () => setShowDeleteModal(true) : () => setShowCancelModal(true)
         }}
-        save={{
-          label: "Save as Draft",
-          saving: savingDraft,
-          saved: submissionStatus === 'success',
-          onClick: saveDraft
-        }}
+        save={{ label: 'Save as Draft', saving: savingDraft, saved: submissionStatus === 'success', onClick: saveDraft }}
       />
 
       <div className="sub-create-price-plan" style={{ padding: '24px 64px', flex: 1 }}>
@@ -300,41 +396,25 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
               zIndex: 1,
             }}
           >
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className={`sub-step-item ${index === currentStep ? 'active' : ''}`}
-                onClick={() => setCurrentStep(index)}
-              >
-                <div className="sub-icon-wrappers">
-                  {index < currentStep ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                      <path d="M7 12l3 3 6-6" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
-                      <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
-                    </svg>
-                  )}
-                  {index < steps.length - 1 && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="2" height="111" viewBox="0 0 2 111" fill="none">
-                      <path
-                        d="M1 110L1 1"
-                        stroke={index < currentStep ? 'var(--color-primary-800)' : '#BDBBBE'}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  )}
+            {steps.map((step, index) => {
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              return (
+                <div
+                  key={index}
+                  className={`sub-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                  onClick={() => setCurrentStep(index)}
+                >
+                  <div className="sub-marker">
+                    <span className="outer"><span className="inner" /></span>
+                  </div>
+                  <div className="sub-step-text">
+                    <span className="sub-step-title">{step.title}</span>
+                    <span className="sub-step-desc">{step.desc}</span>
+                  </div>
                 </div>
-                <div className="sub-step-text">
-                  <span className="sub-step-title">{step.title}</span>
-                  <span className="sub-step-desc">{step.desc}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </aside>
 
           <div
@@ -348,23 +428,26 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
               position: 'relative',
             }}
           >
+            <div className="sub-section-header">
+              <h3 className="sub-section-title">{sectionHeading.toUpperCase()}</h3>
+            </div>
+
             <div className="form-card">{renderStepContent()}</div>
+
             <div className="button-group">
-              <button className="back" onClick={handleBack} disabled={currentStep === 0}>
-                Back
-              </button>
+              {currentStep > 0 && (
+                <button className="back" onClick={handleBack}>Back</button>
+              )}
               <button
                 className="save-next"
                 onClick={handleNext}
-                disabled={!canSaveNext}
-                title={!canSaveNext ? 'Select customer, product, rate plan and payment type' : currentStep < steps.length - 1 ? 'Save & Next' : 'Create Purchase'}
+                title={currentStep < steps.length - 1 ? 'Save & Next' : 'Create Purchase'}
               >
                 {currentStep < steps.length - 1 ? 'Save & Next' : 'Create Purchase'}
               </button>
             </div>
           </div>
         </div>
-
 
         {showCancelModal && (
           <div className="delete-modal-overlay">
@@ -374,16 +457,25 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
                 <p>Your progress will not be saved.</p>
               </div>
               <div className="delete-modal-footer">
-                <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>
-                  Back
-                </button>
-                <button className="delete-modal-confirm" onClick={onClose}>
-                  Confirm
-                </button>
+                <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>Back</button>
+                <button className="delete-modal-confirm" onClick={onClose}>Confirm</button>
               </div>
             </div>
           </div>
         )}
+
+        <ConfirmDeleteModal
+          isOpen={showDeleteModal}
+          productName={`Subscription ${subscriptionId || ''}`}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+
+        <SaveDraft
+          isOpen={showSaveDraftModal}
+          onClose={handleSaveDraft_NoDelete}   // "No, Delete"
+          onSave={handleSaveDraft_Save}        // "Yes, Save as Draft"
+        />
       </div>
     </div>
   );
