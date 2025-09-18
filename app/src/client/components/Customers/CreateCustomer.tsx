@@ -576,8 +576,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
       <SaveDraft
         isOpen={showSaveDraftModal}
-        onClose={handleSaveDraft_NoDelete}   // "Discard" (do not save)
+        onClose={() => setShowSaveDraftModal(false)}   // Close modal (X button/overlay)
         onSave={handleSaveDraft_Save}        // "Save as Draft"
+        onDelete={handleSaveDraft_NoDelete}  // "No, Delete"
       />
     </div>
   );

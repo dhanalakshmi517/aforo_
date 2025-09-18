@@ -614,7 +614,12 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
       {/* Save Draft confirmation modal */}
       <SaveDraft
         isOpen={showSavePrompt}
-        onClose={async () => {
+        onClose={() => setShowSavePrompt(false)}
+        onSave={async () => {
+          await handleSaveDraft();
+          onClose();
+        }}
+        onDelete={async () => {
           setShowSavePrompt(false);
           try {
             if (createdProductId) {
@@ -625,10 +630,6 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
           } finally {
             onClose();
           }
-        }}
-        onSave={async () => {
-          await handleSaveDraft();
-          onClose();
         }}
       />
       </div>
