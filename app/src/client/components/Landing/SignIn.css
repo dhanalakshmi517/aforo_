@@ -300,8 +300,6 @@ html.modal-open::before {
     .field-input { padding: 10px; }
     .primary-btn { padding: 10px; }
   }
-  
-  @import "./Variables.css";
 
 /* ...everything you already have... */
 

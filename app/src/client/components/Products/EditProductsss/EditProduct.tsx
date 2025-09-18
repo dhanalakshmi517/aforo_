@@ -499,7 +499,13 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
 
         <SaveDraft
           isOpen={showSaveDraftModal}
-          onClose={async () => {
+          onClose={() => setShowSaveDraftModal(false)}
+          onSave={async () => {
+            await handleSaveDraft();
+            setShowSaveDraftModal(false);
+            onClose();
+          }}
+          onDelete={async () => {
             setShowSaveDraftModal(false);
             if (productId) {
               try {
@@ -508,10 +514,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
                 console.error('Failed to delete product draft', e);
               }
             }
-          }}
-          onSave={async () => {
-            await handleSaveDraft();
-            setShowSaveDraftModal(false);
             onClose();
           }}
         />

@@ -344,8 +344,9 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
 
         <SaveDraft
           isOpen={showSaveDraftModal}
-          onClose={handleSaveDraft_NoDelete}   // "No, Delete"
+          onClose={() => setShowSaveDraftModal(false)}   // Close modal (X button/overlay)
           onSave={handleSaveDraft_Save}        // "Yes, Save as Draft"
+          onDelete={handleSaveDraft_NoDelete}  // "No, Delete"
         />
       </div>
       {/* ===== /BODY ===== */}

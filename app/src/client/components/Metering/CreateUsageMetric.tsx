@@ -563,12 +563,13 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
           {/* Save Draft confirmation modal (same behavior as NewProduct) */}
           <SaveDraft
             isOpen={showSavePrompt}
-            onClose={() => {
-              setShowSavePrompt(false);
-              onClose();
-            }}
+            onClose={() => setShowSavePrompt(false)}
             onSave={async () => {
               await handleSaveDraft();
+              onClose();
+            }}
+            onDelete={() => {
+              setShowSavePrompt(false);
               onClose();
             }}
           />
