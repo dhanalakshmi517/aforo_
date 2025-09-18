@@ -1,17 +1,17 @@
 import * as React from "react";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import SaveDraft from "../componenetsss/SaveDraft";
-import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 
 import {
   createRatePlan,
   updateRatePlan,
   confirmRatePlan,
   fetchProducts,
+  fetchRatePlanWithDetails,
   Product,
   RatePlanRequest,
+  deleteRatePlan,
 } from "./api";
 
 import {
@@ -30,7 +30,7 @@ import Review from "./Review";
 import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
 
 import "./CreatePricePlan.css";
-import "../Products/NewProducts/NewProduct.css"; // keep if your alias shim maps .rate-np-* to existing styles
+import "../Products/NewProducts/NewProduct.css";
 
 type ActiveTab = "details" | "billable" | "pricing" | "extras" | "review";
 
@@ -52,6 +52,10 @@ const CreatePricePlan = React.forwardRef<
   CreatePricePlanProps
 >(({ onClose, registerSaveDraft }, ref) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const resumeDraftId: number | null = (location.state as any)?.resumeDraftId ?? null;
+  const isResuming = Boolean(resumeDraftId);
 
   const pricingRef = useRef<PricingHandle>(null);
   const extrasRef = useRef<ExtrasHandle>(null);
@@ -61,8 +65,6 @@ const CreatePricePlan = React.forwardRef<
     return Number.isFinite(saved) && saved >= 0 && saved < steps.length ? saved : 0;
   });
 
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [draftSaving, setDraftSaving] = useState(false);
@@ -79,12 +81,15 @@ const CreatePricePlan = React.forwardRef<
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [ratePlanId, setRatePlanId] = useState<number | null>(null);
 
+  const [draftPricingData, setDraftPricingData] = useState<any>(null);
+  const [draftExtrasData, setDraftExtrasData] = useState<any>(null);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     document.body.classList.add("create-product-page");
     initializeSession();
-    clearOldSessions();
+    if (!isResuming) clearOldSessions();
 
     (async () => {
       try {
@@ -98,7 +103,7 @@ const CreatePricePlan = React.forwardRef<
       document.body.classList.remove("create-product-page");
       clearCurrentSession();
     };
-  }, []);
+  }, [isResuming]);
 
   useEffect(() => {
     setRatePlanData("WIZARD_STEP", currentStep.toString());
@@ -107,6 +112,29 @@ const CreatePricePlan = React.forwardRef<
       localStorage.removeItem("ratePlanWizardStep");
     };
   }, [currentStep]);
+
+  useEffect(() => {
+    if (!isResuming || !resumeDraftId) return;
+
+    (async () => {
+      try {
+        const plan = await fetchRatePlanWithDetails(resumeDraftId);
+
+        setRatePlanId(plan.ratePlanId);
+        setPlanName(plan.ratePlanName ?? "");
+        setPlanDescription(plan.description ?? "");
+        setBillingFrequency(plan.billingFrequency ?? "");
+        setSelectedProductName(plan.productName ?? plan.product?.productName ?? "");
+        setPaymentMethod(plan.paymentType ?? "");
+        if (plan.billableMetricId) setSelectedMetricId(Number(plan.billableMetricId));
+
+        setDraftPricingData(plan);
+        setDraftExtrasData(plan);
+      } catch (e) {
+        console.error("❌ Failed to hydrate draft", e);
+      }
+    })();
+  }, [isResuming, resumeDraftId]);
 
   React.useImperativeHandle(
     ref,
@@ -459,9 +487,9 @@ const CreatePricePlan = React.forwardRef<
           </>
         );
       case 2:
-        return <Pricing ref={pricingRef} ratePlanId={ratePlanId} validationErrors={errors} />;
+        return <Pricing ref={pricingRef} ratePlanId={ratePlanId} validationErrors={errors} draftData={draftPricingData} />;
       case 3:
-        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} />;
+        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={draftExtrasData} />;
       case 4: {
         const planDetails = {
           name: planName,
@@ -533,9 +561,15 @@ const CreatePricePlan = React.forwardRef<
                     {/* Footer actions */}
                     <div className="rate-np-form-footer">
                       <div className="rate-np-btn-group rate-np-btn-group--back">
-                        <button type="button" className="rate-np-btn rate-np-btn--ghost" onClick={handleBack} disabled={currentStep === 0}>
-                          Back
-                        </button>
+                        {currentStep > 0 && (
+                          <button
+                            type="button"
+                            className="rate-np-btn rate-np-btn--ghost"
+                            onClick={handleBack}
+                          >
+                            Back
+                          </button>
+                        )}
                       </div>
 
                       <div className="rate-np-btn-group rate-np-btn-group--next">
@@ -562,30 +596,7 @@ const CreatePricePlan = React.forwardRef<
           </div>
         </div>
 
-        {/* Save Draft confirmation modal */}
-        <SaveDraft
-          isOpen={showSavePrompt}
-          onClose={() => {
-            setShowSavePrompt(false);
-            onClose();
-          }}
-          onSave={async () => {
-            await saveDraft();
-            onClose();
-          }}
-        />
       </div>
-
-      {/* Delete confirmation modal */}
-      <ConfirmDeleteModal
-        isOpen={showDeleteConfirm}
-        productName={planName || "this rate plan"}
-        onConfirm={() => {
-          setShowDeleteConfirm(false);
-          onClose();
-        }}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
     </>
   );
 });

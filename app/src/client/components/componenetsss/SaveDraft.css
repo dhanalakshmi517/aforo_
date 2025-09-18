@@ -1,108 +1,91 @@
 @import "../Variables/Variables.css";
+
 .save-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .save-modal {
-    background: var(--color-neutral-white);
-    border-radius: var(--border-radius-md);
-    padding: 24px;
-    width: 512px;
-    height: 216px auto;
-    text-align: center;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-  
-  .save-modal-title {
-   
-    margin-bottom: 12px;
-    color: var(--color-neutral-1700);
-    text-align: center;
-    
-    /* heading/h5/bold */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-h5);
-    font-style: normal;
-    font-weight: 700;
-    line-height: var(--line-height-heading-h5);  }
-  
-  .save-modal-text {
- 
-    margin-bottom: 20px;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
 
+.save-modal {
+  position: relative;                 /* for the X button */
+  background: var(--color-neutral-white);
+  border-radius: var(--border-radius-md);
+  padding: 24px;
+  width: 512px;
+  max-width: 90vw;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
 
-    color: var(--color-neutral-1000);
-text-align: center;
+/* top-right X */
+.save-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  background: var(--color-neutral-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
 
-/* body/lg/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg, 24px); /* 150% */
-  }
-  
-  .save-modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .save-modal-btn-save {
-    padding: 8px 20px;
-    border-radius: var(--border-radius-sm);
-    width:222px;
-    height:40px;
-    border: none;
-    cursor: pointer;
-    background-color: var(--color-primary-700);
-    color: var(--color-primary-000);
+.save-modal-title {
+  margin: 8px 0 12px;
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-h5);
+  font-weight: 700;
+  line-height: var(--line-height-heading-h5);
+}
 
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-lg);
-   
-  }
-  
-  .save-modal-btn-cancel {
-    padding: 8px 20px;
-    border-radius: var(--border-radius-sm);
-    width:222px;
-    height:40px;
-    border: none;
-    cursor: pointer;
-    background-color: var(--color-error-100);
-    color: var(--color-error-300);
+.save-modal-text {
+  margin-bottom: 20px;
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  line-height: var(--line-height-body-lg, 24px);
+}
 
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-lg);
-  }
-  
+.save-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
 
-  
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
+.save-modal-btn-save,
+.save-modal-btn-cancel {
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
+  width: 222px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  line-height: var(--line-height-body-lg);
+}
+
+.save-modal-btn-save {
+  background-color: var(--color-primary-700);
+  color: var(--color-primary-000);
+}
+
+.save-modal-btn-cancel {
+  background-color: var(--color-error-100);
+  color: var(--color-error-300);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}

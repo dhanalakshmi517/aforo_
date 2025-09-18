@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { saveFlatFeePricing } from './api';
-import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData } from './utils/sessionStorage';
 import './FlatFeeForm.css';
 
 export interface FlatFeePayload {
@@ -32,6 +32,7 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
     flatFee: false, api: false, overage: false, grace: false,
   });
 
+  // Hydrate local inputs when parent data changes
   useEffect(() => {
     setFlatFee(numToStr(data.flatFeeAmount));
     setApiCalls(numToStr(data.numberOfApiCalls));
@@ -39,25 +40,24 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
     setGraceBuffer(numToStr(data.graceBuffer));
   }, [data]);
 
+  // ✅ NEW: Also mirror hydrated values into sessionStorage so step validator sees them
+  useEffect(() => {
+    setRatePlanData('FLAT_FEE_AMOUNT', flatFee);
+    setRatePlanData('FLAT_FEE_API_CALLS', apiCalls);
+    setRatePlanData('FLAT_FEE_OVERAGE', overageRate);
+    setRatePlanData('FLAT_FEE_GRACE', graceBuffer);
+  }, [flatFee, apiCalls, overageRate, graceBuffer]);
+
   const validateField = (value: string, fieldType: 'flatFee' | 'api' | 'overage' | 'grace'): string | null => {
     if (fieldType === 'grace') {
-      // Grace buffer is optional
       if (value.trim() !== '' && (Number(value) < 0 || Number.isNaN(Number(value)))) {
         return 'Enter a valid value';
       }
       return null;
     }
-    
-    // Required fields
-    if (value.trim() === '') {
-      return 'This is a required field';
-    }
-    
+    if (value.trim() === '') return 'This is a required field';
     const num = Number(value);
-    if (Number.isNaN(num) || num < 0) {
-      return 'Enter a valid value';
-    }
-    
+    if (Number.isNaN(num) || num < 0) return 'Enter a valid value';
     return null;
   };
 
@@ -76,26 +76,18 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
       const val = e.target.value;
       setter(val);
 
-      // Save to session storage for validation
-      if (key === 'flatFee') {
-        setRatePlanData('FLAT_FEE_AMOUNT', val);
-      } else if (key === 'api') {
-        setRatePlanData('FLAT_FEE_API_CALLS', val);
-      } else if (key === 'overage') {
-        setRatePlanData('FLAT_FEE_OVERAGE', val);
-      } else if (key === 'grace') {
-        setRatePlanData('FLAT_FEE_GRACE', val);
-      }
+      // Write to sessionStorage live (kept from your original logic)
+      if (key === 'flatFee') setRatePlanData('FLAT_FEE_AMOUNT', val);
+      else if (key === 'api') setRatePlanData('FLAT_FEE_API_CALLS', val);
+      else if (key === 'overage') setRatePlanData('FLAT_FEE_OVERAGE', val);
+      else if (key === 'grace') setRatePlanData('FLAT_FEE_GRACE', val);
 
-      // Validate the field
+      // Validate on change
       const error = validateField(val, key);
       setErrors(prev => {
         const next = { ...prev };
-        if (error) {
-          next[key] = error;
-        } else {
-          delete next[key];
-        }
+        if (error) next[key] = error;
+        else delete next[key];
         return next;
       });
 
