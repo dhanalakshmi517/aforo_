@@ -3,7 +3,7 @@ app OpenSaaS {
 
     version: "^0.17.0"
   },
-  title: "Aforo",
+  title: "aforo",
 
   head: [
     "<meta charset='utf-8' />",
