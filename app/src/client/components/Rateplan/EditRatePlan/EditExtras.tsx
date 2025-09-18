@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './EditExtras.css';
 
 import { saveSetupFee, saveDiscounts, saveFreemiums, saveMinimumCommitment } from '../api';
+import { setRatePlanData } from '../utils/sessionStorage';
 
 interface EditExtrasProps {
   noUpperLimit: boolean;
   ratePlanId?: number;
+  /** Draft data from backend for pre-filling */
+  draftData?: any;
 }
 
-export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps): JSX.Element {
+export default function EditExtras({ noUpperLimit, ratePlanId, draftData }: EditExtrasProps): JSX.Element {
   const [activeSections, setActiveSections] = useState<string[]>([]);
 
   // Setup fee
@@ -34,6 +37,74 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
   // Minimum commitment
   const [minimumUsage, setMinimumUsage] = useState('');
   const [minimumCharge, setMinimumCharge] = useState('');
+
+  // Initialize from backend data (same pattern as draft mode)
+  useEffect(() => {
+    if (!draftData) return;
+
+    const sections: string[] = [];
+
+    // Setup Fee
+    if (draftData.setupFee) {
+      const setup = draftData.setupFee;
+      setSetupFee(String(setup.setupFee || ''));
+      setApplicationTiming(String(setup.applicationTiming || ''));
+      setInvoiceDescription(setup.invoiceDescription || '');
+      setRatePlanData('SETUP_FEE_AMOUNT', String(setup.setupFee || ''));
+      setRatePlanData('SETUP_APPLICATION_TIMING', String(setup.applicationTiming || ''));
+      setRatePlanData('SETUP_INVOICE_DESC', setup.invoiceDescription || '');
+      sections.push('setupFee');
+    }
+
+    // Discounts
+    if (draftData.discount) {
+      const disc = draftData.discount;
+      setDiscountType(disc.discountType || '');
+      setPercentageDiscount(String(disc.percentageDiscount || ''));
+      setFlatDiscountAmount(String(disc.flatDiscountAmount || ''));
+      setEligibility(disc.eligibility || '');
+      setDiscountStart(disc.startDate || '');
+      setDiscountEnd(disc.endDate || '');
+      setRatePlanData('DISCOUNT_TYPE', disc.discountType || '');
+      setRatePlanData('PERCENTAGE_DISCOUNT', String(disc.percentageDiscount || ''));
+      setRatePlanData('FLAT_DISCOUNT_AMOUNT', String(disc.flatDiscountAmount || ''));
+      setRatePlanData('ELIGIBILITY', disc.eligibility || '');
+      setRatePlanData('DISCOUNT_START', disc.startDate || '');
+      setRatePlanData('DISCOUNT_END', disc.endDate || '');
+      sections.push('discounts');
+    }
+
+    // Freemium
+    if (draftData.freemium) {
+      const free = draftData.freemium;
+      setFreemiumType(free.freemiumType || '');
+      setFreeUnits(String(free.freeUnits || ''));
+      setFreeTrialDuration(String(free.freeTrialDuration || ''));
+      setFreeStart(free.startDate || '');
+      setFreeEnd(free.endDate || '');
+      setRatePlanData('FREEMIUM_TYPE', free.freemiumType || '');
+      setRatePlanData('FREE_UNITS', String(free.freeUnits || ''));
+      setRatePlanData('FREE_TRIAL_DURATION', String(free.freeTrialDuration || ''));
+      setRatePlanData('FREEMIUM_START', free.startDate || '');
+      setRatePlanData('FREEMIUM_END', free.endDate || '');
+      sections.push('freemium');
+    }
+
+    // Minimum Commitment
+    if (draftData.minimumCommitment) {
+      const min = draftData.minimumCommitment;
+      setMinimumUsage(String(min.minimumUsage || ''));
+      setMinimumCharge(String(min.minimumCharge || ''));
+      setRatePlanData('MINIMUM_USAGE', String(min.minimumUsage || ''));
+      setRatePlanData('MINIMUM_CHARGE', String(min.minimumCharge || ''));
+      sections.push('commitment');
+    }
+
+    // Auto-expand sections that have data
+    if (sections.length > 0) {
+      setActiveSections(sections);
+    }
+  }, [draftData]);
 
   const toggleSection = (section: string) => {
     setActiveSections(prev =>
@@ -152,11 +223,34 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
             <label>
               Enter one-time Setup Fee <span className="optional">(optional)</span>
             </label>
-            <input type="number" placeholder="$22" value={setupFee} onChange={e => setSetupFee(e.target.value)} />
+            <input 
+              type="number" 
+              placeholder="$22" 
+              value={setupFee} 
+              onChange={e => {
+                setSetupFee(e.target.value);
+                setRatePlanData('SETUP_FEE_AMOUNT', e.target.value);
+              }} 
+            />
             <label>Application Timing</label>
-            <input type="number" placeholder="Timing code" value={applicationTiming} onChange={e => setApplicationTiming(e.target.value)} />
+            <input 
+              type="number" 
+              placeholder="Timing code" 
+              value={applicationTiming} 
+              onChange={e => {
+                setApplicationTiming(e.target.value);
+                setRatePlanData('SETUP_APPLICATION_TIMING', e.target.value);
+              }} 
+            />
             <label>Invoice Description</label>
-            <textarea placeholder="Invoice Description" value={invoiceDescription} onChange={e => setInvoiceDescription(e.target.value)} />
+            <textarea 
+              placeholder="Invoice Description" 
+              value={invoiceDescription} 
+              onChange={e => {
+                setInvoiceDescription(e.target.value);
+                setRatePlanData('SETUP_INVOICE_DESC', e.target.value);
+              }} 
+            />
           </div>
         )}
       </div>
@@ -173,7 +267,11 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
             <label>Discount Type</label>
             <select
               value={discountType}
-              onChange={e => setDiscountType(e.target.value as 'PERCENTAGE' | 'FLAT' | '')}
+              onChange={e => {
+                const value = e.target.value as 'PERCENTAGE' | 'FLAT' | '';
+                setDiscountType(value);
+                setRatePlanData('DISCOUNT_TYPE', value);
+              }}
             >
               <option value="">--Select--</option>
               <option value="PERCENTAGE">Recurring / One-time (Percentage)</option>
@@ -185,7 +283,10 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
               type="text"
               placeholder="10%"
               value={percentageDiscount}
-              onChange={e => setPercentageDiscount(e.target.value)}
+              onChange={e => {
+                setPercentageDiscount(e.target.value);
+                setRatePlanData('PERCENTAGE_DISCOUNT', e.target.value);
+              }}
             />
 
             <label>Enter Flat Discount Amount</label>
@@ -193,7 +294,10 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
               type="text"
               placeholder="$50"
               value={flatDiscountAmount}
-              onChange={e => setFlatDiscountAmount(e.target.value)}
+              onChange={e => {
+                setFlatDiscountAmount(e.target.value);
+                setRatePlanData('FLAT_DISCOUNT_AMOUNT', e.target.value);
+              }}
             />
 
             <label>Eligibility</label>
@@ -201,18 +305,35 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
               type="text"
               placeholder="All Customers / New Customers"
               value={eligibility}
-              onChange={e => setEligibility(e.target.value)}
+              onChange={e => {
+                setEligibility(e.target.value);
+                setRatePlanData('ELIGIBILITY', e.target.value);
+              }}
             />
 
             <label>Validity Period</label>
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input type="date" value={discountStart} onChange={e => setDiscountStart(e.target.value)} />
+                <input 
+                  type="date" 
+                  value={discountStart} 
+                  onChange={e => {
+                    setDiscountStart(e.target.value);
+                    setRatePlanData('DISCOUNT_START', e.target.value);
+                  }} 
+                />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input type="date" value={discountEnd} onChange={e => setDiscountEnd(e.target.value)} />
+                <input 
+                  type="date" 
+                  value={discountEnd} 
+                  onChange={e => {
+                    setDiscountEnd(e.target.value);
+                    setRatePlanData('DISCOUNT_END', e.target.value);
+                  }} 
+                />
               </div>
             </div>
           </div>
@@ -229,7 +350,13 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
         {activeSections.includes('freemium') && (
           <div className="section-content">
             <label>Freemium Type</label>
-            <select value={freemiumType} onChange={e => setFreemiumType(e.target.value)}>
+            <select 
+              value={freemiumType} 
+              onChange={e => {
+                setFreemiumType(e.target.value);
+                setRatePlanData('FREEMIUM_TYPE', e.target.value);
+              }}
+            >
               <option value="">--Select--</option>
               <option value="free_units">Free Units</option>
               <option value="free_trial">Free Trial Duration</option>
@@ -243,7 +370,10 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
                   type="text"
                   placeholder="e.g., 1000 API calls"
                   value={freeUnits}
-                  onChange={e => setFreeUnits(e.target.value)}
+                  onChange={e => {
+                    setFreeUnits(e.target.value);
+                    setRatePlanData('FREE_UNITS', e.target.value);
+                  }}
                 />
               </>
             )}
@@ -255,7 +385,10 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
                   type="text"
                   placeholder="e.g., 14 days"
                   value={freeTrialDuration}
-                  onChange={e => setFreeTrialDuration(e.target.value)}
+                  onChange={e => {
+                    setFreeTrialDuration(e.target.value);
+                    setRatePlanData('FREE_TRIAL_DURATION', e.target.value);
+                  }}
                 />
               </>
             )}
@@ -263,11 +396,25 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input type="date" value={freeStart} onChange={e => setFreeStart(e.target.value)} />
+                <input 
+                  type="date" 
+                  value={freeStart} 
+                  onChange={e => {
+                    setFreeStart(e.target.value);
+                    setRatePlanData('FREEMIUM_START', e.target.value);
+                  }} 
+                />
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input type="date" value={freeEnd} onChange={e => setFreeEnd(e.target.value)} />
+                <input 
+                  type="date" 
+                  value={freeEnd} 
+                  onChange={e => {
+                    setFreeEnd(e.target.value);
+                    setRatePlanData('FREEMIUM_END', e.target.value);
+                  }} 
+                />
               </div>
             </div>
           </div>
@@ -290,7 +437,11 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
               value={minimumUsage}
               onChange={e => {
                 setMinimumUsage(e.target.value);
-                if (e.target.value) setMinimumCharge('');
+                setRatePlanData('MINIMUM_USAGE', e.target.value);
+                if (e.target.value) {
+                  setMinimumCharge('');
+                  setRatePlanData('MINIMUM_CHARGE', '');
+                }
               }}
               disabled={!!minimumCharge}
             />
@@ -302,7 +453,11 @@ export default function EditExtras({ noUpperLimit, ratePlanId }: EditExtrasProps
               value={minimumCharge}
               onChange={e => {
                 setMinimumCharge(e.target.value);
-                if (e.target.value) setMinimumUsage('');
+                setRatePlanData('MINIMUM_CHARGE', e.target.value);
+                if (e.target.value) {
+                  setMinimumUsage('');
+                  setRatePlanData('MINIMUM_USAGE', '');
+                }
               }}
               disabled={!!minimumUsage}
             />

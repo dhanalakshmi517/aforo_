@@ -18,14 +18,91 @@ export interface ExtrasHandle { saveAll: (ratePlanId: number) => Promise<void>; 
 interface ExtrasProps {
   ratePlanId: number | null;
   noUpperLimit: boolean;
+  draftData?: any; // Draft data from backend
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
+const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData }, ref) => {
   React.useEffect(() => {
     if (!ratePlanId) clearExtrasLocalStorage();
   }, [ratePlanId]);
+
+  // Initialize from draftData (direct from backend) - much better than session storage!
+  React.useEffect(() => {
+    if (!draftData) {
+      console.log('🎁 Extras component mounted - no draft data, using defaults');
+      return;
+    }
+
+    console.log('🚀 Extras component mounted - initializing from backend draft data:', draftData);
+
+    const sectionsToExpand: string[] = [];
+
+    // Setup Fee - now properly handled as object (not array)
+    if (draftData.setupFee && typeof draftData.setupFee === 'object') {
+      console.log('🔧 Found Setup Fee in draft data:', draftData.setupFee);
+      setSetupFeePayload({
+        setupFee: draftData.setupFee.setupFee || 0,
+        applicationTiming: draftData.setupFee.applicationTiming || 0,
+        invoiceDescription: draftData.setupFee.invoiceDescription || '',
+      });
+      sectionsToExpand.push('setupFee');
+    } else {
+      console.log('❌ No valid Setup Fee data found');
+    }
+
+    // Discounts - now properly handled as object (not array)
+    if (draftData.discount && typeof draftData.discount === 'object') {
+      console.log('💰 Found Discount in draft data:', draftData.discount);
+      setDiscountForm({
+        discountType: draftData.discount.discountType || 'PERCENTAGE',
+        percentageDiscountStr: String(draftData.discount.percentageDiscount || ''),
+        flatDiscountAmountStr: String(draftData.discount.flatDiscountAmount || ''),
+        eligibility: draftData.discount.eligibility || '',
+        startDate: draftData.discount.startDate || '',
+        endDate: draftData.discount.endDate || '',
+      });
+      sectionsToExpand.push('discounts');
+    } else {
+      console.log('❌ No valid Discount data found');
+    }
+
+    // Freemium - now properly handled as object (not array)
+    if (draftData.freemium && typeof draftData.freemium === 'object') {
+      console.log('🎁 Found Freemium in draft data:', draftData.freemium);
+      const freemiumTypeValue = draftData.freemium.freemiumType || 'FREE_UNITS';
+      setFreemiumType(freemiumTypeValue);
+      setFreemiumPayload({
+        freemiumType: freemiumTypeValue,
+        freeUnits: draftData.freemium.freeUnits || 0,
+        freeTrialDuration: draftData.freemium.freeTrialDuration || 0,
+        startDate: draftData.freemium.startDate || '',
+        endDate: draftData.freemium.endDate || '',
+      });
+      sectionsToExpand.push('freemium');
+    } else {
+      console.log('❌ No valid Freemium data found');
+    }
+
+    // Minimum Commitment - now properly handled as object (not array)
+    if (draftData.minimumCommitment && typeof draftData.minimumCommitment === 'object') {
+      console.log('💼 Found Minimum Commitment in draft data:', draftData.minimumCommitment);
+      setMinimumUsage(String(draftData.minimumCommitment.minimumUsage || ''));
+      setMinimumCharge(String(draftData.minimumCommitment.minimumCharge || ''));
+      sectionsToExpand.push('commitment');
+    } else {
+      console.log('❌ No valid Minimum Commitment data found');
+    }
+
+    // Auto-expand sections that have data
+    if (sectionsToExpand.length > 0) {
+      console.log('🔄 Auto-expanding sections:', sectionsToExpand);
+      setActiveSections(sectionsToExpand);
+    }
+
+    console.log('✅ Extras component initialized from backend data - no session storage needed!');
+  }, [draftData]);
 
   // Save state for each section's button
   const [saveState, setSaveState] = useState<{
@@ -42,7 +119,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId }, ref) => {
 
   /** Setup Fee */
   const [setupFeePayload, setSetupFeePayload] = useState({
-    setupFee: Number(getRatePlanData('SETUP_FEE') || 0),
+    setupFee: 0,
     applicationTiming: 0,
     invoiceDescription: '',
   });

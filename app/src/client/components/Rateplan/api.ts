@@ -59,10 +59,6 @@ export interface RatePlan {
 
 export interface RatePlanRequest {
   ratePlanName: string;
-  /**
-   * Prefer productId for backend compatibility. productName retained for
-   * legacy tests and will be ignored by backend if present.
-   */
   productId?: number;
   productName?: string;
   description: string;
@@ -109,8 +105,6 @@ export const confirmRatePlan = async (ratePlanId: number) => {
 /* =========================
  * Types - Pricing Payloads
  * ========================= */
-
-/** Flat Fee */
 export interface FlatFeePayload {
   flatFeeAmount: number;
   numberOfApiCalls: number;
@@ -118,7 +112,6 @@ export interface FlatFeePayload {
   graceBuffer: number;
 }
 
-/** Volume Pricing */
 export interface VolumeTierInput {
   usageStart: number;
   usageEnd: number | null;
@@ -130,7 +123,6 @@ export interface VolumePricingPayload {
   graceBuffer: number;
 }
 
-/** Tiered Pricing */
 export interface TieredTierInput {
   startRange: number;
   endRange: number | null;
@@ -142,7 +134,6 @@ export interface TieredPricingPayload {
   graceBuffer: number;
 }
 
-/** Stair-Step Pricing */
 export interface StairStepTierInput {
   usageStart: number;
   usageEnd: number | null;
@@ -154,7 +145,6 @@ export interface StairStepPricingPayload {
   graceBuffer: number;
 }
 
-/** Usage-Based Pricing */
 export interface UsageBasedPricingPayload {
   perUnitAmount: number;
   overageUnitRate?: number;
@@ -164,28 +154,18 @@ export interface UsageBasedPricingPayload {
 /* =========================
  * Pricing APIs
  * ========================= */
-
-/** Flat Fee — keep ONLY this version (backend path: /flatfee) */
 export const saveFlatFeePricing = async (ratePlanId: number, payload: FlatFeePayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/flatfee`, payload);
 };
-
-/** Volume */
 export const saveVolumePricing = async (ratePlanId: number, payload: VolumePricingPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/volume-pricing`, payload);
 };
-
-/** Tiered */
 export const saveTieredPricing = async (ratePlanId: number, payload: TieredPricingPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/tiered`, payload);
 };
-
-/** Stair-Step — use singular /stairstep to match backend */
 export const saveStairStepPricing = async (ratePlanId: number, payload: StairStepPricingPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/stairstep`, payload);
 };
-
-/** Usage-Based */
 export const saveUsageBasedPricing = async (ratePlanId: number, payload: UsageBasedPricingPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/usagebased`, payload);
 };
@@ -193,7 +173,6 @@ export const saveUsageBasedPricing = async (ratePlanId: number, payload: UsageBa
 /* =========================
  * Extras
  * ========================= */
-
 export interface MinimumCommitmentPayload {
   minimumUsage: number;
   minimumCharge: number;
@@ -233,3 +212,150 @@ export interface FreemiumPayload {
 export const saveFreemiums = (ratePlanId: number, payload: FreemiumPayload) => {
   return axios.post(`${BASE_URL}/rateplans/${ratePlanId}/freemiums`, payload);
 };
+
+/* =========================
+ * Draft Resume Helpers
+ * ========================= */
+
+// helper: treat 200 with empty array/object as "no data"
+function hasUsefulData(data: any): boolean {
+  if (data == null) return false;
+  if (Array.isArray(data)) return data.length > 0;
+  if (typeof data === 'object') return Object.keys(data).length > 0;
+  return true;
+}
+
+// helper: if array, take first element; else return as-is
+function takeFirstIfArray<T>(data: T | T[]): T | undefined {
+  return Array.isArray(data) ? (data[0] as T | undefined) : (data as T);
+}
+
+// Get pricing snapshot — prefer USAGE first, skip empty results
+export async function getPricingSnapshot(ratePlanId: number) {
+  console.log('🔍 Fetching pricing snapshot for ratePlanId:', ratePlanId);
+
+  // ✅ PRIORITY FIX: put USAGE first so a valid usage-based record wins over empty volume/tiered, etc.
+  const endpoints = [
+    { key: 'USAGE',     url: `${BASE_URL}/rateplans/${ratePlanId}/usagebased` },
+    { key: 'FLAT_FEE',  url: `${BASE_URL}/rateplans/${ratePlanId}/flatfee` },
+    { key: 'VOLUME',    url: `${BASE_URL}/rateplans/${ratePlanId}/volume-pricing` },
+    { key: 'TIERED',    url: `${BASE_URL}/rateplans/${ratePlanId}/tiered` },
+    { key: 'STAIRSTEP', url: `${BASE_URL}/rateplans/${ratePlanId}/stairstep` },
+  ];
+
+  const results = await Promise.allSettled(endpoints.map(e => axios.get(e.url)));
+  console.log('📊 Pricing endpoint results:', results.map((r, i) => ({
+    endpoint: endpoints[i].key,
+    status: r.status,
+    data: r.status === 'fulfilled' ? (r as any).value.data : (r as any)?.reason?.response?.status
+  })));
+
+  // find first with useful data
+  let chosen: { model: string; data: any } | null = null;
+  for (let i = 0; i < endpoints.length; i++) {
+    const r = results[i];
+    if (r.status !== 'fulfilled') continue;
+    const raw = (r as any).value.data;
+    if (!hasUsefulData(raw)) continue;
+
+    // normalize arrays to single record (backend sometimes returns lists)
+    const normalized = takeFirstIfArray<any>(raw);
+    if (!hasUsefulData(normalized)) continue;
+
+    chosen = { model: endpoints[i].key, data: normalized };
+    break;
+  }
+
+  if (!chosen) {
+    console.log('❌ No pricing model found');
+    return null;
+  }
+
+  console.log('✅ Found pricing model:', chosen);
+  return chosen;
+}
+
+// Get extras snapshot - fetches all extras types
+export async function getExtrasSnapshot(ratePlanId: number) {
+  console.log('🎁 Fetching extras snapshot for ratePlanId:', ratePlanId);
+
+  const [setup, discount, freemium, minc] = await Promise.allSettled([
+    axios.get(`${BASE_URL}/rateplans/${ratePlanId}/setupfees`),
+    axios.get(`${BASE_URL}/rateplans/${ratePlanId}/discounts`),
+    axios.get(`${BASE_URL}/rateplans/${ratePlanId}/freemiums`),
+    axios.get(`${BASE_URL}/rateplans/${ratePlanId}/minimumcommitments`)
+  ]);
+
+  console.log('📊 Extras endpoint results:', {
+    setupFee: setup.status === 'fulfilled' ? (setup as any).value.data : (setup as any)?.reason?.response?.status,
+    discount: discount.status === 'fulfilled' ? (discount as any).value.data : (discount as any)?.reason?.response?.status,
+    freemium: freemium.status === 'fulfilled' ? (freemium as any).value.data : (freemium as any)?.reason?.response?.status,
+    minimumCommitment: minc.status === 'fulfilled' ? (minc as any).value.data : (minc as any)?.reason?.response?.status,
+  });
+
+  const pick = (r: any) => (r.status === 'fulfilled' ? (r as any).value.data : undefined);
+  const result = {
+    setupFee: pick(setup),
+    discount: pick(discount),
+    freemium: pick(freemium),
+    minimumCommitment: pick(minc),
+  };
+
+  console.log('✅ Extras data collected:', result);
+  return result;
+}
+
+// Comprehensive fetch that gets rate plan + pricing + extras
+export async function fetchRatePlanWithDetails(ratePlanId: number) {
+  try {
+    const [planResult, pricingResult, extrasResult] = await Promise.allSettled([
+      fetchRatePlan(ratePlanId),
+      getPricingSnapshot(ratePlanId),
+      getExtrasSnapshot(ratePlanId)
+    ]);
+
+    const plan: any = planResult.status === 'fulfilled' ? planResult.value : {};
+    const pricing = pricingResult.status === 'fulfilled' ? pricingResult.value : null;
+    const extras: any = extrasResult.status === 'fulfilled' ? extrasResult.value : {};
+
+    // Attach pricing data to plan object based on model type (normalized)
+    if (pricing) {
+      const data = pricing.data;
+      switch (pricing.model) {
+        case 'FLAT_FEE':
+          plan.flatFeeAmount    = data.flatFeeAmount;
+          plan.numberOfApiCalls = data.numberOfApiCalls;
+          plan.overageUnitRate  = data.overageUnitRate;
+          plan.graceBuffer      = data.graceBuffer;
+          break;
+        case 'VOLUME':
+          plan.volumePricing = data; // object with { tiers, overageUnitRate, graceBuffer } OR already normalized
+          break;
+        case 'TIERED':
+          plan.tieredPricing = data;
+          break;
+        case 'STAIRSTEP':
+          plan.stairStepPricing = data;
+          break;
+        case 'USAGE':
+          // Provide BOTH shapes so consumers can read either one
+          plan.perUnitAmount     = data.perUnitAmount;
+          plan.usageBasedPricing = { ...data };
+          break;
+      }
+    }
+
+    // Attach extras data to plan object (handle arrays from API)
+    const firstOf = (x: any) => (Array.isArray(x) ? x[0] : x);
+    const ex = extras || {};
+    if (ex.setupFee)           plan.setupFee = firstOf(ex.setupFee);
+    if (ex.discount)           plan.discount = firstOf(ex.discount);
+    if (ex.freemium)           plan.freemium = firstOf(ex.freemium);
+    if (ex.minimumCommitment)  plan.minimumCommitment = firstOf(ex.minimumCommitment);
+
+    return plan;
+  } catch (error) {
+    console.error('Failed to fetch complete rate plan details:', error);
+    return await fetchRatePlan(ratePlanId);
+  }
+}
