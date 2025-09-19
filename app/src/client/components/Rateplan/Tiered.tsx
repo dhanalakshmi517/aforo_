@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { saveTieredPricing } from './api';
-import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData } from './utils/sessionStorage';
 import './Tiered.css';
 
 export interface TieredHandle { save: (ratePlanId: number) => Promise<any>; }
@@ -23,6 +23,8 @@ interface TieredProps {
   noUpperLimit?: boolean;
   setNoUpperLimit?: (val: boolean) => void;
   validationErrors?: Record<string, string>;
+  overageCharge?: string | number;
+  graceBuffer?: string | number;
 }
 
 const Tiered = forwardRef<TieredHandle, TieredProps>(({
@@ -33,38 +35,62 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   noUpperLimit: externalUnlimited,
   setNoUpperLimit,
   validationErrors = {},
+  overageCharge: overageFromParent,
+  graceBuffer: graceFromParent,
 }, ref) => {
-  const [tiers, setTiers] = useState<Tier[]>(externalTiers ?? [
-    { from: '', to: '', price: '' },
-  ]);
-
+  const [tiers, setTiers] = useState<Tier[]>(externalTiers ?? [{ from: '', to: '', price: '' }]);
   const [unlimited, setUnlimited] = useState(externalUnlimited ?? false);
-  const [overageCharge, setOverageCharge] = useState('');
-  const [graceBuffer, setGraceBuffer] = useState('');
+  const [overageCharge, setOverageCharge] = useState<string>('');
+  const [graceBuffer, setGraceBuffer] = useState<string>('');
 
   const [tierErrors, setTierErrors] = useState<TierError[]>([]);
   const [tierTouched, setTierTouched] = useState<TierTouched[]>([]);
   const [overageError, setOverageError] = useState<string | null>(null);
   const [overageTouched, setOverageTouched] = useState(false);
 
-  // Persist values so Review can consume
+  // Keep internal tiers synced with props; if parent gives an empty array, still render one blank row
   useEffect(() => {
-    // Save tiers to session storage whenever they change
+    if (externalTiers && externalTiers.length > 0) {
+      setTiers(externalTiers);
+    } else if (externalTiers && externalTiers.length === 0) {
+      setTiers([{ from: '', to: '', price: '' }]);
+    }
+  }, [externalTiers]);
+
+  useEffect(() => {
+    if (externalUnlimited !== undefined) {
+      setUnlimited(externalUnlimited);
+    }
+  }, [externalUnlimited]);
+
+  useEffect(() => {
+    if (overageFromParent !== undefined && overageFromParent !== null) {
+      setOverageCharge(String(overageFromParent));
+    }
+  }, [overageFromParent]);
+
+  useEffect(() => {
+    if (graceFromParent !== undefined && graceFromParent !== null) {
+      setGraceBuffer(String(graceFromParent));
+    }
+  }, [graceFromParent]);
+
+  // Persist for review/draft
+  useEffect(() => {
     setRatePlanData('TIERED_TIERS', JSON.stringify(tiers));
   }, [tiers]);
 
   useEffect(() => {
-    // Save overage to session storage whenever it changes
     setRatePlanData('TIERED_OVERAGE', overageCharge);
   }, [overageCharge]);
 
   useEffect(() => {
-    localStorage.setItem('tieredGrace', graceBuffer);
+    setRatePlanData('TIERED_GRACE', graceBuffer);
   }, [graceBuffer]);
 
   const validateTier = (tier: Tier): TierError => {
     const error: TierError = {};
-    
+
     if (tier.from.trim() === '') {
       error.from = 'This is a required field';
     } else if (Number.isNaN(Number(tier.from)) || Number(tier.from) < 0) {
@@ -116,7 +142,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   useEffect(() => {
     ensureArrays(tiers.length);
     setTierErrors(tiers.map(validateTier));
-    
+
     if (!unlimited) {
       setOverageError(validateOverage(overageCharge));
     } else {
@@ -136,12 +162,15 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   };
 
   const handleAddTier = () => {
-    setTiers([...tiers, { from: '', to: '', price: '' }]);
+    const next = [...tiers, { from: '', to: '', price: '' }];
+    setTiers(next);
+    onAddTier?.();
   };
 
   const handleDeleteTier = (index: number) => {
     const updated = tiers.filter((_, i) => i !== index);
     setTiers(updated);
+    onDeleteTier?.(index);
     setTierTouched(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -149,6 +178,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     setTiers(prev => prev.map((tier, i) => (
       i === index ? { ...tier, [field]: value } : tier
     )) as Tier[]);
+    onChange?.(index, field, value);
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
@@ -158,15 +188,11 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
       updated[index].to = '';
     }
     setTiers(updated);
+    setNoUpperLimit?.(checked);
   };
 
   useImperativeHandle(ref, () => ({
     save: async (ratePlanId: number) => {
-      console.log("📝 Tiered Component: Preparing payload with current state...");
-      console.log("📝 Current tiers:", tiers);
-      console.log("📝 Current overage charge:", overageCharge);
-      console.log("📝 Current grace buffer:", graceBuffer);
-      
       const payload = {
         tiers: tiers.map(tier => ({
           startRange: Number(tier.from) || 0,
@@ -176,10 +202,8 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
         overageUnitRate: Number(overageCharge) || 0,
         graceBuffer: Number(graceBuffer) || 0,
       };
-      
-      console.log("📝 Final tiered payload:", payload);
+
       const result = await saveTieredPricing(ratePlanId, payload);
-      console.log("✅ Tiered Component: Backend response:", result?.data || "");
       return result;
     },
   }));
@@ -195,7 +219,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
         {tiers.map((tier, index) => {
           const error = tierErrors[index] || {};
           const touched = tierTouched[index] || { from: false, to: false, price: false };
-          
+
           return (
             <div className="tiered-row" key={index}>
               <div className="field-col">
@@ -208,9 +232,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 />
                 {touched.from && error.from && <span className="error-text">{error.from}</span>}
               </div>
-              
+
               <span>-</span>
-              
+
               <div className="field-col">
                 <input
                   className={`tiered-input-small ${touched.to && error.to ? 'error-input' : ''}`}
@@ -222,7 +246,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 />
                 {!tier.isUnlimited && touched.to && error.to && <span className="error-text">{error.to}</span>}
               </div>
-              
+
               <div className="field-col">
                 <input
                   className={`tiered-input-large ${touched.price && error.price ? 'error-input' : ''}`}
@@ -233,7 +257,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 />
                 {touched.price && error.price && <span className="error-text">{error.price}</span>}
               </div>
-              
+
               <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -297,8 +321,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
         )}
 
         <button className="tiered-add-btn" onClick={handleAddTier}>+ Add Volume Tier</button>
-        
-        {/* Display validation errors from parent component */}
+
         {validationErrors.tieredTiers && (
           <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>

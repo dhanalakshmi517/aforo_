@@ -68,18 +68,18 @@ export async function updateCustomer(customerId: number | string, payload: Recor
         Object.entries(payload as Record<string, unknown>).filter(
           ([, v]) => v !== '' && v !== null && v !== undefined,
         ),
-      );
+      ) as Record<string, unknown>;
 
   if (!(sanitized as any).customerCountry) {
     delete (sanitized as Record<string, unknown>).phoneNumber;
   }
 
   const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  if (isFormData && headers['Content-Type']) delete headers['Content-Type'];
+  if (isFormData && (headers as any)['Content-Type']) delete (headers as any)['Content-Type'];
 
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
     method: 'PATCH',
-    headers,
+    headers: headers as any,
     body: isFormData ? (sanitized as FormData) : JSON.stringify(sanitized),
   });
 
@@ -102,25 +102,35 @@ export async function createCustomer(payload: Record<string, unknown> | FormData
 
   const isFormData = payload instanceof FormData;
   const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  if (isFormData && headers['Content-Type']) delete headers['Content-Type'];
+  if (isFormData && (headers as any)['Content-Type']) delete (headers as any)['Content-Type'];
 
   const res = await fetch(`${BASE_URL}/customers`, {
     method: 'POST',
-    headers,
+    headers: headers as any,
     body: isFormData ? (payload as FormData) : JSON.stringify(payload),
   });
 
   return handleApiResponse(res);
 }
 
-/** Email existence check */
-export async function checkEmailExists(email: string): Promise<boolean> {
+/**
+ * Email existence check with optional self-exclusion.
+ * If excludeCustomerId is provided, a record with that id will NOT be considered a collision.
+ */
+export async function checkEmailExists(email: string, excludeCustomerId?: number | string): Promise<boolean> {
   if (!isAuthenticated()) throw new Error('Not authenticated');
   try {
     const customers = await getCustomers();
-    return customers.some(c => (c as any).primaryEmail?.toLowerCase() === email.toLowerCase());
+    const want = email.trim().toLowerCase();
+    return customers.some((c: any) => {
+      const id = c.customerId ?? c.id;
+      if (excludeCustomerId != null && id == excludeCustomerId) return false;
+      const pe = (c.primaryEmail || '').toLowerCase();
+      return pe === want;
+    });
   } catch (error) {
     console.error('Error checking email:', error);
+    // On failure, do not block the user with a false positive
     return false;
   }
 }
@@ -146,11 +156,11 @@ export async function updateCustomerLogo(customerId: number | string, file: File
   fd.append('companyLogo', file, file.name);
 
   const headers = getAuthHeaders();
-  if (headers['Content-Type']) delete headers['Content-Type']; // let browser set boundary
+  if ((headers as any)['Content-Type']) delete (headers as any)['Content-Type']; // let browser set boundary
 
   const res = await fetch(
     `${BASE_URL}/customers/${encodeURIComponent(customerId)}/logo`,
-    { method: 'PATCH', headers, body: fd }
+    { method: 'PATCH', headers: headers as any, body: fd }
   );
   return handleApiResponse(res);
 }

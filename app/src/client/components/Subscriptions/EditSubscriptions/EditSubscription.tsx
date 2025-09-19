@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Api, Product, RatePlan, Customer, Subscription as SubscriptionType } from '../api';
 import EditReview from './EditReview';
 import './EditSubscription.css';
+import SaveDraft from '../../componenetsss/SaveDraft';
 
 interface EditSubscriptionProps {
   onClose: () => void;
   /** pass the existing subscription here when opening edit */
   initial?: SubscriptionType | null;
+  onRefresh?: () => void;
 }
 
 const steps = [
@@ -14,7 +16,7 @@ const steps = [
   { title: 'Review & Confirm' }
 ];
 
-const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial }) => {
+const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, onRefresh }) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
@@ -29,6 +31,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
   const [paymentType, setPaymentType] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(0);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -81,8 +84,32 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
     }
   }, [selectedRatePlanId, ratePlans]);
 
-  const handleNext = () =>
-    currentStep < steps.length - 1 && setCurrentStep((s) => s + 1);
+  const handleHeaderBack = () => setShowSaveDraftModal(true);
+  
+  const handleNext = async () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep((s) => s + 1);
+      return;
+    }
+
+    // Final step - Save Changes
+    if (!initial?.subscriptionId) return;
+    try {
+      const payload = {
+        customerId: selectedCustomerId ?? initial.customerId,
+        productId: selectedProductId ?? initial.productId,
+        ratePlanId: selectedRatePlanId ?? initial.ratePlanId,
+        paymentType: paymentType || initial.paymentType,
+        adminNotes: planDescription,
+        status: 'ACTIVE'
+      };
+      await Api.updateSubscription(initial.subscriptionId, payload as any);
+      if (onRefresh) onRefresh();
+      onClose();
+    } catch (e) {
+      console.error('Failed to save changes', e);
+    }
+  };
 
   const handleBack = () =>
     currentStep > 0 ? setCurrentStep((s) => s - 1) : onClose();
@@ -107,6 +134,27 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
     } finally {
       setSavingDraft(false);
     }
+  };
+
+  // SaveDraft modal (back arrow) — delete flow
+  const handleSaveDraft_NoDelete = async () => {
+    try {
+      if (initial?.subscriptionId != null) {
+        await Api.deleteSubscription(initial.subscriptionId);
+        if (onRefresh) onRefresh();
+      }
+      setShowSaveDraftModal(false);
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete subscription', error);
+    }
+  };
+
+  // SaveDraft modal (back arrow) — SAVE AS DRAFT flow
+  const handleSaveDraft_Save = async () => {
+    await saveDraft();
+    setShowSaveDraftModal(false);
+    onClose();
   };
 
   const renderStepContent = () => {
@@ -220,7 +268,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
       <div className="edit-sub-header-outer">
         <div className="edit-sub-header-bar">
           <div className="back-cluster">
-            <button className="back-btn" onClick={handleBack} aria-label="Back">
+            <button className="back-btn" onClick={handleHeaderBack} aria-label="Back">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
                   d="M10.0003 15.8337L4.16699 10.0003M4.16699 10.0003L10.0003 4.16699M4.16699 10.0003H15.8337"
@@ -228,15 +276,9 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
                 />
               </svg>
             </button>
-            <h1 className="edit-title">Edit “Subscription”</h1>
+            <h1 className="edit-title">Edit "Subscription"</h1>
           </div>
 
-          <div className="edit-sub-header-actions">
-            <button className="cancel-btn" onClick={() => setShowCancelModal(true)}>Cancel</button>
-            <button className="draft-btn" onClick={saveDraft} disabled={savingDraft}>
-              {savingDraft ? 'Saving…' : submissionStatus==='success' ? 'Saved as Draft' : 'Save as Draft'}
-            </button>
-          </div>
         </div>
       </div>
       {/* ===== /HEADER ===== */}
@@ -271,15 +313,11 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
             </div>
 
             <div className="button-group">
-              <button className="back" onClick={handleBack} disabled={currentStep === 0}>
-                Back
-              </button>
               <button
                 className="save-next"
                 onClick={handleNext}
-                disabled={currentStep === steps.length - 1}
               >
-                Save & Next
+                {currentStep === steps.length - 1 ? 'Save Changes' : 'Save & Next'}
               </button>
             </div>
           </div>
@@ -303,6 +341,13 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial })
             </div>
           </div>
         )}
+
+        <SaveDraft
+          isOpen={showSaveDraftModal}
+          onClose={() => setShowSaveDraftModal(false)}   // Close modal (X button/overlay)
+          onSave={handleSaveDraft_Save}        // "Yes, Save as Draft"
+          onDelete={handleSaveDraft_NoDelete}  // "No, Delete"
+        />
       </div>
       {/* ===== /BODY ===== */}
     </>

@@ -26,10 +26,24 @@ interface Props {
   data?: AccountDetailsData;
   onChange?: (data: AccountDetailsData) => void;
   errors?: { [key: string]: string };
-  onEmailBlur?: (email: string) => void; // optional legacy hook
+  onEmailBlur?: (email: string) => void; // optional parent hook
+  /** NEW: exclude self from uniqueness checks */
+  currentCustomerId?: number | string;
+  /** NEW: whether this is a resumed draft */
+  isDraft?: boolean;
+  /** NEW: for unchanged-email suppression */
+  initialPrimaryEmail?: string;
 }
 
-const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEmailBlur }) => {
+const AccountDetailsForm: React.FC<Props> = ({
+  data,
+  onChange,
+  errors = {},
+  onEmailBlur,
+  currentCustomerId,
+  isDraft = false,
+  initialPrimaryEmail = ''
+}) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [primaryEmailError, setPrimaryEmailError] = useState<string>(''); // inline error for email
@@ -149,8 +163,15 @@ const AccountDetailsForm: React.FC<Props> = ({ data, onChange, errors = {}, onEm
       return;
     }
 
+    // NEW: for drafts, if unchanged from initial, never flag
+    const normalized = value.toLowerCase();
+    if (isDraft && normalized === (initialPrimaryEmail || '').toLowerCase()) {
+      setPrimaryEmailError('');
+      return;
+    }
+
     try {
-      const exists = await checkEmailExists(value);
+      const exists = await checkEmailExists(value, currentCustomerId);
       if (exists) {
         setPrimaryEmailError('This email is already registered in your organization.');
       } else {

@@ -77,6 +77,8 @@ export const createSubscription = async (payload: {
   ratePlanId: number;
   paymentType: string;
   adminNotes: string;
+  status?: string;
+  isDraft?: boolean;
 }): Promise<Subscription> => {
   try {
     const { data } = await axios.post(
@@ -153,6 +155,21 @@ export const deleteSubscription = async (id: number): Promise<void> => {
   }
 };
 
+export const confirmSubscription = async (id: number): Promise<Subscription> => {
+  try {
+    const { data } = await axios.post(
+      `${SUBSCRIPTIONS_BASE_URL}/${id}/confirm`,
+      {
+        organizationId: localStorage.getItem('organizationId')
+      },
+      { headers: getAuthHeaders() }
+    );
+    return data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
 // -----------------------------------------------------------------------------
 // Backward compatibility: preserve previous `Api` object interface used by UI
 // -----------------------------------------------------------------------------
@@ -165,6 +182,7 @@ export const Api = {
   getSubscription,
   updateSubscription,
   deleteSubscription,
+  confirmSubscription,
   // draft helpers
   createSubscriptionDraft: (p: Omit<Subscription,'subscriptionId'>&{isDraft?:boolean})=>createSubscription({ ...p, isDraft:true } as any),
   updateSubscriptionDraft: (id:number,p:Partial<Subscription>)=>updateSubscription(id,{...p,isDraft:true}),

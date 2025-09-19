@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CustomerReview from './CustomerReview';
 import {
   createCustomer,
@@ -49,7 +49,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [isDraft, setIsDraft] = useState(false);
 
-  const [emailCheckTimeout, setEmailCheckTimeout] = useState<NodeJS.Timeout | null>(null);
+  const initialPrimaryEmailRef = useRef<string | null>(null);
+  const emailCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     document.body.classList.add('create-customer-page');
@@ -87,6 +88,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     const id = draftCustomer.customerId ?? draftCustomer.id ?? null;
     if (id != null) setCustomerId(id);
     setIsDraft(true);
+
+    // capture initial draft email for change detection
+    initialPrimaryEmailRef.current = draftCustomer.primaryEmail ?? '';
   }, [draftCustomer]);
 
   useEffect(() => {
@@ -97,10 +101,29 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     setErrors(next);
   }, [companyName, customerName, companyType]); // eslint-disable-line
 
+  /**
+   * Debounced uniqueness check used while typing.
+   * - Skips when in Draft and email hasn't changed from the initial draft value.
+   * - Excludes the current draft's own id from the search to avoid self-collision.
+   */
   const checkEmailUniqueness = useCallback(async (email: string) => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+    const normalized = email.trim().toLowerCase();
+    const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
+
+    if (isDraft && normalized === initial) {
+      // same email as draft's original → never flag
+      setAccountErrors(prev => {
+        const n = { ...prev };
+        if (n.primaryEmail) delete n.primaryEmail;
+        return n;
+      });
+      return;
+    }
+
     try {
-      const exists = await checkEmailExists(email);
+      const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
       if (exists) {
         setAccountErrors(prev => ({ ...prev, primaryEmail: 'This email address is already registered' }));
       } else {
@@ -110,30 +133,60 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
           return n;
         });
       }
-    } catch { /* ignore */ }
-  }, []);
+    } catch {
+      // ignore network errors here
+    }
+  }, [isDraft, customerId]);
 
+  /**
+   * Legacy onBlur hook from child → mirror the same rules as the debounced checker.
+   */
   const handleEmailBlur = useCallback(async (email: string) => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+    const normalized = email.trim().toLowerCase();
+    const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
+
+    if (isDraft && normalized === initial) {
+      setAccountErrors(prev => {
+        const n = { ...prev };
+        if (n.primaryEmail) delete n.primaryEmail;
+        return n;
+      });
+      return;
+    }
+
     try {
-      const exists = await checkEmailExists(email);
+      const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
       if (exists) setAccountErrors(prev => ({ ...prev, primaryEmail: 'This email address is already registered' }));
       else setAccountErrors(prev => {
         const n = { ...prev };
         if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail;
         return n;
       });
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    if (emailCheckTimeout) clearTimeout(emailCheckTimeout);
-    if (accountDetails?.primaryEmail) {
-      const t = setTimeout(() => checkEmailUniqueness(accountDetails.primaryEmail!), 500);
-      setEmailCheckTimeout(t);
+    } catch {
+      // ignore
     }
-    return () => { if (emailCheckTimeout) clearTimeout(emailCheckTimeout); };
-  }, [accountDetails?.primaryEmail, checkEmailUniqueness]); // eslint-disable-line
+  }, [isDraft, customerId]);
+
+  // Debounce uniqueness on change — but only when it's not the initial draft email
+  useEffect(() => {
+    if (emailCheckTimeoutRef.current) clearTimeout(emailCheckTimeoutRef.current);
+
+    const email = accountDetails?.primaryEmail?.trim() ?? '';
+    const normalized = email.toLowerCase();
+    const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
+
+    // New create → always check when valid
+    // Draft → only check if user changed the email from initial
+    const shouldCheck = !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (!isDraft || normalized !== initial);
+
+    if (shouldCheck) {
+      emailCheckTimeoutRef.current = setTimeout(() => checkEmailUniqueness(email), 500);
+    }
+
+    return () => { if (emailCheckTimeoutRef.current) clearTimeout(emailCheckTimeoutRef.current); };
+  }, [accountDetails?.primaryEmail, isDraft, checkEmailUniqueness]);
 
   useEffect(() => {
     if (!accountDetails) return;
@@ -173,12 +226,24 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     }
     if (s === 1) {
       const n: Record<string, string> = {};
+      const email = (accountDetails?.primaryEmail ?? '').trim();
       if (!accountDetails?.phoneNumber?.trim()) n.phoneNumber = 'Phone Number is required';
-      if (!accountDetails?.primaryEmail?.trim()) n.primaryEmail = 'Primary Email is required';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(accountDetails.primaryEmail)) n.primaryEmail = 'Enter a valid email address';
+      if (!email) n.primaryEmail = 'Primary Email is required';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) n.primaryEmail = 'Enter a valid email address';
       else {
-        try { if (await checkEmailExists(accountDetails.primaryEmail)) n.primaryEmail = 'This email address is already registered'; } catch {}
+        try {
+          const normalized = email.toLowerCase();
+          const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
+
+          // For NEW create → always check uniqueness.
+          // For DRAFT → only when email changed, excluding self by id.
+          if (!isDraft || normalized !== initial) {
+            const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
+            if (exists) n.primaryEmail = 'This email address is already registered';
+          }
+        } catch { /* ignore */ }
       }
+
       [
         'billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
         'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
@@ -387,7 +452,18 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
           </>
         );
       case 1:
-        return <AccountDetailsForm data={accountDetails ?? undefined} onChange={setAccountDetails} errors={accountErrors} onEmailBlur={handleEmailBlur} />;
+        return (
+          <AccountDetailsForm
+            data={accountDetails ?? undefined}
+            onChange={setAccountDetails}
+            errors={accountErrors}
+            onEmailBlur={handleEmailBlur}
+            // NEW: let child know who we are and what is initial email
+            currentCustomerId={customerId ?? undefined}
+            isDraft={isDraft}
+            initialPrimaryEmail={initialPrimaryEmailRef.current ?? undefined}
+          />
+        );
       case 2:
         return <CustomerReview customerName={customerName} companyName={companyName} companyType={companyType} accountDetails={accountDetails} />;
       default:
@@ -395,7 +471,6 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     }
   };
 
-  // Build the dynamic title with the actual name inside curly quotes
   const modalName = (customerName || draftCustomer?.customerName || companyName || draftCustomer?.companyName || '').trim() || 'this customer';
   const deleteModalTitle = `Are you sure you want to delete the product “${modalName}”?`;
 
@@ -458,8 +533,15 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
           <div className="form-footer">
             <div className="footer-button-group">
-              <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
-              <button className={buttonStyles.buttonPrimary} onClick={handleNext} disabled={isSubmitting}>
+              {currentStep > 0 && (
+                <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
+              )}
+              <button
+                className={buttonStyles.buttonPrimary}
+                onClick={handleNext}
+                disabled={isSubmitting}
+                style={currentStep === 0 ? { marginLeft: 'auto' } : undefined}
+              >
                 {currentStep === steps.length - 1 ? 'Create Customer' : 'Save & Next'}
               </button>
             </div>
@@ -475,15 +557,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
               <p>This action cannot be undone.</p>
             </div>
             <div className="rate-delete-modal-footer">
-              {/* Left button: Discard (light-blue) just closes modal */}
               <button
                 className="rate-delete-modal-cancel"
                 onClick={() => setShowDeleteModal(false)}
               >
                 Discard
               </button>
-
-              {/* Right button: Delete (destructive) confirms */}
               <button
                 className="rate-delete-modal-confirm"
                 onClick={handleConfirmDelete}
@@ -497,8 +576,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
       <SaveDraft
         isOpen={showSaveDraftModal}
-        onClose={handleSaveDraft_NoDelete}   // "Discard" (do not save)
+        onClose={() => setShowSaveDraftModal(false)}   // Close modal (X button/overlay)
         onSave={handleSaveDraft_Save}        // "Save as Draft"
+        onDelete={handleSaveDraft_NoDelete}  // "No, Delete"
       />
     </div>
   );

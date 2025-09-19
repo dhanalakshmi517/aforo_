@@ -1,9 +1,9 @@
 app OpenSaaS {
   wasp: {
 
-    version: "^0.17.0"
+    version: "^0.18.0"
   },
-  title: "Aforo.ai",
+  title: "aforo.ai",
 
   head: [
     "<meta charset='utf-8' />",

@@ -1,31 +1,59 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { saveStairStepPricing } from './api';
-import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData } from './utils/sessionStorage';
 import './StairStep.css';
 
 export interface StairStepHandle { save: (ratePlanId: number) => Promise<void>; }
-
-interface StairStepProps {
-  validationErrors?: Record<string, string>;
-}
 
 interface Stair { from: string; to: string; cost: string; isUnlimited?: boolean; }
 type RowError = { from?: string; to?: string; cost?: string };
 type RowTouched = { from: boolean; to: boolean; cost: boolean };
 
-const StairStep = forwardRef<StairStepHandle, StairStepProps>(({ validationErrors = {} }, ref) => {
-  const [stairs, setStairs] = useState<Stair[]>([{ from: '', to: '', cost: '' }]);
+interface StairStepProps {
+  validationErrors?: Record<string, string>;
+  /** ✅ NEW: hydrate from parent */
+  stairs?: Stair[];
+  overageCharge?: string | number;
+  graceBuffer?: string | number;
+}
+
+const StairStep = forwardRef<StairStepHandle, StairStepProps>(
+({ validationErrors = {}, stairs: externalStairs, overageCharge: overageFromParent, graceBuffer: graceFromParent }, ref) => {
+  const [stairs, setStairs] = useState<Stair[]>(externalStairs && externalStairs.length
+    ? externalStairs
+    : [{ from: '', to: '', cost: '' }]
+  );
   const [touched, setTouched] = useState<RowTouched[]>([{ from:false, to:false, cost:false }]);
   const [rowErrors, setRowErrors] = useState<RowError[]>([{}]);
 
   const [unlimited, setUnlimited] = useState(false);
-  const [overageCharge, setOverageCharge] = useState('');
+  const [overageCharge, setOverageCharge] = useState<string>('');
   const [overageTouched, setOverageTouched] = useState(false);
-  const [graceBuffer, setGraceBuffer] = useState('');
+  const [graceBuffer, setGraceBuffer] = useState<string>('');
 
   const [mustHaveOneError, setMustHaveOneError] = useState<string | null>(null);
   const [overageError, setOverageError] = useState<string | null>(null);
 
+  /** ✅ sync from parent when props change */
+  useEffect(() => {
+    if (externalStairs && externalStairs.length > 0) {
+      setStairs(externalStairs);
+    }
+  }, [externalStairs]);
+
+  useEffect(() => {
+    if (overageFromParent !== undefined && overageFromParent !== null) {
+      setOverageCharge(String(overageFromParent));
+    }
+  }, [overageFromParent]);
+
+  useEffect(() => {
+    if (graceFromParent !== undefined && graceFromParent !== null) {
+      setGraceBuffer(String(graceFromParent));
+    }
+  }, [graceFromParent]);
+
+  // persist to session storage
   useEffect(() => { setRatePlanData('STAIR_TIERS', JSON.stringify(stairs)); }, [stairs]);
   useEffect(() => { setRatePlanData('STAIR_OVERAGE', overageCharge); }, [overageCharge]);
   useEffect(() => { setRatePlanData('STAIR_GRACE', graceBuffer); }, [graceBuffer]);
@@ -58,14 +86,6 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(({ validationError
   const validateOverage = (value: string): string | null => {
     if (value.trim() === '') return 'This is a required field';
     if (!isPositiveNum(value)) return 'Enter a valid value';
-    return null;
-  };
-
-  const validateGrace = (value: string): string | null => {
-    // Grace buffer is optional
-    if (value.trim() !== '' && !isNonNegInt(value)) {
-      return 'Enter a valid value';
-    }
     return null;
   };
 
@@ -224,8 +244,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(({ validationError
         )}
 
         <button className="add-stair-btn" onClick={addStair}>+ Add Stair</button>
-        
-        {/* Display validation errors from parent component */}
+
         {validationErrors.stairTiers && (
           <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>

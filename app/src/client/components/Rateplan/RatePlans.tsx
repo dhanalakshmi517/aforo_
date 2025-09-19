@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
 import TopBar from '../TopBar/TopBar';
 import SaveDraft from '../componenetsss/SaveDraft'; // ⬅️ NEW: use the Save-as-Draft modal
+import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -83,6 +84,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const createPlanRef = useRef<{ back: () => boolean; getRatePlanId: () => number | null }>(null);
   const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<void>)>(null);
   const [draftSaving, setDraftSaving] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const navigate = useNavigate();
 
   // Prevent browser window scroll on Rate Plans page
@@ -273,8 +275,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
             }}
             cancel={{
               label: "Delete",
-              // Open the same Save-as-Draft modal (Design: No, Delete | Yes, Save as Draft)
-              onClick: () => setShowSaveDraftModal(true)
+              // Open the ConfirmDeleteModal for rate plan deletion
+              onClick: () => setShowConfirmDelete(true)
             }}
             save={{
               label: "Save as Draft",
@@ -304,21 +306,9 @@ const RatePlans: React.FC<RatePlansProps> = ({
           {/* ======= Save-as-Draft Modal (Back/Delete in wizard) ======= */}
           <SaveDraft
             isOpen={showSaveDraftModal}
-            onClose={async () => {
-              // "No, Delete" clicked
+            onClose={() => {
+              // Just close the modal (X button or overlay click)
               setShowSaveDraftModal(false);
-
-              const currentId = createPlanRef.current?.getRatePlanId();
-              if (currentId) {
-                try {
-                  await deleteRatePlan(currentId);
-                } catch (e) {
-                  console.error('Failed to delete current wizard rate plan', e);
-                }
-              }
-              setShowCreatePlan(false);
-              await loadRatePlans();
-              navigate('/get-started/rate-plans');
             }}
             onSave={async () => {
               // "Yes, Save as Draft" clicked
@@ -330,12 +320,65 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 }
               } catch (e) {
                 console.error('Save as draft (from modal) failed', e);
+                setDraftSaving(false);
               } finally {
                 setShowSaveDraftModal(false);
                 setShowCreatePlan(false);
                 await loadRatePlans();
-                navigate('/get-started/rate-plans');
+                // Don't navigate here - let the parent handle navigation
               }
+            }}
+            onDelete={async () => {
+              // "No, Delete" clicked
+              setShowSaveDraftModal(false);
+
+              const currentId = createPlanRef.current?.getRatePlanId();
+              if (currentId) {
+                try {
+                  await deleteRatePlan(currentId);
+                  console.log('Rate plan deleted successfully');
+                } catch (e) {
+                  console.error('Failed to delete current wizard rate plan', e);
+                }
+              } else {
+                console.log('No rate plan to delete - just discarding changes');
+              }
+              
+              setShowCreatePlan(false);
+              await loadRatePlans();
+              // Don't navigate here - let the parent handle navigation
+            }}
+          />
+
+          {/* ======= Confirm Delete Modal (TopBar Delete button) ======= */}
+          <ConfirmDeleteModal
+            isOpen={showConfirmDelete}
+            productName={createPlanRef.current?.getRatePlanId() ? "Rate Plan" : "Draft Rate Plan"}
+            onConfirm={async () => {
+              setShowConfirmDelete(false);
+              
+              const currentId = createPlanRef.current?.getRatePlanId();
+              if (currentId) {
+                try {
+                  await deleteRatePlan(currentId);
+                  console.log('Rate plan deleted successfully from TopBar');
+                  setNotification({ type: 'success', ratePlanName: 'Rate Plan' });
+                  setTimeout(() => setNotification(null), 3000);
+                } catch (e) {
+                  console.error('Failed to delete rate plan from TopBar', e);
+                  setNotification({ type: 'error', ratePlanName: 'Rate Plan' });
+                  setTimeout(() => setNotification(null), 3000);
+                }
+              } else {
+                console.log('No rate plan to delete - just discarding changes');
+              }
+              
+              setShowCreatePlan(false);
+              await loadRatePlans();
+            }}
+            onCancel={() => {
+              setShowConfirmDelete(false);
+              // Stay on the same page - just close the modal
             }}
           />
         </div>
@@ -407,7 +450,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         {plan.status?.toLowerCase() === 'draft' ? (
                           <button
                             className="resume-button"
-                            onClick={() => handleEdit(plan.ratePlanId)}
+                            onClick={() => {
+                              // Open the same Create screen but in "resumeDraft" mode
+                              setShowCreatePlan(true);
+                              navigate('/get-started/rate-plans', { 
+                                state: { resumeDraftId: plan.ratePlanId } 
+                              });
+                            }}
                             title="Resume Draft"
                             aria-label="Resume Draft"
                           >

@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../../componenetsss/TopBar';
-import SaveDraft from '../../componenetsss/SaveDraft';
-import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
-
+import SaveDraft from '../../componenetsss/SaveDraft';              // ⬅️ add
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
 
+import EditBillable from './EditBillable';
 import EditPricing from './EditPricing';
 import EditExtras from './EditExtras';
 import EditReview from './EditReview';
@@ -15,32 +14,31 @@ import EditReview from './EditReview';
 import {
   fetchProducts,
   fetchRatePlan,
+  fetchRatePlanWithDetails,
   updateRatePlan,
+  deleteRatePlan,                                          // ⬅️ add
   RatePlanRequest,
 } from '../api';
 
-import './EditRatePlan.css';              // your rate-plan specific styles (optional)
-import '../../Products/EditProductsss/EditProduct.css'; // reuse np/edit-np layout styles if needed
+import './EditRatePlan.css';
+import '../../Products/EditProductsss/EditProduct.css';
 
-type ActiveTab = 'details' | 'pricing' | 'extras' | 'review';
+type ActiveTab = 'details' | 'billable' | 'pricing' | 'extras' | 'review';
 
-interface EditRatePlanProps {
-  onClose?: () => void;
-}
+interface EditRatePlanProps { onClose?: () => void; }
 
 const steps = [
   { id: 1, title: 'Plan Details', desc: 'Define the basic information and structure of your plan.' },
-  { id: 2, title: 'Pricing Model Setup', desc: 'Configure how pricing will work for this plan.' },
-  { id: 3, title: 'Extras', desc: 'Add optional features or benefits to enhance your plan.' },
-  { id: 4, title: 'Review & Confirm', desc: 'Check and finalize details.' },
+  { id: 2, title: 'Select Billable Metric', desc: 'Select or define a Billable Metric' },
+  { id: 3, title: 'Pricing Model Setup', desc: 'Configure how pricing will work for this plan.' },
+  { id: 4, title: 'Extras', desc: 'Add optional features or benefits to enhance your plan.' },
+  { id: 5, title: 'Review & Confirm', desc: 'Check and finalize details.' },
 ];
 
 const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Accept data in either shape:
-  //   location.state = { plan: {...} }  OR  location.state = { ...fields }
   const raw = (location.state || {}) as any;
   const ratePlanId: number | undefined = raw?.plan?.ratePlanId ?? raw.ratePlanId;
 
@@ -55,42 +53,31 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     };
   }, [raw]);
 
-  const close = () => {
-    if (onClose) onClose();
-    else navigate('/get-started/rate-plans');
-  };
+  const exitToList = () => (onClose ? onClose() : navigate('/get-started/rate-plans'));
 
-  // ---- Wizard & tab
   const [currentStep, setCurrentStep] = useState(0);
-  const activeTab: ActiveTab =
-    currentStep === 0 ? 'details' :
-    currentStep === 1 ? 'pricing' :
-    currentStep === 2 ? 'extras' :
-    'review';
+  const activeTab: ActiveTab = currentStep === 0 ? 'details' : currentStep === 1 ? 'billable' : currentStep === 2 ? 'pricing' : currentStep === 3 ? 'extras' : 'review';
 
-  // ---- UI state: modals & saving flags
-  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [loading, setLoading] = useState(false);
 
-  // ---- Form state
   const [ratePlanName, setRatePlanName] = useState<string>(initial.ratePlanName);
   const [description, setDescription] = useState<string>(initial.description);
   const [billingFrequency, setBillingFrequency] = useState<string>(initial.billingFrequency);
   const [selectedProductName, setSelectedProductName] = useState<string>(initial.productName);
   const [paymentType, setPaymentType] = useState<string>(initial.paymentType);
 
-  // ---- Products for dropdown
   const [products, setProducts] = useState<Array<{ productId: number; productName: string }>>([]);
   const [productError, setProductError] = useState<string>('');
+  const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
 
-  // ---- Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [draftData, setDraftData] = useState<any>(null);
 
-  // Prefetch products & plan details
+  // NEW: save-as-draft modal state
+  const [showSaveModal, setShowSaveModal] = useState(false);
+
   useEffect(() => {
-    document.body.classList.add('edit-product-page'); // reuse page background/layout
+    document.body.classList.add('edit-product-page');
     (async () => {
       try {
         const prods = await fetchProducts();
@@ -103,13 +90,15 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     const loadPlan = async () => {
       if (!ratePlanId) return;
       try {
-        const plan = await fetchRatePlan(ratePlanId);
+        const plan = await fetchRatePlanWithDetails(ratePlanId);
         setRatePlanName(plan.ratePlanName || '');
         setDescription(plan.description || '');
         setBillingFrequency(plan.billingFrequency || '');
         setPaymentType(plan.paymentType || '');
         setSelectedProductName(plan.productName || plan.product?.productName || '');
-        // prime localStorage for subforms (same as your original)
+        if (plan.billableMetricId) setSelectedMetricId(Number(plan.billableMetricId));
+        setDraftData(plan);
+
         if (plan.flatFeeAmount) localStorage.setItem('pricingModel','Flat Fee');
         else if (plan.volumePricing) localStorage.setItem('pricingModel','Volume-Based');
         else if (plan.tieredPricing) localStorage.setItem('pricingModel','Tiered Pricing');
@@ -117,23 +106,21 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         else if (plan.perUnitAmount) localStorage.setItem('pricingModel','Usage-Based');
 
         if (plan.volumePricing?.tiers) {
-          localStorage.setItem('volumeTiers', JSON.stringify(plan.volumePricing.tiers.map((t:any)=>({from:t.usageStart,to:t.usageEnd,price:t.unitPrice}))));
-          localStorage.setItem('volumeOverage', String(plan.volumePricing.overageUnitRate||''));
+          localStorage.setItem('volumeTiers', JSON.stringify(plan.volumePricing.tiers.map((t:any)=>({from:t.usageStart,to:t.usageEnd,price:t.unitPrice})))); 
+          localStorage.setItem('volumeOverage', String(plan.volumePricing.overageUnitRate||'')); 
           localStorage.setItem('volumeGrace', String(plan.volumePricing.graceBuffer||''));
         }
         if (plan.tieredPricing?.tiers) {
-          localStorage.setItem('tieredTiers', JSON.stringify(plan.tieredPricing.tiers.map((t:any)=>({from:t.startRange,to:t.endRange,price:t.unitPrice}))));
-          localStorage.setItem('tieredOverage', String(plan.tieredPricing.overageUnitRate||''));
+          localStorage.setItem('tieredTiers', JSON.stringify(plan.tieredPricing.tiers.map((t:any)=>({from:t.startRange,to:t.endRange,price:t.unitPrice})))); 
+          localStorage.setItem('tieredOverage', String(plan.tieredPricing.overageUnitRate||'')); 
           localStorage.setItem('tieredGrace', String(plan.tieredPricing.graceBuffer||''));
         }
         if (plan.stairStepPricing?.tiers) {
-          localStorage.setItem('stairTiers', JSON.stringify(plan.stairStepPricing.tiers.map((t:any)=>({from:t.usageStart,to:t.usageEnd,price:t.flatCost}))));
-          localStorage.setItem('stairOverage', String(plan.stairStepPricing.overageUnitRate||''));
+          localStorage.setItem('stairTiers', JSON.stringify(plan.stairStepPricing.tiers.map((t:any)=>({from:t.usageStart,to:t.usageEnd,price:t.flatCost})))); 
+          localStorage.setItem('stairOverage', String(plan.stairStepPricing.overageUnitRate||'')); 
           localStorage.setItem('stairGrace', String(plan.stairStepPricing.graceBuffer||''));
         }
-        if (plan.perUnitAmount) {
-          localStorage.setItem('usagePerUnit', String(plan.perUnitAmount));
-        }
+        if (plan.perUnitAmount) localStorage.setItem('usagePerUnit', String(plan.perUnitAmount));
         if (plan.setupFee) {
           localStorage.setItem('setupFee', String(plan.setupFee.setupFee));
           localStorage.setItem('setupApplicationTiming', String(plan.setupFee.applicationTiming));
@@ -160,18 +147,25 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         }
       } catch (e) {
         console.error('Failed to fetch plan', e);
+        try {
+          const basicPlan = await fetchRatePlan(ratePlanId);
+          setRatePlanName(basicPlan.ratePlanName || '');
+          setDescription(basicPlan.description || '');
+          setBillingFrequency(basicPlan.billingFrequency || '');
+          setPaymentType(basicPlan.paymentType || '');
+          setSelectedProductName(basicPlan.productName || basicPlan.product?.productName || '');
+        } catch (fallbackError) {
+          console.error('Failed to fetch basic plan data:', fallbackError);
+        }
       }
     };
     loadPlan();
 
-    return () => {
-      document.body.classList.remove('edit-product-page');
-    };
+    return () => { document.body.classList.remove('edit-product-page'); };
   }, [ratePlanId]);
 
   const goToStep = (index: number) => setCurrentStep(index);
 
-  // ------ Validation (details step)
   const validateDetails = (): boolean => {
     const e: Record<string, string> = {};
     if (!ratePlanName.trim()) e.ratePlanName = 'This is a required field';
@@ -182,19 +176,18 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     return Object.keys(e).length === 0;
   };
 
-  // ------ Persist top (details) portion
+  // allow isDraft to attach status
   const persistPlan = async (isDraft: boolean): Promise<boolean> => {
-    if (!ratePlanId) return true; // nothing to save if id missing
+    if (!ratePlanId) return true;
     try {
       setLoading(true);
-      // map product name to id (optional — backend may accept productName as well)
       let productId: number | undefined;
       if (selectedProductName && !productError) {
         const p = products.find(pr => pr.productName === selectedProductName);
         productId = p?.productId ? Number(p.productId) : undefined;
       }
 
-      const payload: Partial<Omit<RatePlanRequest,'billableMetricId'>> = {
+      const payload: Partial<Omit<RatePlanRequest,'billableMetricId'>> & { status?: string } = {
         ratePlanName,
         description,
         billingFrequency: billingFrequency as any,
@@ -202,7 +195,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         productId,
         productName: productId ? undefined : selectedProductName || undefined,
       };
-      if (isDraft) (payload as any).status = 'DRAFT';
+      if (isDraft) payload.status = 'DRAFT';
 
       await updateRatePlan(ratePlanId, payload);
       return true;
@@ -214,25 +207,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     }
   };
 
-  // ------ Save Draft (TopBar)
-  const handleSaveDraft = async () => {
-    if (draftStatus === 'saving') return;
-    if (!validateDetails()) return;
-
-    try {
-      setDraftStatus('saving');
-      const ok = await persistPlan(true);
-      if (!ok) { setDraftStatus('idle'); return; }
-      setDraftStatus('saved');
-      setTimeout(() => setDraftStatus('idle'), 4000);
-    } catch (e) {
-      console.error('Save draft failed', e);
-      alert('Failed to save draft. Please try again.');
-      setDraftStatus('idle');
-    }
-  };
-
-  // ------ Footer navigation
   const handleNextStep = async () => {
     if (activeTab === 'details') {
       if (!validateDetails()) return;
@@ -241,18 +215,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
       goToStep(1);
       return;
     }
-    if (activeTab === 'pricing') {
-      // Pricing form (EditPricing) can persist on its own button actions
-      goToStep(2);
-      return;
-    }
-    if (activeTab === 'extras') {
-      // Extras form (EditExtras) can persist on its own button actions
-      goToStep(3);
-      return;
-    }
+    if (activeTab === 'billable') { goToStep(2); return; }
+    if (activeTab === 'pricing') { goToStep(3); return; }
+    if (activeTab === 'extras')  { goToStep(4); return; }
     if (activeTab === 'review') {
-      // Final save of details (if any pending), then exit
       const ok = await persistPlan(false);
       if (ok) navigate('/get-started/rate-plans');
     }
@@ -260,7 +226,28 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
   const handlePreviousStep = () => {
     if (currentStep > 0) goToStep(currentStep - 1);
-    else setShowSaveDraftModal(true);
+    else setShowSaveModal(true);                     // ⬅️ show modal on first-step back
+  };
+
+  // --- modal actions
+  const handleSaveDraft = async () => {
+    if (!validateDetails()) return;                  // same behavior as earlier
+    const ok = await persistPlan(true);
+    if (ok) { setShowSaveModal(false); exitToList(); }
+  };
+
+  const handleDelete = async () => {
+    if (!ratePlanId) return;
+    try {
+      setLoading(true);
+      await deleteRatePlan(ratePlanId);
+      setShowSaveModal(false);
+      exitToList();
+    } catch (e: any) {
+      alert(e?.message || 'Failed to delete rate plan');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -303,11 +290,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                   value={selectedProductName}
                   onChange={setSelectedProductName}
                   placeholder={productError ? 'Failed to load products' : 'Select Product'}
-                  options={
-                    productError
-                      ? []
-                      : products.map((p) => ({ label: p.productName, value: p.productName }))
-                  }
+                  options={productError ? [] : products.map((p) => ({ label: p.productName, value: p.productName }))}
                   error={errors.selectedProductName}
                 />
               </div>
@@ -337,25 +320,34 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             </div>
           </div>
         );
-
+      case 'billable':
+        return (
+          <div className="edit-np-section">
+            <div className="edit-np-configuration-tab">
+              <EditBillable 
+                productName={selectedProductName}
+                selectedMetricId={selectedMetricId}
+                onSelectMetric={setSelectedMetricId}
+              />
+            </div>
+          </div>
+        );
       case 'pricing':
         return (
           <div className="edit-np-section">
             <div className="edit-np-configuration-tab">
-              <EditPricing ratePlanId={ratePlanId} />
+              <EditPricing ratePlanId={ratePlanId} draftData={draftData} />
             </div>
           </div>
         );
-
       case 'extras':
         return (
           <div className="edit-np-section">
             <div className="edit-np-configuration-tab">
-              <EditExtras ratePlanId={ratePlanId} noUpperLimit={false} />
+              <EditExtras ratePlanId={ratePlanId} noUpperLimit={false} draftData={draftData} />
             </div>
           </div>
         );
-
       case 'review':
         return (
           <div className="edit-np-section">
@@ -364,7 +356,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             </div>
           </div>
         );
-
       default:
         return <p>Coming soon...</p>;
     }
@@ -373,26 +364,13 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   return (
     <>
       <TopBar
-        title={ratePlanId ? 'Edit Rate Plan' : 'Create Rate Plan'}
-        onBack={() => setShowSaveDraftModal(true)}
-        cancel={{
-          label: 'Cancel',
-          onClick: () => setShowDeleteConfirm(true),
-        }}
-        save={{
-          label: draftStatus === 'saved' ? 'Saved as Draft' : 'Save as Draft',
-          labelWhenSaved: 'Saved as Draft',
-          saved: draftStatus === 'saved',
-          saving: draftStatus === 'saving',
-          disabled: loading,
-          onClick: handleSaveDraft,
-        }}
+        title={ratePlanName?.trim() ? `Edit “${ratePlanName}”` : 'Edit Rate Plan'}
+        onBack={() => setShowSaveModal(true)}           // ⬅️ open modal
       />
 
       <div className="edit-np-viewport">
         <div className="edit-np-card">
           <div className="edit-np-grid">
-            {/* Sidebar */}
             <aside className="edit-np-rail">
               <div className="edit-np-steps">
                 {steps.map((step, index) => {
@@ -406,18 +384,14 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                       role="button"
                     >
                       <div className="edit-np-step__title">{step.title}</div>
-                      {/* optional desc: <div className="edit-np-step__desc">{step.desc}</div> */}
                     </div>
                   );
                 })}
               </div>
             </aside>
 
-            {/* Main Content */}
             <div className="edit-np-content">
-              <div className="edit-np-form">
-                {renderStepContent()}
-              </div>
+              <div className="edit-np-form">{renderStepContent()}</div>
 
               {/* Footer Buttons */}
               <div className="edit-np-form-footer">
@@ -441,37 +415,22 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                     onClick={handleNextStep}
                     disabled={loading}
                   >
-                    {loading
-                      ? 'Saving...'
-                      : activeTab === 'review'
-                      ? 'Update Rate Plan'
-                      : 'Next'}
+                    {loading ? 'Saving...' : activeTab === 'review' ? 'Update Rate Plan' : 'Next'}
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Save Draft confirmation modal (leave flow) */}
-        <SaveDraft
-          isOpen={showSaveDraftModal}
-          onClose={() => setShowSaveDraftModal(false)}
-          onSave={async () => {
-            await handleSaveDraft();
-            setShowSaveDraftModal(false);
-            close();
-          }}
-        />
-
-        {/* Discard / Cancel confirmation */}
-        <ConfirmDeleteModal
-          isOpen={showDeleteConfirm}
-          productName={ratePlanName || 'this rate plan'}
-          onConfirm={close}
-          onCancel={() => setShowDeleteConfirm(false)}
-        />
       </div>
+
+      {/* Save as Draft / Delete modal */}
+      <SaveDraft
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}     // overlay / X / cancel path
+        onSave={handleSaveDraft}
+        onDelete={handleDelete}                    // ⬅️ new
+      />
     </>
   );
 };
