@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SignIn from './SignIn';
 import './Landing.css';
 import visual from './visual.svg'; // Import the SVG background
@@ -13,6 +13,24 @@ import Footer from './Footer';
 const Landing: React.FC = () => {
   const [showOrg, setShowOrg] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  // push a history entry when org or sign-in opens so browser back works
+  useEffect(() => {
+    if (showOrg || showSignIn) {
+      const stateObj = showOrg ? { org: true } : { signin: true };
+      window.history.pushState(stateObj, 'Modal');
+    }
+    const handler = (e: PopStateEvent) => {
+      if (showOrg) {
+        setShowOrg(false);
+        e.preventDefault();
+      } else if (showSignIn) {
+        setShowSignIn(false);
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [showOrg, showSignIn]);
   // Only show navbar when not showing organization form or sign in
   const showNavbar = !showOrg && !showSignIn;
   
