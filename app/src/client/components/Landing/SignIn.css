@@ -29,7 +29,7 @@
   align-items:center;
   justify-content:center;
   gap:8px;
-  margin-bottom:20px;
+  margin-bottom:16px;
 }
 
 /* Logo */
@@ -58,7 +58,7 @@ letter-spacing: -2.248px;
   /* Title */
   .signin-title {
    
-    margin: 0 0 4px;
+    margin: 0 0 30px;
     text-align: center;
 
     /* heading/bold/h5 */
@@ -80,12 +80,19 @@ letter-spacing: -2.248px;
 
 /* Reduce vertical gap between field, error message and next field specifically for sign-in */
 .signin-form .field-input {
-  margin-bottom: 4px; 
+  margin-bottom: 12px; 
 } 
 .signin-form .field-error {
   color: var(--color-error-400);
   font-size: var(--font-size-sm);
-  margin: 0 0 4px;
+  margin: 0 0 4px;/* small gap below error text */
+  margin-top: -8px;
+}
+
+/* When field is in error state, reduce gap between input and error text */
+/* Keep consistent 12px gap even when field has error */
+.signin-form .field-input.is-error {
+  margin-bottom: 12px;
 }
     
   .field-label {
@@ -99,7 +106,7 @@ letter-spacing: -2.248px;
     font-style: normal;
     font-weight: 400;
     line-height: var(--line-height-body-md); /* 160% */
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     margin-left: 4px;
   }
   
@@ -219,7 +226,7 @@ letter-spacing: -2.248px;
     font-style: normal;
     font-weight: 500;
     line-height: var(--line-height-body-lg);
-    margin-top: 6px;
+    margin-top: 20px;
     cursor: pointer;
   }
   

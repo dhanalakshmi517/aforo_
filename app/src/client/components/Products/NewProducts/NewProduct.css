@@ -27,7 +27,7 @@ html, body, #root{
   border-bottom: 1px solid var(--color-neutral-300);
   padding: var(--np-gap-top) var(--np-gap-right) 30px var(--np-gap-left);
   box-sizing: border-box;
-  height: calc(100vh - 40px);
+  height: calc(100vh - 20px);
   width: 100%;
   max-width: 100%;
   display: flex;
@@ -202,6 +202,17 @@ line-height: var(--line-height-body-lg); /* 150% */
 text-align: left;
 margin-bottom: 2px;
 }
+.np-step__title:hover{
+  color: var(--color-neutral-1700);
+
+  /* body/md/med */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-lg);
+    
+}
 .np-step__desc{ color: var(--color-neutral-1400);
 
   /* body/md/reg */
@@ -359,19 +370,31 @@ text-transform: uppercase;
   position:absolute;
   left:0; right:0; bottom:-5px;
   height:1px;
-  background:var(--color-neutral-300);
+}
+
+/* Adjust skeleton faint rules just for New Product main area */
+.np-main .af-skel-rule--top { top: 60px; }
+.np-card .af-skel-rule--bottom { bottom: 70px; left: 300px; }
+
+.np-form-footer .af-skel-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  /* background: var(--color-neutral-300); */
 }
 
 /* Footer actions on a full-bleed line */
 .np-form-footer {
+  position: relative;
   margin: 0 -24px;
   padding: 16px 24px;
   display: flex;
   justify-content: space-between; /* Space between back and next buttons */
   align-items: center;
-  border-top: 1px solid var(--color-neutral-300);
-  margin-top: auto;
-  margin-bottom: 34px;
+ margin-top: auto;
+  margin-bottom: 24px;
 }
 
 .np-btn-group { 

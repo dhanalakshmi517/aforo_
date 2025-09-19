@@ -1,4 +1,5 @@
 /* ---------------- Layout variables ---------------- */
+@import "../Variables/Variables.css";
 :root {
     /* Outer gaps around the card */
     --af-gap-left: 170px;
@@ -18,7 +19,7 @@
   
     /* Inner separators in main area */
     --af-rule: #f2f3f7;
-    --af-rule-offset: 32px;
+    --af-rule-offset: 48px;
   }
   
   /* ---------------- Outer viewport (applies gaps) ---------------- */
@@ -111,8 +112,8 @@
     z-index: 0;
     pointer-events: none;
   }
-  .af-skel-rule--top { top: var(--af-rule-offset); }
-  .af-skel-rule--bottom { bottom: var(--af-rule-offset); }
+  .af-skel-rule--top { top: var(--af-rule-offset); color: var(--color-neutral-200); }
+  .af-skel-rule--bottom { bottom: var(--af-rule-offset); color: var(--color-neutral-200); }
   
   /* ---------------- Responsiveness ---------------- */
   @media (max-width: 1200px) {

@@ -12,6 +12,7 @@ import SaveDraft from "../../componenetsss/SaveDraft";
 import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
 
 import "./NewProduct.css";
+import "../../componenetsss/SkeletonForm.css";
 
 type ActiveTab = "general" | "configuration" | "review";
 
@@ -319,7 +320,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       }
 
       console.log('Draft saved successfully');
-      setSaveDraftSuccess(true);
+      // ensure spinner visible
+await new Promise(res=>setTimeout(res,500));
+setSaveDraftSuccess(true);
       setTimeout(() => setSaveDraftSuccess(false), 3000);
       return true;
     } catch (error) {
@@ -395,7 +398,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           label: isDraftSaved ? "Saved!" : "Save as Draft",
           saved: isDraftSaved,
           saving: isDraftSaving,
-          labelWhenSaved: "Saved!"
+          labelWhenSaved: "Saved as Draft"
         }}
       />
 
@@ -447,6 +450,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
             {/* MAIN area */}
             <main className="np-main">
+              {/* faint separators behind content */}
+              <div className="af-skel-rule af-skel-rule--top" />
               <div className="np-main__inner">
                 <div className="np-body">
                   <form className="np-form" onSubmit={(e) => e.preventDefault()}>
@@ -641,6 +646,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
               </div>
             </main>
           </div>
+
+      <div className="af-skel-rule af-skel-rule--bottom" />
 
       {/* Save Draft confirmation modal */}
       <SaveDraft
