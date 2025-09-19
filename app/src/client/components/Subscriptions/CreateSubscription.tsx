@@ -9,6 +9,8 @@ import { Subscription as SubscriptionType } from './api';
 interface CreateSubscriptionProps {
   onClose: () => void;
   onCreateSuccess: (sub: SubscriptionType) => void;
+  onRefresh?: () => void; // optional callback to refetch list in parent
+  draftData?: SubscriptionType; // optional data when resuming a draft
 }
 
 type StepId = 1 | 2;
@@ -26,7 +28,7 @@ const steps: Array<{ id: StepId; title: string; desc: string }> = [
   },
 ];
 
-const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCreateSuccess }) => {
+const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCreateSuccess, onRefresh, draftData }) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
@@ -137,6 +139,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
       const resp: SubscriptionType = await Api.createSubscription(payload);
       setSubmissionStatus('success');
       onCreateSuccess(resp);
+      onRefresh?.();
       onClose();
     } catch (e) {
       console.error('Failed to create subscription', e);
