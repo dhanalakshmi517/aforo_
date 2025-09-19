@@ -25,6 +25,7 @@ import Review from './Review';
 
 // Reuse the same CSS shell for np-* classes
 import './Usagemetric.css';
+import '../componenetsss/SkeletonForm.css';
 
 type ActiveTab = 'metric' | 'conditions' | 'review';
 
@@ -388,6 +389,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
             {/* MAIN */}
             <main className="met-np-main">
+              {/* faint separators behind content */}
+              <div className="af-skel-rule af-skel-rule--top" />
               <div className="met-np-main__inner">
                 <div className="met-np-body">
                   <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
@@ -396,6 +399,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                       {activeTab === 'metric' && (
                         <section>
                           <div className="met-np-section-header">
+                          <div className="af-skel-rule af-skel-rule--top" />
+
                             <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
                           </div>
 
@@ -638,6 +643,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
               </div>
             </main>
           </div>
+          <div className="af-skel-rule af-skel-rule--bottom" />
 
           {/* Save Draft confirmation modal (same behavior as NewProduct) */}
           <SaveDraft

@@ -45,6 +45,20 @@ line-height: var(--line-height-heading-h4); }
   /* right side */
   .af-topbar__right{ display:flex; align-items:center; gap:16px; }
   
+  /* Spinner */
+  .af-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: var(--color-primary-800);
+    border-right-color: var(--color-primary-800);
+    border-radius: 50%;
+    animation: af-spin 0.8s linear infinite;
+  }
+  @keyframes af-spin {
+    to { transform: rotate(360deg); }
+  }
+
   /* pills */
   .af-topbar__btn{
     display: inline-flex;
