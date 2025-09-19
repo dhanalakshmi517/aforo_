@@ -3,12 +3,13 @@ import "./SaveDraft.css";
 
 interface SaveDraftProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: () => void; // Fallback if onDelete not provided
   onSave: () => void;
+  onDelete?: () => void; // Optional explicit delete handler
   onDismiss?: () => void; // Just close popup without any action
 }
 
-const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDismiss }) => {
+const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDelete, onDismiss }) => {
   if (!isOpen) return null;
 
   return (
@@ -25,7 +26,7 @@ const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDismis
           continue later.
         </p>
         <div className="save-modal-buttons">
-          <button className="save-modal-btn save-modal-btn-cancel" onClick={onClose}>
+          <button className="save-modal-btn save-modal-btn-cancel" onClick={onDelete || onClose}>
             No, Delete
           </button>
           <button className="save-modal-btn save-modal-btn-save" onClick={onSave}>
