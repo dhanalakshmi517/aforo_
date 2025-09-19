@@ -647,13 +647,20 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         isOpen={showSavePrompt}
         onClose={async () => {
           setShowSavePrompt(false);
+          let ok = true;
           try {
             if (createdProductId) {
               await deleteProduct(createdProductId);
             }
           } catch (e) {
             console.error('Failed to delete product on discard', e);
+            ok = false;
           } finally {
+            showToast({
+              kind: ok ? 'success' : 'error',
+              title: ok ? 'Product Deleted' : 'Delete Failed',
+              message: ok ? 'Product deleted successfully.' : 'Unable to delete product. Please try again.'
+            });
             onClose();
           }
         }}
@@ -661,7 +668,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           const ok = await handleSaveDraft();
           showToast({
             kind: ok ? "success" : "error",
-            title: ok ? "Draft Saved" : "Failed to Save Draft",
+            title: ok ? "Product Draft Saved" : "Failed to Save Draft",
             message: ok ? "Product draft saved successfully." : "Unable to save draft. Please try again."
           });
           onClose();
@@ -679,13 +686,20 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         isOpen={showDeleteConfirm} 
         productName={formData.productName || "this product"}
         onConfirm={async () => {
+          let ok = true;
           try {
             if (createdProductId) {
               await deleteProduct(createdProductId);
             }
           } catch (e) {
             console.error('Failed to delete product', e);
+            ok = false;
           } finally {
+            showToast({
+              kind: ok ? 'success' : 'error',
+              title: ok ? 'Product Deleted' : 'Delete Failed',
+              message: ok ? 'Product deleted successfully.' : 'Unable to delete product. Please try again.'
+            });
             setShowDeleteConfirm(false);
             onClose();
           }

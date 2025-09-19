@@ -12,9 +12,25 @@
     align-items: center;
     z-index: 1000;
   }
+  .del-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
   
   /* Modal container */
   .del-modal-container {
+    position: relative;
+
     background: var(--color-neutral-white);
     border-radius: var(--border-radius-sm);
     padding: 24px;
@@ -22,6 +38,8 @@
     height:220px auto;
     text-align: center;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease-in-out;
+
   }
   
   /* Title */

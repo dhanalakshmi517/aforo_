@@ -4,6 +4,7 @@ import { Api, Product, RatePlan, Customer } from './api';
 import './CreateSubscription.new.css';
 import { InputField, TextareaField, SelectField } from '../Components/InputFields';
 import TopBar from '../TopBar/TopBar';
+import { useToast } from '../componenetsss/ToastProvider';
 import { Subscription as SubscriptionType } from './api';
 
 interface CreateSubscriptionProps {
@@ -46,6 +47,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const { showToast } = useToast();
   const [savingDraft, setSavingDraft] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -138,6 +140,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
       };
       const resp: SubscriptionType = await Api.createSubscription(payload);
       setSubmissionStatus('success');
+      showToast({kind:'success',title:'Subscription Created',message:'Subscription created successfully.'});
       onCreateSuccess(resp);
       onRefresh?.();
       onClose();
@@ -416,7 +419,7 @@ const CreateSubscription: React.FC<CreateSubscriptionProps> = ({ onClose, onCrea
               <button className="delete-modal-cancel" onClick={() => setShowCancelModal(false)}>
                 Back
               </button>
-              <button className="delete-modal-confirm" onClick={onClose}>
+              <button className="delete-modal-confirm" onClick={()=>{ showToast({kind:'success',title:'Discarded',message:'Subscription draft discarded.'}); onClose(); }}>
                 Confirm
               </button>
             </div>

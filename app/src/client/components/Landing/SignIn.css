@@ -13,7 +13,7 @@
   /* Card */
   .signin-card {
     width: 100%;
-    max-width: 540px;
+    max-width: 500px;
     background: var(--color-neutral-white);
     border-radius: var(--border-radius-md);
     padding: 32px 32px 32px 32px;
@@ -58,14 +58,14 @@ letter-spacing: -2.248px;
   /* Title */
   .signin-title {
    
-    margin: 6px 0 18px;
+    margin: 0 0 4px;
     text-align: center;
 
     /* heading/bold/h5 */
     font-family: var(--font-family-primary);
     font-size: var(--font-size-h4);
     font-style: normal;
-    font-weight: 800;
+    font-weight: 700;
     line-height: var(--line-height-heading-h4); /* 140% */
     background: var(--Gradient-blue, linear-gradient(254deg, var(--color-primary-700, #025A94) 26.47%, var(--color-primary-1000, #00365A) 76.37%));
     background-clip: text;
@@ -80,13 +80,12 @@ letter-spacing: -2.248px;
 
 /* Reduce vertical gap between field, error message and next field specifically for sign-in */
 .signin-form .field-input {
-  margin-bottom: 4px; /* was 14px */
-}
+  margin-bottom: 4px; 
+} 
 .signin-form .field-error {
-  margin: 2px 0 6px; /* top small, bottom small before next label */
   color: var(--color-error-400);
   font-size: var(--font-size-sm);
-
+  margin: 0 0 4px;
 }
     
   .field-label {
@@ -98,7 +97,7 @@ letter-spacing: -2.248px;
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
-    font-weight: 500;
+    font-weight: 400;
     line-height: var(--line-height-body-md); /* 160% */
     margin-bottom: 6px;
     margin-left: 4px;
@@ -124,7 +123,7 @@ letter-spacing: -2.248px;
   /* Hover state */
   .signin-form .field-input:hover:not(:focus):not(:focus-visible):not(:disabled) {
     border-color: var(--color-neutral-200);
-    background-color: var(--color-neutral-100);
+    background-color: var(--color-neutral-white);
   }
 
   /* Focus / writing state */
@@ -141,10 +140,11 @@ letter-spacing: -2.248px;
   
   /* Placeholder text styling */
   .field-input::placeholder {
-    color: var(--color-neutral-400);
+    color: var(--color-neutral-300);
     opacity: 1; /* For Firefox */
     font-size: var(--font-size-md);
     font-family: var(--font-family-primary);
+    font-weight: 400;
   }
 
   /* For Internet Explorer 10-11 */
@@ -199,7 +199,7 @@ letter-spacing: -2.248px;
     font-family: var(--type-font-family-primary);
     font-size: var(--font-size-sm);
     font-style: normal;
-    font-weight: 400;
+    font-weight: 600;
     line-height: var(--line-height-body-sm);
     text-decoration: none;
   }
@@ -217,7 +217,7 @@ letter-spacing: -2.248px;
     font-family: var(--type-font-family-primary);
     font-size: var(--font-size-lg);
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: var(--line-height-body-lg);
     margin-top: 6px;
     cursor: pointer;
@@ -296,7 +296,7 @@ line-height: var(--line-height-body-md);
   
   .signin-footer a {
     text-decoration: none;
-    color: var(--color-primary-800);
+    color: var(--color-primary-700);
 text-align: center;
 
 font-family: var(--type-font-family-primary);
