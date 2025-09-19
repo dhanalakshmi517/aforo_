@@ -478,7 +478,6 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
             isOpen={showEditPopup}
             onClose={() => {
               setShowEditPopup(false);
-              onClose();
             }}
             onSave={async () => {
               await handleSaveDraft();
