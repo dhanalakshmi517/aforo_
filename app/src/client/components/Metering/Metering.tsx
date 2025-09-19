@@ -25,6 +25,7 @@ interface Metric {
   productName: string;
   unit: string;
   status: string;
+  createdOn?: string;
 }
 
 interface NotificationState {
@@ -123,34 +124,34 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     }
   };
 
-  useEffect(() => {
-    getUsageMetrics()
-      .then((data: UsageMetricDTO[]) => {
-        const mapped: Metric[] = data.map((m) => ({
+  const fetchMetrics = React.useCallback(async () => {
+    try {
+      const data: UsageMetricDTO[] = await getUsageMetrics();
+      const mapped: Metric[] = data.map((m) => ({
         id: (m as any).metricId ?? (m as any).billableMetricId,
         usageMetric: m.metricName,
         productName: m.productName,
         unit: m.unitOfMeasure,
-        status: (m as any).status ?? (m as any).metricStatus ?? "Active", 
-        
+        status: (m as any).status ?? (m as any).metricStatus ?? "Active",
+        createdOn: (m as any).createdOn,
       }));
       setMetrics(mapped);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (String(err).includes("401")) {
-          // Token expired or unauthorized, logout user
-          logout();
-        }
-      });
+    } catch (err) {
+      console.error(err);
+      if (String(err).includes("401")) logout();
+    }
   }, []);
 
+  useEffect(() => {
+    fetchMetrics();
+  }, [fetchMetrics]);
+
   if (showNewUsageMetricForm) {
-    return <CreateUsageMetric onClose={() => setShowNewUsageMetricForm(false)} />;
+    return <CreateUsageMetric draftMetricId={selectedMetricId ?? undefined} onClose={() => { setShowNewUsageMetricForm(false); fetchMetrics(); }} />;
   }
 
   if (showEditMetricForm && selectedMetricId !== null) {
-    return <EditMetrics metricId={selectedMetricId.toString()} onClose={() => setShowEditMetricForm(false)} />;
+    return <EditMetrics metricId={selectedMetricId.toString()} onClose={() => { setShowEditMetricForm(false); fetchMetrics(); }} />;
   }
 
   const metricColors = [
@@ -164,10 +165,18 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   ];
   const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
 
-  const filteredMetrics = metrics.filter((m) =>
-    m.usageMetric.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.productName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMetrics = metrics
+    .filter((m) =>
+      m.usageMetric.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.productName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aDraft = String(a.status).toLowerCase() === 'draft';
+      const bDraft = String(b.status).toLowerCase() === 'draft';
+      if (aDraft && !bDraft) return -1;
+      if (!aDraft && bDraft) return 1;
+      return 0;
+    });
 
   return (
     <div className="rate-plan-container">
@@ -187,7 +196,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
             <th>Usage Metric</th>
             <th>Product Name</th>
             <th>Unit Of Measure</th>
-            <th>Status</th>           
+            <th>Status</th>     
+            <th>Created On</th>
             <th className="actions-cell">Actions</th>
             
           </tr>
@@ -195,7 +205,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         <tbody>
           {filteredMetrics.map((metric, idx) => (
             <tr key={metric.id}>
-              <td className="metrics-cell"><div className="metrics-wrapper" style={{display:'flex',alignItems:'center',justifyContent:'flex-start'}}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom">{display(metric.unit)}</div><div className="metric-name">{display(metric.usageMetric)}</div></div></div><span style={{marginLeft:4}}>{display(metric.usageMetric)}</span></div></td>
+              <td className="metrics-cell"><div className="metrics-wrapper" style={{display:'flex',alignItems:'center',justifyContent:'flex-start'}}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom" title={metric.unit}>{display(metric.unit && metric.unit.length > 3 ? `${metric.unit.substring(0, 3)}...` : metric.unit)}</div><div className="metric-name" title={metric.usageMetric}>{display(metric.usageMetric && metric.usageMetric.length > 3 ? `${metric.usageMetric.substring(0, 3)}...` : metric.usageMetric)}</div></div></div><span style={{marginLeft:4}}>{display(metric.usageMetric)}</span></div></td>
               <td>{display(metric.productName)}</td>
               <td>{display(metric.unit)}</td>
               <td>
@@ -205,10 +215,11 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                   {formatStatus(metric.status)}
                 </span>
               </td>
+              <td>{display(metric.createdOn)}</td>
               
               <td className="actions-cell"><div className="product-action-buttons">
                 {String(metric.status).toLowerCase() === 'draft' ? (
-                  <button className="product-view-button" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
+                  <button className="product-view-button" onClick={() => { setSelectedMetricId(metric.id); setShowNewUsageMetricForm(true); }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M7.99967 1.33325C11.6816 1.33325 14.6663 4.31802 14.6663 7.99992C14.6663 11.6818 11.6816 14.6666 7.99967 14.6666C4.31778 14.6666 1.33301 11.6818 1.33301 7.99992H5.33301H10.6663M10.6663 7.99992L7.99967 10.6666M10.6663 7.99992L7.99967 5.33325" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -231,7 +242,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
           ))}
           {filteredMetrics.length === 0 && (
             <tr>
-              <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+              <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                 <div className="metrics-empty-state">
                   <img src={UsageEmptyImg} alt="No metrics" style={{ width: 200, height: 200 }} />
                   <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>

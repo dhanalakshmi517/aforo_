@@ -123,15 +123,17 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
             error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
           }
         />
-        {error ? (
-          <div id={`${controlId}-error`} className="if-error">
-            {error}
-          </div>
-        ) : helperText ? (
-          <div id={`${controlId}-help`} className="if-help">
-            {helperText}
-          </div>
-        ) : null}
+        <div className="if-msg">
+          {error ? (
+            <span id={`${controlId}-error`} className="if-error">
+              {error}
+            </span>
+          ) : helperText ? (
+            <span id={`${controlId}-help`} className="if-help">
+              {helperText}
+            </span>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -205,15 +207,17 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
           ))}
         </select>
 
-        {error ? (
-          <div id={`${controlId}-error`} className="if-error">
-            {error}
-          </div>
-        ) : helperText ? (
-          <div id={`${controlId}-help`} className="if-help">
-            {helperText}
-          </div>
-        ) : null}
+        <div className="if-msg">
+          {error ? (
+            <span id={`${controlId}-error`} className="if-error">
+              {error}
+            </span>
+          ) : helperText ? (
+            <span id={`${controlId}-help`} className="if-help">
+              {helperText}
+            </span>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -400,11 +404,13 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
         </div>
       )}
 
-      {error ? (
-        <div className="if-error">{error}</div>
-      ) : helperText ? (
-        <div className="if-help">{helperText}</div>
-      ) : null}
+      <div className="if-msg">
+        {error ? (
+          <span className="if-error">{error}</span>
+        ) : helperText ? (
+          <span className="if-help">{helperText}</span>
+        ) : null}
+      </div>
     </div>
   );
 };
@@ -470,20 +476,21 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
             error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
           }
         />
-        {error ? (
-          <div id={`${controlId}-error`} className="if-error">
-            {error}
-          </div>
-        ) : helperText ? (
-          <div id={`${controlId}-help`} className="if-help">
-            {helperText}
-          </div>
-        ) : null}
+        <div className="if-msg">
+          {error ? (
+            <span id={`${controlId}-error`} className="if-error">
+              {error}
+            </span>
+          ) : helperText ? (
+            <span id={`${controlId}-help`} className="if-help">
+              {helperText}
+            </span>
+          ) : null}
+        </div>
       </div>
     );
   }
 );
 TextareaField.displayName = "TextareaField";
-
 
 

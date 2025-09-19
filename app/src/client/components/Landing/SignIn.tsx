@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '../../api';
 import { setAuthData, type LoginResponse } from '../../utils/auth';
 import './SignIn.css';
-import { InputField } from '../componenetsss/Inputs';
 import SigninLogo from './signin.svg';
 
 const PERSONAL_DOMAINS = new Set([
@@ -112,16 +111,18 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
         <h2 className="signin-title">Sign in to your aforo account</h2>
 
         <form className="signin-form" noValidate onSubmit={handleSubmit}>
-          <InputField
+          <label className="field-label" htmlFor="email">Business Email*</label>
+          <input
             id="email"
-            label="Business Email*"
             type="email"
             inputMode="email"
             placeholder="name@company.com"
             value={email}
-            onChange={(val) => { setEmail(val); if (emailError) setEmailError(null); }}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setEmail(e.currentTarget.value); if (emailError) setEmailError(null); }}
             onBlur={() => setEmailError(validateEmail(email))}
             autoComplete="username"
+            className={`field-input ${emailError ? 'is-error' : ''}`}
+            required
           />
           {emailError && <p id="email-error" className="field-error" role="alert">{emailError}</p>}
 
@@ -131,16 +132,15 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
           </div>
 
           <div className="password-wrapper">
-            <InputField
+            <input
               id="password"
-              label=""
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               value={password}
-              onChange={(val) => { setPassword(val); if (passwordError) setPasswordError(null); }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.currentTarget.value); if (passwordError) setPasswordError(null); }}
               onBlur={() => setPasswordError(validatePassword(password))}
               autoComplete="current-password"
-              error={passwordError || undefined}
+              className={`field-input ${passwordError ? 'is-error' : ''}`}
               required
             />
             <button

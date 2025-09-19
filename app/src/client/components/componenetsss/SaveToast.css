@@ -1,0 +1,122 @@
+@import "../Variables/Variables.css";
+@import "../Variables/Variables.css";
+
+/* tweakable sizes */
+:root{
+  --toast-icon-size: 60px;   /* was 28px */
+  --toast-min-height: 130px; /* was ~92px */
+}
+
+/* Container fixed bottom-right */
+.toast-viewport{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 9999;
+  pointer-events: none; /* clicks pass through except cards */
+}
+
+/* Card base */
+.toast-card{
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;                 /* was start — center to match bigger icon */
+  gap: 12px;
+
+  min-width: 366px;
+  min-height: auto; /* ✅ was height:92px auto (invalid) */
+  height: auto;                        /* let content grow if needed */
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-neutral-white);
+  box-shadow: 0 15px 36px 0 rgba(0, 0, 0, 0.07),
+              0 6.118px 13.141px 0 rgba(0, 0, 0, 0.03),
+              0 2.41px 6.38px 0 rgba(0, 0, 0, 0.02),
+              0 1.111px 3.127px 0 rgba(0, 0, 0, 0.01),
+              0 0.463px 1.237px 0 rgba(0, 0, 0, 0.01);
+  /* entrance animation */
+  transform: translateY(8px) scale(0.98);
+  opacity: 0;
+  animation: toast-in 220ms ease-out forwards, toast-life linear forwards;
+}
+
+/* success + error skins (match your screenshot feel) */
+.toast-success{
+  background: var(--color-neutral-white);
+  border: 0.6px solid #9BCE80;
+}
+
+.toast-error{
+  background: var(--color-neutral-white);
+  border: 0.6px solid #F5C9C9;
+}
+
+.toast-icon{
+  display: grid;
+  place-items: center;
+  width: var(--toast-icon-size);       /* ✅ bigger round chip */
+  height: var(--toast-icon-size);      /* ✅ bigger round chip */
+  border-radius: 999px;
+  background: rgba(0,0,0,0.03);
+  margin-top: 0;                       /* ✅ no offset now that we’re centered */
+}
+
+.toast-success .toast-icon{ background: #EDF7E6; }
+.toast-error   .toast-icon{ background: #FFEDE9; }
+
+.toast-body{
+  display: grid;
+  gap: 4px;
+}
+
+.toast-title{
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-lg); /* 150% */
+}
+
+/* subtitle / body */
+.toast-message{
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm); /* 150% */
+}
+
+/* close button (X) */
+.toast-close{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  padding: 6px;
+  margin-left: 8px;
+  border-radius: 8px;
+  margin-top: -35px;
+  cursor: pointer;
+}
+.toast-close:hover{ color:#111827; background: rgba(0,0,0,0.06); }
+
+/* slide/fade in */
+@keyframes toast-in{
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* life bar via box-shadow inset (4 seconds default) */
+@keyframes toast-life {
+  from { box-shadow: inset 0 -3px 0 0 rgba(0,0,0,0.08), 0 10px 22px rgba(0,0,0,0.12);}
+  to   { box-shadow: inset -100% -3px 0 0 rgba(0,0,0,0.08), 0 10px 22px rgba(0,0,0,0.12);}
+}
+
+/* pause animation while hovering */
+.toast-paused{ animation-play-state: paused !important; }
+.toast-paused *{ animation-play-state: paused !important; }

@@ -1,5 +1,4 @@
-CustomSelect---
-.custom-select-container {
+custom select .custom-select-container {
   position: relative;
   width: 100%;
   font-family: var(--font-family-primary, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);

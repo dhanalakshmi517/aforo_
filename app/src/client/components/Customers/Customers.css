@@ -74,7 +74,6 @@
 .customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 10%; }
 
 /* ---------------------- Company (column 1) ---------------------- */
-.name-cell { /* keep as table-cell */ }
 .cell-flex { display: flex; align-items: center; }
 
 .customer-logo {
@@ -104,7 +103,6 @@
 }
 
 /* ---------------------- Customer (column 2) ---------------------- */
-.customer-cell { /* keep as table-cell */ }
 .cell-stack { display: flex; flex-direction: column; align-self: stretch; }
 
 .person-name {

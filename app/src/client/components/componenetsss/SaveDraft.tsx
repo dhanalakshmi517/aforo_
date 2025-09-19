@@ -5,14 +5,20 @@ interface SaveDraftProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+  onDismiss?: () => void; // Just close popup without any action
 }
 
-const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave }) => {
+const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDismiss }) => {
   if (!isOpen) return null;
 
   return (
     <div className="save-modal-overlay">
       <div className="save-modal">
+        <button className="save-modal-close" onClick={onDismiss || onClose}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M11 1L1 11M1 1L11 11" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
         <p className="save-modal-title">Do you want to save this plan as a draft?</p>
         <p className="save-modal-text">
           If you go back now, your progress will be lost. Save it as a draft to

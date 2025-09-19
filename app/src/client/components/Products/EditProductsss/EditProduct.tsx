@@ -2,11 +2,12 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputField, TextareaField } from '../../componenetsss/Inputs';
-import SaveDraft from '../../componenetsss/SaveDraft';
+import EditPopup from '../../componenetsss/EditPopUp';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { ConfigurationTab } from './EditConfiguration';
 import EditReview from './EditReview';
 import TopBar from '../../componenetsss/TopBar';
+import { useToast } from '../../componenetsss/ToastProvider';
 import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration, buildAuthHeaders } from './EditProductApi';
 import { finalizeProduct, deleteProduct } from '../api';
@@ -32,6 +33,7 @@ type ActiveTab = 'general' | 'configuration' | 'review';
 
 const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditProductProps) => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     document.body.classList.add('edit-product-page');
@@ -59,6 +61,10 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
   });
   // store existing products for uniqueness checks
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
+  // store original values to exclude current product from uniqueness checks
+  const [originalValues, setOriginalValues] = useState<{ productName: string; skuCode: string }>({ productName: '', skuCode: '' });
+  // track which fields have been modified by the user
+  const [modifiedFields, setModifiedFields] = useState<Set<string>>(new Set());
 
   // Fetch existing products once on mount (for uniqueness checks)
   useEffect(() => {
@@ -96,9 +102,20 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     const trimmed = value.trim();
     setFormData(prev => ({ ...prev, [field]: value }));
 
-    // Uniqueness checks similar to NewProduct component
+    // Mark this field as modified by the user
+    setModifiedFields(prev => new Set(prev).add(field));
+
+    // Only check uniqueness for fields that have been modified by the user (including this change)
     if (field === 'productName') {
-      const duplicate = existingProducts.some(p => (p.productName || '').toLowerCase() === trimmed.toLowerCase() && p.skuCode !== formData.skuCode);
+      const duplicate = existingProducts.some(p => {
+        // Skip if this is the current product (same original values)
+        if ((p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() && 
+            (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) {
+          return false;
+        }
+        // Check if another product has the same name
+        return (p.productName || '').toLowerCase() === trimmed.toLowerCase();
+      });
       if (duplicate) {
         setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
       } else if (errors.productName === 'Must be unique') {
@@ -107,7 +124,15 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
       }
     }
     if (field === 'skuCode') {
-      const duplicate = existingProducts.some(p => (p.skuCode || '').toLowerCase() === trimmed.toLowerCase() && p.productName !== formData.productName);
+      const duplicate = existingProducts.some(p => {
+        // Skip if this is the current product (same original values)
+        if ((p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() && 
+            (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) {
+          return false;
+        }
+        // Check if another product has the same SKU
+        return (p.skuCode || '').toLowerCase() === trimmed.toLowerCase();
+      });
       if (duplicate) {
         setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
       } else if (errors.skuCode === 'Must be unique') {
@@ -133,12 +158,35 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     if (!formData.productName.trim()) newErrors.productName = 'Product name is required';
     if (!formData.skuCode.trim()) newErrors.skuCode = 'SKU code is required';
 
-    // Uniqueness checks
-    if (formData.productName && existingProducts.some(p => lower(p.productName || '') === lower(formData.productName) && p.skuCode !== formData.skuCode)) {
-      newErrors.productName = 'Must be unique';
+    // Uniqueness checks - only for fields that have been modified by the user
+    if (formData.productName && modifiedFields.has('productName')) {
+      const isDuplicate = existingProducts.some(p => {
+        // Skip if this is the current product (same original values)
+        if (lower(p.productName || '') === lower(originalValues.productName) && 
+            lower(p.skuCode || '') === lower(originalValues.skuCode)) {
+          return false;
+        }
+        // Check if another product has the same name
+        return lower(p.productName || '') === lower(formData.productName);
+      });
+      if (isDuplicate) {
+        newErrors.productName = 'Must be unique';
+      }
     }
-    if (formData.skuCode && existingProducts.some(p => lower(p.skuCode || '') === lower(formData.skuCode) && p.productName !== formData.productName)) {
-      newErrors.skuCode = 'Must be unique';
+
+    if (formData.skuCode && modifiedFields.has('skuCode')) {
+      const isDuplicate = existingProducts.some(p => {
+        // Skip if this is the current product (same original values)
+        if (lower(p.productName || '') === lower(originalValues.productName) && 
+            lower(p.skuCode || '') === lower(originalValues.skuCode)) {
+          return false;
+        }
+        // Check if another product has the same SKU
+        return lower(p.skuCode || '') === lower(formData.skuCode);
+      });
+      if (isDuplicate) {
+        newErrors.skuCode = 'Must be unique';
+      }
     }
 
     setErrors(newErrors);
@@ -216,75 +264,108 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
   const handleNextStep = async () => {
     if (activeTab === 'general') {
       if (!validateForm()) return;
-      
-      // Update product via PUT API before moving to next step
-      try {
-        setLoading(true);
-        const { getAuthData } = await import('../../../utils/auth');
-        const authData = getAuthData();
-        
-        if (!authData?.token) {
-          throw new Error('No authentication token found');
-        }
-
-        const updatePayload = {
-          productName: formData.productName,
-          version: formData.version,
-          internalSkuCode: formData.skuCode,
-          productDescription: formData.description
-        };
-
-        await updateGeneralDetails(productId!, updatePayload);
-
-        // Only move to next step if API call succeeds
-        goToStep(1);
-      } catch (err) {
-        console.error('Update failed:', err);
-        // Show error to user - you could add a toast notification here
-        alert('Failed to update product. Please try again.');
-      } finally {
-        setLoading(false);
-      }
+      // Just move to next step without API call
+      goToStep(1);
       return;
     }
     if (activeTab === 'configuration') {
-      const ok = await configRef.current?.submit();
-      if (!ok) return;
+      // Just move to next step without API call - validation will happen in review
       goToStep(2);
       return;
     }
     if (activeTab === 'review') {
-      if (isDraft && productId) {
-        try {
-          setLoading(true);
-          await finalizeProduct(productId);
-          onClose();
-        } catch (err) {
-          console.error('Finalize failed', err);
-          alert('Failed to finalize product. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      } else {
+      // Use the shared save function
+      const success = await saveAllChanges();
+      if (success) {
+        showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
         onClose();
+      } else {
+        showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update product. Please try again.' });
       }
     }
   };
 
 
-  // Submit configuration PUT
-  const submitConfig = async (): Promise<boolean> => {
-    if (!productId) return true; // new product? allow
+  // Function to save all changes (used in both review tab and back button popup)
+  const saveAllChanges = async ({ includeGeneral = true, includeConfig = true }: { includeGeneral?: boolean; includeConfig?: boolean } = {}): Promise<boolean> => {
     try {
+      setLoading(true);
+      console.log('Starting saveAllChanges...');
+      console.log('Current form data:', formData);
+      console.log('Current configuration:', configuration);
+      console.log('Product ID:', productId);
+      console.log('Is Draft:', isDraft);
+
       const { getAuthData } = await import('../../../utils/auth');
       const authData = getAuthData();
-      if (!authData?.token) throw new Error('No authentication token');
-      await updateConfiguration(productId, configuration.productType, configuration);
+      
+      if (!authData?.token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Check if productId exists
+      if (!productId) {
+        throw new Error('Product ID is required for updating');
+      }
+
+      // 1. Update general details with comprehensive payload (only if requested)
+      if (includeGeneral) {
+      const generalDetailsPayload = {
+        productName: formData.productName?.trim() || '',
+        version: formData.version?.trim() || '',
+        internalSkuCode: formData.skuCode?.trim() || '',
+        productDescription: formData.description?.trim() || '',
+        status: isDraft ? 'DRAFT' : 'ACTIVE',
+        productType: configuration.productType || productType || '',
+        lastUpdated: new Date().toISOString()
+      };
+      
+      console.log('Sending general details payload:', generalDetailsPayload);
+      await updateGeneralDetails(productId, generalDetailsPayload);
+      console.log('General details updated successfully');
+      }
+
+      // 2. Update configuration with enhanced payload (only if requested)
+      if (includeConfig && configuration.productType && productId) {
+        const configurationPayload = {
+          productType: configuration.productType,
+          productId: productId,
+          version: formData.version?.trim() || '1.0',
+          status: 'ACTIVE',
+          lastUpdated: new Date().toISOString(),
+          ...Object.fromEntries(
+            Object.entries(configuration).map(([key, value]) => [key, String(value)])
+          )
+        };
+        
+        console.log('Sending configuration payload:', configurationPayload);
+        await updateConfiguration(productId, configuration.productType, configurationPayload);
+        console.log('Configuration updated successfully');
+      } else {
+        console.log('Skipping configuration update - no productType or productId');
+      }
+
+      // 3. Finalize product if it was a draft
+      if (isDraft && productId) {
+        console.log('Finalizing product:', productId);
+        await finalizeProduct(productId);
+        console.log('Product finalized successfully');
+      } else {
+        console.log('Skipping finalization - not a draft or no productId');
+      }
+
+      console.log('All updates completed successfully');
       return true;
     } catch (err) {
-      console.error('Config update failed', err);
-      alert('Failed to update configuration');
+      console.error('Update failed:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined
+      });
+      alert(`Failed to update product: ${err instanceof Error ? err.message : 'Unknown error'}`);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -305,13 +386,23 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
         const data = await fetchGeneralDetails(productId);
         console.log('Fetched general product details:', data);
         
+        const originalProductName = data.productName ?? '';
+        const originalSkuCode = data.internalSkuCode ?? '';
+        
         setFormData(prev => ({
           ...prev,
-          productName: data.productName ?? '',
+          productName: originalProductName,
           version: data.version ?? '',
-          skuCode: data.internalSkuCode ?? '',
+          skuCode: originalSkuCode,
           description: data.productDescription ?? ''
         }));
+        
+        // Store original values for uniqueness validation
+        setOriginalValues({
+          productName: originalProductName,
+          skuCode: originalSkuCode
+        });
+        
         setIsDraft((data.status ?? '').toUpperCase() === 'DRAFT');
         
         // Set product type for configuration component to fetch its data
@@ -346,27 +437,13 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
     fetchDetails();
   }, [productId]);
 
-  if (loading) {
-    return <div style={{ padding: 20 }}>Loading...</div>;
-  }
+  // Removed loading screen - component renders immediately
 
   return (
     <>
       <TopBar
         title={productId ? 'Edit Product' : 'Create New Product'}
         onBack={() => setShowSaveDraftModal(true)}
-        cancel={{
-          label: 'Cancel',
-          onClick: handleCancel
-        }}
-        save={{
-          label: draftStatus === 'saved' ? 'Saved as Draft' : 'Save as Draft',
-          labelWhenSaved: 'Saved as Draft',
-          saved: draftStatus === 'saved',
-          saving: draftStatus === 'saving',
-          disabled: loading,
-          onClick: handleSaveDraft
-        }}
       />
       <div className="edit-np-viewport">
 
@@ -451,7 +528,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
                         onProductTypeChange={handleProductTypeChange}
                         ref={configRef}
                         productId={productId ?? formData.skuCode}
-                        onSubmit={submitConfig}
                       />
                     </div>
                   </div>
@@ -497,22 +573,31 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           </div>
         </div>
 
-        <SaveDraft
+        <EditPopup
           isOpen={showSaveDraftModal}
-          onClose={async () => {
-            setShowSaveDraftModal(false);
-            if (productId) {
-              try {
-                await deleteProduct(productId);
-              } catch (e) {
-                console.error('Failed to delete product draft', e);
-              }
-            }
-          }}
-          onSave={async () => {
-            await handleSaveDraft();
+          onClose={() => {
+            // Cancel - just close popup and form without saving
             setShowSaveDraftModal(false);
             onClose();
+          }}
+          onSave={async () => {
+            // Save Changes - validate form first, then call all APIs like in review tab
+            if (!validateForm()) {
+              setShowSaveDraftModal(false);
+              return; // Don't close if validation fails, let user see errors
+            }
+            
+            setShowSaveDraftModal(false);
+            const success = await saveAllChanges({
+              includeGeneral: true,
+              includeConfig: activeTab !== 'general'
+            });
+            if (success) {
+              showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
+              onClose();
+            } else {
+              showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update product. Please try again.' });
+            }
           }}
         />
 

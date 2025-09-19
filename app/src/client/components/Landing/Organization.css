@@ -6,6 +6,10 @@
     background: var(--color-neutral-white);
   }
   
+
+  select:invalid {
+    color: #999; /* gray placeholder color */
+  }
   .org-bg {
     position: absolute;
     inset: -80px -120px -80px -120px;
@@ -45,6 +49,19 @@ background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
 
+  }
+  select:invalid {
+    color: #999; /* placeholder */
+  }
+  select:not(:invalid) {
+    color: var(--color-neutral-1700); /* chosen value */
+  }
+  select option:not(:disabled) {
+    color: var(--color-neutral-1700);
+    font-style: normal;
+  }
+  select option:disabled {
+    color: #999; /* gray placeholder color */
   }
   
   .org-title span {
@@ -95,7 +112,17 @@ background-clip: text;
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
+    line-height: var(--line-height-body-md);
+  }
+
+   
+  .form-label {
+    color: var(--color-neutral-1400);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
     line-height: var(--line-height-body-md);
   }
   .opt-note {
@@ -216,7 +243,8 @@ background-clip: text;
 
   /* Style for empty required fields */
   .org-field input:required:not(:placeholder-shown):invalid,
-  .org-field select:required:invalid,
+  /* Remove auto red border for untouched required selects */
+/* .org-field select:required:invalid, */
   .org-field textarea:required:not(:placeholder-shown):invalid {
     border-color: var(--color-error-400);
     box-shadow: 0 0 0 1px var(--color-error-400);
@@ -247,14 +275,72 @@ background-clip: text;
     border:1px solid var(--color-neutral-300);
 
   }
+
+  /* Hover state */
+  .org-field input:hover:not(:focus):not(:disabled):not(.error),
+  .org-field select:hover:not(:focus):not(:disabled):not(.error),
+  .org-field textarea:hover:not(:focus):not(:disabled):not(.error) {
+    border-color: var(--color-neutral-200);
+    background-color: var(--color-neutral-100);
+  }
+
+  /* Focus / writing state */
+  .org-field input:focus,
+  .org-field select:focus,
+  .org-field textarea:focus {
+    border-color: var(--color-primary-600);
+    outline: none;
+    background-color: var(--color-neutral-white);
+    box-shadow: 0 0 0 1px var(--color-primary-600);
+  }
   
+  /* Ensure select text color once value chosen or on focus */
+  .org-field select:not(:invalid),
+  .org-field select:focus {
+    color: var(--color-neutral-1700);
+  }
+
+  /* Phone number composite field */
+  .phone-input-wrapper:hover:not(.error) {
+    border-color: var(--color-neutral-200);
+    background-color: var(--color-neutral-white);
+  }
+  .phone-input-wrapper:focus-within {
+    border-color: var(--color-primary-600);
+    box-shadow: 0 0 0 1px var(--color-primary-600);
+    background-color: var(--color-neutral-white);
+  }
+
   /* Style for the select placeholder */
   .org-field select:invalid,
   .org-field select option[value=""] {
     color: var(--color-neutral-600);
   }
   
-  /* Style for selected value */
+  /* Placeholder style for "select your role" option */
+.org-field select:invalid {
+  color: #999;
+  font-style: italic;
+}
+.org-field select option[value=""] {
+  color: #999;
+  font-style: italic;
+}
+
+/* Suppress browser invalid red border until we add .error class */
+.org-field select:required:invalid:not(.error) {
+  border-color: var(--color-neutral-300) !important;
+  box-shadow: none !important;
+}
+
+/* Final override for placeholder in selects */
+.org-field select:invalid {
+  color: var(--color-neutral-500);
+  font-weight: 400;
+  font-family: var(--font-family-primary);
+}
+
+/* Style for selected value */
   .org-field select option[value=""] {
     color: var(--color-neutral-400);
   }
@@ -267,7 +353,7 @@ background-clip: text;
     width: 100%;
     margin-top: 10px;
     padding: 0; /* align with other org-field containers */
-    background: transparent;
+    background-color: var(--color-neutral-white);
     border: none;
   }
   
@@ -290,6 +376,7 @@ background-clip: text;
 
   .other-role-input input::placeholder {
     color: var(--color-neutral-400);
+    background-color: var(--color-neutral-white);
   }
 
   .other-role-input input.error {
@@ -333,17 +420,12 @@ background-clip: text;
 
   
   .org-field select {
-    appearance: none;
+    appearance: auto;
     border:1px solid var(--color-neutral-300);
     /* match input height */
     min-height: 40px;
     padding: 8px 12px;
-    background-image:
-      linear-gradient(45deg, transparent 50%, #7c8da6 50%),
-      linear-gradient(135deg, #7c8da6 50%, transparent 50%);
-    background-position: calc(100% - 20px) calc(1.1em), calc(100% - 15px) calc(1.1em);
-    background-size: 6px 6px, 6px 6px;
-    background-repeat: no-repeat;
+    /* remove custom arrow, use native */
   }
   
   .org-field textarea { resize: vertical; min-height: 112px; }

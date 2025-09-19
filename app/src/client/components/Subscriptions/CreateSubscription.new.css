@@ -37,6 +37,13 @@
   left: 0;
   z-index: 1;
 }
+/* custom scrollbar */
+.sub-sidebars::-webkit-scrollbar      { width: 6px; }
+.sub-sidebars::-webkit-scrollbar-track{ background: transparent; }
+.sub-sidebars::-webkit-scrollbar-thumb{ background-color: #C3C2D0; border-radius:2px; }
+.sub-sidebars::-webkit-scrollbar-thumb:hover{ background-color:#A9A8B5; }
+.sub-sidebars::-webkit-scrollbar-thumb:active{ background-color:#878694; }
+.sub-sidebars{ scrollbar-width: thin; scrollbar-color:#C3C2D0 transparent; }
 
 .form-section {
   margin-left: 300px;
@@ -46,6 +53,13 @@
   padding: 32px 40px;
   position: relative;
 }
+/* custom scrollbar */
+.form-section::-webkit-scrollbar      { width: 6px; }
+.form-section::-webkit-scrollbar-track{ background: transparent; }
+.form-section::-webkit-scrollbar-thumb{ background-color: #C3C2D0; border-radius:2px; }
+.form-section::-webkit-scrollbar-thumb:hover{ background-color:#A9A8B5; }
+.form-section::-webkit-scrollbar-thumb:active{ background-color:#878694; }
+.form-section{ scrollbar-width: thin; scrollbar-color:#C3C2D0 transparent; }
 
 .rateplan-note {
   display: flex;
@@ -53,12 +67,12 @@
   gap: 4px;
   margin-top: 4px;
   flex: 1 0 0;
-  color: var(--text-text-dark, #75797E);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--fontsize-body-xs, 10px);
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-xs);
   font-style: normal;
   font-weight: 500;
-  line-height: var(--line-height-body-xs, 16px);
+  line-height: var(--line-height-body-xs);
 }
 
 .form-card {

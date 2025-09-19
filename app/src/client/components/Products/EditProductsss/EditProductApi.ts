@@ -16,11 +16,12 @@ export const buildAuthHeaders = async (): Promise<Record<string, string>> => {
 /** Update general product details (name, version, sku, description) */
 export const updateGeneralDetails = async (
   productId: string,
-  payload: { productName: string; version: string; internalSkuCode: string; productDescription: string }
+  payload: { productName: string; version: string; internalSkuCode: string; productDescription: string },
+  method: 'PUT' | 'PATCH' = 'PUT'
 ): Promise<void> => {
   const headers = await buildAuthHeaders();
   const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}`, {
-    method: 'PUT',
+    method,
     headers,
     body: JSON.stringify(payload),
   });
@@ -92,19 +93,10 @@ export const updateConfiguration = async (
   const endpoint = endpointMap[productType] || productType.toLowerCase();
   const url = `http://54.238.204.246:8080/api/products/${productId}/${endpoint}`;
 
-  // Decide between POST and PUT. If no values selected (empty payload) treat as create (POST), else update (PUT).
-  const hasValues = Object.keys(payload).length > 0;
-  let method: 'POST' | 'PUT' = hasValues ? 'PUT' : 'POST';
-
-  let res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
-  if (res.ok) return;
-
-  // Retry with alternate method on typical conflict / not allowed codes
-  const alternate: 'POST' | 'PUT' = method === 'POST' ? 'PUT' : 'POST';
-  if ([404, 405, 409, 500].includes(res.status)) {
-    res = await fetch(url, { method: alternate, headers, body: JSON.stringify(payload) });
-    if (res.ok) return;
+  // Always use PUT for existing products (EditProduct flow)
+  const method: 'PUT' = 'PUT';
+  const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
+  if (!res.ok) {
+    throw new Error('Failed to update configuration');
   }
-
-  throw new Error('Failed to save configuration');
 };

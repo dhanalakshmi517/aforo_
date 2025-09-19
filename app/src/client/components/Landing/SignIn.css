@@ -75,9 +75,20 @@ letter-spacing: -2.248px;
   
   /* Form fields */
   .signin-form {
-    text-align: left;
-  }
-  
+  text-align: left;
+}
+
+/* Reduce vertical gap between field, error message and next field specifically for sign-in */
+.signin-form .field-input {
+  margin-bottom: 4px; /* was 14px */
+}
+.signin-form .field-error {
+  margin: 2px 0 6px; /* top small, bottom small before next label */
+  color: var(--color-error-400);
+  font-size: var(--font-size-sm);
+
+}
+    
   .field-label {
     display: block;
     color: var(--color-neutral-1700);
@@ -87,7 +98,7 @@ letter-spacing: -2.248px;
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: var(--line-height-body-md); /* 160% */
     margin-bottom: 6px;
     margin-left: 4px;
@@ -101,10 +112,31 @@ letter-spacing: -2.248px;
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-md);
     line-height: 1.5;
+    background-color: var(--color-neutral-white);
+    color: var(--color-neutral-1400);
+  }
+
+  /* Error state */
+  .signin-form .field-input.is-error {
+    border-color: var(--color-error-400);
+  }
+
+  /* Hover state */
+  .signin-form .field-input:hover:not(:focus):not(:focus-visible):not(:disabled) {
+    border-color: var(--color-neutral-200);
     background-color: var(--color-neutral-100);
-    color: var(--color-neutral-900);
-    background-color: var(--color-neutral-100);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Focus / writing state */
+  .signin-form .field-input:focus,
+  .signin-form .field-input:focus-visible {
+    border:1px solid var(--color-primary-600);
+    background-color: var(--color-neutral-white);
+    outline: none;
+    color: var(--color-neutral-1400);
+    font-weight: 400;
+    font-size: var(--font-size-md);
+    font-family: var(--font-family-primary);
   }
   
   /* Placeholder text styling */

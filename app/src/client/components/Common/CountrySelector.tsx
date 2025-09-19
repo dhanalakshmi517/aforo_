@@ -31,34 +31,22 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const selectedCountry = countries.find(c => c.code === value);
   const placeholder = 'Select a country';
-  
-  // Filter countries based on search term
-  const filteredCountries = searchTerm 
+
+  const filteredCountries = searchTerm
     ? countries.filter(country => {
-        const searchLower = searchTerm.toLowerCase();
-        const countryNameLower = country.name.toLowerCase();
-        const countryCodeLower = country.code.toLowerCase();
-        
-        // First priority: Exact start of country name
-        if (countryNameLower.startsWith(searchLower)) return true;
-        
-        // Second priority: Exact start of country code
-        if (countryCodeLower.startsWith(searchLower)) return true;
-        
-        // Third priority: Contains in country name
-        if (countryNameLower.includes(searchLower)) return true;
-        
-        // Fourth priority: Contains in country code
-        if (countryCodeLower.includes(searchLower)) return true;
-        
-        // Last priority: Dial code match
+        const s = searchTerm.toLowerCase();
+        const name = country.name.toLowerCase();
+        const code = country.code.toLowerCase();
+        if (name.startsWith(s)) return true;
+        if (code.startsWith(s)) return true;
+        if (name.includes(s)) return true;
+        if (code.includes(s)) return true;
         return country.dialCode.includes(searchTerm);
       })
     : countries;
@@ -67,37 +55,49 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     const country = countries.find(c => c.code === countryCode);
     if (country) {
       onChange(countryCode);
-      if (onDialCodeChange) {
-        onDialCodeChange(country.dialCode);
-      }
+      onDialCodeChange?.(country.dialCode);
     }
     setIsOpen(false);
   };
 
   return (
     <div className="country-selector" ref={dropdownRef}>
-      <div 
-        className={`country-selector__control ${error ? 'error' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
+      <div
+        className={`${error ? 'error' : ''} ${isOpen ? 'open' : ''} country-selector__control`}
+        onClick={() => setIsOpen(o => !o)}
+        role="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') setIsOpen(o => !o);
+          if (e.key === 'Escape') setIsOpen(false);
+        }}
       >
         {selectedCountry ? (
-          <div className="flex items-center">
-            <img 
-              src={`https://flagcdn.com/16x12/${selectedCountry.code.toLowerCase()}.png`} 
+          <div className="selected-option">
+            <img
+              src={`https://flagcdn.com/16x12/${selectedCountry.code.toLowerCase()}.png`}
               alt={selectedCountry.name}
-              style={{ width: '20px', height: '15px', marginRight: '8px', objectFit: 'cover' }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              className="flag"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
             <span>{selectedCountry.name}</span>
           </div>
         ) : (
-          <span className="text-gray-400">{placeholder}</span>
+          <span className="placeholder-text">{placeholder}</span>
         )}
-        <span className="chevron">{isOpen ? '▲' : '▼'}</span>
+
+        {/* SVG chevron (consistent across browsers/DPIs) */}
+        <svg
+          className="chevron"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </div>
-      
+
       {isOpen && (
         <div className="dropdown">
           <div className="p-2 border-b border-gray-200">
@@ -111,21 +111,21 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
               autoFocus
             />
           </div>
-          <div className="dropdown-list">
+          <div className="dropdown-list" role="listbox">
             {filteredCountries.length > 0 ? (
               filteredCountries.map(country => (
-                <div 
+                <div
                   key={country.code}
                   className={`dropdown-item ${value === country.code ? 'selected' : ''}`}
                   onClick={() => handleSelect(country.code)}
+                  role="option"
+                  aria-selected={value === country.code}
                 >
-                  <img 
-                    src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
+                  <img
+                    src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
                     alt={`${country.name} flag`}
                     className="flag"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <span className="truncate">{country.name} ({country.code})</span>
                   <span className="ml-auto text-gray-500 text-sm">{country.dialCode}</span>
@@ -137,57 +137,83 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           </div>
         </div>
       )}
-      
+
       {error && <span className="error-msg">{error}</span>}
+
       <style>{`
-        .country-selector {
+        .country-selector { position: relative; width: 100%; }
+        .country-selector__control {
           position: relative;
           width: 100%;
-        }
-        .country-selector__control {
-          width: 100%;
-          padding: 8px 12px;
-          border: 1px solid #d9d9d9;
+          min-height: 40px;
+          padding: 8px 44px 8px 16px; /* extra right padding for icon */
+          border: 1px solid var(--color-neutral-300);
           border-radius: 8px;
           cursor: pointer;
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          background: white;
-          transition: border-color 0.2s ease;
-          min-height: 40px;
+          background: var(--color-neutral-white);
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .country-selector__control.error {
-          border-color: #ff4d4f;
+        .country-selector__control:hover:not(.error) {
+          border-color: var(--color-neutral-200);
+          background-color: var(--color-neutral-100);
         }
-        .selected-option {
-          display: flex;
-          align-items: center;
-          gap: 8px;
+                  }
+        .country-selector__control.open {
+          border-color: var(--color-primary-600);
+          background-color: var(--color-neutral-white);
         }
-        .flag {
+        /* Focus-visible (keyboard) */
+        .country-selector__control:focus-visible {
+          border-color: var(--color-primary-600);
+          outline: none;
+          box-shadow: 0 0 0 1px var(--color-primary-600);
+        }
+        .country-selector__control.error { border: 1px solid #ff4d4f; }
+
+        .selected-option { display: flex; align-items: center; gap: 8px; color: var(--color-neutral-1700); }
+        .flag { width: 20px; height: 15px; object-fit: cover; }
+
+        /* SVG chevron: absolute, consistent size, inherits text color */
+        .chevron {
+          position: absolute;
+          right: 12px;
+          top: 50%;
           width: 20px;
-          height: 15px;
-          object-fit: cover;
+          height: 20px;
+          color: var(--color-neutral-500);
+          transform: translateY(-50%);
+          transition: transform 0.15s ease;
+          pointer-events: none;
         }
+        .country-selector__control.open .chevron {
+          transform: translateY(-50%) rotate(180deg);
+        }
+
+        .placeholder-text {
+          color: var(--color-neutral-500);
+          font-weight: 400;
+          font-family: var(--font-family-primary);
+        }
+        .error-msg { color: #ff4d4f; font-size: 0.8em; margin-top: 4px; }
+
         .dropdown {
           position: absolute;
           top: 100%;
-          left: 0;
-          right: 0;
-          max-height: 300px;
-          background: white;
+          left: 0; right: 0;
+          background: var(--color-neutral-white);
           border: 1px solid #e2e8f0;
-          border-radius: 4px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.08);
           z-index: 10;
           display: flex;
           flex-direction: column;
+          max-height: 320px;
+          overflow: hidden;
+          margin-top: 6px;
         }
-        .dropdown-list {
-          overflow-y: auto;
-          max-height: 250px;
-        }
+        .dropdown-list { overflow-y: auto; max-height: 260px; }
         .dropdown-item {
           padding: 8px 12px;
           cursor: pointer;
@@ -195,23 +221,18 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           align-items: center;
           gap: 8px;
         }
-        .dropdown-item:hover {
-          background-color: white;
+        .dropdown-item:hover { background-color: #f9fafb; }
+        .dropdown-item.selected { background-color: #eef2ff; }
+
+        /* Search input inside dropdown */
+        .dropdown input {
+          border: 1px solid var(--color-neutral-300);
+          border-radius: 6px;
+          outline: none;
         }
-        .chevron {
-          margin-left: 8px;
-          font-size: 0.8em;
-          color: #666;
-          pointer-events: none;
-        }
-        .placeholder-text {
-          color: var(--color-neutral-400);
-          font-style: italic;
-        }
-        .error-msg {
-          color: #ff4d4f;
-          font-size: 0.8em;
-          margin-top: 4px;
+        .dropdown input:focus {
+          border-color: var(--color-primary-600);
+          box-shadow: none;
         }
       `}</style>
     </div>
@@ -219,3 +240,4 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
 };
 
 export default CountrySelector;
+

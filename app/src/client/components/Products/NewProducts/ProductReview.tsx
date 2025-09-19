@@ -31,7 +31,7 @@ interface ProductReviewProps {
 
 const CardSection: React.FC<ReviewSection> = ({ title, rows }: ReviewSection) => {
   return (
-    <section className="pr-card" aria-label={title}>
+    <section className="product-review-card" aria-label={title}>
       <header className="pr-card__header">
         <h3 className="pr-card__title">{title}</h3>
       </header>
@@ -71,7 +71,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({
   ];
 
   return (
-    <div className="pr-grid">
+    <div className="product-review-grid">
       {sections.map((section) => (
         <CardSection key={section.title} {...section} />
       ))}
