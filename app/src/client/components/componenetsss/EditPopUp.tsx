@@ -1,5 +1,5 @@
 import React from "react";
-import "./EditPopup.css";
+import "./EditPopUp.css";
 
 interface EditPopupProps {
   isOpen: boolean;
