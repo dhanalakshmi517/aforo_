@@ -62,7 +62,14 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
   }, []);
 
   const showToast = useCallback((opts: ToastOptions) => {
-    const id = opts.id ?? crypto.randomUUID();
+    const generateId = () => {
+      if (typeof crypto !== 'undefined' && typeof (crypto as any).randomUUID === 'function') {
+        return (crypto as any).randomUUID();
+      }
+      // simple fallback (not crypto-secure but sufficient for ids)
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    };
+    const id = opts.id ?? generateId();
     const item: ToastItem = {
       id,
       kind: opts.kind ?? "success",
