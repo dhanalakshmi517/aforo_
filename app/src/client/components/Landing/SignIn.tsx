@@ -135,7 +135,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
+              placeholder="Password"
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.currentTarget.value); if (passwordError) setPasswordError(null); }}
               onBlur={() => setPasswordError(validatePassword(password))}
