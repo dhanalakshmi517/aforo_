@@ -40,10 +40,22 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const { showToast } = useToast();
     // helper to delete metric then close
   const deleteAndClose = async () => {
-    if (metricId) {
-      await deleteUsageMetric(metricId);
+    let ok = true;
+    try {
+      if (metricId) {
+        await deleteUsageMetric(metricId);
+      }
+    } catch (e) {
+      console.error('Failed to delete metric', e);
+      ok = false;
+    } finally {
+      showToast({
+        kind: ok ? 'success' : 'error',
+        title: ok ? 'Metric Deleted' : 'Delete Failed',
+        message: ok ? 'Metric deleted successfully.' : 'Unable to delete metric. Please try again.'
+      });
+      onClose();
     }
-    onClose();
   };
 
   // page class
