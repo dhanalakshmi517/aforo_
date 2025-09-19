@@ -27,16 +27,16 @@
   position: relative;               /* for dropdown menu positioning */
   display: flex;
   flex-direction: column;
-  gap: 6px; /* spacing between label and control */
+  gap: 4px; /* spacing between label and control - reduced from 4px */
   width: 456px;
-  margin-bottom: 20px; /* space after each field */
+  margin-bottom: 0px; /* space after each field - reduced to 0 */
 }
 
 .if-label {
   color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-weight: 400;
+  font-weight: 500;
   line-height: var(--line-height-body-md);
   user-select: none;
 }
@@ -44,17 +44,18 @@
 /* ---------- DEFAULT (base) ---------- */
 .if-control {
   width: 456px;
-  height:40px;
-  padding:8px 12px;
-  font-size: var(--font-size-md);
-  color: var(--color-neutral-1700);
+  height: 40px;
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-1400);
   background: var(--color-neutral-white) !important;
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
-  padding: 8px 12px;
+  font-weight: 400;
   outline: none;
   transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
   box-shadow: 0 0 0 0 rgba(0,0,0,0);
+  line-height: var(--line-height-body-sm); /* Added line-height for better text alignment */
 }
 
 
@@ -64,6 +65,7 @@
     width: 456px;       /* example */
     height: 40px;  
     padding: 8px 12px;
+    line-height: 1.5; /* Ensure proper line height */
     /* fixed height for dropdown */
   }
   
@@ -106,8 +108,10 @@
 }
 
 /* Helper + error text */
+.if-msg{min-height:18px;display:block;}
+
 .if-help { font-size: 12px; color: var(--if-text-muted); }
-.if-error { font-size: 12px; color: var(--if-text-error); margin-top: 2px; }
+.if-error { font-size: 12px; color: var(--if-text-error); margin-top: -4px; }
 
 /* ---------- Select (native caret) ---------- */
 .if-select {

@@ -180,8 +180,8 @@ html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
 .rate-np-step.completed .rate-np-step__icon svg { visibility:hidden; }
 
 .rate-np-step.active .rate-np-step__icon svg circle:nth-of-type(2) { fill:var(--color-primary-800); }
-.rate-np-step.active .rate-np-step__connector { background-color: var(--color-primary-800); }
-rate-np-step.active .rate-np-step__icon svg circle:nth-of-type(1) { stroke:var(--color-primary-800); }
+.rate-np-step.active .rate-np-step__connector { background-color: #C3C2D0; }
+.rate-np-step.active .rate-np-step__icon svg circle:nth-of-type(1) { stroke: var(--color-primary-800); }
 
 .rate-np-step.active .rate-np-step__title {
   color: var(--color-neutral-1700);

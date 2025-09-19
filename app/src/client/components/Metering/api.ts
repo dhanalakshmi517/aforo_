@@ -1,3 +1,4 @@
+
 export interface Product {
   productId: number;
   productName: string;
@@ -48,6 +49,15 @@ export async function getUsageMetrics(): Promise<UsageMetricDTO[]> {
     console.error('Error fetching usage metrics:', error);
     return [];
   }
+}
+
+
+export async function getUsageMetric(id:number):Promise<UsageMetricDTO|null>{
+  try{
+    const response=await fetch(`${METRICS_BASE_URL}/billable-metrics/${id}`,{headers:getAuthHeaders()});
+    if(!response.ok) return null;
+    return await response.json();
+  }catch(e){console.error('Error fetching metric',e);return null;}
 }
 
 export async function deleteUsageMetric(id: number): Promise<boolean> {

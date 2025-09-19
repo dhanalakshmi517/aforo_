@@ -5,9 +5,10 @@ import { ProductFormData } from '../../../types/productTypes';
 import EditProduct from './EditProductsss/EditProduct';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
 import CreateProduct from './NewProducts/NewProduct';
+import type { DraftProduct } from './NewProducts/NewProduct';
 import './Products.css';
 import '../Rateplan/RatePlan.css';
-import { getProducts, createProduct as createProductApi, deleteProduct as deleteProductApi, getBillableMetrics } from './api';
+import { getProducts, createProduct as createProductApi, deleteProduct as deleteProductApi } from './api';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 
 // Function to get a random background color for metric cards
@@ -36,49 +37,8 @@ const getRandomBorderColor = (index: number) => {
 import styles from './Products.module.css';
 import PageHeader from '../PageHeader/PageHeader';
 import EmptyBox from './Componenets/empty.svg';
+import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 
-// Icon components
-const SuccessIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path d="M20 6L9 17L4 12" stroke="#23A36D" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ErrorIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path d="M12 8V12M12 16H12.01M7.9 20C9.8 21 12 21.2 14.1 20.75C16.2 20.3 18 19.05 19.3 17.3C20.6 15.55 21.15 13.4 20.98 11.3C20.81 9.15 19.89 7.15 18.37 5.63C16.85 4.11 14.85 3.18 12.71 3.02C10.57 2.85 8.44 3.45 6.71 4.72C4.97 5.98 3.75 7.82 3.25 9.91C2.76 12 3.02 14.19 4 16.1L2 22L7.9 20Z" stroke="#E34935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-interface NotificationProps {
-  message: string;
-  type: 'success' | 'error';
-  productName: string;
-  onClose: () => void;
-}
-const Notification: React.FC<NotificationProps> = ({ message, type, productName, onClose }: NotificationProps) => {
-  const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
-  return (
-    <div className={`notification ${type === 'error' ? 'error' : ''}`}>
-      <div className="notification-icon">
-        <Icon />
-      </div>
-      <button className="notification-close" onClick={onClose} aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M12 4L4 12M4 4L12 12" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      <div className="notification-text">
-        <h5>{type === 'success' ? 'Product Deleted' : 'Failed to Delete Product'}</h5>
-        <p className="notification-details">
-          {type === 'success'
-            ? `The product "${productName}" was successfully deleted.`
-            : `Failed to delete the product "${productName}". Please try again.`}
-        </p>
-      </div>
-    </div>
-  );
-};
 
 interface DeleteModalProps {
   onCancel: () => void;
@@ -125,13 +85,7 @@ interface ProductsProps {
   setShowNewProductForm: (show: boolean) => void;
 }
 
-type NotificationType = 'success' | 'error';
 
-interface NotificationState {
-  type: NotificationType;
-  message: string;
-  productName: string;
-}
 
 export default function Products({ showNewProductForm, setShowNewProductForm }: ProductsProps) {
   // Prevent browser scroll for Products page
@@ -143,31 +97,31 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Reusable function to fetch products along with their billable metrics
+  // Fetch products with billable metrics included in the response
   const fetchProducts = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const list = await getProducts();
-      const productsWithMetrics = await Promise.all(
-        list.map(async (product) => {
-          try {
-            const metrics = await getBillableMetrics(product.productId);
-            return {
-              ...product,
-              metrics: metrics.map(m => ({
-                metricName: m.metricName || '',
-                unitOfMeasure: m.unitOfMeasure,
-                aggregationFunction: m.aggregationFunction,
-                aggregationWindow: m.aggregationWindow
-              }))
-            };
-          } catch (error) {
-            console.error(`Error fetching metrics for product ${product.productId}:`, error);
-            return { ...product, metrics: [] };
-          }
-        })
-      );
-
+      const products = await getProducts();
+      console.log('Fetched products:', products); // Debug log
+      
+      // Process products and map billableMetrics to metrics
+      const productsWithMetrics = products.map((product, index) => {
+        console.log(`=== Product ${index + 1}: ${product.productName} ===`);
+        console.log('Full product object:', product);
+        console.log('Has billableMetrics property:', 'billableMetrics' in product);
+        console.log('billableMetrics value:', (product as any).billableMetrics);
+        console.log('billableMetrics length:', (product as any).billableMetrics?.length || 0);
+        console.log('==========================================');
+        
+        // Map billableMetrics to metrics for component compatibility
+        const productWithMetrics = {
+          ...product,
+          metrics: (product as any).billableMetrics || []
+        } as Product;
+        
+        return productWithMetrics;
+      });
+      
       setProducts(productsWithMetrics);
       setError(null);
     } catch (err) {
@@ -185,16 +139,33 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [deleteProductName, setDeleteProductName] = useState<string>('');
   const [productQuery, setProductQuery] = useState<string>('');
-  // products filtered by search term
-  const filteredProducts = products.filter(p => p.productName?.toLowerCase().includes(productQuery.toLowerCase()));
-  const [notification, setNotification] = useState<NotificationState | null>(null);
+  // products filtered by search term and sorted with drafts at top
+  const filteredProducts = products
+    .filter(p => p.productName?.toLowerCase().includes(productQuery.toLowerCase()))
+    .sort((a, b) => {
+      // Sort by status: draft products first, then others
+      if (a.status.toLowerCase() === 'draft' && b.status.toLowerCase() !== 'draft') {
+        return -1; // a comes before b
+      }
+      if (a.status.toLowerCase() !== 'draft' && b.status.toLowerCase() === 'draft') {
+        return 1; // b comes before a
+      }
+      // If both are draft or both are not draft, maintain original order
+      return 0;
+    });
   const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
+
+  // get toast API
+  const { showToast } = useToast();
 
   // Memoize the cancel handler to prevent re-renders
   const handleCreateProductCancel = React.useCallback(() => {
     setShowCreateProduct(false);
     setShowNewProductForm(false);
-  }, [setShowNewProductForm]);
+    setEditingProduct(null);
+    // Refresh products list when closing the form to ensure data is up to date
+    fetchProducts();
+  }, [setShowNewProductForm, fetchProducts]);
 
   // Sync with parent component's state
 
@@ -215,15 +186,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     }
   }, [showCreateProduct, isEditFormOpen]);
 
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 4000); // 4 seconds
-
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
 
 
   const productTypeNames = {
@@ -239,16 +201,22 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   };
 
   const InfoIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginLeft: 4 }}>
-      <g clipPath="url(#clip0_6157_14454)">
-        <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#98959A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-      <defs>
-        <clipPath id="clip0_6157_14454">
-          <rect width="12" height="12" fill="white" />
-        </clipPath>
-      </defs>
-    </svg>
+    <span 
+      className="info-icon-tooltip" 
+      title="The unit of usage your customers are billed on, e.g., users, storage, or API calls"
+      style={{ marginLeft: 4, cursor: 'help' }}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <g clipPath="url(#clip0_6157_14454)">
+          <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#98959A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+        <defs>
+          <clipPath id="clip0_6157_14454">
+            <rect width="12" height="12" fill="white" />
+          </clipPath>
+        </defs>
+      </svg>
+    </span>
   );
 
   // const renderBreadcrumb = () => {
@@ -304,17 +272,18 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       await fetchProducts();
       setShowDeleteModal(false);
       setDeleteProductId(null);
-      setNotification({
-        type: 'success',
-        message: 'Product deleted successfully',
-        productName: deleteProductName
+      // toast success
+      showToast({
+        kind: 'success',
+        title: 'Product Deleted',
+        message: `The product “${deleteProductName}” was successfully deleted.`
       });
     } catch (err) {
       console.error('Failed to delete product:', err);
-      setNotification({
-        type: 'error',
-        message: 'Failed to delete product',
-        productName: deleteProductName
+      showToast({
+        kind: 'error',
+        title: 'Failed to Delete',
+        message: `Failed to delete the product “${deleteProductName}”. Please try again.`
       });
     } finally {
       setIsDeleting(false);
@@ -323,21 +292,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
   // Moved DeleteModal and Notification components outside the main component to prevent hook issues
 
-  if (isLoading) return <div className="loading">Loading products...</div>;
   if (error) return <div className="error">Something Went wrong: {error}</div>;
 
   return (
-    <>
-      {notification && (
-        <div className="notification-container">
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            productName={notification.productName}
-            onClose={() => setNotification(null)}
-          />
-        </div>
-      )}
+    <ToastProvider>
+      <>
 
       <div>
         {/* {renderBreadcrumb()} */}
@@ -351,9 +310,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         )}
 
         {/* Create Product Form */}
-        {showCreateProduct && (
+        {showCreateProduct && !isEditFormOpen && (
           <CreateProduct
             onClose={handleCreateProductCancel}
+            draftProduct={editingProduct as unknown as DraftProduct}
           />
         )}
 
@@ -364,6 +324,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               productId={editingProduct?.productId.toString() || ''}
               onClose={() => {
                 setIsEditFormOpen(false);
+                setEditingProduct(null);
                 // Refresh the products list after save
                 fetchProducts();
               }}
@@ -405,8 +366,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   {filteredProducts.map((product) => (
                       <tr key={product.productId}>
                         <td>
-                          <div className="product-name">
-                            {product.productName}
+                          <div className="product-name-container">
+                            <div className="product-icon" style={{ backgroundColor: getRandomBackgroundColor(parseInt(product.productId) || 0) }}>
+                              {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
+                            </div>
+                            <div className="product-name">
+                              {product.productName}
+                            </div>
                           </div>
                         </td>
                         <td>
@@ -417,14 +383,28 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td className="metrics-cell">
                           <div className="metrics-wrapper">
                             {product.metrics && product.metrics.length > 0 ? (
-                              product.metrics.map((metric, index) => (
-                                <div key={index} className="metric-item" style={{ backgroundColor: getRandomBackgroundColor(index) }}>
-                                  <div className="metric-content">
-                                    <div className="metric-name">{metric.metricName}</div>
-                                    <div className="metric-uom">{metric.unitOfMeasure}</div>
+                              product.metrics.map((metric, index) => {
+                                console.log(`Rendering metric for ${product.productName}:`, {
+                                  metricName: metric.metricName,
+                                  unitOfMeasure: metric.unitOfMeasure,
+                                  fullMetric: metric
+                                });
+                                const truncatedName = metric.metricName.length > 3 
+                                  ? metric.metricName.substring(0, 3) + '...'
+                                  : metric.metricName;
+                                const truncatedUOM = metric.unitOfMeasure.length > 3 
+                                  ? metric.unitOfMeasure.substring(0, 3) + '...'
+                                  : metric.unitOfMeasure;
+                                
+                                return (
+                                  <div key={index} className="metric-item" style={{ backgroundColor: getRandomBackgroundColor(index) }}>
+                                    <div className="metric-content">
+                                      <div className="metric-uom" title={metric.unitOfMeasure}>{truncatedUOM}</div>
+                                      <div className="metric-name" title={metric.metricName}>{truncatedName}</div>
+                                    </div>
                                   </div>
-                                </div>
-                              ))
+                                );
+                              })
                             ) : (
                               <span className="no-metrics">-</span>
                             )}
@@ -440,7 +420,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                 className="product-view-button"
                                 onClick={() => {
                                   setEditingProduct(product);
-                                  setIsEditFormOpen(true);
+                                  setIsEditFormOpen(false);
+                                  setShowCreateProduct(true);
+                                  setShowNewProductForm(true);
                                 }}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -451,6 +433,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               <button
                                 className="product-edit-button"
                                 onClick={() => {
+                                  setShowCreateProduct(false);
+                                  setShowNewProductForm(false);
                                   setEditingProduct(product);
                                   setIsEditFormOpen(true);
                                 }}
@@ -503,6 +487,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           </div>
         )}
       </div>
-    </>
+      </>
+    </ToastProvider>
   );
 }

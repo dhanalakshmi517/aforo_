@@ -5,14 +5,17 @@ import TopBar from '../componenetsss/TopBar';
 import { InputField, TextareaField, SelectField } from '../componenetsss/Inputs';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import SaveDraft from '../componenetsss/SaveDraft';
+import { useToast } from '../componenetsss/ToastProvider';
 
 import {
   getProducts,
+  getUsageMetric,
   Product,
   createBillableMetric,
   updateBillableMetric,
   BillableMetricPayload,
-  finalizeBillableMetric
+  finalizeBillableMetric,
+  deleteUsageMetric
 } from './api';
 
 import UsageConditionForm from './UsageConditionForm';
@@ -31,9 +34,18 @@ const steps = [
   { id: 3, title: 'Review & Confirm',            desc: 'Review your setup to make sure everything is correct before saving the metric.' }
 ];
 
-interface CreateUsageMetricProps { onClose: () => void; }
+interface CreateUsageMetricProps { onClose: () => void; draftMetricId?: number; }
 
-export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): JSX.Element {
+export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsageMetricProps): JSX.Element {
+  const { showToast } = useToast();
+    // helper to delete metric then close
+  const deleteAndClose = async () => {
+    if (metricId) {
+      await deleteUsageMetric(metricId);
+    }
+    onClose();
+  };
+
   // page class
   useEffect(() => {
     document.body.classList.add('create-product-page');
@@ -69,12 +81,44 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
   // simple field errors holder (aligned with NewProduct pattern)
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // preload existing metric if draftMetricId
+  useEffect(() => {
+    if (draftMetricId) {
+      (async () => {
+        const data = await getUsageMetric(draftMetricId);
+        if (data) {
+          setMetricId(data.metricId ?? (data as any).billableMetricId ?? null);
+          setMetricName(data.metricName || '');
+          setSelectedProductId(String(data.productId));
+          if ((data as any).productType) setSelectedProductType((data as any).productType);
+          setUnitOfMeasure(data.unitOfMeasure || '');
+          setDescription(data.description || '');
+          setAggregationFunction(data.aggregationFunction || '');
+          setAggregationWindow(data.aggregationWindow || '');
+          setBillingCriteria(data.billingCriteria || '');
+          // usageConditions may be stored elsewhere
+        }
+      })();
+    }
+  }, [draftMetricId]);
+
   // load products
   useEffect(() => {
     getProducts()
       .then(setProducts)
       .catch((err) => console.error('Failed to load products', err));
   }, []);
+
+  // once products are loaded, derive product name & type from selectedProductId (needed for UOM options)
+  useEffect(() => {
+    if (selectedProductId && products.length) {
+      const prod = products.find(p => String(p.productId) === selectedProductId);
+      if (prod) {
+        setSelectedProductName(prod.productName);
+        setSelectedProductType(prod.productType);
+      }
+    }
+  }, [products, selectedProductId]);
 
   // previous values tracker (kept in case you use it later for diffs)
   const [previousValues, setPreviousValues] = useState<Partial<BillableMetricPayload>>({});
@@ -175,10 +219,10 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
       return true;
     }
 
-    // Creating a new metric but no data – nothing to persist
+    // Creating a new metric but no data – nothing to persist.
+    // Silently succeed so the caller can simply close the dialog without showing alerts.
     if (!metricId && Object.keys(payload).length === 0) {
-      alert('No fields to save');
-      return false;
+      return true;
     }
 
     try {
@@ -397,10 +441,33 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
                                 };
                                 const key = selectedProductType?.toUpperCase();
                                 const opts = map[key] || null;
+
                                 if (opts) {
                                   return (
-                                    <SelectField
-                                      placeholder="Select unit (eg. calls, GB, hours)"
+                                    <>
+                                      <SelectField
+                                        placeholder="Select unit (eg. calls, GB, hours)"
+                                        value={unitOfMeasure}
+                                        onChange={(v: string) => {
+                                          setUnitOfMeasure(v);
+                                          if (errors.unitOfMeasure) {
+                                            const { unitOfMeasure, ...rest } = errors;
+                                            setErrors(rest);
+                                          }
+                                        }}
+                                        options={opts.map(o => ({ label: o, value: o }))}
+                                      />
+                                      {errors.unitOfMeasure && (
+                                        <div className="met-np-error-message">{errors.unitOfMeasure}</div>
+                                      )}
+                                    </>
+                                  );
+                                }
+
+                                return (
+                                  <>
+                                    <InputField
+                                      placeholder="Unit"
                                       value={unitOfMeasure}
                                       onChange={(v: string) => {
                                         setUnitOfMeasure(v);
@@ -409,24 +476,11 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
                                           setErrors(rest);
                                         }
                                       }}
-                                      options={opts.map(o => ({ label: o, value: o }))}
-                                      error={errors.unitOfMeasure}
                                     />
-                                  );
-                                }
-                                return (
-                                  <InputField
-                                    placeholder="Unit"
-                                    value={unitOfMeasure}
-                                    onChange={(v: string) => {
-                                      setUnitOfMeasure(v);
-                                      if (errors.unitOfMeasure) {
-                                        const { unitOfMeasure, ...rest } = errors;
-                                        setErrors(rest);
-                                      }
-                                    }}
-                                    error={errors.unitOfMeasure}
-                                  />
+                                    {errors.unitOfMeasure && (
+                                      <div className="met-np-error-message">{errors.unitOfMeasure}</div>
+                                    )}
+                                  </>
                                 );
                               })()}
                             </div>
@@ -447,7 +501,7 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
                                 }}
                               />
                               {errors.aggregationFunction && (
-                                <div className="np-error-message">{errors.aggregationFunction}</div>
+                                <div className="met-np-error-message">{errors.aggregationFunction}</div>
                               )}
                             </div>
 
@@ -458,8 +512,17 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
                                 productType={selectedProductType}
                                 unitOfMeasure={unitOfMeasure}
                                 value={aggregationWindow}
-                                onChange={setAggregationWindow}
+                                onChange={(v:string)=>{
+                                  setAggregationWindow(v);
+                                  if (errors.aggregationWindow) {
+                                    const { aggregationWindow, ...rest } = errors;
+                                    setErrors(rest);
+                                  }
+                                }}
                               />
+                              {errors.aggregationWindow && (
+                                <div className="met-np-error-message">{errors.aggregationWindow}</div>
+                              )}
                             </div>
                           </div>
                         </section>
@@ -505,7 +568,7 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
 
                     {/* FOOTER (mirrors NewProduct) */}
                     <div className="met-np-form-footer">
-                      {errors.form && <div className="met-np-error-message">{errors.form}</div>}
+                      {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
 
                       {activeTab === 'metric' && (
                         <div className="met-np-btn-group met-np-btn-group--next">
@@ -531,27 +594,31 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
                       )}
 
                       {activeTab === 'review' && (
-                        <div className="met-np-btn-group">
-                          <button type="button" className="met-np-btn met-np-btn--ghost" onClick={() => gotoStep(1)}>
-                            Back
-                          </button>
-                          <button
-                            type="button"
-                            className="met-np-btn met-np-btn--primary"
-                            onClick={async () => {
-                              if (!metricId) return;
-                              setSaving(true);
-                              console.log('Finalize call for metricId', metricId);
-                              const finalized = await finalizeBillableMetric(metricId);
-                              setSaving(false);
-                              if (finalized) onClose();
-                              else alert('Finalize failed');
-                            }}
-                            disabled={saving}
-                          >
-                            {saving ? 'Submitting...' : 'Create Metric'}
-                          </button>
-                        </div>
+                        <>
+                          <div className="met-np-btn-group met-np-btn-group--back">
+                            <button type="button" className="met-np-btn met-np-btn--ghost" onClick={() => gotoStep(1)}>
+                              Back
+                            </button>
+                          </div>
+                          <div className="met-np-btn-group met-np-btn-group--next">
+                            <button
+                              type="button"
+                              className="met-np-btn met-np-btn--primary"
+                              onClick={async () => {
+                                if (!metricId) return;
+                                setSaving(true);
+                                console.log('Finalize call for metricId', metricId);
+                                const finalized = await finalizeBillableMetric(metricId);
+                                setSaving(false);
+                                if (finalized) onClose();
+                                else alert('Finalize failed');
+                              }}
+                              disabled={saving}
+                            >
+                              {saving ? 'Submitting...' : 'Create Metric'}
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
                   </form>
@@ -563,13 +630,17 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
           {/* Save Draft confirmation modal (same behavior as NewProduct) */}
           <SaveDraft
             isOpen={showSavePrompt}
-            onClose={() => setShowSavePrompt(false)}
-            onSave={async () => {
-              await handleSaveDraft();
-              onClose();
-            }}
-            onDelete={() => {
+            onClose={async () => {
               setShowSavePrompt(false);
+              await deleteAndClose();
+            }}
+            onSave={async () => {
+              const ok = await handleSaveDraft();
+              showToast({
+                kind: ok ? 'success' : 'error',
+                title: ok ? 'Draft Saved' : 'Failed to Save Draft',
+                message: ok ? 'Usage metric draft saved successfully.' : 'Unable to save draft. Please try again.'
+              });
               onClose();
             }}
           />
@@ -580,9 +651,9 @@ export default function CreateUsageMetric({ onClose }: CreateUsageMetricProps): 
       <ConfirmDeleteModal
         isOpen={showDeleteConfirm}
         productName={metricName || 'this metric'}
-        onConfirm={() => {
+        onConfirm={async () => {
           setShowDeleteConfirm(false);
-          onClose();
+          await deleteAndClose();
         }}
         onCancel={() => setShowDeleteConfirm(false)}
       />

@@ -61,13 +61,13 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Others', value: 'OTHERS' },
       ],
     },
-    { label: 'File Location', type: 'text', placeholder: 'e.g., GPT-4, Claude, custom model', required: true },
+    { label: 'File Location', type: 'text', placeholder: 'e.g., /path/to/file.csv', required: true },
   ],
   [ProductTypeEnum.SQLResult]: [
     {
       label: 'Connection String',
       type: 'text',
-      placeholder: 'eg. https://api.example.com/v1/{endpoint}',
+      placeholder: 'eg. server=localhost;database=mydb;user=admin;password=***',
       required: true,
     },
     {
@@ -471,10 +471,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
                 onBlur={handleBlur}
-                options={[
-                  { label: field.placeholder || `Select ${labelText}`, value: '' },
-                  ...(field.options || getSelectOptions(field.label) || []),
-                ]}
+                options={field.options || getSelectOptions(field.label) || []}
                 error={fieldError}
                 required={field.required}
               />
@@ -583,11 +580,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       <div className="configuration-tab">
         <div className="form-group">
           <SelectField
-            label="Product Type"
+            label=" Type of Product"
             value={productType}
             onChange={handleProductTypeChange}
             options={productOptions}
-            placeholderOption="Select Type of Product"
             required
           />
         </div>

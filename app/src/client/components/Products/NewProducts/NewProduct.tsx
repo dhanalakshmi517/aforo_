@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import TopBar from "../../componenetsss/TopBar";
+import { useToast } from "../../componenetsss/ToastProvider";
 import { InputField, TextareaField } from "../../componenetsss/Inputs";
 import ConfirmDeleteModal from "../../componenetsss/ConfirmDeleteModal";
 import { ConfigurationTab } from "./ConfigurationTab";
@@ -20,10 +21,25 @@ const steps = [
   { id: 3, title: "Review & Confirm", desc: "Validate all details before finalizing." },
 ];
 
-interface NewProductProps { onClose: () => void; }
+export interface DraftProduct {
+  productId?: string;
+  productName?: string;
+  version?: string;
+  internalSkuCode?: string;
+  skuCode?: string;
+  productDescription?: string;
+  status?: string;
+  productType?: string;
+}
 
-export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
+interface NewProductProps {
+  onClose: () => void;
+  draftProduct?: DraftProduct;
+}
+
+export default function NewProduct({ onClose, draftProduct }: NewProductProps): JSX.Element {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   useEffect(() => {
@@ -38,17 +54,18 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
 
+  // Initialize form fields with draft values if available
   const [formData, setFormData] = useState({
-    productName: "",
-    version: "",
-    skuCode: "",
-    description: "",
+    productName: draftProduct?.productName || "",
+    version: draftProduct?.version || "",
+    skuCode: (draftProduct?.internalSkuCode ?? draftProduct?.skuCode) || "",
+    description: draftProduct?.productDescription || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [configuration, setConfiguration] = useState<Record<string, any>>({
-    productType: '' // Start with blank product type
+    productType: draftProduct?.productType || '' // Prefill product type if available
   });
-  const [createdProductId, setCreatedProductId] = useState<string | null>(null);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(draftProduct?.productId || null);
   const [saving, setSaving] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [saveDraftSuccess, setSaveDraftSuccess] = useState(false);
@@ -84,7 +101,11 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
     setFormData({ ...formData, [field]: v });
     // uniqueness check for productName and skuCode
     if (field === 'productName') {
-      const duplicate = existingProducts.some(p => (p.productName || '').toLowerCase() === trimmed.toLowerCase());
+      // Exclude current draft product from uniqueness check
+      const duplicate = existingProducts.some(p => 
+        (p.productName || '').toLowerCase() === trimmed.toLowerCase() && 
+        p.productName !== draftProduct?.productName
+      );
       if (duplicate) {
         setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
       } else if (errors.productName === 'Must be unique') {
@@ -93,7 +114,11 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
       }
     }
     if (field === 'skuCode') {
-      const duplicate = existingProducts.some(p => (p.skuCode || '').toLowerCase() === trimmed.toLowerCase());
+      // Exclude current draft product from uniqueness check
+      const duplicate = existingProducts.some(p => 
+        (p.skuCode || '').toLowerCase() === trimmed.toLowerCase() && 
+        p.skuCode !== (draftProduct?.internalSkuCode ?? draftProduct?.skuCode)
+      );
       if (duplicate) {
         setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
       } else if (errors.skuCode === 'Must be unique') {
@@ -156,20 +181,26 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
     // Only validate required fields if not a draft
     if (!isDraft) {
       const newErrors: Record<string, string> = {};
-      // uniqueness checks
+      // uniqueness checks - exclude current draft product
       const lower = (s:string)=>s.trim().toLowerCase();
-      if (formData.productName && existingProducts.some(p=> lower(p.productName||'')===lower(formData.productName))) {
+      if (formData.productName && existingProducts.some(p=> 
+        lower(p.productName||'')===lower(formData.productName) && 
+        p.productName !== draftProduct?.productName
+      )) {
         newErrors.productName = 'Must be unique';
       }
-      if (formData.skuCode && existingProducts.some(p=> lower(p.skuCode||'')===lower(formData.skuCode))) {
+      if (formData.skuCode && existingProducts.some(p=> 
+        lower(p.skuCode||'')===lower(formData.skuCode) && 
+        p.skuCode !== (draftProduct?.internalSkuCode ?? draftProduct?.skuCode)
+      )) {
         newErrors.skuCode = 'Must be unique';
       }
       if (activeTab === 'general') {
         if (!formData.productName.trim()) {
-          newErrors.productName = 'Product name is required';
+          newErrors.productName = 'This field is required';
         }
         if (!formData.skuCode.trim()) {
-          newErrors.skuCode = 'SKU Code is required';
+          newErrors.skuCode = 'This field is required';
         }
         
         if (Object.keys(newErrors).length > 0) {
@@ -468,7 +499,7 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
                           </div>
                           <ConfigurationTab
                             onConfigChange={(c) => setConfiguration((prev) => ({ ...prev, ...c }))}
-                            onProductTypeChange={(t) => setConfiguration((prev) => ({ ...prev, productType: t }))}
+                            onProductTypeChange={(t) => setConfiguration({ productType: t })}
                             ref={configRef}
                             productId={createdProductId || undefined}
                             onSubmit={async (isDraft?: boolean) => {
@@ -614,12 +645,7 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
       {/* Save Draft confirmation modal */}
       <SaveDraft
         isOpen={showSavePrompt}
-        onClose={() => setShowSavePrompt(false)}
-        onSave={async () => {
-          await handleSaveDraft();
-          onClose();
-        }}
-        onDelete={async () => {
+        onClose={async () => {
           setShowSavePrompt(false);
           try {
             if (createdProductId) {
@@ -630,6 +656,19 @@ export default function NewProduct({ onClose }: NewProductProps): JSX.Element {
           } finally {
             onClose();
           }
+        }}
+        onSave={async () => {
+          const ok = await handleSaveDraft();
+          showToast({
+            kind: ok ? "success" : "error",
+            title: ok ? "Draft Saved" : "Failed to Save Draft",
+            message: ok ? "Product draft saved successfully." : "Unable to save draft. Please try again."
+          });
+          onClose();
+        }}
+        onDismiss={() => {
+          // Just close the popup, don't close the entire form
+          setShowSavePrompt(false);
         }}
       />
       </div>

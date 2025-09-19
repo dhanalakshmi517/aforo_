@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import TopBar from '../../componenetsss/TopBar';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
+import { useToast } from '../../componenetsss/ToastProvider';
+import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 
 import { getProducts, Product, updateBillableMetric } from './api';
@@ -28,6 +30,7 @@ const steps = [
 ];
 
 const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => {
+  const { showToast } = useToast();
   // rails / tabs
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>('metric');
@@ -36,6 +39,8 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
   const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
+  // edit popup state
+  const [showEditPopup, setShowEditPopup] = useState(false);
 
   // form state
   const [metricName, setMetricName] = useState('');
@@ -178,10 +183,11 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
       }
       const ok = await updateBillableMetric(Number(metricId), payload);
       if (!ok) throw new Error('Failed to update metric');
+      showToast({ kind: 'success', title: 'Changes Saved', message: 'Metric updated successfully.' });
       onClose();
     } catch (err) {
       console.error('Error updating metric:', err);
-      // console error already logged; no user alert
+      showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update metric. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -201,11 +207,12 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
       const ok = await updateBillableMetric(Number(metricId), payload);
       if (!ok) throw new Error('Failed to save draft');
       setDraftStatus('saved');
+      showToast({ kind: 'success', title: 'Draft Saved', message: 'Metric draft saved successfully.' });
       setTimeout(() => setDraftStatus('idle'), 3500);
       onClose();
     } catch (err) {
       console.error('Save draft failed:', err);
-      // console error already logged; no user alert
+      showToast({ kind: 'error', title: 'Failed to Save Draft', message: 'Unable to save draft. Please try again.' });
       setDraftStatus('idle');
     }
   };
@@ -333,15 +340,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     <>
       <TopBar
         title="Edit Usage Metric"
-        onBack={onClose}
-        cancel={{ label: 'Cancel', onClick: handleCancel }}
-        save={{
-          label: draftStatus === 'saved' ? 'Saved as Draft' : 'Save as Draft',
-          labelWhenSaved: 'Saved as Draft',
-          saved: draftStatus === 'saved',
-          saving: draftStatus === 'saving',
-          onClick: handleSaveDraft
-        }}
+        onBack={() => setShowEditPopup(true)}
       />
 
       <div className="edit-np-viewport">
@@ -442,7 +441,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                         onClick={handleSubmitFinal}
                         disabled={loading}
                       >
-                        {loading ? 'Saving...' : 'Save'}
+                        {loading ? 'Saving...' : 'Save changes'}
                       </button>
                     )}
                   </div>
@@ -472,6 +471,19 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
               onClose();
             }}
             onCancel={() => setShowDeleteConfirm(false)}
+          />
+
+          {/* Edit confirmation popup */}
+          <EditPopup
+            isOpen={showEditPopup}
+            onClose={() => {
+              setShowEditPopup(false);
+              onClose();
+            }}
+            onSave={async () => {
+              await handleSaveDraft();
+              onClose();
+            }}
           />
         </div>
       </div>

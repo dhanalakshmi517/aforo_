@@ -85,11 +85,11 @@
   .del-modal-btn-delete {
     width:222px;
     height:40px;
+    cursor: pointer;
    border:none;
    background-color: var(--color-error-400);
     padding: 8px 20px;
     border-radius: var(--border-radius-sm);
-    cursor: pointer;
     color: var(--color-neutral-white);
 
     /* body/md/med */

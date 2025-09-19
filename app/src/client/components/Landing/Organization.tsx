@@ -20,6 +20,7 @@ const Organization: React.FC = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('');
+  const [empSize, setEmpSize] = useState('');
   const [otherRole, setOtherRole] = useState('');
 
   // Load countries on component mount
@@ -118,6 +119,8 @@ const Organization: React.FC = () => {
       if (value !== 'OTHER') {
         setOtherRole('');
       }
+    } else if (name === 'empSize') {
+      setEmpSize(value);
     }
     
     if (errors[name] && value.trim()) {
@@ -386,26 +389,30 @@ const Organization: React.FC = () => {
               <div className="org-field">
                 <label htmlFor="role" className="form-label">Your Role</label>
                 <div className="role-selector">
-                  <select 
-                    id="role" 
-                    name="role" 
-                    value={selectedRole}
-                    onChange={handleFieldChange}
-                    className={errors.role ? 'error' : ''}
-                  >
-                    <option value="">Select your role...</option>
-                    <option value="OWNER">Owner</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="CEO">CEO</option>
-                    <option value="CTO">CTO</option>
-                    <option value="CFO">CFO</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="ENGINEER">Engineer</option>
-                    <option value="MARKETING">Marketing</option>
-                    <option value="SALES">Sales</option>
-                    <option value="SUPPORT">Support</option>
-                    <option value="OTHER">Other</option>
-                  </select>
+                <select
+  id="role"
+  name="role"
+  value={selectedRole}
+  onChange={handleFieldChange}
+  className={errors.role ? 'error' : ''}
+  required
+>
+  <option value="" disabled hidden>
+    Select your role...
+  </option>
+  <option value="OWNER">Owner</option>
+  <option value="ADMIN">Admin</option>
+  <option value="CEO">CEO</option>
+  <option value="CTO">CTO</option>
+  <option value="CFO">CFO</option>
+  <option value="MANAGER">Manager</option>
+  <option value="ENGINEER">Engineer</option>
+  <option value="MARKETING">Marketing</option>
+  <option value="SALES">Sales</option>
+  <option value="SUPPORT">Support</option>
+  <option value="OTHER">Other</option>
+</select>
+
                   {selectedRole === 'OTHER' && (
                     <div className="org-field other-role-input" style={{ marginTop: '8px', width: '100%' }}>
                       <label htmlFor="otherRole" className="form-label">
@@ -432,28 +439,36 @@ const Organization: React.FC = () => {
               </div>
             </div>
             <div className="org-field">
-              <label htmlFor="empSize" className="form-label">Employee size of the company</label>
-              <select 
-                id="empSize" 
-                name="empSize" 
-                defaultValue="" 
-                onChange={handleFieldChange}
-                className={errors.empSize ? 'error' : ''}
-              >
-                <option value="">Select company size</option>
-                <option value="_1_10">1-10</option>
-                <option value="_11_50">11-50</option>
-                <option value="_51_100">51-100</option>
-                <option value="_101_500">101-500</option>
-                <option value="_501_1000">501-1000</option>
-                <option value="_1001_5000">1001-5000</option>
-                <option value="_5001_10000">5001-10000</option>
-                <option value="_10001_50000">10001-50000</option>
-                <option value="_50001_100000">50001-100000</option>
-                <option value="_100001_PLUS">100001+</option>
-              </select>
-              {errors.empSize && (<span className="error-msg">{errors.empSize}</span>)}
-            </div>
+  <label htmlFor="empSize" className="form-label">
+    Employee size of the company
+  </label>
+  <select 
+    id="empSize" 
+    name="empSize" 
+    value={empSize}   // controlled input
+    onChange={handleFieldChange}
+    className={errors.empSize ? 'error' : ''}
+    required
+  >
+    <option value="" disabled hidden>
+      Select company size
+    </option>
+    <option value="_1_10">1-10</option>
+    <option value="_11_50">11-50</option>
+    <option value="_51_100">51-100</option>
+    <option value="_101_500">101-500</option>
+    <option value="_501_1000">501-1000</option>
+    <option value="_1001_5000">1001-5000</option>
+    <option value="_5001_10000">5001-10000</option>
+    <option value="_10001_50000">10001-50000</option>
+    <option value="_50001_100000">50001-100000</option>
+    <option value="_100001_PLUS">100001+</option>
+  </select>
+  {errors.empSize && (
+    <span className="error-msg">{errors.empSize}</span>
+  )}
+</div>
+
 
             <div className="org-row">
               <div className="org-field">
@@ -469,12 +484,11 @@ const Organization: React.FC = () => {
                     onDialCodeChange={handleDialCodeChange}
                   />
                 )}
-                {errors.country && (<span className="error-msg">{errors.country}</span>)}
               </div>
               <div className="org-fields">
                 <label htmlFor="phone" className="form-label">Phone Number</label>
                 <div className="phone-input-container">
-                  <div className="phone-input-wrapper">
+                  <div className={`phone-input-wrapper ${errors.phone ? 'error' : ''}`}>
                     <div className="country-code-display">
                       {selectedCountry ? (
                         <>
