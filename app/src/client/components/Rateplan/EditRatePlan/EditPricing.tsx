@@ -7,7 +7,7 @@ import {
   saveStairStepPricing,
   saveUsageBasedPricing
 } from '../api';
-import { setRatePlanData } from '../utils/sessionStorage';
+import { getRatePlanData, setRatePlanData } from '../utils/sessionStorage';
 import EditFlat from './EditFlat';
 import EditVolume from './EditVolume';
 import EditTiered from './EditTiered';
@@ -23,15 +23,20 @@ interface Tier {
 
 interface EditPricingProps {
   ratePlanId?: number;
-  /** Optional: parent can register a handler to invoke save from its own button */
   registerSavePricing?: (fn: () => Promise<void>) => void;
-  /** Draft data from backend for pre-filling */
   draftData?: any;
 }
+
+const toNumber = (v: any, fallback = 0) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+};
 
 const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePricing, draftData }) => {
   const [selected, setSelected] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Local component state
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [overageUnitRate, setOverageUnitRate] = useState(0);
   const [graceBuffer, setGraceBuffer] = useState(0);
@@ -52,10 +57,9 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
     setTiers(updated);
   };
 
-  // Initialize from backend data (same pattern as draft mode)
+  // Initialize from backend data
   useEffect(() => {
     if (!draftData) {
-      // Fallback to localStorage for backward compatibility
       const savedModel = localStorage.getItem('pricingModel');
       if (savedModel) setSelected(savedModel);
       return;
@@ -107,10 +111,15 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
       setTiers(t);
       setOverageUnitRate(volumeObj.overageUnitRate || 0);
       setGraceBuffer(volumeObj.graceBuffer || 0);
+
       setRatePlanData('PRICING_MODEL', 'Volume-Based');
       setRatePlanData('VOLUME_TIERS', JSON.stringify(t));
       setRatePlanData('VOLUME_OVERAGE', String(volumeObj.overageUnitRate || 0));
       setRatePlanData('VOLUME_GRACE', String(volumeObj.graceBuffer || 0));
+
+      localStorage.setItem('volumeTiers', JSON.stringify(t));
+      localStorage.setItem('volumeOverage', String(volumeObj.overageUnitRate || ''));
+      localStorage.setItem('volumeGrace', String(volumeObj.graceBuffer || ''));
       return;
     }
 
@@ -128,40 +137,45 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
       setTiers(t);
       setOverageUnitRate(tieredObj.overageUnitRate || 0);
       setGraceBuffer(tieredObj.graceBuffer || 0);
+
       setRatePlanData('PRICING_MODEL', 'Tiered Pricing');
       setRatePlanData('TIERED_TIERS', JSON.stringify(t));
       setRatePlanData('TIERED_OVERAGE', String(tieredObj.overageUnitRate || 0));
       setRatePlanData('TIERED_GRACE', String(tieredObj.graceBuffer || 0));
+
+      localStorage.setItem('tieredTiers', JSON.stringify(t));
+      localStorage.setItem('tieredOverage', String(tieredObj.overageUnitRate || 0));
+      localStorage.setItem('tieredGrace', String(tieredObj.graceBuffer || 0));
       return;
     }
 
-    // Stairstep
-    const stairObj = Array.isArray(draftData.stairStepPricing)
-      ? draftData.stairStepPricing[0]
+    // Stairstep (✅ use last item if array)
+    const stairRaw = Array.isArray(draftData.stairStepPricing)
+      ? draftData.stairStepPricing[draftData.stairStepPricing.length - 1]
       : draftData.stairStepPricing;
-    if (stairObj && Object.keys(stairObj).length > 0) {
+    if (stairRaw && Object.keys(stairRaw).length > 0) {
       setSelected('Stairstep');
-      const t = (stairObj.tiers || []).map((x: any) => ({
+      const t = (stairRaw.tiers || []).map((x: any) => ({
         from: x.usageStart ?? null,
         to: x.usageEnd ?? null,
         price: x.flatCost ?? null
       }));
       setTiers(t);
-      setOverageUnitRate(stairObj.overageUnitRate || 0);
-      setGraceBuffer(stairObj.graceBuffer || 0);
+      setOverageUnitRate(stairRaw.overageUnitRate || 0);
+      setGraceBuffer(stairRaw.graceBuffer || 0);
+
       setRatePlanData('PRICING_MODEL', 'Stairstep');
       const stairTiers = t.map((y: Tier) => ({
         from: String(y.from ?? ''),
         to: String(y.to ?? ''),
         cost: String(y.price ?? '')
       }));
-      setRatePlanData('STAIR_TIERS', JSON.stringify(stairTiers));
-      setRatePlanData('STAIR_OVERAGE', String(stairObj.overageUnitRate || 0));
-      setRatePlanData('STAIR_GRACE', String(stairObj.graceBuffer || 0));
+      localStorage.setItem('stairTiers', JSON.stringify(stairTiers));
+      localStorage.setItem('stairOverage', String(stairRaw.overageUnitRate || 0));
+      localStorage.setItem('stairGrace', String(stairRaw.graceBuffer || 0));
     }
   }, [draftData]);
 
-  // Persist model name when user changes it
   useEffect(() => {
     if (selected) setRatePlanData('PRICING_MODEL', selected);
   }, [selected]);
@@ -172,62 +186,132 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
       setSaving(true);
 
       if (selected === 'Flat Fee') {
+        const flatFeeAmount = toNumber(
+          getRatePlanData('FLAT_FEE_AMOUNT') ?? localStorage.getItem('flatFeeAmount') ?? 0
+        );
+        const numberOfApiCalls = toNumber(
+          getRatePlanData('FLAT_FEE_API_CALLS') ?? localStorage.getItem('flatFeeApiCalls') ?? 0
+        );
+        const overageUnitRateNum = toNumber(
+          getRatePlanData('FLAT_FEE_OVERAGE') ?? localStorage.getItem('flatFeeOverage') ?? 0
+        );
+        const graceBufferNum = toNumber(
+          getRatePlanData('FLAT_FEE_GRACE') ?? localStorage.getItem('flatFeeGrace') ?? 0
+        );
+
         const payload = {
-          flatFeeAmount: Number(localStorage.getItem('flatFeeAmount') || 0),
-          numberOfApiCalls: Number(localStorage.getItem('flatFeeApiCalls') || 0),
-          overageUnitRate: Number(localStorage.getItem('flatFeeOverage') || 0),
-          graceBuffer: Number(localStorage.getItem('flatFeeGrace') || 0)
+          flatFeeAmount,
+          numberOfApiCalls,
+          overageUnitRate: overageUnitRateNum,
+          graceBuffer: graceBufferNum
         };
         await saveFlatFeePricing(ratePlanId, payload);
+
       } else if (selected === 'Volume-Based') {
-        const payload = {
-          tiers: tiers.map(t => ({
-            usageStart: t.from ?? 0,
-            usageEnd: t.isUnlimited || !t.to ? null : t.to,
-            unitPrice: t.price ?? 0
-          })),
-          overageUnitRate,
+        const savedTiers = JSON.parse(localStorage.getItem('volumeTiers') || '[]');
+        const list = Array.isArray(savedTiers) && savedTiers.length > 0 ? savedTiers : tiers;
+
+        const tiersToSend = list.map((t: any) => {
+          const fromStr = typeof t.from === 'string' ? t.from.trim() : `${t.from ?? ''}`.trim();
+          const toStr = typeof t.to === 'string' ? t.to.trim() : `${t.to ?? ''}`.trim();
+          const priceStr = typeof t.price === 'string' ? t.price.trim() : `${t.price ?? ''}`.trim();
+
+          return {
+            usageStart: fromStr ? Number(fromStr) : 0,
+            usageEnd: t.isUnlimited ? null : (toStr ? Number(toStr) : null),
+            unitPrice: priceStr ? Number(priceStr) : 0,
+          };
+        });
+
+        const over = toNumber(
+          localStorage.getItem('volumeOverage') ??
+          getRatePlanData('VOLUME_OVERAGE') ??
+          overageUnitRate
+        );
+        const grace = toNumber(
+          localStorage.getItem('volumeGrace') ??
+          getRatePlanData('VOLUME_GRACE') ??
           graceBuffer
+        );
+
+        const payload = {
+          tiers: tiersToSend,
+          overageUnitRate: over,
+          graceBuffer: grace,
         };
         await saveVolumePricing(ratePlanId, payload);
+
       } else if (selected === 'Tiered Pricing') {
         const saved = JSON.parse(localStorage.getItem('tieredTiers') || '[]');
-        const tiers = saved.map((t: any) => ({
-          startRange: Number(t.from),
-          endRange: t.to ? Number(t.to) : null,
-          unitPrice: Number(t.price)
-        }));
+
+        const tiersToSend = saved.map((t: any) => {
+          const fromStr = typeof t.from === 'string' ? t.from.trim() : `${t.from ?? ''}`.trim();
+          const toStr = typeof t.to === 'string' ? t.to.trim() : `${t.to ?? ''}`.trim();
+          const priceStr = typeof t.price === 'string' ? t.price.trim() : `${t.price ?? ''}`.trim();
+
+          return {
+            startRange: fromStr ? Number(fromStr) : 0,
+            endRange: t.isUnlimited ? null : (toStr ? Number(toStr) : null),
+            unitPrice: priceStr ? Number(priceStr) : 0,
+          };
+        });
+
         const payload = {
-          tiers,
+          tiers: tiersToSend,
           overageUnitRate: Number(localStorage.getItem('tieredOverage') || 0),
           graceBuffer: Number(localStorage.getItem('tieredGrace') || 0)
         };
         await saveTieredPricing(ratePlanId, payload);
+
       } else if (selected === 'Stairstep') {
+        const saved = JSON.parse(localStorage.getItem('stairTiers') || '[]');
+        const list = Array.isArray(saved) && saved.length > 0
+          ? saved
+          : tiers.map(t => ({
+              from: String(t.from ?? ''),
+              to: String(t.to ?? ''),
+              cost: String(t.price ?? ''),
+              isUnlimited: t.isUnlimited ?? false,
+            }));
+
+        const tiersToSend = list.map((s: any) => {
+          const fromStr = (s.from ?? '').toString().trim();
+          const toStr = (s.to ?? '').toString().trim();
+          const costStr = (s.cost ?? s.price ?? '').toString().trim();
+
+          return {
+            usageStart: fromStr ? Number(fromStr) : 0,
+            usageEnd: s.isUnlimited ? null : (toStr ? Number(toStr) : null),
+            flatCost: costStr ? Number(costStr) : 0,
+          };
+        });
+
+        const over = Number(localStorage.getItem('stairOverage') ?? overageUnitRate ?? 0);
+        const grace = Number(localStorage.getItem('stairGrace') ?? graceBuffer ?? 0);
+
         const payload = {
-          tiers: tiers.map(s => ({
-            usageStart: s.from ?? 0,
-            usageEnd: s.isUnlimited || !s.to ? null : s.to,
-            flatCost: s.price ?? 0
-          })),
-          overageUnitRate,
-          graceBuffer
+          tiers: tiersToSend,
+          overageUnitRate: over,
+          graceBuffer: grace
         };
         await saveStairStepPricing(ratePlanId, payload);
+
       } else if (selected === 'Usage-Based') {
-        const perUnit = Number(localStorage.getItem('usagePerUnit') || 0);
+        const perUnit = toNumber(
+          getRatePlanData('USAGE_PER_UNIT_AMOUNT') ?? localStorage.getItem('usagePerUnit') ?? 0
+        );
         await saveUsageBasedPricing(ratePlanId, { perUnitAmount: perUnit });
       }
 
       alert('Pricing saved');
     } catch (err: any) {
       alert(err?.message || 'Failed to save pricing');
+      throw err;
     } finally {
       setSaving(false);
     }
   }, [ratePlanId, selected, tiers, overageUnitRate, graceBuffer]);
 
-  // Let the parent register a way to trigger save (optional)
   useEffect(() => {
     if (registerSavePricing) {
       registerSavePricing(handleSave);
@@ -245,15 +329,12 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
             const v = e.target.value;
             setSelected(v);
             localStorage.setItem('pricingModel', v);
-            // Auto-add blank tier for Tiered Pricing if none exist
             if (v === 'Tiered Pricing' && tiers.length === 0) {
               setTiers([{ from: null, to: null, price: null }]);
             }
           }}
         >
-          <option value="" disabled hidden>
-            --Select--
-          </option>
+          <option value="" disabled hidden>--Select--</option>
           <option value="Flat Fee">Flat Fee</option>
           <option value="Tiered Pricing">Tiered Pricing</option>
           <option value="Volume-Based">Volume-Based</option>
@@ -287,8 +368,6 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
           </div>
         )}
       </div>
-
-      {/* Removed the duplicate bottom "Save Pricing" button */}
     </div>
   );
 };

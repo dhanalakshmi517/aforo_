@@ -2,7 +2,6 @@ import * as React from "react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-
 import {
   createRatePlan,
   updateRatePlan,
@@ -18,6 +17,7 @@ import {
   initializeSession,
   clearCurrentSession,
   clearOldSessions,
+  clearAllRatePlanData,
   getRatePlanData,
   setRatePlanData,
 } from "./utils/sessionStorage";
@@ -37,6 +37,7 @@ type ActiveTab = "details" | "billable" | "pricing" | "extras" | "review";
 interface CreatePricePlanProps {
   onClose: () => void;
   registerSaveDraft?: (fn: () => Promise<void>) => void;
+  draftData?: any; // Draft data from backend for pre-filling
 }
 
 const steps = [
@@ -50,7 +51,7 @@ const steps = [
 const CreatePricePlan = React.forwardRef<
   { back: () => boolean; getRatePlanId: () => number | null },
   CreatePricePlanProps
->(({ onClose, registerSaveDraft }, ref) => {
+>(({ onClose, registerSaveDraft, draftData }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -64,7 +65,6 @@ const CreatePricePlan = React.forwardRef<
     const saved = Number(getRatePlanData("WIZARD_STEP"));
     return Number.isFinite(saved) && saved >= 0 && saved < steps.length ? saved : 0;
   });
-
 
   const [saving, setSaving] = useState(false);
   const [draftSaving, setDraftSaving] = useState(false);
@@ -83,13 +83,23 @@ const CreatePricePlan = React.forwardRef<
 
   const [draftPricingData, setDraftPricingData] = useState<any>(null);
   const [draftExtrasData, setDraftExtrasData] = useState<any>(null);
+  const [isFreshCreation, setIsFreshCreation] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     document.body.classList.add("create-product-page");
-    initializeSession();
-    if (!isResuming) clearOldSessions();
+
+    if (!isResuming && !draftData) {
+      // For fresh new rate plan creation, clear all data and start fresh
+      setIsFreshCreation(true);
+      clearAllRatePlanData();
+    } else {
+      // For resuming drafts, just initialize session and clear old ones
+      setIsFreshCreation(false);
+      initializeSession();
+      clearOldSessions();
+    }
 
     (async () => {
       try {
@@ -103,7 +113,7 @@ const CreatePricePlan = React.forwardRef<
       document.body.classList.remove("create-product-page");
       clearCurrentSession();
     };
-  }, [isResuming]);
+  }, [isResuming, draftData]);
 
   useEffect(() => {
     setRatePlanData("WIZARD_STEP", currentStep.toString());
@@ -113,28 +123,35 @@ const CreatePricePlan = React.forwardRef<
     };
   }, [currentStep]);
 
+  // Hydrate from draftData prop (from RatePlans component) or legacy resumeDraftId
   useEffect(() => {
-    if (!isResuming || !resumeDraftId) return;
+    if (draftData) {
+      clearAllRatePlanData();
+      hydrateFormData(draftData);
+    } else if (isResuming && resumeDraftId) {
+      (async () => {
+        try {
+          const plan = await fetchRatePlanWithDetails(resumeDraftId);
+          hydrateFormData(plan);
+        } catch (e) {
+          console.error("❌ Failed to hydrate draft", e);
+        }
+      })();
+    }
+  }, [draftData, isResuming, resumeDraftId]);
 
-    (async () => {
-      try {
-        const plan = await fetchRatePlanWithDetails(resumeDraftId);
+  const hydrateFormData = (plan: any) => {
+    setRatePlanId(plan.ratePlanId);
+    setPlanName(plan.ratePlanName ?? "");
+    setPlanDescription(plan.description ?? "");
+    setBillingFrequency(plan.billingFrequency ?? "");
+    setSelectedProductName(plan.productName ?? plan.product?.productName ?? "");
+    setPaymentMethod(plan.paymentType ?? "");
+    if (plan.billableMetricId) setSelectedMetricId(Number(plan.billableMetricId));
 
-        setRatePlanId(plan.ratePlanId);
-        setPlanName(plan.ratePlanName ?? "");
-        setPlanDescription(plan.description ?? "");
-        setBillingFrequency(plan.billingFrequency ?? "");
-        setSelectedProductName(plan.productName ?? plan.product?.productName ?? "");
-        setPaymentMethod(plan.paymentType ?? "");
-        if (plan.billableMetricId) setSelectedMetricId(Number(plan.billableMetricId));
-
-        setDraftPricingData(plan);
-        setDraftExtrasData(plan);
-      } catch (e) {
-        console.error("❌ Failed to hydrate draft", e);
-      }
-    })();
-  }, [isResuming, resumeDraftId]);
+    setDraftPricingData(plan);
+    setDraftExtrasData(plan);
+  };
 
   React.useImperativeHandle(
     ref,
@@ -278,6 +295,7 @@ const CreatePricePlan = React.forwardRef<
     if (ok) setCurrentStep(index);
   };
 
+  // ===== Save-as-Draft: always try to persist pricing (best-effort) =====
   const saveDraft = useCallback(async () => {
     setHasSavedAsDraft(true);
     setRatePlanData("CURRENT_STEP", currentStep.toString());
@@ -288,8 +306,7 @@ const CreatePricePlan = React.forwardRef<
       setDraftSaving(true);
       const selectedProduct = products.find((p) => p.productName === selectedProductName);
 
-      const partial: Partial<RatePlanRequest> = {
-        // @ts-ignore backend allows status
+      const partial: Partial<RatePlanRequest> & { status?: string } = {
         status: "DRAFT",
         ratePlanName: (planName || undefined) as any,
         productId: selectedProduct ? Number(selectedProduct.productId) : undefined,
@@ -308,6 +325,17 @@ const CreatePricePlan = React.forwardRef<
         await updateRatePlan(currentId, partial as any);
       }
 
+      // ✅ Always attempt to save pricing (don’t gate on validation snapshot)
+      try {
+        if (currentId && pricingRef.current) {
+          await pricingRef.current.save();
+        }
+      } catch (pricingErr) {
+        // best-effort for drafts: swallow errors so user can continue
+        console.warn("Pricing draft save warning:", pricingErr);
+      }
+
+      // Best-effort extras save
       if (currentId && extrasRef.current) {
         try {
           await extrasRef.current.saveAll(currentId);
@@ -482,12 +510,22 @@ const CreatePricePlan = React.forwardRef<
               onSelectMetric={setSelectedMetricId}
             />
             {errors.billableMetric && (
-              <div className="rate-np-error-message" style={{ marginTop: 10 }}>{errors.billableMetric}</div>
+              <div className="rate-np-error-message" style={{ marginTop: 10 }}>
+                {errors.billableMetric}
+              </div>
             )}
           </>
         );
       case 2:
-        return <Pricing ref={pricingRef} ratePlanId={ratePlanId} validationErrors={errors} draftData={draftPricingData} />;
+        return (
+          <Pricing
+            ref={pricingRef}
+            ratePlanId={ratePlanId}
+            validationErrors={errors}
+            draftData={draftPricingData}
+            isFreshCreation={isFreshCreation}
+          />
+        );
       case 3:
         return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={draftExtrasData} />;
       case 4: {
@@ -521,7 +559,9 @@ const CreatePricePlan = React.forwardRef<
                     <button
                       key={step.id}
                       type="button"
-                      className={["rate-np-step", isActive ? "active" : "", isCompleted ? "completed" : ""].join(" ").trim()}
+                      className={["rate-np-step", isActive ? "active" : "", isCompleted ? "completed" : ""]
+                        .join(" ")
+                        .trim()}
                       onClick={() => onStepClick(i)}
                     >
                       <span className="rate-np-step__bullet" aria-hidden="true">
@@ -562,11 +602,7 @@ const CreatePricePlan = React.forwardRef<
                     <div className="rate-np-form-footer">
                       <div className="rate-np-btn-group rate-np-btn-group--back">
                         {currentStep > 0 && (
-                          <button
-                            type="button"
-                            className="rate-np-btn rate-np-btn--ghost"
-                            onClick={handleBack}
-                          >
+                          <button type="button" className="rate-np-btn rate-np-btn--ghost" onClick={handleBack}>
                             Back
                           </button>
                         )}
@@ -595,7 +631,6 @@ const CreatePricePlan = React.forwardRef<
             </main>
           </div>
         </div>
-
       </div>
     </>
   );

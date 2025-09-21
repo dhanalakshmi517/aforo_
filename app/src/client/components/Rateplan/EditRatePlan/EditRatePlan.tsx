@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../../componenetsss/TopBar';
-import SaveDraft from '../../componenetsss/SaveDraft';              // ⬅️ add
+import SaveDraft from '../../componenetsss/SaveDraft';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
 
 import EditBillable from './EditBillable';
@@ -16,7 +16,7 @@ import {
   fetchRatePlan,
   fetchRatePlanWithDetails,
   updateRatePlan,
-  deleteRatePlan,                                          // ⬅️ add
+  deleteRatePlan,
   RatePlanRequest,
 } from '../api';
 
@@ -56,7 +56,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const exitToList = () => (onClose ? onClose() : navigate('/get-started/rate-plans'));
 
   const [currentStep, setCurrentStep] = useState(0);
-  const activeTab: ActiveTab = currentStep === 0 ? 'details' : currentStep === 1 ? 'billable' : currentStep === 2 ? 'pricing' : currentStep === 3 ? 'extras' : 'review';
+  const activeTab: ActiveTab =
+    currentStep === 0 ? 'details' :
+    currentStep === 1 ? 'billable' :
+    currentStep === 2 ? 'pricing'  :
+    currentStep === 3 ? 'extras'   : 'review';
 
   const [loading, setLoading] = useState(false);
 
@@ -73,8 +77,12 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [draftData, setDraftData] = useState<any>(null);
 
-  // NEW: save-as-draft modal state
+  // Save-as-draft modal
   const [showSaveModal, setShowSaveModal] = useState(false);
+
+  // child savers
+  const [savePricingFn, setSavePricingFn] = useState<null | (() => Promise<void>)>(null);
+  const [saveExtrasFn,  setSaveExtrasFn]  = useState<null | (() => Promise<void>)>(null);
 
   useEffect(() => {
     document.body.classList.add('edit-product-page');
@@ -176,7 +184,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     return Object.keys(e).length === 0;
   };
 
-  // allow isDraft to attach status
   const persistPlan = async (isDraft: boolean): Promise<boolean> => {
     if (!ratePlanId) return true;
     try {
@@ -216,8 +223,40 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
       return;
     }
     if (activeTab === 'billable') { goToStep(2); return; }
-    if (activeTab === 'pricing') { goToStep(3); return; }
-    if (activeTab === 'extras')  { goToStep(4); return; }
+
+    if (activeTab === 'pricing') {
+      if (savePricingFn) {
+        try {
+          setLoading(true);
+          await savePricingFn();
+        } catch (e: any) {
+          console.error('Failed to save pricing:', e);
+          setLoading(false);
+          return;
+        }
+      }
+      setLoading(false);
+      goToStep(3);
+      return;
+    }
+
+    if (activeTab === 'extras')  {
+      // ensure Extras persist on Next as well
+      if (saveExtrasFn) {
+        try {
+          setLoading(true);
+          await saveExtrasFn();
+        } catch (e: any) {
+          console.error('Failed to save extras:', e);
+          setLoading(false);
+          return;
+        }
+      }
+      setLoading(false);
+      goToStep(4);
+      return;
+    }
+
     if (activeTab === 'review') {
       const ok = await persistPlan(false);
       if (ok) navigate('/get-started/rate-plans');
@@ -226,14 +265,28 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
   const handlePreviousStep = () => {
     if (currentStep > 0) goToStep(currentStep - 1);
-    else setShowSaveModal(true);                     // ⬅️ show modal on first-step back
+    else setShowSaveModal(true);
   };
 
-  // --- modal actions
+  // === Save-as-Draft now also saves PRICING + EXTRAS (best-effort) ===
   const handleSaveDraft = async () => {
-    if (!validateDetails()) return;                  // same behavior as earlier
+    if (activeTab === 'details' && !validateDetails()) return;
+
     const ok = await persistPlan(true);
-    if (ok) { setShowSaveModal(false); exitToList(); }
+
+    if (ok) {
+      // best-effort pricing
+      if (savePricingFn) {
+        try { await savePricingFn(); } catch (e) { console.warn('Pricing draft save warning:', e); }
+      }
+      // best-effort extras
+      if (saveExtrasFn) {
+        try { await saveExtrasFn(); } catch (e) { console.warn('Extras draft save warning:', e); }
+      }
+    }
+
+    setShowSaveModal(false);
+    exitToList();
   };
 
   const handleDelete = async () => {
@@ -336,7 +389,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         return (
           <div className="edit-np-section">
             <div className="edit-np-configuration-tab">
-              <EditPricing ratePlanId={ratePlanId} draftData={draftData} />
+              <EditPricing
+                ratePlanId={ratePlanId}
+                draftData={draftData}
+                registerSavePricing={(fn) => setSavePricingFn(() => fn)}
+              />
             </div>
           </div>
         );
@@ -344,7 +401,13 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         return (
           <div className="edit-np-section">
             <div className="edit-np-configuration-tab">
-              <EditExtras ratePlanId={ratePlanId} noUpperLimit={false} draftData={draftData} />
+              <EditExtras
+                ratePlanId={ratePlanId}
+                noUpperLimit={false}
+                draftData={draftData}
+                // NEW: let parent save extras when needed
+                registerSaveExtras={(fn) => setSaveExtrasFn(() => fn)}
+              />
             </div>
           </div>
         );
@@ -365,7 +428,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     <>
       <TopBar
         title={ratePlanName?.trim() ? `Edit “${ratePlanName}”` : 'Edit Rate Plan'}
-        onBack={() => setShowSaveModal(true)}           // ⬅️ open modal
+        onBack={() => setShowSaveModal(true)}
       />
 
       <div className="edit-np-viewport">
@@ -393,7 +456,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             <div className="edit-np-content">
               <div className="edit-np-form">{renderStepContent()}</div>
 
-              {/* Footer Buttons */}
               <div className="edit-np-form-footer">
                 <div className="edit-np-btn-group edit-np-btn-group--back">
                   {currentStep > 0 && (
@@ -424,12 +486,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Save as Draft / Delete modal */}
       <SaveDraft
         isOpen={showSaveModal}
-        onClose={() => setShowSaveModal(false)}     // overlay / X / cancel path
+        onClose={() => setShowSaveModal(false)}
         onSave={handleSaveDraft}
-        onDelete={handleDelete}                    // ⬅️ new
+        onDelete={handleDelete}
       />
     </>
   );

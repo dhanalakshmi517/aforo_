@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './EditStair.css';
 
 interface Stair {
@@ -9,23 +9,64 @@ interface Stair {
 }
 
 const EditStair: React.FC = () => {
-  const [stairs, setStairs] = useState<Stair[]>([
-    { from: '00', to: '10', cost: '$11' },
-    { from: '11', to: '20', cost: '$10' },
-    { from: '21', to: '', cost: '$8' },
-  ]);
+  // hydrate from localStorage if available
+  const [stairs, setStairs] = useState<Stair[]>(() => {
+    const saved = localStorage.getItem('stairTiers');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // accept both {from,to,cost} and {from,to,price} shapes
+        return parsed.map((r: any) => ({
+          from: r.from ?? '',
+          to: r.to ?? '',
+          cost: r.cost ?? r.price ?? '',
+          isUnlimited: r.isUnlimited ?? false,
+        }));
+      } catch {}
+    }
+    return [{ from: '', to: '', cost: '' }];
+  });
 
   const [unlimited, setUnlimited] = useState(false);
-  const [overageCharge, setOverageCharge] = useState('');
-  const [graceBuffer, setGraceBuffer] = useState('');
+  const [overageCharge, setOverageCharge] = useState(
+    localStorage.getItem('stairOverage') || ''
+  );
+  const [graceBuffer, setGraceBuffer] = useState(
+    localStorage.getItem('stairGrace') || ''
+  );
+
+  // persist stairs snapshot (debounced via microtask so state is latest)
+  const persistStairs = (next: Stair[]) => {
+    const toSave = next.map(s => ({
+      from: s.from,
+      to: s.to,
+      cost: s.cost,
+      isUnlimited: s.isUnlimited,
+    }));
+    // defer to ensure state is committed before read elsewhere
+    setTimeout(() => localStorage.setItem('stairTiers', JSON.stringify(toSave)), 0);
+  };
+
+  useEffect(() => {
+    persistStairs(stairs);
+  }, [stairs]);
+
+  useEffect(() => {
+    localStorage.setItem('stairOverage', overageCharge);
+  }, [overageCharge]);
+
+  useEffect(() => {
+    localStorage.setItem('stairGrace', graceBuffer);
+  }, [graceBuffer]);
 
   const handleAddStair = () => {
-    setStairs([...stairs, { from: '', to: '', cost: '' }]);
+    const next = [...stairs, { from: '', to: '', cost: '' }];
+    setStairs(next);
   };
 
   const handleDeleteStair = (index: number) => {
     const updated = stairs.filter((_, i) => i !== index);
-    setStairs(updated);
+    setStairs(updated.length ? updated : [{ from: '', to: '', cost: '' }]);
   };
 
   const handleChange = (index: number, field: keyof Stair, value: string) => {
@@ -46,7 +87,6 @@ const EditStair: React.FC = () => {
   return (
     <div className="edit-stair-container">
       <div className="edit-stair-input-section">
-        {/* Heading Row */}
         <div className="edit-stair-header-row">
           <div className="edit-stair-usage-range-label">Usage Range</div>
           <div className="edit-stair-cost-label">Flat–Stair Cost</div>
@@ -94,8 +134,7 @@ const EditStair: React.FC = () => {
             }}
           />
           <svg className="edit-checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z"
-              stroke="#E6E5E6" strokeWidth="1.2" />
+            <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
             <path className="tick" d="M8 12.5L10.5 15L16 9.5" stroke="#4C7EFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span>No upper limit for this Stair</span>
@@ -114,7 +153,7 @@ const EditStair: React.FC = () => {
               />
             </label>
             <label>
-              Grace Buffer(optional)
+              Grace Buffer (optional)
               <input
                 type="text"
                 className="edit-input-extra-stairs"
@@ -128,22 +167,6 @@ const EditStair: React.FC = () => {
 
         <button className="edit-add-stair-btn" onClick={handleAddStair}>+ Add Stair</button>
       </div>
-
-      {/* <div className="stair-example-section">
-        <h4>EXAMPLE</h4>
-        <a href="#">Stair – Step Pricing</a>
-        <table>
-          <tbody>
-            <tr><td>Stair 1</td><td>1 – 200</td><td>$20</td></tr>
-            <tr><td>Stair 2</td><td>201 – 500</td><td>$30</td></tr>
-            <tr><td>Stair 3</td><td>501 – 700</td><td>$40</td></tr>
-          </tbody>
-        </table>
-        <p className="consumer-note">
-          <a href="#">You to consumer:</a><br />
-          <em>“You’ve used 300 units this billing cycle, placing you in Stair 2. Your total charge will be $30.”</em>
-        </p>
-      </div> */}
     </div>
   );
 };

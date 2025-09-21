@@ -9,9 +9,16 @@ interface EditExtrasProps {
   ratePlanId?: number;
   /** Draft data from backend for pre-filling */
   draftData?: any;
+  /** NEW: allow parent to trigger save-on-demand (Next / Save as Draft) */
+  registerSaveExtras?: (fn: () => Promise<void>) => void;
 }
 
-export default function EditExtras({ noUpperLimit, ratePlanId, draftData }: EditExtrasProps): JSX.Element {
+export default function EditExtras({
+  noUpperLimit,
+  ratePlanId,
+  draftData,
+  registerSaveExtras,
+}: EditExtrasProps): JSX.Element {
   const [activeSections, setActiveSections] = useState<string[]>([]);
 
   // Setup fee
@@ -100,10 +107,7 @@ export default function EditExtras({ noUpperLimit, ratePlanId, draftData }: Edit
       sections.push('commitment');
     }
 
-    // Auto-expand sections that have data
-    if (sections.length > 0) {
-      setActiveSections(sections);
-    }
+    if (sections.length > 0) setActiveSections(sections);
   }, [draftData]);
 
   const toggleSection = (section: string) => {
@@ -111,6 +115,58 @@ export default function EditExtras({ noUpperLimit, ratePlanId, draftData }: Edit
       prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]
     );
   };
+
+  // === expose the saver to the parent ===
+  const handleSaveExtras = async () => {
+    if (!ratePlanId) return;
+    try {
+      if (setupFee) {
+        await saveSetupFee(ratePlanId, {
+          setupFee: Number(setupFee),
+          applicationTiming: Number(applicationTiming || 0),
+          invoiceDescription,
+        });
+      }
+      if (discountType) {
+        await saveDiscounts(ratePlanId, {
+          discountType: discountType as any,
+          percentageDiscount: Number(percentageDiscount || 0),
+          flatDiscountAmount: Number(flatDiscountAmount || 0),
+          eligibility,
+          startDate: discountStart,
+          endDate: discountEnd,
+        });
+      }
+      if (freemiumType) {
+        await saveFreemiums(ratePlanId, {
+          freemiumType: freemiumType.toUpperCase() as any,
+          freeUnits: Number(freeUnits || 0),
+          freeTrialDuration: Number(freeTrialDuration || 0),
+          startDate: freeStart,
+          endDate: freeEnd,
+        });
+      }
+      if (minimumUsage || minimumCharge) {
+        await saveMinimumCommitment(ratePlanId, {
+          minimumUsage: Number(minimumUsage || 0),
+          minimumCharge: Number(minimumCharge || 0),
+        });
+      }
+      alert('Extras saved');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to save extras');
+      throw err;
+    }
+  };
+
+  useEffect(() => {
+    if (registerSaveExtras) {
+      registerSaveExtras(() => handleSaveExtras());
+    }
+    // We intentionally do NOT include all local state as deps here,
+    // to keep a stable function reference like we do for pricing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registerSaveExtras, ratePlanId]);
 
   /** Same icon set/colors as Extras */
   const iconMap: Record<string, JSX.Element> = {
@@ -167,47 +223,6 @@ export default function EditExtras({ noUpperLimit, ratePlanId, draftData }: Edit
       </span>
     </div>
   );
-
-  const handleSaveExtras = async () => {
-    if (!ratePlanId) return;
-    try {
-      if (setupFee) {
-        await saveSetupFee(ratePlanId, {
-          setupFee: Number(setupFee),
-          applicationTiming: Number(applicationTiming || 0),
-          invoiceDescription,
-        });
-      }
-      if (discountType) {
-        await saveDiscounts(ratePlanId, {
-          discountType: discountType as any,
-          percentageDiscount: Number(percentageDiscount || 0),
-          flatDiscountAmount: Number(flatDiscountAmount || 0),
-          eligibility,
-          startDate: discountStart,
-          endDate: discountEnd,
-        });
-      }
-      if (freemiumType) {
-        await saveFreemiums(ratePlanId, {
-          freemiumType: freemiumType.toUpperCase() as any,
-          freeUnits: Number(freeUnits || 0),
-          freeTrialDuration: Number(freeTrialDuration || 0),
-          startDate: freeStart,
-          endDate: freeEnd,
-        });
-      }
-      if (minimumUsage || minimumCharge) {
-        await saveMinimumCommitment(ratePlanId, {
-          minimumUsage: Number(minimumUsage || 0),
-          minimumCharge: Number(minimumCharge || 0),
-        });
-      }
-      alert('Extras saved');
-    } catch (err: any) {
-      alert(err?.message || 'Failed to save extras');
-    }
-  };
 
   return (
     <div className="extras-container">

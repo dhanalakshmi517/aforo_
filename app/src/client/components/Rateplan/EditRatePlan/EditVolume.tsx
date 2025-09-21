@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './EditVolume.css';
 
 interface Tier {
@@ -19,28 +19,45 @@ const EditVolume: React.FC = () => {
   const [overageCharge, setOverageCharge] = useState(localStorage.getItem('volumeOverage')||'');
   const [graceBuffer, setGraceBuffer] = useState(localStorage.getItem('volumeGrace')||'');
 
+  // ✅ persist latest tiers snapshot (avoids stale writes after setState)
+  useEffect(() => {
+    localStorage.setItem('volumeTiers', JSON.stringify(tiers));
+  }, [tiers]);
+
+  // ✅ persist overage / grace so EditPricing can read latest values
+  useEffect(() => {
+    localStorage.setItem('volumeOverage', overageCharge);
+  }, [overageCharge]);
+
+  useEffect(() => {
+    localStorage.setItem('volumeGrace', graceBuffer);
+  }, [graceBuffer]);
+
   const handleAddTier = () => {
     setTiers(prev=>[...prev,{from:'',to:'',price:''}]);
   };
 
   const handleDeleteTier = (index: number) => {
-    const updated = tiers.filter((_, i) => i !== index);
-    setTiers(updated);
+    setTiers(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleChange = (index: number, field: keyof Tier, value: string) => {
-    setTiers(prev => prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[]);
-    // persist
-    setTimeout(()=>localStorage.setItem('volumeTiers',JSON.stringify(tiers)),0);
+    setTiers(prev =>
+      prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[]
+    );
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
-    const updated = [...tiers];
-    updated[index].isUnlimited = checked;
-    if (checked) {
-      updated[index].to = '';
-    }
-    setTiers(updated);
+    setTiers(prev => {
+      const updated = [...prev];
+      const t = updated[index] || { from: '', to: '', price: '' };
+      updated[index] = {
+        ...t,
+        isUnlimited: checked,
+        to: checked ? '' : t.to,
+      };
+      return updated;
+    });
   };
 
   return (
@@ -86,18 +103,18 @@ const EditVolume: React.FC = () => {
             type="checkbox"
             checked={unlimited}
             onChange={(e) => {
-              setUnlimited(e.target.checked);
-              if (e.target.checked && tiers.length > 0) {
-                handleUnlimitedToggle(true, tiers.length - 1);
+              const checked = e.target.checked;
+              setUnlimited(checked);
+              if (tiers.length > 0) {
+                handleUnlimitedToggle(checked, tiers.length - 1);
               }
             }}
           />
           <svg className="edit-checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z"
-              stroke="#E6E5E6" strokeWidth="1.2" />
+            <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
             <path className="tick" d="M8 12.5L10.5 15L16 9.5" stroke="#4C7EFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span>No upper limit for this Stair</span>
+          <span>No upper limit for last tier</span>
         </label>
 
         {!unlimited && (
@@ -127,22 +144,6 @@ const EditVolume: React.FC = () => {
 
         <button className="edit-volume-add-stair-btn" onClick={handleAddTier}>+ Add Volume Tier</button>
       </div>
-
-      {/* <div className="volume-example-section">
-        <h4>EXAMPLE</h4>
-        <a href="#">Volume Based Pricing</a>
-        <table>
-          <tbody>
-            <tr><td>Volume 1</td><td>1 – 200</td><td>$8</td></tr>
-            <tr><td>Volume 2</td><td>201 – 500</td><td>$5</td></tr>
-            <tr><td>Volume 3</td><td>501 – 700</td><td>$3</td></tr>
-          </tbody>
-        </table>
-        <p className="volume-consumer-note">
-          <a href="#">You to consumer:</a><br />
-          <em>“You’ve consumed 560 units this billing cycle, which falls under Stair 3. At $3 per unit, your total charge comes to 560×3 = $1680”</em>
-        </p>
-      </div> */}
     </div>
   );
 };

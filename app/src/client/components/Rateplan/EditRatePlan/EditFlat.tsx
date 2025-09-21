@@ -1,17 +1,46 @@
-import React, { useState } from 'react';
+// EditFlat.tsx
+import React, { useState, useEffect } from 'react';
 import './EditFlat.css';
+import { getRatePlanData, setRatePlanData } from '../utils/sessionStorage';
+
+const read = (sessionKey: any, legacyKey: string): string =>
+  getRatePlanData(sessionKey as any) ??
+  localStorage.getItem(legacyKey) ??
+  '';
 
 const EditFlat: React.FC = () => {
-  const [flatFee, setFlatFee] = useState<string>(localStorage.getItem('flatFeeAmount') || '');
-  const [apiCalls, setApiCalls] = useState<string>(localStorage.getItem('flatFeeApiCalls') || '');
-  const [overageRate, setOverageRate] = useState<string>(localStorage.getItem('flatFeeOverage') || '');
-  const [graceBuffer, setGraceBuffer] = useState<string>(localStorage.getItem('flatFeeGrace') || '');
+  // Initialize from session-scoped storage first, then legacy localStorage
+  const [flatFee, setFlatFee] = useState<string>(() => read('FLAT_FEE_AMOUNT', 'flatFeeAmount'));
+  const [apiCalls, setApiCalls] = useState<string>(() => read('FLAT_FEE_API_CALLS', 'flatFeeApiCalls'));
+  const [overageRate, setOverageRate] = useState<string>(() => read('FLAT_FEE_OVERAGE', 'flatFeeOverage'));
+  const [graceBuffer, setGraceBuffer] = useState<string>(() => read('FLAT_FEE_GRACE', 'flatFeeGrace'));
+
+  // On mount, re-hydrate once more in case parent finished setting session data just before this render
+  useEffect(() => {
+    setFlatFee(read('FLAT_FEE_AMOUNT', 'flatFeeAmount'));
+    setApiCalls(read('FLAT_FEE_API_CALLS', 'flatFeeApiCalls'));
+    setOverageRate(read('FLAT_FEE_OVERAGE', 'flatFeeOverage'));
+    setGraceBuffer(read('FLAT_FEE_GRACE', 'flatFeeGrace'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange =
-    (setter: React.Dispatch<React.SetStateAction<string>>, key: string) =>
+    (
+      setter: React.Dispatch<React.SetStateAction<string>>,
+      sessionKey:
+        | 'FLAT_FEE_AMOUNT'
+        | 'FLAT_FEE_API_CALLS'
+        | 'FLAT_FEE_OVERAGE'
+        | 'FLAT_FEE_GRACE',
+      legacyKey: string
+    ) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setter(e.target.value);
-      localStorage.setItem(key, e.target.value);
+      const val = e.target.value;
+      setter(val);
+      // new session-scoped storage (used by the rest of the wizard)
+      setRatePlanData(sessionKey as any, val);
+      // legacy localStorage for backwards compatibility
+      localStorage.setItem(legacyKey, val);
     };
 
   return (
@@ -24,7 +53,7 @@ const EditFlat: React.FC = () => {
             type="number"
             placeholder="Enter amount"
             value={flatFee}
-            onChange={handleChange(setFlatFee, 'flatFeeAmount')}
+            onChange={handleChange(setFlatFee, 'FLAT_FEE_AMOUNT', 'flatFeeAmount')}
           />
         </div>
 
@@ -35,7 +64,7 @@ const EditFlat: React.FC = () => {
             type="number"
             placeholder="Enter limit"
             value={apiCalls}
-            onChange={handleChange(setApiCalls, 'flatFeeApiCalls')}
+            onChange={handleChange(setApiCalls, 'FLAT_FEE_API_CALLS', 'flatFeeApiCalls')}
           />
         </div>
 
@@ -46,7 +75,7 @@ const EditFlat: React.FC = () => {
             type="number"
             placeholder="Enter overage per unit"
             value={overageRate}
-            onChange={handleChange(setOverageRate, 'flatFeeOverage')}
+            onChange={handleChange(setOverageRate, 'FLAT_FEE_OVERAGE', 'flatFeeOverage')}
           />
         </div>
 
@@ -59,7 +88,7 @@ const EditFlat: React.FC = () => {
             type="number"
             placeholder="Enter grace buffer"
             value={graceBuffer}
-            onChange={handleChange(setGraceBuffer, 'flatFeeGrace')}
+            onChange={handleChange(setGraceBuffer, 'FLAT_FEE_GRACE', 'flatFeeGrace')}
           />
         </div>
       </div>

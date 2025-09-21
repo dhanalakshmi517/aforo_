@@ -12,13 +12,14 @@ const EditTiered: React.FC = () => {
   const [tiers, setTiers] = useState<Tier[]>(() => {
     const saved = localStorage.getItem('tieredTiers');
     if (saved) return JSON.parse(saved);
-    return [{from:'',to:'',price:''}];
+    return [{ from: '', to: '', price: '' }];
   });
 
   const [unlimited, setUnlimited] = useState(false);
-  const [overageCharge, setOverageCharge] = useState(localStorage.getItem('tieredOverage')||'');
-  const [graceBuffer, setGraceBuffer] = useState(localStorage.getItem('tieredGrace')||'');
+  const [overageCharge, setOverageCharge] = useState(localStorage.getItem('tieredOverage') || '');
+  const [graceBuffer, setGraceBuffer] = useState(localStorage.getItem('tieredGrace') || '');
 
+  // ✅ Persist the current tiers snapshot only here
   useEffect(() => {
     localStorage.setItem('tieredTiers', JSON.stringify(tiers));
   }, [tiers]);
@@ -32,26 +33,32 @@ const EditTiered: React.FC = () => {
   }, [graceBuffer]);
 
   const handleAddTier = () => {
-    setTiers([...tiers, { from: '', to: '', price: '' }]);
+    setTiers(prev => [...prev, { from: '', to: '', price: '' }]);
   };
 
   const handleDeleteTier = (index: number) => {
-    const updated = tiers.filter((_, i) => i !== index);
-    setTiers(updated);
+    setTiers(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleChange = (index: number, field: keyof Tier, value: string) => {
-    setTiers(prev=>prev.map((tier,i)=>(i===index?{...tier,[field]:value}:tier)) as Tier[]);
-    setTimeout(()=>localStorage.setItem('tieredTiers',JSON.stringify(tiers)),0);
+    // ✅ Update state only; persistence handled by useEffect([tiers])
+    setTiers(prev =>
+      prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[]
+    );
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
-    const updated = [...tiers];
-    updated[index].isUnlimited = checked;
-    if (checked) {
-      updated[index].to = '';
-    }
-    setTiers(updated);
+    // ✅ Functional update to avoid race conditions
+    setTiers(prev => {
+      const updated = [...prev];
+      const t = updated[index] || { from: '', to: '', price: '' };
+      updated[index] = {
+        ...t,
+        isUnlimited: checked,
+        to: checked ? '' : t.to,
+      };
+      return updated;
+    });
   };
 
   return (
@@ -137,25 +144,6 @@ const EditTiered: React.FC = () => {
 
         <button className="edit-tiered-add-btn" onClick={handleAddTier}>+ Add Volume Tier</button>
       </div>
-
-      {/* <div className="tiered-example-section">
-        <h4>EXAMPLE</h4>
-        <a href="#">Tired Based Pricing</a>
-        <table>
-          <tbody>
-            <tr><td>Tier 1</td><td>1 – 200</td><td>$8</td></tr>
-            <tr><td>Tier 2</td><td>201 – 500</td><td>$5</td></tr>
-            <tr><td>Tier 3</td><td>501 – 700</td><td>$3</td></tr>
-          </tbody>
-        </table>
-        <p className="tiered-consumer-note">
-          <a href="#">You to consumer:</a><br />
-          <em>“You’ve consumed 300 units this billing cycle.<br />
-          • First 200 units are for $8 → $1600<br />
-          • Next 100 units are for $5 → $500<br />
-          Total charge: $2,100.”</em>
-        </p>
-      </div> */}
     </div>
   );
 };

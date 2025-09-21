@@ -5,12 +5,12 @@ import {
   saveTieredPricing,
   saveVolumePricing,
 } from './api';
-import { setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData, getRatePlanData } from './utils/sessionStorage';
 import './Pricing.css';
 
 import FlatFeeForm, { FlatFeePayload, FlatFeeHandle } from './FlatFeeForm';
 import Tiered, { TieredHandle } from './Tiered';
-import StairStep, { StairStepHandle } from './StairStep';
+import StairStep, { StairStepHandle, Stair } from './StairStep';
 import UsageBased, { UsagePayload, UsageBasedHandle } from './UsageBased';
 import Volume, { VolumeHandle } from './Volume';
 
@@ -31,6 +31,7 @@ interface PricingProps {
   ratePlanId: number | null;
   validationErrors?: Record<string, string>;
   draftData?: any;
+  isFreshCreation?: boolean;
 }
 
 type PricingErrors = {
@@ -44,7 +45,7 @@ type PricingErrors = {
 };
 
 const Pricing = forwardRef<PricingHandle, PricingProps>(
-  ({ ratePlanId, validationErrors = {}, draftData }, ref) => {
+  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false }, ref) => {
     const [selected, setSelected] = useState('');
     const [errors, setErrors] = useState<PricingErrors>({});
 
@@ -174,8 +175,6 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         };
         setFlatFee(next);
         setRatePlanData('PRICING_MODEL', 'Flat Fee');
-
-        // ✅ NEW: write hydrated values to sessionStorage so validators see them
         setRatePlanData('FLAT_FEE_AMOUNT', String(next.flatFeeAmount || ''));
         setRatePlanData('FLAT_FEE_API_CALLS', String(next.numberOfApiCalls || ''));
         setRatePlanData('FLAT_FEE_OVERAGE', String(next.overageUnitRate || ''));
@@ -225,31 +224,48 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         return;
       }
 
-      // Stairstep
-      const stairObj = Array.isArray(draftData.stairStepPricing)
-        ? draftData.stairStepPricing[0]
-        : draftData.stairStepPricing;
-      if (stairObj && Object.keys(stairObj).length > 0) {
+      // Stairstep (supports array)
+      const stairRaw = Array.isArray(draftData.stairStepPricing)
+        ? draftData.stairStepPricing[draftData.stairStepPricing.length - 1]
+        : draftData.stairStepPricing
+        // also support the list style: stairStepPricings from your payload
+        || (Array.isArray(draftData.stairStepPricings)
+            ? draftData.stairStepPricings[draftData.stairStepPricings.length - 1]
+            : draftData.stairStepPricings);
+
+      if (stairRaw && Object.keys(stairRaw).length > 0) {
         setSelected('Stairstep');
-        const t = (stairObj.tiers || []).map((x: any) => ({
+        const t = (stairRaw.tiers || []).map((x: any) => ({
           from: x.usageStart ?? null,
           to: x.usageEnd ?? null,
           price: x.flatCost ?? null
         }));
         setTiers(t);
-        setOverageUnitRate(stairObj.overageUnitRate || 0);
-        setGraceBuffer(stairObj.graceBuffer || 0);
+        setOverageUnitRate(stairRaw.overageUnitRate || 0);
+        setGraceBuffer(stairRaw.graceBuffer || 0);
         setRatePlanData('PRICING_MODEL', 'Stairstep');
         const stairTiers = t.map((y: Tier) => ({
           from: String(y.from ?? ''),
           to: String(y.to ?? ''),
-          cost: String(y.price ?? '')
+          cost: String(y.price ?? ''),
         }));
         setRatePlanData('STAIR_TIERS', JSON.stringify(stairTiers));
-        setRatePlanData('STAIR_OVERAGE', String(stairObj.overageUnitRate || 0));
-        setRatePlanData('STAIR_GRACE', String(stairObj.graceBuffer || 0));
+        setRatePlanData('STAIR_OVERAGE', String(stairRaw.overageUnitRate || 0));
+        setRatePlanData('STAIR_GRACE', String(stairRaw.graceBuffer || 0));
       }
     }, [draftData]);
+
+    // Initialize from session storage on mount
+    useEffect(() => {
+      if (isFreshCreation) {
+        setSelected('');
+      } else if (!draftData) {
+        const savedModel = getRatePlanData('PRICING_MODEL');
+        if (savedModel && savedModel !== selected) {
+          setSelected(savedModel);
+        }
+      }
+    }, []); // eslint-disable-line
 
     useEffect(() => {
       if (selected) setRatePlanData('PRICING_MODEL', selected);
@@ -277,6 +293,15 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
     const toStr = (n: number | null | undefined) =>
       n == null || Number.isNaN(n) ? '' : String(n);
+
+    // mapper to convert Stair (string fields) from child to our numeric Tier[]
+    const mapStairsToTiers = (s: Stair[]): Tier[] =>
+      (s || []).map(r => ({
+        from: r.from?.trim() === '' ? null : parseInt(r.from, 10),
+        to: r.isUnlimited ? null : (r.to?.trim() === '' ? null : parseInt(r.to, 10)),
+        price: r.cost?.trim() === '' ? null : parseFloat(r.cost),
+        isUnlimited: r.isUnlimited,
+      }));
 
     return (
       <div className="pricing-container">
@@ -377,12 +402,29 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   ref={stairStepRef}
                   validationErrors={validationErrors}
                   stairs={tiers.map(t => ({
-                    from: t == null || t.from == null ? '' : String(t.from),
-                    to: t == null || t.to == null ? '' : String(t.to),
-                    cost: t == null || t.price == null ? '' : String(t.price),
+                    from: toStr(t.from),
+                    to: toStr(t.to),
+                    cost: toStr(t.price),
+                    isUnlimited: !!t.isUnlimited,
                   }))}
+                  onStairsChange={(next) => {
+                    setTiers(mapStairsToTiers(next));
+                    // also mirror to session for validation elsewhere
+                    const stairTiers = next.map(y => ({ from: y.from, to: y.isUnlimited ? '' : y.to, cost: y.cost }));
+                    setRatePlanData('STAIR_TIERS', JSON.stringify(stairTiers));
+                  }}
                   overageCharge={String(overageUnitRate || '')}
+                  onOverageChange={(v) => {
+                    const n = (v ?? '').toString().trim();
+                    setOverageUnitRate(n === '' ? 0 : Number(n));
+                    setRatePlanData('STAIR_OVERAGE', n);
+                  }}
                   graceBuffer={String(graceBuffer || '')}
+                  onGraceBufferChange={(v) => {
+                    const n = (v ?? '').toString().trim();
+                    setGraceBuffer(n === '' ? 0 : Number(n));
+                    setRatePlanData('STAIR_GRACE', n);
+                  }}
                 />
               </div>
               {errors.stair && <div className="inline-error">{errors.stair}</div>}

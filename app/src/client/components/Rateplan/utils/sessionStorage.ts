@@ -68,6 +68,25 @@ export const clearCurrentSession = (): void => {
   currentSessionId = null;
 };
 
+// Force clear all rate plan related data (for fresh start)
+export const clearAllRatePlanData = (): void => {
+  // Clear current session
+  clearCurrentSession();
+  
+  // Also clear any legacy localStorage keys that might be cached
+  const legacyKeys = [
+    'pricingModel', 'flatFeeAmount', 'flatFeeApiCalls', 'flatFeeOverage', 'flatFeeGrace',
+    'usagePerUnit', 'tieredTiers', 'tieredOverage', 'tieredGrace',
+    'volumeTiers', 'volumeOverage', 'volumeGrace',
+    'stairTiers', 'stairOverage', 'stairGrace'
+  ];
+  
+  legacyKeys.forEach(key => localStorage.removeItem(key));
+  
+  // Initialize a fresh session
+  initializeSession();
+};
+
 // Clear old sessions (cleanup utility)
 export const clearOldSessions = (): void => {
   const currentSession = getCurrentSessionId();
