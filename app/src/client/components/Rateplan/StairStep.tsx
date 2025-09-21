@@ -1,59 +1,70 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { saveStairStepPricing } from './api';
 import { setRatePlanData } from './utils/sessionStorage';
 import './StairStep.css';
 
+export interface Stair { from: string; to: string; cost: string; isUnlimited?: boolean; }
 export interface StairStepHandle { save: (ratePlanId: number) => Promise<void>; }
 
-interface Stair { from: string; to: string; cost: string; isUnlimited?: boolean; }
 type RowError = { from?: string; to?: string; cost?: string };
 type RowTouched = { from: boolean; to: boolean; cost: boolean };
 
 interface StairStepProps {
   validationErrors?: Record<string, string>;
-  /** ✅ NEW: hydrate from parent */
+
+  /** controlled props from parent */
   stairs?: Stair[];
   overageCharge?: string | number;
   graceBuffer?: string | number;
+
+  /** bubble up changes so parent state stays in sync */
+  onStairsChange?: (stairs: Stair[]) => void;
+  onOverageChange?: (val: string) => void;
+  onGraceBufferChange?: (val: string) => void;
 }
 
 const StairStep = forwardRef<StairStepHandle, StairStepProps>(
-({ validationErrors = {}, stairs: externalStairs, overageCharge: overageFromParent, graceBuffer: graceFromParent }, ref) => {
-  const [stairs, setStairs] = useState<Stair[]>(externalStairs && externalStairs.length
-    ? externalStairs
-    : [{ from: '', to: '', cost: '' }]
+({ validationErrors = {}, stairs: externalStairs, overageCharge: overageFromParent, graceBuffer: graceFromParent, onStairsChange, onOverageChange, onGraceBufferChange }, ref) => {
+  // hydrate from parent only once to prevent clobbering user edits on re-renders
+  const hydrated = useRef(false);
+
+  const [stairs, setStairs] = useState<Stair[]>(
+    externalStairs && externalStairs.length ? externalStairs : [{ from: '', to: '', cost: '' }]
   );
   const [touched, setTouched] = useState<RowTouched[]>([{ from:false, to:false, cost:false }]);
   const [rowErrors, setRowErrors] = useState<RowError[]>([{}]);
 
-  const [unlimited, setUnlimited] = useState(false);
-  const [overageCharge, setOverageCharge] = useState<string>('');
+  const [unlimited, setUnlimited] = useState(!!(externalStairs?.[externalStairs.length - 1]?.isUnlimited));
+  const [overageCharge, setOverageCharge] = useState<string>(overageFromParent != null ? String(overageFromParent) : '');
   const [overageTouched, setOverageTouched] = useState(false);
-  const [graceBuffer, setGraceBuffer] = useState<string>('');
+  const [graceBuffer, setGraceBuffer] = useState<string>(graceFromParent != null ? String(graceFromParent) : '');
 
   const [mustHaveOneError, setMustHaveOneError] = useState<string | null>(null);
   const [overageError, setOverageError] = useState<string | null>(null);
 
-  /** ✅ sync from parent when props change */
+  // one-time hydration
   useEffect(() => {
-    if (externalStairs && externalStairs.length > 0) {
+    if (!hydrated.current && externalStairs && externalStairs.length > 0) {
+      hydrated.current = true;
       setStairs(externalStairs);
+      const last = externalStairs[externalStairs.length - 1];
+      setUnlimited(!!last?.isUnlimited);
     }
   }, [externalStairs]);
 
   useEffect(() => {
-    if (overageFromParent !== undefined && overageFromParent !== null) {
+    if (!hydrated.current && overageFromParent !== undefined && overageFromParent !== null) {
       setOverageCharge(String(overageFromParent));
     }
   }, [overageFromParent]);
 
   useEffect(() => {
-    if (graceFromParent !== undefined && graceFromParent !== null) {
+    if (!hydrated.current && graceFromParent !== undefined && graceFromParent !== null) {
       setGraceBuffer(String(graceFromParent));
     }
   }, [graceFromParent]);
 
-  // persist to session storage
+  // persist to session storage for validation outside
   useEffect(() => { setRatePlanData('STAIR_TIERS', JSON.stringify(stairs)); }, [stairs]);
   useEffect(() => { setRatePlanData('STAIR_OVERAGE', overageCharge); }, [overageCharge]);
   useEffect(() => { setRatePlanData('STAIR_GRACE', graceBuffer); }, [graceBuffer]);
@@ -71,15 +82,15 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
 
   const validateRow = (r:Stair): RowError => {
     const e: RowError = {};
-    if (r.from.trim()==='') e.from='This is a required field';
-    else if(!isNonNegInt(r.from)) e.from='Enter a valid value';
+    if ((r.from ?? '').trim()==='') e.from='This is a required field';
+    else if(!isNonNegInt(r.from!)) e.from='Enter a valid value';
     if (!r.isUnlimited){
-      if (r.to.trim()==='') e.to='This is a required field';
-      else if(!isNonNegInt(r.to)) e.to='Enter a valid value';
+      if ((r.to ?? '').trim()==='') e.to='This is a required field';
+      else if(!isNonNegInt(r.to!)) e.to='Enter a valid value';
       if(!e.from && !e.to && Number(r.to)<Number(r.from)) e.to='Must be ≥ From';
     }
-    if (r.cost.trim()==='') e.cost='This is a required field';
-    else if(!isPositiveNum(r.cost)) e.cost='Enter a valid value';
+    if ((r.cost ?? '').trim()==='') e.cost='This is a required field';
+    else if(!isPositiveNum(r.cost!)) e.cost='Enter a valid value';
     return e;
   };
 
@@ -99,26 +110,43 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
     } else setOverageError(null);
   }, [stairs, unlimited, overageCharge]);
 
-  const addStair = () => setStairs(prev => [...prev, { from:'', to:'', cost:'' }]);
+  const pushChangeUp = (nextStairs: Stair[]) => {
+    onStairsChange?.(nextStairs);
+  };
+  const pushOverageUp = (val: string) => {
+    onOverageChange?.(val);
+  };
+  const pushGraceUp = (val: string) => {
+    onGraceBufferChange?.(val);
+  };
+
+  const addStair = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    const next = [...stairs, { from:'', to:'', cost:'' }];
+    setStairs(next);
+    pushChangeUp(next);
+  };
 
   const deleteStair = (index:number) => {
-    setStairs(prev => {
-      const n = prev.filter((_,i)=>i!==index);
-      return n.length===0 ? [{from:'',to:'',cost:''}] : n;
-    });
+    const next = stairs.filter((_,i)=>i!==index);
+    const safe = next.length===0 ? [{from:'',to:'',cost:''}] : next;
+    setStairs(safe);
     setTouched(prev => {
       const n = prev.filter((_,i)=>i!==index);
       return n.length===0 ? [{from:false,to:false,cost:false}] : n;
     });
+    pushChangeUp(safe);
   };
 
   const change = (i:number, field:keyof Stair, val:string) => {
     if (field==='to' && stairs[i].isUnlimited) return;
     const n=[...stairs]; (n[i] as any)[field]=val; setStairs(n);
+    pushChangeUp(n);
   };
 
   const toggleUnlimited = (checked:boolean, index:number) => {
     const n=[...stairs]; n[index].isUnlimited=checked; if(checked) n[index].to=''; setStairs(n); setUnlimited(checked);
+    pushChangeUp(n);
   };
 
   const last = stairs.length-1;
@@ -199,7 +227,11 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
         })}
 
         <label className="checkbox-label">
-          <input type="checkbox" checked={unlimited} onChange={(e)=>toggleUnlimited(e.target.checked, last)} />
+          <input
+            type="checkbox"
+            checked={unlimited}
+            onChange={(e)=>toggleUnlimited(e.target.checked, last)}
+          />
           <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
             <path className="tick" d="M8 12.5L10.5 15L16 9.5" stroke="#4C7EFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -215,7 +247,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                 type="text"
                 className={`input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                 value={overageCharge}
-                onChange={(e)=>setOverageCharge(e.target.value)}
+                onChange={(e)=>{ setOverageCharge(e.target.value); pushOverageUp(e.target.value); }}
                 onBlur={()=>setOverageTouched(true)}
                 placeholder="Enter overage charge"
               />
@@ -236,7 +268,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                 type="text"
                 className="input-extra"
                 value={graceBuffer}
-                onChange={(e)=>setGraceBuffer(e.target.value)}
+                onChange={(e)=>{ setGraceBuffer(e.target.value); pushGraceUp(e.target.value); }}
                 placeholder="Enter grace buffer"
               />
             </label>

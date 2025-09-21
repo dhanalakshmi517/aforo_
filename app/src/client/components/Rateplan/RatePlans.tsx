@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchRatePlans, deleteRatePlan } from './api';
+import { fetchRatePlans, deleteRatePlan, fetchRatePlanWithDetails } from './api';
 import './RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,7 @@ import CreatePricePlan from './CreatePricePlan';
 import TopBar from '../TopBar/TopBar';
 import SaveDraft from '../componenetsss/SaveDraft'; // ⬅️ NEW: use the Save-as-Draft modal
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import { clearAllRatePlanData } from './utils/sessionStorage';
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -85,6 +86,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<void>)>(null);
   const [draftSaving, setDraftSaving] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [draftPlanData, setDraftPlanData] = useState<any>(null);
   const navigate = useNavigate();
 
   // Prevent browser window scroll on Rate Plans page
@@ -149,7 +151,33 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const handleEdit = (id: number) => {
     const plan = ratePlansState.find((p) => p.ratePlanId === id);
     if (!plan) return;
+    // Clear any cached data before navigating to edit
+    clearAllRatePlanData();
     navigate(`/get-started/rate-plans/${id}/edit`, { state: { plan } });
+  };
+
+  const handleDraft = async (id: number) => {
+    try {
+      console.log('🔄 Fetching fresh draft data for ratePlanId:', id);
+      // Clear any cached data first
+      clearAllRatePlanData();
+      
+      // Fetch fresh data from backend
+      const freshData = await fetchRatePlanWithDetails(id);
+      console.log('✅ Fresh draft data fetched:', freshData);
+      
+      // Set the draft data and open create screen
+      setDraftPlanData(freshData);
+      setShowCreatePlan(true);
+    } catch (error) {
+      console.error('❌ Failed to fetch draft data:', error);
+      // Fallback to basic plan data
+      const plan = ratePlansState.find((p) => p.ratePlanId === id);
+      if (plan) {
+        setDraftPlanData(plan);
+        setShowCreatePlan(true);
+      }
+    }
   };
 
   const handleDeleteClick = (id: number) => {
@@ -296,7 +324,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
             <CreatePricePlan
               ref={createPlanRef}
               registerSaveDraft={(fn) => setSaveDraftFn(() => fn)}
+              draftData={draftPlanData}
               onClose={() => {
+                // Clear draft data and session storage when closing
+                setDraftPlanData(null);
+                clearAllRatePlanData();
                 setShowCreatePlan(false);
                 loadRatePlans();
               }}
@@ -450,13 +482,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         {plan.status?.toLowerCase() === 'draft' ? (
                           <button
                             className="resume-button"
-                            onClick={() => {
-                              // Open the same Create screen but in "resumeDraft" mode
-                              setShowCreatePlan(true);
-                              navigate('/get-started/rate-plans', { 
-                                state: { resumeDraftId: plan.ratePlanId } 
-                              });
-                            }}
+                            onClick={() => handleDraft(plan.ratePlanId)}
                             title="Resume Draft"
                             aria-label="Resume Draft"
                           >
