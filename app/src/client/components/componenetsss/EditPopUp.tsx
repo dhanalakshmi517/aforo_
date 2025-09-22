@@ -3,17 +3,19 @@ import "./EditPopUp.css";
 
 interface EditPopupProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: () => void; // invoked by Cancel button
   onSave: () => void;
+  onDismiss?: () => void; // invoked by X icon (optional)
 }
 
-const EditPopup: React.FC<EditPopupProps> = ({ isOpen, onClose, onSave }) => {
+const EditPopup: React.FC<EditPopupProps> = ({ isOpen, onClose, onSave, onDismiss }) => {
+  const handleDismiss = onDismiss ?? onClose;
   if (!isOpen) return null;
 
   return (
     <div className="popup-overlay">
       <div className="popup-container">
-        <button className="popup-close" onClick={onClose} aria-label="Close popup">
+        <button className="popup-close" onClick={handleDismiss} aria-label="Close popup">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="12"

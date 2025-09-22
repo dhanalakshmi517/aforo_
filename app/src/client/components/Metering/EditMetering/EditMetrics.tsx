@@ -447,6 +447,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                   </div>
                 </div>
               </div>
+              <div className="af-skel-rule af-skel-rule--bottom" />
             </div>
           </div>
 
@@ -476,8 +477,10 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
           {/* Edit confirmation popup */}
           <EditPopup
             isOpen={showEditPopup}
+            onDismiss={() => setShowEditPopup(false)}
             onClose={() => {
               setShowEditPopup(false);
+              onClose();
             }}
             onSave={async () => {
               await handleSaveDraft();
@@ -491,4 +494,5 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
 };
 
 export default EditMetrics;
+
 

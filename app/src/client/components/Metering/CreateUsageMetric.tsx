@@ -347,7 +347,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           label: isDraftSaved ? 'Saved!' : 'Save as Draft',
           saved: isDraftSaved,
           saving: isDraftSaving,
-          labelWhenSaved: 'Saved!'
+          labelWhenSaved: 'Saved as Draft'
         }}
       />
 
@@ -399,7 +399,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                       {activeTab === 'metric' && (
                         <section>
                           <div className="met-np-section-header">
-                          <div className="af-skel-rule af-skel-rule--top" />
 
                             <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
                           </div>
@@ -643,6 +642,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
               </div>
             </main>
           </div>
+
           <div className="af-skel-rule af-skel-rule--bottom" />
 
           {/* Save Draft confirmation modal (same behavior as NewProduct) */}
