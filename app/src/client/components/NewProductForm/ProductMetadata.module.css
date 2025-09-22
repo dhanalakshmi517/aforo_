@@ -262,14 +262,6 @@
   transition: all 0.2s ease;
  
 }
-
-.error {
-  color: var(--color-error-400);
-  font-size: 0.875rem;
-  margin-top: 4px;
-  font-family: var(--font-family-primary);
-  font-weight: 400;
-}
 .plusIcon {
   width: 16px;
   height: 16px;

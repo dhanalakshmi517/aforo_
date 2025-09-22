@@ -114,6 +114,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
           }}
           className={[
             "if-control",
+            "custom-input",
             writing ? "is-writing" : "",
             error ? "is-error" : "",
             disabled ? "is-disabled" : "",
@@ -188,9 +189,10 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
           className={[
             "if-control",
             "if-select",
+            "custom-select",
             writing ? "is-writing" : "",
             error ? "is-error" : "",
-            disabled ? "is-disabled" : "",
+            disabled ? "is-disabled" : " ",
           ].join(" ").trim()}
           aria-invalid={!!error}
           aria-describedby={

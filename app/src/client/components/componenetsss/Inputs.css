@@ -27,9 +27,9 @@
   position: relative;               /* for dropdown menu positioning */
   display: flex;
   flex-direction: column;
-  gap: 4px; /* spacing between label and control - reduced from 4px */
+  gap: 2px; /* Reduced gap between label and control */
   width: 456px;
-  margin-bottom: 0px; /* space after each field - reduced to 0 */
+  margin-bottom: 6px; /* Consistent bottom margin for all fields */
 }
 
 .if-label {
@@ -108,10 +108,38 @@
 }
 
 /* Helper + error text */
-.if-msg{min-height:18px;display:block;}
+.if-msg {
+  min-height: 0;
+  height: 0;
+  display: block;
+  transition: height 0.1s ease;
+  overflow: hidden;
+  margin-top: 2px;
+  line-height: 1.2;
+}
 
-.if-help { font-size: 12px; color: var(--if-text-muted); }
-.if-error { font-size: 12px; color: var(--if-text-error); margin-top: -4px; }
+.if-msg:not(:empty) {
+  min-height: 16px;
+  height: auto;
+  margin-top: 2px;
+}
+
+.if-help { 
+  font-size: 12px; 
+  color: var(--if-text-muted);
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.if-error { 
+  font-size: 12px; 
+  color: var(--if-text-error);
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
 
 /* ---------- Select (native caret) ---------- */
 .if-select {
@@ -127,6 +155,69 @@
 
 /* ---------- Textarea ---------- */
 .if-textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
+
+/* ===== Custom Input and Select Fields ===== */
+.input-field-wrapper {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+/* Base styles for all input controls */
+.if-field {
+  width: 100%;
+  max-width: 456px;
+  margin-bottom: 0;
+  padding-bottom: 4px; /* Space for error message */
+}
+
+/* Input field specific styles */
+.if-field input[type="text"],
+.if-field input[type="password"],
+.if-field input[type="email"],
+.if-field input[type="number"],
+.if-field input:not([type]) {
+  margin: 0;
+  padding: 8px 12px;
+  height: 40px;
+  line-height: 1.5;
+}
+
+/* Select field specific styles */
+.if-field select {
+  margin: 0;
+  padding: 8px 12px;
+  height: 40px;
+  line-height: 1.5;
+}
+
+/* Error message container */
+.if-msg {
+  min-height: 0;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+/* Show error message with minimal gap */
+.if-msg:not(:empty) {
+  min-height: 16px;
+  height: auto;
+  margin-top: 2px;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+/* Ensure consistent error message styling */
+.if-error {
+  font-size: 12px;
+  color: var(--if-text-error);
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
 
 /* ========== Custom Dropdown ========== */
 .dd-wrap {

@@ -39,7 +39,7 @@
 }
 
 .form-control {
-  width: 50%;
+  width: 45%;
   padding: 8px 12px;
   border: 1px solid var(--color-neutral-300);
   border-radius: 4px;
@@ -86,11 +86,7 @@ input[type='checkbox'] {
 }
 
 
-.error-message {
-  color: #dc3545;
-  font-size: 12px;
-  margin-top: 4px;
-}
+
 
 .form-group {
   margin-bottom: 0px; /* Reduced from 2px to 0px */

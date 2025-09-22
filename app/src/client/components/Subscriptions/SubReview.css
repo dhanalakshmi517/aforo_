@@ -1,3 +1,4 @@
+@import "../Variables/Variables.css";
 .review-container {
   max-width: 600px;
   margin: 40px 32px;              /* keep card positioned consistently */

@@ -138,3 +138,93 @@
   margin-top: -10px;
   margin-left: -30px;
 }
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.sub-create-price-plan {
+  padding: 24px;
+  width: 100%;
+  height: calc(100vh - 80px);
+  background-color: var(--color-neutral-50);
+  position: relative;
+  overflow: hidden;
+}
+
+.sub-usage-metric-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-neutral-white);
+  border: 1.5px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+  position: relative;
+  overflow: hidden;
+}
+
+.sub-sidebars {
+  width: 300px;
+  background-color: var(--color-neutral-100);
+  padding: 30px 20px;
+  border-right: 1.5px solid var(--color-neutral-200);
+  overflow-y: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+}
+/* custom scrollbar */
+.sub-sidebars::-webkit-scrollbar      { width: 6px; }
+.sub-sidebars::-webkit-scrollbar-track{ background: transparent; }
+.sub-sidebars::-webkit-scrollbar-thumb{ background-color: #C3C2D0; border-radius:2px; }
+.sub-sidebars::-webkit-scrollbar-thumb:hover{ background-color:#A9A8B5; }
+.sub-sidebars::-webkit-scrollbar-thumb:active{ background-color:#878694; }
+.sub-sidebars{ scrollbar-width: thin; scrollbar-color:#C3C2D0 transparent; }
+
+.form-section {
+  margin-left: 300px;
+  width: calc(100% - 300px);
+  height: 100%;
+  overflow-y: auto;
+  padding: 32px 40px;
+  position: relative;
+}
+/* custom scrollbar */
+.form-section::-webkit-scrollbar      { width: 6px; }
+.form-section::-webkit-scrollbar-track{ background: transparent; }
+.form-section::-webkit-scrollbar-thumb{ background-color: #C3C2D0; border-radius:2px; }
+.form-section::-webkit-scrollbar-thumb:hover{ background-color:#A9A8B5; }
+.form-section::-webkit-scrollbar-thumb:active{ background-color:#878694; }
+.form-section{ scrollbar-width: thin; scrollbar-color:#C3C2D0 transparent; }
+
+.rateplan-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 4px;
+  flex: 1 0 0;
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-xs);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-xs);
+}
+
+.form-card {
+  max-width: 100%;
+  height: 100%;
+}
+
+.sub-step-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 25px;
+  cursor: pointer;
+}
