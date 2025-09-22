@@ -16,14 +16,7 @@
 
 
 
-.errorMessage {
-  color: var(--color-error-400);
-  font-size: 0.875rem;
-  margin-top: 4px;
-  font-family: var(--font-family-primary);
-  font-weight: 400;
-  
-}
+
 .formGroupLabel {
   color: var(--color-neutral-1200);
   font-family: var(--font-family-primary);

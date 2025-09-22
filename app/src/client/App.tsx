@@ -42,7 +42,8 @@ const meteringLoader = () => import('./components/Metering/Metering');
 const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
 const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
-import DataIngestion from './components/DataIngestion/DataIngestion';
+const dataIngestionLoader = () => import('./components/DataIngestion/DataIngestionPage');
+const DataIngestionPage = React.lazy(dataIngestionLoader) as React.ComponentType<any>;
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
@@ -149,13 +150,13 @@ export default function App() {
 
   // Prefetch heavy modules (also edit screen)
   useEffect(() => {
-    productsLoader();
     customersLoader();
     meteringLoader();
     subscriptionsLoader();
     ratePlansLoader();
     editPlanLoader();
-    editCustomerLoader(); // NEW: prefetch edit customer chunk so it’s ready
+    editCustomerLoader();
+    dataIngestionLoader(); // Prefetch data ingestion chunk
   }, []);
 
   // Small reusable spinner for route-level Suspense
@@ -190,7 +191,7 @@ export default function App() {
             element={user ? <Navigate to="/get-started" replace /> : <div className="min-h-screen"><Landing /></div>}
           />
 
-          {/* ✅ Get Started landing — ONLY sidebar */}
+          {/* Get Started landing — ONLY sidebar */}
           <Route
             path="/get-started"
             element={
@@ -456,6 +457,39 @@ export default function App() {
                       {/* NEW: route-level Suspense so we always show a loader while chunk loads */}
                       <Suspense fallback={RouteSpinner}>
                         <EditCustomer />
+                      </Suspense>
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Data Ingestion */}
+          <Route
+            path="/get-started/data-ingetion"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <Suspense fallback={RouteSpinner}>
+                        <DataIngestionPage />
                       </Suspense>
                     </div>
                   </div>

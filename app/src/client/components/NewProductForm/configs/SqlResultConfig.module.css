@@ -75,12 +75,5 @@
 }
 
 
-.errorMessage {
-  color: var(--color-error-400);
-  font-size: 0.875rem;
-  margin-top: 4px;
-  /* margin-left: 250px; */
-  font-family: var(--font-family-primary);
-  font-weight: 400;
-}
+
 

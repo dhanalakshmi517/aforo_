@@ -1,386 +1,559 @@
 @import "../Variables/Variables.css";
 
+:root {
+  /* Outer gaps */
+  --np-gap-left: 100px;
+  --np-gap-right: 100px;
+  --np-gap-top: 10px;
+  --np-gap-bottom: 15px;
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.sub-sidebars::-webkit-scrollbar,
-.form-section::-webkit-scrollbar {
-  display: none;
+ 
 }
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.sub-sidebars,
-.form-section {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-/* Reset and base styles */
-* {
-  box-sizing: border-box;
+/* Ensure full page height */
+html, body, #root{ 
+  height: 100%; 
   margin: 0;
   padding: 0;
+  overflow: visible; 
 }
 
-/* Main container with fixed height */
-.sub-create-price-plan {
-  padding: 24px;
+/* Viewport fills screen */
+.pur-np-viewport {
+  border-bottom: 1px solid var(--color-neutral-300);
+  padding: var(--np-gap-top) var(--np-gap-right) 30px var(--np-gap-left);
+  box-sizing: border-box;
+  height: calc(100vh - 20px);
   width: 100%;
-  height: calc(100vh - 80px); /* Viewport height minus header */
-  background-color: var(--color-neutral-50);
-  margin: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Card */
+.pur-np-card {
+  margin-bottom: 40px;          /* gap beneath card */
+  padding-bottom: 32px; /* space below footer */
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
+  width: 100%;
   position: relative;
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 20px);
   overflow: hidden;
 }
 
-/* Main content wrapper */
-.sub-usage-metric-wrapper {
-  display: flex;
+/* Grid fills height */
+.pur-np-grid{
+  display: grid;
+  grid-template-columns: 300px 1fr;
   flex: 1;
   min-height: 0;
-  background-color: var(--color-neutral-white);
-  border: 1.5px solid var(--color-neutral-200);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
-  overflow: hidden;
-  position: relative;
-  height: 100%;
 }
 
-/* Sidebar */
-.sub-sidebars {
-  width: 300px;
-  background-color: var(--color-neutral-100);
-  padding: 30px 20px;
-  border-right: 1.5px solid var(--color-neutral-200);
-  overflow-y: auto;
+/* ===== Rail with vertical connector line ===== */
+.pur-np-rail{
+  background: var(--color-neutral-100);
+  height: auto;
+  align-self: stretch;
+  padding: 16px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--color-neutral-300);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  height:100vh;
 }
 
-/* Main content area */
-.form-section {
-  flex: 1;
-  min-width: 0;
-  overflow-y: auto;
-  padding: 32px 40px 32px 340px; /* 300px sidebar + 40px padding */
-  box-sizing: border-box;
-  margin-left: 300px; /* Match sidebar width */
-  height: 100%;
+/* Steps container */
+.pur-np-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 8px 8px 0;
+  background-color: #f8f9fb;
+}
+
+/* Steps container */
+.pur-np-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap between steps */
+  padding: 8px 8px 8px 0;
+  background-color: #f8f9fb;
   position: relative;
 }
 
-/* Form card inside content area */
-.form-card {
-  flex: 1;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.sub-step-item {
+/* Each step card */
+.pur-np-step {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 25px;
-  cursor: pointer;
+  gap: 12px;
+  padding: 12px 8px;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  min-height: 70px; /* Reduced height for better alignment */
 }
 
-.sub-icon-wrappers {
-  margin-left: -6px;
-  position: relative;
-  overflow: visible;
+/* Bullet container */
+.pur-np-step__bullet {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 12px;
+  width: 24px;
+  flex: 0 0 24px;
+  position: relative;
+  z-index: 2;
 }
 
-.sub-icon-wrappers svg:first-child {
+/* Icon container */
+.pur-np-step__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 24px;
   height: 24px;
-  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  background: #f8f9fb; /* Match the rail background */
+}
+
+/* Connector line container */
+.pur-np-step__connector {
+  position: absolute;
+  top: 24px; /* Start from the bottom of the circle */
+  left: 11px;
+  z-index: 1;
+  width: 2px;
+  background-color: #C3C2D0; /* Match the circle stroke color */
+  content: '';
+  display: block;
+}
+
+/* Different heights for each connector */
+.pur-np-step:nth-child(1) .pur-np-step__connector {
+  height: 88px; /* Height for first connector */
+}
+
+.pur-np-step:nth-child(2) .pur-np-step__connector {
+  height: 98px; /* Height for second connector */
 }
 
 
 
+/* Vertical tweaks for steps after the first */
+.pur-np-step:not(:first-child) .pur-np-step__bullet { margin-top: -10px; }
+.pur-np-step:not(:first-child) .pur-np-step__text { margin-top: -10px; }
 
-.sub-step-text {
-  max-width: 180px;
+/* Step container */
+.pur-np-step {
+  position: relative;
+  padding: 0 0 12px 0;
+  min-height: 100px; /* Increased to accommodate the tallest connector */
+  display: flex;
+  align-items: flex-start;
 }
 
-.sub-step-title {
-  color: var(--color-neutral-800);
+/* Remove connector from last step */
+.pur-np-step:last-child .pur-np-step__connector {
+  display: none;
+}
+
+/* Remove bottom padding from last step */
+.pur-np-step:last-child {
+  padding-bottom: 0;
+}
+
+/* Text content */
+.pur-np-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 4px;
+  padding-top: 2px; /* Align text with circle */
+}
+
+.pur-np-step__connector svg {
+  display: block;
+  height: 100%;
+}
+
+.pur-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
+.pur-np-step__title{
+   color: var(--color-neutral-1400);
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-lg); /* 150% */
+text-align: left;
+margin-bottom: 2px;
+}
+.pur-np-step__title:hover{
+  color: var(--color-neutral-1700);
+
+  /* body/md/med */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   line-height: var(--line-height-body-lg);
-  display: block;
-  margin-bottom: 2px;
+    
 }
+.pur-np-step__desc{ color: var(--color-neutral-1400);
 
-
-.sub-step-item.active .sub-icon-wrappers svg circle:first-child {
-  stroke: var(--color-primary-800);
-
-}
-
-.sub-step-item.active .sub-icon-wrappers svg circle:last-child {
-  fill: var(--color-primary-800);
-  stroke-width: 3;
-
-}
-
-.sub-step-item.active .sub-step-title {
-  color: var(--color-neutral-1700);
-}
-
-
-.sub-step-desc {
-  color: var(--color-neutral-800);
-
+  /* body/md/reg */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md);
-  display: block;
+  line-height: var(--line-height-body-md); /* 142.857% */
 }
 
-.form-section {
-  background-color: transparent;
-  border: none;
-  padding: 32px 40px;
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  /* margin-top: -30px; */
-  display: flex;
-  flex-direction: column;
-}
+/* States */
+/* .np-step.active{
+   border:1px solid var(--color-neutral-300); 
+   border-radius: var(--border-radius-sm);
+    } */
+.pur-np-step.completed .pur-np-step__connector{ background-color: var(--color-primary-800); }
 
-.form-card {
-  background-color: transparent;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  max-width: 100%;
-  border: none;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  flex: 1 1 auto;
-  padding-bottom: 120px; /* keep bottom space for sticky buttons */
-}
+.pur-np-step.completed .pur-np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
+.pur-np-step.completed .pur-np-step__icon svg{ visibility:hidden; }
+.pur-np-step.active .pur-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
+.pur-np-step.active .pur-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
 
+.pur-np-step.active .pur-np-step__connector{ background-color: #C3C2D0; }
 
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 70%;
-}
+.pur-np-step.active .pur-np-step__title{ color: var(--color-neutral-1700);
 
-.sub-create-form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
-  width: 80%;
-}
-
-.sub-create-form label {
-    color: var(--color-neutral-1400);
-
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-}
-.sub-create-form input[type="text"]
-  {
-    width: 80%;
-    height:40px;
-    padding: 8px 12px;
-    font-size: var(--font-size-md);
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--color-neutral-200);
-    background-color: var(--color-neutral-100);
-    resize: none;
-    color: var(--color-neutral-1400);
-
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md);
-  }
-
-
-
-.sub-create-form textarea,
-.sub-create-form select {
-    width: 80%;
-  padding: 8px 12px;
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--border-radius-sm);
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-800);
+  /* body/md/med */
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-body-md);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-lg); /* 150% */
 }
 
-.sub-create-form textarea {
-  resize: vertical;
-  min-height: 100px;
-}
 
-.sub-header {
+/* ===== Main area ===== */
+.pur-np-main { 
+  border-radius: var(--border-radius-sm); 
+  position: relative; 
+  background: #fff;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  height: calc(100% - 20px);
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding-bottom: var(--np-gap-bottom);
+}
+
+/* Make inner area a column so footer can stick to bottom */
+.pur-np-main__inner {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.pur-np-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.pur-np-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 20px;
+  gap: 2px; /* Reduced from 4px to 2px */
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* === Hide scrollbars for the form === */
+.pur-np-form::-webkit-scrollbar {
+  display: none;
+}
+.pur-np-form::-webkit-scrollbar-track {
+  display: none;
+}
+.pur-np-form::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+/* Firefox */
+.pur-np-form {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pur-np-form-section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 15px;
+}
+/* custom scrollbar */
+.pur-np-form-section::-webkit-scrollbar      { width: 6px; }
+.pur-np-form-section::-webkit-scrollbar-track{ background: transparent; }
+.pur-np-form-section::-webkit-scrollbar-thumb{
+  background-color:transparent;
+  border-radius:2px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:repeat-y;
+  background-position:center;
+  background-size:4px 49px;
+}
+.pur-np-form-section::-webkit-scrollbar-thumb:hover{ background-color:transparent; }
+.pur-np-form-section::-webkit-scrollbar-thumb:active{ background-color:transparent; }
+.pur-np-form-section{ scrollbar-width: thin; scrollbar-color:transparent transparent; }
+
+/* Section title above a full-bleed faint line */
+.pur-np-section-header{
+  position:sticky;
+  top:0;
+  background:#fff;
+  z-index:5;
+  margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
+  padding:0 24px;   
+ 
+}
+.pur-np-section-title{
+  color: var(--color-neutral-800);
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h6);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-heading-h6);
+text-transform: uppercase;
+}
+.pur-np-section-header::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-5px;
+  height:1px;
+}
+
+/* Adjust skeleton faint rules just for New Product main area */
+.pur-np-main .af-skel-rule--top { 
+  top: 60px; 
+  background: var(--color-neutral-200);
+}
+
+.pur-np-viewport .af-skel-rule--bottom { 
+  position: absolute;
+  bottom: 80px; 
+  left: 400px;
+  right: 100px;
+  height: 1px;
+  background: var(--color-neutral-300);
+  z-index: 0;
+}
+
+.pur-np-form-footer .af-skel-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  /* background: var(--color-neutral-300); */
+}
+
+/* Footer actions on a full-bleed line */
+.pur-np-form-footer {
+  position: relative;
+  margin: 0 -24px;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between; /* Space between back and next buttons */
   align-items: center;
-  margin-bottom: 24px;
+ margin-top: auto;
+  margin-bottom: 20px;
 }
 
-.sub-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-neutral-1700);
-}
-
-.header-actions {
+.pur-np-btn-group { 
   display: flex;
   gap: 12px;
 }
 
-.header-actions .cancel-btn,
-.header-actions .draft-btn {
-  padding: 8px 16px;
-  border-radius: var(--border-radius-sm);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  cursor: pointer;
-  gap: 10px;
+/* Back button group - align to left */
+.pur-np-btn-group--back {
+  margin-right: auto;
 }
 
-.header-actions .cancel-btn {
-    background-color: var(--color-error-100);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    width:139px;
-    height: 40px;
-    color: var(--color-error-400);
-    border: 1px solid var(--color-error-500);
-  
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
+/* Next button group - align to right */
+.pur-np-btn-group--next {
+  margin-left: auto;
 }
 
-.header-actions .draft-btn {
-  border: 1px solid var(--color-primary-800);
-    background-color: var(--color-primary-000);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    width:139px;
-    height: 40px;
-    color: var(--color-primary-800);
-   
-   font-family: var(--font-family-primary);
-   font-size: var(--font-size-md);
-   font-style: normal;
-   font-weight: 400;
-   line-height: var(--line-height-body-md);
+/* Ensure the next button is on the right */
+.pur-np-form-footer > .pur-np-btn-group:last-child {
+  margin-left: auto;
 }
-
-.button-group {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 24px;
-  position: sticky;
-  bottom: 0;
-  background: var(--color-neutral-white);
-  padding-bottom: 12px;
-}
-
-.top-actions {
-  display: flex;
-  justify-content: space-between;
-  display: flex;
-  width: 140px;
-  padding: 8px 20px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
+/* Base Button Styles */
+/* Base button styles with no flash */
+.pur-np-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  outline: none;
   height: 40px;
-  color: var(--color-primary-800);
-
-  font-family: var(--font-family-primary);
+  padding: 8px 20px;
+  font-family: var(--type-font-family-primary);
   font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: var(--line-height-body-md);
-  background-color: var(--color-primary-000);
+  border-radius: var(--border-radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 144px auto;
+  text-align: center;
 }
 
-.save-next {
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
 
-  display: flex;
-  width: 164px;
-  padding: 8px 20px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  color: var(--color-neutral-1400);
 
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
+/* Active state with no transform */
+.pur-np-btn:active {
+  transform: none !important;
+  transition: none !important;
+}
+
+.pur-np-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.pur-np-btn--primary { 
+  background-color: var(--color-primary-700);
+  color: white;
+}
+
+.pur-np-btn--primary:hover:not(:disabled) {
   background-color: var(--color-primary-800);
 }
 
-.sub-step-item:nth-child(2) {
-  margin-top: -34px;
-}
-.sub-step-item:nth-child(2) .sub-step-text {
-  margin-top: 8px;
+.pur-np-btn--primary:active:not(:disabled) {
+  background-color: var(--color-primary-900);
 }
 
-/* Mobile layout */
-@media (max-width: 768px) {
-  .sub-usage-metric-wrapper {
-    flex-direction: column;
-    margin: 16px;
-    padding: 16px 16px 32px;
-    gap: 16px;
-    width: 100%;
-    min-height: calc(100vh - 32px);
+.pur-np-btn--primary:disabled {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+}
+
+/* Ghost Button */
+.pur-np-btn--ghost { 
+  background-color: var(--color-primary-000);
+  border: 1px solid var(--color-neutral-400);
+  color: var(--color-primary-800);
+}
+
+.pur-np-btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-500);
+}
+
+.pur-np-btn--ghost:active:not(:disabled) {
+  background-color: var(--color-neutral-200);
+}
+
+.pur-np-btn--ghost:disabled {
+  background-color: transparent;
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-400);
+}
+
+/* responsive */
+@media (max-width: 1200px){
+  :root{ --np-gap-left:72px; --np-gap-right:72px; }
+}
+@media (max-width: 900px){
+  :root{ --np-gap-left:48px; --np-gap-right:48px; }
+}
+/* Override grid inside form sections to stack fields vertically */
+.pur-np-form .pur-np-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Reduced from 4px to 2px */
+}
+
+@media (max-width: 640px){
+  :root{
+    --np-gap-top:24px; --np-gap-bottom:15px;
+    --np-gap-left:16px; --np-gap-right:16px;
+    --np-rail-w:100%;
   }
-  .sub-sidebars {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--color-neutral-200);
-    margin-bottom: 16px;
-  }
-  .form-section {
-    padding: 20px 16px 100px;
-  }
+  .np-grid{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .np-form{ gap:2px; }
+}
+
+
+/* --- tuneable sizes so math stays correct --- */
+:root{
+  --np-step-icon: 24px;      /* circle size */
+  --np-steps-pl: 16px;       /* left padding on .np-steps */
+  --np-conn-w: 2px;          /* SVG line width */
+}
+
+/* Steps container (keep your existing look) */
+.pur-np-steps{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-left: var(--np-steps-pl);
+  background-color: #f8f9fb;
+}
+
+/* Remove any old line rules if present */
+.pur-np-steps::before,
+.pur-np-step:not(:last-child)::after { background: none; }
+
+/* Vertical line is now handled by individual step connectors in JSX */
+
+/* Step row (keep your existing styles—just ensure the icon uses the same size) */
+.pur-np-step{
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px 10px 0;
+  background-color: #f8f9fb;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all .2s ease;
+  z-index: 1;
+}
+
+.pur-np-step__icon{
+  width: var(--np-step-icon);
+  height: var(--np-step-icon);
+  border-radius: 50%;
+  flex-shrink: 0;
 }
