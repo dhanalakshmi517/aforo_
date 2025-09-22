@@ -67,9 +67,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     productType: draftProduct?.productType || '' // Prefill product type if available
   });
   const [createdProductId, setCreatedProductId] = useState<string | null>(draftProduct?.productId || null);
-  const [saving, setSaving] = useState(false);
-  const [savingDraft, setSavingDraft] = useState(false);
-  const [saveDraftSuccess, setSaveDraftSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   // store existing products for uniqueness checks
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
 
@@ -139,7 +137,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       return;
     }
 
-    setSaving(true);
+    setIsSaving(true);
     try {
       const response = await finalizeProduct(createdProductId);
       if (response.success) {
@@ -154,7 +152,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       console.error('Failed to finalize product:', errorMessage);
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -212,7 +210,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     }
 
     try {
-      setSaving(true);
+      setIsSaving(true);
       
       // Create base payload with current form data
       const basePayload: ProductPayload = {
@@ -279,7 +277,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       }));
       return false;
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -291,8 +289,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     }
 
     try {
-      setIsDraftSaving(true);
-      setSaveDraftSuccess(false);
+      setIsSaving(true);
+      setIsDraftSaved(false);
 
       // Create draft data from current form state
       const draftData = {
@@ -321,16 +319,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
       console.log('Draft saved successfully');
       // ensure spinner visible
-await new Promise(res=>setTimeout(res,500));
-setSaveDraftSuccess(true);
-      setTimeout(() => setSaveDraftSuccess(false), 3000);
+      await new Promise(res=>setTimeout(res,500));
+      setIsDraftSaved(true);
+      setTimeout(() => setIsDraftSaved(false), 3000);
       return true;
     } catch (error) {
       console.error('Error saving draft:', error);
-      setSaveDraftSuccess(false);
+      setIsDraftSaved(false);
       return false;
     } finally {
-      setIsDraftSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -350,7 +348,7 @@ setSaveDraftSuccess(true);
     } else if (activeTab === 'configuration') {
       try {
         console.log('Starting configuration save...');
-        setSaving(true);
+        setIsSaving(true);
         // Trigger the configuration tab's submit handler
         if (configRef.current) {
           console.log('Calling configRef.current.submit()');
@@ -376,7 +374,7 @@ setSaveDraftSuccess(true);
           form: error instanceof Error ? error.message : 'Failed to save configuration. Please check your inputs and try again.'
         }));
       } finally {
-        setSaving(false);
+        setIsSaving(false);
       }
     } else {
       // For other tabs, just move to the next step
@@ -518,7 +516,7 @@ setSaveDraftSuccess(true);
                               return true;
                             }}
                             initialProductType={configuration.productType}
-                            isSavingDraft={savingDraft}
+                            isSavingDraft={isSaving}
                           />
                         </section>
                       )}
@@ -569,7 +567,7 @@ setSaveDraftSuccess(true);
                             className="np-btn np-btn--primary"
                             onClick={async () => {
                               try {
-                                setSaving(true);
+                                setIsSaving(true);
                                 if (configRef.current) {
                                   const success = await configRef.current.submit();
                                   if (success) {
@@ -583,12 +581,12 @@ setSaveDraftSuccess(true);
                                   form: 'Failed to save configuration. Please try again.'
                                 }));
                               } finally {
-                                setSaving(false);
+                                setIsSaving(false);
                               }
                             }}
-                            disabled={saving}
+                            disabled={isSaving}
                           >
-                            {saving ? 'Saving...' : 'Save & Next'}
+                            {isSaving ? 'Saving...' : 'Save & Next'}
                           </button>
                         </div>
                         </>
@@ -614,7 +612,7 @@ setSaveDraftSuccess(true);
                                   console.error('No product ID available for finalization');
                                   return;
                                 }
-                                setSaving(true);
+                                setIsSaving(true);
                                 finalizeProduct(createdProductId)
                                   .then(response => {
                                     if (response.success) {
@@ -630,12 +628,12 @@ setSaveDraftSuccess(true);
                                     console.error('Failed to finalize product:', errorMessage);
                                   })
                                   .finally(() => {
-                                    setSaving(false);
+                                    setIsSaving(false);
                                   });
                               }}
-                              disabled={saving}
+                              disabled={isSaving}
                             >
-                              {saving ? 'Submitting...' : 'Create Product'}
+                              {isSaving ? 'Submitting...' : 'Create Product'}
                             </button>
                           </div>
                         </>
