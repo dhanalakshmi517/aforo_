@@ -163,7 +163,23 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
     ref
   ) => {
     const [writing, setWriting] = React.useState(false);
+    const [isOpen, setIsOpen] = React.useState(false);
     const controlId = id || React.useId();
+    const selectRef = React.useRef<HTMLSelectElement>(null);
+
+    // Handle click outside to close dropdown
+    React.useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+          setIsOpen(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, []);
 
     return (
       <div className={`if-field ${className ?? ""}`}>
@@ -173,31 +189,47 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
           </label>
         )}
 
-        <select
-          ref={ref}
-          id={controlId}
-          name={name}
-          required={required}
-          disabled={disabled}
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setWriting(true)}
-          onBlur={(e) => {
-            setWriting(false);
-            onBlur?.();
-          }}
-          className={[
-            "if-control",
-            "if-select",
-            "custom-select",
-            writing ? "is-writing" : "",
-            error ? "is-error" : "",
-            disabled ? "is-disabled" : " ",
-          ].join(" ").trim()}
-          aria-invalid={!!error}
-          aria-describedby={
-            error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
-          }
+        <div className={`if-select-wrapper ${isOpen ? 'is-open' : ''}`}>
+          <select
+            ref={(node) => {
+              if (node) {
+                // @ts-ignore - We know this is safe
+                selectRef.current = node;
+                if (typeof ref === 'function') {
+                  ref(node);
+                } else if (ref) {
+                  // @ts-ignore - We know this is safe
+                  ref.current = node;
+                }
+              }
+            }}
+            id={controlId}
+            name={name}
+            required={required}
+            disabled={disabled}
+            value={value ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+            onFocus={() => {
+              setWriting(true);
+              setIsOpen(true);
+            }}
+            onBlur={(e) => {
+              setWriting(false);
+              onBlur?.();
+            }}
+            onClick={() => setIsOpen(!isOpen)}
+            className={[
+              "if-control",
+              "if-select",
+              "custom-select",
+              writing ? "is-writing" : "",
+              error ? "is-error" : "",
+              disabled ? "is-disabled" : " ",
+            ].join(" ").trim()}
+            aria-invalid={!!error}
+            aria-describedby={
+              error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
+            }
         >
           <option value="" disabled hidden>
             {placeholderOption}
@@ -207,7 +239,8 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
               {opt.label}
             </option>
           ))}
-        </select>
+          </select>
+        </div>
 
         <div className="if-msg">
           {error ? (

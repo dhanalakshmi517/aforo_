@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useToast } from '../componenetsss/ToastProvider';
 import { Api, Subscription as SubscriptionType } from './api';
 import CreateSubscription from './CreateSubscription';
 import EditSubscription from './EditSubscriptions/EditSubscription';
@@ -179,6 +180,8 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     setShowDeleteModal(true);
   };
 
+  const { showToast } = useToast();
+
   const handleConfirmDelete = async () => {
     if (!subscriptionToDelete) return;
     try {
@@ -186,8 +189,18 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       fetchSubs();
       setShowDeleteModal(false);
       setSubscriptionToDelete(null);
+      showToast({
+        kind: 'success',
+        title: 'Subscription Deleted',
+        message: 'The subscription has been successfully deleted.'
+      });
     } catch (error) {
       console.error('Failed to delete subscription', error);
+      showToast({
+        kind: 'error',
+        title: 'Deletion Failed',
+        message: 'Failed to delete the subscription. Please try again.'
+      });
     }
   };
 
@@ -217,7 +230,11 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   }, [editingSub, draftSub]);
 
   // create & edit wizards
-  if (showNewSubscriptionForm && !editingSub && !draftSub) {
+  if (editingSub) {
+    return <EditSubscription onClose={() => setEditingSub(null)} initial={editingSub} onRefresh={fetchSubs} />;
+  }
+
+  if (showNewSubscriptionForm && !draftSub) {
     return (
       <CreateSubscription
         onClose={() => setShowNewSubscriptionForm(false)}
@@ -246,10 +263,6 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         draftData={draftSub}
       />
     );
-  }
-
-  if (editingSub) {
-    return <EditSubscription onClose={() => setEditingSub(null)} initial={editingSub} onRefresh={fetchSubs} />;
   }
 
   const filtered = subscriptions.filter(sub => {

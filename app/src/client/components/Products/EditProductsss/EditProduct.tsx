@@ -580,6 +580,10 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
             setShowSaveDraftModal(false);
             onClose();
           }}
+          onDismiss={() => {
+            // Only close the popup, not the form
+            setShowSaveDraftModal(false);
+          }}
           onSave={async () => {
             // Save Changes - validate form first, then call all APIs like in review tab
             if (!validateForm()) {

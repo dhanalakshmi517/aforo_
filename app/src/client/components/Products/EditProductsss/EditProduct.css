@@ -35,6 +35,15 @@ html, body, #root{
   overflow-x: hidden;
 }
 
+.edit-np-label{
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+  user-select: none;
+
+}
 /* Card */
 .edit-np-card {
   margin-bottom: 40px;          /* gap beneath card */
@@ -410,7 +419,7 @@ text-transform: uppercase;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 144px;
+  width: 144px auto;
   text-align: center;
 }
 

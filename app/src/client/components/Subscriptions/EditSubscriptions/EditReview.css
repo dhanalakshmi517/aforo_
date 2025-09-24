@@ -1,0 +1,127 @@
+@import "../../Variables/Variables.css";
+
+
+
+.sub-review-title {
+  color: var(--color-neutral-1400);
+
+  /* body/md/thin */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 300;
+  line-height: var(--line-height-body-md); /* 142.857% */
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.sub-review-table {
+  width: 600px;
+  border-collapse: collapse;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.sub-review-table td {
+  padding: 10px 0;
+  vertical-align: top;
+  margin-left: 10px;
+  border-bottom: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-100);
+
+
+}
+
+.sub-review-table td:first-child {
+  width: 180px;
+  color: var(--color-neutral-1400);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */}
+
+.sub-review-table td {
+  padding-top: 12px;
+  color: var(--color-neutral-1400);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  margin-left: 10px;
+}
+
+.review-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background-color: var(--color-primary-600);
+  color: white;
+  border-color: var(--color-primary-600);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+}
+
+.btn-primary:disabled {
+  background-color: var(--color-neutral-400);
+  border-color: var(--color-neutral-400);
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: var(--color-neutral-800);
+  border: 1px solid var(--color-neutral-300);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-neutral-100);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sub-review-table {
+    width: 100%;
+  }
+  
+  .review-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}

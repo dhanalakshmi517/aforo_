@@ -7,6 +7,7 @@ interface SubReviewProps {
   ratePlan: string;
   paymentMethod: string;
   adminNotes: string;
+  subscriptionId?: number | null;
 }
 
 const SubReview: React.FC<SubReviewProps> = ({
@@ -15,12 +16,13 @@ const SubReview: React.FC<SubReviewProps> = ({
   ratePlan,
   paymentMethod,
   adminNotes,
+  subscriptionId,
 }) => {
 
   return (
-    <div className="review-container">
-      <h4 className="review-title">SUBSCRIPTION DETAILS</h4>
-      <table className="review-table">
+    <div className="sub-review-container">
+      <table className="sub-review-table">
+        <h4 className="sub-review-title">SUBSCRIPTION DETAILS</h4>
         <tbody>
           <tr>
             <td>Customer Name</td>
@@ -40,13 +42,16 @@ const SubReview: React.FC<SubReviewProps> = ({
           </tr>
           <tr>
             <td>Admin Notes</td>
-            <td>{adminNotes}</td>
+            <td>{adminNotes || '-'}</td>
           </tr>
+          {subscriptionId && (
+            <tr>
+              <td>Subscription ID</td>
+              <td>{subscriptionId}</td>
+            </tr>
+          )}
         </tbody>
       </table>
-      <p className="disclaimer-text">
-        You're about to create a new subscription. Please review your entries before proceeding.
-      </p>
     </div>
   );
 };

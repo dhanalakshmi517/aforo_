@@ -27,9 +27,9 @@
   position: relative;               /* for dropdown menu positioning */
   display: flex;
   flex-direction: column;
-  gap: 2px; /* Reduced gap between label and control */
+  gap: 4px; /* Gap between label and control */
   width: 456px;
-  margin-bottom: 6px; /* Consistent bottom margin for all fields */
+  margin-bottom: 15px !important  ; /* Increased bottom margin for better spacing between fields */
 }
 
 .if-label {
@@ -142,16 +142,64 @@
 }
 
 /* ---------- Select (native caret) ---------- */
-.if-select {
-  appearance: auto;
-  -webkit-appearance: menulist;
-  -moz-appearance: menulist;
-  background-image: none;
-  padding-right: 12px;
-  padding: 8px 12px;
+.if-select-wrapper {
+  position: relative;
+  width: 100%;
 }
+
+.if-select-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%) rotate(0deg); /* Point down by default */
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.if-select-wrapper.is-open::after {
+  transform: translateY(-50%) rotate(180deg); /* Point up when open */
+}
+
+.if-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--color-neutral-white);
+  padding: 8px 36px 8px 12px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 40px;
+  border: 1px solid var(--color-neutral-300) !important;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--color-neutral-1400);
+  width: 100%;
+}
+
+.if-select:hover:not(:disabled) {
+  border-color: var(--color-neutral-400) !important;
+  background-color: var(--color-neutral-100);
+}
+
 .if-select:focus,
-.if-select:focus-visible { outline: none; }
+.if-select:focus-visible { 
+  outline: none !important; 
+  border-color: var(--color-primary-600) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  background-color: var(--color-neutral-white);
+}
+
+.if-select:disabled {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-600);
+  cursor: not-allowed;
+  border-color: var(--color-neutral-200) !important;
+}
 
 /* ---------- Textarea ---------- */
 .if-textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
@@ -183,11 +231,46 @@
 }
 
 /* Select field specific styles */
-.if-field select {
-  margin: 0;
-  padding: 8px 12px;
+.if-field .if-select-wrapper {
+  width: 100%;
+}
+
+.if-field select.if-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--color-neutral-white);
+  padding: 8px 36px 8px 12px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
   height: 40px;
+  border: 1px solid var(--color-neutral-300) !important;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--color-neutral-1400);
+  width: 100%;
+  margin: 0;
   line-height: 1.5;
+}
+
+.if-field .if-select-wrapper:hover .if-select:not(:disabled) {
+  border-color: var(--color-neutral-400) !important;
+  background-color: var(--color-neutral-100);
+}
+
+.if-field .if-select:focus,
+.if-field .if-select:focus-visible { 
+  outline: none !important; 
+  border-color: var(--color-primary-600) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  background-color: var(--color-neutral-white);
+}
+
+.if-field .if-select:disabled {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-600);
+  cursor: not-allowed;
+  border-color: var(--color-neutral-200) !important;
 }
 
 /* Error message container */

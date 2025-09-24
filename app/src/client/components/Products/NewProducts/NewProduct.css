@@ -60,6 +60,12 @@ html, body, #root{
   min-height: 0;
 }
 
+/* Add margin above the product name field */
+.np-grid > div:first-child {
+  margin-top: 20px;
+}
+
+
 /* ===== Rail with vertical connector line ===== */
 .np-rail{
   background: var(--color-neutral-100);
