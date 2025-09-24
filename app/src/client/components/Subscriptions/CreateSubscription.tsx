@@ -21,7 +21,7 @@ import {
 import "./CreateSubscription.css"; // keep your CSS; class names now match np-* layout too
 
 type StepId = 1 | 2;
-type PaymentKind = "PREPAID" | "POSTPAID" | "";
+type PaymentKind = "PREPAID" | "POSTPAID";
 
 const steps: Array<{ id: StepId; title: string; desc: string }> = [
   {
@@ -63,11 +63,62 @@ export default function CreateSubscription({
   const [selectedProductName, setSelectedProductName] = useState("");
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
   const [selectedRatePlanName, setSelectedRatePlanName] = useState("");
-  const [paymentType, setPaymentType] = useState<PaymentKind>("");
+  const [paymentType, setPaymentType] = useState<PaymentKind | ''>('');
   const [planDescription, setPlanDescription] = useState("");
 
   // flow state
   const [currentStep, setCurrentStep] = useState(0); // 0-based like NewProduct
+
+  // Handle draft data when component mounts or draftData changes
+  useEffect(() => {
+    if (draftData) {
+      // Set form fields from draft data
+      if (draftData.customerId) {
+        setSelectedCustomerId(draftData.customerId);
+        // Find and set customer name if available
+        const customer = customers.find(c => c.customerId === draftData.customerId);
+        if (customer) {
+          setSelectedCustomerName(customer.customerName || '');
+        }
+      }
+      
+      if (draftData.productId) {
+        setSelectedProductId(draftData.productId);
+        // Find and set product name if available
+        const product = products.find(p => p.productId === draftData.productId);
+        if (product) {
+          setSelectedProductName(product.productName || '');
+        }
+      }
+      
+      if (draftData.ratePlanId) {
+        setSelectedRatePlanId(draftData.ratePlanId);
+        // Find and set rate plan name if available
+        const ratePlan = ratePlans.find(rp => rp.ratePlanId === draftData.ratePlanId);
+        if (ratePlan) {
+          setSelectedRatePlanName(ratePlan.ratePlanName || '');
+        }
+      }
+      
+      if (draftData.paymentType) {
+        const paymentType = draftData.paymentType === 'PREPAID' || draftData.paymentType === 'POSTPAID'
+          ? draftData.paymentType as PaymentKind
+          : undefined;
+        if (paymentType) {
+          setPaymentType(paymentType);
+        }
+      }
+      
+      if (draftData.adminNotes) {
+        setPlanDescription(draftData.adminNotes);
+      }
+      
+      // Set subscription ID if it exists
+      if (draftData.subscriptionId) {
+        setSubscriptionId(draftData.subscriptionId);
+      }
+    }
+  }, [draftData, customers, products, ratePlans]);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -96,9 +147,14 @@ export default function CreateSubscription({
         setCustomers(customersData ?? []);
       } catch (e) {
         console.error("Failed to load subscription dependencies.", e);
+        showToast({
+          kind: 'error',
+          title: 'Loading Failed',
+          message: 'Failed to load required data. Please refresh the page to try again.'
+        });
       }
     })();
-  }, []);
+  }, [showToast]);
 
   const clearError = (field: string) => {
     setErrors((prev) => {
@@ -112,39 +168,73 @@ export default function CreateSubscription({
     if (!selectedCustomerId) e.customerId = "This field is required";
     if (!selectedProductId) e.productId = "This field is required";
     if (!selectedRatePlanId) e.ratePlanId = "This field is required";
-    if (!paymentType) e.paymentType = "This field is required";
+    if (!paymentType || (paymentType !== 'PREPAID' && paymentType !== 'POSTPAID')) {
+      e.paymentType = "This field is required";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   // ----- Draft save -----
-  const saveDraft = async () => {
+  const saveDraft = async (): Promise<SubscriptionType | undefined> => {
     if (savingDraft) return;
     setSavingDraft(true);
+    
     try {
-      const payload = {
-        customerId: selectedCustomerId || 0,
-        productId: selectedProductId || 0,
-        ratePlanId: selectedRatePlanId || 0,
-        paymentType: (paymentType || "PREPAID") as "PREPAID" | "POSTPAID",
-        adminNotes: planDescription,
-        status: "DRAFT",
-      } as any;
-
-      let resp: SubscriptionType;
-      if (subscriptionId) {
-        resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
-      } else {
-        resp = await Api.createSubscriptionDraft(payload);
-        setSubscriptionId(resp.subscriptionId);
+      // No validations for draft - save whatever fields are available
+      const payload: any = {
+        status: "DRAFT"
+      };
+      
+      // Only include fields that have values
+      if (selectedCustomerId) payload.customerId = selectedCustomerId;
+      if (selectedProductId) payload.productId = selectedProductId;
+      if (selectedRatePlanId) payload.ratePlanId = selectedRatePlanId;
+      if (paymentType === 'PREPAID' || paymentType === 'POSTPAID') {
+        payload.paymentType = paymentType;
       }
-      setSubmissionStatus("success");
-      setIsDraftSaved(true);
-      setTimeout(() => setIsDraftSaved(false), 2500);
+      if (planDescription) payload.adminNotes = planDescription;
+      
+      let resp: SubscriptionType;
+      
+      try {
+        // Simple logic: If we have an ID, use PATCH. Otherwise, use POST.
+        if (subscriptionId) {
+          resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
+        } else {
+          resp = await Api.createSubscriptionDraft(payload);
+          setSubscriptionId(resp.subscriptionId);
+        }
+        
+        setSubmissionStatus("success");
+        setIsDraftSaved(true);
+        
+        // Reset the saved state after 2.5 seconds
+        setTimeout(() => {
+          console.log('Resetting draft saved state');
+          setIsDraftSaved(false);
+        }, 2500);
+        
+        return resp;
+      } catch (error) {
+        console.error('Error in saveDraft API call:', error);
+        throw error;
+      }
     } catch (e) {
-      console.error("Failed to save draft", e);
+      const error = e as Error;
+      console.error("Failed to save draft:", error);
+      
+      // Show error to user
+      showToast({
+        kind: "error",
+        title: "Save Failed",
+        message: error.message || "Failed to save draft. Please try again.",
+      });
+      
       setSubmissionStatus("error");
+      throw error; // Re-throw to allow error handling in the calling function
     } finally {
+      console.log('Save operation completed');
       setSavingDraft(false);
     }
   };
@@ -153,53 +243,152 @@ export default function CreateSubscription({
   const gotoStep = (index: number) => setCurrentStep(index);
 
   const handleBackTop = () => {
-    // show save prompt instead of directly closing (same UX as product)
     setShowSavePrompt(true);
   };
 
-  const handleSaveDraftTop = async () => {
-    setIsDraftSaving(true);
-    await saveDraft();
-    setIsDraftSaving(false);
-    setIsDraftSaved(true);
-    setTimeout(() => setIsDraftSaved(false), 2500);
+  const handleSaveDraftAndClose = async () => {
+    try {
+      setIsDraftSaving(true);
+      const result = await saveDraft();
+      if (result) {
+        // Close the form after successful save
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      showToast({
+        kind: 'error',
+        title: 'Save Failed',
+        message: 'Failed to save draft. Please try again.'
+      });
+    } finally {
+      setIsDraftSaving(false);
+    }
   };
 
-  const handleCancelTop = () => setShowDeleteConfirm(true);
+  const handleDeleteDraft = async () => {
+    if (!subscriptionId) {
+      onClose(); // Just close if no subscription ID exists
+      return;
+    }
+
+    try {
+      setShowDeleteConfirm(false);
+      await Api.deleteSubscription(subscriptionId);
+      showToast({
+        kind: 'success',
+        title: 'Subscription deleted',
+        message: 'The subscription has been successfully deleted.'
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error deleting draft:', error);
+      showToast({
+        kind: 'error',
+        title: 'Error',
+        message: 'Failed to delete draft. Please try again.'
+      });
+    }
+  };
+
+  const handleSaveDraftTop = async () => {
+    try {
+      setIsDraftSaving(true);
+      const result = await saveDraft();
+      // Don't show toast here - it will be shown by the SaveDraft component when saving from back button
+      return !!result;
+    } catch (error) {
+      console.error('Error in handleSaveDraftTop:', error);
+      // Error is already handled in saveDraft
+      return false;
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  const handleCancelTop = () => {
+  if (!subscriptionId) {
+    // If there's no subscription ID, it's a new draft that hasn't been saved yet
+    showToast({
+      kind: 'info',
+      title: 'Subscription deleted',
+      message: 'Subscription is deleted successfully.'
+    });
+    onClose();
+  } else {
+    // For existing drafts, show the delete confirmation modal
+    setShowDeleteConfirm(true);
+  }
+};
 
   const canSaveNext =
     !!selectedCustomerId &&
     !!selectedProductId &&
     !!selectedRatePlanId &&
-    (paymentType === "PREPAID" || paymentType === "POSTPAID");
+    (paymentType === 'PREPAID' || paymentType === 'POSTPAID');
 
   const handleSaveAndNext = async () => {
     if (!validateStep0()) return;
-    gotoStep(1);
+    
+    try {
+      // Save the draft (will use POST or PATCH automatically based on subscriptionId)
+      const draftSubscription = await saveDraft();
+      
+      if (draftSubscription) {
+        // Navigate to review step after successful save
+        gotoStep(1);
+      }
+    } catch (e) {
+      console.error("Failed to save draft", e);
+      setSubmissionStatus("error");
+      showToast({
+        kind: "error",
+        title: "Error",
+        message: "Failed to save subscription draft. Please try again.",
+      });
+    }
   };
 
   const handleFinalSubmit = async () => {
+    if (!subscriptionId) {
+      showToast({
+        kind: "error",
+        title: "Error",
+        message: "No subscription ID found. Please go back and try again.",
+      });
+      return;
+    }
+
     try {
-      const payload = {
-        customerId: selectedCustomerId || 0,
-        productId: selectedProductId || 0,
-        ratePlanId: selectedRatePlanId || 0,
-        paymentType: (paymentType || "PREPAID") as "PREPAID" | "POSTPAID",
-        adminNotes: planDescription,
-      };
-      const resp = await Api.createSubscription(payload);
+      // Show loading state
+      showToast({
+        kind: "info",
+        title: "Processing",
+        message: "Confirming your subscription...",
+        autoDismiss: false
+      });
+      
+      // Call confirm API with the saved subscription ID
+      const resp = await Api.confirmSubscription(subscriptionId);
+      
       setSubmissionStatus("success");
       showToast({
         kind: "success",
-        title: "Subscription Created",
-        message: "Subscription created successfully.",
+        title: "Subscription Confirmed",
+        message: "Subscription has been confirmed successfully.",
       });
+      
       onCreateSuccess(resp);
       onRefresh?.();
       onClose();
     } catch (e) {
       console.error("Failed to create subscription", e);
       setSubmissionStatus("error");
+      showToast({
+        kind: "error",
+        title: "Confirmation Failed",
+        message: "Failed to confirm subscription. Please try again.",
+      });
     }
   };
 
@@ -275,11 +464,14 @@ export default function CreateSubscription({
         label="Payment Type"
         value={paymentType}
         onChange={(val) => {
-          setPaymentType(val as PaymentKind);
-          clearError("paymentType");
+          if (val === 'PREPAID' || val === 'POSTPAID' || val === '') {
+            setPaymentType(val);
+            clearError("paymentType");
+          }
         }}
         error={errors.paymentType}
         options={[
+          { label: "Select Payment Type", value: "" },
           { label: "Post-Paid", value: "POSTPAID" },
           { label: "Pre-Paid", value: "PREPAID" },
         ]}
@@ -295,27 +487,34 @@ export default function CreateSubscription({
   );
 
   const renderStep1 = () => (
-    <SubReview
-      customerName={selectedCustomerName || ''}
-      productName={selectedProductName || ''}
-      ratePlan={selectedRatePlanName || ''}
-      paymentMethod={paymentType ? (paymentType === "PREPAID" ? "Pre-Paid" : "Post-Paid") : ""}
-      adminNotes={planDescription}
-    />
+    <div className="review-container">
+      <SubReview
+        customerName={selectedCustomerName || ''}
+        productName={selectedProductName || ''}
+        ratePlan={selectedRatePlanName || ''}
+        paymentMethod={paymentType === 'PREPAID' ? 'Pre-Paid' : paymentType === 'POSTPAID' ? 'Post-Paid' : 'Not specified'}
+        adminNotes={planDescription}
+        subscriptionId={subscriptionId}
+      />
+    </div>
   );
 
   return (
     <>
       <TopBar
         title="Create New Subscription"
-        onBack={handleBackTop}
+        onBack={currentStep === 0 ? handleBackTop : () => gotoStep(0)}
         cancel={{ onClick: handleCancelTop }}
-        save={{
+        save={currentStep === 0 ? {
           onClick: handleSaveDraftTop,
           label: isDraftSaved ? "Saved!" : "Save as Draft",
           saved: isDraftSaved,
           saving: isDraftSaving,
           labelWhenSaved: "Saved as Draft",
+        } : {
+          // onClick: handleFinalSubmit,
+          // saved: submissionStatus === 'success',
+          // labelWhenSaved: 'Confirmed!'
         }}
       />
 
@@ -447,13 +646,20 @@ export default function CreateSubscription({
           onClose();
         }}
         onSave={async () => {
-          await saveDraft();
-          showToast({
-            kind: "success",
-            title: "Subscription Draft Saved",
-            message: "Subscription draft saved successfully.",
-          });
-          onClose();
+          try {
+            const result = await saveDraft();
+            if (result) {
+              showToast({
+                kind: "success",
+                title: "Draft Saved",
+                message: "Your changes have been saved as a draft.",
+              });
+              onClose();
+            }
+          } catch (error) {
+            console.error('Error saving draft from back button:', error);
+            // Error is already handled in saveDraft
+          }
         }}
         onDismiss={() => setShowSavePrompt(false)}
       />
@@ -462,10 +668,7 @@ export default function CreateSubscription({
       <ConfirmDeleteModal
         isOpen={showDeleteConfirm}
         productName="subscription draft"
-        onConfirm={() => {
-          setShowDeleteConfirm(false);
-          onClose();
-        }}
+        onConfirm={handleDeleteDraft}
         onCancel={() => setShowDeleteConfirm(false)}
       />
     </>

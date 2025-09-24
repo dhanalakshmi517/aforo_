@@ -67,7 +67,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Connection String',
       type: 'text',
-      placeholder: 'eg. server=localhost;database=mydb;user=admin;password=***',
+      placeholder: 'eg. https://api.example.com/v1/{endpoint}',
       required: true,
     },
     {

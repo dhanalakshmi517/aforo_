@@ -1,32 +1,34 @@
 import React from 'react';
-// import './SubReview.css'; // You can rename this to EditReview.css if preferred
+import './EditReview.css';
 
 interface EditReviewProps {
   customerName: string;
   productName: string;
-  ratePlan: string;
-  paymentMethod: string;
-  basePrice: number;
-  quantity: number;
+  ratePlanName: string;
+  paymentType: string;
+  onBack: () => void;
+  onConfirm: () => void;
+  confirmLabel?: string;
+  confirmLoading?: boolean;
 }
 
 const EditReview: React.FC<EditReviewProps> = ({
   customerName,
   productName,
-  ratePlan,
-  paymentMethod,
-  basePrice,
-  quantity,
+  ratePlanName,
+  paymentType,
+  onBack,
+  onConfirm,
+  confirmLabel = 'Save Draft',
+  confirmLoading = false,
 }) => {
-  const total = basePrice * quantity;
-
   return (
-    <div className="review-container">
-      <h4 className="review-title">SUBSCRIPTION DETAILS</h4>
-      <table className="review-table">
+    <div className="edit-review-container">
+      <h4 className="sub-review-title">SUBSCRIPTION DETAILS</h4>
+      <table className="sub-review-table">
         <tbody>
           <tr>
-            <td>Customer Name</td>
+            <td>Customer</td>
             <td>{customerName}</td>
           </tr>
           <tr>
@@ -35,17 +37,31 @@ const EditReview: React.FC<EditReviewProps> = ({
           </tr>
           <tr>
             <td>Rate Plan</td>
-            <td>{ratePlan}</td>
+            <td>{ratePlanName}</td>
           </tr>
           <tr>
-            <td>Payment Method</td>
-            <td>{paymentMethod}</td>
+            <td>Payment Type</td>
+            <td>{paymentType}</td>
           </tr>
         </tbody>
       </table>
-      <p className="disclaimer-text">
-        You're about to create a new subscription. Please review your entries before proceeding.
-      </p>
+      
+      {/* <div className="edit-review-actions">
+        <button 
+          className="edit-review-btn edit-review-btn--secondary"
+          onClick={onBack}
+          disabled={confirmLoading}
+        >
+          Back
+        </button>
+        <button 
+          className="edit-review-btn edit-review-btn--primary"
+          onClick={onConfirm}
+          disabled={confirmLoading}
+        >
+          {confirmLoading ? 'Saving...' : confirmLabel}
+        </button>
+      </div> */}
     </div>
   );
 };

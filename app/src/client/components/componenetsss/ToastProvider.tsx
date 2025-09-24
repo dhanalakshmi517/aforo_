@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import "./Toast.css";
 
-type ToastKind = "success" | "error";
+type ToastKind = "success" | "error" | "info";
 
 export interface ToastOptions {
   id?: string;
@@ -10,10 +10,13 @@ export interface ToastOptions {
   message?: string;
   // ms
   duration?: number;
+  // Whether the toast should auto-dismiss
+  autoDismiss?: boolean;
 }
 
-interface ToastItem extends Required<Omit<ToastOptions, "duration">> {
+interface ToastItem extends Required<Omit<ToastOptions, "duration" | "autoDismiss">> {
   duration: number;
+  autoDismiss: boolean;
 }
 
 type ToastContextType = {
@@ -39,6 +42,14 @@ const ErrorIcon: React.FC = () => (
 const SuccessIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="13" viewBox="0 0 18 13" fill="none" aria-hidden>
     <path d="M17 1L6 12L1 7" stroke="#6AB349" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const InfoIcon: React.FC = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+    <path d="M9 16.5C13.1421 16.5 16.5 13.1421 16.5 9C16.5 4.85786 13.1421 1.5 9 1.5C4.85786 1.5 1.5 4.85786 1.5 9C1.5 13.1421 4.85786 16.5 9 16.5Z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12V9" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 6H9.0075" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -76,10 +87,13 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
       title: opts.title ?? (opts.kind === "error" ? "Failed" : "Success"),
       message: opts.message ?? "",
       duration: Math.max(1000, opts.duration ?? 4000),
+      autoDismiss: opts.autoDismiss ?? true, // Default to true for backward compatibility
     };
     setToasts(prev => [item, ...prev]); // newest on top
-    // auto hide
-    timersRef.current[id] = window.setTimeout(() => dismissToast(id), item.duration);
+    // auto hide if autoDismiss is true
+    if (item.autoDismiss) {
+      timersRef.current[id] = window.setTimeout(() => dismissToast(id), item.duration);
+    }
     return id;
   }, [dismissToast]);
 
@@ -98,8 +112,15 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
   );
 };
 
-const ToastCard: React.FC<{ item: ToastItem; onClose: () => void }> = ({ item, onClose }) => {
-  // pause on hover
+const ToastCard: React.FC<{ item: ToastItem; onClose: (id: string) => void }> = ({
+  item: { id, kind, title, message },
+  onClose,
+}) => {
+  const icon = kind === "success" 
+    ? <SuccessIcon /> 
+    : kind === "error" 
+      ? <ErrorIcon /> 
+      : <InfoIcon />;
   const ref = useRef<HTMLDivElement | null>(null);
   const pauseTimers = useRef<{paused: boolean}>({ paused: false });
 
@@ -116,26 +137,28 @@ const ToastCard: React.FC<{ item: ToastItem; onClose: () => void }> = ({ item, o
     ref.current?.classList.remove("toast-paused");
   };
 
+  const handleClose = () => onClose(id);
+
   return (
     <div
       ref={ref}
-      className={`toast-card ${item.kind === "error" ? "toast-error" : "toast-success"}`}
+      className={`toast-card ${kind === "error" ? "toast-error" : kind === "info" ? "toast-info" : "toast-success"}`}
       role="status"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div className="toast-icon">
-        {item.kind === "error" ? <ErrorIcon/> : <SuccessIcon/>}
+        {icon}
       </div>
 
       <div className="toast-body">
         <div className="toast-title">
-          {item.title}
+          {title}
         </div>
-        {item.message ? <div className="toast-message">{item.message}</div> : null}
+        {message ? <div className="toast-message">{message}</div> : null}
       </div>
 
-      <button className="toast-close" aria-label="Dismiss notification" onClick={onClose}>
+      <button className="toast-close" aria-label="Dismiss notification" onClick={handleClose}>
         <CloseIcon/>
       </button>
     </div>

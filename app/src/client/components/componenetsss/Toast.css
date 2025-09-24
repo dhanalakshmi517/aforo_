@@ -55,6 +55,11 @@
   border: 0.6px solid #F5C9C9;
 }
 
+.toast-info {
+  background: var(--color-neutral-white);
+  border: 0.6px solid #BFDBFE;
+}
+
 .toast-icon{
   display: grid;
   place-items: center;
@@ -67,6 +72,7 @@
 
 .toast-success .toast-icon{ background: #EDF7E6; }
 .toast-error   .toast-icon{ background: #FFEDE9; }
+.toast-info    .toast-icon{ background: #EFF6FF; }
 
 .toast-body{
   display: grid;

@@ -1,0 +1,10 @@
+.form-group label {
+  color: var(--color-neutral-1700);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}

@@ -538,7 +538,6 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         {productType && (
           <div className="configuration-fields">
-            <h4>Configuration for {productType.charAt(0).toUpperCase() + productType.slice(1)}</h4>
             {error && <div className="error-message">{error}</div>}
             <div className="form-fields">
               {configurationFields[productType]?.map((field: FieldProps) => renderField(field))}
