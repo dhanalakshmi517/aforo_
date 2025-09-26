@@ -474,66 +474,42 @@ background-clip: text;
   }
 
   .org-terms {
-    font-size: 13px;
-    margin: 0 0 8px;
-    color: var(--color-neutral-900);
-  }
-
-  .org-terms {
-    display: grid;
-    grid-template-columns: 18px 1fr;
-    gap: 10px;
-    align-items: start;
-    color: var(--color-neutral-900);
-    font-size: 12.5px;
+    display: flex;
+    align-items: flex-start;
+    margin: 20px 0;
+    font-size: 14px;
     line-height: 1.5;
-    margin-top: 4px;
+    color: var(--color-neutral-700);
   }
   
-  .org-terms input[type="checkbox"] {
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    outline: none;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%3E%3Cpath%20d='M1%209C1%205.22876%201%203.34314%202.17158%202.17158C3.34314%201%205.22876%201%209%201C12.7712%201%2014.6569%201%2015.8284%202.17158C17%203.34314%2017%205.22876%2017%209C17%2012.7712%2017%2014.6569%2015.8284%2015.8284C14.6569%2017%2012.7712%2017%209%2017C5.22876%2017%203.34314%2017%202.17158%2015.8284C1%2014.6569%201%2012.7712%201%209Z'%20stroke='%23E6E5E6'%20stroke-width='1.2'/%3E%3C/svg%3E");
-  }
-  .org-terms input[type="checkbox"]:checked {
-    background-color: var(--color-primary-800); /* fill box with primary color */
-    border: none;
-    background-image: none; /* hide outline when filled */
-  }
-
-  /* Remove default focus ring */
-  .org-terms input[type="checkbox"]:focus,
-  .org-terms input[type="checkbox"]:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .org-terms input[type="checkbox"]:checked::after {
-    content: "";
-    position: absolute;
-    width: 6px;
-    height: 12px;
-    border: solid #fff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    top: 1px;
-    left: 6px;
+  /* Style for the new Checkbox component */
+  .org-checkbox .af-checkbox {
+    align-items: flex-start;
   }
   
-  .org-terms a {
+  .org-checkbox .af-checkbox__label {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-neutral-700);
+    margin-top: 2px;
+  }
+  
+  .org-checkbox .af-checkbox__box {
+    margin-top: 2px;
+  }
+  
+  .org-checkbox .af-checkbox__input:focus-visible + .af-checkbox__box {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: 2px;
+  }
+  
+  .org-checkbox a {
     color: var(--color-primary-700);
     text-decoration: none;
   }
-  .org-terms a:hover { text-decoration: underline; }
+  .org-checkbox a:hover { 
+    text-decoration: underline; 
+  }
   
   .org-btn {
     margin-top: 4px;

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ProductFormData } from '../../../types/productTypes';
 import EditProduct from './EditProductsss/EditProduct';
+import KongIntegration from './Kong Integration/KongIntegration';
 import { ProductType, EditProductFormProps } from './EditProduct/types';
 import CreateProduct from './NewProducts/NewProduct';
 import type { DraftProduct } from './NewProducts/NewProduct';
@@ -35,7 +36,7 @@ const getRandomBorderColor = (index: number) => {
   return colors[index % colors.length];
 };
 import styles from './Products.module.css';
-import PageHeader from '../PageHeader/PageHeader';
+import Header from '../componenetsss/Header';
 import EmptyBox from './Componenets/empty.svg';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 
@@ -135,8 +136,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
+  const [showKongIntegration, setShowKongIntegration] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteProductName, setDeleteProductName] = useState<string>('');
   const [productQuery, setProductQuery] = useState<string>('');
   // products filtered by search term and sorted with drafts at top
@@ -166,6 +168,41 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     // Refresh products list when closing the form to ensure data is up to date
     fetchProducts();
   }, [setShowNewProductForm, fetchProducts]);
+
+  const handleDeleteClick = (productId: string, productName: string) => {
+    setDeleteProductId(productId);
+    setDeleteProductName(productName);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteProductId) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteProductApi(deleteProductId);
+      if (showToast) {
+        showToast({ message: 'Product deleted successfully', kind: 'success' });
+      }
+      fetchProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      if (showToast) {
+        showToast({ message: 'Failed to delete product', kind: 'error' });
+      }
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setDeleteProductId(null);
+      setDeleteProductName('');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDeleteProductId(null);
+    setDeleteProductName('');
+  };
 
   // Sync with parent component's state
 
@@ -301,11 +338,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       <div>
         {/* {renderBreadcrumb()} */}
         {showDeleteModal && (
-          <ConfirmDeleteModal
-            isOpen={showDeleteModal}
-            productName={deleteProductName}
+          <DeleteModal
+            onCancel={handleDeleteCancel}
             onConfirm={handleDeleteConfirm}
-            onCancel={() => setShowDeleteModal(false)}
+            isDeleting={isDeleting}
           />
         )}
 
@@ -318,6 +354,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         )}
 
         {/* Edit Product Form */}
+        {/* Kong Integration popup */}
+        {showKongIntegration && (
+          <div className="products-form-container">
+            <KongIntegration onClose={() => setShowKongIntegration(false)} />
+          </div>
+        )}
+
         {isEditFormOpen && (
           <div className="products-form-container">
             <EditProduct
@@ -336,17 +379,18 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         {!showCreateProduct && !isEditFormOpen && (
                       <div className="rate-plan-product-container">
 
-            <PageHeader
+            <Header
               title="Products"
               searchTerm={productQuery}
               onSearchTermChange={setProductQuery}
               searchDisabled={products.length === 0}
               filterDisabled={false}
-              showPrimary={products.length > 0}
+              showPrimary={filteredProducts.length > 0}
+              showKongButton={filteredProducts.length > 0}
               primaryLabel="New Product"
               onPrimaryClick={() => { setShowCreateProduct(true); setShowNewProductForm(true); }}
               onFilterClick={() => { }}
-              onSettingsClick={() => { }}
+              onSettingsClick={() => setShowKongIntegration(true)}
               onNotificationsClick={() => { }}
             />
 
@@ -446,11 +490,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             )}
                             <button
                               className="product-delete-button"
-                              onClick={() => {
-                                setDeleteProductId(product.productId);
-                                setDeleteProductName(product.productName);
-                                setShowDeleteModal(true);
-                              }}
+                              onClick={() => handleDeleteClick(product.productId, product.productName)}
                               disabled={isDeleting}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
@@ -467,16 +507,50 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <div className="products-empty-state">
                           <img src={EmptyBox} alt="No products" style={{ width: 200, height: 200 }} />
                           <p className="products-empty-state-text" style={{ marginTop: 8 }}>No products added yet. Click "New Product" to <br /> create your first product.</p>
-                          <button
-                            onClick={() => {
-                              setShowCreateProduct(true);
-                              setShowNewProductForm(true);
-                            }}
-                            className={styles.newButton}
-                            style={{ marginTop: 12 }}
-                          >
-                            + New Product
-                          </button>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                            <button
+                              onClick={() => {
+                                setShowCreateProduct(true);
+                                setShowNewProductForm(true);
+                              }}
+                              className={styles.newButtons}
+                            >
+                              + New Product
+                            </button>
+                            <button
+                              onClick={() => {
+                                setShowKongIntegration(true);
+                              }}
+                              className={styles.kongButton  }
+                              
+                            >
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none">
+  <path d="M0.400391 11.2438V14.1384H2.88147L5.1558 11.0371H7.84363L8.67066 10.0033L5.56931 6.48841L3.50174 8.34922H2.67472L0.400391 11.2438Z" fill="url(#paint0_linear_8506_33340)"/>
+  <path d="M5.56931 11.8641L5.1558 12.2776L5.98282 13.5181V14.1384H9.29093L9.49769 13.5181L7.84363 11.8641H5.56931Z" fill="url(#paint1_linear_8506_33340)"/>
+  <path d="M7.43012 3.80057L6.18958 5.86814L12.599 13.3114L12.3923 14.1384H15.0801L15.7004 11.8641L8.87742 3.80057H7.43012Z" fill="url(#paint2_linear_8506_33340)"/>
+  <path d="M8.4639 1.733L7.63688 2.97354L7.84363 3.1803H9.29093L11.9788 6.07489L13.4261 4.83435V4.42084L13.0126 3.59381V2.76679L10.118 0.699219L8.4639 1.733Z" fill="url(#paint3_linear_8506_33340)"/>
+  <defs>
+    <linearGradient id="paint0_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14A06C"/>
+      <stop offset="1" stop-color="#2578D1"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14A06C"/>
+      <stop offset="1" stop-color="#2578D1"/>
+    </linearGradient>
+    <linearGradient id="paint2_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14A06C"/>
+      <stop offset="1" stop-color="#2578D1"/>
+    </linearGradient>
+    <linearGradient id="paint3_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14A06C"/>
+      <stop offset="1" stop-color="#2578D1"/>
+    </linearGradient>
+  </defs>
+</svg>
+                              Import from Kong
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

@@ -1,0 +1,70 @@
+:root {
+    --af-checkbox-border: #B3B8BC;
+    --af-checkbox-checked: #004B80;
+    --af-checkbox-text: #1F2326;
+    --af-checkbox-disabled: #D5D9DD;
+    --af-checkbox-focus: #1B75D0;
+    --af-checkbox-error: #D92D20;
+  }
+  
+  .af-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--af-checkbox-text);
+    position: relative;
+  }
+  
+  .af-checkbox.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .af-checkbox__input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+  }
+  
+  .af-checkbox__box {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    line-height: 0;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms ease;
+  }
+  
+  .af-checkbox:not(.is-disabled) .af-checkbox__box:hover {
+    transform: scale(1.04);
+  }
+  
+  .af-checkbox__input:focus-visible + .af-checkbox__box {
+    outline: 2px solid var(--af-checkbox-focus);
+    outline-offset: 2px;
+    border-radius: 6px; /* matches rounded square */
+  }
+  
+  .af-checkbox__label {
+    font-size: 14px;
+  }
+  
+  .af-checkbox__req {
+    color: var(--af-checkbox-error);
+    margin-left: 4px;
+  }
+  
+  .af-checkbox__error {
+    position: absolute;
+    left: 34px;
+    top: 100%;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--af-checkbox-error);
+  }
+  

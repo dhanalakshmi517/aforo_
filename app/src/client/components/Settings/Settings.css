@@ -1,0 +1,76 @@
+.settings-page {
+    margin-left: 250px; /* ⬅️ as requested */
+    padding: 20px 20px 40px 0;
+    background: #fff;
+  }
+  
+  /* Tabs row */
+  .settings-tabs {
+    display: flex;
+    gap: 28px;
+    margin: 12px 0 24px;
+    border-bottom: 1px solid #E9E9EE;
+  }
+  .tab {
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #7A7F87;
+    padding: 10px 0;
+    cursor: pointer;
+  }
+  .tab.active {
+    color: #0F1217;
+    font-weight: 600;
+    border-bottom: 2px solid #1B69FF;
+  }
+  
+  /* Integration card */
+  .integration-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  
+    max-width: 520px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #E9E9EE;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .integration-card:hover {
+    background: #f8faff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  
+  .icon {
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1px solid #E9E9EE;
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+  }
+  
+  .info {
+    flex: 1;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0F1217;
+    margin-bottom: 4px;
+  }
+  .desc {
+    font-size: 13px;
+    color: #7A7F87;
+    line-height: 1.4;
+  }
+  
+  .arrow {
+    flex-shrink: 0;
+  }
+  

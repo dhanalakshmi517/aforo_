@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createOrganization, fetchCountries, type OrganizationPayload } from "./api";
 import { useNavigate } from "react-router-dom";
 import CountrySelector from "../Common/CountrySelector";
+import { Checkbox } from "../componenetsss/Checkbox";
 import "./Organization.css";
 import SigninLogo from "./signin.svg";
 import { Link } from "react-router-dom";
@@ -583,9 +584,15 @@ const Organization: React.FC = () => {
             <p className="org-disclaimer">By submitting this form, you agree to our <a href="#" aria-label="Terms & Conditions">Terms & Conditions</a> and <a href="#" aria-label="Privacy Policy">Privacy Policy</a>.</p>
 
             <div className="org-terms">
-              <input id="agree" name="agree" type="checkbox" />
-              <label htmlFor="agree">Yes, I'd like to receive mails on occasional updates, feature launches, and tips to help me grow with Aforo. You can unsubscribe anytime.
-              </label>
+              <Checkbox
+                name="agree"
+                label={
+                  <span>
+                    Yes, I'd like to receive mails on occasional updates, feature launches, and tips to help me grow with Aforo. You can unsubscribe anytime.
+                  </span>
+                }
+                className="org-checkbox"
+              />
             </div>
 
             <button className="org-btn" type="submit">Contact Sales</button>

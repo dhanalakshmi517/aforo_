@@ -12,6 +12,15 @@
   background:var(--color-neutral-white);
   box-sizing:border-box;
   min-height:calc(100vh - 48px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.cus-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 /* ===== PROGRESS RAIL ===== */
@@ -56,14 +65,257 @@
 .side-step:focus-visible{ outline:2px solid var(--border-default,#025A94); outline-offset:2px; }
 
 /* ===== FORM AREA ===== */
-.form-section{
-  min-width:0;
-  padding:30px 40px 120px 28px !important;
-  box-sizing:border-box;
-  background:transparent;
+.edit-np-section {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
 }
-.cus-wrapper .form-section{ margin-left:0 !important; padding-left:28px !important; }
-.cus-wrapper .form-section .form-card{ margin-left:0 !important; padding-left:0 !important; }
+
+.edit-np-form-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.edit-np-form-group {
+  flex: 1;
+  min-width: 300px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-np-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Override InputField component styles */
+.edit-np-form-group .if-field,
+.if-field {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 0 !important;
+}
+
+/* Style the input element inside InputField */
+.edit-np-form-group .if-field .if-control,
+.if-field .if-control {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300) !important;
+  border-radius: var(--border-radius-sm) !important;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-neutral-1400);
+  background-color: var(--color-neutral-white) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+  margin: 0 !important;
+}
+
+/* Style native input elements directly */
+.edit-np-form-group input[type="text"],
+.edit-np-form-group input[type="email"],
+.edit-np-form-group input[type="tel"],
+.edit-np-form-group input[type="number"],
+.edit-np-form-group input[type="password"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-neutral-1400);
+  background-color: var(--color-neutral-white) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* Focus states */
+.edit-np-form-group .if-field .if-control:focus,
+.edit-np-form-group input[type="text"]:focus,
+.edit-np-form-group input[type="email"]:focus,
+.edit-np-form-group input[type="tel"]:focus,
+.edit-np-form-group input[type="number"]:focus,
+.edit-np-form-group input[type="password"]:focus,
+.if-field .if-control:focus,
+.if-field input[type="text"]:focus,
+.if-field input[type="email"]:focus,
+.if-field input[type="tel"]:focus,
+.if-field input[type="number"]:focus,
+.if-field input[type="password"]:focus {
+  border-color: var(--color-primary-600) !important;
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2) !important;
+}
+
+/* Error states */
+.if-field .if-error,
+.edit-np-form-group .if-error {
+  color: var(--color-error-200);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Ensure all form controls take full width */
+.edit-np-form-group .if-field,
+.edit-np-form-group .sf-field {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 0 !important;
+}
+
+/* Override the fixed width from Inputs.css */
+.edit-np-form-group .if-field .if-control,
+.edit-np-form-group .sf-field .if-control,
+.edit-np-form-group input,
+.edit-np-form-group select {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Reset any fixed heights that might cause overflow */
+.edit-np-form-group .if-control,
+.edit-np-form-group .if-select {
+  height: auto !important;
+  min-height: 40px;
+}
+
+/* Style for SelectField */
+.sf-field {
+  margin-bottom: 16px;
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.sf-field .if-control,
+.sf-field select {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 40px;
+  padding: 8px 36px 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-neutral-1400);
+  background-color: var(--color-neutral-white) !important;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.sf-field .if-control:focus,
+.sf-field select:focus {
+  border-color: var(--color-primary-600);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}
+
+.sf-field .if-error {
+  color: var(--color-error-200);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.if-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.if-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.if-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.if-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Style for SelectField */
+.sf-field {
+  margin-bottom: 16px;
+}
+
+.sf-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.sf-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Form section styles */
+.form-section {
+  min-width: 0;
+  padding: 30px 40px 120px 28px !important;
+  box-sizing: border-box;
+  background: transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.form-section::-webkit-scrollbar {
+  display: none;
+}
+
+.cus-wrapper .form-section { 
+  margin-left: 0 !important; 
+  padding-left: 28px !important; 
+}
+
+.cus-wrapper .form-section .form-card { 
+  margin-left: 0 !important; 
+  padding-left: 0 !important; 
+}
 
 .form-card{
   padding:0 40px 24px 0 !important;
