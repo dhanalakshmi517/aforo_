@@ -1080,9 +1080,7 @@ line-height: var(--line-height-body-md);
   position: relative;
 }
 
-.notification.error {
-  background: var(--color-neutral-white);
-}
+
 
 .notification.hide {
   animation: slideOut 0.3s ease-out forwards;
@@ -1098,10 +1096,6 @@ line-height: var(--line-height-body-md);
   border-radius: 1.875rem;
   background-color: var(--color-neutral-white);
   margin-right: 20px;
-}
-
-.notification.error .notification-icon {
-  background: pink;
 }
 
 .notification-icon svg {
