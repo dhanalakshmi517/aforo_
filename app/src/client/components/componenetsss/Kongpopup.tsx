@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './kongpopup.css';
+import './Kongpopup.css';
 
 type Props = {
   isOpen: boolean;
