@@ -9,6 +9,7 @@ import CreateProduct from './NewProducts/NewProduct';
 import type { DraftProduct } from './NewProducts/NewProduct';
 import './Products.css';
 import '../Rateplan/RatePlan.css';
+import styles from './Products.module.css';
 import { getProducts, createProduct as createProductApi, deleteProduct as deleteProductApi } from './api';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 
@@ -35,34 +36,11 @@ const getRandomBorderColor = (index: number) => {
   ];
   return colors[index % colors.length];
 };
-import styles from './Products.module.css';
 import Header from '../componenetsss/Header';
 import EmptyBox from './Componenets/empty.svg';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 
 
-interface DeleteModalProps {
-  onCancel: () => void;
-  onConfirm: () => void;
-  isDeleting: boolean;
-}
-
-const DeleteModal: React.FC<DeleteModalProps> = ({ onCancel, onConfirm, isDeleting }: DeleteModalProps) => (
-  <div className="rate-delete-modal-overlay">
-    <div className="rate-delete-modal-content">
-      <div className="rate-delete-modal-body">
-        <h5>Are you sure you want to delete this <br />rate plan?</h5>
-        <p>This action cannot be undone.</p>
-      </div>
-      <div className="rate-delete-modal-footer">
-        <button className="rate-delete-modal-cancel" onClick={onCancel}>Back</button>
-        <button className="rate-delete-modal-confirm" onClick={onConfirm} disabled={isDeleting}>
-          {isDeleting ? 'Deleting...' : 'Confirm'}
-        </button>
-      </div>
-    </div>
-  </div>
-);
 
 interface Product {
   productId: string;
@@ -138,7 +116,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [showKongIntegration, setShowKongIntegration] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [deleteProductName, setDeleteProductName] = useState<string>('');
   const [productQuery, setProductQuery] = useState<string>('');
   // products filtered by search term and sorted with drafts at top
@@ -172,7 +150,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const handleDeleteClick = (productId: string, productName: string) => {
     setDeleteProductId(productId);
     setDeleteProductName(productName);
-    setShowDeleteModal(true);
+    setShowConfirmDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -192,14 +170,14 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       }
     } finally {
       setIsDeleting(false);
-      setShowDeleteModal(false);
+      setShowConfirmDeleteModal(false);
       setDeleteProductId(null);
       setDeleteProductName('');
     }
   };
 
   const handleDeleteCancel = () => {
-    setShowDeleteModal(false);
+    setShowConfirmDeleteModal(false);
     setDeleteProductId(null);
     setDeleteProductName('');
   };
@@ -307,7 +285,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       await deleteProductApi(deleteProductId);
       // Refresh the list after successful delete
       await fetchProducts();
-      setShowDeleteModal(false);
+      setShowConfirmDeleteModal(false);
       setDeleteProductId(null);
       // toast success
       showToast({
@@ -327,7 +305,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     }
   };
 
-  // Moved DeleteModal and Notification components outside the main component to prevent hook issues
+  // Moved ConfirmDeleteModal and Notification components outside the main component to prevent hook issues
 
   if (error) return <div className="error">Something Went wrong: {error}</div>;
 
@@ -337,11 +315,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
       <div>
         {/* {renderBreadcrumb()} */}
-        {showDeleteModal && (
-          <DeleteModal
+        {showConfirmDeleteModal && (
+          <ConfirmDeleteModal
+            isOpen={showConfirmDeleteModal}
+            productName={deleteProductName}
             onCancel={handleDeleteCancel}
             onConfirm={handleDeleteConfirm}
-            isDeleting={isDeleting}
           />
         )}
 

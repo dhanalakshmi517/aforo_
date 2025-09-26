@@ -370,7 +370,7 @@ line-height: var(--line-height-body-lg);
 }
 
 .products-empty-state {
-  margin: 60px auto 0;
+  margin: 40px auto 0;
 
   display: flex;
   flex-direction: column;
@@ -681,7 +681,7 @@ body.products-page {
 }
 
 @media (max-width: 767px) {
-  .products-empty-state { margin: 40px auto 0; }
+  .products-empty-state { margin: 30px auto 0; }
 }
 
 /* Adjust table wrapper bottom spacing and flex behaviour */
@@ -689,7 +689,7 @@ body.products-page {
   flex: 1 1 auto;          /* let it stretch */
   margin-top: -8px;          /* pull table closer to header */
   height: auto;            /* no fixed height so bottom padding visible */
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - 120px);
   padding-bottom: 12px;    /* bottom gap */
 }
 
