@@ -15,6 +15,7 @@ import LogoUploader from './LogoUploader';
 import buttonStyles from '../NewProductForm/GeneralDetails.module.css';
 import TopBar from '../TopBar/TopBar';
 import SaveDraft from '../componenetsss/SaveDraft';
+import { InputField } from '../componenetsss/Inputs';
 
 interface CreateCustomerProps {
   onClose: () => void;
@@ -408,15 +409,17 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
         return (
           <>
             <div className="sub-create-form">
-              <label className="com-form-label">Company Name</label>
-              <input
-                type="text"
-                className="cus-input"
+              <InputField
+                label="Company Name"
                 value={companyName}
                 placeholder="eg., abc company"
-                onChange={(e) => { setCompanyName(e.target.value); if (errors.companyName) setErrors(p => ({ ...p, companyName: '' })); }}
+                onChange={(value) => { 
+                  setCompanyName(value); 
+                  if (errors.companyName) setErrors(p => ({ ...p, companyName: '' })); 
+                }}
+                error={errors.companyName}
+                className="company-name-input"
               />
-              {errors.companyName && <span className="field-error">{errors.companyName}</span>}
             </div>
 
             <div className="sub-create-form">
@@ -425,15 +428,17 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
             </div>
 
             <div className="sub-create-form">
-              <label className="com-form-label">Customer Name</label>
-              <input
-                type="text"
-                className="cus-input"
+              <InputField
+                label="Customer Name"
                 value={customerName}
                 placeholder="eg. john doe"
-                onChange={(e) => { setCustomerName(e.target.value); if (errors.customerName) setErrors(p => ({ ...p, customerName: '' })); }}
+                onChange={(value) => { 
+                  setCustomerName(value); 
+                  if (errors.customerName) setErrors(p => ({ ...p, customerName: '' })); 
+                }}
+                error={errors.customerName}
+                className="customer-name-input"
               />
-              {errors.customerName && <span className="field-error">{errors.customerName}</span>}
             </div>
 
             <div className="sub-create-form">

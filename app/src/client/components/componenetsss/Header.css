@@ -184,6 +184,25 @@ line-height: var(--line-height-heading-h5); /* 140% */
   background-clip: padding-box;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
+.rp-kong-btn {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-layer-4, #FFF);
+  color: #373B40;
+  background-clip: padding-box;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  margin-right: 8px;
+  cursor: pointer;
+}
+.rp
 .rp-settings-icon,
 .rp-notification-btn svg { width: 16px; height: 16px; }
 

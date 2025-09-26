@@ -38,6 +38,7 @@ const productsLoader = () => import('./components/Products/Products');
 const Products = React.lazy(productsLoader) as React.ComponentType<any>;
 const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
 const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
+const KongProductSelect = React.lazy(() => import('./components/Products/Kong Integration/KongProductSelect')) as React.ComponentType<any>;
 const meteringLoader = () => import('./components/Metering/Metering');
 const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
@@ -57,6 +58,8 @@ const EditPlan = React.lazy(editPlanLoader) as React.ComponentType<any>;
 
 import LoginPage from '../auth/LoginPage';
 import ThankYou from './components/Landing/ThankYou';
+import Settings from './components/Settings/Settings';
+import KongIntegration from './components/Products/Kong Integration/KongIntegration';
 
 export default function App() {
   const navigate = useNavigate();
@@ -117,6 +120,7 @@ export default function App() {
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
     if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
     if (location.pathname === '/get-started/subscriptions') return 'Purchases';
+    if (location.pathname === '/get-started/settings') return 'Settings';
     return 'Get Started';
   })();
 
@@ -199,15 +203,19 @@ export default function App() {
                 <SideNavbar
                   activeTab={currentTab}
                   onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
+                    if (tab === 'Settings') {
+                      navigate('/get-started/settings');
+                    } else {
+                      const slug =
+                        tab === 'Billable Metrics'
+                          ? 'metering'
+                          : tab === 'Purchases'
+                          ? 'subscriptions'
+                          : tab === 'Data Ingetion'
+                          ? 'data-ingetion'
+                          : tab.toLowerCase().replace(/\s+/g, '-');
+                      navigate(`/get-started/${slug}`);
+                    }
                   }}
                   hidden={!showSidebar}
                 />
@@ -223,15 +231,19 @@ export default function App() {
                 <SideNavbar
                   activeTab={currentTab}
                   onTabClick={(tab) => {
-                    const slug =
-                      tab === 'Billable Metrics'
-                        ? 'metering'
-                        : tab === 'Purchases'
-                        ? 'subscriptions'
-                        : tab === 'Data Ingetion'
-                        ? 'data-ingetion'
-                        : tab.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/get-started/${slug}`);
+                    if (tab === 'Settings') {
+                      navigate('/get-started/settings');
+                    } else {
+                      const slug =
+                        tab === 'Billable Metrics'
+                          ? 'metering'
+                          : tab === 'Purchases'
+                          ? 'subscriptions'
+                          : tab === 'Data Ingetion'
+                          ? 'data-ingetion'
+                          : tab.toLowerCase().replace(/\s+/g, '-');
+                      navigate(`/get-started/${slug}`);
+                    }
                   }}
                   hidden={!showSidebar}
                 />
@@ -249,15 +261,19 @@ export default function App() {
                     <SideNavbar
                       activeTab={currentTab}
                       onTabClick={(tab) => {
-                        const slug =
-                          tab === 'Billable Metrics'
-                            ? 'metering'
-                            : tab === 'Purchases'
-                            ? 'subscriptions'
-                            : tab === 'Data Ingetion'
-                            ? 'data-ingetion'
-                            : tab.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/get-started/${slug}`);
+                        if (tab === 'Settings') {
+                          navigate('/get-started/settings');
+                        } else {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }
                       }}
                       hidden={!showSidebar}
                     />
@@ -269,6 +285,45 @@ export default function App() {
                         setShowCreatePlan={setShowCreatePlan}
                       />
                     </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Kong Integration */}
+          <Route
+            path="/kong-integration"
+            element={
+              <ProtectedRoute>
+                <KongIntegration onClose={() => navigate(-1)} />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Settings */}
+          <Route
+            path="/get-started/settings"
+            element={
+              <ProtectedRoute>
+                <div className="flex">
+                  <SideNavbar
+                    activeTab={currentTab}
+                    onTabClick={(tab) => {
+                      const slug =
+                        tab === 'Billable Metrics'
+                          ? 'metering'
+                          : tab === 'Purchases'
+                          ? 'subscriptions'
+                          : tab === 'Data Ingetion'
+                          ? 'data-ingetion'
+                          : tab.toLowerCase().replace(/\s+/g, '-');
+                      navigate(`/get-started/${slug}`);
+                    }}
+                    hidden={!showSidebar}
+                  />
+                  <div className="flex-1 p-6">
+                    <Settings />
                   </div>
                 </div>
               </ProtectedRoute>
@@ -352,15 +407,19 @@ export default function App() {
                     <SideNavbar
                       activeTab={currentTab}
                       onTabClick={(tab) => {
-                        const slug =
-                          tab === 'Billable Metrics'
-                            ? 'metering'
-                            : tab === 'Purchases'
-                            ? 'subscriptions'
-                            : tab === 'Data Ingetion'
-                            ? 'data-ingetion'
-                            : tab.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/get-started/${slug}`);
+                        if (tab === 'Settings') {
+                          navigate('/get-started/settings');
+                        } else {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }
                       }}
                       hidden={!showSidebar}
                     />
@@ -388,15 +447,19 @@ export default function App() {
                     <SideNavbar
                       activeTab={currentTab}
                       onTabClick={(tab) => {
-                        const slug =
-                          tab === 'Billable Metrics'
-                            ? 'metering'
-                            : tab === 'Purchases'
-                            ? 'subscriptions'
-                            : tab === 'Data Ingetion'
-                            ? 'data-ingetion'
-                            : tab.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/get-started/${slug}`);
+                        if (tab === 'Settings') {
+                          navigate('/get-started/settings');
+                        } else {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }
                       }}
                       hidden={!showSidebar}
                     />
@@ -422,15 +485,19 @@ export default function App() {
                     <SideNavbar
                       activeTab={currentTab}
                       onTabClick={(tab) => {
-                        const slug =
-                          tab === 'Billable Metrics'
-                            ? 'metering'
-                            : tab === 'Purchases'
-                            ? 'subscriptions'
-                            : tab === 'Data Ingetion'
-                            ? 'data-ingetion'
-                            : tab.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/get-started/${slug}`);
+                        if (tab === 'Settings') {
+                          navigate('/get-started/settings');
+                        } else {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }
                       }}
                       hidden={!showSidebar}
                     />
@@ -475,15 +542,19 @@ export default function App() {
                     <SideNavbar
                       activeTab={currentTab}
                       onTabClick={(tab) => {
-                        const slug =
-                          tab === 'Billable Metrics'
-                            ? 'metering'
-                            : tab === 'Purchases'
-                            ? 'subscriptions'
-                            : tab === 'Data Ingetion'
-                            ? 'data-ingetion'
-                            : tab.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/get-started/${slug}`);
+                        if (tab === 'Settings') {
+                          navigate('/get-started/settings');
+                        } else {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }
                       }}
                       hidden={!showSidebar}
                     />
@@ -494,6 +565,26 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Import from Kong */}
+          <Route
+            path="/get-started/products/import"
+            element={
+              <ProtectedRoute>
+                <KongProductSelect 
+                  onBack={() => {
+                    // If coming from settings, navigate directly to settings
+                    if (location.state?.from === 'settings') {
+                      navigate('/get-started/settings');
+                    } else {
+                      navigate(-1);
+                    }
+                  }} 
+                  previousRoute={location.state?.from === 'settings' ? 'settings' : 'products'}
+                />
               </ProtectedRoute>
             }
           />

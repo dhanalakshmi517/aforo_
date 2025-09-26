@@ -11,12 +11,11 @@ import type { Customer } from '../Customers';
 import EditReview from './EditReview';
 import { AccountDetailsData } from './EditAccount';
 import EditAccount from './EditAccount';
-import { InputField, SelectField } from '../../Components/InputFields';
-import './EditCustomer.css';
+import { InputField, SelectField } from '../../componenetsss/Inputs';
 import TopBar from '../../TopBar/TopBar';
 import LogoUploader from '../LogoUploader';
 import { getAuthHeaders } from '../../../utils/auth';
-import EditModal from '../../componenetsss/EditModal';
+import EditPopup from '../../componenetsss/EditPopUp';
 
 /* ---------- helpers copied from Customers list ---------- */
 const FILE_HOST = 'http://43.206.110.213:8081';
@@ -47,10 +46,12 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
 /* -------------------------------------------------------- */
 
 const steps = [
-  { title: 'Customer Details' },
-  { title: 'Billing & Plan' },
-  { title: 'Review & Confirm' },
+  { id: 1, title: 'Customer Details' },
+  { id: 2, title: 'Billing & Plan' },
+  { id: 3, title: 'Review & Confirm' },
 ];
+
+type ActiveTab = 'details' | 'account' | 'review';
 
 const EditCustomer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,27 +59,27 @@ const EditCustomer: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // Step 0
+  // Step data
   const [customerName, setCustomerName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [companyType, setCompanyType] = useState('');
   const [companyLogo, setCompanyLogo] = useState<File | null>(null);
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
-
   const lastBlobUrlRef = useRef<string | null>(null);
 
-  // Step 1
   const [accountDetails, setAccountDetails] = useState<AccountDetailsData | null>(null);
 
   // Step control & validation
   const [currentStep, setCurrentStep] = useState(0);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [accountErrors, setAccountErrors] = useState<{ [key: string]: string }>({});
+  const [activeTab, setActiveTab] = useState<ActiveTab>('details');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accountErrors, setAccountErrors] = useState<Record<string, string>>({});
 
-  // Leave modal
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  // Leave popup
+  const [showLeavePopup, setShowLeavePopup] = useState(false);
   const [savingLeave, setSavingLeave] = useState(false);
 
+  // ------- fetch existing customer -------
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -138,7 +139,7 @@ const EditCustomer: React.FC = () => {
     };
   }, []);
 
-  /* ---------- live error clearing (like Create) ---------- */
+  /* ---------- live error clearing ---------- */
   useEffect(() => {
     const next = { ...errors };
     if (companyName.trim()) delete next.companyName;
@@ -172,100 +173,123 @@ const EditCustomer: React.FC = () => {
     if (JSON.stringify(n) !== JSON.stringify(accountErrors)) setAccountErrors(n);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountDetails]);
-  /* ------------------------------------------------------ */
+  /* ---------------------------------------- */
 
-  const handleNext = async () => {
-    if (currentStep === 0) {
-      const newErrors: { [key: string]: string } = {};
-      if (!companyName.trim()) newErrors.companyName = 'Company Name is required';
-      if (!customerName.trim()) newErrors.customerName = 'Customer Name is required';
-      if (!companyType.trim()) newErrors.companyType = 'Company Type is required';
-      setErrors(newErrors);
-      if (Object.keys(newErrors).length) return;
+  // ------- step helpers (match EditProduct UX) -------
+  const goToStep = (index: number) => {
+    setCurrentStep(index);
+    const first = steps[index].title.split(' ')[0].toLowerCase();
+    const tab = (first === 'customer'
+      ? 'details'
+      : first === 'billing'
+      ? 'account'
+      : 'review') as ActiveTab;
+    setActiveTab(tab);
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 0) {
+      goToStep(currentStep - 1);
+    }
+  };
+
+  // ------- validation & navigation -------
+  const validateStep0 = () => {
+    const newErrors: Record<string, string> = {};
+    if (!companyName.trim()) newErrors.companyName = 'Company Name is required';
+    if (!customerName.trim()) newErrors.customerName = 'Customer Name is required';
+    if (!companyType.trim()) newErrors.companyType = 'Company Type is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep1 = () => {
+    const a = accountDetails ?? ({} as AccountDetailsData);
+    const newAccErrs: Record<string, string> = {};
+
+    if (!a.phoneNumber?.trim()) newAccErrs.phoneNumber = 'Phone Number is required';
+    if (!a.primaryEmail?.trim()) {
+      newAccErrs.primaryEmail = 'Primary Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.primaryEmail)) {
+      newAccErrs.primaryEmail = 'Enter a valid email address';
     }
 
-    if (currentStep === 1) {
-      const newAccErrs: { [key: string]: string } = {};
-      if (!accountDetails?.phoneNumber?.trim()) newAccErrs.phoneNumber = 'Phone Number is required';
-      if (!accountDetails?.primaryEmail?.trim()) {
-        newAccErrs.primaryEmail = 'Primary Email is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(accountDetails.primaryEmail)) {
-        newAccErrs.primaryEmail = 'Enter a valid email address';
-      }
+    [
+      'billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
+      'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
+    ].forEach((k) => {
+      // @ts-ignore
+      if (!a[k]?.trim()) newAccErrs[k] = `${k.replace(/([A-Z])/g, ' $1')} is required`;
+    });
 
-      [
-        'billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
-        'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
-      ].forEach((k) => {
-        // @ts-ignore
-        if (!accountDetails?.[k]?.trim()) newAccErrs[k] = `${k.replace(/([A-Z])/g, ' $1')} is required`;
-      });
+    setAccountErrors((prev) => ({ ...prev, ...newAccErrs }));
+    return Object.keys(newAccErrs).length === 0;
+  };
 
-      setAccountErrors({ ...accountErrors, ...newAccErrs });
-      if (Object.keys(newAccErrs).length) return;
-
-      try {
-        const patchPayload: Record<string, any> = {
-          companyName,
-          customerName,
-          companyType,
-          ...(accountDetails ?? {}),
-        };
-        await updateCustomer(id!, patchPayload);
-      } catch (err) {
-        console.error('Failed to save draft before review', err);
-        return;
-      }
+  const savePatch = async () => {
+    if (!id) return false;
+    const payload: Record<string, any> = {
+      companyName,
+      customerName,
+      companyType,
+      ...(accountDetails ?? {}),
+    };
+    try {
+      await updateCustomer(id, payload);
+      return true;
+    } catch (err) {
+      console.error('Failed to save draft/update', err);
+      return false;
     }
+  };
 
-    const isLastStep = currentStep === steps.length - 1;
-    if (isLastStep) {
-      const payload: Record<string, any> = {
-        companyName,
-        customerName,
-        companyType,
-        ...(accountDetails ?? {})
-      };
+  const handleNextStep = async () => {
+    if (activeTab === 'details') {
+      if (!validateStep0()) return;
+      goToStep(1);
+      return;
+    }
+    if (activeTab === 'account') {
+      if (!validateStep1()) return;
+      // persist patch so review is fresh
+      const ok = await savePatch();
+      if (!ok) return;
+      goToStep(2);
+      return;
+    }
+    if (activeTab === 'review') {
+      // final save + confirm
+      const ok = await savePatch();
+      if (!ok || !id) return;
       try {
-        await updateCustomer(id!, payload);
-        await confirmCustomer(id!);
+        await confirmCustomer(id);
         navigate(-1);
       } catch (err) {
-        console.error('Failed to save changes', err);
+        console.error('Failed to confirm customer', err);
       }
-    } else {
-      setCurrentStep((prev) => prev + 1);
     }
   };
 
-  const handleFooterBack = () => {
-    if (currentStep > 0) setCurrentStep((prev) => prev - 1);
-    else navigate(-1);
-  };
+  // ------- leave popup actions -------
+  const openLeavePopup = () => setShowLeavePopup(true);
 
-  const openLeaveModal = () => setShowLeaveModal(true);
-
-  const handleSaveAndLeave = async () => {
-    if (!id) return;
-    try {
-      setSavingLeave(true);
-      const payload: Record<string, any> = {
-        companyName,
-        customerName,
-        companyType,
-        ...(accountDetails ?? {}),
-      };
-      await updateCustomer(id, payload);
-      setShowLeaveModal(false);
-      navigate(-1);
-    } catch (e) {
-      console.error('Failed to save before leaving', e);
-    } finally {
-      setSavingLeave(false);
+  const handlePopupSave = async () => {
+    if (activeTab === 'details' && !validateStep0()) {
+      setShowLeavePopup(false);
+      return;
     }
+    if (activeTab === 'account' && !validateStep1()) {
+      setShowLeavePopup(false);
+      return;
+    }
+    setSavingLeave(true);
+    const ok = await savePatch();
+    setSavingLeave(false);
+    setShowLeavePopup(false);
+    if (ok) navigate(-1);
   };
 
-  /* ---------- Logo handlers ---------- */
+  // ------- Logo handlers -------
   const handleLogoChange = async (file: File | null) => {
     if (!id || !file) return;
     try {
@@ -296,95 +320,120 @@ const EditCustomer: React.FC = () => {
       console.error('Failed to remove logo', e);
     }
   };
-  /* ----------------------------------- */
 
+  // ------- step content -------
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
+    switch (activeTab) {
+      case 'details':
         return (
-          <>
-            <div className="sub-create-form">
-              <InputField
-                label="Company Name"
-                value={companyName}
-                placeholder="Enter company name"
-                onChange={(val: string) => {
-                  setCompanyName(val);
-                  if (!val.trim()) setErrors((p) => ({ ...p, companyName: 'Company Name is required' }));
-                  else if (errors.companyName) setErrors((p) => ({ ...p, companyName: '' }));
-                }}
-                onBlur={() => {
-                  if (!companyName.trim()) setErrors((p) => ({ ...p, companyName: 'Company Name is required' }));
-                }}
-                error={errors.companyName}
-              />
+          <div className="edit-np-section">
+            <div className="edit-np-form-row">
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Company Name</label>
+                <InputField
+                  label=""
+                  value={companyName}
+                  placeholder="Enter company name"
+                  onChange={(val) => {
+                    setCompanyName(val);
+                    if (!val.trim()) setErrors((p) => ({ ...p, companyName: 'Company Name is required' }));
+                    else if (errors.companyName) setErrors((p) => ({
+                      ...Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'companyName'))
+                    }));
+                  }}
+                  onBlur={() => {
+                    if (!companyName.trim()) setErrors((p) => ({ ...p, companyName: 'Company Name is required' }));
+                  }}
+                  error={errors.companyName}
+                  required
+                />
+              </div>
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Customer Name</label>
+                <InputField
+                  label=""
+                  value={customerName}
+                  placeholder="Enter customer name"
+                  onChange={(val) => {
+                    setCustomerName(val);
+                    if (!val.trim()) setErrors((p) => ({ ...p, customerName: 'Customer Name is required' }));
+                    else if (errors.customerName) setErrors((p) => ({
+                      ...Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'customerName'))
+                    }));
+                  }}
+                  onBlur={() => {
+                    if (!customerName.trim()) setErrors((p) => ({ ...p, customerName: 'Customer Name is required' }));
+                  }}
+                  error={errors.customerName}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="sub-create-form">
-              <label className="com-form-label">Company Logo</label>
-              <LogoUploader
-                logo={companyLogo}
-                logoUrl={companyLogoUrl}
-                onChange={handleLogoChange}
-                onRemove={handleLogoRemove}
-              />
-            </div>
+            <div className="edit-np-form-row">
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Company Type</label>
+                <SelectField
+                  label=""
+                  value={companyType}
+                  onChange={(val) => {
+                    setCompanyType(val);
+                    if (!val.trim()) setErrors((p) => ({ ...p, companyType: 'Company Type is required' }));
+                    else if (errors.companyType) setErrors((p) => ({
+                      ...Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'companyType'))
+                    }));
+                  }}
+                  onBlur={() => {
+                    if (!companyType.trim()) setErrors((p) => ({ ...p, companyType: 'Company Type is required' }));
+                  }}
+                  options={[
+                    { label: 'Select company type', value: '' },
+                    { label: 'Individual', value: 'INDIVIDUAL' },
+                    { label: 'Business', value: 'BUSINESS' },
+                  ]}
+                  error={errors.companyType}
+                  required
+                />
+              </div>
 
-            <div className="sub-create-form">
-              <InputField
-                label="Customer Name"
-                value={customerName}
-                placeholder="Enter customer name"
-                onChange={(val: string) => {
-                  setCustomerName(val);
-                  if (!val.trim()) setErrors((p) => ({ ...p, customerName: 'Customer Name is required' }));
-                  else if (errors.customerName) setErrors((p) => ({ ...p, customerName: '' }));
-                }}
-                onBlur={() => {
-                  if (!customerName.trim()) setErrors((p) => ({ ...p, customerName: 'Customer Name is required' }));
-                }}
-                error={errors.customerName}
-              />
+              <div className="edit-np-form-group">
+                <label className="edit-np-label">Company Logo</label>
+                <LogoUploader
+                  logo={companyLogo}
+                  logoUrl={companyLogoUrl}
+                  onChange={handleLogoChange}
+                  onRemove={handleLogoRemove}
+                />
+              </div>
             </div>
+          </div>
+        );
 
-            <div className="sub-create-form">
-              <SelectField
-                label="Company Type"
-                value={companyType}
-                onChange={(val: string) => {
-                  setCompanyType(val);
-                  if (!val.trim()) setErrors((p) => ({ ...p, companyType: 'Company Type is required' }));
-                  else if (errors.companyType) setErrors((p) => ({ ...p, companyType: '' }));
-                }}
-                onBlur={() => {
-                  if (!companyType.trim()) setErrors((p) => ({ ...p, companyType: 'Company Type is required' }));
-                }}
-                options={[
-                  { label: 'Individual', value: 'INDIVIDUAL' },
-                  { label: 'Business', value: 'BUSINESS' },
-                ]}
-                error={errors.companyType}
+      case 'account':
+        return (
+          <div className="edit-np-section">
+            <EditAccount
+              data={accountDetails ?? undefined}
+              onChange={setAccountDetails}
+              errors={accountErrors}
+            />
+          </div>
+        );
+
+      case 'review':
+        return (
+          <div className="edit-np-section">
+            <div className="edit-np-review-container">
+              <EditReview
+                customerName={customerName}
+                companyName={companyName}
+                companyType={companyType}
+                accountDetails={accountDetails}
               />
             </div>
-          </>
+          </div>
         );
-      case 1:
-        return (
-          <EditAccount
-            data={accountDetails ?? undefined}
-            onChange={setAccountDetails}
-            errors={accountErrors}
-          />
-        );
-      case 2:
-        return (
-          <EditReview
-            customerName={customerName}
-            companyName={companyName}
-            companyType={companyType}
-            accountDetails={accountDetails}
-          />
-        );
+
       default:
         return null;
     }
@@ -396,52 +445,79 @@ const EditCustomer: React.FC = () => {
     <>
       <TopBar
         title="Edit Customer"
-        onBack={openLeaveModal}
+        onBack={() => setShowLeavePopup(true)}
       />
 
-      <div className="edit-customer-container">
-        <div className="cus-wrapper">
-          <aside className="side-progress" aria-label="Progress">
-            {steps.map((s, i) => {
-              const isActive = i === currentStep;
-              return (
-                <button
-                  key={s.title}
-                  type="button"
-                  className={`side-step ${isActive ? 'is-active' : 'is-inactive'}`}
-                  onClick={() => setCurrentStep(i)}
-                  aria-current={isActive ? 'step' : undefined}
-                >
-                  <span className="side-step__label">{s.title}</span>
-                </button>
-              );
-            })}
-          </aside>
+      <div className="edit-np-viewport">
+        <div className="edit-np-card">
+          <div className="edit-np-grid">
+            {/* Sidebar */}
+            <aside className="edit-np-rail">
+              <div className="edit-np-steps">
+                {steps.map((step, index) => {
+                  const isActive = index === currentStep;
+                  const isCompleted = index < currentStep;
+                  return (
+                    <div
+                      key={step.id}
+                      className={`edit-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                      onClick={() => goToStep(index)}
+                    >
+                      <div className="edit-np-step__title">{step.title}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </aside>
 
-          <div className="form-section">
-            <div className="form-card">
-              <h4 className="form-section-heading">{steps[currentStep].title.toUpperCase()}</h4>
-              <hr className="form-section-divider" />
-              {renderStepContent()}
-            </div>
-            <div className="button-group">
-              <button className="back" onClick={handleFooterBack} disabled={currentStep === 0}>
-                Back
-              </button>
-              <button className="save-next" onClick={handleNext}>
-                {currentStep === steps.length - 1 ? 'Save Changes' : 'Next'}
-              </button>
+            {/* Main Content */}
+            <div className="edit-np-content">
+              <div className="edit-np-form">
+                {renderStepContent()}
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="edit-np-form-footer">
+                <div className="edit-np-btn-group edit-np-btn-group--back">
+                  {activeTab !== 'details' && (
+                    <button
+                      type="button"
+                      className="np-btn np-btn--ghost"
+                      onClick={handlePreviousStep}
+                    >
+                      Back
+                    </button>
+                  )}
+                </div>
+
+                <div className="edit-np-btn-group edit-np-btn-group--next">
+                  <button
+                    type="button"
+                    className="np-btn np-btn--primary"
+                    onClick={handleNextStep}
+                  >
+                    {activeTab === 'review' ? 'Save Changes' : 'Next'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div className="af-skel-rule af-skel-rule--bottom" />
         </div>
       </div>
 
-      <EditModal
-        isOpen={showLeaveModal}
-        onClose={() => setShowLeaveModal(false)}
-        onCancel={() => setShowLeaveModal(false)}
-        onSave={handleSaveAndLeave}
-        saving={savingLeave}
+      {/* Leave / Save popup (matches EditProduct API) */}
+      <EditPopup
+        isOpen={showLeavePopup}
+        onClose={() => {
+          setShowLeavePopup(false);
+          navigate(-1);
+        }}
+        onDismiss={() => setShowLeavePopup(false)}
+        onSave={async () => {
+          await handlePopupSave();
+        }}
       />
     </>
   );

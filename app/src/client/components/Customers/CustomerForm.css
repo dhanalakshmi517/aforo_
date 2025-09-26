@@ -63,7 +63,6 @@ body.create-customer-page { background: #fff; }
 
 /* Active highlight card — keep same left inset so the connector stays aligned */
 .progress-step-item.active{
-  background: rgba(2, 90, 148, 0.06);
   border-radius: 8px;
   padding:16px 12px 16px var(--wizard-step-inset);
   /* Keep the step in its original horizontal position so the connector stays centered. */

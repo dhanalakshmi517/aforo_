@@ -17,7 +17,8 @@
 
 /* Match component class names so inputs & selects look identical */
 .acc-form-group input,
-.acc-form-group .com-select-field {
+.acc-form-group .com-select-field,
+.acc-form-group .if-field .if-select {
   padding: 8px 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -30,15 +31,23 @@
   color: var(--color-neutral-1400, #1A2126);
   box-sizing: border-box;
   width: 100%;
+  min-height: 40px;                             /* Ensure minimum height */
 }
 
-/* If you ever need to kill native bold in some browsers */
-.acc-form-group .com-select-field {
+/* Style for select fields */
+.acc-form-group .com-select-field,
+.acc-form-group .if-field .if-select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   /* optional: space for native arrow */
   padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+  height: 40px;
+  line-height: 1.5;
 }
 
 /* --- ROW LAYOUT: let left grow, clamp the right (country) --- */

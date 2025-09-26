@@ -92,13 +92,13 @@
 
 
 
-.newButton {
+.newButtons {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   height: 40px;
-  min-width: 164px;
+  width: 183px;
   background-color: var(--color-primary-800);
   color: var(--color-neutral-white);
   padding: 8px 20px;
@@ -112,7 +112,6 @@
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-lg);
-  margin-left: -10px;
 }
 
 .newButton:hover {
@@ -122,6 +121,28 @@
 .newButton.selected,
 .newButton.active {
   background-color: var(--color-primary-900);
+}
+.kongButton{
+   
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  height: 40px;
+  width: 174px auto;
+  background-color: var(--color-neutral-white);
+  color: var(--color-primary-800);
+  padding: 8px 20px;
+  border: 1px solid var(--color-primary-1100);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  white-space: nowrap; /* keep label on single line */
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
 }
 
 @media (max-width: 991px) {

@@ -354,7 +354,7 @@ line-height: var(--line-height-body-md); /* 142.857% */
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 164px;
+  width: 160px;
   height: 40px;
    background-color:var(--color-primary-700);
   color: var(--color-neutral-white);
