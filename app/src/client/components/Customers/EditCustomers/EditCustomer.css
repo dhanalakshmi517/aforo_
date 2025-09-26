@@ -164,14 +164,6 @@
   box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2) !important;
 }
 
-/* Error states */
-.if-field .if-error,
-.edit-np-form-group .if-error {
-  color: var(--color-error-200);
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
-}
 
 /* Ensure all form controls take full width */
 .edit-np-form-group .if-field,
@@ -233,12 +225,7 @@
   box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
-.sf-field .if-error {
-  color: var(--color-error-200);
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
-}
+
 
 .if-label {
   display: block;
@@ -263,11 +250,7 @@
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-.if-error {
-  color: #ef4444;
-  font-size: 12px;
-  margin-top: 4px;
-}
+
 
 /* Style for SelectField */
 .sf-field {
@@ -356,13 +339,7 @@
   display:block;
 }
 
-/* Error text */
-.field-error{
-  color:var(--color-error-400);
-  font-size:var(--font-size-sm);
-  font-weight:400;
-  font-family:var(--font-family-primary);
-}
+
 
 /* Footer actions */
 .button-group{

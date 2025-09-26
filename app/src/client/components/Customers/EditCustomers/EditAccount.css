@@ -70,14 +70,6 @@
   margin-bottom: 16px;
 }
 
-/* Error message styling */
-.field-error,
-.if-error {
-  color: var(--color-error-200);
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
-}
 
 .acc-form-row {
   display: flex;
@@ -176,11 +168,3 @@
   .acc-form-row .acc-form-group { flex: 1 1 420px; }
 }
 
-/* Field validation errors */
-.field-error {
-  color: var(--color-error-400);
-  font-size: var(--font-size-sm);
-  font-weight: 400;
-  font-family: var(--font-family-primary);
-  margin-top: 2px;
-}

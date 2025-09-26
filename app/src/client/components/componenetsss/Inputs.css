@@ -86,16 +86,15 @@
 
 /* ---------- WRITING / FOCUS ---------- */
 .if-control:focus:not(.is-error):not(.is-disabled):not(:disabled),
-.if-control:focus-visible:not(.is-error):not(.is-disabled):not(:disabled),
-.if-control.is-writing:not(.is-error):not(.is-disabled):not(:disabled) {
+.if-control:focus-visible:not(.is-error):not(.is-disabled):not(:disabled){
   border-color: var(--color-primary-600);
   background-color: var(--color-neutral-white);
 }
 
 /* ---------- ERROR ---------- */
 .if-control.is-error {
-  border-color: var(--color-error-200);
-  background-color: var(--color-error-100);
+  border-color: var(--color-error-200) !important;
+  background-color: var(--color-error-100) !important; /* lighter red background */
 }
 
 /* ---------- DISABLED ---------- */
@@ -134,7 +133,7 @@
 
 .if-error { 
   font-size: 12px; 
-  color: var(--if-text-error);
+  color: var(--color-error-400);
   display: block;
   margin: 0;
   padding: 0;
@@ -295,7 +294,7 @@
 /* Ensure consistent error message styling */
 .if-error {
   font-size: 12px;
-  color: var(--if-text-error);
+  color: var(--color-error-400);
   display: block;
   margin: 0;
   padding: 0;
