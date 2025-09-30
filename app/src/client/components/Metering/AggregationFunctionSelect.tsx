@@ -6,6 +6,7 @@ interface AggregationFunctionSelectProps {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
 }
 
 /**
@@ -16,7 +17,7 @@ interface AggregationFunctionSelectProps {
  *   • TRANSACTION            → dropdown with "COUNT" and "DISTINCT_COUNT"
  *   • Anything else          → free-text input so user can type a custom function.
  */
-const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ productType, unitOfMeasure, value, onChange }) => {
+const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ productType, unitOfMeasure, value, onChange, error }) => {
   // If either field is not yet selected, show a disabled placeholder dropdown so the layout remains consistent
   if (!productType || !unitOfMeasure) {
     return (
@@ -80,6 +81,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ p
         onChange={onChange}
         options={options.map(opt=>({label:opt,value:opt}))}
         placeholderOption="--select--"
+        error={error}
       />
     );
   }
@@ -90,6 +92,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ p
       value={value}
       onChange={onChange}
       placeholder="Aggregation Function"
+      error={error}
     />
   );
 };

@@ -228,11 +228,12 @@ export interface ConfigurationTabProps {
   productId?: string;
   onSubmit?: (isDraft?: boolean) => Promise<boolean>;
   isSavingDraft?: boolean;
+  readOnly?: boolean;
 }
 
 const EditConfiguration = React.forwardRef<ConfigurationTabHandle, ConfigurationTabProps>(
   (
-    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit, isSavingDraft }: ConfigurationTabProps,
+    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit, isSavingDraft, readOnly = false }: ConfigurationTabProps,
     ref
   ) => {
     const [formData, setFormData] = useState<Record<string, string>>({});
@@ -248,18 +249,24 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         setFormData(newFormData);
         onConfigChange(newFormData);
       },
-      [formData, onConfigChange]
+      [formData, onConfigChange, readOnly]
     );
 
     const handleProductTypeChange = React.useCallback(
       (type: string) => {
-        setProductType(type);
-        onProductTypeChange(type);
-        setFormData({});
-        setFieldErrors({});
-        setError('');
+        // Prevent any changes when in read-only mode
+        if (readOnly) {
+          return;
+        }
+        
+        // Only proceed if we're not in read-only mode
+        if (!readOnly) {
+          setError('');
+          setProductType(type);
+          onProductTypeChange(type);
+        }
       },
-      [onProductTypeChange]
+      [onProductTypeChange, readOnly]
     );
 
     // Validation (no network)
@@ -420,29 +427,37 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     const handleInputChange = React.useCallback(
       (field: string) => (value: string) => {
-        // Create a new form data object without the field if the value is empty
-        const newFormData = { ...formData };
-        if (value === '' || value === null || value === undefined) {
-          delete newFormData[field];
-        } else {
-          newFormData[field] = value;
+        // Prevent any changes when in read-only mode
+        if (readOnly) {
+          return;
         }
         
-        setFormData(newFormData);
-        onConfigChange(newFormData);
-        
-        // inline validation for required fields
-        const def = (configurationFields[productType] || []).find((f) => f.label === field);
-        if (def?.required && !value) {
-          setFieldErrors((prev) => ({ ...prev, [field]: 'This field is required' }));
-        } else {
-          setFieldErrors((prev) => {
-            const { [field]: _, ...rest } = prev;
-            return rest;
-          });
+        // Only proceed if we're not in read-only mode
+        if (!readOnly) {
+          // Create a new form data object without the field if the value is empty
+          const newFormData = { ...formData };
+          if (value === '' || value === null || value === undefined) {
+            delete newFormData[field];
+          } else {
+            newFormData[field] = value;
+          }
+          
+          setFormData(newFormData);
+          onConfigChange(newFormData);
+          
+          // inline validation for required fields
+          const def = (configurationFields[productType] || []).find((f) => f.label === field);
+          if (def?.required && !value) {
+            setFieldErrors((prev) => ({ ...prev, [field]: 'This field is required' }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field]: _, ...rest } = prev;
+              return rest;
+            });
+          }
         }
       },
-      [formData, onConfigChange, productType]
+      [formData, onConfigChange, productType, readOnly]
     );
 
     const renderField = (field: FieldProps) => {
@@ -450,6 +465,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       const fieldError = fieldErrors[field.label];
 
       const handleBlur = () => {
+        if (readOnly) return;
         if (field.required && !fieldValue) {
           setFieldErrors((prev) => ({ ...prev, [field.label]: 'This field is required' }));
         } else if (fieldError) {
@@ -461,19 +477,27 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       };
 
       const labelText = field.label;
+      
+      // Common props for all input fields
+      const commonProps = {
+        label: labelText,
+        value: fieldValue,
+        onChange: handleInputChange(field.label),
+        onBlur: handleBlur,
+        placeholder: field.placeholder,
+        error: fieldError,
+        required: field.required,
+        readOnly,
+        disabled: readOnly
+      };
 
       switch (field.type) {
         case 'select':
           return (
             <div className="form-group">
               <SelectField
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
-                onBlur={handleBlur}
+                {...commonProps}
                 options={field.options || getSelectOptions(field.label) || []}
-                error={fieldError}
-                required={field.required}
               />
             </div>
           );
@@ -483,14 +507,13 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             <div className="form-group">
               <InputField
                 type="checkbox"
-                label={labelText}
-                value={fieldValue}
+                {...commonProps}
                 checked={fieldValue === 'true'}
                 onChange={(val: string) => {
+                  if (readOnly) return;
                   const newValue = val === 'true' ? 'false' : 'true';
                   handleInputChange(field.label)(newValue);
                 }}
-                onBlur={handleBlur}
               />
             </div>
           );
@@ -499,12 +522,8 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           return (
             <div className="form-group">
               <TextareaField
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
-                placeholder={field.placeholder}
-                error={fieldError}
-                onBlur={handleBlur}
+                {...commonProps}
+                rows={4}
               />
             </div>
           );
@@ -514,12 +533,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             <div className="form-group">
               <InputField
                 type="number"
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
-                onBlur={handleBlur}
-                placeholder={field.placeholder}
-                error={fieldError}
+                {...commonProps}
                 min={field.min}
                 max={field.max}
                 step={field.step}
@@ -533,11 +547,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             <div className="form-group">
               <InputField
                 type="password"
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
-                placeholder={field.placeholder}
-                error={fieldError}
+                {...commonProps}
               />
             </div>
           );
@@ -547,12 +557,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             <div className="form-group">
               <InputField
                 type="email"
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
-                onBlur={handleBlur}
-                placeholder={field.placeholder}
-                error={fieldError}
+                {...commonProps}
                 inputMode="email"
                 autoComplete="email"
               />
@@ -563,12 +568,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           return (
             <div className="form-group">
               <InputField
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
-                placeholder={field.placeholder}
-                error={fieldError}
-                onBlur={handleBlur}
+                {...commonProps}
                 type={field.type as any}
               />
             </div>
@@ -585,6 +585,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             onChange={handleProductTypeChange}
             options={productOptions}
             required
+            disabled={readOnly}
           />
         </div>
 

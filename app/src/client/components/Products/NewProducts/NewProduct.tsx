@@ -410,6 +410,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
                   const showConnector = i < steps.length - 1;
+                  const isReviewTab = step.title.toLowerCase().includes('review');
+                  const isDisabled = isReviewTab && (!createdProductId || !configuration.productType);
+                  
                   return (
                     <button
                       key={step.id}
@@ -418,8 +421,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                         "np-step",
                         isActive ? "active" : "",
                         isCompleted ? "completed" : "",
+                        isDisabled ? "disabled" : ""
                       ].join(" ").trim()}
-                      onClick={() => gotoStep(i)}
+                      onClick={() => !isDisabled && gotoStep(i)}
+                      disabled={isDisabled}
+                      title={isDisabled ? "Please complete the configuration first" : ""}
                     >
                       {/* Bullet + connector column */}
                       <span className="np-step__bullet" aria-hidden="true">
@@ -517,18 +523,30 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             }}
                             initialProductType={configuration.productType}
                             isSavingDraft={isSaving}
+                            readOnly={activeTab !== 'configuration'}
                           />
                         </section>
                       )}
 
-                      {activeTab === "review" && (
+                      {activeTab === "review" && createdProductId && configuration.productType ? (
                         <section>
                           <div className="np-section-header">
                             <h3 className="np-section-title">REVIEW & CONFIRM</h3>
                           </div>
                           <ProductReview generalDetails={formData} configuration={configuration} />
                         </section>
-                      )}
+                      ) : activeTab === "review" ? (
+                        <div className="np-section-header">
+                          <h3 className="np-section-title">Please complete the configuration first</h3>
+                          <p>Click 'Back' to complete the required configuration steps.</p>
+                          <button 
+                            className="np-btn np-btn--primary mt-4"
+                            onClick={() => gotoStep(1)}
+                          >
+                            Back to Configuration
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* Footer actions on a line */}

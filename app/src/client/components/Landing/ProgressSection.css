@@ -1,91 +1,107 @@
 .progress-section {
-    padding: 80px 40px;
-    background: white;
-  }
-  
-  .progress-tracker {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 60px;
-    gap: 60px;
-  }
-  
-  .step {
-    text-align: center;
-    color: #888;
-  }
-  
-  .step-icon {
-    width: 24px;
-    height: 24px;
-    background-color: #ccc;
-    border-radius: 50%;
-    margin: 0 auto 8px;
-  }
-  
-  .step.active .step-icon {
-    background-color: #297aae;
-  }
-  
-  .step-label {
-    font-weight: 400;
-    font-size: 14px;
-  }
-  
-  .step-subtext {
-    font-size: 12px;
-    color: #aaa;
-  }
-  
-  .progress-content-box {
-    max-width: 1000px;
-    margin-bottom: 60px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    display: flex;
-    padding: 60px;
-    gap: 40px;
-    align-items: center;
-  }
-  
-  .progress-left {
-    flex: 1;
-  }
-  
-  .progress-left h3 {
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-    line-height: 1.4;
-  }
-  
-  .progress-left .highlight {
-    color: #297aae;
-    font-weight: 600;
-  }
-  
-  .progress-left p {
-    font-size: 1rem;
-    color: #555;
-  }
-  
-  .progress-right {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .square-placeholder {
-    width: 400px;
-    height: 400px;
-    background-color: #f4f4f4;
-  }
-  
-  .circle-placeholder {
-    width: 549px;
-    height: 549px;
-    border-radius: 50%;
-    background-color: #f4f4f4;
-  }
-  
+  padding: 80px 40px;
+  background: white;
+}
+
+.progress-tracker {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 60px;
+  gap: 60px;
+}
+
+.step {
+  text-align: center;
+  color: #888;
+}
+
+.step-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+}
+
+.step.active .step-icon {
+  background-color: #297aae;
+}
+
+.step-label {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.step-subtext {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.progress-content-box {
+  max-width: 1000px;
+  margin-bottom: 60px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  display: flex;
+  padding: 60px;
+  gap: 40px;
+  align-items: center;
+}
+
+.progress-left {
+  flex: 1;
+}
+
+.progress-left h3 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.progress-left .highlight {
+  color: #297aae;
+  font-weight: 600;
+}
+
+.progress-left p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.progress-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.square-placeholder {
+  width: 400px;
+  height: 400px;
+  background-color: #f4f4f4;
+}
+
+.circle-placeholder {
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Glass effect only on the image */
+.glass-image {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+}

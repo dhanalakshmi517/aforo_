@@ -320,7 +320,7 @@ body {
 
 .products-search-input::placeholder {
   overflow: hidden;
-  color: var(--color-neutral-500);
+  color: var(--color-neutral-200);
   text-overflow: ellipsis;
   
   /* body/md/reg */

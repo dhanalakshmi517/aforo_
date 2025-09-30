@@ -472,10 +472,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                           }
                                         }}
                                         options={opts.map(o => ({ label: o, value: o }))}
+                                        error={errors.unitOfMeasure}
                                       />
-                                      {errors.unitOfMeasure && (
-                                        <div className="met-np-error-message">{errors.unitOfMeasure}</div>
-                                      )}
                                     </>
                                   );
                                 }
@@ -492,10 +490,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                           setErrors(rest);
                                         }
                                       }}
+                                      error={errors.unitOfMeasure}
                                     />
-                                    {errors.unitOfMeasure && (
-                                      <div className="met-np-error-message">{errors.unitOfMeasure}</div>
-                                    )}
                                   </>
                                 );
                               })()}
@@ -506,7 +502,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                               <label className="met-np-label">Aggregation Function<span className="required">*</span></label>
                               <AggregationFunctionSelect
                                 productType={selectedProductType}
-                                                                unitOfMeasure={unitOfMeasure}
+                                unitOfMeasure={unitOfMeasure}
                                 value={aggregationFunction}
                                 onChange={(v: string) => {
                                   setAggregationFunction(v);
@@ -515,11 +511,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     setErrors(rest);
                                   }
                                 }}
+                                error={errors.aggregationFunction}
                               />
-                              {errors.aggregationFunction && (
-                                <div className="met-np-error-message">{errors.aggregationFunction}</div>
-                              )}
-                            </div>
+                                                          </div>
 
                             {/* Aggregation Window */}
                             <div className="met-np-field">
@@ -535,11 +529,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     setErrors(rest);
                                   }
                                 }}
+                                error={errors.aggregationWindow}
                               />
-                              {errors.aggregationWindow && (
-                                <div className="met-np-error-message">{errors.aggregationWindow}</div>
-                              )}
-                            </div>
+                                                          </div>
                           </div>
                         </section>
                       )}

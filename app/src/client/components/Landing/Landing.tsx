@@ -6,6 +6,7 @@ import SigninLogo from './signin.svg';
 import Features from './Features';
 import ProgressSection from './ProgressSection';
 import Revenue from './Revenue';
+import RevenueCard from './RevenueCard';
 import HeroSection from './HeroSection';
 import Organization from './Organization';
 import Footer from './Footer';
@@ -113,6 +114,9 @@ const Landing: React.FC = () => {
         </section>
         <section>
           <Revenue />
+        </section>
+        <section>
+          <RevenueCard />
         </section>
       </>
     )}

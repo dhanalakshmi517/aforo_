@@ -50,6 +50,13 @@
   }
  
   
+  /* Custom styles for CountrySelector in KongIntegration */
+  .kong-country-selector .flag {
+    width: 36px !important;
+    height: 26px !important;
+    object-fit: cover;
+  }
+  
   .kong-page{
     position: relative;
     min-height: calc(100vh - 60px); /* subtract topbar approx height */
@@ -151,7 +158,7 @@ line-height: var(--line-height-body-md);
     display: flex;
     width: 100%;
     flex-direction: column;
-    gap: 4px;
+    gap: 32px;
   }
   
   .kong-field{ display: flex; flex-direction: column; gap: 2px; }
@@ -176,9 +183,8 @@ line-height: var(--line-height-body-md);
     gap: 8px;
   }
   
-  .kong-forgot{
+  .kong-forgot {
     color: var(--color-primary-800);
-
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-style: normal;
@@ -186,23 +192,59 @@ line-height: var(--line-height-body-md);
     line-height: var(--line-height-body-md);
     text-decoration: none;
   }
-  
 
-  
-  
-  
-  .kong-eye{
+  .kong-eye {
     position: absolute;
     right: 10px;
     top: 50%;
-    translate: 0 -50%;
+    transform: translateY(-50%);
     border: none;
     background: transparent;
-    color: #6B7280;
-    padding: 4px;
+  }
+
+  /* Select field styles */
+  .select-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .kong-select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-border-1, #E9E9EE);
+    border-radius: 4px;
+    background-color: white;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    color: var(--text-strong);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%2346505A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
     cursor: pointer;
   }
+
+  .kong-select:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px rgba(0, 75, 128, 0.1);
+  }
+
+  .kong-select:disabled {
+    background-color: var(--color-neutral-100);
+    cursor: not-allowed;
+  }
+
+  /* Hide default arrow in IE */
+  .kong-select::-ms-expand {
+    display: none;
+  }
   
+ 
   .kong-btn{
     height: 40px;
     border: none;
@@ -217,5 +259,4 @@ font-weight: 500;
 line-height: var(--line-height-body-md);
   }
   
- 
   

@@ -6,13 +6,14 @@ interface AggregationWindowSelectProps {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
 }
 
 /**
  * Displays appropriate aggregation-window options based on product type + unit-of-measure.
  * Currently only API product rules are defined as per requirements.
  */
-const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ productType, unitOfMeasure, value, onChange }) => {
+const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ productType, unitOfMeasure, value, onChange, error }) => {
   // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
     return (
@@ -110,6 +111,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ produ
         onChange={onChange}
         options={options.map(opt=>({label:opt,value:opt}))}
         placeholderOption="--select--"
+        error={error}
       />
     );
   }
@@ -120,6 +122,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ produ
       value={value}
       onChange={onChange}
       placeholder="Aggregation Window"
+      error={error}
     />
   );
 };

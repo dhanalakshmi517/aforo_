@@ -1,6 +1,6 @@
 .configuration-tab {
   padding: 20px;
-  max-width: 550px;
+  max-width: 470px;
   margin: 0 ;
   background-color: var(--color-neutral-white);
 }
@@ -39,7 +39,7 @@
 }
 
 .form-control {
-  width: 45%;
+  width: 40%;
   padding: 8px 12px;
   border: 1px solid var(--color-neutral-300);
   border-radius: 4px;
@@ -62,7 +62,7 @@ input[type='checkbox'] {
 
 .navigation-buttons .left-buttons {
   display: flex;
-  gap: 12px;
+  gap: 5px;
 }
 
 .navigation-buttons .outline-button {
@@ -105,7 +105,7 @@ input[type='checkbox'] {
 }
 
 .form-control {
-  width: 100%;
+  width: 30%;
   padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
