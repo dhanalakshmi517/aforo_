@@ -27,7 +27,7 @@ export function setAuthData(loginResponse: LoginResponse, businessEmail: string)
     status: loginResponse.status,
     businessEmail
   };
-  
+
   localStorage.setItem(AUTH_TOKEN_KEY, loginResponse.token);
   localStorage.setItem(AUTH_DATA_KEY, JSON.stringify(authData));
 }
@@ -39,7 +39,6 @@ export function getAuthData(): AuthData | null {
   try {
     const authDataStr = localStorage.getItem(AUTH_DATA_KEY);
     if (!authDataStr) return null;
-    
     const authData = JSON.parse(authDataStr) as AuthData;
     return authData;
   } catch (error) {
@@ -61,46 +60,7 @@ export function getAuthToken(): string | null {
  */
 export function getOrganizationId(): number | null {
   const authData = getAuthData();
-  return authData?.organizationId || null;
-}
-
-/**
- * Check if user is authenticated
- */
-export function isAuthenticated(): boolean {
-  const token = getAuthToken();
-  const authData = getAuthData();
-  return !!(token && authData && authData.organizationId);
-}
-
-/**
- * Clear authentication data
- */
-export function clearAuthData(): void {
-  localStorage.removeItem(AUTH_TOKEN_KEY);
-  localStorage.removeItem(AUTH_DATA_KEY);
-}
-
-/**
- * Get authorization headers for API requests
- */
-export function getAuthHeaders(): Record<string, string> {
-  const token = getAuthToken();
-  const organizationId = getOrganizationId();
-  
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  if (organizationId) {
-    headers['X-Organization-Id'] = organizationId.toString();
-  }
-  
-  return headers;
+  return authData?.organizationId ?? null;
 }
 
 /**
@@ -129,12 +89,55 @@ export function decodeToken(token: string): any {
 export function isTokenExpired(token?: string): boolean {
   const tokenToCheck = token || getAuthToken();
   if (!tokenToCheck) return true;
-  
+
   const decoded = decodeToken(tokenToCheck);
   if (!decoded || !decoded.exp) return true;
-  
+
   const currentTime = Math.floor(Date.now() / 1000);
   return decoded.exp < currentTime;
+}
+
+/** Check if user is authenticated (and token not expired) */
+export function isAuthenticated(): boolean {
+  const token = getAuthToken();
+  if (!token) return false;
+  return !isTokenExpired(token);
+}
+
+/**
+ * Clear authentication data
+ */
+export function clearAuthData(): void {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_DATA_KEY);
+}
+
+/**
+ * Get authorization headers for API requests.
+ * - For JSON requests, use getAuthHeadersJSON()
+ * - For multipart/FormData, use getAuthHeaders() (do NOT set Content-Type)
+ */
+export function getAuthHeaders(opts?: { contentType?: 'json' | null }): Record<string, string> {
+  const token = getAuthToken();
+  const organizationId = getOrganizationId();
+  const { contentType = null } = opts || {};
+
+  const headers: Record<string, string> = {};
+
+  // IMPORTANT: do NOT set Content-Type for multipart/FormData; axios will set it with boundary
+  if (contentType === 'json') {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (organizationId != null) headers['X-Organization-Id'] = String(organizationId);
+
+  return headers;
+}
+
+/** Convenience for JSON requests */
+export function getAuthHeadersJSON(): Record<string, string> {
+  return getAuthHeaders({ contentType: 'json' });
 }
 
 /**
@@ -142,6 +145,5 @@ export function isTokenExpired(token?: string): boolean {
  */
 export function logout(): void {
   clearAuthData();
-  // Redirect to login page
   window.location.href = '/signin';
 }

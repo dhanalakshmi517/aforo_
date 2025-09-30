@@ -3,23 +3,6 @@ import { getAuthHeaders } from '../../utils/auth';
 
 const INGESTION_BASE_URL = 'http://43.207.67.221:8088/api/ingestion';
 
-// Error handler for API requests
-const handleApiError = (error: any) => {
-  if (error.response?.status === 401) {
-    // Token expired or invalid, redirect to login
-    window.location.href = '/login';
-  }
-  throw error;
-};
-
-// Helper function to get common request config
-const getRequestConfig = () => ({
-  headers: getAuthHeaders(),
-  params: {
-    organizationId: localStorage.getItem('organizationId')
-  }
-});
-
 export interface FileIngestResponse {
   success: boolean;
   message?: string;
@@ -28,6 +11,24 @@ export interface FileIngestResponse {
   errorData?: any;
 }
 
+// Centralized error pass-through (kept if you want to redirect on 401 elsewhere)
+const handleApiError = (error: any) => {
+  if (error.response?.status === 401) {
+    window.location.href = '/login';
+  }
+  throw error;
+};
+
+/**
+ * Upload files via multipart/form-data.
+ * - Sends Authorization + X-Organization-Id headers.
+ * - Builds query string explicitly with bracket notation for descriptions[].
+ * - Lets axios set Content-Type (multipart boundary).
+ *
+ * Backend variants:
+ * - If backend expects MultipartFile[] files  -> keeps "files" key.
+ * - If backend expects repeated "file" key    -> switch to the commented block.
+ */
 export const ingestFiles = async (
   files: File[],
   descriptions: string[],
@@ -36,66 +37,49 @@ export const ingestFiles = async (
 ): Promise<FileIngestResponse> => {
   const formData = new FormData();
 
-  // Append each file (do not wrap in Blob, keep original File object)
-  files.forEach((file) => {
-    formData.append('files', file, file.name);
-  });
+  // Default: many backends use MultipartFile[] files
+  files.forEach((file) => formData.append('files', file, file.name));
 
-  // ✅ Build query params (Swagger style: descriptions as query array)
-  const requestConfig = {
-    ...getRequestConfig(),
-    // ⚠️ Do NOT override Content-Type, let Axios set the multipart boundary
-    params: {
-      ...getRequestConfig().params,
-      ingestType,
-      validateNow: validateNow.toString(),
-      descriptions // backend expects this in query string, not FormData
-    }
-  };
+  // If your backend expects repeated single key "file":
+  // files.forEach((file) => formData.append('file', file, file.name));
+
+  // Build query string with explicit bracket notation for descriptions[]
+  const qs = new URLSearchParams();
+  qs.set('ingestType', ingestType);
+  qs.set('validateNow', String(validateNow));
+  descriptions.forEach((d) => qs.append('descriptions[]', d ?? ''));
+
+  const headers = getAuthHeaders(); // no Content-Type here!
+
+  const endpoint = `${INGESTION_BASE_URL}/files?${qs.toString()}`;
 
   console.log('=== REQUEST DETAILS ===');
-  console.log('Endpoint:', `${INGESTION_BASE_URL}/files`);
+  console.log('Endpoint:', endpoint);
   console.log('Method: POST');
-  console.log('Query Parameters:', requestConfig.params);
-  console.log('Headers:', requestConfig.headers);
+  console.log('Headers:', headers);
+  console.log('Files:', files.map(f => f.name));
+  console.log('Descriptions:', descriptions);
 
   try {
     console.log('=== SENDING REQUEST ===');
-    const response = await axios.post(
-      `${INGESTION_BASE_URL}/files`,
-      formData,
-      requestConfig
-    );
+    const response = await axios.post(endpoint, formData, {
+      headers,
+      withCredentials: false, // set true only if server needs cookies
+    });
 
-    console.log('=== RESPONSE RECEIVED ===');
-    console.log('Status:', response.status);
-    console.log('Response Data:', response.data);
-
-    return {
-      success: true,
-      data: response.data,
-    };
+    console.log('=== RESPONSE RECEIVED ===', response.status, response.data);
+    return { success: true, data: response.data };
   } catch (error: any) {
     console.error('=== ERROR DETAILS ===');
     if (error.response) {
-      console.error('Response Status:', error.response.status);
-      console.error('Response Data:', JSON.stringify(error.response.data, null, 2));
-
-      if (error.response.data?.errors?.length > 0) {
-        console.error('Error Details:');
-        error.response.data.errors.forEach((err: any, index: number) => {
-          console.error(`  Error ${index + 1}:`, JSON.stringify(err, null, 2));
-        });
-      }
-
-      console.error('Response Headers:', error.response.headers);
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+      console.error('Headers:', error.response.headers);
     } else if (error.request) {
-      console.error('No response received. Request:', error.request);
+      console.error('No response. Request:', error.request);
     } else {
-      console.error('Error Message:', error.message);
-      console.error('Error Stack:', error.stack);
+      console.error('Message:', error.message);
     }
-
     return {
       success: false,
       message: error.response?.data?.message || error.message || 'Failed to ingest files',
