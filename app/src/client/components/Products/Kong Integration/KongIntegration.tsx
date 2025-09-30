@@ -67,16 +67,15 @@ export default function KongIntegration({ onClose }: KongIntegrationProps) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCountry) {
-      alert('Please select a country');
-      return;
-    }
-    // Directly show product selection screen
-    const selectedCountryData = countries.find(c => c.code === selectedCountry);
+    
+    // Log the import attempt
     console.log('Importing with', { 
-      country: selectedCountryData?.name || selectedCountry, 
+      country: selectedCountry ? 
+        (countries.find(c => c.code === selectedCountry)?.name || selectedCountry) : 
+        'No country selected',
       authToken
     });
+    
     // hide sidebar via global event used in App
     window.dispatchEvent(new CustomEvent('toggleSidebar', { 
       detail: { 
@@ -104,25 +103,26 @@ export default function KongIntegration({ onClose }: KongIntegrationProps) {
           <div className="kong-headings">
             <h2 className="kong-title">Connect Your Kong Account</h2>
             <p className="kong-subtitle">
-            Securely connect to Kong to import services            </p>
+              Securely connect to Kong to import services
+            </p>
           </div>
 
           {/* form */}
           <form className="kong-form" onSubmit={onSubmit} noValidate>
             <div className="kong-field">
               <div className="kong-field">
-                <label className="kong-label">Select Country*</label>
+                <label className="kong-label">Select Country (Optional)</label>
                 {isLoading ? (
                   <div className="loading-text">Loading countries...</div>
                 ) : (
                   <div className="kong-country-selector">
-                  <CountrySelector
-                    value={selectedCountry}
-                    onChange={setSelectedCountry}
-                    countries={countries}
-                    showDialCode={false}
-                  />
-                </div>
+                    <CountrySelector
+                      value={selectedCountry}
+                      onChange={setSelectedCountry}
+                      countries={countries}
+                      showDialCode={false}
+                    />
+                  </div>
                 )}
               </div>
             </div>
@@ -131,7 +131,6 @@ export default function KongIntegration({ onClose }: KongIntegrationProps) {
               <div className="kong-label-row">
                 <span className="kong-label">Auth Token*</span>
               </div>
-              <div style={{position:'relative'}}>
                 <InputField
                   type="text"
                   name="kong-auth-token"
@@ -163,7 +162,6 @@ export default function KongIntegration({ onClose }: KongIntegrationProps) {
                     <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6"/>
                   </svg>
                 </button> */}
-              </div>
             </div>
 
             <button className="kong-btn" type="submit">
