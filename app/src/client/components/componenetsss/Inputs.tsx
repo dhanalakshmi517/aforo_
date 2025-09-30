@@ -9,6 +9,7 @@ export type CommonProps = {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
   helperText?: string;
   error?: string;
   className?: string;
@@ -55,6 +56,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       placeholder,
       required,
       disabled,
+      readOnly,
       helperText,
       error,
       type = "text",
@@ -78,7 +80,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
     return (
       <div className={`if-field ${className ?? ""}`}>
         {label && (
-          <label htmlFor={controlId} className="if-label">
+          <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
             {label} {required ? "*" : null}
           </label>
         )}
@@ -91,6 +93,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
           placeholder={placeholder}
           required={required}
           disabled={disabled}
+          readOnly={readOnly}
           checked={checked}
           min={min as any}
           max={max as any}
@@ -143,23 +146,23 @@ InputField.displayName = "InputField";
 
 /** ---------- Select (native caret) ---------- */
 export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>(
-  (
-    {
-      id,
-      name,
-      label,
-      placeholder = "Select…",
-      placeholderOption = "Select…",
-      required,
-      disabled,
-      helperText,
-      error,
-      value,
-      onChange,
-      options,
-      onBlur,
-      className,
-    },
+  ({
+    id,
+    name,
+    label,
+    placeholder = "Select…",
+    placeholderOption = "Select…",
+    required,
+    disabled,
+    readOnly,
+    helperText,
+    error,
+    value,
+    onChange,
+    options,
+    onBlur,
+    className,
+  },
     ref
   ) => {
     const [writing, setWriting] = React.useState(false);
@@ -184,7 +187,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
     return (
       <div className={`if-field ${className ?? ""}`}>
         {label && (
-          <label htmlFor={controlId} className="if-label">
+          <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
             {label} {required ? "*" : null}
           </label>
         )}
@@ -206,7 +209,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
             id={controlId}
             name={name}
             required={required}
-            disabled={disabled}
+            disabled={disabled || readOnly}
             value={value ?? ""}
             onChange={(e) => onChange(e.target.value)}
             onFocus={() => {
@@ -358,7 +361,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   return (
     <div className={`if-field ${className ?? ""} dd-wrap`} ref={wrapperRef}>
       {label && (
-        <label htmlFor={controlId} className="if-label">
+        <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
           {label} {required ? "*" : null}
         </label>
       )}
@@ -460,6 +463,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
       placeholder,
       required,
       disabled,
+      readOnly,
       helperText,
       error,
       rows = 4,
@@ -477,7 +481,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
     return (
       <div className={`if-field ${className ?? ""}`}>
         {label && (
-          <label htmlFor={controlId} className="if-label">
+          <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
             {label} {required ? "*" : null}
           </label>
         )}
@@ -490,6 +494,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
           placeholder={placeholder}
           required={required}
           disabled={disabled}
+          readOnly={readOnly}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => {
             setWriting(true);

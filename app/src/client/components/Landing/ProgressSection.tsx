@@ -1,4 +1,5 @@
 import React from 'react';
+import revenueSvg from './revenue.svg';
 import './ProgressSection.css';
 
 const ProgressSection: React.FC = () => {
@@ -39,7 +40,9 @@ const ProgressSection: React.FC = () => {
           </div>
           <div className="progress-right">
             {idx === 0 ? (
-              <div className="circle-placeholder" />
+              <div className='circle-placeholder'>
+              <img src={revenueSvg} alt="Revenue" className="glass-image" />
+              </div>
             ) : (
               <div className="square-placeholder" />
             )}

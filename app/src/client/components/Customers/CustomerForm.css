@@ -18,14 +18,17 @@ body.create-customer-page { background: #fff; }
 /* ───────────────── CARD WRAPPER ───────────────── */
 .create-customer-layout{
   display:flex;
+  flex-direction: column;
   gap:0;
   height:auto;
   min-height: calc(100vh - 120px);
   border: 1px solid var(--border-border-1, #E9E9EE);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: hidden;
   background: #FFF;
-  margin: 24px 7.5rem 55px; /* top 24, sides 120, bottom 55 */
+  margin: 24px 1rem 55px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ───────────────── PROGRESS SIDEBAR ───────────────── */
@@ -124,13 +127,15 @@ body.create-customer-page { background: #fff; }
   padding: 16px var(--content-pad-x) 0;   /* top 16, L/R 24, bottom 0 */
 }
 
-/* Sub-header — horizontal spacing comes from the container above */
+/* Sub-header */
 .section-header{
   display:flex;
-  padding: 0 0 12px;
+  padding: 0 16px 12px;
   align-items:center;
   gap:4px;
-  align-self:stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   border-bottom: 0;
 }
 .section-title{
@@ -144,16 +149,20 @@ body.create-customer-page { background: #fff; }
 /* Scrollable content area */
 .form-content-wrapper{
   flex:1 1 auto;
-  overflow-y:auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-/* Form layout column (spec width 897) */
+/* Form layout column */
 .form-card{
-  width: 897px;
+  width: 100%;
   max-width: 100%;
-  padding: 0 0 24px;
-  margin-top: 16px;
+  padding: 0 16px 24px;
+  margin: 16px auto 0;
   box-sizing: border-box;
 }
 
@@ -248,7 +257,7 @@ body.create-customer-page { background: #fff; }
 }
 .sub-create-form .cus-input::placeholder,
 .sub-create-form .textarea-field::placeholder{
-  color: var(--color-neutral-300);
+  color: var(--color-neutral-200);
 }
 
 /* Logo uploader — same width/height as inputs */
@@ -265,28 +274,81 @@ body.create-customer-page { background: #fff; }
 }
 .logo-box:hover{ border-color: var(--color-neutral-300); }
 
-/* ───────────────── Responsive gutters ───────────────── */
-@media (max-width: 1280px){
-  .create-customer-layout{ margin: 16px 24px 40px; }
-  .form-card{ width: 100%; }
-}
-@media (max-width: 768px){
-  .create-customer-layout{ margin: 16px; }
-  .progress-sidebar{
+/* ───────────────── Responsive gutters */
+@media (max-width: 767px) {
+  .create-customer-layout { 
+    margin: 16px;
+    min-height: calc(100vh - 32px);
+  }
+  .progress-sidebar {
     min-width: 100%;
     width: 100%;
-    border-right:none;
-    border-bottom:1px solid var(--border-border-2, #D5D4DF);
+    border-right: none;
+    border-bottom: 1px solid var(--border-border-2, #D5D4DF);
   }
-  .main-content-area{ padding: 16px var(--content-pad-x) 0; }
-  .form-card{ margin-top: 16px; padding: 0 0 16px; }
-  .sub-create-form{ max-width: 100%; }
+  .main-content-area { 
+    padding: 16px; 
+  }
+  .form-card { 
+    margin-top: 16px; 
+    padding: 0 0 16px;
+  }
+  .sub-create-form { 
+    max-width: 100%;
+    padding: 0 8px;
+  }
+  .section-header {
+    padding: 0 8px 12px;
+  }
+  
+  /* Ensure inputs and form elements don't overflow on mobile */
+  .cus-input,
+  .cus-select,
+  .textarea-field {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  /* Adjust modal for mobile */
+  .rate-delete-modal-content {
+    width: calc(100% - 32px);
+    margin: 0 16px;
+  }
+  
+  /* Stack buttons on mobile */
+  .rate-delete-modal-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .rate-delete-modal-footer .rate-delete-modal-cancel,
+  .rate-delete-modal-footer .rate-delete-modal-confirm {
+    width: 100%;
+  }
 }
 
-/* ───────────────── Delete confirmation modal (updated) ───────────────── */
-.rate-delete-modal-overlay{
-  position: fixed;
-  inset: 0;
+@media (min-width: 768px) {
+  .create-customer-layout {
+    flex-direction: row;
+    margin: 24px 2rem 55px;
+  }
+  .form-card {
+    padding: 0 24px 24px;
+  }
+  .section-header {
+    padding: 0 24px 12px;
+  }
+}
+
+@media (min-width: 992px) {
+  .create-customer-layout {
+    margin: 24px 4rem 55px;
+  }
+}
+
+/* Delete modal styles */
+.rate-delete-modal-overlay {
   background: rgba(16, 15, 19, 0.5);
   z-index: 1000;
   display: flex;
