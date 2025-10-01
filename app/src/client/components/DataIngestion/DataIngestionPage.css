@@ -6,17 +6,23 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;               
+  padding: 16px 16px 0 16px;
+  box-sizing: border-box;
+  position: relative;
 }
 
 :root { --data-header-h: 72px; }
 
 .data-content {
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 4px 16px 0 16px;       
+  padding-bottom: 16px;
   box-sizing: border-box;
+  min-height: 0;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
 }
 
 .data-tabs {
@@ -81,6 +87,20 @@
 .data-tab.is-disabled { color: var(--color-neutral-200); cursor: not-allowed; }
 .data-tabs-spacer { flex: 1 1 auto; }
 
+/* ================= History Tab ================= */
+.history-content {
+  background: var(--color-netral-white);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 16px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-neutral-600);
+}
+
 /* ================= Card ================= */
 .data-card {
   display: flex;
@@ -89,9 +109,21 @@
   border: 1px solid var(--color-neutral-200);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  flex: 1 1 auto;
-  min-height: 0;
+  height: calc(100% - 20px); /* Account for gap */
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
 }
+
+.data-table-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  height: 100%;
+
+}
+
 
 /* Header with right-aligned actions */
 .data-card-header {
@@ -177,14 +209,15 @@
 }
 
 /* ================= Table Area ================= */
-.data-table-scroll {
+/* .data-table-scroll {
   width: 100%;
-  height: calc(100vh-20px); /* Increased table height by reducing the subtracted value from 400px to 300px */
+  height: 100%;
+
   overflow-y: auto;
   padding: 8px 16px 16px 16px;
   box-sizing: border-box;
   position: relative;
-}
+} */
 
 .data-table-scroll::-webkit-scrollbar {
   width: 4px;
@@ -199,7 +232,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 920px;
+  /* min-width: 920px; */
   table-layout: fixed;
   border: none;
 }

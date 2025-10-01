@@ -3,6 +3,7 @@ import DataHeader from "../componenetsss/DataHeader";
 import NoteModal from "../componenetsss/NoteModal";
 import { ingestFiles } from "./api";
 import "./DataIngestionPage.css";
+import IngestionHistory from "./IngestionHistory";
 
 export type FileRow = {
   id: number;
@@ -22,7 +23,7 @@ const DataIngestionPage: React.FC = () => {
   const [currentNoteFile, setCurrentNoteFile] = useState<FileRow | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const canIngest = rows.length > 0;
+  const canIngest = selectedRows.size > 0;
   const allSelected = rows.length > 0 && selectedRows.size === rows.length;
 
   const columns = useMemo(
@@ -84,22 +85,38 @@ const DataIngestionPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const ingest = async () => {
-    if (!canIngest || isLoading) return;
+    console.log('Ingest button clicked');
+    console.log('canIngest:', canIngest, 'isLoading:', isLoading, 'selectedRows:', selectedRows.size);
+    
+    if (!canIngest || isLoading || selectedRows.size === 0) {
+      console.log('Ingest prevented - condition not met');
+      return;
+    }
     
     try {
       setIsLoading(true);
-      const filesToUpload = rows.map(row => row.file).filter(Boolean) as File[];
-      const descriptions = rows.map(row => row.note || '');
+      // Only get selected rows
+      const selectedFiles = Array.from(selectedRows).map(index => rows[index]);
+      console.log('Selected files:', selectedFiles);
       
+      const filesToUpload = selectedFiles.map(row => row.file).filter(Boolean) as File[];
+      const descriptions = selectedFiles.map(row => row.note || '');
+      
+      console.log('Files to upload:', filesToUpload);
+      console.log('Descriptions:', descriptions);
+      
+      console.log('Calling ingestFiles API...');
       const result = await ingestFiles(filesToUpload, descriptions);
+      console.log('API Response:', result);
       
       if (result.success) {
         // Update the status of uploaded files
         setRows(prevRows => 
-          prevRows.map(row => ({
-            ...row,
-            status: "Uploaded" as const
-          }))
+          prevRows.map((row, index) => 
+            selectedRows.has(index) 
+              ? { ...row, status: 'Uploaded' as const }
+              : row
+          )
         );
         // Clear selection after successful upload
         setSelectedRows(new Set());
@@ -175,15 +192,25 @@ const DataIngestionPage: React.FC = () => {
       <div className="data-content">
         <div className="data-tabs">
           <button
-            className="data-tab is-active"
+            className={`data-tab ${activeTab === 'ingestion' ? 'is-active' : ''}`}
             type="button"
+            onClick={() => setActiveTab('ingestion')}
           >
             Ingestion
+          </button>
+          <button
+            className={`data-tab ${activeTab === 'history' ? 'is-active' : ''}`}
+            type="button"
+            onClick={() => setActiveTab('history')}
+          >
+            Ingestion History
           </button>
           <div className="data-tabs-spacer" />
         </div>
 
         <div>
+          {activeTab === 'ingestion' && (
+          <>
           <header className="data-card-header">
             <span>Selected Files</span>
             <div className="data-card-actions">
@@ -209,7 +236,7 @@ const DataIngestionPage: React.FC = () => {
                 {isLoading 
                   ? 'Uploading...' 
                   : canIngest 
-                    ? `Ingest ${rows.length} File${rows.length > 1 ? 's' : ''}` 
+                    ? `Ingest ${selectedRows.size} File${selectedRows.size > 1 ? 's' : ''}` 
                     : 'Ingest Files'}
               </button>
             </div>
@@ -347,6 +374,22 @@ const DataIngestionPage: React.FC = () => {
         </section>
 
           <div className="data-bottom-pad" />
+          </>
+          )}
+          
+          {activeTab === 'history' && (
+  <IngestionHistory rows={rows
+    .filter(row => row.status !== 'Staged') // Only include uploaded or failed files
+    .map((row, idx) => ({
+      id: row.id,
+      name: row.name,
+      ingestionType: mode === "left" ? "Manual" : "API",
+      ingestedOn: row.uploadedAt,
+      status: row.status === "Uploaded" ? "Success" : "Failed",
+      note: row.note,
+    }))} />
+)}
+
         </div>
 
         <input
