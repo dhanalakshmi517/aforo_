@@ -111,6 +111,19 @@
   overflow: hidden;
 }
 
+/* ================= Progress Bar Container ================= */
+.progress-bar-container {
+  background: var(--color-primary-000);
+  border:none;
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ================= Card ================= */
 .data-card {
   display: flex;
