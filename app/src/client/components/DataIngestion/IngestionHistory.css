@@ -1,0 +1,39 @@
+/* src/pages/IngestionHistory.css */
+
+.data-type-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .data-type-manual {
+    background: #eef3ff;
+    color: #00365a;
+  }
+  
+  .data-type-api {
+    background: #e6f9f3;
+    color: #05603a;
+  }
+  
+  .data-status-chip {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .data-status-success {
+    background: #e6f9e6;
+    color: #1a7f37;
+  }
+  
+  .data-status-failed {
+    background: #fdeaea;
+    color: #d93025;
+  }
+  
