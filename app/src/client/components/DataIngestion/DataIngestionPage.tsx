@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import DataHeader from "../componenetsss/DataHeader";
 import NoteModal from "../componenetsss/NoteModal";
+import ProgressBar from "../componenetsss/ProgressBar";
 import { ingestFiles } from "./api";
 import "./DataIngestionPage.css";
 import IngestionHistory from "./IngestionHistory";
@@ -93,6 +94,7 @@ const DataIngestionPage: React.FC = () => {
   const removeRow = (id: number) => setRows(prev => prev.filter(r => r.id !== id));
 
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const ingest = async () => {
     console.log('Ingest button clicked');
@@ -112,11 +114,45 @@ const DataIngestionPage: React.FC = () => {
       const filesToUpload = selectedFiles.map(row => row.file).filter(Boolean) as File[];
       const descriptions = selectedFiles.map(row => row.note || '');
       
+      // Initialize progress
+      setUploadProgress({ current: 0, total: filesToUpload.length });
+      
       console.log('Files to upload:', filesToUpload);
       console.log('Descriptions:', descriptions);
       
+      // Each file takes 5 seconds to upload
+      const timePerFileMs = 5000; // 5 seconds per file
+      const totalTimeMs = timePerFileMs * filesToUpload.length; // Total time based on file count
+      const intervalTime = timePerFileMs; // Time per file
+      
+      // Start progress simulation
+      const progressPromise = new Promise<void>((resolve) => {
+        let currentProgress = 0;
+        const progressInterval = setInterval(() => {
+          currentProgress++;
+          setUploadProgress(prev => ({ 
+            current: Math.min(currentProgress, filesToUpload.length), 
+            total: filesToUpload.length 
+          }));
+          
+          if (currentProgress >= filesToUpload.length) {
+            clearInterval(progressInterval);
+            resolve();
+          }
+        }, intervalTime);
+      });
+      
       console.log('Calling ingestFiles API...');
-      const result = await ingestFiles(filesToUpload, descriptions);
+      
+      // Wait for both API and progress to complete
+      const [result] = await Promise.all([
+        ingestFiles(filesToUpload, descriptions),
+        progressPromise
+      ]);
+      
+      // Keep the progress bar at 100% for 2 seconds before closing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       console.log('API Response:', result);
       
       if (result.success) {
@@ -147,6 +183,7 @@ const DataIngestionPage: React.FC = () => {
       );
     } finally {
       setIsLoading(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
@@ -220,36 +257,47 @@ const DataIngestionPage: React.FC = () => {
         <div className="data-ingestion-container">
           {activeTab === 'ingestion' && (
           <>
-          <header className="data-card-header">
-            <span>Selected Files</span>
-            <div className="data-card-actions">
-              {rows.length > 0 ? (
-                <>
-                  <button className="data-link-clear" type="button" onClick={clearAll}>
-                    Clear all
-                  </button>
-                  <button type="button" className="data-btn-outline" onClick={addMoreFiles}>
-                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                      <path d="M3.333 8H12.667M8 3.333V12.667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                    Add more files
-                  </button>
-                </>
-              ) : null}
-              <button
-                className={`data-ingest-btn ${canIngest ? "" : "is-disabled"}`}
-                onClick={ingest}
-                disabled={!canIngest || isLoading}
-                type="button"
-              >
-                {isLoading 
-                  ? 'Uploading...' 
-                  : canIngest 
-                    ? `Ingest ${selectedRows.size} File${selectedRows.size > 1 ? 's' : ''}` 
-                    : 'Ingest Files'}
-              </button>
+          {!isLoading && (
+            <header className="data-card-header">
+              <span>Selected Files</span>
+              <div className="data-card-actions">
+                {rows.length > 0 ? (
+                  <>
+                    <button className="data-link-clear" type="button" onClick={clearAll}>
+                      Clear all
+                    </button>
+                    <button type="button" className="data-btn-outline" onClick={addMoreFiles}>
+                      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                        <path d="M3.333 8H12.667M8 3.333V12.667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                      Add more files
+                    </button>
+                  </>
+                ) : null}
+                <button
+                  className={`data-ingest-btn ${canIngest ? "" : "is-disabled"}`}
+                  onClick={ingest}
+                  disabled={!canIngest || isLoading}
+                  type="button"
+                >
+                  {isLoading 
+                    ? 'Uploading...' 
+                    : canIngest 
+                      ? `Ingest ${selectedRows.size} File${selectedRows.size > 1 ? 's' : ''}` 
+                      : 'Ingest Files'}
+                </button>
+              </div>
+            </header>
+          )}
+
+          {isLoading && uploadProgress.total > 0 && (
+            <div className="progress-bar-container">
+              <ProgressBar 
+                current={uploadProgress.current} 
+                total={uploadProgress.total} 
+              />
             </div>
-          </header>
+          )}
 
         <section className="data-card">
           <div className="data-table-scroll">

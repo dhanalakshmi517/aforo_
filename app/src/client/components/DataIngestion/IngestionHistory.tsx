@@ -1,5 +1,4 @@
-// src/pages/IngestionHistory.tsx
-import React from "react";
+import React, { useMemo, useState } from "react";
 import "./IngestionHistory.css";
 
 export type HistoryRow = {
@@ -16,6 +15,11 @@ interface Props {
 }
 
 const IngestionHistory: React.FC<Props> = ({ rows }) => {
+  const [query, setQuery] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"All" | "Success" | "Failed">("All");
+  const [typeFilter, setTypeFilter] = useState<"All" | "Manual" | "API">("All");
+
   const formatDate = (d: Date) =>
     d.toLocaleString(undefined, {
       day: "2-digit",
@@ -25,8 +29,134 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
       minute: "2-digit",
     });
 
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return rows.filter((r) => {
+      const matchesQuery =
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        (r.note ? r.note.toLowerCase().includes(q) : false);
+
+      const matchesStatus = statusFilter === "All" || r.status === statusFilter;
+      const matchesType = typeFilter === "All" || r.ingestionType === typeFilter;
+
+      return matchesQuery && matchesStatus && matchesType;
+    });
+  }, [rows, query, statusFilter, typeFilter]);
+
+  const hasData = rows.length > 0;
+  const hasResults = filtered.length > 0;
+
+  const clearFilters = () => {
+    setQuery("");
+    setStatusFilter("All");
+    setTypeFilter("All");
+  };
+
   return (
+    <>
+      <div className="data-toolbar">
+    <div className="data-search">
+      <svg
+        aria-hidden
+        className="data-search-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+      >
+        <path
+          d="M11.5 11.5L15 15"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle
+          cx="7.25"
+          cy="7.25"
+          r="5.75"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      </svg>
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search"
+        className="data-search-input"
+        aria-label="Search ingestion history"
+      />
+      {query && (
+        <button className="data-search-clear" onClick={() => setQuery("")} aria-label="Clear">
+          ×
+        </button>
+      )}
+    </div>
+
+    <div className="data-filter">
+      <button
+        className={`data-filter-btn ${showFilter ? "is-open" : ""}`}
+        onClick={() => setShowFilter((s) => !s)}
+        aria-haspopup="menu"
+        aria-expanded={showFilter}
+        aria-label="Filter"
+      >
+        {/* filter icon */}
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M2 4h14M5 9h8M7.5 14h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      {showFilter && (
+        <div className="data-filter-menu" role="menu">
+          <div className="data-filter-row">
+            <label className="data-filter-label">Status</label>
+            <div className="data-filter-pills">
+              {(["All", "Success", "Failed"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  className={`data-pill ${statusFilter === opt ? "is-active" : ""}`}
+                  onClick={() => setStatusFilter(opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="data-filter-row">
+            <label className="data-filter-label">Type</label>
+            <div className="data-filter-pills">
+              {(["All", "Manual", "API"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  className={`data-pill ${typeFilter === opt ? "is-active" : ""}`}
+                  onClick={() => setTypeFilter(opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {(statusFilter !== "All" || typeFilter !== "All" || query) && (
+            <div className="data-filter-actions">
+              <button className="data-clear-link" onClick={clearFilters}>
+                Clear all
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      </div>
+    </div>
+    
     <section className="data-card">
+      {/* Toolbar */}
+     
+
+      {/* Table */}
       <div className="data-table-scroll">
         <table className="data-table">
           <colgroup>
@@ -50,14 +180,22 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
           </thead>
 
           <tbody>
-            {rows.length === 0 ? (
+            {!hasData ? (
               <tr className="data-empty-row">
                 <td colSpan={6}>
                   <p className="data-empty-hint">No ingestion history available.</p>
                 </td>
               </tr>
+            ) : !hasResults ? (
+              <tr className="data-empty-row">
+                <td colSpan={6}>
+                  <p className="data-empty-hint">
+                    No results {query ? <>for “{query}”</> : ""} with current filters.
+                  </p>
+                </td>
+              </tr>
             ) : (
-              rows.map((r, idx) => (
+              filtered.map((r, idx) => (
                 <tr key={r.id}>
                   <td>{idx + 1}</td>
                   <td>{r.name}</td>
@@ -80,6 +218,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
         </table>
       </div>
     </section>
+    </>
   );
 };
 
