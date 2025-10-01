@@ -66,6 +66,7 @@ const DataIngestionPage: React.FC = () => {
     if (!files.length) return;
 
     const now = new Date();
+    const currentRowCount = rows.length;
     const next = files.map((f, i) => ({
       id: Date.now() + i,
       file: f,
@@ -75,6 +76,15 @@ const DataIngestionPage: React.FC = () => {
       uploadedAt: now,
     }));
     setRows(prev => [...prev, ...next]);
+
+    // Auto-select the newly added files
+    setSelectedRows(prev => {
+      const newSelected = new Set(prev);
+      for (let i = 0; i < files.length; i++) {
+        newSelected.add(currentRowCount + i);
+      }
+      return newSelected;
+    });
 
     // allow selecting the same file again later
     e.target.value = "";
@@ -188,7 +198,6 @@ const DataIngestionPage: React.FC = () => {
         onSettingsClick={() => {}}
         onNotificationsClick={() => {}}
       />
-
       <div className="data-content">
         <div className="data-tabs">
           <button
@@ -208,7 +217,7 @@ const DataIngestionPage: React.FC = () => {
           <div className="data-tabs-spacer" />
         </div>
 
-        <div>
+        <div className="data-ingestion-container">
           {activeTab === 'ingestion' && (
           <>
           <header className="data-card-header">
