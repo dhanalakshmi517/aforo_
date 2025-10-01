@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;               
-  padding: 16px 16px 0 16px;
+  padding: 8px 16px 0 16px;
   box-sizing: border-box;
   position: relative;
 }
@@ -17,10 +17,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding-bottom: 16px;
+  padding: 0;
+  margin: 0;
   box-sizing: border-box;
   min-height: 0;
-  gap: 16px;
+  gap: 8px;
   position: relative;
   overflow: hidden;
 }
@@ -29,8 +30,8 @@
   display: flex;
   align-items: center;
   gap: 0;
-  height: 36px;
-  margin-bottom: 12px;
+  height: 32px;
+  margin: 0 0 8px 0;
   position: sticky;              
   top: 0;
   z-index: 1;
@@ -80,7 +81,7 @@
   position: absolute;
   left: 0; right: 0; bottom: -1px;
   height: 2px;
-  background: var(--color-primary-500);
+  background: var(--color-primary-700);
   border-radius: 2px 2px 0 0;
   z-index: 2;
 }
@@ -101,6 +102,15 @@
   color: var(--color-neutral-600);
 }
 
+/* ================= Ingestion Container ================= */
+.data-ingestion-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* ================= Card ================= */
 .data-card {
   display: flex;
@@ -109,7 +119,9 @@
   border: 1px solid var(--color-neutral-200);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  height: calc(100% - 20px); /* Account for gap */
+  flex: 1;
+  min-height: 0;
+  margin-bottom: clamp(8px, 1vh, 16px); /* Responsive gap at bottom */
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
@@ -118,10 +130,9 @@
 .data-table-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
-  height: 100%;
-
+  min-height: 0;
 }
 
 
@@ -131,12 +142,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 8px 16px 6px 16px;  /* Reduced top padding from 14px to 8px, bottom to 6px */
   color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-weight: 500;
   line-height: var(--line-height-heading-h6);
+  margin-top: -4px;  /* Added negative margin to pull it up slightly */
 }
 
 .data-card-actions {
@@ -163,11 +175,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  width:157px auto;
   height: 40px;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-primary-1300);
-  background-color: var(--color-primary-000);
+  background-color: var(--color-neutral-white);
   color: var(--color-primary-800);
 
   font-family: var(--font-family-primary);
@@ -181,12 +194,13 @@
 
 /* Primary CTA in header */
 .data-ingest-btn {
+  width:115 auto;
   height: 40px;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
   border: none;
   background: var(--color-primary-700);
-  color: var(--color-primary-000);
+  color: var(--color-neutral-white);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
@@ -249,7 +263,9 @@
   font-weight: 500;
   line-height: 20px;
   border: none;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   vertical-align: middle;
 }
 
@@ -263,7 +279,7 @@
 }
 
 .data-table tbody td {
-  padding: 12px 24px;
+  padding: 12px 16px;
   border: none;
   border-bottom: 1px solid var(--color-neutral-100);
   color: var(--color-neutral-1400);
@@ -272,7 +288,7 @@
   font-style: normal;
   font-weight: 400;
   vertical-align: middle;
-  background: #fff;
+  background: var(--color-neutral-white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -280,10 +296,58 @@
 
 .data-td-sno { 
   width: 80px;
-  color: var(--color-neutral-800);
-  text-align: center;
-  padding: 0 12px;
+  color: var(--color-neutral-1400);
+  text-align: left;
+  padding: 12px 12px;
 }
+
+.data-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 0;
+}
+
+/* Custom Checkbox Styling */
+.data-checkbox-container input[type="checkbox"],
+.data-table thead input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--color-neutral-400);
+  border-radius: 4px;
+  background-color: var(--color-neutral-white);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.data-checkbox-container input[type="checkbox"]:hover,
+.data-table thead input[type="checkbox"]:hover {
+  border-color: var(--color-primary-700);
+}
+
+.data-checkbox-container input[type="checkbox"]:checked,
+.data-table thead input[type="checkbox"]:checked {
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+}
+
+.data-checkbox-container input[type="checkbox"]:checked::after,
+.data-table thead input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 1px;
+  width: 2px;
+  height: 4px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 
 .data-td-name { 
   min-width: 200px;
@@ -291,23 +355,29 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding: 12px 12px;
 }
 
 .data-td-status { 
   width: 140px;
-  text-align: left;
-  padding: 0 16px;
+  text-align: center;
+  padding: 12px 12px;
+}
+
+.data-td-status .data-status-chip {
+  display: inline-flex;
+  margin: 0 auto;
 }
 
 .data-td-uploaded { 
   width: 200px; 
   color: var(--color-neutral-800);
-  padding: 0 16px;
+  padding: 12px 12px;
 }
 
 .data-td-notes, .data-th-notes { 
   min-width: 200px;
-  padding: 0 16px;
+  padding: 12px 12px;
 }
 
 /* ================= Row Bits ================= */
@@ -315,11 +385,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px; height: 22px;
   border-radius: 6px;
-  background: #F1F5FB;
-  color: #0B5FA4;
-  font: 600 12px/22px var(--type-font-family-primary, "IBM Plex Sans");
 }
 
 .data-file-chip {
@@ -327,16 +393,26 @@
   align-items: center;
   gap: 8px;
   height: 32px;
-  padding: 4px;
+  padding: 4px 8px 4px 4px;
   border-radius: 8px;
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-200);
 }
 .data-file-icon {
-  width: 10px; height: 12px;
-  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   background: var(--color-primary-100);
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-file-icon svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-primary-700);
 }
 .data-file-name {
   max-width: 36vw;
@@ -396,7 +472,6 @@
   background: var(--color-primary-000);
   color: var(--color-primary-800);
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
 .data-select-btn svg { color: var(--color-primary-800); }
 .data-empty-hint {
