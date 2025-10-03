@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateUsageMetric from "./CreateUsageMetric";
 import EditMetrics from "./EditMetering/EditMetrics";
 import "../Rateplan/RatePlan.css";
@@ -10,6 +11,7 @@ import { useToast } from '../componenetsss/ToastProvider';
 import UsageEmptyImg from "./usage.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
+import PrimaryButton from '../componenetsss/PrimaryButton';
 
 // Props for Metering component
 interface MeteringProps {
@@ -66,6 +68,7 @@ const ToastNotification: React.FC<NotificationState> = ({ message, type, product
 };
 
 const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewUsageMetricForm, setHideSidebarOnEditMetric }) => {
+  const navigate = useNavigate();
   const formatStatus = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '-';
   const display = (v: any) => (v === undefined || v === null || String(v).trim() === '' ? '-' : v);
   const [metrics, setMetrics] = useState<Metric[]>([]);
@@ -186,7 +189,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
         primaryLabel="+New Usage Metric"
-        onPrimaryClick={() => setShowNewUsageMetricForm(true)}
+        onPrimaryClick={() => navigate('/get-started/metering/new')}
         showPrimary={metrics.length > 0}
       />
       <div className="products-table-wrapper">
@@ -219,7 +222,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               
               <td className="actions-cell"><div className="product-action-buttons">
                 {String(metric.status).toLowerCase() === 'draft' ? (
-                  <button className="product-view-button" onClick={() => { setSelectedMetricId(metric.id); setShowNewUsageMetricForm(true); }}>
+                  <button className="product-view-button" onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M7.99967 1.33325C11.6816 1.33325 14.6663 4.31802 14.6663 7.99992C14.6663 11.6818 11.6816 14.6666 7.99967 14.6666C4.31778 14.6666 1.33301 11.6818 1.33301 7.99992H5.33301H10.6663M10.6663 7.99992L7.99967 10.6666M10.6663 7.99992L7.99967 5.33325" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -246,13 +249,13 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 <div className="metrics-empty-state">
                   <img src={UsageEmptyImg} alt="No metrics" style={{ width: 200, height: 200 }} />
                   <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
-                  <button
-                    onClick={() => setShowNewUsageMetricForm(true)}
-                    className="new-metric-button"
-                    style={{ marginTop: 12 }}
-                  >
-                    + New Billable Metric
-                  </button>
+                  <div className="new-metric-button-wrapper">
+                    <PrimaryButton 
+                      onClick={() => navigate('/get-started/metering/new')}
+                    >
+                      + New Billable Metric
+                    </PrimaryButton>
+                  </div>
                 </div>
               </td>
             </tr>

@@ -53,24 +53,15 @@ function handleApiError(error: unknown): never {
       throw new Error('Session expired. Please login again.');
     }
 
-    console.error('API Error Response:', {
-      status: response?.status,
-      statusText: response?.statusText,
-      data: response?.data,
-      headers: response?.headers,
-    });
-
     const errorMessage =
       response?.data?.message || message || 'API request failed';
     throw new Error(errorMessage);
   }
 
   if (error instanceof Error) {
-    console.error('Error details:', error);
     throw error;
   }
 
-  console.error('Unknown error occurred:', error);
   throw new Error('An unknown error occurred');
 }
 
@@ -131,7 +122,6 @@ export const listAllProducts = async (): Promise<Product[]> => {
     if (!res.ok) throw new Error('Failed to fetch products');
     return await res.json();
   } catch (e) {
-    console.error('listAllProducts error', e);
     throw e;
   }
 };
@@ -186,8 +176,6 @@ export const createProduct = async (payload: ProductPayload & { status?: string 
     // Append the blob to form data with the correct field name 'request'
     formData.append('request', blob);
 
-    console.log('Request Payload:', cleanPayload);
-    
     const api = createApiClient();
     
     // Set headers - let the browser set the Content-Type with boundary
@@ -196,36 +184,18 @@ export const createProduct = async (payload: ProductPayload & { status?: string 
       // Don't set Content-Type here - let the browser set it with the correct boundary
     };
     
-    console.log('Sending multipart/form-data request...');
-    const startTime = performance.now();
-    
     const response = await api.post<Product>('/products', formData, {
       headers,
       transformRequest: [(data) => data] // Prevent axios from transforming the form data
     });
     
-    const endTime = performance.now();
-    console.log(`Request completed in ${(endTime - startTime).toFixed(2)}ms`);
-    console.log('Response Status:', response.status, response.statusText);
-    console.log('Response Data:', response.data);
-    
-    const result = handleApiResponse(response);
-    console.log('Created Product ID:', result.productId);
-    
-    return result;
+    return handleApiResponse(response);
   } catch (error) {
-    console.error('Error creating product:', error);
-    if (axios.isAxiosError(error)) {
-      console.error('Error Response:', error.response?.data);
-      console.error('Status Code:', error.response?.status);
-    }
     return handleApiError(error);
   }
 }
 
 export const updateProduct = async (productId: string, payload: Partial<ProductPayload>): Promise<Product> => {
-  console.log(`Updating product ${productId} with:`, payload);
-  
   const authData = getAuthData();
   
   // Clean the payload to remove undefined or empty strings
@@ -240,9 +210,6 @@ export const updateProduct = async (productId: string, payload: Partial<ProductP
   if (Object.keys(cleanPayload).length === 0) {
     throw new Error('No valid fields to update');
   }
-  
-  // For PATCH requests, send as raw JSON instead of form-data
-  console.log(`Sending PATCH to /products/${productId} with:`, cleanPayload);
   
   const api = createApiClient();
   
@@ -347,12 +314,6 @@ export const saveProductConfiguration = async (
   configData: Record<string, any>,
   isUpdate: boolean = false
 ): Promise<any> => {
-  console.log('saveProductConfiguration called with:', {
-    productId,
-    productType,
-    configData: JSON.parse(JSON.stringify(configData)), // Ensure we log the actual data
-    isUpdate
-  });
   try {
     const api = createApiClient();
     const normalizedType = productType.toLowerCase();
@@ -482,7 +443,6 @@ export const saveProductConfiguration = async (
           dbType: configData.dbType || 'MYSQL',
           authType: configData.authType || 'NONE'
         };
-        console.log('SQL Result payload:', payload);
         break;
       }
         
@@ -568,18 +528,15 @@ export const saveProductConfiguration = async (
 
       let response;
       if (operationType === 'update') {
-        console.log('Using PUT for update with payload:', cleanedPayload);
         response = await api.put(apiEndpoint, cleanedPayload, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
       } else {
-        console.log('Using POST for create with payload:', cleanedPayload);
         response = await api.post(apiEndpoint, cleanedPayload);
       }
       
-      console.log(`${operationType === 'update' ? 'Updated (PUT)' : 'Created (POST)'} configuration successfully:`, response.data);
       return response.data;
     } catch (error: any) {
       console.error('Full error object:', JSON.stringify(error, null, 2));
@@ -603,7 +560,6 @@ export const saveProductConfiguration = async (
       throw new Error(`Failed to save ${productType} configuration: ${errorMessage}`);
     }
   } catch (error) {
-    console.error('Error saving product configuration:', error);
     throw error;
   }
 };
@@ -618,29 +574,16 @@ export const finalizeProduct = async (
       throw new Error('No authentication token found. Please log in again.');
     }
 
-    console.group('Finalizing Product - API Request');
-    console.log('API Endpoint:', `${BASE_URL}/products/${productId}/finalize`);
-    
     const api = createApiClient();
     api.defaults.headers['X-Organization-Id'] = authData?.organizationId?.toString() || '';
     
     const response = await api.post(`/products/${productId}/finalize`, {});
-    
-    console.log('Response Status:', response.status, response.statusText);
-    console.log('Response Data:', response.data);
-    console.groupEnd();
     
     return {
       success: true,
       message: 'Product finalized successfully'
     };
   } catch (error) {
-    console.error('Error finalizing product:', error);
-    if (axios.isAxiosError(error)) {
-      console.error('Error Response:', error.response?.data);
-      console.error('Status Code:', error.response?.status);
-    }
-    console.groupEnd();
     return handleApiError(error);
   }
 };
@@ -665,7 +608,6 @@ export const getBillableMetrics = async (productId: string): Promise<BillableMet
     const response = await api.get<BillableMetric[]>(`/billable-metrics/by-product?productId=${productId}`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching billable metrics for product ${productId}:`, error);
     // Return empty list so UI shows '-' when no metrics
     return [];
   }

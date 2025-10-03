@@ -201,17 +201,25 @@
 }
 
 .empty-new-rate-btn {
-  height: 48px;
-  padding: 0 20px;
-  border-radius: 12px;
-  background: var(--surface-sidebar);
-  color: #fff;
-  border: none;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 600;
+  justify-content: center;
+  text-align: center;
+  height: 40px;
+  width: 183px auto;
+  background-color: var(--color-primary-800);
+  color: var(--color-neutral-white);
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+  white-space: nowrap; /* keep label on single line */
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
 }
 .empty-new-rate-btn:hover { filter: brightness(0.98); }
 .empty-btn-plus {
@@ -453,10 +461,4 @@
   color: var(--text-dark);
   font-weight: 400;
   margin: 0;
-}
-.pp-empty-row .empty-new-rate-btn {
-  height: 48px;
-  padding: 0 24px;
-  border-radius: 12px;
-  font-weight: 600;
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import SecondaryButton from "./SecondaryButton";
 import "./NoteModal.css";
 
 // File icon component
@@ -77,7 +78,9 @@ const NoteModal: React.FC<NoteModalProps> = ({
             aria-label="Close" 
             onClick={onClose}
           >
-            ×
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <path d="M15 5L5 15M5 5L15 15" stroke="#75797E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
           </button>
         </header>
 
@@ -91,9 +94,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
     rows={5}
   />
   <div className="di-notes-footer-row">
-    <button
-      type="button"
-      className="di-notes-applyall"
+    <SecondaryButton
       onClick={() => {
         onSaveAll(value);
         setValue('');
@@ -102,7 +103,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
     >
       <PlusIcon />
       Add same note to all files
-    </button>
+    </SecondaryButton>
     <label className="di-notes-checkbox">
       <input
         type="checkbox"

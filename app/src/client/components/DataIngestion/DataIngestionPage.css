@@ -348,17 +348,12 @@
   border-color: var(--color-primary-700);
 }
 
-.data-checkbox-container input[type="checkbox"]:checked::after,
-.data-table thead input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 4.5px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+.data-checkbox-container input[type="checkbox"]:checked,
+.data-table thead input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M12.3346 1L5.0013 8.33333L1.66797 5' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 10px;
 }
 
 
@@ -460,7 +455,50 @@
   font: 500 13px/20px var(--type-font-family-primary, "IBM Plex Sans");
   cursor: pointer;
 }
-.data-note-text { color: var(--color-neutral-1400); }
+
+/* Notes container with text truncation */
+.data-note-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.data-note-text { 
+  color: var(--color-neutral-1400);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+}
+
+/* Edit button styling */
+.data-edit-note-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-000);
+  border: 1px solid var(--color-neutral-200);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+
+.data-edit-note-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
 
 /* ================= Empty State ================= */
 .data-empty-row td {

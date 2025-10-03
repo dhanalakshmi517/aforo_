@@ -1,21 +1,5 @@
 @import "../Variables/Variables.css";
 
-.buttonSecondary {
-  width: 140px;
-  height: 40px;
-  background-color: var(--color-primary-000);
-  color: var(--color-primary-800);
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
- 
-}
 
 
 .buttonPrimary {

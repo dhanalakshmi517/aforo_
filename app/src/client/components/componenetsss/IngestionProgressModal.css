@@ -1,0 +1,77 @@
+/* Overlay */
+.ipm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    background: rgba(16, 24, 40, 0.35); /* dim */
+    backdrop-filter: blur(3px);          /* slight background blur */
+  }
+  
+  /* Modal card */
+  .ipm-modal {
+    width: min(560px, 92vw);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 16px 64px rgba(16, 24, 40, 0.18);
+    border: 1px solid #eef0f4;
+    padding: 22px 26px 18px;
+  }
+  
+  /* Headings */
+  .ipm-head {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .ipm-title {
+    color: #2c3137;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .ipm-subtitle {
+    color: #0b63ff;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  
+  /* Progress section */
+  .ipm-progress {
+    margin-top: 6px;
+  }
+  .ipm-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .ipm-hint-left {
+    font-size: 12px;
+    color: #6b6f76;
+  }
+  .ipm-hint-right {
+    font-size: 12px;
+    color: #6b6f76;
+  }
+  
+  /* Actions (optional cancel) */
+  .ipm-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .ipm-cancel {
+    border: none;
+    background: transparent;
+    color: #6b6f76;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 8px;
+  }
+  .ipm-cancel:hover {
+    color: #1f2937;
+    text-decoration: underline;
+  }
+  

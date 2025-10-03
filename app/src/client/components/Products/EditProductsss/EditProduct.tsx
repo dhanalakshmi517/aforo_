@@ -8,6 +8,8 @@ import { ConfigurationTab } from './EditConfiguration';
 import EditReview from './EditReview';
 import TopBar from '../../componenetsss/TopBar';
 import { useToast } from '../../componenetsss/ToastProvider';
+import PrimaryButton from '../../componenetsss/PrimaryButton';
+import SecondaryButton from '../../componenetsss/SecondaryButton';
 import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration, buildAuthHeaders } from './EditProductApi';
 import { finalizeProduct, deleteProduct } from '../api';
@@ -548,25 +550,23 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
               <div className="edit-np-form-footer">
                 <div className="edit-np-btn-group edit-np-btn-group--back">
                   {activeTab !== 'general' && (
-                    <button
+                    <SecondaryButton
                       type="button"
-                      className="np-btn np-btn--ghost"
                       onClick={handlePreviousStep}
                     >
                       Back
-                    </button>
+                    </SecondaryButton>
                   )}
                 </div>
 
                 <div className="edit-np-btn-group edit-np-btn-group--next">
-                  <button
+                  <PrimaryButton
                     type="button"
-                    className={`np-btn np-btn--primary ${loading ? 'np-btn--loading' : ''}`}
                     onClick={handleNextStep}
                     disabled={loading}
                   >
                     {loading ? 'Saving...' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Update Product') : 'Next'}
-                  </button>
+                  </PrimaryButton>
                 </div>
               </div>
             </div>

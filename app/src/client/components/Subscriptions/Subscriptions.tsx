@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '../componenetsss/ToastProvider';
 import { Api, Subscription as SubscriptionType } from './api';
 import CreateSubscription from './CreateSubscription';
@@ -8,6 +9,7 @@ import './Subscriptions.css';
 import '../Rateplan/RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
 import { getAuthHeaders } from '../../utils/auth';
+import PrimaryButton from '../componenetsss/PrimaryButton';
 
 // Empty cart SVG icon (file URL)
 import purchaseSvg from './purchase.svg';
@@ -130,6 +132,7 @@ interface SubscriptionsProps {
 }
 
 const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, setShowNewSubscriptionForm }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [editingSub, setEditingSub] = useState<SubscriptionType | null>(null);
   const [draftSub, setDraftSub] = useState<SubscriptionType | null>(null);
@@ -304,7 +307,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
         primaryLabel="New Purchase"
-        onPrimaryClick={() => setShowNewSubscriptionForm(true)}
+        onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
         onFilterClick={() => {}}
         searchDisabled={searchDisabled}
         showPrimary={!isEmpty}
@@ -441,20 +444,19 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
             <p className="empty-state-text">
               No Purchases yet. Click ‘New Purchase’ to create your First Purchase.
             </p>
-            <button
-              type="button"
-              className="new-purchase-btn"
-              onClick={() => setShowNewSubscriptionForm(true)}
+            <PrimaryButton
+              onClick={() => navigate('/get-started/subscriptions/new')}
+              className="empty-new-purchase-btn"
             >
-              <span className="btn-plus" aria-hidden>+</span>
-              New Purchase
-            </button>
+              
+             + New Purchase
+            </PrimaryButton>
           </div>
         )}
       </div>
 
       <ConfirmDeleteModal
-        isOpen={showDeleteModal}
+        isOpen={!!subscriptionToDelete}
         productName={subscriptionToDelete ? `Subscription ${subscriptionToDelete.subscriptionId}` : ''}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}

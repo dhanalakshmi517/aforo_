@@ -3,6 +3,8 @@ import TopBar from '../../componenetsss/TopBar';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { useToast } from '../../componenetsss/ToastProvider';
+import PrimaryButton from '../../componenetsss/PrimaryButton';
+import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 
@@ -410,22 +412,18 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                 <div className="edit-np-form-footer">
                   <div className="edit-np-btn-group edit-np-btn-group--back">
                     {activeTab !== 'metric' && (
-                      <button
-                        type="button"
-                        className="np-btn np-btn--ghost"
+                      <SecondaryButton
                         onClick={() => gotoStep(currentStep - 1)}
                         disabled={loading}
                       >
                         Back
-                      </button>
+                      </SecondaryButton>
                     )}
                   </div>
 
                   <div className="edit-np-btn-group edit-np-btn-group--next">
                     {activeTab !== 'review' ? (
-                      <button
-                        type="button"
-                        className={`np-btn np-btn--primary ${loading ? 'np-btn--loading' : ''}`}
+                      <PrimaryButton
                         onClick={() => {
                           if (!validateStep(currentStep)) return;
                           gotoStep(currentStep + 1);
@@ -433,16 +431,14 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                         disabled={loading}
                       >
                         {loading ? 'Saving...' : 'Next'}
-                      </button>
+                      </PrimaryButton>
                     ) : (
-                      <button
-                        type="button"
-                        className={`np-btn np-btn--primary ${loading ? 'np-btn--loading' : ''}`}
+                      <PrimaryButton
                         onClick={handleSubmitFinal}
                         disabled={loading}
                       >
                         {loading ? 'Saving...' : 'Save changes'}
-                      </button>
+                      </PrimaryButton>
                     )}
                   </div>
                 </div>

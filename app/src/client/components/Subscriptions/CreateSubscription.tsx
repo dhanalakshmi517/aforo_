@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../componenetsss/TopBar";
 import { useToast } from "../componenetsss/ToastProvider";
@@ -49,7 +50,28 @@ export default function CreateSubscription({
   onRefresh,
   draftData,
 }: CreateSubscriptionProps): JSX.Element {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+
+  // Handle browser back button and add page class
+  useEffect(() => {
+    document.body.classList.add("create-product-page");
+    
+    // Handle browser back button
+    const handleBackButton = (event: PopStateEvent) => {
+      event.preventDefault();
+      navigate('/get-started/subscriptions');
+    };
+    
+    window.addEventListener('popstate', handleBackButton);
+    window.history.pushState(null, '', window.location.pathname);
+    
+    return () => {
+      document.body.classList.remove("create-product-page");
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [navigate]);
 
   // data sources
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -307,19 +329,9 @@ export default function CreateSubscription({
   };
 
   const handleCancelTop = () => {
-  if (!subscriptionId) {
-    // If there's no subscription ID, it's a new draft that hasn't been saved yet
-    showToast({
-      kind: 'info',
-      title: 'Subscription deleted',
-      message: 'Subscription is deleted successfully.'
-    });
-    onClose();
-  } else {
-    // For existing drafts, show the delete confirmation modal
+    // Always show the delete confirmation modal
     setShowDeleteConfirm(true);
-  }
-};
+  };
 
   const canSaveNext =
     !!selectedCustomerId &&

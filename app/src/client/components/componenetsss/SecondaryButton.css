@@ -1,0 +1,68 @@
+@import "../Variables/Variables.css";
+
+  
+  /* Base */
+  .af-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width:132px auto;
+  
+    height: 40px;
+    padding: 8px 20px;
+    border-radius: var(--border-radius-sm);
+  
+    background: var(--color-primary-000);
+    color: var(--color-primary-800);
+    border: 1px solid transparent;
+  
+
+    /* body/md/med */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-md); /* 142.857% */  
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+    transition: background-color .15s ease, box-shadow .15s ease, transform .02s ease;
+  }
+  
+  .af-secondary-btn.is-full { width: 100%; }
+  
+  .af-secondary-btn:hover:not(:disabled) { background: var(--color-primary-100); 
+    color: var(--color-primary-800);
+    border: 1px solid transparent;
+  
+    /* body/md/med */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-md); /* 142.857% */ }
+  .af-secondary-btn:active:not(:disabled) {
+    background: var(--color-primary-200);
+    transform: translateY(0.5px);
+  }
+  .af-secondary-btn:focus-visible {
+    outline: none;
+    border:2px solid var(--color-primary-200);
+    background: var(--color-primary-000);
+  }
+  
+  .af-secondary-btn:disabled {
+    background: var(--color-neutral-200);
+    color: var(--color-neutral-500);
+    border-color: var(--color-neutral-200);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  /* High-contrast / accessibility */
+  @media (forced-colors: active) {
+    .af-secondary-btn { border: 1px solid ButtonText; }
+    .af-secondary-btn:focus-visible { outline: 2px solid Highlight; box-shadow: none; }
+  }
+  
