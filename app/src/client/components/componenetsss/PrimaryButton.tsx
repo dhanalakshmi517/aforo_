@@ -1,5 +1,5 @@
 import * as React from "react";
-import "./PrimaryButton.css";
+import "./Primarybutton.css";
 
 type Props = {
   children: React.ReactNode;          // button text
