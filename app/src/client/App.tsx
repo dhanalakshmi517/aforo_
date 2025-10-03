@@ -41,8 +41,12 @@ const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
 const KongProductSelect = React.lazy(() => import('./components/Products/Kong Integration/KongProductSelect')) as React.ComponentType<any>;
 const meteringLoader = () => import('./components/Metering/Metering');
 const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
+const createUsageMetricLoader = () => import('./components/Metering/CreateUsageMetric');
+const CreateUsageMetric = React.lazy(createUsageMetricLoader) as React.ComponentType<any>;
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
 const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
+const createSubscriptionLoader = () => import('./components/Subscriptions/CreateSubscription');
+const CreateSubscription = React.lazy(createSubscriptionLoader) as React.ComponentType<any>;
 const dataIngestionLoader = () => import('./components/DataIngestion/DataIngestionPage');
 const DataIngestionPage = React.lazy(dataIngestionLoader) as React.ComponentType<any>;
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
@@ -65,10 +69,18 @@ export default function App() {
   const navigate = useNavigate();
   const { data: user, isLoading: isAuthLoading } = useAuth();
   const location = useLocation();
-
-  const isNewProductPage = location.pathname === '/get-started/products/new';
-
+  const [isNewProductPage, setIsNewProductPage] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+
+  // Update page states when location changes
+  useEffect(() => {
+    setIsNewProductPage(location.pathname === '/get-started/products/new');
+    
+    // Reset sidebar visibility when navigating away from edit pages
+    if (!location.pathname.includes('/edit') && !location.pathname.endsWith('/new')) {
+      setShowSidebar(true);
+    }
+  }, [location.pathname]);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showNewProductForm, setShowNewProductForm] = useState(false);
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
@@ -337,6 +349,21 @@ export default function App() {
               <ProtectedRoute>
                 <div className="flex flex-col">
                   <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
                     <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                       <EditPlan />
                     </div>
@@ -353,23 +380,21 @@ export default function App() {
               <ProtectedRoute>
                 <div className="flex flex-col">
                   <div className="flex-1">
-                    {!isNewProductPage && (
-                      <SideNavbar
-                        activeTab={currentTab}
-                        onTabClick={(tab) => {
-                          const slug =
-                            tab === 'Billable Metrics'
-                              ? 'metering'
-                              : tab === 'Purchases'
-                              ? 'subscriptions'
-                              : tab === 'Data Ingetion'
-                              ? 'data-ingetion'
-                              : tab.toLowerCase().replace(/\s+/g, '-');
-                          navigate(`/get-started/${slug}`);
-                        }}
-                        hidden={!showSidebar}
-                      />
-                    )}
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        const slug =
+                          tab === 'Billable Metrics'
+                            ? 'metering'
+                            : tab === 'Purchases'
+                            ? 'subscriptions'
+                            : tab === 'Data Ingetion'
+                            ? 'data-ingetion'
+                            : tab.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/get-started/${slug}`);
+                      }}
+                      hidden={!showSidebar}
+                    />
                     <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                       <Products
                         showNewProductForm={showNewProductForm}
@@ -436,8 +461,22 @@ export default function App() {
             }
           />
 
-          {/* Subscriptions */
-          }
+          <Route
+            path="/get-started/metering/new"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <CreateUsageMetric onClose={() => navigate('/get-started/metering')} />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Subscriptions */}
           <Route
             path="/get-started/subscriptions"
             element={
@@ -467,6 +506,25 @@ export default function App() {
                       <Subscriptions
                         showNewSubscriptionForm={showNewSubscriptionForm}
                         setShowNewSubscriptionForm={setShowNewSubscriptionForm}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/get-started/subscriptions/new"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                      <CreateSubscription 
+                        onClose={() => navigate('/get-started/subscriptions')}
+                        onCreateSuccess={() => navigate('/get-started/subscriptions')}
+                        onRefresh={() => {}}
                       />
                     </div>
                   </div>

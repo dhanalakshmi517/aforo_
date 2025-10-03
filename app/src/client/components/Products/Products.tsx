@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ProductFormData } from '../../../types/productTypes';
 import EditProduct from './EditProductsss/EditProduct';
 import KongIntegration from './Kong Integration/KongIntegration';
@@ -73,6 +73,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return () => { document.body.style.overflow = ''; };
   }, []);
   const location = useLocation();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -356,7 +357,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
         {/* Main Content */}
         {!showCreateProduct && !isEditFormOpen && (
-                      <div className="rate-plan-product-container">
+                      <div className="rate-plan-container">
 
             <Header
               title="Products"
@@ -367,7 +368,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               showPrimary={filteredProducts.length > 0}
               showKongButton={filteredProducts.length > 0}
               primaryLabel="New Product"
-              onPrimaryClick={() => { setShowCreateProduct(true); setShowNewProductForm(true); }}
+              onPrimaryClick={() => navigate('/get-started/products/new')}
               onFilterClick={() => { }}
               onSettingsClick={() => setShowKongIntegration(true)}
               onNotificationsClick={() => { }}
@@ -442,10 +443,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               <button
                                 className="product-view-button"
                                 onClick={() => {
-                                  setEditingProduct(product);
-                                  setIsEditFormOpen(false);
-                                  setShowCreateProduct(true);
-                                  setShowNewProductForm(true);
+                                  // Navigate to new product page with draft data
+                                  navigate('/get-started/products/new', { state: { draftProduct: product } });
                                 }}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -488,10 +487,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           <p className="products-empty-state-text" style={{ marginTop: 8 }}>No products added yet. Click "New Product" to <br /> create your first product.</p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                             <button
-                              onClick={() => {
-                                setShowCreateProduct(true);
-                                setShowNewProductForm(true);
-                              }}
+                              onClick={() => navigate('/get-started/products/new')}
                               className={styles.newButtons}
                             >
                               + New Product
@@ -500,7 +496,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               onClick={() => {
                                 setShowKongIntegration(true);
                               }}
-                              className={styles.kongButton  }
+                              className={styles.kongButton}
                               
                             >
                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none">

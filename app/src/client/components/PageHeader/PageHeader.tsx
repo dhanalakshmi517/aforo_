@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import PrimaryButton from '../componenetsss/PrimaryButton';
 import './PageHeader.css';
 
 export interface PageHeaderProps {
@@ -121,12 +122,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
         {/* New Rate Plan */}
         {showPrimary && (
-          <button className="new-rate-button" onClick={onPrimaryClick}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <PrimaryButton onClick={onPrimaryClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ marginRight: '8px' }}>
               <path d="M3.33301 8.00004H12.6663M7.99967 3.33337V12.6667" stroke="#F8F7FA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {primaryLabel}
-          </button>
+          </PrimaryButton>
         )}
 
         {/* NEW Divider AFTER the New button (right side) */}

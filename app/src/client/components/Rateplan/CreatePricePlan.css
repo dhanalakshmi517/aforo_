@@ -20,7 +20,7 @@ html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
 
 /* Card */
 .rate-np-card {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   padding-bottom: 32px;
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-300);
@@ -240,7 +240,7 @@ html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
   background: #fff;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 24px);
+  height: calc(100% - 20px);
   min-height: 0;
   width: 100%;
   max-width: 100%;
@@ -369,6 +369,7 @@ rate-np-btn-group--next { margin-left: auto; }
 .rate-np-btn--primary:disabled { background-color: var(--color-neutral-300); color: var(--color-neutral-600); }
 
 .rate-np-btn--ghost {
+  width: 144px;
   background-color: var(--color-primary-000);
   border: 1px solid var(--color-neutral-400);
   color: var(--color-primary-800);

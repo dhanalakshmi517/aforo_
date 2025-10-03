@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../../componenetsss/TopBar";
 import { useToast } from "../../componenetsss/ToastProvider";
@@ -9,6 +9,8 @@ import ConfirmDeleteModal from "../../componenetsss/ConfirmDeleteModal";
 import { ConfigurationTab } from "./ConfigurationTab";
 import ProductReview from "./ProductReview";
 import SaveDraft from "../../componenetsss/SaveDraft";
+import PrimaryButton from "../../componenetsss/PrimaryButton";
+import SecondaryButton from "../../componenetsss/SecondaryButton";
 import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
 
 import "./NewProduct.css";
@@ -40,13 +42,36 @@ interface NewProductProps {
 
 export default function NewProduct({ onClose, draftProduct }: NewProductProps): JSX.Element {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+  
+  // Get draft product from route state if available
+  const draftFromState = (location.state as any)?.draftProduct;
+  const activeDraft = draftFromState || draftProduct;
 
   useEffect(() => {
     document.body.classList.add("create-product-page");
-    return () => document.body.classList.remove("create-product-page");
-  }, []);
+    
+    // Handle browser back button
+    const handleBackButton = (event: PopStateEvent) => {
+      // Prevent default back behavior
+      event.preventDefault();
+      // Navigate to products list
+      navigate('/get-started/products');
+    };
+    
+    // Add event listener for popstate (back/forward navigation)
+    window.addEventListener('popstate', handleBackButton);
+    
+    // Push a new entry to the history stack
+    window.history.pushState(null, '', window.location.pathname);
+    
+    return () => {
+      document.body.classList.remove("create-product-page");
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [navigate]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
@@ -57,16 +82,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   // Initialize form fields with draft values if available
   const [formData, setFormData] = useState({
-    productName: draftProduct?.productName || "",
-    version: draftProduct?.version || "",
-    skuCode: (draftProduct?.internalSkuCode ?? draftProduct?.skuCode) || "",
-    description: draftProduct?.productDescription || "",
+    productName: activeDraft?.productName || "",
+    version: activeDraft?.version || "",
+    skuCode: (activeDraft?.internalSkuCode ?? activeDraft?.skuCode) || "",
+    description: activeDraft?.productDescription || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [configuration, setConfiguration] = useState<Record<string, any>>({
-    productType: draftProduct?.productType || '' // Prefill product type if available
+    productType: activeDraft?.productType || '' // Prefill product type if available
   });
-  const [createdProductId, setCreatedProductId] = useState<string | null>(draftProduct?.productId || null);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(activeDraft?.productId || null);
   const [isSaving, setIsSaving] = useState(false);
   // store existing products for uniqueness checks
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
@@ -557,32 +582,29 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             <div className="np-error-message">{errors.form}</div>
                           )}
                           <div className="np-btn-group np-btn-group--next">
-                          <button
+                          <PrimaryButton
                             type="button"
-                            className="np-btn np-btn--primary"
                             onClick={handleSaveAndNext}
                           >
                             Save & Next
-                          </button>
+                          </PrimaryButton>
                         </div>
                         </>
                       )}
 
                       {activeTab === "configuration" && (
                         <>
-                          <div className="np-btn-group np-btn-group--back">
-                            <button
+                          <div>
+                            <SecondaryButton
                               type="button"
-                              className="np-btn np-btn--ghost"
                               onClick={() => gotoStep(0)}
                             >
                               Back
-                            </button>
+                            </SecondaryButton>
                           </div>
                           <div className="np-btn-group np-btn-group--next">
-                          <button
+                          <PrimaryButton
                             type="button"
-                            className="np-btn np-btn--primary"
                             onClick={async () => {
                               try {
                                 setIsSaving(true);
@@ -604,8 +626,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             }}
                             disabled={isSaving}
                           >
-                            {isSaving ? 'Saving...' : 'Save & Next'}
-                          </button>
+                            Save & Next
+                          </PrimaryButton>
                         </div>
                         </>
                       )}
@@ -613,18 +635,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       {activeTab === "review" && (
                         <>
                           <div className="np-btn-group np-btn-group--back">
-                            <button
+                            <SecondaryButton
                               type="button"
-                              className="np-btn np-btn--ghost"
                               onClick={() => gotoStep(1)}
                             >
                               Back
-                            </button>
+                            </SecondaryButton>
                           </div>
                           <div className="np-btn-group np-btn-group--next">
-                            <button 
+                            <PrimaryButton 
                               type="button" 
-                              className="np-btn np-btn--primary"
                               onClick={() => {
                                 if (!createdProductId) {
                                   console.error('No product ID available for finalization');
@@ -651,8 +671,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               }}
                               disabled={isSaving}
                             >
-                              {isSaving ? 'Submitting...' : 'Create Product'}
-                            </button>
+                              Create Product
+                            </PrimaryButton>
                           </div>
                         </>
                       )}

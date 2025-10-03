@@ -391,7 +391,7 @@ line-height: var(--line-height-body-lg);
 
 .products-table-wrapper {
   flex: 1 1 auto;
-  min-height: calc(100vh - 126px);
+  min-height: calc(100vh - 110px);
   /* max-height removed to let wrapper size to content */
   overflow-y: auto; /* enable scroll inside wrapper */
   scrollbar-width: none; /* Firefox hide scrollbar */
@@ -689,8 +689,8 @@ body.products-page {
   flex: 1 1 auto;          /* let it stretch */
   margin-top: -8px;          /* pull table closer to header */
   height: auto;            /* no fixed height so bottom padding visible */
-  min-height: calc(100vh - 120px);
-  padding-bottom: 12px;    /* bottom gap */
+  min-height: calc(100vh - 110px);
+  padding-bottom:10px;    /* bottom gap */
 }
 
 /* Small screens: table uses full width */

@@ -1,11 +1,14 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../componenetsss/TopBar';
 import { InputField, TextareaField, SelectField } from '../componenetsss/Inputs';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import SaveDraft from '../componenetsss/SaveDraft';
 import { useToast } from '../componenetsss/ToastProvider';
+import PrimaryButton from '../componenetsss/PrimaryButton';
+import SecondaryButton from '../componenetsss/SecondaryButton';
 
 import {
   getProducts,
@@ -38,7 +41,13 @@ const steps = [
 interface CreateUsageMetricProps { onClose: () => void; draftMetricId?: number; }
 
 export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsageMetricProps): JSX.Element {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+  
+  // Get draft metric ID from route state if available
+  const draftFromState = (location.state as any)?.draftMetricId;
+  const activeMetricId = draftFromState || draftMetricId;
     // helper to delete metric then close
   const deleteAndClose = async () => {
     let ok = true;
@@ -59,11 +68,24 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
   };
 
-  // page class
+  // page class and browser back button handler
   useEffect(() => {
     document.body.classList.add('create-product-page');
-    return () => document.body.classList.remove('create-product-page');
-  }, []);
+    
+    // Handle browser back button
+    const handleBackButton = (event: PopStateEvent) => {
+      event.preventDefault();
+      navigate('/get-started/metering');
+    };
+    
+    window.addEventListener('popstate', handleBackButton);
+    window.history.pushState(null, '', window.location.pathname);
+    
+    return () => {
+      document.body.classList.remove('create-product-page');
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [navigate]);
 
   // UI state mirroring NewProduct
   const [currentStep, setCurrentStep] = useState(0);
@@ -94,11 +116,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   // simple field errors holder (aligned with NewProduct pattern)
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // preload existing metric if draftMetricId
+  // preload existing metric if activeMetricId
   useEffect(() => {
-    if (draftMetricId) {
+    if (activeMetricId) {
       (async () => {
-        const data = await getUsageMetric(draftMetricId);
+        const data = await getUsageMetric(activeMetricId);
         if (data) {
           setMetricId(data.metricId ?? (data as any).billableMetricId ?? null);
           setMetricName(data.metricName || '');
@@ -113,13 +135,22 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         }
       })();
     }
-  }, [draftMetricId]);
+  }, [activeMetricId]);
 
   // load products
   useEffect(() => {
+    console.log('Starting to fetch products...');
     getProducts()
-      .then(setProducts)
-      .catch((err) => console.error('Failed to load products', err));
+      .then((productsData) => {
+        console.log('Products fetched successfully:', productsData);
+        console.log('Number of products:', productsData?.length || 0);
+        console.log('Products data:', JSON.stringify(productsData, null, 2));
+        setProducts(productsData);
+      })
+      .catch((err) => {
+        console.error('Failed to load products - Error:', err);
+        console.error('Error details:', JSON.stringify(err, null, 2));
+      });
   }, []);
 
   // once products are loaded, derive product name & type from selectedProductId (needed for UOM options)
@@ -335,6 +366,10 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   };
 
   const productOptions = products.map(p => ({ label: p.productName, value: String(p.productId) }));
+  
+  console.log('Products state:', products);
+  console.log('Product options for dropdown:', productOptions);
+  console.log('Selected product ID:', selectedProductId);
 
   return (
     <>
@@ -580,23 +615,23 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                       {activeTab === 'metric' && (
                         <div className="met-np-btn-group met-np-btn-group--next">
-                          <button type="button" className="met-np-btn met-np-btn--primary" onClick={handleSaveAndNext}>
+                          <PrimaryButton onClick={handleSaveAndNext}>
                             Save & Next
-                          </button>
+                          </PrimaryButton>
                         </div>
                       )}
 
                       {activeTab === 'conditions' && (
                         <>
                           <div className="met-np-btn-group met-np-btn-group--back">
-                            <button type="button" className="met-np-btn met-np-btn--ghost" onClick={() => gotoStep(0)}>
+                            <SecondaryButton onClick={() => gotoStep(0)}>
                               Back
-                            </button>
+                            </SecondaryButton>
                           </div>
                           <div className="met-np-btn-group met-np-btn-group--next">
-                            <button type="button" className="met-np-btn np-btn--primary" onClick={handleSaveAndNext}>
+                            <PrimaryButton onClick={handleSaveAndNext}>
                               Save & Next
-                            </button>
+                            </PrimaryButton>
                           </div>
                         </>
                       )}
@@ -604,14 +639,12 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                       {activeTab === 'review' && (
                         <>
                           <div className="met-np-btn-group met-np-btn-group--back">
-                            <button type="button" className="met-np-btn met-np-btn--ghost" onClick={() => gotoStep(1)}>
+                            <SecondaryButton onClick={() => gotoStep(1)}>
                               Back
-                            </button>
+                            </SecondaryButton>
                           </div>
                           <div className="met-np-btn-group met-np-btn-group--next">
-                            <button
-                              type="button"
-                              className="met-np-btn met-np-btn--primary"
+                            <PrimaryButton
                               onClick={async () => {
                                 if (!metricId) return;
                                 setSaving(true);
@@ -624,7 +657,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                               disabled={saving}
                             >
                               {saving ? 'Submitting...' : 'Create Metric'}
-                            </button>
+                            </PrimaryButton>
                           </div>
                         </>
                       )}

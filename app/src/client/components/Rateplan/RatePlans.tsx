@@ -4,10 +4,11 @@ import './RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
-import TopBar from '../TopBar/TopBar';
+import TopBar from '../componenetsss/TopBar';
 import SaveDraft from '../componenetsss/SaveDraft'; // ⬅️ NEW: use the Save-as-Draft modal
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import { clearAllRatePlanData } from './utils/sessionStorage';
+import PrimaryButton from '../componenetsss/PrimaryButton';
 
 // ------------ Toast Notification Helpers ------------
 interface NotificationState {
@@ -547,16 +548,16 @@ const RatePlans: React.FC<RatePlansProps> = ({
                           to create your First Rate Plan.
                         </p>
 
-                        <button
-                          className="empty-new-rate-btn"
+                        <PrimaryButton
                           onClick={() => {
                             setShowCreatePlan(true);
                             navigate('/get-started/rate-plans');
                           }}
+                          className="empty-new-rate-btn"
                         >
                           <span className="empty-btn-plus" aria-hidden="true">+</span>
                           New Rate Plan
-                        </button>
+                        </PrimaryButton>
                       </div>
                     </div>
                   </td>

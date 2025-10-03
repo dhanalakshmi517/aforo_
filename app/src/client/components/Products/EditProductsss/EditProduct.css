@@ -460,6 +460,8 @@ text-transform: uppercase;
   background-color: var(--color-primary-000);
   border: 1px solid var(--color-neutral-400);
   color: var(--color-primary-800);
+  width: 144px auto;
+  height: 40px;
 }
 
 .np-btn--ghost:hover:not(:disabled) {

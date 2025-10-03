@@ -2,6 +2,9 @@ import React, { useMemo, useRef, useState } from "react";
 import DataHeader from "../componenetsss/DataHeader";
 import NoteModal from "../componenetsss/NoteModal";
 import ProgressBar from "../componenetsss/ProgressBar";
+import PrimaryButton from "../componenetsss/PrimaryButton";
+import SecondaryButton from "../componenetsss/SecondaryButton";
+import TertiaryButton from "../componenetsss/TertiaryButton";
 import { ingestFiles } from "./api";
 import "./DataIngestionPage.css";
 import IngestionHistory from "./IngestionHistory";
@@ -78,10 +81,10 @@ const DataIngestionPage: React.FC = () => {
     }));
     setRows(prev => [...prev, ...next]);
 
-    // Auto-select the newly added files
+    // Auto-select newly added files
     setSelectedRows(prev => {
       const newSelected = new Set(prev);
-      for (let i = 0; i < files.length; i++) {
+      for (let i = 0; i < next.length; i++) {
         newSelected.add(currentRowCount + i);
       }
       return newSelected;
@@ -266,26 +269,22 @@ const DataIngestionPage: React.FC = () => {
                     <button className="data-link-clear" type="button" onClick={clearAll}>
                       Clear all
                     </button>
-                    <button type="button" className="data-btn-outline" onClick={addMoreFiles}>
-                      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                        <path d="M3.333 8H12.667M8 3.333V12.667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      Add more files
-                    </button>
+                    <TertiaryButton onClick={addMoreFiles}>
+                     
+                      + Add more files
+                    </TertiaryButton>
                   </>
                 ) : null}
-                <button
-                  className={`data-ingest-btn ${canIngest ? "" : "is-disabled"}`}
+                <PrimaryButton
                   onClick={ingest}
                   disabled={!canIngest || isLoading}
-                  type="button"
                 >
                   {isLoading 
                     ? 'Uploading...' 
                     : canIngest 
                       ? `Ingest ${selectedRows.size} File${selectedRows.size > 1 ? 's' : ''}` 
                       : 'Ingest Files'}
-                </button>
+                </PrimaryButton>
               </div>
             </header>
           )}
@@ -325,12 +324,9 @@ const DataIngestionPage: React.FC = () => {
                   <tr className="data-empty-row">
                     <td colSpan={5}>
                       <div className="data-empty">
-                        <button type="button" className="data-select-btn" onClick={openPicker}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M3.333 8H12.667M8 3.333V12.667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                          </svg>
-                          Select files
-                        </button>
+                        <SecondaryButton onClick={openPicker}>
+                        + Select files
+                        </SecondaryButton>
                         <p className="data-empty-hint">
                           You didn't have any files yet. Click on add files to start Ingestion
                         </p>
@@ -376,9 +372,9 @@ const DataIngestionPage: React.FC = () => {
                             aria-label={`Remove ${r.name}`}
                             onClick={() => removeRow(r.id)}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                              <path d="M12 4.6001L4 12.6001M4 4.6001L12 12.6001" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 10 11" fill="none">
+  <path d="M9 1.6001L1 9.6001M1 1.6001L9 9.6001" stroke="#373B40" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                           </button>
                         </span>
                       </td>
@@ -402,13 +398,17 @@ const DataIngestionPage: React.FC = () => {
                                 className="data-edit-note-btn"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  e.preventDefault();
                                   handleAddNote(r);
+                                  return false;
                                 }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onMouseUp={(e) => e.stopPropagation()}
                                 aria-label="Edit note"
                               >
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M8.6 4.57206L11.428 7.40072L4.828 14.0001H2V11.1714L8.6 4.57139V4.57206ZM9.88533 3.28539L11.7713 1.40006C11.9076 1.26341 12.0899 1.18799 12.2793 1.18799C12.4688 1.18799 12.6511 1.26341 12.7873 1.40006L14.6 3.21472C14.7366 3.35096 14.812 3.5333 14.812 3.72272C14.812 3.91213 14.7366 4.09447 14.6 4.23072L12.714 6.11472L9.88533 3.28539Z" fill="#5B6B79"/>
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+  <path d="M6.99933 12.9333H12.9993M9.91667 2.01459C10.1821 1.74919 10.542 1.6001 10.9173 1.6001C11.2927 1.6001 11.6526 1.74919 11.918 2.01459C12.1834 2.27998 12.3325 2.63993 12.3325 3.01525C12.3325 3.39058 12.1834 3.75053 11.918 4.01592L3.91133 12.0233C3.75273 12.1819 3.55668 12.2979 3.34133 12.3606L1.42667 12.9193C1.3693 12.936 1.30849 12.937 1.25061 12.9222C1.19272 12.9073 1.13988 12.8772 1.09763 12.835C1.05538 12.7927 1.02526 12.7399 1.01043 12.682C0.995599 12.6241 0.996602 12.5633 1.01333 12.5059L1.572 10.5913C1.63481 10.3761 1.75083 10.1803 1.90933 10.0219L9.91667 2.01459Z" stroke="#1D7AFC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                               </button>
                             )}
                           </div>
@@ -416,7 +416,14 @@ const DataIngestionPage: React.FC = () => {
                           <button 
                             className="data-link-notes" 
                             type="button" 
-                            onClick={() => handleAddNote(r)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleAddNote(r);
+                              return false;
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onMouseUp={(e) => e.stopPropagation()}
                           >
                             + Add notes
                           </button>

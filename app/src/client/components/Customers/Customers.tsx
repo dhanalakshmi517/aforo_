@@ -7,6 +7,7 @@ import CreateCustomer from "./CreateCustomer";
 import SuccessToast from "./SuccessToast";
 import { getCustomers, deleteCustomer } from "./api";
 import { getAuthHeaders, isAuthenticated } from "../../utils/auth";
+import PrimaryButton from "../componenetsss/PrimaryButton";
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -321,19 +322,18 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                         <div className="action-buttons">
                           {customer.status?.toLowerCase() === "draft" ? (
                             // UPDATED: open Create flow with prefill instead of Edit route
-                            <button
+                            <PrimaryButton
                               type="button"
                               className="resume-button"
-                              title="Resume Draft"
-                              aria-label="Resume Draft"
                               onClick={() => handleResumeDraft(customer)}
+                              aria-label="Resume Draft"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
                                 <path d="M11.75 3.25a5.5 5.5 0 1 1-7.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="M5.25 8h5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="M8.5 6l2.25 2-2.25 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
-                            </button>
+                            </PrimaryButton>
                           ) : (
                             <Link to={`/get-started/customers/${id}/edit`} className="edit-button" title="Edit" aria-label="Edit">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">

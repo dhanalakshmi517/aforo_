@@ -155,11 +155,22 @@ export async function finalizeBillableMetric(metricId: number): Promise<boolean>
 
 export async function getProducts(): Promise<Product[]> {
   try {
+    console.log('getProducts API call started');
+    console.log('Products API URL:', `${PRODUCTS_BASE_URL}/products`);
+    console.log('Auth headers:', getAuthHeaders());
+    
     const response = await fetch(`${PRODUCTS_BASE_URL}/products`, { headers: getAuthHeaders() });
+    
+    console.log('Products API response status:', response.status, response.statusText);
+    
     if (!response.ok) {
+      console.error('Products API error - Status:', response.status);
       throw new Error(`API error with status ${response.status}`);
     }
+    
     const payload = await response.json();
+    console.log('Products API raw payload:', payload);
+    
     const data = Array.isArray(payload)
       ? payload
       : Array.isArray((payload as any)?.data)
@@ -167,9 +178,14 @@ export async function getProducts(): Promise<Product[]> {
       : Array.isArray((payload as any)?.content)
       ? (payload as any).content
       : [];
+    
+    console.log('Products API processed data:', data);
+    console.log('Products count:', data.length);
+    
     return data;
   } catch (error) {
     console.error('Error fetching products:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return [];
   }
 }
