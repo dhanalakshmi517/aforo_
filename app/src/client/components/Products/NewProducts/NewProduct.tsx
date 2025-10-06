@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import TopBar from "../../componenetsss/TopBar";
 import { useToast } from "../../componenetsss/ToastProvider";
@@ -8,10 +8,9 @@ import { InputField, TextareaField } from "../../componenetsss/Inputs";
 import ConfirmDeleteModal from "../../componenetsss/ConfirmDeleteModal";
 import { ConfigurationTab } from "./ConfigurationTab";
 import ProductReview from "./ProductReview";
+import ProductLogoUploader from "../ProductLogoUploader";
 import SaveDraft from "../../componenetsss/SaveDraft";
-import PrimaryButton from "../../componenetsss/PrimaryButton";
-import SecondaryButton from "../../componenetsss/SecondaryButton";
-import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
+import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts, uploadProductIcon } from "../api";
 
 import "./NewProduct.css";
 import "../../componenetsss/SkeletonForm.css";
@@ -42,36 +41,13 @@ interface NewProductProps {
 
 export default function NewProduct({ onClose, draftProduct }: NewProductProps): JSX.Element {
   const navigate = useNavigate();
-  const location = useLocation();
   const { showToast } = useToast();
   const [showSavePrompt, setShowSavePrompt] = useState(false);
-  
-  // Get draft product from route state if available
-  const draftFromState = (location.state as any)?.draftProduct;
-  const activeDraft = draftFromState || draftProduct;
 
   useEffect(() => {
     document.body.classList.add("create-product-page");
-    
-    // Handle browser back button
-    const handleBackButton = (event: PopStateEvent) => {
-      // Prevent default back behavior
-      event.preventDefault();
-      // Navigate to products list
-      navigate('/get-started/products');
-    };
-    
-    // Add event listener for popstate (back/forward navigation)
-    window.addEventListener('popstate', handleBackButton);
-    
-    // Push a new entry to the history stack
-    window.history.pushState(null, '', window.location.pathname);
-    
-    return () => {
-      document.body.classList.remove("create-product-page");
-      window.removeEventListener('popstate', handleBackButton);
-    };
-  }, [navigate]);
+    return () => document.body.classList.remove("create-product-page");
+  }, []);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
@@ -81,17 +57,19 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const [isDraftSaved, setIsDraftSaved] = useState(false);
 
   // Initialize form fields with draft values if available
+  const [productIcon, setProductIcon] = useState<File | null>(null);
+
   const [formData, setFormData] = useState({
-    productName: activeDraft?.productName || "",
-    version: activeDraft?.version || "",
-    skuCode: (activeDraft?.internalSkuCode ?? activeDraft?.skuCode) || "",
-    description: activeDraft?.productDescription || "",
+    productName: draftProduct?.productName || "",
+    version: draftProduct?.version || "",
+    skuCode: (draftProduct?.internalSkuCode ?? draftProduct?.skuCode) || "",
+    description: draftProduct?.productDescription || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [configuration, setConfiguration] = useState<Record<string, any>>({
-    productType: activeDraft?.productType || '' // Prefill product type if available
+    productType: draftProduct?.productType || '' // Prefill product type if available
   });
-  const [createdProductId, setCreatedProductId] = useState<string | null>(activeDraft?.productId || null);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(draftProduct?.productId || null);
   const [isSaving, setIsSaving] = useState(false);
   // store existing products for uniqueness checks
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
@@ -256,11 +234,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           // Update existing product as draft
           console.log('Updating product as draft with ID:', createdProductId);
           await updateProduct(createdProductId, payload);
+          if (productIcon) {
+            try { await uploadProductIcon(createdProductId, productIcon); } catch(e){ console.error('Icon upload failed', e); }
+          }
           console.log('Draft updated');
         } else {
           // Create new product (draft or not)
           console.log('Creating new product with payload:', payload);
           const response = await createProduct(payload);
+          if (productIcon && response?.productId) {
+            try { await uploadProductIcon(response.productId, productIcon); }
+            catch(e){ console.error('Icon upload failed', e); }
+          }
           setCreatedProductId(response.productId);
           console.log('Product created with ID:', response.productId);
         }
@@ -505,6 +490,15 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               onChange={handleFieldChange('version')}
                               placeholder="eg., 2.3-VOS"
                             />
+
+                            {/* Product Icon uploader */}
+                            <div className="sub-create-form">
+                              <label className="com-form-label">Product Icon</label>
+                              <ProductLogoUploader
+                                logo={productIcon}
+                                onChange={setProductIcon}
+                              />
+                            </div>
                             <InputField
                               label="SKU Code"
                               value={formData.skuCode}
@@ -582,29 +576,32 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             <div className="np-error-message">{errors.form}</div>
                           )}
                           <div className="np-btn-group np-btn-group--next">
-                          <PrimaryButton
+                          <button
                             type="button"
+                            className="np-btn np-btn--primary"
                             onClick={handleSaveAndNext}
                           >
                             Save & Next
-                          </PrimaryButton>
+                          </button>
                         </div>
                         </>
                       )}
 
                       {activeTab === "configuration" && (
                         <>
-                          <div>
-                            <SecondaryButton
+                          <div className="np-btn-group np-btn-group--back">
+                            <button
                               type="button"
+                              className="np-btn np-btn--ghost"
                               onClick={() => gotoStep(0)}
                             >
                               Back
-                            </SecondaryButton>
+                            </button>
                           </div>
                           <div className="np-btn-group np-btn-group--next">
-                          <PrimaryButton
+                          <button
                             type="button"
+                            className="np-btn np-btn--primary"
                             onClick={async () => {
                               try {
                                 setIsSaving(true);
@@ -626,8 +623,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             }}
                             disabled={isSaving}
                           >
-                            Save & Next
-                          </PrimaryButton>
+                            {isSaving ? 'Saving...' : 'Save & Next'}
+                          </button>
                         </div>
                         </>
                       )}
@@ -635,23 +632,27 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       {activeTab === "review" && (
                         <>
                           <div className="np-btn-group np-btn-group--back">
-                            <SecondaryButton
+                            <button
                               type="button"
+                              className="np-btn np-btn--ghost"
                               onClick={() => gotoStep(1)}
                             >
                               Back
-                            </SecondaryButton>
+                            </button>
                           </div>
                           <div className="np-btn-group np-btn-group--next">
-                            <PrimaryButton 
+                            <button 
                               type="button" 
+                              className="np-btn np-btn--primary"
                               onClick={() => {
                                 if (!createdProductId) {
                                   console.error('No product ID available for finalization');
                                   return;
                                 }
                                 setIsSaving(true);
-                                finalizeProduct(createdProductId)
+                                // Add a small delay to ensure configuration is fully processed
+                                setTimeout(() => {
+                                  finalizeProduct(createdProductId)
                                   .then(response => {
                                     if (response.success) {
                                       console.log('Product created and finalized successfully!');
@@ -668,11 +669,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   .finally(() => {
                                     setIsSaving(false);
                                   });
+                                }, 1000); // 1 second delay
                               }}
                               disabled={isSaving}
                             >
-                              Create Product
-                            </PrimaryButton>
+                              {isSaving ? 'Submitting...' : 'Create Product'}
+                            </button>
                           </div>
                         </>
                       )}
@@ -688,7 +690,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       {/* Save Draft confirmation modal */}
       <SaveDraft
         isOpen={showSavePrompt}
-        onClose={async () => {
+        onClose={() => setShowSavePrompt(false)}
+        onSave={async () => {
+          const ok = await handleSaveDraft();
+          showToast({
+            kind: ok ? "success" : "error",
+            title: ok ? "Product Draft Saved" : "Failed to Save Draft",
+            message: ok ? "Product draft saved successfully." : "Unable to save draft. Please try again."
+          });
+          setShowSavePrompt(false);
+          onClose();
+        }}
+        onDelete={async () => {
           setShowSavePrompt(false);
           let ok = true;
           try {
@@ -706,19 +719,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
             });
             onClose();
           }
-        }}
-        onSave={async () => {
-          const ok = await handleSaveDraft();
-          showToast({
-            kind: ok ? "success" : "error",
-            title: ok ? "Product Draft Saved" : "Failed to Save Draft",
-            message: ok ? "Product draft saved successfully." : "Unable to save draft. Please try again."
-          });
-          onClose();
-        }}
-        onDismiss={() => {
-          // Just close the popup, don't close the entire form
-          setShowSavePrompt(false);
         }}
       />
       </div>
@@ -752,5 +752,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     </>
   );
 }
+
 
 

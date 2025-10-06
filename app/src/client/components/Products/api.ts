@@ -53,15 +53,24 @@ function handleApiError(error: unknown): never {
       throw new Error('Session expired. Please login again.');
     }
 
+    console.error('API Error Response:', {
+      status: response?.status,
+      statusText: response?.statusText,
+      data: response?.data,
+      headers: response?.headers,
+    });
+
     const errorMessage =
       response?.data?.message || message || 'API request failed';
     throw new Error(errorMessage);
   }
 
   if (error instanceof Error) {
+    console.error('Error details:', error);
     throw error;
   }
 
+  console.error('Unknown error occurred:', error);
   throw new Error('An unknown error occurred');
 }
 
@@ -115,14 +124,16 @@ const verifyAuth = () => {
 /**
  * Fetch all products
  */
-// Public product list without auth (for uniqueness validation)
+// Product list with auth (for uniqueness validation)
 export const listAllProducts = async (): Promise<Product[]> => {
   try {
-    const res = await fetch(`${BASE_URL}/products`);
-    if (!res.ok) throw new Error('Failed to fetch products');
-    return await res.json();
-  } catch (e) {
-    throw e;
+    verifyAuth();
+    const api = createApiClient();
+    const response = await api.get<Product[]>('/products');
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('listAllProducts error', error);
+    return handleApiError(error);
   }
 };
 
@@ -149,7 +160,6 @@ export const createProduct = async (payload: ProductPayload & { status?: string 
   try {
     verifyAuth();
     const authData = getAuthData();
-    const formData = new FormData();
     
     // Create a clean payload with only non-empty values
     const cleanPayload: Record<string, string> = {};
@@ -169,33 +179,75 @@ export const createProduct = async (payload: ProductPayload & { status?: string 
       throw new Error('No valid fields provided for product creation');
     }
 
-    // Convert cleanPayload to JSON string and create a Blob
-    const jsonPayload = JSON.stringify(cleanPayload);
-    const blob = new Blob([jsonPayload], { type: 'application/json' });
+    console.log('Request Payload:', cleanPayload);
     
-    // Append the blob to form data with the correct field name 'request'
-    formData.append('request', blob);
-
     const api = createApiClient();
     
-    // Set headers - let the browser set the Content-Type with boundary
+    // Try JSON first - simpler approach that might avoid transaction issues
     const headers = {
+      'Content-Type': 'application/json',
       'X-Organization-Id': authData?.organizationId?.toString() || ''
-      // Don't set Content-Type here - let the browser set it with the correct boundary
     };
     
-    const response = await api.post<Product>('/products', formData, {
-      headers,
-      transformRequest: [(data) => data] // Prevent axios from transforming the form data
-    });
+    console.log('Sending JSON request...');
+    const startTime = performance.now();
     
-    return handleApiResponse(response);
+    let response;
+    try {
+      // Try JSON first
+      response = await api.post<Product>('/products', cleanPayload, { headers });
+    } catch (jsonError) {
+      console.log('JSON request failed, trying multipart/form-data...');
+      
+      // Fallback to multipart/form-data if JSON fails
+      const formData = new FormData();
+      const jsonPayload = JSON.stringify(cleanPayload);
+      const blob = new Blob([jsonPayload], { type: 'application/json' });
+      formData.append('request', blob);
+      
+      const formHeaders = {
+        'X-Organization-Id': authData?.organizationId?.toString() || ''
+        // Don't set Content-Type here - let the browser set it with the correct boundary
+      };
+      
+      response = await api.post<Product>('/products', formData, {
+        headers: formHeaders,
+        transformRequest: [(data) => data] // Prevent axios from transforming the form data
+      });
+    }
+    
+    const endTime = performance.now();
+    console.log(`Request completed in ${(endTime - startTime).toFixed(2)}ms`);
+    console.log('Response Status:', response.status, response.statusText);
+    console.log('Response Data:', response.data);
+    
+    const result = handleApiResponse(response);
+    console.log('Created Product ID:', result.productId);
+    
+    return result;
   } catch (error) {
+    console.error('Error creating product:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Error Response:', error.response?.data);
+      console.error('Status Code:', error.response?.status);
+      
+      // Provide more specific error messages for common issues
+      if (error.response?.status === 500) {
+        const errorData = error.response?.data;
+        if (errorData?.details?.includes('JPA EntityManager')) {
+          throw new Error('Database connection error. Please try again in a moment.');
+        } else if (errorData?.error === 'Unexpected error occurred') {
+          throw new Error('Server error occurred. Please check your input data and try again.');
+        }
+      }
+    }
     return handleApiError(error);
   }
 }
 
 export const updateProduct = async (productId: string, payload: Partial<ProductPayload>): Promise<Product> => {
+  console.log(`Updating product ${productId} with:`, payload);
+  
   const authData = getAuthData();
   
   // Clean the payload to remove undefined or empty strings
@@ -210,6 +262,9 @@ export const updateProduct = async (productId: string, payload: Partial<ProductP
   if (Object.keys(cleanPayload).length === 0) {
     throw new Error('No valid fields to update');
   }
+  
+  // For PATCH requests, send as raw JSON instead of form-data
+  console.log(`Sending PATCH to /products/${productId} with:`, cleanPayload);
   
   const api = createApiClient();
   
@@ -293,6 +348,38 @@ export const createProductFlatfileConfig = async (
   }
 };
 
+/**
+ * Upload or replace a product icon (PATCH /products/{id}/icon)
+ */
+export const uploadProductIcon = async (productId: string | number, file: File): Promise<void> => {
+  verifyAuth();
+  const api = createApiClient();
+  const fd = new FormData();
+  fd.append('icon', file, file.name);
+  try {
+    await api.patch(`/products/${productId}/icon`, fd, {
+      headers: {
+        // let axios set multipart boundary
+      }
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+/**
+ * Delete product icon (DELETE /products/{id}/icon)
+ */
+export const deleteProductIcon = async (productId: string | number): Promise<void> => {
+  verifyAuth();
+  const api = createApiClient();
+  try {
+    await api.delete(`/products/${productId}/icon`);
+  } catch (e) {
+    return handleApiError(e);
+  }
+};
+
 export const deleteProduct = async (
   productId: number | string
 ): Promise<void> => {
@@ -314,6 +401,12 @@ export const saveProductConfiguration = async (
   configData: Record<string, any>,
   isUpdate: boolean = false
 ): Promise<any> => {
+  console.log('saveProductConfiguration called with:', {
+    productId,
+    productType,
+    configData: JSON.parse(JSON.stringify(configData)), // Ensure we log the actual data
+    isUpdate
+  });
   try {
     const api = createApiClient();
     const normalizedType = productType.toLowerCase();
@@ -443,6 +536,7 @@ export const saveProductConfiguration = async (
           dbType: configData.dbType || 'MYSQL',
           authType: configData.authType || 'NONE'
         };
+        console.log('SQL Result payload:', payload);
         break;
       }
         
@@ -528,15 +622,18 @@ export const saveProductConfiguration = async (
 
       let response;
       if (operationType === 'update') {
+        console.log('Using PUT for update with payload:', cleanedPayload);
         response = await api.put(apiEndpoint, cleanedPayload, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
       } else {
+        console.log('Using POST for create with payload:', cleanedPayload);
         response = await api.post(apiEndpoint, cleanedPayload);
       }
       
+      console.log(`${operationType === 'update' ? 'Updated (PUT)' : 'Created (POST)'} configuration successfully:`, response.data);
       return response.data;
     } catch (error: any) {
       console.error('Full error object:', JSON.stringify(error, null, 2));
@@ -560,6 +657,7 @@ export const saveProductConfiguration = async (
       throw new Error(`Failed to save ${productType} configuration: ${errorMessage}`);
     }
   } catch (error) {
+    console.error('Error saving product configuration:', error);
     throw error;
   }
 };
@@ -574,16 +672,45 @@ export const finalizeProduct = async (
       throw new Error('No authentication token found. Please log in again.');
     }
 
-    const api = createApiClient();
-    api.defaults.headers['X-Organization-Id'] = authData?.organizationId?.toString() || '';
+    console.group('Finalizing Product - API Request');
+    console.log('API Endpoint:', `${BASE_URL}/products/${productId}/finalize`);
     
-    const response = await api.post(`/products/${productId}/finalize`, {});
+    const api = createApiClient();
+    
+    // Add a small delay to avoid potential transaction conflicts
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const response = await api.post(`/products/${productId}/finalize`, {}, {
+      headers: {
+        'X-Organization-Id': authData?.organizationId?.toString() || ''
+      }
+    });
+    
+    console.log('Response Status:', response.status, response.statusText);
+    console.log('Response Data:', response.data);
+    console.groupEnd();
     
     return {
       success: true,
       message: 'Product finalized successfully'
     };
   } catch (error) {
+    console.error('Error finalizing product:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Error Response:', error.response?.data);
+      console.error('Status Code:', error.response?.status);
+      
+      // Provide more specific error messages for database issues
+      if (error.response?.status === 500) {
+        const errorData = error.response?.data;
+        if (errorData?.details?.includes('JPA EntityManager')) {
+          throw new Error('Database connection error during finalization. Please try again in a moment.');
+        } else if (errorData?.error === 'Unexpected error occurred') {
+          throw new Error('Server error during product finalization. Please ensure all product data is valid and try again.');
+        }
+      }
+    }
+    console.groupEnd();
     return handleApiError(error);
   }
 };
@@ -608,6 +735,7 @@ export const getBillableMetrics = async (productId: string): Promise<BillableMet
     const response = await api.get<BillableMetric[]>(`/billable-metrics/by-product?productId=${productId}`);
     return response.data;
   } catch (error) {
+    console.error(`Error fetching billable metrics for product ${productId}:`, error);
     // Return empty list so UI shows '-' when no metrics
     return [];
   }
