@@ -39,6 +39,8 @@ const getRandomBorderColor = (index: number) => {
 import Header from '../componenetsss/Header';
 import EmptyBox from './Componenets/empty.svg';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
+import PrimaryButton from '../componenetsss/PrimaryButton';
+import TertiaryButton from '../componenetsss/TertiaryButton';
 
 
 
@@ -486,45 +488,42 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           <img src={EmptyBox} alt="No products" style={{ width: 200, height: 200 }} />
                           <p className="products-empty-state-text" style={{ marginTop: 8 }}>No products added yet. Click "New Product" to <br /> create your first product.</p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                            <button
+                            <PrimaryButton
                               onClick={() => navigate('/get-started/products/new')}
-                              className={styles.newButtons}
                             >
                               + New Product
-                            </button>
-                            <button
+                            </PrimaryButton>
+                            <TertiaryButton
                               onClick={() => {
                                 setShowKongIntegration(true);
                               }}
-                              className={styles.kongButton}
-                              
                             >
-                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none">
-  <path d="M0.400391 11.2438V14.1384H2.88147L5.1558 11.0371H7.84363L8.67066 10.0033L5.56931 6.48841L3.50174 8.34922H2.67472L0.400391 11.2438Z" fill="url(#paint0_linear_8506_33340)"/>
-  <path d="M5.56931 11.8641L5.1558 12.2776L5.98282 13.5181V14.1384H9.29093L9.49769 13.5181L7.84363 11.8641H5.56931Z" fill="url(#paint1_linear_8506_33340)"/>
-  <path d="M7.43012 3.80057L6.18958 5.86814L12.599 13.3114L12.3923 14.1384H15.0801L15.7004 11.8641L8.87742 3.80057H7.43012Z" fill="url(#paint2_linear_8506_33340)"/>
-  <path d="M8.4639 1.733L7.63688 2.97354L7.84363 3.1803H9.29093L11.9788 6.07489L13.4261 4.83435V4.42084L13.0126 3.59381V2.76679L10.118 0.699219L8.4639 1.733Z" fill="url(#paint3_linear_8506_33340)"/>
-  <defs>
-    <linearGradient id="paint0_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14A06C"/>
-      <stop offset="1" stop-color="#2578D1"/>
-    </linearGradient>
-    <linearGradient id="paint1_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14A06C"/>
-      <stop offset="1" stop-color="#2578D1"/>
-    </linearGradient>
-    <linearGradient id="paint2_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14A06C"/>
-      <stop offset="1" stop-color="#2578D1"/>
-    </linearGradient>
-    <linearGradient id="paint3_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14A06C"/>
-      <stop offset="1" stop-color="#2578D1"/>
-    </linearGradient>
-  </defs>
-</svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none" style={{ marginRight: '8px' }}>
+                                <path d="M0.400391 11.2438V14.1384H2.88147L5.1558 11.0371H7.84363L8.67066 10.0033L5.56931 6.48841L3.50174 8.34922H2.67472L0.400391 11.2438Z" fill="url(#paint0_linear_8506_33340)"/>
+                                <path d="M5.56931 11.8641L5.1558 12.2776L5.98282 13.5181V14.1384H9.29093L9.49769 13.5181L7.84363 11.8641H5.56931Z" fill="url(#paint1_linear_8506_33340)"/>
+                                <path d="M7.43012 3.80057L6.18958 5.86814L12.599 13.3114L12.3923 14.1384H15.0801L15.7004 11.8641L8.87742 3.80057H7.43012Z" fill="url(#paint2_linear_8506_33340)"/>
+                                <path d="M8.4639 1.733L7.63688 2.97354L7.84363 3.1803H9.29093L11.9788 6.07489L13.4261 4.83435V4.42084L13.0126 3.59381V2.76679L10.118 0.699219L8.4639 1.733Z" fill="url(#paint3_linear_8506_33340)"/>
+                                <defs>
+                                  <linearGradient id="paint0_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#14A06C"/>
+                                    <stop offset="1" stopColor="#2578D1"/>
+                                  </linearGradient>
+                                  <linearGradient id="paint1_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#14A06C"/>
+                                    <stop offset="1" stopColor="#2578D1"/>
+                                  </linearGradient>
+                                  <linearGradient id="paint2_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#14A06C"/>
+                                    <stop offset="1" stopColor="#2578D1"/>
+                                  </linearGradient>
+                                  <linearGradient id="paint3_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#14A06C"/>
+                                    <stop offset="1" stopColor="#2578D1"/>
+                                  </linearGradient>
+                                </defs>
+                              </svg>
                               Import from Kong
-                            </button>
+                            </TertiaryButton>
                           </div>
                         </div>
                       </td>

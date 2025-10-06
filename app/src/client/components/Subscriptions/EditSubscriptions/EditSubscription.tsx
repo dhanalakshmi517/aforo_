@@ -5,6 +5,8 @@ import EditModal from '../../componenetsss/EditModal';
 import EditPopUp from '../../componenetsss/EditPopUp';
 import { SelectField, TextareaField } from '../../componenetsss/Inputs';
 import { useToast } from '../../componenetsss/ToastProvider';
+import PrimaryButton from '../../componenetsss/PrimaryButton';
+import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditReview from './EditReview';
 import './EditSubscription.css';
 import { Api, Product, RatePlan, Customer, Subscription as SubscriptionType } from '../api';
@@ -402,34 +404,31 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
               <div className="edit-np-form-footer">
                 <div className="edit-np-btn-group edit-np-btn-group--back">
                   {activeTab !== 'details' && (
-                    <button
+                    <SecondaryButton
                       type="button"
-                      className="np-btn np-btn--ghost"
                       onClick={handlePreviousStep}
                     >
                       Back
-                    </button>
+                    </SecondaryButton>
                   )}
                 </div>
 
                 <div className="edit-np-btn-group edit-np-btn-group--next">
                   {activeTab === 'details' ? (
-                    <button
+                    <PrimaryButton
                       type="button"
-                      className="np-btn np-btn--primary"
                       onClick={handleNextStep}
                       disabled={!canSubmit}
                     >
                      save & Next
-                    </button>
+                    </PrimaryButton>
                   ) : (
-                    <button
+                    <PrimaryButton
                       type="button"
-                      className="np-btn np-btn--primary"
                       onClick={handleSaveDraft}
                     >
                       Confirm changes
-                    </button>
+                    </PrimaryButton>
                   )}
                 </div>
               </div>

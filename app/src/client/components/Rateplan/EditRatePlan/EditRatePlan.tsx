@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import TopBar from '../../componenetsss/TopBar';
 import SaveDraft from '../../componenetsss/SaveDraft';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
+import PrimaryButton from '../../componenetsss/PrimaryButton';
+import SecondaryButton from '../../componenetsss/SecondaryButton';
 
 import EditBillable from './EditBillable';
 import EditPricing from './EditPricing';
@@ -459,26 +461,24 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
               <div className="edit-np-form-footer">
                 <div className="edit-np-btn-group edit-np-btn-group--back">
                   {currentStep > 0 && (
-                    <button
+                    <SecondaryButton
                       type="button"
-                      className="np-btn np-btn--ghost"
                       onClick={handlePreviousStep}
                       disabled={loading}
                     >
                       Back
-                    </button>
+                    </SecondaryButton>
                   )}
                 </div>
 
                 <div className="edit-np-btn-group edit-np-btn-group--next">
-                  <button
+                  <PrimaryButton
                     type="button"
-                    className={`np-btn np-btn--primary ${loading ? 'np-btn--loading' : ''}`}
                     onClick={handleNextStep}
                     disabled={loading}
                   >
                     {loading ? 'Saving...' : activeTab === 'review' ? 'Update Rate Plan' : 'Next'}
-                  </button>
+                  </PrimaryButton>
                 </div>
               </div>
             </div>

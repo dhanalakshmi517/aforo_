@@ -11,6 +11,8 @@ import "../Products/NewProducts/NewProduct.css";
 import "../componenetsss/SkeletonForm.css";
 
 import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs"; // align with NewProduct pattern
+import PrimaryButton from "../componenetsss/PrimaryButton";
+import SecondaryButton from "../componenetsss/SecondaryButton";
 import {
   Api,
   Product,
@@ -603,14 +605,12 @@ export default function CreateSubscription({
                         <>
                           {errors.form && <div className="pur-np-error-message">{errors.form}</div>}
                           <div className="pur-np-btn-group pur-np-btn-group--next">
-                            <button
+                            <PrimaryButton
                               type="button"
-                              className="pur-np-btn pur-np-btn--primary"
                               onClick={handleSaveAndNext}
-                              title="Save & Next"
                             >
                               Save & Next
-                            </button>
+                            </PrimaryButton>
                           </div>
                         </>
                       )}
@@ -618,23 +618,20 @@ export default function CreateSubscription({
                       {currentStepMeta.id === 2 && (
                         <>
                           <div className="pur-np-btn-group pur-np-btn-group--back">
-                            <button
+                            <SecondaryButton
                               type="button"
-                              className="pur-np-btn pur-np-btn--ghost"
                               onClick={() => gotoStep(0)}
                             >
                               Back
-                            </button>
+                            </SecondaryButton>
                           </div>
                           <div className="pur-np-btn-group pur-np-btn-group--next">
-                            <button
+                            <PrimaryButton
                               type="button"
-                              className="pur-np-btn pur-np-btn--primary"
                               onClick={handleFinalSubmit}
-                              title="Create Subscription"
                             >
                               Create Subscription
-                            </button>
+                            </PrimaryButton>
                           </div>
                         </>
                       )}
