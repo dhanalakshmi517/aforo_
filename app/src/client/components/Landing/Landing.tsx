@@ -52,12 +52,12 @@ const Landing: React.FC = () => {
   <path d="M39.8404 29.7011C39.5811 28.6636 37.4355 24.0267 36.8951 22.8379C35.3389 24.3941 33.7884 25.8639 32.7077 26.4042C24.9265 30.2948 17.4695 24.7832 12.9305 21.2168C9.29923 18.3637 7.87841 17.2181 7.1219 17.002C6.68962 17.7585 4.30629 22.309 2.23131 26.4589C-0.362425 31.6464 0.934441 33.9159 3.20396 35.2128C5.47347 36.5097 10.3367 36.8339 19.0906 36.8339H19.0906C27.8444 36.8339 33.3561 36.8339 36.9225 35.537C40.4889 34.2401 40.1646 30.998 39.8404 29.7011Z" fill="url(#paint1_linear_7865_40146)"/>
   <defs>
     <linearGradient id="paint0_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#025A94"/>
-      <stop offset="1" stop-color="#00365A"/>
+      <stop stopColor="#025A94"/>
+      <stop offset="1" stopColor="#00365A"/>
     </linearGradient>
     <linearGradient id="paint1_linear_7865_40146" x1="38.1615" y1="36.8339" x2="15.1533" y2="44.1875" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#025A94"/>
-      <stop offset="1" stop-color="#00365A"/>
+      <stop stopColor="#025A94"/>
+      <stop offset="1" stopColor="#00365A"/>
     </linearGradient>
   </defs>
 </svg>
