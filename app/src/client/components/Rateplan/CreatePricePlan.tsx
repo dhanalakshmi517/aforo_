@@ -28,6 +28,8 @@ import Extras, { ExtrasHandle } from "./Extras";
 import Review from "./Review";
 
 import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
+import PrimaryButton from "../componenetsss/PrimaryButton";
+import SecondaryButton from "../componenetsss/SecondaryButton";
 
 import "./CreatePricePlan.css";
 import "../Products/NewProducts/NewProduct.css";
@@ -602,16 +604,15 @@ const CreatePricePlan = React.forwardRef<
                     <div className="rate-np-form-footer">
                       <div className="rate-np-btn-group rate-np-btn-group--back">
                         {currentStep > 0 && (
-                          <button type="button" className="rate-np-btn rate-np-btn--ghost" onClick={handleBack}>
+                          <SecondaryButton type="button" onClick={handleBack}>
                             Back
-                          </button>
+                          </SecondaryButton>
                         )}
                       </div>
 
                       <div className="rate-np-btn-group rate-np-btn-group--next">
-                        <button
+                        <PrimaryButton
                           type="button"
-                          className="rate-np-btn rate-np-btn--primary"
                           onClick={handleNext}
                           disabled={saving}
                         >
@@ -622,7 +623,7 @@ const CreatePricePlan = React.forwardRef<
                             : currentStep === steps.length - 1
                             ? "Create Rate Plan"
                             : "Save & Next"}
-                        </button>
+                        </PrimaryButton>
                       </div>
                     </div>
                   </form>
