@@ -148,14 +148,7 @@ export const getProducts = async (): Promise<Product[]> => {
   }
 };
 
-/**
- * Create a new product
- * API Endpoint: POST /products
- * Headers: 
- *   - Content-Type: multipart/form-data
- *   - X-Organization-Id: {organizationId}
- *   - Authorization: Bearer {token}
- */
+
 export const createProduct = async (payload: ProductPayload & { status?: string }): Promise<Product> => {
   try {
     verifyAuth();
@@ -192,7 +185,7 @@ export const createProduct = async (payload: ProductPayload & { status?: string 
     console.log('Sending JSON request...');
     const startTime = performance.now();
     
-    let response;
+    let response: AxiosResponse<Product>;
     try {
       // Try JSON first
       response = await api.post<Product>('/products', cleanPayload, { headers });
@@ -221,8 +214,8 @@ export const createProduct = async (payload: ProductPayload & { status?: string 
     console.log('Response Status:', response.status, response.statusText);
     console.log('Response Data:', response.data);
     
-    const result = handleApiResponse(response);
-    console.log('Created Product ID:', result.productId);
+    const result = handleApiResponse<Product>(response);
+   
     
     return result;
   } catch (error) {
@@ -620,7 +613,7 @@ export const saveProductConfiguration = async (
         }
       });
 
-      let response;
+      let response: AxiosResponse<Product>;
       if (operationType === 'update') {
         console.log('Using PUT for update with payload:', cleanedPayload);
         response = await api.put(apiEndpoint, cleanedPayload, {
