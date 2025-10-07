@@ -2,7 +2,7 @@
 
   
   /* container */
-  .af-topbar{
+  .af-topbar {
     position: sticky;
     top: 0;
     width: 100%;
@@ -12,25 +12,86 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-  
-    /* vertical 8px, horizontal via CSS var */
-    padding: 16px 120px;
+    padding: 16px 0;
     box-sizing: border-box;
   }
   
+  /* Container for content to center it */
+  .af-topbar__container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
   /* left side */
-  .af-topbar__left{ display:flex; align-items:center; gap:16px; }
+  .af-topbar__left { 
+    display: flex; 
+    align-items: center; 
+    gap: 16px; 
+    padding-left: 0;
+  }
   
   /* back tile */
-  .af-topbar__back{
-    width: 28px;
-   height: 28px;
-    border-radius: var(--border-radius-sm);
-    background: var(--color-neutral-white);
-    border: 1px solid var(--color-neutral-200);
-    display: inline-flex; align-items: center; justify-content: center;
-    cursor: pointer;
-  }
+  /* Base back tile */
+.af-topbar__back{
+  width: 28px;
+  height: 28px;
+  border-radius: var(--border-radius-sm);
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-200);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #909599;                          /* icon color via currentColor */
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .02s ease;
+}
+
+/* Icon class optional if you want targeted transitions */
+.af-topbar__back-icon{
+  display: block;
+}
+
+/* Hover (mouse) */
+.af-topbar__back:hover:not(:disabled){
+  background: var(--color-neutral-white);
+  border-color: var(--color-primary-1000);
+  color: #6E7377;                          /* darker arrow */
+}
+
+/* Focus (keyboard) */
+.af-topbar__back:focus-visible{
+  outline: none;
+  border-color: var(--color-primary-600);
+}
+
+/* Pressed/Active */
+.af-topbar__back:active:not(:disabled){
+  background: var(--color-neutral-white);
+  border-color: var(--color-neutral-400);
+  color: #4E5256;
+  transform: translateY(0); /* no jump, but keeps a crisp feel */
+}
+
+/* Disabled */
+.af-topbar__back:disabled,
+.af-topbar__back.is-disabled{
+  cursor: not-allowed;
+  background: var(--color-neutral-500);
+  border-color: var(--color-neutral-200);
+  color: var(--color-neutral-400);
+  box-shadow: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .af-topbar__back{ transition: none; }
+}
+
   
   /* title */
   .af-topbar__title{ 
@@ -43,7 +104,12 @@ font-weight: 500;
 line-height: var(--line-height-heading-h4); }
   
   /* right side */
-  .af-topbar__right{ display:flex; align-items:center; gap:16px; }
+  .af-topbar__right { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding-right: 0;
+  }
   
   /* Spinner */
   .af-spinner {
@@ -64,10 +130,10 @@ line-height: var(--line-height-heading-h4); }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     white-space: nowrap;
     padding: 4px 16px;
-    border-radius: 6px; /* Explicit pixel value to ensure consistency */
+    border-radius: var(--border-radius-sm); /* Explicit pixel value to ensure consistency */
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     line-height: var(--line-height-body-md);
@@ -76,38 +142,7 @@ line-height: var(--line-height-heading-h4); }
   }
   .af-topbar__btn-icon{ margin-right:6px; }
   
-  .af-topbar__btn--cancel{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding: 4px 16px;
-    border:none;
-    cursor: pointer;
-    color: var(--color-error-400);
-    background-color: #FDF5F4;
-     width:111px;
-     height:30px;
-    border-radius: 6px; /* Explicit pixel value to ensure consistency */
-    /* body/md/reg */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md); /* 142.857% */  }
-  .af-topbar__btn--save {
-    background: var(--color-primary-000);
-    color: var(--color-primary-800);
-    border: 1px solid var(--color-primary-1300);
-    width: auto;
-    min-width: 120px; /* Ensures minimum width for better appearance */
-    border-radius: 6px; /* Explicit pixel value to ensure consistency */
-    /* body/md/reg */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md); /* 142.857% */
-  }
+  
   .af-topbar__btn--disabled{
     opacity: .5;
     cursor: not-allowed;
@@ -137,3 +172,58 @@ line-height: var(--line-height-body-md); /* 142.857% */
   .af-topbar--px-72  { --af-topbar-px: 72px; }
   .af-topbar--px-48  { --af-topbar-px: 48px; }
   
+
+  /* DELETE (cancel) pill — default */
+.af-topbar__btn--cancel{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 4px 16px;
+  border:none;
+  cursor: pointer;
+  color: var(--color-error-400);
+  background-color: #FFEDE9;          /* default bg */
+  width:111px;
+  height:30px;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+/* Hover (not disabled) */
+.af-topbar__btn--cancel:hover:not(:disabled){
+  background-color: var(--color-primary-100);          /* a touch darker */
+  color: var(--color-primary-800);
+}
+
+/* Focus-visible (keyboard focus ring) */
+.af-topbar__btn--cancel:focus-visible{
+background-color: var(--color-primary-100);
+border: 1px solid var(--color-primary-300);
+}
+
+/* Pressed/Active (not disabled) */
+.af-topbar__btn--cancel:active:not(:disabled){
+  background-color: var(--color-primary-200);          /* deeper */
+  color: var(--color-primary-800);
+  transition: none;                   /* snappier press */
+}
+
+/* Disabled */
+.af-topbar__btn--cancel:disabled,
+.af-topbar__btn--cancel.is-disabled{
+  cursor: not-allowed;
+  background-color:var(--color-neutral-200);          /* faint red */
+  color: var(--color-neutral-500);
+  opacity: .7;
+  box-shadow: none;
+}
+
+/* High-contrast / accessibility niceties */
+@media (prefers-reduced-motion: reduce){
+  .af-topbar__btn--cancel{ transition: none; }
+}

@@ -444,7 +444,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
   return (
     <>
       <TopBar
-        title={productId ? 'Edit Product' : 'Create New Product'}
+        title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
         onBack={() => setShowSaveDraftModal(true)}
       />
       <div className="edit-np-viewport">
@@ -565,7 +565,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
                     onClick={handleNextStep}
                     disabled={loading}
                   >
-                    {loading ? 'Saving...' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Update Product') : 'Next'}
+                    {loading ? 'Saving...' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Save Changes') : 'Save & Next'}
                   </PrimaryButton>
                 </div>
               </div>

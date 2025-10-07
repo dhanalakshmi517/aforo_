@@ -21,7 +21,7 @@ export default function SecondaryButton({
   return (
     <button
       type={type}
-      className={["af-secondary-btn", fullWidth ? "is-full" : "", className].join(" ").trim()}
+      className={["af-secondary-color-btn", fullWidth ? "is-full" : "", className].join(" ").trim()}
       onClick={onClick}
       disabled={disabled}
     >

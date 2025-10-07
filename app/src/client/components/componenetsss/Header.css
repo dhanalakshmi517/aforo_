@@ -103,7 +103,7 @@ line-height: var(--line-height-heading-h5); /* 140% */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-disabled-1, #B8BCC6);
+  color:white;
   cursor: pointer;
   transition: color 0.2s ease;
   z-index: 2;

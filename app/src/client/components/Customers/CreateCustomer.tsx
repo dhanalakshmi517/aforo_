@@ -1,45 +1,54 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import CustomerReview from './CustomerReview';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import TopBar from "../componenetsss/TopBar";
+import SaveDraft from "../componenetsss/SaveDraft";
+import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
+import PrimaryButton from "../componenetsss/PrimaryButton";
+import SecondaryButton from "../componenetsss/SecondaryButton";
+import { InputField, SelectField } from "../componenetsss/Inputs";
+import AccountDetailsForm, { AccountDetailsData } from "./AccountDetailsForm";
+import CustomerReview from "./CustomerReview";
+import LogoUploader from "./LogoUploader";
+
 import {
   createCustomer,
   updateCustomer,
   confirmCustomer,
   checkEmailExists,
   deleteCustomer,
-} from './api';
-import type { Customer } from './Customers';
-import { AccountDetailsData } from './AccountDetailsForm';
-import AccountDetailsForm from './AccountDetailsForm';
-import './CustomerForm.css';
-import LogoUploader from './LogoUploader';
-import buttonStyles from '../NewProductForm/GeneralDetails.module.css';
-import TopBar from '../TopBar/TopBar';
-import SaveDraft from '../componenetsss/SaveDraft';
-import { InputField } from '../componenetsss/Inputs';
+} from "./api";
+
+import type { Customer } from "./Customers";
+import "../componenetsss/SkeletonForm.css";
+import "./CustomerForm.css";
 
 interface CreateCustomerProps {
   onClose: () => void;
-  /** When resuming a draft from the list, prefill with this data */
   draftCustomer?: Partial<Customer>;
-  /** Optional pre-resolved image URL to preview the existing logo */
   initialLogoUrl?: string | null;
 }
 
+type StepKey = "general" | "billing" | "review";
+
 const steps = [
-  { title: 'Customer Details', desc: 'Enter core information for the customer.' },
-  { title: 'Billing & Plan', desc: 'Configure billing frequency and plan.' },
-  { title: 'Review & Confirm', desc: 'Double-check everything before saving.' },
+  { id: 1, key: "general" as StepKey, title: "Customer Details", desc: "Enter core information for the customer." },
+  { id: 2, key: "billing" as StepKey,  title:"Account Details",  desc: "Configure billing frequency and plan." },
+  { id: 3, key: "review"  as StepKey,  title: "Review & Confirm", desc: "Double-check everything before saving." },
 ];
 
 const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer, initialLogoUrl = null }) => {
-  const [customerName, setCustomerName] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [companyType, setCompanyType] = useState('');
-  const [companyLogo, setCompanyLogo] = useState<File | null>(null);
-  const [accountDetails, setAccountDetails] = useState<AccountDetailsData | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [accountErrors, setAccountErrors] = useState<{ [key: string]: string }>({});
+  const activeTab: StepKey = steps[currentStep].key;
+
+  const [companyName, setCompanyName] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [companyType, setCompanyType] = useState("");
+  const [companyLogo, setCompanyLogo] = useState<File | null>(null);
+
+  const [accountDetails, setAccountDetails] = useState<AccountDetailsData | null>(null);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accountErrors, setAccountErrors] = useState<Record<string, string>>({});
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
@@ -50,142 +59,92 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [isDraft, setIsDraft] = useState(false);
 
+  // email helpers
   const initialPrimaryEmailRef = useRef<string | null>(null);
   const emailCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    document.body.classList.add('create-customer-page');
-    return () => { document.body.classList.remove('create-customer-page'); };
+    document.body.classList.add("create-product-page");
+    return () => document.body.classList.remove("create-product-page");
   }, []);
 
-  // Prefill when resuming a draft
+  // prefill draft
   useEffect(() => {
     if (!draftCustomer) return;
 
-    setCompanyName(draftCustomer.companyName ?? '');
-    setCustomerName(draftCustomer.customerName ?? '');
-    setCompanyType(draftCustomer.companyType ?? '');
+    setCompanyName(draftCustomer.companyName ?? "");
+    setCustomerName(draftCustomer.customerName ?? "");
+    setCompanyType(draftCustomer.companyType ?? "");
 
     const acc: AccountDetailsData = {
-      phoneNumber: draftCustomer.phoneNumber ?? '',
-      primaryEmail: draftCustomer.primaryEmail ?? '',
+      phoneNumber: draftCustomer.phoneNumber ?? "",
+      primaryEmail: draftCustomer.primaryEmail ?? "",
       additionalEmailRecipients: draftCustomer.additionalEmailRecipients ?? [],
       billingSameAsCustomer: draftCustomer.billingSameAsCustomer ?? false,
-      customerAddressLine1: draftCustomer.customerAddressLine1 ?? '',
-      customerAddressLine2: draftCustomer.customerAddressLine2 ?? '',
-      customerCity: draftCustomer.customerCity ?? '',
-      customerState: draftCustomer.customerState ?? '',
-      customerPostalCode: draftCustomer.customerPostalCode ?? '',
-      customerCountry: draftCustomer.customerCountry ?? '',
-      billingAddressLine1: draftCustomer.billingAddressLine1 ?? '',
-      billingAddressLine2: draftCustomer.billingAddressLine2 ?? '',
-      billingCity: draftCustomer.billingCity ?? '',
-      billingState: draftCustomer.billingState ?? '',
-      billingPostalCode: draftCustomer.billingPostalCode ?? '',
-      billingCountry: draftCustomer.billingCountry ?? '',
+      customerAddressLine1: draftCustomer.customerAddressLine1 ?? "",
+      customerAddressLine2: draftCustomer.customerAddressLine2 ?? "",
+      customerCity: draftCustomer.customerCity ?? "",
+      customerState: draftCustomer.customerState ?? "",
+      customerPostalCode: draftCustomer.customerPostalCode ?? "",
+      customerCountry: draftCustomer.customerCountry ?? "",
+      billingAddressLine1: draftCustomer.billingAddressLine1 ?? "",
+      billingAddressLine2: draftCustomer.billingAddressLine2 ?? "",
+      billingCity: draftCustomer.billingCity ?? "",
+      billingState: draftCustomer.billingState ?? "",
+      billingPostalCode: draftCustomer.billingPostalCode ?? "",
+      billingCountry: draftCustomer.billingCountry ?? "",
     };
     setAccountDetails(acc);
 
-    const id = draftCustomer.customerId ?? draftCustomer.id ?? null;
+    const id = draftCustomer.customerId ?? (draftCustomer as any).id ?? null;
     if (id != null) setCustomerId(id);
-    setIsDraft(true);
 
-    // capture initial draft email for change detection
-    initialPrimaryEmailRef.current = draftCustomer.primaryEmail ?? '';
+    setIsDraft(true);
+    initialPrimaryEmailRef.current = draftCustomer.primaryEmail ?? "";
   }, [draftCustomer]);
 
   useEffect(() => {
-    const next = { ...errors };
-    if (companyName.trim()) delete next.companyName;
-    if (customerName.trim()) delete next.customerName;
-    if (companyType.trim()) delete next.companyType;
-    setErrors(next);
+    const n = { ...errors };
+    if (companyName.trim()) delete n.companyName;
+    if (customerName.trim()) delete n.customerName;
+    if (companyType.trim()) delete n.companyType;
+    setErrors(n);
   }, [companyName, customerName, companyType]); // eslint-disable-line
 
-  /**
-   * Debounced uniqueness check used while typing.
-   * - Skips when in Draft and email hasn't changed from the initial draft value.
-   * - Excludes the current draft's own id from the search to avoid self-collision.
-   */
+  // email uniqueness
   const checkEmailUniqueness = useCallback(async (email: string) => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
 
     const normalized = email.trim().toLowerCase();
-    const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
+    const initial = (initialPrimaryEmailRef.current ?? "").toLowerCase();
 
     if (isDraft && normalized === initial) {
-      // same email as draft's original → never flag
-      setAccountErrors(prev => {
-        const n = { ...prev };
-        if (n.primaryEmail) delete n.primaryEmail;
-        return n;
-      });
+      setAccountErrors(prev => { const n = { ...prev }; delete n.primaryEmail; return n; });
       return;
     }
 
     try {
       const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
-      if (exists) {
-        setAccountErrors(prev => ({ ...prev, primaryEmail: 'This email address is already registered' }));
-      } else {
-        setAccountErrors(prev => {
-          const n = { ...prev };
-          if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail;
-          return n;
-        });
-      }
-    } catch {
-      // ignore network errors here
-    }
+      if (exists) setAccountErrors(prev => ({ ...prev, primaryEmail: "This email address is already registered" }));
+      else setAccountErrors(prev => { const n = { ...prev }; delete n.primaryEmail; return n; });
+    } catch {/* ignore */}
   }, [isDraft, customerId]);
 
-  /**
-   * Legacy onBlur hook from child → mirror the same rules as the debounced checker.
-   */
-  const handleEmailBlur = useCallback(async (email: string) => {
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  const handleEmailBlur = useCallback(async (email: string) => { await checkEmailUniqueness(email); }, [checkEmailUniqueness]);
 
-    const normalized = email.trim().toLowerCase();
-    const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
-
-    if (isDraft && normalized === initial) {
-      setAccountErrors(prev => {
-        const n = { ...prev };
-        if (n.primaryEmail) delete n.primaryEmail;
-        return n;
-      });
-      return;
-    }
-
-    try {
-      const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
-      if (exists) setAccountErrors(prev => ({ ...prev, primaryEmail: 'This email address is already registered' }));
-      else setAccountErrors(prev => {
-        const n = { ...prev };
-        if (n.primaryEmail === 'This email address is already registered') delete n.primaryEmail;
-        return n;
-      });
-    } catch {
-      // ignore
-    }
-  }, [isDraft, customerId]);
-
-  // Debounce uniqueness on change — but only when it's not the initial draft email
   useEffect(() => {
     if (emailCheckTimeoutRef.current) clearTimeout(emailCheckTimeoutRef.current);
-
-    const email = accountDetails?.primaryEmail?.trim() ?? '';
+    const email = accountDetails?.primaryEmail?.trim() ?? "";
     const normalized = email.toLowerCase();
-    const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
-
-    // New create → always check when valid
-    // Draft → only check if user changed the email from initial
-    const shouldCheck = !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (!isDraft || normalized !== initial);
+    const initial = (initialPrimaryEmailRef.current ?? "").toLowerCase();
+    const shouldCheck =
+      !!email &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+      (!isDraft || normalized !== initial);
 
     if (shouldCheck) {
       emailCheckTimeoutRef.current = setTimeout(() => checkEmailUniqueness(email), 500);
     }
-
     return () => { if (emailCheckTimeoutRef.current) clearTimeout(emailCheckTimeoutRef.current); };
   }, [accountDetails?.primaryEmail, isDraft, checkEmailUniqueness]);
 
@@ -196,62 +155,56 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       // @ts-ignore
       if (accountDetails[k]?.trim && accountDetails[k].trim() && n[keyInErr]) delete n[keyInErr];
     };
-    clear('phoneNumber', 'phoneNumber');
-    clear('primaryEmail', 'primaryEmail');
-    clear('billingAddressLine1', 'billingAddressLine1');
-    clear('billingAddressLine2', 'billingAddressLine2');
-    clear('billingCity', 'billingCity');
-    clear('billingState', 'billingState');
-    clear('billingPostalCode', 'billingPostalCode');
-    clear('billingCountry', 'billingCountry');
-    clear('customerAddressLine1', 'customerAddressLine1');
-    clear('customerAddressLine2', 'customerAddressLine2');
-    clear('customerCity', 'customerCity');
-    clear('customerState', 'customerState');
-    clear('customerPostalCode', 'customerPostalCode');
-    clear('customerCountry', 'customerCountry');
+    [
+      "phoneNumber","primaryEmail",
+      "billingAddressLine1","billingAddressLine2","billingCity","billingState","billingPostalCode","billingCountry",
+      "customerAddressLine1","customerAddressLine2","customerCity","customerState","customerPostalCode","customerCountry"
+    ].forEach((k) => clear(k as any, k));
     setAccountErrors(n);
   }, [accountDetails]); // eslint-disable-line
 
-  const handleHeaderBack = () => setShowSaveDraftModal(true);
-  const handleBack = () => (currentStep === 0 ? onClose() : setCurrentStep(s => s - 1));
+  const gotoStep = (index: number) => setCurrentStep(index);
+  const handleBack = () => {
+    if (currentStep > 0) setCurrentStep(s => s - 1);
+    else setShowSaveDraftModal(true);
+  };
 
   const validateStep = async (s: number): Promise<boolean> => {
     if (s === 0) {
       const n: Record<string, string> = {};
-      if (!companyName.trim()) n.companyName = 'Company Name is required';
-      if (!customerName.trim()) n.customerName = 'Customer Name is required';
-      if (!companyType.trim()) n.companyType = 'Company Type is required';
+      if (!companyName.trim()) n.companyName = "Company Name is required";
+      if (!customerName.trim()) n.customerName = "Customer Name is required";
+      if (!companyType.trim()) n.companyType = "Company Type is required";
       setErrors(n);
       return Object.keys(n).length === 0;
     }
     if (s === 1) {
       const n: Record<string, string> = {};
-      const email = (accountDetails?.primaryEmail ?? '').trim();
-      if (!accountDetails?.phoneNumber?.trim()) n.phoneNumber = 'Phone Number is required';
-      if (!email) n.primaryEmail = 'Primary Email is required';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) n.primaryEmail = 'Enter a valid email address';
+      const email = (accountDetails?.primaryEmail ?? "").trim();
+
+      if (!accountDetails?.phoneNumber?.trim()) n.phoneNumber = "Phone Number is required";
+
+      if (!email) n.primaryEmail = "Primary Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) n.primaryEmail = "Enter a valid email address";
       else {
         try {
           const normalized = email.toLowerCase();
-          const initial = (initialPrimaryEmailRef.current ?? '').toLowerCase();
-
-          // For NEW create → always check uniqueness.
-          // For DRAFT → only when email changed, excluding self by id.
+          const initial = (initialPrimaryEmailRef.current ?? "").toLowerCase();
           if (!isDraft || normalized !== initial) {
             const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
-            if (exists) n.primaryEmail = 'This email address is already registered';
+            if (exists) n.primaryEmail = "This email address is already registered";
           }
         } catch { /* ignore */ }
       }
 
       [
-        'billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
-        'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
+        "billingAddressLine1","billingAddressLine2","billingCity","billingState","billingPostalCode","billingCountry",
+        "customerAddressLine1","customerAddressLine2","customerCity","customerState","customerPostalCode","customerCountry"
       ].forEach(k => {
         // @ts-ignore
-        if (!accountDetails?.[k]?.trim()) n[k] = `${k.replace(/([A-Z])/g,' $1')} is required`;
+        if (!accountDetails?.[k]?.trim()) n[k] = `${k.replace(/([A-Z])/g," $1")} is required`;
       });
+
       setAccountErrors({ ...accountErrors, ...n });
       return Object.keys({ ...accountErrors, ...n }).length === 0;
     }
@@ -260,10 +213,15 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
   const handleNext = async () => {
     if (!(await validateStep(currentStep))) return;
-    const last = currentStep === steps.length - 1;
-    if (last) await handleCreateCustomer();
-    else setCurrentStep(s => s + 1);
+    if (currentStep === steps.length - 1) {
+      await handleCreateCustomer();
+    } else {
+      setCurrentStep(s => s + 1);
+    }
   };
+
+  const buildRequestBlob = (payload: any) =>
+    new Blob([JSON.stringify(payload)], { type: "application/json" });
 
   const handleCreateCustomer = async () => {
     if (!accountDetails) return;
@@ -286,9 +244,10 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       billingPostalCode: accountDetails.billingPostalCode,
       billingCountry: accountDetails.billingCountry,
     };
+
     const fd = new FormData();
-    fd.append('request', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-    if (companyLogo) fd.append('companyLogo', companyLogo, companyLogo.name);
+    fd.append("request", buildRequestBlob(payload));
+    if (companyLogo) fd.append("companyLogo", companyLogo, companyLogo.name);
 
     try {
       setIsSubmitting(true);
@@ -303,7 +262,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
         onClose();
       }
     } catch (e) {
-      console.error('Error creating customer:', e);
+      console.error("Error creating customer:", e);
     } finally {
       setIsSubmitting(false);
     }
@@ -311,13 +270,13 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
   const handleSaveDraft = async () => {
     setDraftSaved(false);
-    const nz = (v?: string | null) => (typeof v === 'string' ? (v.trim() || null) : v ?? null);
 
+    const nz = (v?: string | null) => (typeof v === "string" ? (v.trim() || null) : v ?? null);
     const cleanPhone = (() => {
       const raw = nz(accountDetails?.phoneNumber);
       if (!raw) return null;
-      const cleaned = raw.replace(/[^0-9+]/g, '');
-      return cleaned.startsWith('+') ? '+' + cleaned.slice(1).replace(/[^0-9]/g, '') : cleaned.replace(/[^0-9]/g, '');
+      const cleaned = raw.replace(/[^0-9+]/g, "");
+      return cleaned.startsWith("+") ? "+" + cleaned.slice(1).replace(/[^0-9]/g, "") : cleaned.replace(/[^0-9]/g, "");
     })();
 
     const payload = {
@@ -343,8 +302,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     };
 
     const fd = new FormData();
-    fd.append('request', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-    if (companyLogo) fd.append('companyLogo', companyLogo, companyLogo.name);
+    fd.append("request", buildRequestBlob(payload));
+    if (companyLogo) fd.append("companyLogo", companyLogo, companyLogo.name);
 
     try {
       setIsSavingDraft(true);
@@ -357,236 +316,239 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       }
       setDraftSaved(true);
     } catch (e) {
-      console.error('Error saving draft:', e);
+      console.error("Error saving draft:", e);
     } finally {
       setIsSavingDraft(false);
     }
   };
 
-  const handleAccountDetailsChange = (data: AccountDetailsData) => {
-    setAccountDetails(data);
-    if (draftSaved) setDraftSaved(false);
-  };
-
-  // SaveDraft modal (back arrow) — delete flow
-  const handleSaveDraft_NoDelete = async () => {
+  const discardAndClose = async () => {
     try {
-      if (customerId != null) {
-        await deleteCustomer(customerId);
-      }
+      if (customerId != null) await deleteCustomer(customerId);
     } catch (e) {
-      console.error('Error deleting on back modal:', e);
+      console.error("Error deleting on back modal:", e);
     } finally {
       setShowSaveDraftModal(false);
       onClose();
     }
   };
 
-  // SaveDraft modal (back arrow) — SAVE AS DRAFT flow
-  const handleSaveDraft_Save = async () => {
+  const saveDraftThenClose = async () => {
     await handleSaveDraft();
     setShowSaveDraftModal(false);
     onClose();
   };
 
-  // Top-right Delete confirmation
-  const handleConfirmDelete = async () => {
+  const confirmDeleteTopRight = async () => {
     try {
-      if (customerId != null) {
-        await deleteCustomer(customerId);
-      }
+      if (customerId != null) await deleteCustomer(customerId);
     } catch (e) {
-      console.error('Error deleting customer:', e);
+      console.error("Error deleting customer:", e);
     } finally {
       setShowDeleteModal(false);
       onClose();
     }
   };
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <>
-            <div className="sub-create-form">
-              <InputField
-                label="Company Name"
-                value={companyName}
-                placeholder="eg., abc company"
-                onChange={(value) => { 
-                  setCompanyName(value); 
-                  if (errors.companyName) setErrors(p => ({ ...p, companyName: '' })); 
-                }}
-                error={errors.companyName}
-                className="company-name-input"
-              />
-            </div>
-
-            <div className="sub-create-form">
-              <label style={{ display: 'none' }}>Company Logo</label>
-              <LogoUploader logo={companyLogo} logoUrl={initialLogoUrl} onChange={(file)=>setCompanyLogo(file)} />
-            </div>
-
-            <div className="sub-create-form">
-              <InputField
-                label="Customer Name"
-                value={customerName}
-                placeholder="eg. john doe"
-                onChange={(value) => { 
-                  setCustomerName(value); 
-                  if (errors.customerName) setErrors(p => ({ ...p, customerName: '' })); 
-                }}
-                error={errors.customerName}
-                className="customer-name-input"
-              />
-            </div>
-
-            <div className="sub-create-form">
-              <label className="com-form-label">Company Type</label>
-              <select
-                className="cus-select"
-                value={companyType}
-                onChange={(e) => { setCompanyType(e.target.value); if (errors.companyType) setErrors(p => ({ ...p, companyType: '' })); }}
-              >
-                <option value="">Select Company Type</option>
-                <option value="INDIVIDUAL">Individual</option>
-                <option value="BUSINESS">Business</option>
-              </select>
-              {errors.companyType && <span className="field-error">{errors.companyType}</span>}
-            </div>
-          </>
-        );
-      case 1:
-        return (
-          <AccountDetailsForm
-            data={accountDetails ?? undefined}
-            onChange={setAccountDetails}
-            errors={accountErrors}
-            onEmailBlur={handleEmailBlur}
-            // NEW: let child know who we are and what is initial email
-            currentCustomerId={customerId ?? undefined}
-            isDraft={isDraft}
-            initialPrimaryEmail={initialPrimaryEmailRef.current ?? undefined}
-          />
-        );
-      case 2:
-        return <CustomerReview customerName={customerName} companyName={companyName} companyType={companyType} accountDetails={accountDetails} />;
-      default:
-        return <p>Coming soon...</p>;
-    }
-  };
-
-  const modalName = (customerName || draftCustomer?.customerName || companyName || draftCustomer?.companyName || '').trim() || 'this customer';
-  const deleteModalTitle = `Are you sure you want to delete the product “${modalName}”?`;
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <>
       <TopBar
         title="Create New Customer"
-        onBack={handleHeaderBack}
+        onBack={() => setShowSaveDraftModal(true)}
         cancel={{ onClick: () => setShowDeleteModal(true) }}
-        save={{ label: "Save as Draft", saving: isSavingDraft, saved: draftSaved, disabled: isSubmitting, onClick: handleSaveDraft }}
+        save={{
+          label: draftSaved ? "Saved!" : "Save as Draft",
+          saving: isSavingDraft,
+          saved: draftSaved,
+          disabled: isSubmitting,
+          onClick: handleSaveDraft,
+        }}
       />
 
-      <div className="create-customer-layout" style={{ flex: 1 }}>
-        <aside className="progress-sidebar">
-          <div className="progress-container">
-            {steps.map((step, i) => {
-              const isActive = i === currentStep;
-              const isCompleted = i < currentStep;
-              return (
-                <div
-                  key={i}
-                  className={`progress-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                  onClick={() => setCurrentStep(i)}
-                >
-                  <div className="progress-icon-wrapper">
-                    {isCompleted ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                        <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="11.5" stroke="#D6D5D7" />
-                        <circle cx="12" cy="12" r="6" fill="#D6D5D7" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="progress-step-text">
-                    <span className="progress-step-title">{step.title}</span>
-                    <span className="progress-step-desc">{step.desc}</span>
-                  </div>
+      <div className="customer-np-viewport">
+        <div className="customer-np-card">
+          <div className="customer-np-grid">
+            {/* LEFT rail */}
+            <aside className="customer-np-rail">
+              <nav className="customer-np-steps">
+                {steps.map((step, i) => {
+                  const isActive = i === currentStep;
+                  const isCompleted = i < currentStep;
+                  const showConnector = i < steps.length - 1;
+
+                  return (
+                    <button
+                      key={step.id}
+                      type="button"
+                      className={[
+                        "customer-np-step",
+                        isActive ? "active" : "",
+                        isCompleted ? "completed" : "",
+                      ].join(" ").trim()}
+                      onClick={() => gotoStep(i)}
+                    >
+                      <span className="customer-np-step__bullet" aria-hidden="true">
+                        <span className="customer-np-step__icon">
+                          {isCompleted ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
+                              <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                              <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                            </svg>
+                          )}
+                        </span>
+                        {showConnector && <span className="customer-np-step__connector" />}
+                      </span>
+
+                      <span className="customer-np-step__text">
+                        <span className="customer-np-step__title">{step.title}</span>
+                        <span className="customer-np-step__desc">{step.desc}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </aside>
+
+            {/* MAIN */}
+            <main className="customer-np-main">
+              <div className="customer-np-main__inner">
+                <div className="customer-np-body">
+                  <form className="customer-np-form" onSubmit={(e) => e.preventDefault()}>
+                    <div className="customer-np-form-section">
+                      {/* STEP 1: GENERAL */}
+                      {activeTab === "general" && (
+                        <section>
+                          <div className="customer-np-section-header">
+                            <h3 className="customer-np-section-title">CUSTOMER DETAILS</h3>
+                          </div>
+
+                          <div className="customer-np-grid">
+                            <InputField
+                              label="Company Name"
+                              value={companyName}
+                              placeholder="eg., ABC Company"
+                              onChange={(v) => setCompanyName(v)}
+                              error={errors.companyName}
+                            />
+
+                            <div className="customer-np-grid__full">
+                              <label className="customer-visually-hidden">Company Logo</label>
+                              <LogoUploader
+                                logo={companyLogo}
+                                logoUrl={initialLogoUrl}
+                                onChange={(file) => setCompanyLogo(file)}
+                              />
+                            </div>
+
+                            <InputField
+                              label="Customer Name"
+                              value={customerName}
+                              placeholder="eg., John Doe"
+                              onChange={(v) => setCustomerName(v)}
+                              error={errors.customerName}
+                            />
+
+                            <SelectField
+                              label="Company Type"
+                              value={companyType}
+                              onChange={setCompanyType}
+                              error={errors.companyType}
+                              options={[
+                                { value: '', label: 'Select Company Type' },
+                                { value: 'INDIVIDUAL', label: 'Individual' },
+                                { value: 'BUSINESS', label: 'Business' }
+                              ]}
+                            />
+                          </div>
+                        </section>
+                      )}
+
+                      {/* STEP 2: BILLING */}
+                      {activeTab === "billing" && (
+                        <section>
+                          <div className="customer-np-section-header">
+                            <h3 className="customer-np-section-title">Account Details</h3>
+                          </div>
+                          <AccountDetailsForm
+                            data={accountDetails ?? undefined}
+                            onChange={(d) => { setAccountDetails(d); if (draftSaved) setDraftSaved(false); }}
+                            errors={accountErrors}
+                            onEmailBlur={handleEmailBlur}
+                            currentCustomerId={customerId ?? undefined}
+                            isDraft={isDraft}
+                            initialPrimaryEmail={initialPrimaryEmailRef.current ?? undefined}
+                          />
+                        </section>
+                      )}
+
+                      {/* STEP 3: REVIEW */}
+                      {activeTab === "review" && (
+                        <section>
+                          <div className="customer-np-section-header">
+                            <h3 className="customer-np-section-title">REVIEW & CONFIRM</h3>
+                          </div>
+                          <CustomerReview
+                            customerName={customerName}
+                            companyName={companyName}
+                            companyType={companyType}
+                            accountDetails={accountDetails}
+                          />
+                        </section>
+                      )}
+                    </div>
+
+                    {/* Footer actions */}
+                    <div className="customer-np-form-footer">
+                      {activeTab !== "general" && (
+                        <div className="customer-np-btn-group customer-np-btn-group--back">
+                          <SecondaryButton type="button" onClick={handleBack}>
+                            Back
+                          </SecondaryButton>
+                        </div>
+                      )}
+
+                      <div className="customer-np-btn-group customer-np-btn-group--next">
+                        <PrimaryButton
+                          type="button"
+                          onClick={handleNext}
+                          disabled={isSubmitting}
+                        >
+                          {activeTab === "review" ? "Create Customer" : "Save & Next"}
+                        </PrimaryButton>
+                      </div>
+                    </div>
+                  </form>
                 </div>
-              );
-            })}
-          </div>
-        </aside>
-
-        <div className="main-content-area">
-          <div className="section-header">
-            <div className="section-title">{steps[currentStep].title.toUpperCase()}</div>
-          </div>
-
-          <div className="form-content-wrapper">
-            <div className="form-card">
-              <div className="form-content">
-                {renderStepContent()}
               </div>
-            </div>
-          </div>
-
-          <div className="form-footer">
-            <div className="footer-button-group">
-              {currentStep > 0 && (
-                <button type="button" className={buttonStyles.buttonSecondary} onClick={handleBack}>Back</button>
-              )}
-              <button
-                className={buttonStyles.buttonPrimary}
-                onClick={handleNext}
-                disabled={isSubmitting}
-                style={currentStep === 0 ? { marginLeft: 'auto' } : undefined}
-              >
-                {currentStep === steps.length - 1 ? 'Create Customer' : 'Save & Next'}
-              </button>
-            </div>
+            </main>
           </div>
         </div>
       </div>
 
+      {/* Delete (top-right) */}
       {showDeleteModal && (
-        <div className="rate-delete-modal-overlay" role="dialog" aria-modal="true">
-          <div className="rate-delete-modal-content">
-            <div className="rate-delete-modal-body">
-              <h5>{deleteModalTitle}</h5>
-              <p>This action cannot be undone.</p>
-            </div>
-            <div className="rate-delete-modal-footer">
-              <button
-                className="rate-delete-modal-cancel"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                Discard
-              </button>
-              <button
-                className="rate-delete-modal-confirm"
-                onClick={handleConfirmDelete}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDeleteModal
+          isOpen={showDeleteModal}
+          productName={(customerName || companyName || "this customer").trim()}
+          onConfirm={confirmDeleteTopRight}
+          onCancel={() => setShowDeleteModal(false)}
+        />
       )}
 
+      {/* Save Draft dialog on back */}
       <SaveDraft
         isOpen={showSaveDraftModal}
-        onClose={() => setShowSaveDraftModal(false)}   // Close modal (X button/overlay)
-        onSave={handleSaveDraft_Save}        // "Save as Draft"
-        onDelete={handleSaveDraft_NoDelete}  // "No, Delete"
+        onClose={() => setShowSaveDraftModal(false)}
+        onSave={saveDraftThenClose}
+        onDelete={discardAndClose}
       />
-    </div>
+    </>
   );
 };
 
-export default CreateCustomer; 
+export default CreateCustomer;

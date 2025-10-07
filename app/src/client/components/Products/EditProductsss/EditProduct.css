@@ -61,6 +61,52 @@ html, body, #root{
   overflow: hidden;
 }
 
+
+
+
+/* ====== Logo Uploader (copied from Create) ====== */
+/* Constrain the logo uploader form group */
+.edit-np-form-group:has(.logo-uploader) {
+  flex: 0 0 456px !important;
+  max-width: 456px !important;
+  min-width: 456px !important;
+}
+
+/* Constrain the logo uploader itself */
+.logo-uploader {
+  width: 456px !important;
+  max-width: 456px !important;
+}
+
+.logo-box{
+  width: 456px;
+  height: 36px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 12px;
+  background: var(--surface-layer-4, #FFF);
+  border: 1px solid var(--border-border-2, #D5D4DF);
+  border-radius: var(--border-radius-sm, 8px);
+  cursor:pointer;
+  transition:border-color .2s ease, background .2s ease;
+}
+.logo-box:hover{ border-color: var(--color-neutral-300); }
+
+/* Small action row under the logo (for Remove) */
+.logo-actions{
+  margin-top:8px;
+}
+.logo-remove-btn{
+  border:none;
+  background: rgba(255, 86, 48, 0.12);
+  color:#FF5630;
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
 /* Grid fills height */
 .edit-np-grid{
   display: grid;
@@ -229,7 +275,7 @@ margin-bottom: 2px;
 
 .edit-np-step.active{ border-left:2px solid var(--color-primary-800); background-color:var(--color-neutral-white); }
 .edit-np-step__title{ 
-  color: var(--color-neutral-1700);
+  color: var(--color-neutral-800);
 
   /* body/md/med */
   font-family: var(--font-family-primary);
@@ -237,7 +283,15 @@ margin-bottom: 2px;
   font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-body-lg); /* 150% */
+  transition: color 0.2s ease;
 }
+
+.edit-np-step.active .edit-np-step__title {
+  color: var(--color-neutral-1700);
+  font-weight: 600;
+}
+
+
 
 /* Main area */
 .edit-np-main { 
@@ -285,9 +339,8 @@ margin-bottom: 2px;
   flex: 1;
   width: 100%;
   max-width: 100%;
-    ;
-    margin-top: 30px;
-    margin-left: 30px;
+  margin-top: 30px;
+  margin-left: 30px;
   /* no extra top margin */
 
   /* === Custom scrollbars (match NewProduct) === */
@@ -314,10 +367,7 @@ margin-bottom: 2px;
   overflow-x: hidden;
   width: 100%;
   max-width: 100%;
-  ;
   padding-bottom: 15px;
-  margin-top: 30px;
-  margin-left: 30px;
 }
 
 /* Section title above a full-bleed faint line */
@@ -346,8 +396,7 @@ text-transform: uppercase;
 
 /* Content column ensures footer pushes to bottom */
 .edit-np-content {
-  max-height: 75vh;
-  overflow-y: auto;
+  overflow-y: visible;
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--color-neutral-400) transparent;

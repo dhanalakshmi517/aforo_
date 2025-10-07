@@ -1,19 +1,32 @@
 import React from "react";
 import "./TopBar.css";
 
-type CancelAction = { label?: string; onClick?: () => void };
+type BackAction = {
+  onClick: () => void;
+  disabled?: boolean;
+  title?: string;
+  ariaLabel?: string;
+};
+
+type CancelAction = { label?: string; onClick?: () => void; disabled?: boolean; title?: string };
 type SaveAction = {
-  label?: string;              // default: "Save as Draft"
-  labelWhenSaved?: string;     // default: "Saved as Draft"
-  saved?: boolean;             // green pill state
-  saving?: boolean;            // shows "Saving…" and disables
-  disabled?: boolean;          // force-disabled from parent
+  label?: string;
+  labelWhenSaved?: string;
+  saved?: boolean;
+  saving?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 };
 
 type TopBarProps = {
   title: string;
+
+  /** Backward compatible: still works if you pass onBack only */
   onBack?: () => void;
+
+  /** New: richer control over the back arrow */
+  back?: BackAction;
+
   cancel?: CancelAction;
   save?: SaveAction;
   className?: string;
@@ -22,38 +35,70 @@ type TopBarProps = {
 const TopBar: React.FC<TopBarProps> = ({
   title,
   onBack,
+  back: backProp,
   cancel,
   save,
   className = "",
 }) => {
   const saved = !!save?.saved;
   const saving = !!save?.saving;
-  const disabled = saving || !!save?.disabled;
+  const saveDisabled = saving || !!save?.disabled;
+
+  // Normalize back config (support both old onBack and new back object)
+  const back = backProp ?? (onBack ? { onClick: onBack } : undefined);
+  const backDisabled = !!back?.disabled;
 
   return (
     <div className={["af-topbar", className].join(" ")}>
-      <div className="af-topbar__left">
-        {onBack && (
+      <div className="af-topbar__container">
+        <div className="af-topbar__left">
+        {back && (
           <button
             type="button"
-            className="af-topbar__back"
-            onClick={onBack}
-            aria-label="Back"
+            className={[
+              "af-topbar__back",
+              backDisabled ? "is-disabled" : "",
+            ].join(" ")}
+            onClick={back.onClick}
+            disabled={backDisabled}
+            aria-label={back.ariaLabel ?? "Back"}
+            title={back.title}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-  <path d="M10.0001 15.8334L4.16675 10.0001M4.16675 10.0001L10.0001 4.16675M4.16675 10.0001H15.8334" stroke="#909599" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+            {/* IMPORTANT: stroke uses currentColor so CSS can theme the states */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className="af-topbar__back-icon"
+            >
+              <path
+                d="M10.0001 15.8334L4.16675 10.0001M4.16675 10.0001L10.0001 4.16675M4.16675 10.0001H15.8334"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
-        <span className="af-topbar__title">{title}</span>
-      </div>
+          <span className="af-topbar__title">{title}</span>
+        </div>
 
-      <div className="af-topbar__right">
+        <div className="af-topbar__right">
         {cancel && (
           <button
             type="button"
-            className="af-topbar__btn af-topbar__btn--cancel"
+            className={[
+              "af-topbar__btn",
+              "af-topbar__btn--cancel",
+              cancel.disabled ? "is-disabled" : "",
+            ].join(" ").trim()}
             onClick={cancel.onClick}
+            disabled={!!cancel.disabled}
+            aria-disabled={!!cancel.disabled}
+            title={cancel.title}
           >
             {cancel.label ?? "Delete"}
           </button>
@@ -64,31 +109,19 @@ const TopBar: React.FC<TopBarProps> = ({
             type="button"
             className={[
               "af-topbar__btn",
-              disabled ? "af-topbar__btn--disabled" : "",
+              saveDisabled ? "af-topbar__btn--disabled" : "",
               saved ? "af-topbar__btn--saved" : "af-topbar__btn--save",
             ].join(" ").trim()}
             onClick={(e) => {
-              console.log('Save button clicked');
               e.preventDefault();
               e.stopPropagation();
-              if (disabled) {
-                console.log('Save button is disabled');
-                return;
-              }
-              if (save.onClick) {
-                console.log('Calling save.onClick');
-                save.onClick();
-              } else {
-                console.error('save.onClick is not defined');
-              }
+              if (saveDisabled) return;
+              save.onClick?.();
             }}
-            disabled={disabled}
-            style={{
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              opacity: disabled ? 0.7 : 1
-            }}
+            disabled={saveDisabled}
+            style={{ cursor: saveDisabled ? "not-allowed" : "pointer", opacity: saveDisabled ? 0.7 : 1 }}
           >
-            {saving ? (
+            {save.saving ? (
               <>
                 <span className="af-spinner" aria-hidden="true"></span>
                 Saving…
@@ -103,13 +136,12 @@ const TopBar: React.FC<TopBarProps> = ({
             ) : (
               <>{save.label ?? "Save as Draft"}</>
             )}
-          </button>
-        )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default TopBar;
-
-

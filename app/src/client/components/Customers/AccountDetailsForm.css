@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width:600px;
 }
 
 .acc-form-group {
@@ -86,7 +87,7 @@
 .add-email-btn {
   background: none;
   border: none;
-  color: #0066cc;
+  color:var(--color-neutral-1400, #1A2126);
   font-size: 14px;
   cursor: pointer;
   display: flex;

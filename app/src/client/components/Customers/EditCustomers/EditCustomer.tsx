@@ -496,7 +496,7 @@ const EditCustomer: React.FC = () => {
                     className="np-btn np-btn--primary"
                     onClick={handleNextStep}
                   >
-                    {activeTab === 'review' ? 'Save Changes' : 'Next'}
+                    {activeTab === 'review' ? 'Save Changes' : 'Save &Next'}
                   </button>
                 </div>
               </div>
