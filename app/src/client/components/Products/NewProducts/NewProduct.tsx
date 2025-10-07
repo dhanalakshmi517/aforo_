@@ -12,6 +12,8 @@ import SaveDraft from "../../componenetsss/SaveDraft";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SecondaryButton from "../../componenetsss/SecondaryButton";
 import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
+import ProductIconPickerModal from "../ProductIconPickerModal";
+import { ProductIconData } from "../ProductIcon";
 
 import "./NewProduct.css";
 import "../../componenetsss/SkeletonForm.css";
@@ -98,6 +100,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     skuCode: (activeDraft?.internalSkuCode ?? activeDraft?.skuCode) || "",
     description: activeDraft?.productDescription || "",
   });
+  const [selectedIcon, setSelectedIcon] = useState<ProductIconData | null>(null);
+  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [configuration, setConfiguration] = useState<Record<string, any>>({
     productType: activeDraft?.productType || '' // Prefill product type if available
@@ -139,7 +143,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       // Exclude current draft product from uniqueness check
       const duplicate = existingProducts.some(p => 
         (p.productName || '').toLowerCase() === trimmed.toLowerCase() && 
-        p.productName !== draftProduct?.productName
+        p.productName !== activeDraft?.productName
       );
       if (duplicate) {
         setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
@@ -152,7 +156,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       // Exclude current draft product from uniqueness check
       const duplicate = existingProducts.some(p => 
         (p.skuCode || '').toLowerCase() === trimmed.toLowerCase() && 
-        p.skuCode !== (draftProduct?.internalSkuCode ?? draftProduct?.skuCode)
+        p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
       );
       if (duplicate) {
         setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
@@ -168,6 +172,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   };
 
   const handleFinalSubmit = async () => {
+    // First ensure configuration is saved
+    if (configRef.current) {
+      const ok = await configRef.current.submit();
+      if (!ok) return; // abort if configuration failed
+    }
     if (!createdProductId) {
       console.error('No product ID available for finalization');
       return;
@@ -214,7 +223,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const [lastSavedData, setLastSavedData] = useState<typeof formData | null>(null);
 
   const saveProduct = async (isDraft: boolean = false) => {
-    console.log('Saving product...', { isDraft, formData });
+    console.log('Saving product...', { isDraft, formData, selectedIcon });
     
     // Only validate required fields if not a draft
     if (!isDraft) {
@@ -223,13 +232,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       const lower = (s:string)=>s.trim().toLowerCase();
       if (formData.productName && existingProducts.some(p=> 
         lower(p.productName||'')===lower(formData.productName) && 
-        p.productName !== draftProduct?.productName
+        p.productName !== activeDraft?.productName
       )) {
         newErrors.productName = 'Must be unique';
       }
       if (formData.skuCode && existingProducts.some(p=> 
         lower(p.skuCode||'')===lower(formData.skuCode) && 
-        p.skuCode !== (draftProduct?.internalSkuCode ?? draftProduct?.skuCode)
+        p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
       )) {
         newErrors.skuCode = 'Must be unique';
       }
@@ -259,10 +268,23 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         version: formData.version || ''
       };
 
+      // Add icon data if selected
+      const payloadWithIcon = selectedIcon ? {
+        ...basePayload,
+        productIcon: JSON.stringify({
+          id: selectedIcon.id,
+          label: selectedIcon.label,
+          svgPath: selectedIcon.svgPath,
+          viewBox: selectedIcon.viewBox,
+          outerBg: selectedIcon.outerBg,
+          tileColor: selectedIcon.tileColor
+        })
+      } : basePayload;
+
       if (isDraft || !createdProductId) {
         // For new products or drafts, include all fields
         const payload = {
-          ...basePayload,
+          ...payloadWithIcon,
           ...(isDraft ? { status: 'DRAFT' } : {})
         };
         
@@ -280,7 +302,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         }
       } else {
         // For updates, only include changed fields
-        const changes: Partial<ProductPayload> = {};
+        const changes: Partial<ProductPayload> & { productIcon?: string } = {};
         
         if (lastSavedData?.productName !== formData.productName) {
           changes.productName = basePayload.productName;
@@ -293,6 +315,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         }
         if (lastSavedData?.version !== formData.version) {
           changes.version = basePayload.version;
+        }
+        
+        // Include icon if it exists
+        if (selectedIcon) {
+          changes.productIcon = JSON.stringify({
+            id: selectedIcon.id,
+            label: selectedIcon.label,
+            svgPath: selectedIcon.svgPath,
+            viewBox: selectedIcon.viewBox,
+            outerBg: selectedIcon.outerBg,
+            tileColor: selectedIcon.tileColor
+          });
         }
         
         if (Object.keys(changes).length === 0) {
@@ -385,35 +419,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         gotoStep(configTabIndex);
       }
     } else if (activeTab === 'configuration') {
-      try {
-        console.log('Starting configuration save...');
-        setIsSaving(true);
-        // Trigger the configuration tab's submit handler
-        if (configRef.current) {
-          console.log('Calling configRef.current.submit()');
-          const success = await configRef.current.submit();
-          console.log('Submit result:', success);
-          if (success) {
-            // Only move to review tab if configuration was saved successfully
-            console.log('Configuration saved successfully, moving to review tab');
-            const reviewTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('review'));
-            if (reviewTabIndex > -1) {
-              gotoStep(reviewTabIndex);
-            }
-          } else {
-            console.log('Configuration save failed or returned false');
-          }
-        } else {
-          console.error('configRef.current is null');
-        }
-      } catch (error) {
-        console.error('Failed to save configuration:', error);
-        setErrors(prev => ({
-          ...prev,
-          form: error instanceof Error ? error.message : 'Failed to save configuration. Please check your inputs and try again.'
-        }));
-      } finally {
-        setIsSaving(false);
+      // Skip API save here; just move to review after client-side validation
+      if (configRef.current) {
+        const reviewTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('review'));
+        if (reviewTabIndex > -1) gotoStep(reviewTabIndex);
       }
     } else {
       // For other tabs, just move to the next step
@@ -519,6 +528,112 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               onChange={handleFieldChange('version')}
                               placeholder="eg., 2.3-VOS"
                             />
+                            
+                            {/* Product Icon Field */}
+                            <div className="np-form-group">
+                              <label className="np-label">Product Icon</label>
+                              {!selectedIcon ? (
+                                <button
+                                  type="button"
+                                  className="np-icon-add-btn"
+                                  onClick={() => setIsIconPickerOpen(true)}
+                                >
+                                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 4.16667V15.8333M4.16667 10H15.8333" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  <span>Add product icon</span>
+                                </button>
+                              ) : (
+                                <div className="np-icon-selected">
+                                  <div className="np-icon-preview">
+                                    <div
+                                      style={{
+                                        width: 50.6537,
+                                        height: 46.3351,
+                                        borderRadius: 12,
+                                        border: '0.6px solid var(--border-border-2, #D5D4DF)',
+                                        background: `
+                                          linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
+                                          linear-gradient(135deg, ${selectedIcon.outerBg?.[0] || '#F8F7FA'}, ${selectedIcon.outerBg?.[1] || '#E4EEF9'}),
+                                          radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
+                                        `,
+                                        display: 'flex',
+                                        padding: 8,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          left: 10.5,
+                                          top: 8.2,
+                                          width: 29.45,
+                                          height: 25.243,
+                                          borderRadius: 5.7,
+                                          background: selectedIcon.tileColor || '#CC9434',
+                                        }}
+                                      />
+                                      <div
+                                        style={{
+                                          width: 29.339,
+                                          height: 26.571,
+                                          padding: '1.661px 3.321px',
+                                          display: 'flex',
+                                          justifyContent: 'center',
+                                          alignItems: 'center',
+                                          gap: 2.214,
+                                          flexShrink: 0,
+                                          borderRadius: 6,
+                                          border: '0.6px solid #FFF',
+                                          background: 'rgba(202, 171, 213, 0.10)',
+                                          backdropFilter: 'blur(3.875px)',
+                                          transform: 'translate(3px, 2px)',
+                                          boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                        }}
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="18"
+                                          height="18"
+                                          viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
+                                          fill="none"
+                                          style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+                                        >
+                                          <path d={selectedIcon.svgPath} fill="#FFFFFF" />
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="np-icon-actions">
+                                    <button
+                                      type="button"
+                                      className="np-icon-action-btn"
+                                      onClick={() => setIsIconPickerOpen(true)}
+                                    >
+                                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.3333 2.00004C11.5084 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4188 1.44775 12.6667 1.44775C12.9145 1.44775 13.1598 1.49653 13.3886 1.59129C13.6174 1.68605 13.8249 1.82494 14 2.00004C14.1751 2.17513 14.314 2.38268 14.4088 2.61149C14.5036 2.84029 14.5523 3.08558 14.5523 3.33337C14.5523 3.58117 14.5036 3.82646 14.4088 4.05526C14.314 4.28407 14.1751 4.49161 14 4.66671L5 13.6667L1.33333 14.6667L2.33333 11L11.3333 2.00004Z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                      </svg>
+                                      <span>Edit</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="np-icon-action-btn np-icon-action-btn--remove"
+                                      onClick={() => setSelectedIcon(null)}
+                                    >
+                                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2 4H3.33333H14" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M5.33333 4.00004V2.66671C5.33333 2.31309 5.47381 1.97395 5.72386 1.7239C5.97391 1.47385 6.31304 1.33337 6.66667 1.33337H9.33333C9.68696 1.33337 10.0261 1.47385 10.2761 1.7239C10.5262 1.97395 10.6667 2.31309 10.6667 2.66671V4.00004M12.6667 4.00004V13.3334C12.6667 13.687 12.5262 14.0261 12.2761 14.2762C12.0261 14.5262 11.687 14.6667 11.3333 14.6667H4.66667C4.31304 14.6667 3.97391 14.5262 3.72386 14.2762C3.47381 14.0261 3.33333 13.687 3.33333 13.3334V4.00004H12.6667Z" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                      </svg>
+                                      <span>Remove</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
                             <InputField
                               label="SKU Code"
                               value={formData.skuCode}
@@ -533,6 +648,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               placeholder="eg. Mapping service API for location-based apps..."
                             />
                           </div>
+                          
+                          {/* Product Icon Picker Modal */}
+                          <ProductIconPickerModal
+                            isOpen={isIconPickerOpen}
+                            onClose={() => setIsIconPickerOpen(false)}
+                            onSelect={(icon) => {
+                              setSelectedIcon(icon);
+                              setIsIconPickerOpen(false);
+                            }}
+                          />
                         </section>
                       )}
 
@@ -573,6 +698,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             <h3 className="np-section-title">REVIEW & CONFIRM</h3>
                           </div>
                           <ProductReview generalDetails={formData} configuration={configuration} />
+                          {/* Hidden ConfigurationTab to keep ref alive */}
+                          <div style={{ display: 'none' }}>
+                            <ConfigurationTab
+                              ref={configRef}
+                              productId={createdProductId || undefined}
+                              initialProductType={configuration.productType}
+                              onConfigChange={() => {}}
+                              onProductTypeChange={() => {}}
+                              isSavingDraft={false}
+                              readOnly={true}
+                            />
+                          </div>
                         </section>
                       ) : activeTab === "review" ? (
                         <div className="np-section-header">
@@ -623,10 +760,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               try {
                                 setIsSaving(true);
                                 if (configRef.current) {
-                                  const success = await configRef.current.submit();
-                                  if (success) {
-                                    gotoStep(2);
-                                  }
+                                  // run client-side validation only (isDraft=true prevents API)
+                                  const success = await configRef.current.submit(true);
+                                  if (success) gotoStep(2);
                                 }
                               } catch (error) {
                                 console.error('Error saving configuration:', error);
@@ -659,29 +795,35 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                           <div className="np-btn-group np-btn-group--next">
                             <PrimaryButton 
                               type="button" 
-                              onClick={() => {
+                              onClick={async () => {
                                 if (!createdProductId) {
                                   console.error('No product ID available for finalization');
                                   return;
                                 }
+                                if (!configRef.current) {
+                                  console.error('Configuration ref not available');
+                                  return;
+                                }
                                 setIsSaving(true);
-                                finalizeProduct(createdProductId)
-                                  .then(response => {
-                                    if (response.success) {
-                                      console.log('Product created and finalized successfully!');
-                                      onClose();
-                                    } else {
-                                      throw new Error(response.message || 'Failed to finalize product');
-                                    }
-                                  })
-                                  .catch(error => {
-                                    console.error('Error finalizing product:', error);
-                                    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-                                    console.error('Failed to finalize product:', errorMessage);
-                                  })
-                                  .finally(() => {
-                                    setIsSaving(false);
-                                  });
+                                try {
+                                  // 1️⃣ save configuration (real API call)
+                                  const ok = await configRef.current.submit();
+                                  if (!ok) return;
+                                  // 2️⃣ finalize product
+                                  const resp = await finalizeProduct(createdProductId);
+                                  if (resp.success) {
+                                    console.log('Product created and finalized successfully!');
+                                    onClose();
+                                  } else {
+                                    throw new Error(resp.message || 'Failed to finalize product');
+                                  }
+                                } catch (error) {
+                                  console.error('Error finalizing product:', error);
+                                  const msg = error instanceof Error ? error.message : 'Unknown error';
+                                  setErrors(prev => ({ ...prev, form: msg }));
+                                } finally {
+                                  setIsSaving(false);
+                                }
                               }}
                               disabled={isSaving}
                             >

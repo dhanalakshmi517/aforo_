@@ -555,14 +555,89 @@ text-transform: uppercase;
   padding: 10px 12px 10px 0;
   background-color: #f8f9fb;
   border: 1px solid transparent;
-  cursor: pointer;
-  transition: all .2s ease;
-  z-index: 1;
+  flex-shrink: 0;
 }
 
-.np-step__icon{
-  width: var(--np-step-icon);
-  height: var(--np-step-icon);
-  border-radius: 50%;
+/* ===== Product Icon Picker Styles ===== */
+.np-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.np-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-700, #374151);
+  margin-bottom: 4px;
+}
+
+.np-icon-add-btn {
+  display: flex;
+  width:456px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-neutral-white, #FFFFFF);
+  border: 1px dashed var(--color-neutral-400, #9CA3AF);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: var(--color-neutral-600, #6B7280);
+}
+
+.np-icon-add-btn:hover {
+  border-color: var(--color-neutral-500, #6B7280);
+  background: var(--color-neutral-50, #F9FAFB);
+}
+
+.np-icon-add-btn svg {
+  flex-shrink: 0;
+}
+
+.np-icon-selected {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.np-icon-preview {
+  flex-shrink: 0;
+}
+
+.np-icon-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.np-icon-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-primary-500, #3B82F6);
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.np-icon-action-btn:hover {
+  background: var(--color-primary-50, #EFF6FF);
+}
+
+.np-icon-action-btn--remove {
+  color: var(--color-error-500, #EF4444);
+}
+
+.np-icon-action-btn--remove:hover {
+  background: var(--color-error-50, #FEF2F2);
+}
+
+.np-icon-action-btn svg {
   flex-shrink: 0;
 }

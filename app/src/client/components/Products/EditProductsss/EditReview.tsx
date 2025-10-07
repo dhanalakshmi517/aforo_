@@ -2,7 +2,7 @@
 // Description: Read-only review UI.
 // Usage: import and render <EditReview />. Styles in ProductReview.css
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import './EditReview.css';
 
 // Types
@@ -19,6 +19,7 @@ interface ReviewSection {
 interface EditReviewProps {
   generalDetails: Record<string, string>;
   configuration: Record<string, string>;
+  enableLocalStorage?: boolean; // Optional flag to enable localStorage persistence
 }
 
 // Known label overrides for common keys
@@ -94,7 +95,47 @@ const CardSection: React.FC<ReviewSection> = React.memo(({ title, rows }) => {
 });
 CardSection.displayName = 'CardSection';
 
-const EditReview: React.FC<EditReviewProps> = ({ generalDetails, configuration }) => {
+// Utility function to clear localStorage for edit review
+export const clearEditReviewStorage = () => {
+  localStorage.removeItem('editReviewGeneralDetails');
+  localStorage.removeItem('editReviewConfiguration');
+};
+
+// Utility function to load review data from localStorage
+export const loadEditReviewFromStorage = (): {
+  generalDetails: Record<string, string> | null;
+  configuration: Record<string, string> | null;
+} => {
+  try {
+    const generalDetails = localStorage.getItem('editReviewGeneralDetails');
+    const configuration = localStorage.getItem('editReviewConfiguration');
+    return {
+      generalDetails: generalDetails ? JSON.parse(generalDetails) : null,
+      configuration: configuration ? JSON.parse(configuration) : null,
+    };
+  } catch (error) {
+    console.error('Error loading review data from localStorage:', error);
+    return { generalDetails: null, configuration: null };
+  }
+};
+
+const EditReview: React.FC<EditReviewProps> = ({ 
+  generalDetails, 
+  configuration, 
+  enableLocalStorage = true 
+}) => {
+  // Persist to localStorage whenever props change
+  useEffect(() => {
+    if (enableLocalStorage) {
+      if (generalDetails && Object.keys(generalDetails).length > 0) {
+        localStorage.setItem('editReviewGeneralDetails', JSON.stringify(generalDetails));
+      }
+      if (configuration && Object.keys(configuration).length > 0) {
+        localStorage.setItem('editReviewConfiguration', JSON.stringify(configuration));
+      }
+    }
+  }, [generalDetails, configuration, enableLocalStorage]);
+
   const generalRows: ReviewRow[] = orderGeneral(generalDetails).map(([k, v]) => ({
     label: prettify(k),
     value: (v ?? '').toString() || '—',

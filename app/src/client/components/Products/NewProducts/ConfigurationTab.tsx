@@ -377,9 +377,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     // Expose submit via ref (client-side only)
     React.useImperativeHandle(ref, () => ({
       submit: async (isDraft: boolean = false) => {
-        // Skip validation for draft saves
-        if (!isDraft && !validate()) return false;
-        
+        // Always run client-side validation
+        if (!validate()) return false;
+        // If invoked in draft mode (from Save & Next), skip server call
+        if (isDraft) return true;
         try {
           console.log('Original formData:', JSON.parse(JSON.stringify(formData)));
           
