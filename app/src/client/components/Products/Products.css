@@ -37,11 +37,19 @@ body {
 
 .table th {
   border-radius: var(--border-radius-sm);
-  padding: 12px 16px;
+  padding: 6px 16px;
   border-bottom-left-radius:var(--border-radius-sm); 
   border-bottom-right-radius:var(--border-radius-sm); 
   
 
+}
+
+/* FREEZE HEADER */
+.products-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;                    /* stay above rows               */
+  background: var(--color-neutral-100);  /* covers rows under it   */
 }
 .rate-plan-product-container {
   padding: 0;
@@ -411,15 +419,8 @@ line-height: var(--line-height-body-lg);
     margin-left: 0;
     width: calc(100% - 40px); /* keep 20px side gap */
     margin-right: 20px;
-  }
-}
-
+  }}
 /* ensure inner table stretches full wrapper */
-
-/* Prevent window scroll on Products page */
-body.products-page {
-  overflow: hidden;
-}
 
 .products-table-wrapper:hover {
   /* show scrollbar */
@@ -711,7 +712,7 @@ body.products-page {
   flex: 1 1 auto;          /* let it stretch */
   margin-top: 24px;        /* Increased gap between header and table */
   height: auto;            /* no fixed height so bottom padding visible */
-  min-height: calc(100vh - 110px);
+  height: calc(100vh - 110px);
   padding-bottom: 10px;    /* bottom gap */
 }
 
@@ -773,6 +774,8 @@ line-height: var(--line-height-body-sm);
   border: 0.4px solid var(--color-neutral-500);
 }
 
+ 
+
 .product-type-badge--sqlresult {
   background-color: var(--color-neutral-white);
   border-radius: 20px;
@@ -786,13 +789,55 @@ line-height: var(--line-height-body-sm);
   line-height: var(--line-height-body-sm);
 }
 
+/* FlatFile badge */
+.product-type-badge--flatfile {
+  background-color: var(--color-neutral-white);
+  border-radius: 20px;
+  padding: 4px 12px;
+  height: 24px;
+  border: 0.4px solid var(--color-neutral-500);
+  color: var(--color-neutral-1700);
+  font-family: "IBM Plex Sans";
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: var(--line-height-body-sm);
+}
+
+/* LLM Token badge */
+.product-type-badge--llmtoken {
+  background-color: var(--color-neutral-white);
+  border-radius: 20px;
+  padding: 4px 12px;
+  height: 24px;
+  border: 0.4px solid var(--color-neutral-500);
+  color: var(--color-neutral-1700);
+  font-family: "IBM Plex Sans";
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: var(--line-height-body-sm);
+}
+
+.product-type-badge--sqlresult {
+  background-color: var(--color-neutral-white);
+  border-radius: 20px;
+  padding: 4px 12px;
+  height: 24px;
+  border: 0.4px solid var(--color-neutral-500);
+  color: var(--color-neutral-1700);
+  font-family: "IBM Plex Sans";
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: var(--line-height-body-sm);
+}
+
+
 .products-table th {
+  position: sticky;
   background-color: var(--color-neutral-100);
   height: auto;
   padding: 4px 16px;
   text-align: left;
   border-radius: 0; /* remove rounded corners for seamless look */
-  position: sticky;
   top: 0;
   z-index: 1;
   color: var(--color-neutral-800);

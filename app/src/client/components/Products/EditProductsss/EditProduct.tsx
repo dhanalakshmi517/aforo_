@@ -95,7 +95,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
   }, []);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [configuration, setConfiguration] = useState<Record<string, string>>({});
+  const [configuration, setConfiguration] = useState<Record<string, string>>(() => {
+    // Load configuration from localStorage on mount
+    const saved = localStorage.getItem('editConfigFormData');
+    return saved ? JSON.parse(saved) : {};
+  });
   const [isDraft, setIsDraft] = useState(false);
   const [loading, setLoading] = useState(false);
   const configRef = useRef<import('./EditConfiguration').ConfigurationTabHandle>(null);
@@ -208,6 +212,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
         console.error('Failed to delete product', e);
       }
     }
+    // Clear localStorage when canceling/deleting
+    localStorage.removeItem('editConfigFormData');
+    localStorage.removeItem('editConfigProductType');
     onClose();
     navigate('/get-started/products');
   };
@@ -244,12 +251,22 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
   };
 
   const handleConfigChange = React.useCallback((config: Record<string, string>) => {
-    setConfiguration(prev => ({ ...prev, ...config }));
+    setConfiguration(prev => {
+      const updated = { ...prev, ...config };
+      // Persist to localStorage whenever configuration changes
+      localStorage.setItem('editConfigFormData', JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   const handleProductTypeChange = (type: string) => {
-    setConfiguration(prev => ({ ...prev, productType: type }));
+    setConfiguration(prev => {
+      const updated = { ...prev, productType: type };
+      localStorage.setItem('editConfigFormData', JSON.stringify(updated));
+      return updated;
+    });
     setProductType(type);
+    localStorage.setItem('editConfigProductType', type);
   };
 
   const goToStep = (index: number) => {
@@ -357,6 +374,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
       }
 
       console.log('All updates completed successfully');
+      
+      // Clear localStorage after successful save
+      localStorage.removeItem('editConfigFormData');
+      localStorage.removeItem('editConfigProductType');
+      
       return true;
     } catch (err) {
       console.error('Update failed:', err);
@@ -408,7 +430,12 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
         setIsDraft((data.status ?? '').toUpperCase() === 'DRAFT');
         
         // Set product type for configuration component to fetch its data
-        if (data.productType) {
+        // Check localStorage first, then use fetched data
+        const savedProductType = localStorage.getItem('editConfigProductType');
+        if (savedProductType) {
+          setProductType(savedProductType);
+          setConfiguration(prev => ({ ...prev, productType: savedProductType }));
+        } else if (data.productType) {
           setProductType(data.productType);
           handleProductTypeChange(data.productType);
         } else {
@@ -577,6 +604,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
         <EditPopup
           isOpen={showSaveDraftModal}
           onClose={() => {
+            // Clear localStorage when closing without saving
+            localStorage.removeItem('editConfigFormData');
+            localStorage.removeItem('editConfigProductType');
             setShowSaveDraftModal(false);
             onClose();
           }}

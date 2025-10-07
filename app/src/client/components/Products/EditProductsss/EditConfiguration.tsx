@@ -4,6 +4,25 @@ import './ConfigurationTab.css';
 import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
 
 /* ------------------------------------
+ * EditConfiguration Component
+ * ------------------------------------
+ * Enhanced with comprehensive localStorage functionality:
+ * 
+ * LocalStorage Keys:
+ * - editConfigFormData: Current form field values
+ * - editConfigProductType: Selected product type
+ * - editConfigFetchedData: Original data fetched from API (baseline)
+ * - editConfigModifiedFields: Array of field names that user has modified
+ * 
+ * Features:
+ * - Auto-saves all changes to localStorage immediately
+ * - Tracks which fields have been modified after fetch
+ * - Preserves user changes even if data is re-fetched
+ * - Provides utilities to check for unsaved changes
+ * - Merges fetched data with existing user changes intelligently
+ * ------------------------------------*/
+
+/* ------------------------------------
  * Configuration field definitions
  * ------------------------------------*/
 export interface FieldProps {
@@ -214,10 +233,62 @@ export const getSelectOptions = (fieldLabel: string): Array<{ label: string; val
 };
 
 /* ------------------------------------
+ * LocalStorage Utility Functions
+ * ------------------------------------*/
+
+/**
+ * Clears all localStorage data for edit configuration
+ * Removes: form data, product type, fetched data, and modified fields tracking
+ */
+export const clearEditConfigStorage = () => {
+  localStorage.removeItem('editConfigFormData');
+  localStorage.removeItem('editConfigProductType');
+  localStorage.removeItem('editConfigFetchedData');
+  localStorage.removeItem('editConfigModifiedFields');
+};
+
+/**
+ * Gets the list of field names that have been modified by the user
+ * @returns Array of field label strings that were changed after initial fetch
+ */
+export const getModifiedFields = (): string[] => {
+  try {
+    const modifiedFields = localStorage.getItem('editConfigModifiedFields');
+    return modifiedFields ? JSON.parse(modifiedFields) : [];
+  } catch (error) {
+    console.error('Error reading modified fields:', error);
+    return [];
+  }
+};
+
+/**
+ * Checks if there are unsaved changes by comparing current data with fetched baseline
+ * @returns true if current form data differs from originally fetched data
+ */
+export const hasUnsavedChanges = (): boolean => {
+  try {
+    const currentData = localStorage.getItem('editConfigFormData');
+    const fetchedData = localStorage.getItem('editConfigFetchedData');
+    
+    if (!currentData || !fetchedData) return false;
+    
+    return JSON.stringify(JSON.parse(currentData)) !== JSON.stringify(JSON.parse(fetchedData));
+  } catch (error) {
+    console.error('Error checking unsaved changes:', error);
+    return false;
+  }
+};
+
+/* ------------------------------------
  * Public API
  * ------------------------------------*/
 export interface ConfigurationTabHandle {
   submit: () => Promise<boolean>; // now: purely client-side validation
+  clearStorage: () => void; // clear localStorage data
+  getModifiedFields: () => string[]; // get list of modified fields
+  hasUnsavedChanges: () => boolean; // check if there are unsaved changes
+  getCurrentData: () => Record<string, string>; // get current form data
+  getFetchedData: () => Record<string, string> | null; // get original fetched data
 }
 
 export interface ConfigurationTabProps {
@@ -236,16 +307,28 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit }: ConfigurationTabProps,
     ref
   ) => {
-    const [formData, setFormData] = useState<Record<string, string>>({});
-    const [productType, setProductType] = useState(initialProductType || '');
+    const [formData, setFormData] = useState<Record<string, string>>(() => {
+      // Load configuration from localStorage on mount
+      const saved = localStorage.getItem('editConfigFormData');
+      return saved ? JSON.parse(saved) : {};
+    });
+    const [productType, setProductType] = useState(() => {
+      // Load product type from localStorage on mount
+      const saved = localStorage.getItem('editConfigProductType');
+      return saved || initialProductType || '';
+    });
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [isFetched, setIsFetched] = useState(false); // Track if data has been fetched
+    const [hasUserChanges, setHasUserChanges] = useState(false); // Track if user has made changes
 
     // Memoized change handlers
     const handleConfigChange = React.useCallback(
       (updates: Record<string, string>) => {
         const newFormData = { ...formData, ...updates };
         setFormData(newFormData);
+        // Persist to localStorage
+        localStorage.setItem('editConfigFormData', JSON.stringify(newFormData));
         onConfigChange(newFormData);
       },
       [formData, onConfigChange]
@@ -254,8 +337,12 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     const handleProductTypeChange = React.useCallback(
       (type: string) => {
         setProductType(type);
+        // Persist product type to localStorage
+        localStorage.setItem('editConfigProductType', type);
         onProductTypeChange(type);
+        // Clear form data when changing product type
         setFormData({});
+        localStorage.removeItem('editConfigFormData');
         setFieldErrors({});
         setError('');
       },
@@ -294,6 +381,35 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           }
         }
         return true;
+      },
+      clearStorage: () => {
+        clearEditConfigStorage();
+        localStorage.removeItem('editConfigFetchedData');
+        localStorage.removeItem('editConfigModifiedFields');
+        setFormData({});
+        setProductType('');
+        setFieldErrors({});
+        setError('');
+        setIsFetched(false);
+        setHasUserChanges(false);
+      },
+      getModifiedFields: () => {
+        return getModifiedFields();
+      },
+      hasUnsavedChanges: () => {
+        return hasUnsavedChanges();
+      },
+      getCurrentData: () => {
+        return formData;
+      },
+      getFetchedData: () => {
+        try {
+          const fetchedData = localStorage.getItem('editConfigFetchedData');
+          return fetchedData ? JSON.parse(fetchedData) : null;
+        } catch (error) {
+          console.error('Error reading fetched data:', error);
+          return null;
+        }
       }
     }));
 
@@ -356,7 +472,26 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 if (configData.dbType) mapped['DB Type'] = configData.dbType;
                 if (configData.authType) mapped['Auth Type'] = configData.authType;
               }
-              setFormData(mapped);
+              // Check if there are existing user changes in localStorage
+              const existingData = localStorage.getItem('editConfigFormData');
+              const hasExistingChanges = existingData && Object.keys(JSON.parse(existingData)).length > 0;
+              
+              // Only overwrite if there are no existing user changes
+              if (!hasExistingChanges) {
+                setFormData(mapped);
+                localStorage.setItem('editConfigFormData', JSON.stringify(mapped));
+                localStorage.setItem('editConfigFetchedData', JSON.stringify(mapped)); // Store original fetched data
+              } else {
+                // Merge fetched data with existing changes, prioritizing user changes
+                const existingChanges = JSON.parse(existingData);
+                const mergedData = { ...mapped, ...existingChanges };
+                setFormData(mergedData);
+                localStorage.setItem('editConfigFormData', JSON.stringify(mergedData));
+                if (!localStorage.getItem('editConfigFetchedData')) {
+                  localStorage.setItem('editConfigFetchedData', JSON.stringify(mapped));
+                }
+              }
+              setIsFetched(true);
             }
           }
         } catch (err) {
@@ -368,6 +503,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     }, [productId, productType, onConfigChange, initialProductType]);
 
     useEffect(() => {
+      // Persist to localStorage whenever formData changes
+      if (Object.keys(formData).length > 0) {
+        localStorage.setItem('editConfigFormData', JSON.stringify(formData));
+      }
       onConfigChange(formData);
     }, [formData, onConfigChange]);
 
@@ -375,6 +514,18 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       (field: string) => (value: string) => {
         const newFormData = { ...formData, [field]: value };
         setFormData(newFormData);
+        setHasUserChanges(true); // Mark that user has made changes
+        
+        // Persist to localStorage immediately
+        localStorage.setItem('editConfigFormData', JSON.stringify(newFormData));
+        
+        // Track modified fields separately
+        const modifiedFields = JSON.parse(localStorage.getItem('editConfigModifiedFields') || '[]');
+        if (!modifiedFields.includes(field)) {
+          modifiedFields.push(field);
+          localStorage.setItem('editConfigModifiedFields', JSON.stringify(modifiedFields));
+        }
+        
         onConfigChange(newFormData);
         // inline validation for required fields
         const def = (configurationFields[productType] || []).find((f) => f.label === field);
