@@ -236,8 +236,14 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit, isSavingDraft, readOnly = false }: ConfigurationTabProps,
     ref
   ) => {
-    const [formData, setFormData] = useState<Record<string, string>>({});
-    const [productType, setProductType] = useState(initialProductType || '');
+    const [formData, setFormData] = useState<Record<string, string>>(() => {
+      const saved = localStorage.getItem('configFormData');
+      return saved ? JSON.parse(saved) : {};
+    });
+    const [productType, setProductType] = useState(() => {
+      const saved = localStorage.getItem('configProductType');
+      return saved || initialProductType || '';
+    });
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [hasSaved, setHasSaved] = useState(false); // Track if we've saved at least once
@@ -263,6 +269,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         if (!readOnly) {
           setError('');
           setProductType(type);
+          localStorage.setItem('configProductType', type);
           onProductTypeChange(type);
         }
       },
@@ -443,6 +450,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           }
           
           setFormData(newFormData);
+          localStorage.setItem('configFormData', JSON.stringify(newFormData));
           onConfigChange(newFormData);
           
           // inline validation for required fields

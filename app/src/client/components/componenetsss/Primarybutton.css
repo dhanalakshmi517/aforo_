@@ -4,9 +4,8 @@
   .af-primary-btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width:132px auto;
-  
+    justify-content: center; min-width: 134px;
+    width: auto;  
     height: 40px;
     padding: 8px 20px;
     border-radius: var(--border-radius-sm);

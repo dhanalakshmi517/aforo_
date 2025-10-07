@@ -402,7 +402,7 @@ line-height: var(--line-height-body-lg);
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-lg);
   padding: 12px;
-  /* border: 1px solid var(--color-neutral-200); */
+  border: 1px solid var(--color-neutral-200);
   /* box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00); */
 }
 
@@ -472,7 +472,7 @@ body.products-page {
   border-collapse: collapse;
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
-  /* border: 1px solid var(--color-neutral-200); */
+
 
   /* Product Name Container */
   .product-name-container {
@@ -648,36 +648,59 @@ body.products-page {
   border-bottom-right-radius: var(--border-radius-sm);
 }
 
-/* Status badge styles */
+/* Status Badges */
 .product-status-badge {
-  display: inline-block;
-  padding: 4px 12px 6px 12px;
-  border-radius: 20px;
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  text-transform: capitalize;
+  min-width: 80px;
+  justify-content: center;
+  align-items: center;
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-}
-.status-draft {
-  background-color: var(--color-neutral-300);
-  color: var(--color-neutral-1000);
-}
-.status-active {
-  background-color: #EBF9FF;
-  color: #247EA1;
+  border: 1px solid transparent;
 }
 
-/* Make products table fill vertical space */
-.products-table-wrapper {
-  /* fixed height so rows scroll inside */
-  height: 600px;
-  max-height: 600px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-  /* stop flex grow so it doesn’t stretch */
-  flex: 0 0 auto;
-  display: block;
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--border-radius-lg);
+/* Status Colors */
+.status-active,
+.status-published,
+.status-live,
+.status-ACTIVE,
+.status-PUBLISHED,
+.status-LIVE {
+  background: #E6F6E6;
+  color: #006600;
+  border-color: #B3E0B3;
+}
+
+.status-inactive,
+.status-draft,
+.status-pending,
+.status-INACTIVE,
+.status-DRAFT,
+.status-PENDING {
+  background: #FFF2E5;
+  color: #CC5500;
+  border-color: #FFD9B3;
+}
+
+.status-archived,
+.status-suspended,
+.status-ARCHIVED,
+.status-SUSPENDED {
+  background: #F2F2F2;
+  color: #4D4D4D;
+  border-color: #E0E0E0;
+}
+
+.status-configured,
+.status-CONFIGURED {
+  background: var(--color-primary-000);
+  color: var(--color-primary-800);
+  border-color: var(--color-primary-200);
 }
 
 @media (max-width: 767px) {

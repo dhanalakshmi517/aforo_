@@ -3,7 +3,7 @@
 
 /* Global layout */
 html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
-.create-product-page { min-height: 100vh; background: #f7f8fb; }
+.create-product-page { height: 100vh; background: #f7f8fb; }
 
 /* Viewport */
 .rate-np-viewport {

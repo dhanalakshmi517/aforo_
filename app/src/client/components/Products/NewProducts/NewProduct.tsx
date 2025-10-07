@@ -70,11 +70,22 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     return () => {
       document.body.classList.remove("create-product-page");
       window.removeEventListener('popstate', handleBackButton);
+      // Clear localStorage on unmount
+      localStorage.removeItem('activeTab');
+      localStorage.removeItem('currentStep');
+      localStorage.removeItem('configFormData');
+      localStorage.removeItem('configProductType');
     };
   }, [navigate]);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("general");
+  const [currentStep, setCurrentStep] = useState(() => {
+    const saved = localStorage.getItem('currentStep');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    const saved = localStorage.getItem('activeTab');
+    return (saved as ActiveTab) || "general";
+  });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
@@ -185,6 +196,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     setCurrentStep(index);
     const firstWord = steps[index].title.split(" ")[0].toLowerCase() as ActiveTab;
     setActiveTab(firstWord);
+    // Store in localStorage to persist state
+    localStorage.setItem('activeTab', firstWord);
+    localStorage.setItem('currentStep', index.toString());
   };
 
   const handleBack = () => {
@@ -548,7 +562,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             }}
                             initialProductType={configuration.productType}
                             isSavingDraft={isSaving}
-                            readOnly={activeTab !== 'configuration'}
+                            readOnly={false}
                           />
                         </section>
                       )}
@@ -694,26 +708,45 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           try {
             if (createdProductId) {
               await deleteProduct(createdProductId);
+              // Only show toast if there was actually a product to delete
+              showToast({
+                kind: 'success',
+                title: 'Product Deleted',
+                message: 'Product deleted successfully.'
+              });
             }
           } catch (e) {
             console.error('Failed to delete product on discard', e);
             ok = false;
-          } finally {
+            // Only show error toast if deletion failed
             showToast({
-              kind: ok ? 'success' : 'error',
-              title: ok ? 'Product Deleted' : 'Delete Failed',
-              message: ok ? 'Product deleted successfully.' : 'Unable to delete product. Please try again.'
+              kind: 'error',
+              title: 'Delete Failed',
+              message: 'Unable to delete product. Please try again.'
             });
+          } finally {
             onClose();
           }
         }}
         onSave={async () => {
           const ok = await handleSaveDraft();
-          showToast({
-            kind: ok ? "success" : "error",
-            title: ok ? "Product Draft Saved" : "Failed to Save Draft",
-            message: ok ? "Product draft saved successfully." : "Unable to save draft. Please try again."
-          });
+          // Check if user has filled any details
+          const hasData = formData.productName || formData.version || formData.skuCode || formData.description;
+          
+          // Show success toast if save was successful and there's data
+          if (ok && hasData) {
+            showToast({
+              kind: "success",
+              title: "Product Draft Saved",
+              message: "Product draft saved successfully."
+            });
+          } else if (!ok) {
+            showToast({
+              kind: "error",
+              title: "Failed to Save Draft",
+              message: "Unable to save draft. Please try again."
+            });
+          }
           onClose();
         }}
         onDismiss={() => {
@@ -733,16 +766,23 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           try {
             if (createdProductId) {
               await deleteProduct(createdProductId);
+              // Only show success toast if there was actually a product to delete
+              showToast({
+                kind: 'success',
+                title: 'Product Deleted',
+                message: 'Product deleted successfully.'
+              });
             }
           } catch (e) {
             console.error('Failed to delete product', e);
             ok = false;
-          } finally {
+            // Only show error toast if deletion failed
             showToast({
-              kind: ok ? 'success' : 'error',
-              title: ok ? 'Product Deleted' : 'Delete Failed',
-              message: ok ? 'Product deleted successfully.' : 'Unable to delete product. Please try again.'
+              kind: 'error',
+              title: 'Delete Failed',
+              message: 'Unable to delete product. Please try again.'
             });
+          } finally {
             setShowDeleteConfirm(false);
             onClose();
           }

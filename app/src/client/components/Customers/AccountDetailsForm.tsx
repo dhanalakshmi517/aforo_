@@ -278,7 +278,6 @@ const AccountDetailsForm: React.FC<Props> = ({
 
       {/* Secondary Email IDs */}
       <div className="acc-form-group">
-        <label>Secondary Email IDs</label>
         {additionalEmails.map((email, idx) => (
           <div key={idx} className="email-row">
             <InputField
@@ -290,7 +289,7 @@ const AccountDetailsForm: React.FC<Props> = ({
             />
           </div>
         ))}
-        <button type="button" className="add-email-btn" onClick={addEmailField}>+ Add</button>
+        <button type="button" className="add-email-btn" onClick={addEmailField}>+ Add Additional Email Recipients</button>
       </div>
 
       {/* Billing Address */}

@@ -349,9 +349,21 @@
 }
 
 /* ====== Logo Uploader (copied from Create) ====== */
+/* Constrain the logo uploader form group */
+.edit-np-form-group:has(.logo-uploader) {
+  flex: 0 0 456px !important;
+  max-width: 456px !important;
+  min-width: 456px !important;
+}
+
+/* Constrain the logo uploader itself */
+.logo-uploader {
+  width: 456px !important;
+  max-width: 456px !important;
+}
+
 .logo-box{
-  width: 100%;
-  max-width: 100%;
+  width: 456px;
   height: 36px;
   display:flex;
   align-items:center;

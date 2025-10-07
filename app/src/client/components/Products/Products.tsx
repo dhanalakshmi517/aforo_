@@ -369,7 +369,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               filterDisabled={false}
               showPrimary={filteredProducts.length > 0}
               showKongButton={filteredProducts.length > 0}
-              primaryLabel="New Product"
+              primaryLabel="+ Create Product"
               onPrimaryClick={() => navigate('/get-started/products/new')}
               onFilterClick={() => { }}
               onSettingsClick={() => setShowKongIntegration(true)}
@@ -491,7 +491,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             <PrimaryButton
                               onClick={() => navigate('/get-started/products/new')}
                             >
-                              + New Product
+                              + Create Product
                             </PrimaryButton>
                             <TertiaryButton
                               onClick={() => {
