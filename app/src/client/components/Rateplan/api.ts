@@ -23,6 +23,7 @@ export interface Product {
  * Constants
  * ========================= */
 export const BASE_URL = 'http://54.238.204.246:8080/api';
+const BM_BASE = 'http://18.182.19.181:8081/api/billable-metrics';
 
 /* =========================
  * Helpers
@@ -82,7 +83,7 @@ function extractNumericId(maybe: any, keys: string[] = []): number | undefined {
     ? keys
     : ['flatFeeId','usageBasedPricingId','tieredPricingId','stairStepPricingId','volumePricingId','id'];
   for (const k of candidates) {
-    const v = maybe[k];
+    const v = (maybe as any)[k];
     const n = typeof v === 'string' ? Number(v) : v;
     if (Number.isFinite(n)) return n as number;
   }
@@ -101,10 +102,21 @@ export interface BillableMetric {
  * Billable Metrics APIs
  * ========================= */
 export const fetchBillableMetrics = async (productName?: string): Promise<BillableMetric[]> => {
-  const base = 'http://18.182.19.181:8081/api/billable-metrics';
-  const url = productName ? `${base}?product=${encodeURIComponent(productName)}` : base;
+  const url = productName ? `${BM_BASE}?product=${encodeURIComponent(productName)}` : BM_BASE;
   const response = await axios.get(nocache(url));
   return response.data;
+};
+
+// ⬇️ NEW: get billable metric by id
+export const fetchBillableMetricById = async (metricId: number) => {
+  const { data } = await axios.get(nocache(`${BM_BASE}/${metricId}`));
+  return data as {
+    metricId: number;
+    metricName: string;
+    unitOfMeasure?: string;   // e.g. "API_CALL"
+    uom?: string;
+    uomShort?: string;
+  };
 };
 
 /* =========================
@@ -219,7 +231,6 @@ export interface UsageBasedPricingPayload {
  * Pricing APIs
  * ========================================================= */
 
-// FLAT FEE (POST-first with GET+PUT fallback)
 export const saveFlatFeePricing = async (ratePlanId: number, payload: FlatFeePayload) => {
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/flatfee`;
   const clean = stripIds(payload);
@@ -239,7 +250,6 @@ export const saveFlatFeePricing = async (ratePlanId: number, payload: FlatFeePay
   }
 };
 
-// VOLUME-BASED — GET-first so we update instead of creating duplicates
 export const saveVolumePricing = async (ratePlanId: number, payload: VolumePricingPayload) => {
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/volume-pricing`;
   const clean = stripIds(payload);
@@ -262,7 +272,6 @@ export const saveVolumePricing = async (ratePlanId: number, payload: VolumePrici
   return axios.post(baseUrl, clean);
 };
 
-// TIERED — GET-first
 export const saveTieredPricing = async (ratePlanId: number, payload: TieredPricingPayload) => {
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/tiered`;
   const clean = stripIds(payload);
@@ -285,34 +294,28 @@ export const saveTieredPricing = async (ratePlanId: number, payload: TieredPrici
   return axios.post(baseUrl, clean);
 };
 
-// ✅ STAIRSTEP — GET-first so we PUT the existing record instead of POSTing new ones
 export const saveStairStepPricing = async (ratePlanId: number, payload: StairStepPricingPayload) => {
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/stairstep`;
   const clean = stripIds(payload);
 
-  // 1) Try to fetch existing stairstep pricing(s)
   try {
     const { data } = await axios.get(nocache(baseUrl));
     if (hasUsefulData(data)) {
       const latest = pickLatest<any>(data);
       const stairStepPricingId = extractNumericId(latest, ['stairStepPricingId', 'id']);
       if (stairStepPricingId != null) {
-        // 2) Update existing
         return axios.put(`${baseUrl}/${stairStepPricingId}`, clean);
       }
     }
   } catch (getErr: any) {
-    // If GET fails with 404/500, we'll POST a new one; otherwise bubble up.
     if (getErr?.response && getErr.response.status !== 404 && getErr.response.status !== 500) {
       throw getErr;
     }
   }
 
-  // 3) Nothing to update -> create new
   return axios.post(baseUrl, clean);
 };
 
-// USAGE-BASED — GET-first
 export const saveUsageBasedPricing = async (ratePlanId: number, payload: UsageBasedPricingPayload) => {
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/usagebased`;
   const clean = stripIds(payload);
@@ -364,7 +367,6 @@ export interface FreemiumPayload {
   endDate: string;
 }
 
-// fetch latest item + its id for a given extras endpoint
 async function getExistingExtrasItem(ratePlanId: number, endpoint: string): Promise<{ id?: number; item?: any } | null> {
   try {
     const { data } = await axios.get(nocache(`${BASE_URL}/rateplans/${ratePlanId}/${endpoint}`));
@@ -379,7 +381,6 @@ async function getExistingExtrasItem(ratePlanId: number, endpoint: string): Prom
   }
 }
 
-// Setup Fee: POST -> PATCH/PUT /setupfees/{id}
 export const saveSetupFee = async (ratePlanId: number, payload: SetupFeePayload, usePut: boolean = false) => {
   const endpoint = 'setupfees';
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/${endpoint}`;
@@ -393,7 +394,6 @@ export const saveSetupFee = async (ratePlanId: number, payload: SetupFeePayload,
   return axios.post(baseUrl, payload);
 };
 
-// Discounts: POST -> PATCH/PUT /discounts/{id}
 export const saveDiscounts = async (ratePlanId: number, payload: DiscountPayload, usePut: boolean = false) => {
   const endpoint = 'discounts';
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/${endpoint}`;
@@ -407,7 +407,6 @@ export const saveDiscounts = async (ratePlanId: number, payload: DiscountPayload
   return axios.post(baseUrl, payload);
 };
 
-// Freemiums: POST -> PATCH/PUT /freemiums/{id}
 export const saveFreemiums = async (ratePlanId: number, payload: FreemiumPayload, usePut: boolean = false) => {
   const endpoint = 'freemiums';
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/${endpoint}`;
@@ -421,7 +420,6 @@ export const saveFreemiums = async (ratePlanId: number, payload: FreemiumPayload
   return axios.post(baseUrl, payload);
 };
 
-// Minimum Commitments: POST -> PATCH/PUT /minimumcommitments/{id}
 export const saveMinimumCommitment = async (ratePlanId: number, payload: MinimumCommitmentPayload, usePut: boolean = false) => {
   const endpoint = 'minimumcommitments';
   const baseUrl = `${BASE_URL}/rateplans/${ratePlanId}/${endpoint}`;
@@ -439,9 +437,16 @@ export const saveMinimumCommitment = async (ratePlanId: number, payload: Minimum
  * Snapshots
  * ========================= */
 
-export async function getPricingSnapshot(ratePlanId: number) {
-  console.log('🔍 Fetching pricing snapshot for ratePlanId:', ratePlanId);
+// Label map for UI
+const PRICING_MODEL_LABELS: Record<string, string> = {
+  USAGE: 'Usage-based',
+  FLAT_FEE: 'Flat fee',
+  VOLUME: 'Volume',
+  TIERED: 'Tiered',
+  STAIRSTEP: 'Stair-step'
+};
 
+export async function getPricingSnapshot(ratePlanId: number) {
   const endpoints = [
     { key: 'USAGE',     url: `${BASE_URL}/rateplans/${ratePlanId}/usagebased` },
     { key: 'FLAT_FEE',  url: `${BASE_URL}/rateplans/${ratePlanId}/flatfee` },
@@ -451,13 +456,8 @@ export async function getPricingSnapshot(ratePlanId: number) {
   ];
 
   const results = await Promise.allSettled(endpoints.map(e => axios.get(nocache(e.url))));
-  console.log('📊 Pricing endpoint results:', results.map((r, i) => ({
-    endpoint: endpoints[i].key,
-    status: r.status,
-    data: r.status === 'fulfilled' ? (r as any).value.data : (r as any)?.reason?.response?.status
-  })));
 
-  let chosen: { model: string; data: any } | null = null;
+  let chosen: { model: keyof typeof PRICING_MODEL_LABELS; data: any } | null = null;
   for (let i = 0; i < endpoints.length; i++) {
     const r = results[i];
     if (r.status !== 'fulfilled') continue;
@@ -465,22 +465,14 @@ export async function getPricingSnapshot(ratePlanId: number) {
     if (!hasUsefulData(raw)) continue;
     const normalized = pickLatest<any>(raw);
     if (!hasUsefulData(normalized)) continue;
-    chosen = { model: endpoints[i].key, data: normalized };
+    chosen = { model: endpoints[i].key as any, data: normalized };
     break;
   }
 
-  if (!chosen) {
-    console.log('❌ No pricing model found');
-    return null;
-  }
-
-  console.log('✅ Found pricing model:', chosen);
-  return chosen;
+  return chosen; // may be null
 }
 
 export async function getExtrasSnapshot(ratePlanId: number) {
-  console.log('🎁 Fetching extras snapshot for ratePlanId:', ratePlanId);
-
   const [setup, discount, freemium, minc] = await Promise.allSettled([
     axios.get(nocache(`${BASE_URL}/rateplans/${ratePlanId}/setupfees`)),
     axios.get(nocache(`${BASE_URL}/rateplans/${ratePlanId}/discounts`)),
@@ -492,18 +484,24 @@ export async function getExtrasSnapshot(ratePlanId: number) {
     if (r.status !== 'fulfilled') return undefined;
     const data = r.value.data;
     return pickLatest(data);
-    // Note: pickLatest from helpers
   };
 
-  const result = {
+  return {
     setupFee: pick(setup),
     discount: pick(discount),
     freemium: pick(freemium),
     minimumCommitment: pick(minc),
   };
+}
 
-  console.log('✅ Extras data collected:', result);
-  return result;
+// Infer model key from raw plan fields when snapshot failed
+function inferModelKeyFromPlan(plan: any): keyof typeof PRICING_MODEL_LABELS | undefined {
+  if (plan?.flatFee || plan?.flatFeeAmount != null) return 'FLAT_FEE';
+  if (plan?.usageBasedPricing || plan?.perUnitAmount != null) return 'USAGE';
+  if (plan?.tieredPricing) return 'TIERED';
+  if (plan?.stairStepPricing) return 'STAIRSTEP';
+  if (plan?.volumePricing) return 'VOLUME';
+  return undefined;
 }
 
 export async function fetchRatePlanWithDetails(ratePlanId: number) {
@@ -518,6 +516,23 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
     const pricing = pricingResult.status === 'fulfilled' ? pricingResult.value : null;
     const extras: any = extrasResult.status === 'fulfilled' ? extrasResult.value : {};
 
+    // ---------------- Billable Metric lookup by id (NEW) ----------------
+    try {
+      const bmId = Number(plan?.billableMetricId);
+      if (Number.isFinite(bmId)) {
+        const bm = await fetchBillableMetricById(bmId);
+        if (bm) {
+          plan.billableMetric = {
+            name: bm.metricName ?? (bm as any).name ?? '',
+            uomShort: bm.unitOfMeasure ?? (bm as any).uomShort ?? (bm as any).uom ?? ''
+          };
+        }
+      }
+    } catch (e) {
+      // swallow – badge will fall back to "—"
+    }
+
+    // --- copy pricing data and set pricing model name/key for UI ---
     if (pricing) {
       const data = pricing.data;
       switch (pricing.model) {
@@ -541,8 +556,17 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
           plan.usageBasedPricing = { ...data };
           break;
       }
+      plan.pricingModelKey = pricing.model;
+      plan.pricingModelName = PRICING_MODEL_LABELS[pricing.model] || pricing.model;
+    } else {
+      const inferred = inferModelKeyFromPlan(plan);
+      if (inferred) {
+        plan.pricingModelKey = inferred;
+        plan.pricingModelName = PRICING_MODEL_LABELS[inferred];
+      }
     }
 
+    // --- extras ---
     const ex = extras || {};
     if (ex.setupFee)           plan.setupFee = ex.setupFee;
     if (ex.discount)           plan.discount = ex.discount;
@@ -552,6 +576,12 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
     return plan;
   } catch (error) {
     console.error('Failed to fetch complete rate plan details:', error);
-    return await fetchRatePlan(ratePlanId);
+    const plan = await fetchRatePlan(ratePlanId);
+    const inferred = inferModelKeyFromPlan(plan);
+    if (inferred) {
+      (plan as any).pricingModelKey = inferred;
+      (plan as any).pricingModelName = PRICING_MODEL_LABELS[inferred];
+    }
+    return plan;
   }
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import './ConfigurationTab.css';
 import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
-import { saveConfiguration as sendConfiguration } from './NewProductApi';
+import { saveProductConfiguration } from '../api';
 
 /* ------------------------------------
  * Configuration field definitions
@@ -361,7 +361,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           isUpdate
         });
         
-        await sendConfiguration(productId, productType, requestBody);
+        await saveProductConfiguration(productId, productType, requestBody, hasSaved);
         
         // Mark as saved after first successful save (regardless of draft status)
         setHasSaved(true);
