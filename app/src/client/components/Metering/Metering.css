@@ -152,7 +152,6 @@ body {
 /* No fixed column widths; let browser auto-size */
 /* widen first column */
 
-.metering-table th,
 .metering-table td {
   padding: 18px 16px;
   text-align: left;
