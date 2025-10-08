@@ -119,6 +119,26 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
     setRatePlanData('VOLUME_OVERAGE', overageUnitRate.toString());
   }, [overageUnitRate]);
 
+  useEffect(() => {
+    // Save grace buffer to session storage whenever it changes
+    setRatePlanData('VOLUME_GRACE', graceBuffer.toString());
+  }, [graceBuffer]);
+
+  // Debug: Log when graceBuffer prop changes
+  useEffect(() => {
+    console.log('📊 Volume: graceBuffer prop changed to:', graceBuffer);
+  }, [graceBuffer]);
+
+  // Debug: Log component mount with all props
+  useEffect(() => {
+    console.log('📊 Volume: Component mounted with props:', {
+      tiersLength: tiers.length,
+      overageUnitRate,
+      graceBuffer,
+      noUpperLimit
+    });
+  }, []);
+
   const markTouched = (index: number, field: keyof TierTouched) => {
     setTierTouched(prev => {
       const newTouched = [...prev];

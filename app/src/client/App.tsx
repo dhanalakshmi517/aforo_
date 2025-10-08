@@ -203,7 +203,7 @@ export default function App() {
           <Route path="/contact-sales" element={<div className="min-h-screen"><Organization /></div>} />
           <Route path="/thank-you" element={<div className="min-h-screen"><ThankYou /></div>} />
           <Route
-            path="/*"
+            path="*"
             element={user ? <Navigate to="/get-started" replace /> : <div className="min-h-screen"><Landing /></div>}
           />
 
