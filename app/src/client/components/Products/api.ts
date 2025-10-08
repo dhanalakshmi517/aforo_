@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { isAuthenticated, getAuthData, clearAuthData } from '../../utils/auth';
 
 export type Product = {
@@ -9,10 +9,12 @@ export type Product = {
   status: string;
   category: string;
   createdOn?: string;
-  icon?: string; // <-- backend may return "/uploads/icons/<file>.svg"
+  icon?: string; // backend may return "/uploads/icons/<file>.svg" or "api/uploads/..."
 };
 
 export const BASE_URL = 'http://54.238.204.246:8080/api';
+// Useful if you ever need to build absolute URLs without doubling "/api"
+export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 
 export interface BillableMetric {
   unitOfMeasure: string;
@@ -87,11 +89,11 @@ const createApiClient = (): AxiosInstance => {
       if (authData?.token) {
         config.headers.Authorization = `Bearer ${authData.token}`;
       }
-
+      // Attach Content-Type smartly
       if (config.data instanceof FormData) {
-        config.headers['Content-Type'] = 'multipart/form-data';
+        (config.headers as any)['Content-Type'] = 'multipart/form-data';
       } else {
-        config.headers['Content-Type'] = 'application/json';
+        (config.headers as any)['Content-Type'] = 'application/json';
       }
       return config;
     },
@@ -186,6 +188,7 @@ export const createProduct = async (
     const api = createApiClient();
     const response = await api.post<Product>('/products', formData, {
       headers: {
+        // Some backends require org header during creation
         'X-Organization-Id': authData?.organizationId?.toString() || ''
       }
     });
@@ -315,7 +318,7 @@ export const saveProductConfiguration = async (
 ): Promise<any> => {
   try {
     const api = createApiClient();
-    const normalizedType = productType.toLowerCase();
+    const normalizedType = (productType || '').toLowerCase();
     const operationType = isUpdate ? 'update' : 'create';
 
     const createPayload = (data: Record<string, any>): Record<string, any> => {
@@ -430,10 +433,10 @@ export const saveProductConfiguration = async (
       return Object.entries(obj).reduce((acc, [key, value]) => {
         if (value === null || value === undefined) return acc;
         if (typeof value === 'object' && !Array.isArray(value)) {
-          const cleaned = cleanPayload(value);
+          const cleaned = cleanPayload(value as Record<string, any>);
           if (Object.keys(cleaned).length > 0) (acc as any)[key] = cleaned;
         } else if (Array.isArray(value)) {
-          const cleanedArray = value
+          const cleanedArray = (value as any[])
             .map((item) => (typeof item === 'object' && item !== null ? cleanPayload(item) : item))
             .filter((item) => item !== undefined && item !== null && item !== '');
           if (cleanedArray.length > 0) (acc as any)[key] = cleanedArray;
@@ -472,8 +475,9 @@ export const finalizeProduct = async (
       throw new Error('No authentication token found. Please log in again.');
     }
     const api = createApiClient();
+    // small delay to show progress UI if needed
     await new Promise((resolve) => setTimeout(resolve, 500));
-    const response = await api.post(`/products/${productId}/finalize`, {}, {
+    await api.post(`/products/${productId}/finalize`, {}, {
       headers: {
         'X-Organization-Id': authData?.organizationId?.toString() || ''
       }
