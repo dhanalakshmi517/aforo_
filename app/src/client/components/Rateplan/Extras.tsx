@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import {
   saveSetupFee,
   saveDiscounts,
@@ -23,38 +23,190 @@ interface ExtrasProps {
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
+// 🔁 MAP: API ⇄ UI freemium type
+type UIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
+type APIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL' | 'UNITS_PER_DURATION';
+
+const apiToUiFreemium = (api: APIFreemiumType | '' | undefined): UIFreemiumType => {
+  if (api === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
+  if (api === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
+  return 'FREE_UNITS';
+};
+
+const uiToApiFreemium = (ui: UIFreemiumType | '' | undefined): APIFreemiumType => {
+  if (ui === 'FREE_TRIAL_DURATION') return 'FREE_TRIAL';
+  if (ui === 'FREE_UNITS_PER_DURATION') return 'UNITS_PER_DURATION';
+  return 'FREE_UNITS';
+};
+
 const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData }, ref) => {
+  // ❌ Removed aggressive clear on null ratePlanId (that was nuking saved values)
+  // React.useEffect(() => {
+  //   if (!ratePlanId) clearExtrasLocalStorage();
+  // }, [ratePlanId]);
+
+  // ✅ Optional guarded clear: only when switching between two *different* valid plans
+  const prevRatePlanIdRef = useRef<number | null>(null);
   React.useEffect(() => {
-    if (!ratePlanId) clearExtrasLocalStorage();
+    if (
+      prevRatePlanIdRef.current !== null &&
+      ratePlanId !== null &&
+      prevRatePlanIdRef.current !== ratePlanId
+    ) {
+      // We're switching to a different plan explicitly; safe to clear
+      clearExtrasLocalStorage();
+    }
+    if (ratePlanId !== null) {
+      prevRatePlanIdRef.current = ratePlanId;
+    }
   }, [ratePlanId]);
 
-  // Initialize from draftData (direct from backend) - much better than session storage!
+  // -------------------------------------------------------
+  // Hydrate from sessionStorage when no backend draft data
+  // -------------------------------------------------------
+  React.useEffect(() => {
+    // Skip session storage hydration if we have draftData (even if empty object)
+    if (draftData !== null && draftData !== undefined) {
+      console.log('⏭️ Skipping session storage hydration - draftData exists:', draftData);
+      return;
+    }
+
+    console.log('🔍 Session storage hydration - checking for existing data...');
+    const sections: string[] = [];
+
+    // Setup Fee
+    const setupFeeStr = getRatePlanData('SETUP_FEE');
+    const setupTimingStr = getRatePlanData('SETUP_APPLICATION_TIMING');
+    const invoiceDesc = getRatePlanData('SETUP_INVOICE_DESC');
+    if (setupFeeStr && Number(setupFeeStr) > 0) {
+      setSetupFeePayload(prev => ({
+        ...prev,
+        setupFee: Number(setupFeeStr),
+        applicationTiming: setupTimingStr ? Number(setupTimingStr) : 0,
+        invoiceDescription: invoiceDesc || '',
+      }));
+      sections.push('setupFee');
+    }
+
+    // Discounts
+    const percentStr = getRatePlanData('DISCOUNT_PERCENT');
+    const flatStr    = getRatePlanData('DISCOUNT_FLAT');
+    const typeStr    = getRatePlanData('DISCOUNT_TYPE');
+    const eligStr    = getRatePlanData('ELIGIBILITY');
+    const dStart     = getRatePlanData('DISCOUNT_START');
+    const dEnd       = getRatePlanData('DISCOUNT_END');
+
+    // Only expand if there's actual meaningful data (not just empty strings)
+    const hasDiscountData = (
+      (percentStr && Number(percentStr) > 0) ||
+      (flatStr && Number(flatStr) > 0) ||
+      (eligStr && eligStr.trim()) ||
+      (dStart && dStart.trim()) ||
+      (dEnd && dEnd.trim())
+    );
+
+    if (hasDiscountData) {
+      setDiscountForm(prev => ({
+        ...prev,
+        discountType: (typeStr as 'PERCENTAGE'|'FLAT') || (percentStr ? 'PERCENTAGE' : 'FLAT'),
+        percentageDiscountStr: percentStr || '',
+        flatDiscountAmountStr: flatStr || '',
+        eligibility: eligStr || '',
+        startDate: dStart || '',
+        endDate: dEnd || '',
+      }));
+      sections.push('discounts');
+    }
+
+    // Freemium (session storage is in UI terms; convert for payload)
+    const freeTypeStr   = getRatePlanData('FREEMIUM_TYPE') as UIFreemiumType | '' | null;
+    const freeUnitsStr  = getRatePlanData('FREEMIUM_UNITS');
+    const trialDurStr   = getRatePlanData('FREE_TRIAL_DURATION');
+    const freeStartStr  = getRatePlanData('FREEMIUM_START');
+    const freeEndStr    = getRatePlanData('FREEMIUM_END');
+
+    console.log('🔍 Session storage freemium values:', {
+      freeTypeStr, freeUnitsStr, trialDurStr, freeStartStr, freeEndStr
+    });
+
+    // Only expand if there's actual meaningful data (not just empty strings or null/undefined)
+    const hasFreemiumData = (
+      (freeTypeStr && typeof freeTypeStr === 'string' && freeTypeStr.trim()) ||
+      (freeUnitsStr && typeof freeUnitsStr === 'string' && freeUnitsStr.trim() && Number(freeUnitsStr) > 0) ||
+      (trialDurStr && typeof trialDurStr === 'string' && trialDurStr.trim() && Number(trialDurStr) > 0) ||
+      (freeStartStr && typeof freeStartStr === 'string' && freeStartStr.trim()) ||
+      (freeEndStr && typeof freeEndStr === 'string' && freeEndStr.trim())
+    );
+
+    console.log('🎯 hasFreemiumData result:', hasFreemiumData);
+
+    if (hasFreemiumData) {
+      const inferredUi: UIFreemiumType =
+        (freeTypeStr as UIFreemiumType) ||
+        (freeUnitsStr ? 'FREE_UNITS' : trialDurStr ? 'FREE_TRIAL_DURATION' : 'FREE_UNITS');
+
+      const apiType = uiToApiFreemium(inferredUi);
+
+      setFreemiumType(inferredUi);
+      setFreemiumPayload({
+        freemiumType: apiType,
+        freeUnits: freeUnitsStr ? Number(freeUnitsStr) : 0,
+        freeTrialDuration: trialDurStr ? Number(trialDurStr) : 0,
+        startDate: freeStartStr || '',
+        endDate: freeEndStr || '',
+      });
+      sections.push('freemium');
+    }
+
+    // Minimum Commitment
+    const minUsageStr = getRatePlanData('MINIMUM_USAGE');
+    const minChargeStr = getRatePlanData('MINIMUM_CHARGE');
+    if (minUsageStr && Number(minUsageStr) > 0) {
+      setMinimumUsage(minUsageStr);
+      setMinimumCharge('');
+      sections.push('commitment');
+    } else if (minChargeStr && Number(minChargeStr) > 0) {
+      setMinimumCharge(minChargeStr);
+      setMinimumUsage('');
+      sections.push('commitment');
+    }
+
+    console.log('📋 Session storage sections to expand:', sections);
+    if (sections.length) {
+      setActiveSections(sections);
+      console.log('✅ Expanded sections from session storage:', sections);
+    } else {
+      console.log('✅ No sections to expand - keeping all closed');
+    }
+  }, [draftData]);
+
+  // Initialize from draftData (direct from backend)
   React.useEffect(() => {
     if (!draftData) {
+      // eslint-disable-next-line no-console
       console.log('🎁 Extras component mounted - no draft data, using defaults');
       return;
     }
 
+    // eslint-disable-next-line no-console
     console.log('🚀 Extras component mounted - initializing from backend draft data:', draftData);
+    console.log('🔍 Checking freemium data structure:', draftData.freemium);
+    console.log('🔍 Checking freemiums array:', draftData.freemiums);
 
     const sectionsToExpand: string[] = [];
 
-    // Setup Fee - now properly handled as object (not array)
+    // Setup Fee
     if (draftData.setupFee && typeof draftData.setupFee === 'object') {
-      console.log('🔧 Found Setup Fee in draft data:', draftData.setupFee);
       setSetupFeePayload({
         setupFee: draftData.setupFee.setupFee || 0,
         applicationTiming: draftData.setupFee.applicationTiming || 0,
         invoiceDescription: draftData.setupFee.invoiceDescription || '',
       });
       sectionsToExpand.push('setupFee');
-    } else {
-      console.log('❌ No valid Setup Fee data found');
     }
 
-    // Discounts - now properly handled as object (not array)
+    // Discounts
     if (draftData.discount && typeof draftData.discount === 'object') {
-      console.log('💰 Found Discount in draft data:', draftData.discount);
       setDiscountForm({
         discountType: draftData.discount.discountType || 'PERCENTAGE',
         percentageDiscountStr: String(draftData.discount.percentageDiscount || ''),
@@ -64,47 +216,57 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         endDate: draftData.discount.endDate || '',
       });
       sectionsToExpand.push('discounts');
-    } else {
-      console.log('❌ No valid Discount data found');
     }
 
-    // Freemium - now properly handled as object (not array)
+    // Freemium - check both freemium (object) and freemiums (array)
+    let freemiumData = null;
     if (draftData.freemium && typeof draftData.freemium === 'object') {
-      console.log('🎁 Found Freemium in draft data:', draftData.freemium);
-      const freemiumTypeValue = draftData.freemium.freemiumType || 'FREE_UNITS';
-      setFreemiumType(freemiumTypeValue);
+      freemiumData = draftData.freemium;
+      console.log('✅ Found freemium object:', freemiumData);
+    } else if (draftData.freemiums && Array.isArray(draftData.freemiums) && draftData.freemiums.length > 0) {
+      freemiumData = draftData.freemiums[0]; // Take first item from array
+      console.log('✅ Found freemiums array, using first item:', freemiumData);
+    }
+
+    if (freemiumData) {
+      // API gives APIFreemiumType → convert to UI for dropdown
+      const apiType = (freemiumData.freemiumType || 'FREE_UNITS') as APIFreemiumType;
+      const uiType = apiToUiFreemium(apiType);
+
+      console.log('🔄 Converting freemium types:', { apiType, uiType });
+      console.log('📊 Freemium values:', {
+        freeUnits: freemiumData.freeUnits,
+        freeTrialDuration: freemiumData.freeTrialDuration,
+        startDate: freemiumData.startDate,
+        endDate: freemiumData.endDate
+      });
+
+      setFreemiumType(uiType); // UI dropdown value
       setFreemiumPayload({
-        freemiumType: freemiumTypeValue,
-        freeUnits: draftData.freemium.freeUnits || 0,
-        freeTrialDuration: draftData.freemium.freeTrialDuration || 0,
-        startDate: draftData.freemium.startDate || '',
-        endDate: draftData.freemium.endDate || '',
+        freemiumType: apiType,   // keep API value in payload
+        freeUnits: freemiumData.freeUnits || 0,
+        freeTrialDuration: freemiumData.freeTrialDuration || 0,
+        startDate: freemiumData.startDate || '',
+        endDate: freemiumData.endDate || '',
       });
       sectionsToExpand.push('freemium');
+      console.log('✅ Freemium section will be expanded');
     } else {
-      console.log('❌ No valid Freemium data found');
+      console.log('❌ No freemium data found in draftData');
     }
 
-    // Minimum Commitment - now properly handled as object (not array)
+    // Minimum Commitment
     if (draftData.minimumCommitment && typeof draftData.minimumCommitment === 'object') {
-      console.log('💼 Found Minimum Commitment in draft data:', draftData.minimumCommitment);
       setMinimumUsage(String(draftData.minimumCommitment.minimumUsage || ''));
       setMinimumCharge(String(draftData.minimumCommitment.minimumCharge || ''));
       sectionsToExpand.push('commitment');
-    } else {
-      console.log('❌ No valid Minimum Commitment data found');
     }
 
-    // Auto-expand sections that have data
-    if (sectionsToExpand.length > 0) {
-      console.log('🔄 Auto-expanding sections:', sectionsToExpand);
-      setActiveSections(sectionsToExpand);
-    }
-
-    console.log('✅ Extras component initialized from backend data - no session storage needed!');
+    console.log('📋 Backend draft sections to expand:', sectionsToExpand);
+    setActiveSections(sectionsToExpand); // Always set, even if empty array
   }, [draftData]);
 
-  // Save state for each section's button
+  // Save state for buttons
   const [saveState, setSaveState] = useState<{
     setupFee: SaveState;
     discounts: SaveState;
@@ -139,12 +301,10 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   });
 
   /** Freemium */
-  const [freemiumType, setFreemiumType] = useState<
-    'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION'
-  >('FREE_UNITS');
+  const [freemiumType, setFreemiumType] = useState<UIFreemiumType>('FREE_UNITS');
 
   const [freemiumPayload, setFreemiumPayload] = useState<FreemiumPayload>({
-    freemiumType: 'FREE_UNITS',
+    freemiumType: 'FREE_UNITS', // API-type string in your payload type is fine at runtime
     freeUnits: 0,
     freeTrialDuration: 0,
     startDate: '',
@@ -154,6 +314,46 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   /** Minimum Commitment */
   const [minimumUsage, setMinimumUsage] = useState('');
   const [minimumCharge, setMinimumCharge] = useState('');
+
+  // -------------------------------------------------------
+  // Sync key pieces of state to sessionStorage immediately
+  // -------------------------------------------------------
+  React.useEffect(() => {
+    // Setup fee
+    setRatePlanData('SETUP_FEE', setupFeePayload.setupFee > 0 ? String(setupFeePayload.setupFee) : '');
+    setRatePlanData('SETUP_APPLICATION_TIMING', setupFeePayload.applicationTiming > 0 ? String(setupFeePayload.applicationTiming) : '');
+    setRatePlanData('SETUP_INVOICE_DESC', setupFeePayload.invoiceDescription);
+  }, [setupFeePayload]);
+
+  React.useEffect(() => {
+    // Discounts – persist all relevant fields
+    const pct  = discountForm.discountType === 'PERCENTAGE' ? discountForm.percentageDiscountStr : '';
+    const flat = discountForm.discountType === 'FLAT'       ? discountForm.flatDiscountAmountStr : '';
+
+    setRatePlanData('DISCOUNT_TYPE',  discountForm.discountType || '');
+    setRatePlanData('DISCOUNT_PERCENT', pct);
+    setRatePlanData('DISCOUNT_FLAT',    flat);
+    setRatePlanData('ELIGIBILITY',      discountForm.eligibility);
+    setRatePlanData('DISCOUNT_START',   discountForm.startDate);
+    setRatePlanData('DISCOUNT_END',     discountForm.endDate);
+  }, [discountForm]);
+
+  React.useEffect(() => {
+    // Freemium – persist all relevant fields (store UI type for consistency)
+    setRatePlanData('FREEMIUM_TYPE', freemiumType);
+    setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits > 0 ? String(freemiumPayload.freeUnits) : '');
+    setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration > 0 ? String(freemiumPayload.freeTrialDuration) : '');
+    setRatePlanData('FREEMIUM_START', freemiumPayload.startDate);
+    setRatePlanData('FREEMIUM_END',   freemiumPayload.endDate);
+  }, [freemiumType, freemiumPayload]);
+
+  React.useEffect(() => {
+    // Minimum commitment
+    setRatePlanData('MINIMUM_USAGE', minimumUsage ? minimumUsage : '');
+  }, [minimumUsage]);
+  React.useEffect(() => {
+    setRatePlanData('MINIMUM_CHARGE', minimumCharge ? minimumCharge : '');
+  }, [minimumCharge]);
 
   /** Expand/collapse */
   const [activeSections, setActiveSections] = useState<string[]>([]);
@@ -214,13 +414,10 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
 
   useImperativeHandle(ref, () => ({
     saveAll: async (ratePlanId: number) => {
-      // Save all extras sections that have data with individual error handling
       const savePromises: Promise<any>[] = [];
       
       if (setupFeePayload.setupFee > 0) {
-        // Update session storage
         setRatePlanData('SETUP_FEE', setupFeePayload.setupFee.toString());
-        
         savePromises.push(
           saveSetupFee(ratePlanId, setupFeePayload).catch((err: any) => {
             console.error('Setup fee save failed:', err);
@@ -236,7 +433,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       }
       
       if (discountForm.discountType && (discountForm.percentageDiscountStr || discountForm.flatDiscountAmountStr)) {
-        // Update session storage
         const percentVal = Number(discountForm.percentageDiscountStr || 0);
         const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
         
@@ -267,12 +463,26 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         setRatePlanData('DISCOUNT_FLAT', '');
       }
       
+      const buildFreemiumPayload = (): FreemiumPayload => {
+        const { freemiumType: apiType, freeUnits, freeTrialDuration, startDate, endDate } = freemiumPayload;
+        const clean: FreemiumPayload = { freemiumType: apiType, freeUnits: 0, freeTrialDuration: 0, startDate, endDate };
+        if (apiType === 'FREE_UNITS') clean.freeUnits = freeUnits;
+        else if (apiType === 'FREE_TRIAL') clean.freeTrialDuration = freeTrialDuration;
+        else {
+          clean.freeUnits = freeUnits;
+          clean.freeTrialDuration = freeTrialDuration;
+        }
+        return clean;
+      };
+
       if (freemiumPayload.freemiumType && (freemiumPayload.freeUnits > 0 || freemiumPayload.freeTrialDuration > 0)) {
-        // Update session storage
-        setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits.toString());
+        setRatePlanData('FREEMIUM_TYPE', freemiumType);
+        setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits ? String(freemiumPayload.freeUnits) : '');
+        setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration ? String(freemiumPayload.freeTrialDuration) : '');
         
+        const cleanFreemium = buildFreemiumPayload();
         savePromises.push(
-          saveFreemiums(ratePlanId, freemiumPayload).catch((err: any) => {
+          saveFreemiums(ratePlanId, cleanFreemium).catch((err: any) => {
             console.error('Freemiums save failed:', err);
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during freemiums save - likely duplicate entry, continuing...');
@@ -282,11 +492,12 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           })
         );
       } else {
+        setRatePlanData('FREEMIUM_TYPE', '');
         setRatePlanData('FREEMIUM_UNITS', '');
+        setRatePlanData('FREE_TRIAL_DURATION', '');
       }
       
       if (minimumUsage || minimumCharge) {
-        // Update session storage
         const payload = {
           minimumUsage: minimumUsage ? +minimumUsage : 0,
           minimumCharge: minimumCharge ? +minimumCharge : 0,
@@ -518,11 +729,13 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
             <label>Freemium Type</label>
             <SelectField
               value={freemiumType}
-              onChange={(val)=>{
-                const type = val as 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
-                setFreemiumType(type);
-                // @ts-ignore
-                setFreemiumPayload({ ...freemiumPayload, freemiumType: type });
+              onChange={val => {
+                const ui = val as UIFreemiumType;
+                setFreemiumType(ui);
+                setFreemiumPayload(prev => ({
+                  ...prev,                               // <— keep previously-hydrated numbers
+                  freemiumType: uiToApiFreemium(ui),
+                }));
               }}
               options={[
                 { label: '--Select--', value: '' },
@@ -537,7 +750,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <label>Select Free Units</label>
                 <InputField
                   type="number"
-                  value={freemiumPayload.freeUnits === 0 ? '' : freemiumPayload.freeUnits}
+                  value={freemiumPayload.freeUnits === 0 ? '' : String(freemiumPayload.freeUnits)}
                   onChange={(val)=>{
                     setFreemiumPayload({
                       ...freemiumPayload,
@@ -554,7 +767,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <label>Select Free Trial Duration</label>
                 <InputField
                   type="number"
-                  value={freemiumPayload.freeTrialDuration === 0 ? '' : freemiumPayload.freeTrialDuration}
+                  value={freemiumPayload.freeTrialDuration === 0 ? '' : String(freemiumPayload.freeTrialDuration)}
                   onChange={(val)=>{
                     setFreemiumPayload({
                       ...freemiumPayload,
@@ -593,9 +806,13 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, freemium: 'saving' }));
                 try {
-                  // Update session storage
-                  setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits.toString());
-                  
+                  // Persist UI type and numbers for back/forward navigation
+                  setRatePlanData('FREEMIUM_TYPE', freemiumType);
+                  setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits ? String(freemiumPayload.freeUnits) : '');
+                  setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration ? String(freemiumPayload.freeTrialDuration) : '');
+                  setRatePlanData('FREEMIUM_START', freemiumPayload.startDate);
+                  setRatePlanData('FREEMIUM_END', freemiumPayload.endDate);
+
                   await saveFreemiums(ratePlanId, freemiumPayload);
                   setSaveState(s => ({ ...s, freemium: 'saved' }));
                 } catch {

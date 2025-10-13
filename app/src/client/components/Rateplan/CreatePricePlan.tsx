@@ -85,6 +85,10 @@ const CreatePricePlan = React.forwardRef<
 
   const [draftPricingData, setDraftPricingData] = useState<any>(null);
   const [draftExtrasData, setDraftExtrasData] = useState<any>(null);
+  
+  // Keep draft data persistent across step navigation
+  const [persistentDraftData, setPersistentDraftData] = useState<any>(null);
+  const [currentStepData, setCurrentStepData] = useState<any>(null);
   const [isFreshCreation, setIsFreshCreation] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -134,10 +138,16 @@ const CreatePricePlan = React.forwardRef<
 
   // Hydrate from draftData prop (from RatePlans component) or legacy resumeDraftId
   useEffect(() => {
+    console.log('🔄 CreatePricePlan useEffect triggered');
+    console.log('📦 draftData prop:', draftData);
+    console.log('🔄 isResuming:', isResuming, 'resumeDraftId:', resumeDraftId);
+    
     if (draftData) {
+      console.log('✅ Using draftData prop for hydration');
       clearAllRatePlanData();
       hydrateFormData(draftData);
     } else if (isResuming && resumeDraftId) {
+      console.log('✅ Using resumeDraftId for hydration');
       (async () => {
         try {
           const plan = await fetchRatePlanWithDetails(resumeDraftId);
@@ -146,10 +156,34 @@ const CreatePricePlan = React.forwardRef<
           console.error("❌ Failed to hydrate draft", e);
         }
       })();
+    } else {
+      console.log('❌ No draft data or resumeDraftId available');
     }
   }, [draftData, isResuming, resumeDraftId]);
 
+  // Fetch current data when navigating to Extras step (step 3)
+  useEffect(() => {
+    const fetchCurrentDataForStep = async () => {
+      if (currentStep === 3 && ratePlanId && !persistentDraftData && !draftExtrasData) {
+        console.log('🔄 Navigated to Extras step, fetching current data for ratePlanId:', ratePlanId);
+        try {
+          const currentPlan = await fetchRatePlanWithDetails(ratePlanId);
+          console.log('✅ Fetched current plan data for Extras step:', currentPlan);
+          console.log('🔍 Current freemiums:', currentPlan.freemiums);
+          setCurrentStepData(currentPlan);
+        } catch (error) {
+          console.error('❌ Failed to fetch current plan data for step:', error);
+        }
+      } else if (currentStep !== 3) {
+        // Clear current step data when not on Extras step
+        setCurrentStepData(null);
+      }
+    };
+    fetchCurrentDataForStep();
+  }, [currentStep, ratePlanId, persistentDraftData, draftExtrasData]);
+
   const hydrateFormData = (plan: any) => {
+    console.log('🚀 Hydrating form data with plan:', plan);
     setRatePlanId(plan.ratePlanId);
     setPlanName(plan.ratePlanName ?? "");
     setPlanDescription(plan.description ?? "");
@@ -160,6 +194,8 @@ const CreatePricePlan = React.forwardRef<
 
     setDraftPricingData(plan);
     setDraftExtrasData(plan);
+    setPersistentDraftData(plan); // Keep persistent copy
+    console.log('✅ Draft data set for Extras component');
   };
 
   React.useImperativeHandle(
@@ -535,8 +571,11 @@ const CreatePricePlan = React.forwardRef<
             isFreshCreation={isFreshCreation}
           />
         );
-      case 3:
-        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={draftExtrasData} />;
+      case 3: {
+        const extrasData = persistentDraftData || draftExtrasData || currentStepData;
+        console.log('📦 Passing to Extras component - persistentDraftData:', persistentDraftData, 'draftExtrasData:', draftExtrasData, 'currentStepData:', currentStepData);
+        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={extrasData} />;
+      }
       case 4: {
         const planDetails = {
           name: planName,

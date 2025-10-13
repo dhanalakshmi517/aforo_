@@ -585,3 +585,55 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
     return plan;
   }
 }
+
+/* =========================
+ * Revenue Estimation API
+ * ========================= */
+
+export interface RevenueEstimationRequest {
+  pricingModel: string;
+  usage: number;
+  flatFeeAmount: number;
+  numberOfApiCalls: number;
+  overageUnitRate: number;
+  perUnitAmount: number;
+  tiers: Array<{
+    minUnits: number;
+    maxUnits: number;
+    pricePerUnit: number;
+  }>;
+  steps: Array<{
+    usageThresholdStart: number;
+    usageThresholdEnd: number;
+    monthlyCharge: number;
+  }>;
+  includeSetup: boolean;
+  setupFee: number;
+  includeDiscount: boolean;
+  discountPct: number;
+  flatDiscountAmount: number;
+  includeFreemium: boolean;
+  freeUnits: number;
+  includeCommitment: boolean;
+  minCommitmentAmount: number;
+  flatFeeAmountSafe: number;
+  usageSafe: number;
+  includedUnitsSafe: number;
+  overageUnitRateSafe: number;
+  perUnitAmountSafe: number;
+}
+
+export interface RevenueEstimationResponse {
+  modelType: string;
+  breakdown: Array<{
+    label: string;
+    calculation: string;
+    amount: number;
+  }>;
+  total: number;
+}
+
+export const estimateRevenue = async (request: RevenueEstimationRequest): Promise<RevenueEstimationResponse> => {
+  const response = await axios.post(`${BASE_URL}/rateplans/estimate-revenue`, request);
+  return response.data;
+};
