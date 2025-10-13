@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { saveTieredPricing } from './api';
-import { setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData, getRatePlanData } from './utils/sessionStorage';
 import './Tiered.css';
 
 export interface TieredHandle { save: (ratePlanId: number) => Promise<any>; }
@@ -59,18 +59,22 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
 
   useEffect(() => {
     if (externalUnlimited !== undefined) {
+      console.log('🎯 Tiered: Updating unlimited from prop:', externalUnlimited);
       setUnlimited(externalUnlimited);
     }
   }, [externalUnlimited]);
-
+  
+  // Update overage and grace from props
   useEffect(() => {
     if (overageFromParent !== undefined && overageFromParent !== null) {
+      console.log('🎯 Tiered: Updating overage from prop:', overageFromParent);
       setOverageCharge(String(overageFromParent));
     }
   }, [overageFromParent]);
-
+  
   useEffect(() => {
     if (graceFromParent !== undefined && graceFromParent !== null) {
+      console.log('🎯 Tiered: Updating grace buffer from prop:', graceFromParent);
       setGraceBuffer(String(graceFromParent));
     }
   }, [graceFromParent]);

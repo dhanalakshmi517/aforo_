@@ -257,15 +257,156 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
     // Initialize from session storage on mount
     useEffect(() => {
-      if (isFreshCreation) {
+      // Check if there's any existing session data to determine if this is truly fresh
+      const savedModel = getRatePlanData('PRICING_MODEL');
+      const savedStep = getRatePlanData('WIZARD_STEP');
+      const hasExistingData = savedModel || savedStep;
+      
+      console.log('📋 Pricing component mounted. Saved model:', savedModel, 'Saved step:', savedStep, 'Has existing data:', hasExistingData);
+      
+      if (isFreshCreation && !hasExistingData) {
+        console.log('🆆 True fresh creation - clearing pricing model');
         setSelected('');
-      } else if (!draftData) {
-        const savedModel = getRatePlanData('PRICING_MODEL');
-        if (savedModel && savedModel !== selected) {
+      } else {
+        // Load from session storage (either resuming or navigating between steps)
+        console.log('📋 Loading saved pricing model from session:', savedModel);
+        
+        if (savedModel) {
           setSelected(savedModel);
+          
+          // Also load the corresponding form data
+          if (savedModel === 'Flat Fee') {
+            const savedAmount = getRatePlanData('FLAT_FEE_AMOUNT');
+            const savedCalls = getRatePlanData('FLAT_FEE_API_CALLS');
+            const savedOverage = getRatePlanData('FLAT_FEE_OVERAGE');
+            const savedGrace = getRatePlanData('FLAT_FEE_GRACE');
+            
+            if (savedAmount || savedCalls || savedOverage) {
+              const restoredData = {
+                flatFeeAmount: Number(savedAmount) || 0,
+                numberOfApiCalls: Number(savedCalls) || 0,
+                overageUnitRate: Number(savedOverage) || 0,
+                graceBuffer: Number(savedGrace) || 0
+              };
+              setFlatFee(restoredData);
+              console.log('💰 Restored Flat Fee data:', restoredData);
+              
+              // Force update the ref if it exists
+              if (flatFeeRef.current) {
+                console.log('🔄 Updating FlatFeeForm ref with restored data');
+              }
+            }
+          } else if (savedModel === 'Usage-Based') {
+            const savedPerUnit = getRatePlanData('USAGE_PER_UNIT_AMOUNT');
+            if (savedPerUnit) {
+              setUsage({ perUnitAmount: Number(savedPerUnit) || 0 });
+              console.log('📊 Restored Usage-Based data:', savedPerUnit);
+            }
+          } else if (savedModel === 'Volume-Based') {
+            const savedTiers = getRatePlanData('VOLUME_TIERS');
+            const savedOverage = getRatePlanData('VOLUME_OVERAGE');
+            const savedGrace = getRatePlanData('VOLUME_GRACE');
+            
+            if (savedTiers) {
+              try {
+                const parsedTiers = JSON.parse(savedTiers);
+                if (Array.isArray(parsedTiers) && parsedTiers.length > 0) {
+                  const volumeTiers = parsedTiers.map((t: any) => ({
+                    from: Number(t.from) || null,
+                    to: Number(t.to) || null,
+                    price: Number(t.price) || null,
+                    isUnlimited: t.isUnlimited || false
+                  }));
+                  setTiers(volumeTiers);
+                  console.log('📊 Restored Volume tiers:', volumeTiers);
+                }
+              } catch (e) {
+                console.error('Failed to parse volume tiers:', e);
+              }
+            }
+            
+            if (savedOverage) {
+              setOverageUnitRate(Number(savedOverage) || 0);
+              console.log('📊 Restored Volume overage:', savedOverage);
+            }
+            
+            if (savedGrace) {
+              const graceValue = Number(savedGrace) || 0;
+              setGraceBuffer(graceValue);
+              console.log('📊 Restored Volume grace buffer:', savedGrace, '-> parsed as:', graceValue);
+            } else {
+              console.log('⚠️ No saved grace buffer found for Volume pricing');
+            }
+          } else if (savedModel === 'Tiered Pricing') {
+            const savedTiers = getRatePlanData('TIERED_TIERS');
+            const savedOverage = getRatePlanData('TIERED_OVERAGE');
+            const savedGrace = getRatePlanData('TIERED_GRACE');
+            
+            if (savedTiers) {
+              try {
+                const parsedTiers = JSON.parse(savedTiers);
+                if (Array.isArray(parsedTiers) && parsedTiers.length > 0) {
+                  const tieredTiers = parsedTiers.map((t: any) => ({
+                    from: Number(t.from) || null,
+                    to: Number(t.to) || null,
+                    price: Number(t.price) || null,
+                    isUnlimited: t.isUnlimited || false
+                  }));
+                  setTiers(tieredTiers);
+                  console.log('🎯 Restored Tiered tiers:', tieredTiers);
+                }
+              } catch (e) {
+                console.error('Failed to parse tiered tiers:', e);
+              }
+            }
+            
+            if (savedOverage) {
+              setOverageUnitRate(Number(savedOverage) || 0);
+              console.log('🎯 Restored Tiered overage:', savedOverage);
+            }
+            
+            if (savedGrace) {
+              setGraceBuffer(Number(savedGrace) || 0);
+              console.log('🎯 Restored Tiered grace buffer:', savedGrace);
+            }
+          } else if (savedModel === 'Stairstep') {
+            const savedStairs = getRatePlanData('STAIR_TIERS');
+            const savedOverage = getRatePlanData('STAIR_OVERAGE');
+            const savedGrace = getRatePlanData('STAIR_GRACE');
+            
+            if (savedStairs) {
+              try {
+                const parsedStairs = JSON.parse(savedStairs);
+                if (Array.isArray(parsedStairs) && parsedStairs.length > 0) {
+                  const stairTiers = parsedStairs.map((s: any) => ({
+                    from: Number(s.from) || null,
+                    to: Number(s.to) || null,
+                    price: Number(s.cost) || null, // Note: StairStep uses 'cost' field
+                    isUnlimited: s.isUnlimited || false
+                  }));
+                  setTiers(stairTiers);
+                  console.log('🎡 Restored StairStep tiers:', stairTiers);
+                }
+              } catch (e) {
+                console.error('Failed to parse stair tiers:', e);
+              }
+            }
+            
+            if (savedOverage) {
+              setOverageUnitRate(Number(savedOverage) || 0);
+              console.log('🎡 Restored StairStep overage:', savedOverage);
+            }
+            
+            if (savedGrace) {
+              setGraceBuffer(Number(savedGrace) || 0);
+              console.log('🎡 Restored StairStep grace buffer:', savedGrace);
+            }
+          }
+        } else {
+          console.log('⚠️ No saved pricing model found - keeping empty selection');
         }
       }
-    }, []); // eslint-disable-line
+    }, [isFreshCreation]); // Re-run when isFreshCreation changes
 
     useEffect(() => {
       if (selected) setRatePlanData('PRICING_MODEL', selected);
@@ -313,6 +454,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             value={selected}
             onChange={e => {
               const v = e.target.value;
+              console.log('📝 Pricing model selected:', v);
               setSelected(v);
               if (v === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null }]);

@@ -8,6 +8,7 @@ import TopBar from '../TopBar/TopBar';
 import SaveDraft from '../componenetsss/SaveDraft';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import { clearAllRatePlanData } from './utils/sessionStorage';
+import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 
 /* ---------------- Types ---------------- */
 export interface RatePlan {
@@ -106,6 +107,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [draftPlanData, setDraftPlanData] = useState<any>(null);
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  
+  // Toast system (like Products component)
+  const { showToast } = useToast();
+  
+  // Table row delete modal states (like Products component)
+  const [showTableDeleteModal, setShowTableDeleteModal] = useState(false);
+  const [deleteRatePlanName, setDeleteRatePlanName] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -204,7 +212,6 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, [filteredPlans, detailsById]);
 
   /* ---------- actions ---------- */
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -227,24 +234,55 @@ const RatePlans: React.FC<RatePlansProps> = ({
     }
   };
 
-  const handleDeleteClick = (id: number) => { setDeleteTargetId(id); setShowDeleteModal(true); };
+  const handleDeleteClick = (id: number) => { 
+    console.log('🗑️ Delete button clicked for rate plan ID:', id);
+    const plan = ratePlansState.find(p => p.ratePlanId === id);
+    setDeleteTargetId(id); 
+    setDeleteRatePlanName(plan?.ratePlanName || 'Unknown Plan');
+    setShowTableDeleteModal(true);
+    console.log('📋 ConfirmDeleteModal opened for:', plan?.ratePlanName);
+  };
 
-  const confirmDelete = async () => {
-    if (deleteTargetId == null) return;
-    const deletedPlan = ratePlansState.find((p) => p.ratePlanId === deleteTargetId);
+  // Table row delete confirmation (like Products component)
+  const handleTableDeleteConfirm = async () => {
+    if (deleteTargetId == null) {
+      console.log('❌ No delete target ID set');
+      return;
+    }
+    
+    console.log('🗑️ Confirming delete for plan ID:', deleteTargetId);
+    
     try {
       setIsDeleting(true);
+      console.log('🔄 Calling deleteRatePlan API...');
       await deleteRatePlan(deleteTargetId);
+      console.log('✅ Delete API successful');
+      
+      // Update the list
       const next = ratePlansState.filter((p) => p.ratePlanId !== deleteTargetId);
       setBoth(next);
-      setShowDeleteModal(false);
-      setNotification({ type: 'success', ratePlanName: deletedPlan?.ratePlanName || '' });
-    } catch {
-      setNotification({ type: 'error', ratePlanName: deletedPlan?.ratePlanName || '' });
+      
+      // Show success toast (like Products)
+      showToast?.({ message: 'Rate plan deleted successfully', kind: 'success' });
+      console.log('🎉 Success toast shown');
+      
+    } catch (error) {
+      console.error('❌ Delete failed:', error);
+      // Show error toast (like Products)
+      showToast?.({ message: 'Failed to delete rate plan', kind: 'error' });
     } finally {
       setIsDeleting(false);
-      setTimeout(() => setNotification(null), 3000);
+      setShowTableDeleteModal(false);
+      setDeleteTargetId(null);
+      setDeleteRatePlanName('');
     }
+  };
+  
+  const handleTableDeleteCancel = () => {
+    console.log('❌ Table delete cancelled');
+    setShowTableDeleteModal(false);
+    setDeleteTargetId(null);
+    setDeleteRatePlanName('');
   };
 
   /* ---------- render helpers ---------- */
@@ -352,10 +390,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
 
   /* ---------------- JSX ---------------- */
   return (
-    <div className="main-container">
-      {notification && (
-        <div className="notification-container"><Notification {...notification} /></div>
-      )}
+    <ToastProvider>
+      <div className="main-container">
+        {notification && (
+          <div className="notification-container"><Notification {...notification} /></div>
+        )}
 
       {showCreatePlan ? (
         <div className="create-plan-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -515,25 +554,19 @@ const RatePlans: React.FC<RatePlansProps> = ({
             </table>
           </div>
 
-          {showDeleteModal && (
-            <div className="rate-delete-modal-overlay">
-              <div className="rate-delete-modal-content">
-                <div className="rate-delete-modal-body">
-                  <h5>Are you sure you want to delete this <br /> rate plan?</h5>
-                  <p>This action cannot be undone.</p>
-                </div>
-                <div className="rate-delete-modal-footer">
-                  <button className="rate-delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>Back</button>
-                  <button className="rate-delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
-                    {isDeleting ? 'Deleting...' : 'Confirm'}
-                  </button>
-                </div>
-              </div>
-            </div>
+          {/* Table row delete modal (like Products component) */}
+          {showTableDeleteModal && (
+            <ConfirmDeleteModal
+              isOpen={showTableDeleteModal}
+              productName={deleteRatePlanName}
+              onCancel={handleTableDeleteCancel}
+              onConfirm={handleTableDeleteConfirm}
+            />
           )}
         </div>
       )}
-    </div>
+      </div>
+    </ToastProvider>
   );
 };
 

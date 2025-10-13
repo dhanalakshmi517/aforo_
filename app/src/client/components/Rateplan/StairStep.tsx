@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { saveStairStepPricing } from './api';
-import { setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData, getRatePlanData } from './utils/sessionStorage';
 import './StairStep.css';
 
 export interface Stair { from: string; to: string; cost: string; isUnlimited?: boolean; }

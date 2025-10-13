@@ -342,7 +342,7 @@ const NewProductForm: React.FC<NewProductFormProps> = ({ onSubmit, onClose }) =>
           {index < steps.length - 1 && (
             <div className={styles.connector}>
               <svg xmlns="http://www.w3.org/2000/svg" width="2" height="87" viewBox="0 0 2 87" fill="none">
-                <path d="M1 85.7998L1 1.7998" stroke="#D6D5D7" stroke-width="2" stroke-linecap="round" />
+                <path d="M1 85.7998L1 1.7998" stroke="#D6D5D7" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
           )}

@@ -92,14 +92,21 @@ const CreatePricePlan = React.forwardRef<
   useEffect(() => {
     document.body.classList.add("create-product-page");
 
-    if (!isResuming && !draftData) {
-      // For fresh new rate plan creation, clear all data and start fresh
+    // Check if there's any existing session data to determine if this is truly fresh
+    const hasExistingSessionData = getRatePlanData('WIZARD_STEP') || getRatePlanData('PRICING_MODEL') || getRatePlanData('BILLABLE_METRIC_NAME');
+    
+    if (!isResuming && !draftData && !hasExistingSessionData) {
+      // For truly fresh new rate plan creation, clear all data and start fresh
+      console.log('🆆 Truly fresh creation - clearing all data');
       setIsFreshCreation(true);
       clearAllRatePlanData();
     } else {
-      // For resuming drafts, just initialize session and clear old ones
+      // For resuming drafts or continuing existing session, preserve data
+      console.log('🔄 Resuming or continuing session - preserving data');
       setIsFreshCreation(false);
-      initializeSession();
+      if (!hasExistingSessionData) {
+        initializeSession();
+      }
       clearOldSessions();
     }
 
