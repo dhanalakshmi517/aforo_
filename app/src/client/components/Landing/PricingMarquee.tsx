@@ -2,15 +2,15 @@ import React from "react";
 import "./PricingMarquee.css";
 
 /** import your finished SVG cards (all text is inside the svgs) */
-import frame1 from "../landingcomponents/frame1.svg";
-import frame2 from "../landingcomponents/frame2.svg";
-import frame3 from "../landingcomponents/frame3.svg";
-import frame4 from "../landingcomponents/frame4.svg";
-import frame5 from "../landingcomponents/frame5.svg";
-import frame6 from "../landingcomponents/frame6.svg";
-import frame7 from "../landingcomponents/frame7.svg";
-import frame8 from "../landingcomponents/frame8.svg";
-import frame9 from "../landingcomponents/frame9.svg";
+import frame1 from "../LandingComponents/frame1.svg";
+import frame2 from "../LandingComponents/frame2.svg";
+import frame3 from "../LandingComponents/frame3.svg";
+import frame4 from "../LandingComponents/frame4.svg";
+import frame5 from "../LandingComponents/frame5.svg";
+import frame6 from "../LandingComponents/frame6.svg";
+import frame7 from "../LandingComponents/frame7.svg";
+import frame8 from "../LandingComponents/frame8.svg";
+import frame9 from "../LandingComponents/frame9.svg";
 
 
 
