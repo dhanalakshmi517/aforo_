@@ -174,9 +174,20 @@ export const createProduct = async (
             ? JSON.parse(payload.productIcon)
             : payload.productIcon;
 
-        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
-          iconData.viewBox || '0 0 24 24'
-        }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+        // Use the SVG content exactly as provided - no modifications
+        let svgContent: string;
+        
+        if (iconData.svgContent) {
+          // Use the original SVG content as-is
+          svgContent = iconData.svgContent;
+        } else if (iconData.svgPath) {
+          // Create a simple SVG from the path - no extra styling or frames
+          svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
+            iconData.viewBox || '0 0 24 24'
+          }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+        } else {
+          throw new Error('Invalid icon data: missing svgContent or svgPath');
+        }
 
         const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
         formData.append('icon', svgBlob, 'icon.svg');

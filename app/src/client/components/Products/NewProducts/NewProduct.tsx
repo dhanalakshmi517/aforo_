@@ -268,16 +268,43 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         version: formData.version || ''
       };
 
-      // Add icon data if selected
+      // Helper function to extract color from CSS var() or return as-is
+      const extractColor = (colorStr: string): string => {
+        if (!colorStr) return '#CC9434'; // default fallback
+        // Match pattern: var(--variable-name, #HEXCODE)
+        const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+        return match ? match[1].trim() : colorStr;
+      };
+
+      // Add icon data if selected - generate complete styled SVG
       const payloadWithIcon = selectedIcon ? {
         ...basePayload,
         productIcon: JSON.stringify({
-          id: selectedIcon.id,
-          label: selectedIcon.label,
-          svgPath: selectedIcon.svgPath,
-          viewBox: selectedIcon.viewBox,
-          outerBg: selectedIcon.outerBg,
-          tileColor: selectedIcon.tileColor
+          svgContent: (() => {
+            const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
+            const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
+            const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
+            const viewBox = selectedIcon.viewBox ?? '0 0 18 18';
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
+              <defs>
+                <linearGradient id="bg-${selectedIcon.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:${outer[0]}" />
+                  <stop offset="100%" style="stop-color:${outer[1]}" />
+                </linearGradient>
+              </defs>
+              <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-${selectedIcon.id})"/>
+              <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
+                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" stroke-width="0.6"/>
+              <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${tile}"/>
+              <g transform="translate(10.657,9.385)">
+                <rect width="29.339" height="26.571" rx="6"
+                      fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" stroke-width="0.6"/>
+                <svg x="5.67" y="4.285" width="18" height="18" viewBox="${viewBox}">
+                  <path d="${selectedIcon.svgPath}" fill="#FFFFFF"/>
+                </svg>
+              </g>
+            </svg>`;
+          })()
         })
       } : basePayload;
 
@@ -317,15 +344,32 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           changes.version = basePayload.version;
         }
         
-        // Include icon if it exists
+        // Include icon if it exists - generate complete styled SVG
         if (selectedIcon) {
+          const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
+          const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
+          const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
+          const viewBox = selectedIcon.viewBox ?? '0 0 18 18';
           changes.productIcon = JSON.stringify({
-            id: selectedIcon.id,
-            label: selectedIcon.label,
-            svgPath: selectedIcon.svgPath,
-            viewBox: selectedIcon.viewBox,
-            outerBg: selectedIcon.outerBg,
-            tileColor: selectedIcon.tileColor
+            svgContent: `<svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
+              <defs>
+                <linearGradient id="bg-${selectedIcon.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:${outer[0]}" />
+                  <stop offset="100%" style="stop-color:${outer[1]}" />
+                </linearGradient>
+              </defs>
+              <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-${selectedIcon.id})"/>
+              <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
+                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" stroke-width="0.6"/>
+              <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${tile}"/>
+              <g transform="translate(10.657,9.385)">
+                <rect width="29.339" height="26.571" rx="6"
+                      fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" stroke-width="0.6"/>
+                <svg x="5.67" y="4.285" width="18" height="18" viewBox="${viewBox}">
+                  <path d="${selectedIcon.svgPath}" fill="#FFFFFF"/>
+                </svg>
+              </g>
+            </svg>`
           });
         }
         
@@ -529,22 +573,34 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               placeholder="eg., 2.3-VOS"
                             />
                             
-                            {/* Product Icon Field */}
+                            {/* Product Icon Field - Add */}
                             <div className="np-form-group">
-                              <label className="np-label">Product Icon</label>
-                              {!selectedIcon ? (
+                              <label className="if-label">Product Icon</label>
+                              <div className="np-icon-field-wrapper">
+                                <div className="np-icon-placeholder">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA"/>
+                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" stroke-width="1.05"/>
+                                    <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" stroke-width="2.1"/>
+                                    <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" stroke-width="2.1"/>
+                                  </svg>
+                                </div>
+                                <span className="np-icon-placeholder-text">Add product icon</span>
                                 <button
                                   type="button"
                                   className="np-icon-add-btn"
                                   onClick={() => setIsIconPickerOpen(true)}
                                 >
-                                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M10 4.16667V15.8333M4.16667 10H15.8333" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                  <span>Add product icon</span>
+                                  <span>+ Add</span>
                                 </button>
-                              ) : (
-                                <div className="np-icon-selected">
+                              </div>
+                            </div>
+
+                            {/* Product Icon Field - Selected */}
+                            {selectedIcon && (
+                              <div className="np-form-group">
+                                <label className="if-label">Product Icon</label>
+                                <div className="np-icon-field-wrapper">
                                   <div className="np-icon-preview">
                                     <div
                                       style={{
@@ -613,9 +669,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                       className="np-icon-action-btn"
                                       onClick={() => setIsIconPickerOpen(true)}
                                     >
-                                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M11.3333 2.00004C11.5084 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4188 1.44775 12.6667 1.44775C12.9145 1.44775 13.1598 1.49653 13.3886 1.59129C13.6174 1.68605 13.8249 1.82494 14 2.00004C14.1751 2.17513 14.314 2.38268 14.4088 2.61149C14.5036 2.84029 14.5523 3.08558 14.5523 3.33337C14.5523 3.58117 14.5036 3.82646 14.4088 4.05526C14.314 4.28407 14.1751 4.49161 14 4.66671L5 13.6667L1.33333 14.6667L2.33333 11L11.3333 2.00004Z" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                      </svg>
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+  <path d="M5.99942 10.9517H11.2494M8.55208 1.39783C8.7843 1.16562 9.09926 1.03516 9.42767 1.03516C9.75607 1.03516 10.071 1.16562 10.3032 1.39783C10.5355 1.63005 10.6659 1.94501 10.6659 2.27342C10.6659 2.60183 10.5355 2.91678 10.3032 3.149L3.29742 10.1554C3.15864 10.2942 2.9871 10.3957 2.79867 10.4506L1.12333 10.9394C1.07314 10.9541 1.01993 10.9549 0.969281 10.942C0.91863 10.929 0.872399 10.9026 0.835427 10.8657C0.798455 10.8287 0.772102 10.7825 0.759125 10.7318C0.746149 10.6812 0.747027 10.6279 0.761667 10.5778L1.2505 8.90242C1.30546 8.7142 1.40698 8.54286 1.54567 8.40425L8.55208 1.39783Z" stroke="#1D7AFC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                                       <span>Edit</span>
                                     </button>
                                     <button
@@ -623,16 +679,15 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                       className="np-icon-action-btn np-icon-action-btn--remove"
                                       onClick={() => setSelectedIcon(null)}
                                     >
-                                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2 4H3.33333H14" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <path d="M5.33333 4.00004V2.66671C5.33333 2.31309 5.47381 1.97395 5.72386 1.7239C5.97391 1.47385 6.31304 1.33337 6.66667 1.33337H9.33333C9.68696 1.33337 10.0261 1.47385 10.2761 1.7239C10.5262 1.97395 10.6667 2.31309 10.6667 2.66671V4.00004M12.6667 4.00004V13.3334C12.6667 13.687 12.5262 14.0261 12.2761 14.2762C12.0261 14.5262 11.687 14.6667 11.3333 14.6667H4.66667C4.31304 14.6667 3.97391 14.5262 3.72386 14.2762C3.47381 14.0261 3.33333 13.687 3.33333 13.3334V4.00004H12.6667Z" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                      </svg>
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14" fill="none">
+  <path d="M0.75 3.7845H11.25M10.0833 3.7845V11.9512C10.0833 12.5345 9.5 13.1178 8.91667 13.1178H3.08333C2.5 13.1178 1.91667 12.5345 1.91667 11.9512V3.7845M3.66667 3.78451V2.61784C3.66667 2.03451 4.25 1.45117 4.83333 1.45117H7.16667C7.75 1.45117 8.33333 2.03451 8.33333 2.61784V3.78451M4.83333 6.70117V10.2012M7.16667 6.70117V10.2012" stroke="#ED5142" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                                       <span>Remove</span>
                                     </button>
                                   </div>
                                 </div>
-                              )}
-                            </div>
+                              </div>
+                            )}
 
                             <InputField
                               label="SKU Code"
@@ -760,8 +815,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               try {
                                 setIsSaving(true);
                                 if (configRef.current) {
-                                  // run client-side validation only (isDraft=true prevents API)
-                                  const success = await configRef.current.submit(true);
+                                  // Validate but don't save to server yet (skipValidation=false, saveToServer=false)
+                                  const success = await configRef.current.submit(false, false);
                                   if (success) gotoStep(2);
                                 }
                               } catch (error) {

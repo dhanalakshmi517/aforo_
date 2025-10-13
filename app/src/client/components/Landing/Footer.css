@@ -1,8 +1,7 @@
 .footer {
     display: flex;
     justify-content: space-between;
-    background: linear-gradient(to right, #1c7fa5, #18688e);
-    color: white;
+background: linear-gradient(to bottom right, var(--color-primary-700, #025A94) 0%, var(--color-primary-1000, #00365A) 50%) bottom right / 50% 50% no-repeat, linear-gradient(to bottom left, var(--color-primary-700, #025A94) 0%, var(--color-primary-1000, #00365A) 50%) bottom left / 50% 50% no-repeat, linear-gradient(to top left, var(--color-primary-700, #025A94) 0%, var(--color-primary-1000, #00365A) 50%) top left / 50% 50% no-repeat, linear-gradient(to top right, var(--color-primary-700, #025A94) 0%, var(--color-primary-1000, #00365A) 50%) top right / 50% 50% no-repeat;    color: white;
     padding: 40px 60px;
     font-family: sans-serif;
     flex-wrap: wrap;

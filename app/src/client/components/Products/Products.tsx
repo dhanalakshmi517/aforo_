@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ProductFormData } from '../../../types/productTypes';
 import EditProduct from './EditProductsss/EditProduct';
@@ -11,7 +11,7 @@ import './Products.css';
 import '../Rateplan/RatePlan.css';
 import styles from './Products.module.css';
 import axios from 'axios';
-import { getAuthData } from '../../utils/auth';
+import { getAuthData, getAuthHeaders } from '../../utils/auth';
 import {
   getProducts,
   createProduct as createProductApi,
@@ -47,7 +47,7 @@ interface Product {
   status: string;
   category: string;
   createdOn?: string;
-  icon?: string; // raw backend path (relative/absolute)
+  icon?: string; // raw backend path
   iconUrl?: string | null; // blob url fetched with auth
   metrics?: Array<{
     metricName: string;
@@ -62,25 +62,6 @@ interface ProductsProps {
   setShowNewProductForm: (show: boolean) => void;
 }
 
-// --- helpers to build a safe icon URL ---
-const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, ''); // http://host:port
-
-// normalize any backend-provided icon string to a proper absolute URL
-const normalizeIconAbsoluteUrl = (icon?: string): string | null => {
-  if (!icon) return null;
-  if (icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('data:')) {
-    return icon;
-  }
-
-  // ensure path starts with one leading slash
-  const clean = `/${icon.replace(/^\/+/, '')}`;
-
-  // make sure it lives under /api if backend serves files there
-  const path = clean.startsWith('/api/') ? clean : `/api${clean}`;
-
-  return `${API_ORIGIN}${path}`;
-};
-
 export default function Products({ showNewProductForm, setShowNewProductForm }: ProductsProps) {
   // Prevent browser scroll for Products page
   useEffect(() => {
@@ -94,135 +75,60 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
-  const [showKongIntegration, setShowKongIntegration] = useState(false);
-  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-  const [deleteProductName, setDeleteProductName] = useState<string>('');
-  const [productQuery, setProductQuery] = useState<string>('');
-  const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
 
-  // track blob URLs so we can revoke them when replaced/unmounted
-  const previousBlobUrlsRef = React.useRef<string[]>([]);
-
-  // get toast API
-  const { showToast } = useToast();
-
-  // Generate a fallback icon based on product name
-  const generateFallbackIcon = (productName: string): string => {
-    // Create a simple SVG with initials
-    const initials = productName
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase())
-      .join('')
-      .substring(0, 2);
+  // resolve backend icon URL (supports absolute, data:, and relative /uploads paths)
+  const resolveIconUrl = (icon?: string) => {
+    if (!icon) return null;
+    if (icon.startsWith('http') || icon.startsWith('data:')) return icon;
     
-    // Use a consistent color based on product name hash
-    const hash = productName.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
+    // If the icon path starts with /uploads, serve it from the base server URL (not /api)
+    if (icon.startsWith('/uploads')) {
+      // Remove /api from BASE_URL and use just the server base
+      const serverBase = BASE_URL.replace('/api', '');
+      return `${serverBase}${icon}`;
+    }
     
-    const colors = [
-      ['#F8F7FA', '#E4EEF9', '#CC9434'],
-      ['#FFF5F5', '#FED7D7', '#E53E3E'],
-      ['#F0FFF4', '#C6F6D5', '#38A169'],
-      ['#EBF8FF', '#BEE3F8', '#3182CE'],
-      ['#FAF5FF', '#E9D8FD', '#805AD5']
-    ];
-    
-    const colorSet = colors[Math.abs(hash) % colors.length];
-    
-    const svgContent = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
-        <defs>
-          <linearGradient id="bg-fallback" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:${colorSet[0]}" />
-            <stop offset="100%" style="stop-color:${colorSet[1]}" />
-          </linearGradient>
-        </defs>
-        <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-fallback)"/>
-        <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
-              fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" strokeWidth="0.6"/>
-        <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${colorSet[2]}"/>
-        <g transform="translate(10.657,9.385)">
-          <rect width="29.339" height="26.571" rx="6"
-                fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
-          <text x="14.67" y="18" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
-            ${initials}
-          </text>
-        </g>
-      </svg>
-    `.trim();
-    
-    return `data:image/svg+xml;base64,${btoa(svgContent)}`;
+    const leadingSlash = icon.startsWith('/') ? '' : '/';
+    return `${BASE_URL}${leadingSlash}${icon}`;
   };
 
-  // Try to fetch icon, fallback to generated icon on failure
-  const fetchIconWithAuth = async (iconPath?: string, productName?: string): Promise<string | null> => {
-    // If no iconPath, generate fallback immediately
-    if (!iconPath) {
-      return productName ? generateFallbackIcon(productName) : null;
-    }
-
-    // If iconPath looks like a data URL, return it directly
-    if (iconPath.startsWith('data:')) {
-      return iconPath;
-    }
-
-    const absolute = normalizeIconAbsoluteUrl(iconPath);
-    if (!absolute) {
-      return productName ? generateFallbackIcon(productName) : null;
-    }
-
+  // Fetch products with billable metrics included in the response
+  const fetchIconWithAuth = async (iconPath?: string): Promise<string | null> => {
+    if (!iconPath) return null;
+    const resolved = resolveIconUrl(iconPath);
+    if (!resolved) return null;
     try {
-      const authData = getAuthData();
-      const headers: Record<string, string> = {};
-      if (authData?.token) headers.Authorization = `Bearer ${authData.token}`;
-      if (authData?.organizationId != null) headers['X-Organization-Id'] = String(authData.organizationId);
-
-      const response = await axios.get(absolute, {
+      // Use getAuthHeaders to include both Authorization token and X-Organization-Id
+      const authHeaders = getAuthHeaders();
+      const response = await axios.get(resolved, {
         responseType: 'blob',
-        headers
+        headers: authHeaders
       });
-
-      const blobUrl = URL.createObjectURL(response.data);
-      previousBlobUrlsRef.current.push(blobUrl);
-      return blobUrl;
-    } catch (e) {
-      // Backend doesn't serve icons or auth failed - use fallback
-      console.warn('Icon fetch failed, using fallback for:', absolute);
-      return productName ? generateFallbackIcon(productName) : null;
+      return URL.createObjectURL(response.data);
+    } catch (e: any) {
+      // Silently fail and show fallback icon
+      // Common errors: 404 (file not found), 500 (server error), 401 (auth issue)
+      if (e?.response?.status === 500) {
+        console.warn(`Icon not available on server: ${iconPath}`);
+      }
+      return null;
     }
   };
-
-  // Cleanup blob URLs when products change or component unmounts
-  useEffect(() => {
-    return () => {
-      previousBlobUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-      previousBlobUrlsRef.current = [];
-    };
-  }, []);
 
   const fetchProducts = React.useCallback(async () => {
     setIsLoading(true);
-    // cleanup any earlier blobs before refetch
-    previousBlobUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-    previousBlobUrlsRef.current = [];
-
     try {
-      const list = await getProducts();
-
-      const productsWithMetricsPromises = list.map(async (p: any) => {
-        const iconUrl = await fetchIconWithAuth(p.icon, p.productName);
-        return {
-          ...p,
-          metrics: p.billableMetrics || [],
-          iconUrl // IMPORTANT: we only render this; we never render raw protected URL
+      const products = await getProducts();
+      // Process products and map billableMetrics to metrics
+      const productsWithMetricsPromises = products.map(async (product) => {
+        const iconUrl = await fetchIconWithAuth((product as any).icon);
+       
+        const productWithMetrics = {
+          ...product,
+          metrics: (product as any).billableMetrics || [],
+          iconUrl
         } as Product;
+        return productWithMetrics;
       });
 
       const resolved = await Promise.all(productsWithMetricsPromises);
@@ -235,6 +141,30 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       setIsLoading(false);
     }
   }, []);
+
+  const [error, setError] = useState<string | null>(null);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
+  const [showKongIntegration, setShowKongIntegration] = useState(false);
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
+  const [deleteProductName, setDeleteProductName] = useState<string>('');
+  const [productQuery, setProductQuery] = useState<string>('');
+
+  // products filtered by search term and sorted with drafts at top
+  const filteredProducts = products
+    .filter((p) => p.productName?.toLowerCase().includes(productQuery.toLowerCase()))
+    .sort((a, b) => {
+      if (a.status.toLowerCase() === 'draft' && b.status.toLowerCase() !== 'draft') return -1;
+      if (a.status.toLowerCase() !== 'draft' && b.status.toLowerCase() === 'draft') return 1;
+      return 0;
+    });
+
+  const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
+
+  // get toast API
+  const { showToast } = useToast();
 
   // Memoize cancel handler
   const handleCreateProductCancel = React.useCallback(() => {
@@ -256,11 +186,15 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setIsDeleting(true);
     try {
       await deleteProductApi(deleteProductId);
-      showToast?.({ message: 'Product deleted successfully', kind: 'success' });
+      if (showToast) {
+        showToast({ message: 'Product deleted successfully', kind: 'success' });
+      }
       fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
-      showToast?.({ message: 'Failed to delete product', kind: 'error' });
+      if (showToast) {
+        showToast({ message: 'Failed to delete product', kind: 'error' });
+      }
     } finally {
       setIsDeleting(false);
       setShowConfirmDeleteModal(false);
@@ -298,7 +232,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   };
 
   const getProductTypeName = (type: string): string => {
-    const normalizedType = type?.toLowerCase() || '';
+    const normalizedType = type.toLowerCase();
     return (productTypeNames as any)[normalizedType] || type;
   };
 
@@ -338,22 +272,38 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       await createProductApi(formData);
       await fetchProducts();
       setShowCreateProduct(false);
-      setShowNewProductForm(false);
+      if (setShowNewProductForm) setShowNewProductForm(false);
     } catch (error) {
       console.error('Error creating product:', error);
       alert('Failed to create product. Please try again.');
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    return products
-      .filter((p) => p.productName?.toLowerCase().includes(productQuery.toLowerCase()))
-      .sort((a, b) => {
-        if (a.status?.toLowerCase() === 'draft' && b.status?.toLowerCase() !== 'draft') return -1;
-        if (a.status?.toLowerCase() !== 'draft' && b.status?.toLowerCase() === 'draft') return 1;
-        return 0;
+  const handleDeleteConfirm = async () => {
+    if (!deleteProductId) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteProductApi(deleteProductId);
+      await fetchProducts();
+      setShowConfirmDeleteModal(false);
+      setDeleteProductId(null);
+      showToast({
+        kind: 'success',
+        title: 'Product Deleted',
+        message: `The product “${deleteProductName}” was successfully deleted.`
       });
-  }, [products, productQuery]);
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+      showToast({
+        kind: 'error',
+        title: 'Failed to Delete',
+        message: `Failed to delete the product “${deleteProductName}”. Please try again.`
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (error) return <div className="error">Something Went wrong: {error}</div>;
 
@@ -366,7 +316,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               isOpen={showConfirmDeleteModal}
               productName={deleteProductName}
               onCancel={handleDeleteCancel}
-              onConfirm={handleConfirmDelete}
+              onConfirm={handleDeleteConfirm}
             />
           )}
 
@@ -437,13 +387,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td>
                           <div className="product-name-container">
                             {(() => {
-                              // IMPORTANT: Only use the blob URL we fetched with auth
-                              const safeIconUrl = product.iconUrl;
-                              if (safeIconUrl) {
+                              // Only use iconUrl if it was successfully fetched with auth
+                              // Don't fall back to direct URL to avoid 401 errors
+                              if (product.iconUrl) {
                                 return (
                                   <div className="product-icon product-icon--image">
                                     <img
-                                      src={safeIconUrl}
+                                      src={product.iconUrl}
                                       alt={`${product.productName} icon`}
                                       onError={(e) => {
                                         const wrapper = e.currentTarget.parentElement as HTMLElement;
@@ -454,7 +404,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   </div>
                                 );
                               }
-                              // Fallback to initials tile (NEVER use raw protected URL)
+                              // Fallback to initials if icon fetch failed or no icon exists
                               return (
                                 <div
                                   className="product-icon"

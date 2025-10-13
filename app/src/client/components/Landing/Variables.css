@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap');
 /* Brand Colors */
-html {
-  font-size: 16px;   /* fixes rem scaling */
-  -webkit-text-size-adjust: 100%; /* prevents iOS zoom scaling */
-}
 :root {
   --brand-000: rgba(225, 240, 230, 1);
   --brand-100: rgba(185, 207, 193, 1);
@@ -106,13 +102,10 @@ html {
   --scale-800: 32px;
   --scale-900: 36px;
 
-
-  /* Font Sizes body */
-  --font-size-xs: 0.625rem;
-  --font-size-sm: 0.75rem;
-  --font-size-md: 0.875rem;
-  --font-size-lg: 1rem;
-  /* font sizes headings */
+  --font-size-xs: 0.5rem;     /* 8px */
+  --font-size-sm: 0.625rem;   /* 10px */
+  --font-size-md: 0.75rem;    /* 12px */
+  --font-size-lg: 0.875rem;   /* 14px */
 
   /* Heading Font Sizes (Responsive or Base) */
   --font-size-h6: 1.125rem;
