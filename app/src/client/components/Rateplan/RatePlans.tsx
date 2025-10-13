@@ -422,7 +422,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             title="Rate Plans"
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            primaryLabel="+New Rate Plan"
+            primaryLabel="+ New Rate Plan"
             onPrimaryClick={() => { setShowCreatePlan(true); navigate('/get-started/rate-plans'); }}
             onFilterClick={() => {}}
             showPrimary={hasRows}

@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import path from 'path';
 
 // Lightweight alias so we don't require the full 'fastify' types in projects that use Express only.
 type FastifyLike = {
@@ -21,6 +22,12 @@ export const serverSetup = (app: express.Express | FastifyLike) => {
   if (typeof (app as any).use === 'function') {
     (app as any).use(cors({ origin, credentials: true }));
     (app as any).use(express.json());
+    
+    // Serve static files from uploads directory
+    // This allows /uploads/icons/* paths to be accessible
+    const uploadsPath = path.join(process.cwd(), 'uploads');
+    (app as any).use('/uploads', express.static(uploadsPath));
+    
     return app;
   }
 

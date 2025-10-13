@@ -11,7 +11,7 @@ import './Products.css';
 import '../Rateplan/RatePlan.css';
 import styles from './Products.module.css';
 import axios from 'axios';
-import { getAuthData } from '../../utils/auth';
+import { getAuthData, getAuthHeaders } from '../../utils/auth';
 import {
   getProducts,
   createProduct as createProductApi,
@@ -80,6 +80,14 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const resolveIconUrl = (icon?: string) => {
     if (!icon) return null;
     if (icon.startsWith('http') || icon.startsWith('data:')) return icon;
+    
+    // If the icon path starts with /uploads, serve it from the base server URL (not /api)
+    if (icon.startsWith('/uploads')) {
+      // Remove /api from BASE_URL and use just the server base
+      const serverBase = BASE_URL.replace('/api', '');
+      return `${serverBase}${icon}`;
+    }
+    
     const leadingSlash = icon.startsWith('/') ? '' : '/';
     return `${BASE_URL}${leadingSlash}${icon}`;
   };
@@ -90,13 +98,19 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     const resolved = resolveIconUrl(iconPath);
     if (!resolved) return null;
     try {
-      const authData = getAuthData();
+      // Use getAuthHeaders to include both Authorization token and X-Organization-Id
+      const authHeaders = getAuthHeaders();
       const response = await axios.get(resolved, {
         responseType: 'blob',
-        headers: authData?.token ? { Authorization: `Bearer ${authData.token}` } : {}
+        headers: authHeaders
       });
       return URL.createObjectURL(response.data);
-    } catch (e) {
+    } catch (e: any) {
+      // Silently fail and show fallback icon
+      // Common errors: 404 (file not found), 500 (server error), 401 (auth issue)
+      if (e?.response?.status === 500) {
+        console.warn(`Icon not available on server: ${iconPath}`);
+      }
       return null;
     }
   };
@@ -373,12 +387,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td>
                           <div className="product-name-container">
                             {(() => {
-                              const iconUrl = product.iconUrl || resolveIconUrl(product.icon);
-                              if (iconUrl) {
+                              // Only use iconUrl if it was successfully fetched with auth
+                              // Don't fall back to direct URL to avoid 401 errors
+                              if (product.iconUrl) {
                                 return (
                                   <div className="product-icon product-icon--image">
                                     <img
-                                      src={iconUrl}
+                                      src={product.iconUrl}
                                       alt={`${product.productName} icon`}
                                       onError={(e) => {
                                         const wrapper = e.currentTarget.parentElement as HTMLElement;
@@ -389,6 +404,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   </div>
                                 );
                               }
+                              // Fallback to initials if icon fetch failed or no icon exists
                               return (
                                 <div
                                   className="product-icon"

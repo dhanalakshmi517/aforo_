@@ -1,0 +1,143 @@
+@import "../Variables/Variables.css";
+
+/* Optional custom font (ensure these paths exist in /public/fonts) */
+@font-face {
+  font-family: "Modern Gothic";
+  src: url("/fonts/ModernGothic.woff2") format("woff2"),
+       url("/fonts/ModernGothic.woff") format("woff");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Global font (if you really want navbar to drive body font) */
+body {
+  font-family: "Modern Gothic", sans-serif;
+}
+
+/* ---------- Navbar ---------- */
+.af-nav {
+  width: 100%; /* full-bleed background */
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(26.75px);
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+/* Content container capped at 1910px */
+.af-nav__inner {
+  max-width: 1910px;                 /* ⬅ cap content */
+  width: 100%;
+  margin: 0 auto;                    /* center the inner container */
+  padding: 10px 80px;
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Brand */
+.af-brand {
+  font-family: "Modern Gothic", sans-serif;
+  font-size: 34.611px;
+  font-weight: bold;
+  line-height: 49.046px; /* 141.704% */
+  letter-spacing: -2.33px;
+  text-decoration: none;
+
+  color: var(--color-primary-800);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  background: linear-gradient(
+    254deg,
+    var(--color-primary-700, #025A94) 26.47%,
+    var(--color-primary-1000, #00365A) 76.37%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.af-brand img {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+
+/* Links */
+.af-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.af-nav__link {
+  text-decoration: none;
+  color: var(--color-neutral-1000);
+  text-align: center;
+
+  /* body/md/reg from your tokens */
+  font-family: var(--font-family-primary, "Modern Gothic", sans-serif);
+  font-size: var(--font-size-md, 16px);
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 1.43);
+
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.af-nav__link:hover {
+  background: #fff;
+  color: var(--color-primary-800);
+}
+
+.af-nav__link--active {
+  position: relative;
+  background: linear-gradient(
+    254deg,
+    var(--color-primary-700, #025A94) 26.47%,
+    var(--color-primary-1000, #00365A) 76.37%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 500;
+}
+
+.af-nav__link--active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background-color: var(--color-primary-800);
+  border-radius: 1px;
+}
+
+/* ---------- Responsiveness ---------- */
+@media (max-width: 768px) {
+  .af-nav__inner {
+    height: 72px;
+    padding: 8px clamp(12px, 4vw, 28px);
+  }
+  .af-brand {
+    font-size: 28px;
+    line-height: 40px;
+    letter-spacing: -1.4px;
+  }
+}
+
+@media (max-width: 420px) {
+  .af-nav__links {
+    gap: 10px;
+  }
+  .af-nav__link {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,168 @@
+:root{
+    --pm-card-w: 320px;     
+    --pm-card-h: 500px;
+    --pm-gap: 28px;
+    --pm-speed: 26s;        
+}
+
+.pm{
+    padding: 20px 40px;
+    overflow-x: hidden;  /* horizontal marquee */
+    overflow-y: visible; /* allow vertical cards fully visible */
+    background: white;
+}
+
+.pm__container{ 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    text-align: center; 
+}
+
+.pm__title{ 
+    margin:0 0 10px; 
+    font-size:32px; 
+    font-weight:800; 
+    color:#0b2430; 
+}
+
+.pm__subtitle{ 
+    margin:0 auto 32px; 
+    max-width:900px; 
+    color:#4b5b68; 
+    line-height:1.6; 
+    font-size:15px; 
+}
+
+.pm__track{
+    display:flex;
+    gap: var(--pm-gap);
+    width: max-content;
+    animation: pm-marquee var(--pm-speed) linear infinite;
+}
+
+/* Card styling */
+.pm-card{
+    flex: 0 0 var(--pm-card-w);
+    height: var(--pm-card-h);
+    margin: 0;
+    padding: 0;
+    position: relative;
+    display: grid;
+    place-items: center;
+    filter: drop-shadow(0 3px 14px rgba(0,33,55,0.08));
+    background: transparent;
+    border-radius: 16px;
+    overflow: visible;
+}
+
+.pm-card__img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+@keyframes pm-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* -------------------- Media Queries -------------------- */
+
+/* Large desktops / ultra-wide */
+@media (min-width: 1920px){
+    :root { --pm-card-w: 400px; --pm-card-h: 600px; --pm-gap: 40px; --pm-speed: 28s; }
+}
+
+/* Desktops 1440px–1919px */
+@media (min-width: 1440px) and (max-width: 1919px){
+    :root { --pm-card-w: 360px; --pm-card-h: 550px; --pm-gap: 36px; --pm-speed: 27s; }
+}
+
+/* Desktop 1024px–1439px */
+@media (min-width: 1024px) and (max-width: 1439px){
+    :root { --pm-card-w: 320px; --pm-card-h: 500px; --pm-gap: 28px; --pm-speed: 26s; }
+}
+
+/* Tablets 768px–1023px */
+@media (min-width: 768px) and (max-width: 1023px){
+    :root { --pm-card-w: 280px; --pm-card-h: 450px; --pm-gap: 24px; --pm-speed: 24s; }
+}
+
+/* Tablets 520px–767px */
+@media (min-width: 520px) and (max-width: 767px){
+    :root { --pm-card-w: 240px; --pm-card-h: 380px; --pm-gap: 20px; --pm-speed: 22s; }
+    .pm__title{ font-size:28px; }
+    .pm__subtitle{ font-size:14px; }
+}
+
+/* Small tablets / large phones 421px–519px */
+@media (min-width: 421px) and (max-width: 519px){
+    :root { --pm-card-w: 220px; --pm-card-h: 320px; --pm-gap: 16px; --pm-speed: 20s; }
+    .pm__title{ font-size:26px; }
+    .pm__subtitle{ font-size:13px; }
+}
+
+/* Small screens <=420px */
+@media (max-width: 420px){
+    :root { --pm-card-w: 200px; --pm-card-h: 280px; --pm-gap: 12px; --pm-speed: 18s; }
+    .pm {
+        padding: 30px 12px 40px;
+        overflow-x: auto;  /* allow horizontal scroll if needed */
+    }
+    .pm__track{
+        flex-wrap: wrap;  /* allow wrapping to multiple rows */
+        justify-content: center;
+        animation: none;  /* disable marquee on very small screens */
+    }
+    .pm__title{ font-size: 20px; }
+    .pm__subtitle{ font-size: 12px; line-height:1.4; }
+}
+
+/* Extra small phones <=360px */
+@media (max-width: 360px){
+    :root { --pm-card-w: 180px; --pm-card-h: 240px; --pm-gap: 10px; --pm-speed: 16s; }
+    .pm {
+        padding: 25px 8px 35px;
+    }
+    .pm__track{
+        flex-wrap: wrap;
+        justify-content: center;
+        animation: none;
+    }
+    .pm__title{ font-size: 18px; }
+    .pm__subtitle{ font-size: 11px; }
+}
+
+
+/* Extra small screens <=420px */
+@media (max-width: 420px) {
+    :root {
+      --pm-card-w: 180px;
+      --pm-card-h: 250px;
+      --pm-gap: 12px;
+      --pm-speed: 16s;  /* marquee speed */
+    }
+  
+    .pm {
+      padding: 25px 12px 35px;
+      overflow: hidden;  /* hide scroll, keep moving */
+    }
+  
+    .pm__track {
+      flex-wrap: nowrap;              /* keep cards in one row */
+      width: max-content;             /* ensure it's wider than container */
+      animation: pm-marquee var(--pm-speed) linear infinite; /* keep marquee moving */
+    }
+  
+    .pm__title {
+      font-size: 20px;
+    }
+  
+    .pm__subtitle {
+      font-size: 12px;
+      line-height: 1.4;
+      max-width: 100%;
+    }
+  }
+  

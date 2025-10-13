@@ -218,7 +218,7 @@ export const getSelectOptions = (fieldLabel: string): Array<{ label: string; val
  * Public API
  * ------------------------------------*/
 export interface ConfigurationTabHandle {
-  submit: () => Promise<boolean>; // now: purely client-side validation
+  submit: (skipValidation?: boolean, saveToServer?: boolean) => Promise<boolean>; // skipValidation: true for draft saves, saveToServer: true for final save
 }
 
 export interface ConfigurationTabProps {
@@ -376,11 +376,25 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     // Expose submit via ref (client-side only)
     React.useImperativeHandle(ref, () => ({
-      submit: async (isDraft: boolean = false) => {
-        // Always run client-side validation
-        if (!validate()) return false;
-        // If invoked in draft mode (from Save & Next), skip server call
-        if (isDraft) return true;
+      submit: async (skipValidation: boolean = false, saveToServer: boolean = true) => {
+        // Skip validation when saving as draft (skipValidation=true)
+        if (!skipValidation) {
+          // Run validation for Save & Next and final submit
+          if (!validate()) return false;
+        } else {
+          // Clear any existing errors when saving as draft
+          setFieldErrors({});
+          setError('');
+          // For draft saves, just return true without saving to server
+          return true;
+        }
+        
+        // If saveToServer is false, just return true after validation (for Save & Next)
+        if (!saveToServer) {
+          return true;
+        }
+        
+        // For final submit (validation passed), save to server
         try {
           console.log('Original formData:', JSON.parse(JSON.stringify(formData)));
           
@@ -393,14 +407,14 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           }, {} as Record<string, any>);
           
           console.log('Cleaned formData before sendConfiguration:', cleanedFormData);
-          const success = await saveConfiguration(cleanedFormData, isDraft);
+          const success = await saveConfiguration(cleanedFormData, false);
           if (success && onSubmit) {
-            return await onSubmit(isDraft);
+            return await onSubmit(false);
           }
           return success;
         } catch (error) {
-          console.error(`Error in ${isDraft ? 'draft ' : ''}configuration submit:`, error);
-          setError(`Failed to save ${isDraft ? 'draft ' : ''}configuration. Please try again.`);
+          console.error('Error in configuration submit:', error);
+          setError('Failed to save configuration. Please try again.');
           return false;
         }
       }
