@@ -219,7 +219,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     }
 
     // Freemium - check both freemium (object) and freemiums (array)
-    let freemiumData = null;
+    // use loose typing to accommodate various backend shapes
+    let freemiumData: any = null;
     if (draftData.freemium && typeof draftData.freemium === 'object') {
       freemiumData = draftData.freemium;
       console.log('✅ Found freemium object:', freemiumData);
