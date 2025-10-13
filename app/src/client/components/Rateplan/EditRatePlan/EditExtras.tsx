@@ -152,9 +152,9 @@ export default function EditExtras({
           minimumCharge: Number(minimumCharge || 0),
         });
       }
-      alert('Extras saved');
+      console.log('✅ Extras saved');
     } catch (err: any) {
-      alert(err?.message || 'Failed to save extras');
+      console.error('Failed to save extras', err);
       throw err;
     }
   };

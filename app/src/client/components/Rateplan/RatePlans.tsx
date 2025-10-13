@@ -223,14 +223,24 @@ const RatePlans: React.FC<RatePlansProps> = ({
   };
 
   const handleDraft = async (id: number) => {
+    console.log('🎯 handleDraft called for ID:', id);
     try {
       clearAllRatePlanData();
+      console.log('📡 Fetching rate plan details...');
       const fresh = await fetchRatePlanWithDetails(id);
+      console.log('✅ Fetched draft data:', fresh);
+      console.log('🔍 Freemiums in draft data:', fresh.freemiums);
       setDraftPlanData(fresh);
       setShowCreatePlan(true);
-    } catch {
+      console.log('🚀 Opening CreatePricePlan with draft data');
+    } catch (error) {
+      console.error('❌ Failed to fetch detailed draft data:', error);
       const plan = ratePlansState.find((p) => p.ratePlanId === id);
-      if (plan) { setDraftPlanData(plan); setShowCreatePlan(true); }
+      if (plan) { 
+        console.log('📋 Using basic plan data as fallback:', plan);
+        setDraftPlanData(plan); 
+        setShowCreatePlan(true); 
+      }
     }
   };
 

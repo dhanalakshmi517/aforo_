@@ -303,9 +303,9 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
         await saveUsageBasedPricing(ratePlanId, { perUnitAmount: perUnit });
       }
 
-      alert('Pricing saved');
+      console.log('✅ Pricing saved');
     } catch (err: any) {
-      alert(err?.message || 'Failed to save pricing');
+      console.error('Failed to save pricing', err);
       throw err;
     } finally {
       setSaving(false);
