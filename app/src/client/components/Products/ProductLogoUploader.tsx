@@ -38,7 +38,7 @@ const ProductLogoUploader: React.FC<ProductLogoUploaderProps> = ({ logo, onChang
           <!-- OUTER CARD -->
           <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-${icon.id})"/>
           <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
-                fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" stroke-width="0.6"/>
+                fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" strokeWidth="0.6"/>
 
           <!-- BACK TILE -->
           <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${tile}"/>
@@ -46,7 +46,7 @@ const ProductLogoUploader: React.FC<ProductLogoUploaderProps> = ({ logo, onChang
           <!-- GLASS FOREGROUND TILE -->
           <g transform="translate(10.657,9.385)">
             <rect width="29.339" height="26.571" rx="6"
-                  fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" stroke-width="0.6"/>
+                  fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
             <!-- ICON PATH (scaled) -->
             <g transform="translate(5.2,4.2) scale(0.08)">
               <g transform="translate(200,200) translate(-200,-200)">
