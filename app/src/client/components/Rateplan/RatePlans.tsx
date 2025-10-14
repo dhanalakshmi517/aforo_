@@ -472,7 +472,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
             primaryLabel="+ New Rate Plan"
-            onPrimaryClick={() => { setShowCreatePlan(true); navigate('/get-started/rate-plans'); }}
+            onPrimaryClick={() => { 
+              clearAllRatePlanData(); 
+              setShowCreatePlan(true); 
+              navigate('/get-started/rate-plans'); 
+            }}
             onFilterClick={() => {}}
             showPrimary={hasRows}
           />
@@ -552,7 +556,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
                           <p className="products-empty-state-text">
                             No Rate Plan created yet. Click ‘New Rate Plan’<br /> to create your First Rate Plan.
                           </p>
-                          <button className="empty-new-rate-btn" onClick={() => { setShowCreatePlan(true); navigate('/get-started/rate-plans'); }}>
+                          <button className="empty-new-rate-btn" onClick={() => { 
+                            clearAllRatePlanData(); 
+                            setShowCreatePlan(true); 
+                            navigate('/get-started/rate-plans'); 
+                          }}>
                             <span className="empty-btn-plus" aria-hidden="true">+</span> New Rate Plan
                           </button>
                         </div>

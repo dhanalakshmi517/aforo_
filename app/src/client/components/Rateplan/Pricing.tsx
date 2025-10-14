@@ -77,9 +77,21 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
     const savePricing = async (): Promise<boolean> => {
       setErrors({});
-      if (!selected) return true;
+      console.log('💾 Pricing: savePricing called with selected:', selected);
+      
+      // Always persist the pricing model selection to session storage
+      if (selected) {
+        console.log('💾 Pricing: Ensuring pricing model is persisted:', selected);
+        setRatePlanData('PRICING_MODEL', selected);
+      }
+      
+      if (!selected) {
+        console.log('⚠️ Pricing: No pricing model selected, returning early');
+        return true;
+      }
 
       if (!ratePlanId) {
+        console.log('❌ Pricing: No ratePlanId available');
         setErrors({
           general: 'Pricing can be saved after the rate plan is created in earlier steps.'
         });
@@ -265,23 +277,30 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
           from: String(y.from ?? ''),
           to: String(y.to ?? ''),
           cost: String(y.price ?? ''),
+          isUnlimited: !!y.isUnlimited  // ← Added missing isUnlimited property
         }));
         setRatePlanData('STAIR_TIERS', JSON.stringify(stairTiers));
         setRatePlanData('STAIR_OVERAGE', String(stairRaw.overageUnitRate || 0));
         setRatePlanData('STAIR_GRACE', String(stairRaw.graceBuffer || 0));
+        setRatePlanData('STAIR_NO_UPPER_LIMIT', lastUnlimited ? 'true' : 'false');  // ← Added missing unlimited flag
       }
     }, [draftData]);
 
     // Initialize from session storage on mount
     useEffect(() => {
+      console.log('🔧 Pricing component mounted - checking session storage...');
       const savedModel = getRatePlanData('PRICING_MODEL');
       const savedStep = getRatePlanData('WIZARD_STEP');
+      console.log('📖 Saved pricing model from session:', savedModel);
+      console.log('📖 Saved wizard step from session:', savedStep);
       const hasExistingData = savedModel || savedStep;
 
       if (isFreshCreation && !hasExistingData) {
+        console.log('🆕 Fresh creation with no existing data - clearing selection');
         setSelected('');
       } else {
         if (savedModel) {
+          console.log('✅ Setting pricing model to:', savedModel);
           setSelected(savedModel);
 
           if (savedModel === 'Flat Fee') {
@@ -315,11 +334,12 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 const parsedTiers = JSON.parse(savedTiers);
                 if (Array.isArray(parsedTiers) && parsedTiers.length > 0) {
                   const volumeTiers = parsedTiers.map((t: any) => ({
-                    from: Number(t.from) || null,
-                    to: t.isUnlimited ? null : (Number(t.to) || null),
-                    price: Number(t.price) || null,
+                    from: t.from !== undefined && t.from !== null && t.from !== '' ? Number(t.from) : null,
+                    to: t.isUnlimited ? null : (t.to !== undefined && t.to !== null && t.to !== '' ? Number(t.to) : null),
+                    price: t.price !== undefined && t.price !== null && t.price !== '' ? Number(t.price) : null,
                     isUnlimited: !!t.isUnlimited
                   }));
+                  console.log('🔧 Pricing: Restoring Volume tiers from session:', volumeTiers);
                   setTiers(volumeTiers);
                   const lastUnlimited = volumeTiers.length > 0 ? !!volumeTiers[volumeTiers.length - 1].isUnlimited : false;
                   const finalUnlimited = savedUnlimited != null ? savedUnlimited === 'true' : lastUnlimited;
@@ -330,8 +350,14 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 console.error('Failed to parse volume tiers:', e);
               }
             }
-            if (savedOverage) setOverageUnitRate(Number(savedOverage) || 0);
-            if (savedGrace) setGraceBuffer(Number(savedGrace) || 0);
+            if (savedOverage) {
+              console.log('🔧 Pricing: Restoring Volume overage from session:', savedOverage);
+              setOverageUnitRate(Number(savedOverage) || 0);
+            }
+            if (savedGrace) {
+              console.log('🔧 Pricing: Restoring Volume grace from session:', savedGrace);
+              setGraceBuffer(Number(savedGrace) || 0);
+            }
           } else if (savedModel === 'Tiered Pricing') {
             const savedTiers = getRatePlanData('TIERED_TIERS');
             const savedOverage = getRatePlanData('TIERED_OVERAGE');
@@ -343,11 +369,12 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 const parsedTiers = JSON.parse(savedTiers);
                 if (Array.isArray(parsedTiers) && parsedTiers.length > 0) {
                   const tieredTiers = parsedTiers.map((t: any) => ({
-                    from: Number(t.from) || null,
-                    to: t.isUnlimited ? null : (Number(t.to) || null),
-                    price: Number(t.price) || null,
+                    from: t.from !== undefined && t.from !== null && t.from !== '' ? Number(t.from) : null,
+                    to: t.isUnlimited ? null : (t.to !== undefined && t.to !== null && t.to !== '' ? Number(t.to) : null),
+                    price: t.price !== undefined && t.price !== null && t.price !== '' ? Number(t.price) : null,
                     isUnlimited: !!t.isUnlimited
                   }));
+                  console.log('🔧 Pricing: Restoring Tiered tiers from session:', tieredTiers);
                   setTiers(tieredTiers);
 
                   const lastUnlimited = tieredTiers.length > 0 ? !!tieredTiers[tieredTiers.length - 1].isUnlimited : false;
@@ -359,8 +386,14 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 console.error('Failed to parse tiered tiers:', e);
               }
             }
-            if (savedOverage) setOverageUnitRate(Number(savedOverage) || 0);
-            if (savedGrace) setGraceBuffer(Number(savedGrace) || 0);
+            if (savedOverage) {
+              console.log('🔧 Pricing: Restoring Tiered overage from session:', savedOverage);
+              setOverageUnitRate(Number(savedOverage) || 0);
+            }
+            if (savedGrace) {
+              console.log('🔧 Pricing: Restoring Tiered grace from session:', savedGrace);
+              setGraceBuffer(Number(savedGrace) || 0);
+            }
           } else if (savedModel === 'Stairstep') {
             const savedStairs = getRatePlanData('STAIR_TIERS');
             const savedOverage = getRatePlanData('STAIR_OVERAGE');
@@ -371,11 +404,12 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 const parsedStairs = JSON.parse(savedStairs);
                 if (Array.isArray(parsedStairs) && parsedStairs.length > 0) {
                   const stairTiers = parsedStairs.map((s: any) => ({
-                    from: Number(s.from) || null,
-                    to: s.isUnlimited ? null : (Number(s.to) || null),
-                    price: Number(s.cost) || null,
+                    from: s.from !== undefined && s.from !== null && s.from !== '' ? Number(s.from) : null,
+                    to: s.isUnlimited ? null : (s.to !== undefined && s.to !== null && s.to !== '' ? Number(s.to) : null),
+                    price: s.cost !== undefined && s.cost !== null && s.cost !== '' ? Number(s.cost) : null,
                     isUnlimited: !!s.isUnlimited
                   }));
+                  console.log('🔧 Pricing: Restoring Stairstep tiers from session:', stairTiers);
                   setTiers(stairTiers);
                   const lastUnlimited = stairTiers.length > 0 ? !!stairTiers[stairTiers.length - 1].isUnlimited : false;
                   setNoUpperLimit(lastUnlimited);
@@ -384,15 +418,27 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 console.error('Failed to parse stair tiers:', e);
               }
             }
-            if (savedOverage) setOverageUnitRate(Number(savedOverage) || 0);
-            if (savedGrace) setGraceBuffer(Number(savedGrace) || 0);
+            if (savedOverage) {
+              console.log('🔧 Pricing: Restoring Stairstep overage from session:', savedOverage);
+              setOverageUnitRate(Number(savedOverage) || 0);
+            }
+            if (savedGrace) {
+              console.log('🔧 Pricing: Restoring Stairstep grace from session:', savedGrace);
+              setGraceBuffer(Number(savedGrace) || 0);
+            }
           }
         }
       }
     }, [isFreshCreation]);
 
     useEffect(() => {
-      if (selected) setRatePlanData('PRICING_MODEL', selected);
+      console.log('💾 Pricing: Persisting selected model to session storage:', selected);
+      if (selected) {
+        setRatePlanData('PRICING_MODEL', selected);
+        console.log('✅ Pricing: Saved to session storage:', selected);
+      } else {
+        console.log('⚠️ Pricing: Selected is empty, not persisting');
+      }
     }, [selected]);
 
     const handleAddTier = () => {
@@ -494,6 +540,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             value={selected}
             onChange={e => {
               const v = e.target.value;
+              console.log('🎯 Pricing: User selected pricing model:', v);
               setSelected(v);
               if (v === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
@@ -535,12 +582,16 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
               <div className="pricing-container">
                 <Tiered
                   ref={tieredRef}
-                  tiers={tiers.map(t => ({
-                    from: toStr(t.from),
-                    to: toStr(t.to),
-                    price: toStr(t.price),
-                    isUnlimited: !!t.isUnlimited,
-                  }))}
+                  tiers={(() => {
+                    const mappedTiers = tiers.map(t => ({
+                      from: toStr(t.from),
+                      to: toStr(t.to),
+                      price: toStr(t.price),
+                      isUnlimited: !!t.isUnlimited,
+                    }));
+                    console.log('🔧 Pricing: Passing tiers to Tiered:', mappedTiers, 'from tiers:', tiers);
+                    return mappedTiers;
+                  })()}
                   onAddTier={handleAddTier}
                   onDeleteTier={handleDeleteTier}
                   onChange={handleTierChange}
@@ -572,7 +623,10 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
               <div className="pricing-container">
                 <Volume
                   ref={volumeRef}
-                  tiers={tiers as any}
+                  tiers={(() => {
+                    console.log('🔧 Pricing: Passing tiers to Volume:', tiers);
+                    return tiers as any;
+                  })()}
                   onAddTier={handleAddTier}
                   onDeleteTier={handleDeleteTier}
                   onChange={handleTierChange}
@@ -624,12 +678,16 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 <StairStep
                   ref={stairStepRef}
                   validationErrors={validationErrors}
-                  stairs={tiers.map(t => ({
-                    from: toStr(t.from),
-                    to: toStr(t.to),
-                    cost: toStr(t.price),
-                    isUnlimited: !!t.isUnlimited,
-                  }))}
+                  stairs={(() => {
+                    const mappedStairs = tiers.map(t => ({
+                      from: toStr(t.from),
+                      to: toStr(t.to),
+                      cost: toStr(t.price),
+                      isUnlimited: !!t.isUnlimited,
+                    }));
+                    console.log('🔧 Pricing: Passing stairs to StairStep:', mappedStairs, 'from tiers:', tiers);
+                    return mappedStairs;
+                  })()}
                   onStairsChange={(next) => {
                     setTiers(mapStairsToTiers(next));
                     const stairTiers = next.map(y => ({ from: y.from, to: y.isUnlimited ? '' : y.to, cost: y.cost, isUnlimited: !!y.isUnlimited }));

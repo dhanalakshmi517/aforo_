@@ -157,7 +157,8 @@ const CreatePricePlan = React.forwardRef<
         }
       })();
     } else {
-      console.log('❌ No draft data or resumeDraftId available');
+      console.log('🆕 Fresh rate plan creation - clearing any stale session data');
+      clearAllRatePlanData();
     }
   }, [draftData, isResuming, resumeDraftId]);
 
@@ -377,7 +378,113 @@ const CreatePricePlan = React.forwardRef<
       // ✅ Always attempt to save pricing (don’t gate on validation snapshot)
       try {
         if (currentId && pricingRef.current) {
+          // Pricing component is mounted, use its save method
           await pricingRef.current.save();
+        } else if (currentId) {
+          // Pricing component not mounted, save from session storage
+          console.log('💾 Pricing component not mounted, saving from session storage...');
+          const savedModel = getRatePlanData('PRICING_MODEL');
+          console.log('📖 Saved pricing model from session:', savedModel);
+
+          if (savedModel) {
+            console.log('✅ Saving pricing model to backend:', savedModel);
+            // Import the pricing save functions and save based on model type
+            const { saveFlatFeePricing, saveUsageBasedPricing, saveTieredPricing, saveVolumePricing, saveStairStepPricing } = await import('./api');
+
+            if (savedModel === 'Flat Fee') {
+              const savedAmount = getRatePlanData('FLAT_FEE_AMOUNT');
+              const savedCalls = getRatePlanData('FLAT_FEE_API_CALLS');
+              const savedOverage = getRatePlanData('FLAT_FEE_OVERAGE');
+              const savedGrace = getRatePlanData('FLAT_FEE_GRACE');
+
+              if (savedAmount || savedCalls || savedOverage) {
+                const payload = {
+                  flatFeeAmount: Number(savedAmount) || 0,
+                  numberOfApiCalls: Number(savedCalls) || 0,
+                  overageUnitRate: Number(savedOverage) || 0,
+                  graceBuffer: Number(savedGrace) || 0
+                };
+                await saveFlatFeePricing(currentId, payload);
+                console.log('✅ Saved Flat Fee pricing from session storage');
+              }
+            } else if (savedModel === 'Usage-Based') {
+              const savedPerUnit = getRatePlanData('USAGE_PER_UNIT_AMOUNT');
+              if (savedPerUnit) {
+                const payload = { perUnitAmount: Number(savedPerUnit) || 0 };
+                await saveUsageBasedPricing(currentId, payload);
+                console.log('✅ Saved Usage-Based pricing from session storage');
+              }
+            } else if (savedModel === 'Volume-Based') {
+              const savedTiers = getRatePlanData('VOLUME_TIERS');
+              const savedOverage = getRatePlanData('VOLUME_OVERAGE');
+              const savedGrace = getRatePlanData('VOLUME_GRACE');
+              
+              if (savedTiers) {
+                try {
+                  const parsedTiers = JSON.parse(savedTiers);
+                  const payload = {
+                    tiers: parsedTiers.map((t: any) => ({
+                      usageStart: t.from ?? 0,
+                      usageEnd: t.isUnlimited || !t.to ? null : t.to,
+                      unitPrice: t.price ?? 0
+                    })),
+                    overageUnitRate: Number(savedOverage) || 0,
+                    graceBuffer: Number(savedGrace) || 0
+                  };
+                  await saveVolumePricing(currentId, payload);
+                  console.log('✅ Saved Volume-Based pricing from session storage');
+                } catch (e) {
+                  console.error('Failed to parse volume tiers for draft save:', e);
+                }
+              }
+            } else if (savedModel === 'Tiered Pricing') {
+              const savedTiers = getRatePlanData('TIERED_TIERS');
+              const savedOverage = getRatePlanData('TIERED_OVERAGE');
+              const savedGrace = getRatePlanData('TIERED_GRACE');
+              
+              if (savedTiers) {
+                try {
+                  const parsedTiers = JSON.parse(savedTiers);
+                  const payload = {
+                    tiers: parsedTiers.map((t: any) => ({
+                      startRange: t.from ?? 0,
+                      endRange: t.isUnlimited || !t.to ? null : t.to,
+                      unitPrice: t.price ?? 0
+                    })),
+                    overageUnitRate: Number(savedOverage) || 0,
+                    graceBuffer: Number(savedGrace) || 0
+                  };
+                  await saveTieredPricing(currentId, payload);
+                  console.log('✅ Saved Tiered pricing from session storage');
+                } catch (e) {
+                  console.error('Failed to parse tiered tiers for draft save:', e);
+                }
+              }
+            } else if (savedModel === 'Stairstep') {
+              const savedTiers = getRatePlanData('STAIR_TIERS');
+              const savedOverage = getRatePlanData('STAIR_OVERAGE');
+              const savedGrace = getRatePlanData('STAIR_GRACE');
+              
+              if (savedTiers) {
+                try {
+                  const parsedTiers = JSON.parse(savedTiers);
+                  const payload = {
+                    tiers: parsedTiers.map((t: any) => ({
+                      usageStart: t.from ?? 0,
+                      usageEnd: t.isUnlimited || !t.to ? null : t.to,
+                      flatCost: t.cost ?? 0
+                    })),
+                    overageUnitRate: Number(savedOverage) || 0,
+                    graceBuffer: Number(savedGrace) || 0
+                  };
+                  await saveStairStepPricing(currentId, payload);
+                  console.log('✅ Saved Stairstep pricing from session storage');
+                } catch (e) {
+                  console.error('Failed to parse stair tiers for draft save:', e);
+                }
+              }
+            }
+          }
         }
       } catch (pricingErr) {
         // best-effort for drafts: swallow errors so user can continue
