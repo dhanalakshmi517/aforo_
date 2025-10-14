@@ -40,6 +40,7 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [overageUnitRate, setOverageUnitRate] = useState(0);
   const [graceBuffer, setGraceBuffer] = useState(0);
+  const [noUpperLimit, setNoUpperLimit] = useState(false);
 
   const handleAddTier = () => setTiers([...tiers, { from: null, to: null, price: null, isUnlimited: false }]);
   const handleDeleteTier = (index: number) => setTiers(tiers.filter((_, i) => i !== index));
@@ -106,9 +107,12 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
       const t = (volumeObj.tiers || []).map((x: any) => ({
         from: x.usageStart ?? null,
         to: x.usageEnd ?? null,
-        price: x.unitPrice ?? null
+        price: x.unitPrice ?? null,
+        isUnlimited: x.usageEnd == null
       }));
       setTiers(t);
+      const lastUnlimited = t.length > 0 ? !!t[t.length - 1].isUnlimited : false;
+      setNoUpperLimit(lastUnlimited);
       setOverageUnitRate(volumeObj.overageUnitRate || 0);
       setGraceBuffer(volumeObj.graceBuffer || 0);
 
@@ -132,9 +136,12 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
       const t = (tieredObj.tiers || []).map((x: any) => ({
         from: x.startRange ?? null,
         to: x.endRange ?? null,
-        price: x.unitPrice ?? null
+        price: x.unitPrice ?? null,
+        isUnlimited: x.endRange == null
       }));
       setTiers(t);
+      const lastUnlimited = t.length > 0 ? !!t[t.length - 1].isUnlimited : false;
+      setNoUpperLimit(lastUnlimited);
       setOverageUnitRate(tieredObj.overageUnitRate || 0);
       setGraceBuffer(tieredObj.graceBuffer || 0);
 
@@ -158,9 +165,12 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
       const t = (stairRaw.tiers || []).map((x: any) => ({
         from: x.usageStart ?? null,
         to: x.usageEnd ?? null,
-        price: x.flatCost ?? null
+        price: x.flatCost ?? null,
+        isUnlimited: x.usageEnd == null
       }));
       setTiers(t);
+      const lastUnlimited = t.length > 0 ? !!t[t.length - 1].isUnlimited : false;
+      setNoUpperLimit(lastUnlimited);
       setOverageUnitRate(stairRaw.overageUnitRate || 0);
       setGraceBuffer(stairRaw.graceBuffer || 0);
 
@@ -349,17 +359,83 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
         )}
         {selected === 'Tiered Pricing' && (
           <div className="edit-pricing-container">
-            <EditTiered />
+            <EditTiered 
+              tiers={tiers.map(t => ({
+                from: String(t.from ?? ''),
+                to: String(t.to ?? ''),
+                price: String(t.price ?? ''),
+                isUnlimited: !!t.isUnlimited
+              }))}
+              onTiersChange={(newTiers) => {
+                const converted = newTiers.map(t => ({
+                  from: t.from ? Number(t.from) : null,
+                  to: t.isUnlimited ? null : (t.to ? Number(t.to) : null),
+                  price: t.price ? Number(t.price) : null,
+                  isUnlimited: !!t.isUnlimited
+                }));
+                setTiers(converted);
+              }}
+              unlimited={noUpperLimit}
+              onUnlimitedChange={setNoUpperLimit}
+              overageCharge={String(overageUnitRate)}
+              onOverageChange={(val) => setOverageUnitRate(Number(val) || 0)}
+              graceBuffer={String(graceBuffer)}
+              onGraceChange={(val) => setGraceBuffer(Number(val) || 0)}
+            />
           </div>
         )}
         {selected === 'Volume-Based' && (
           <div className="edit-pricing-container">
-            <EditVolume />
+            <EditVolume 
+              tiers={tiers.map(t => ({
+                from: String(t.from ?? ''),
+                to: String(t.to ?? ''),
+                price: String(t.price ?? ''),
+                isUnlimited: !!t.isUnlimited
+              }))}
+              onTiersChange={(newTiers) => {
+                const converted = newTiers.map(t => ({
+                  from: t.from ? Number(t.from) : null,
+                  to: t.isUnlimited ? null : (t.to ? Number(t.to) : null),
+                  price: t.price ? Number(t.price) : null,
+                  isUnlimited: !!t.isUnlimited
+                }));
+                setTiers(converted);
+              }}
+              unlimited={noUpperLimit}
+              onUnlimitedChange={setNoUpperLimit}
+              overageCharge={String(overageUnitRate)}
+              onOverageChange={(val) => setOverageUnitRate(Number(val) || 0)}
+              graceBuffer={String(graceBuffer)}
+              onGraceChange={(val) => setGraceBuffer(Number(val) || 0)}
+            />
           </div>
         )}
         {selected === 'Stairstep' && (
           <div className="edit-pricing-container">
-            <EditStair />
+            <EditStair 
+              stairs={tiers.map(t => ({
+                from: String(t.from ?? ''),
+                to: String(t.to ?? ''),
+                cost: String(t.price ?? ''),
+                isUnlimited: !!t.isUnlimited
+              }))}
+              onStairsChange={(newStairs) => {
+                const converted = newStairs.map(s => ({
+                  from: s.from ? Number(s.from) : null,
+                  to: s.isUnlimited ? null : (s.to ? Number(s.to) : null),
+                  price: s.cost ? Number(s.cost) : null,
+                  isUnlimited: !!s.isUnlimited
+                }));
+                setTiers(converted);
+              }}
+              unlimited={noUpperLimit}
+              onUnlimitedChange={setNoUpperLimit}
+              overageCharge={String(overageUnitRate)}
+              onOverageChange={(val) => setOverageUnitRate(Number(val) || 0)}
+              graceBuffer={String(graceBuffer)}
+              onGraceChange={(val) => setGraceBuffer(Number(val) || 0)}
+            />
           </div>
         )}
         {selected === 'Usage-Based' && (

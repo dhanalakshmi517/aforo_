@@ -263,8 +263,12 @@ const CreatePricePlan = React.forwardRef<
     } else if (selectedPricingModel === "Volume-Based") {
       const volumeTiers = JSON.parse(getRatePlanData("VOLUME_TIERS") || "[]");
       const overage = getRatePlanData("VOLUME_OVERAGE");
+      const noUpperLimit = getRatePlanData("VOLUME_NO_UPPER_LIMIT") === "true";
       if (volumeTiers.length === 0) e.volumeTiers = "At least one volume tier is required";
-      if (!overage || Number(overage) <= 0) e.volumeOverage = "Overage unit rate is required";
+      // Only require overage when NOT unlimited (same logic as Tiered and Stairstep)
+      if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
+        e.volumeOverage = "Overage unit rate is required when no unlimited tier";
+      }
     } else if (selectedPricingModel === "Stairstep") {
       const stairTiers = JSON.parse(getRatePlanData("STAIR_TIERS") || "[]");
       const overage = getRatePlanData("STAIR_OVERAGE");

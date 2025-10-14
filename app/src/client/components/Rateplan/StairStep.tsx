@@ -122,14 +122,25 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
 
   const addStair = (e?: React.MouseEvent) => {
     e?.preventDefault();
-    const next = [...stairs, { from:'', to:'', cost:'' }];
+    
+    // When adding a new stair, uncheck unlimited since user wants more stairs
+    setUnlimited(false);
+    
+    // Clear unlimited from current last stair if it was unlimited
+    const updated = [...stairs];
+    if (updated.length > 0 && updated[updated.length - 1].isUnlimited) {
+      updated[updated.length - 1].isUnlimited = false;
+    }
+    
+    // Add new stair with unlimited = false
+    const next = [...updated, { from:'', to:'', cost:'', isUnlimited: false }];
     setStairs(next);
     pushChangeUp(next);
   };
 
   const deleteStair = (index:number) => {
     const next = stairs.filter((_,i)=>i!==index);
-    const safe = next.length===0 ? [{from:'',to:'',cost:''}] : next;
+    const safe = next.length===0 ? [{from:'',to:'',cost:'', isUnlimited: false}] : next;
     setStairs(safe);
     setTouched(prev => {
       const n = prev.filter((_,i)=>i!==index);
