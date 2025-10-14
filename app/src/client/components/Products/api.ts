@@ -321,6 +321,48 @@ export const deleteProduct = async (productId: number | string): Promise<void> =
   }
 };
 
+export const getProductConfiguration = async (
+  productId: string,
+  productType: string
+): Promise<Record<string, any>> => {
+  try {
+    const api = createApiClient();
+    const normalizedType = (productType || '').toLowerCase();
+    
+    const getApiEndpoint = (type: string): string => {
+      switch (type) {
+        case 'api':
+          return `/products/${productId}/api`;
+        case 'sqlresult':
+        case 'sql-result':
+          return `/products/${productId}/sql-result`;
+        case 'llmtoken':
+        case 'llm-token':
+          return `/products/${productId}/llm-token`;
+        case 'flatfile':
+          return `/products/${productId}/flatfile`;
+        default:
+          return `/products/${productId}/config`;
+      }
+    };
+
+    const apiEndpoint = getApiEndpoint(normalizedType);
+    console.log('Fetching configuration from:', apiEndpoint);
+    
+    const response = await api.get(apiEndpoint);
+    console.log('Configuration fetched:', response.data);
+    return response.data || {};
+  } catch (error: any) {
+    // If 404, configuration doesn't exist yet - return empty object
+    if (error.response?.status === 404) {
+      console.log('No configuration found for product, returning empty');
+      return {};
+    }
+    console.error('Error fetching product configuration:', error);
+    throw error;
+  }
+};
+
 export const saveProductConfiguration = async (
   productId: string,
   productType: string,
@@ -459,6 +501,12 @@ export const saveProductConfiguration = async (
     };
 
     const cleanedPayload = cleanPayload(payload);
+
+    console.log('=== BACKEND API CALL ===');
+    console.log('Endpoint:', apiEndpoint);
+    console.log('Method:', operationType === 'update' ? 'PUT' : 'POST');
+    console.log('Payload sent to backend:', JSON.stringify(cleanedPayload, null, 2));
+    console.log('========================');
 
     let response: AxiosResponse<Product>;
     if (operationType === 'update') {

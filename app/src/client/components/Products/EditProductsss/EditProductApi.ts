@@ -40,7 +40,8 @@ export const fetchGeneralDetails = async (productId: string): Promise<any> => {
 export const updateConfiguration = async (
   productId: string,
   productType: string,
-  config: Record<string, string>
+  config: Record<string, string>,
+  usePost: boolean = false // If true, use POST (for new configurations or changed product type)
 ): Promise<void> => {
   // Map UI labels to backend keys first
   let mapped: Record<string, string | undefined> = {};
@@ -93,8 +94,14 @@ export const updateConfiguration = async (
   const endpoint = endpointMap[productType] || productType.toLowerCase();
   const url = `http://54.238.204.246:8080/api/products/${productId}/${endpoint}`;
 
-  // Always use PUT for existing products (EditProduct flow)
-  const method: 'PUT' = 'PUT';
+  // Use POST if product type changed or configuration doesn't exist, otherwise PUT
+  const method = usePost ? 'POST' : 'PUT';
+  console.log(`=== CONFIGURATION API CALL (EditProduct) ===`);
+  console.log(`Method: ${method} (usePost: ${usePost})`);
+  console.log(`URL: ${url}`);
+  console.log(`Payload:`, payload);
+  console.log(`===========================================`);
+  
   const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
   if (!res.ok) {
     throw new Error('Failed to update configuration');

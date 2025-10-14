@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import './ConfigurationTab.css';
 import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
-import { saveProductConfiguration } from '../api';
+import { saveProductConfiguration, getProductConfiguration } from '../api';
 
 /* ------------------------------------
  * Configuration field definitions
@@ -246,7 +246,121 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     });
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-    const [hasSaved, setHasSaved] = useState(false); // Track if we've saved at least once
+    const [hasSaved, setHasSaved] = useState(() => {
+      // Check localStorage for persisted hasSaved state
+      const saved = localStorage.getItem(`configHasSaved_${productId}`);
+      return saved === 'true';
+    });
+    const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+
+    // Sync productType with initialProductType when editing a draft
+    useEffect(() => {
+      if (initialProductType) {
+        console.log('Initial product type received:', initialProductType);
+        console.log('Current product type state:', productType);
+        
+        // Normalize the product type to match our enum values
+        let normalizedType = initialProductType;
+        const lowerType = initialProductType.toLowerCase();
+        
+        if (lowerType === 'sqlresult' || lowerType === 'sql-result') {
+          normalizedType = 'sql-result';
+        } else if (lowerType === 'llmtoken' || lowerType === 'llm-token') {
+          normalizedType = 'llm-token';
+        } else if (lowerType === 'flatfile') {
+          normalizedType = 'FlatFile';
+        } else if (lowerType === 'api') {
+          normalizedType = 'API';
+        }
+        
+        console.log('Normalized product type:', normalizedType);
+        
+        if (productType !== normalizedType) {
+          console.log('Syncing product type to:', normalizedType);
+          setProductType(normalizedType);
+          localStorage.setItem('configProductType', normalizedType);
+        }
+      }
+    }, [initialProductType]);
+
+    // Fetch existing configuration when editing a draft product
+    useEffect(() => {
+      const fetchConfiguration = async () => {
+        if (productId && initialProductType && !readOnly) {
+          try {
+            setIsLoadingConfig(true);
+            console.log('Fetching configuration for product:', productId, 'type:', initialProductType);
+            const configData = await getProductConfiguration(productId, initialProductType);
+            
+            // Check if configuration exists in backend
+            const configExists = configData && Object.keys(configData).length > 0;
+            
+            if (configExists) {
+              console.log('Configuration data received:', configData);
+              console.log('Product type (normalized):', initialProductType.toLowerCase());
+              console.log('Configuration exists in backend - will use PUT for updates');
+              
+              // Map backend field names to form field labels based on product type
+              const mappedFormData: Record<string, string> = {};
+              const normalizedType = initialProductType.toLowerCase();
+              
+              // Helper to check if value is valid (not placeholder like "string")
+              const isValidValue = (val: any) => {
+                return val && val !== 'string' && val !== '';
+              };
+              
+              if (normalizedType === 'api') {
+                console.log('Mapping API fields:', { endpointUrl: configData.endpointUrl, authType: configData.authType });
+                if (isValidValue(configData.endpointUrl)) mappedFormData['Endpoint URL'] = configData.endpointUrl;
+                if (isValidValue(configData.authType)) mappedFormData['Auth Type'] = configData.authType;
+              } else if (normalizedType === 'flatfile') {
+                console.log('Mapping FlatFile fields:', { format: configData.format, fileLocation: configData.fileLocation });
+                if (isValidValue(configData.format)) mappedFormData['File Format'] = configData.format;
+                if (isValidValue(configData.fileLocation)) mappedFormData['File Location'] = configData.fileLocation;
+              } else if (normalizedType === 'sqlresult' || normalizedType === 'sql-result') {
+                console.log('Mapping SQL Result fields:', { 
+                  connectionString: configData.connectionString, 
+                  dbType: configData.dbType, 
+                  authType: configData.authType 
+                });
+                if (isValidValue(configData.connectionString)) mappedFormData['Connection String'] = configData.connectionString;
+                if (isValidValue(configData.dbType)) mappedFormData['DB Type'] = configData.dbType;
+                if (isValidValue(configData.authType)) mappedFormData['Auth Type'] = configData.authType;
+              } else if (normalizedType === 'llmtoken' || normalizedType === 'llm-token') {
+                console.log('Mapping LLM Token fields:', { 
+                  modelName: configData.modelName, 
+                  endpointUrl: configData.endpointUrl, 
+                  authType: configData.authType 
+                });
+                if (isValidValue(configData.modelName)) mappedFormData['Model Name'] = configData.modelName;
+                if (isValidValue(configData.endpointUrl)) mappedFormData['Endpoint URL'] = configData.endpointUrl;
+                if (isValidValue(configData.authType)) mappedFormData['Auth Type'] = configData.authType;
+              }
+              
+              console.log('Mapped form data:', mappedFormData);
+              console.log('Number of fields mapped:', Object.keys(mappedFormData).length);
+              setFormData(mappedFormData);
+              setHasSaved(true); // Mark as saved since configuration exists in backend
+              localStorage.setItem('configFormData', JSON.stringify(mappedFormData));
+              localStorage.setItem(`configHasSaved_${productId}`, 'true');
+            } else {
+              console.log('No existing configuration found - will use POST for creation');
+              setHasSaved(false); // No configuration exists, use POST
+              localStorage.setItem(`configHasSaved_${productId}`, 'false');
+            }
+          } catch (error) {
+            console.error('Error loading configuration:', error);
+            // Don't show error to user - just means no config exists yet
+            setHasSaved(false); // On error, assume no configuration exists
+            localStorage.setItem(`configHasSaved_${productId}`, 'false');
+          } finally {
+            setIsLoadingConfig(false);
+          }
+        }
+      };
+
+      fetchConfiguration();
+    }, [productId, initialProductType, readOnly]);
 
     // Memoized change handlers
     const handleConfigChange = React.useCallback(
@@ -352,7 +466,12 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         // Decide whether to POST (first time) or PUT (subsequent / draft updates)
         const isUpdate = hasSaved;
-        console.log('Update check:', { isUpdate, hasSaved, isDraft, productId });
+        console.log('=== CONFIGURATION SAVE DECISION ===');
+        console.log('hasSaved state:', hasSaved);
+        console.log('isUpdate (will use PUT if true):', isUpdate);
+        console.log('isDraft:', isDraft);
+        console.log('productId:', productId);
+        console.log('===================================');
         
         console.log('Sending request to API with:', {
           productId,
@@ -365,6 +484,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         
         // Mark as saved after first successful save (regardless of draft status)
         setHasSaved(true);
+        localStorage.setItem(`configHasSaved_${productId}`, 'true');
         console.log(isDraft ? 'Draft saved successfully' : 'Configuration saved successfully');
         return true;
       } catch (error) {
@@ -385,8 +505,6 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           // Clear any existing errors when saving as draft
           setFieldErrors({});
           setError('');
-          // For draft saves, just return true without saving to server
-          return true;
         }
         
         // If saveToServer is false, just return true after validation (for Save & Next)
@@ -394,7 +512,14 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           return true;
         }
         
-        // For final submit (validation passed), save to server
+        // For draft saves, check if there's a product type selected
+        // If no product type, just return true without saving
+        if (skipValidation && !productType) {
+          console.log('No product type selected, skipping configuration save');
+          return true;
+        }
+        
+        // Save to server for both draft and final submit
         try {
           console.log('Original formData:', JSON.parse(JSON.stringify(formData)));
           
@@ -407,9 +532,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           }, {} as Record<string, any>);
           
           console.log('Cleaned formData before sendConfiguration:', cleanedFormData);
-          const success = await saveConfiguration(cleanedFormData, false);
+          const isDraft = skipValidation; // If skipValidation is true, it's a draft save
+          const success = await saveConfiguration(cleanedFormData, isDraft);
           if (success && onSubmit) {
-            return await onSubmit(false);
+            return await onSubmit(isDraft);
           }
           return success;
         } catch (error) {
@@ -608,11 +734,17 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             onChange={handleProductTypeChange}
             options={productOptions}
             required
-            disabled={readOnly}
+            disabled={readOnly || isLoadingConfig}
           />
         </div>
 
-        {productType && (
+        {isLoadingConfig && (
+          <div className="loading-message" style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            Loading configuration...
+          </div>
+        )}
+
+        {!isLoadingConfig && productType && (
           <div className="configuration-fields">
             {error && <div className="error-message">{error}</div>}
             <div className="form-fields">

@@ -35,6 +35,7 @@ export interface DraftProduct {
   productDescription?: string;
   status?: string;
   productType?: string;
+  productIcon?: string; // JSON string containing icon data
 }
 
 interface NewProductProps {
@@ -107,6 +108,35 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     productType: activeDraft?.productType || '' // Prefill product type if available
   });
   const [createdProductId, setCreatedProductId] = useState<string | null>(activeDraft?.productId || null);
+
+  // Load icon from draft product if available
+  useEffect(() => {
+    if (activeDraft?.productIcon) {
+      try {
+        console.log('Loading icon from draft:', activeDraft.productIcon);
+        const parsedIcon = JSON.parse(activeDraft.productIcon);
+        
+        // Check if we have the full iconData (new format)
+        if (parsedIcon.iconData) {
+          console.log('Loading icon from iconData field');
+          setSelectedIcon(parsedIcon.iconData as ProductIconData);
+          console.log('Icon loaded successfully:', parsedIcon.iconData);
+        } 
+        // Fallback: check if the parsed data itself is the icon (old format)
+        else if (parsedIcon.id) {
+          console.log('Loading icon from root level (old format)');
+          setSelectedIcon(parsedIcon as ProductIconData);
+          console.log('Icon loaded successfully');
+        }
+        // If only svgContent exists, we can't reconstruct the icon picker data
+        else if (parsedIcon.svgContent) {
+          console.warn('Icon only has svgContent, cannot load into icon picker. Please re-select icon.');
+        }
+      } catch (error) {
+        console.error('Error parsing icon data:', error);
+      }
+    }
+  }, [activeDraft?.productIcon]);
   const [isSaving, setIsSaving] = useState(false);
   // store existing products for uniqueness checks
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
@@ -276,10 +306,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         return match ? match[1].trim() : colorStr;
       };
 
-      // Add icon data if selected - generate complete styled SVG
+      // Add icon data if selected - save both SVG and full icon data for reconstruction
       const payloadWithIcon = selectedIcon ? {
         ...basePayload,
         productIcon: JSON.stringify({
+          // Save the full icon data so we can reconstruct it when editing
+          iconData: selectedIcon,
           svgContent: (() => {
             const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
             const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
@@ -344,13 +376,14 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           changes.version = basePayload.version;
         }
         
-        // Include icon if it exists - generate complete styled SVG
+        // Include icon if it exists - save both SVG and full icon data
         if (selectedIcon) {
           const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
           const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
           const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
           const viewBox = selectedIcon.viewBox ?? '0 0 18 18';
           changes.productIcon = JSON.stringify({
+            iconData: selectedIcon,
             svgContent: `<svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
               <defs>
                 <linearGradient id="bg-${selectedIcon.id}" x1="0%" y1="0%" x2="100%" y2="100%">
