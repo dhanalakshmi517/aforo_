@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { saveVolumePricing } from './api';
-import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
+import { setRatePlanData } from './utils/sessionStorage';
 import './Tiered.css';
 import './Volume.css';
 
@@ -48,16 +48,18 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
   const [overageError, setOverageError] = useState<string | null>(null);
   const [overageTouched, setOverageTouched] = useState(false);
 
-  const validateTier = (tier: Tier): TierError => {
+  /** basic field validation (caller decides whether a row is unlimited) */
+  const validateTier = (tier: Tier & { _derivedUnlimited?: boolean }): TierError => {
     const error: TierError = {};
-    
+    const isUnlimited = !!(tier.isUnlimited || tier._derivedUnlimited);
+
     if (String(tier.from).trim() === '' || Number.isNaN(tier.from)) {
       error.from = 'This is a required field';
     } else if (tier.from < 0) {
       error.from = 'Enter a valid value';
     }
 
-    if (!tier.isUnlimited) {
+    if (!isUnlimited) {
       if (String(tier.to).trim() === '' || Number.isNaN(tier.to)) {
         error.to = 'This is a required field';
       } else if (tier.to < 0) {
@@ -100,8 +102,16 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
 
   useEffect(() => {
     ensureArrays(tiers.length);
-    setTierErrors(tiers.map(validateTier));
-    
+
+    // 🔧 Derive "unlimited" from the global checkbox for the last row during validation
+    const lastIndex = tiers.length - 1;
+    const derived = tiers.map((t, i) => ({
+      ...t,
+      _derivedUnlimited: noUpperLimit && i === lastIndex
+    }));
+    setTierErrors(derived.map(validateTier));
+
+    // Overage is only applicable when NOT unlimited
     if (!noUpperLimit) {
       setOverageError(validateOverage(overageUnitRate));
     } else {
@@ -109,35 +119,27 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
     }
   }, [tiers, noUpperLimit, overageUnitRate]);
 
+  // Persist editable fields
   useEffect(() => {
-    // Save tiers to session storage whenever they change
     setRatePlanData('VOLUME_TIERS', JSON.stringify(tiers));
   }, [tiers]);
 
   useEffect(() => {
-    // Save overage to session storage whenever it changes
     setRatePlanData('VOLUME_OVERAGE', overageUnitRate.toString());
   }, [overageUnitRate]);
 
   useEffect(() => {
-    // Save grace buffer to session storage whenever it changes
     setRatePlanData('VOLUME_GRACE', graceBuffer.toString());
   }, [graceBuffer]);
 
-  // Debug: Log when graceBuffer prop changes
+  // Persist unlimited flag and clear dependent stored values
   useEffect(() => {
-    console.log('📊 Volume: graceBuffer prop changed to:', graceBuffer);
-  }, [graceBuffer]);
-
-  // Debug: Log component mount with all props
-  useEffect(() => {
-    console.log('📊 Volume: Component mounted with props:', {
-      tiersLength: tiers.length,
-      overageUnitRate,
-      graceBuffer,
-      noUpperLimit
-    });
-  }, []);
+    setRatePlanData('VOLUME_NO_UPPER_LIMIT', noUpperLimit ? 'true' : 'false');
+    if (noUpperLimit) {
+      setRatePlanData('VOLUME_OVERAGE', '');
+      setRatePlanData('VOLUME_GRACE', '');
+    }
+  }, [noUpperLimit]);
 
   const markTouched = (index: number, field: keyof TierTouched) => {
     setTierTouched(prev => {
@@ -151,7 +153,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
-    // mirror Tiered behavior: mark last tier unlimited and clear "to"
+    // Keep tier model in sync with the checkbox
     const val = checked ? '' : String(tiers[index]?.to ?? '');
     onChange(index, 'isUnlimited', String(checked) as unknown as any);
     onChange(index, 'to', val);
@@ -165,8 +167,8 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
           usageEnd: tier.isUnlimited ? null : tier.to,
           unitPrice: tier.price,
         })),
-        overageUnitRate,
-        graceBuffer,
+        overageUnitRate: noUpperLimit ? 0 : overageUnitRate,
+        graceBuffer: noUpperLimit ? 0 : graceBuffer,
       };
       await saveVolumePricing(ratePlanId, payload);
     },
@@ -199,7 +201,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 />
                 {touched.from && error.from && <span className="error-text">{error.from}</span>}
               </div>
-              
+
               <span>-</span>
 
               <div className="field-col">
@@ -250,9 +252,18 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
             onChange={(e) => {
               const checked = e.target.checked;
               setNoUpperLimit(checked);
+
               if (tiers.length > 0) {
                 // toggle only the last tier as unlimited (same UX as Tiered)
                 handleUnlimitedToggle(checked, tiers.length - 1);
+              }
+
+              if (checked) {
+                // reset overage/grace ui + validation
+                setOverageUnitRate(0);
+                setGraceBuffer(0);
+                setOverageTouched(false);
+                setOverageError(null);
               }
             }}
           />
@@ -266,21 +277,22 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
           <span>No upper limit for last tier</span>
         </label>
 
-        {/* Volume doesn’t use overage/grace when unlimited; mirror Tiered’s layout */}
+        {/* Hide overage/grace entirely when unlimited */}
         {!noUpperLimit && (
           <div className="tiered-extra-fields">
             <label>
               Overage Charge
               <input
                 type="text"
-                className={`volume-input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
+                className={`volume-input-extra ${!noUpperLimit && overageTouched && overageError ? 'error-input' : ''}`}
                 placeholder="Enter overage charge"
                 value={overageUnitRate}
                 onChange={(e) => setOverageUnitRate(parseFloat(e.target.value) || 0)}
                 onBlur={() => setOverageTouched(true)}
               />
-              {overageTouched && overageError && <span className="error-text">{overageError}</span>}
-              {validationErrors.volumeOverage && (
+              {/* Only show overage errors when NOT unlimited */}
+              {!noUpperLimit && overageTouched && overageError && <span className="error-text">{overageError}</span>}
+              {!noUpperLimit && validationErrors.volumeOverage && (
                 <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
                     <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
@@ -305,8 +317,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
         <button className="tiered-add-btn" onClick={onAddTier}>
           + Add Volume Tier
         </button>
-        
-        {/* Display validation errors from parent component */}
+
         {validationErrors.volumeTiers && (
           <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>

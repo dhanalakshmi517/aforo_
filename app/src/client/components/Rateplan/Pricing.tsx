@@ -72,6 +72,9 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
       setFlatFee
     }));
 
+    const [tiers, setTiers] = useState<Tier[]>([]);
+    const [noUpperLimit, setNoUpperLimit] = useState(false);
+
     const savePricing = async (): Promise<boolean> => {
       setErrors({});
       if (!selected) return true;
@@ -100,14 +103,15 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
           }
           await saveUsageBasedPricing(ratePlanId, usage);
         } else if (selected === 'Volume-Based') {
+          // When unlimited, overage/grace are irrelevant
           const payload = {
             tiers: tiers.map(t => ({
               usageStart: t.from ?? 0,
               usageEnd: t.isUnlimited || !t.to ? null : t.to,
               unitPrice: t.price ?? 0
             })),
-            overageUnitRate,
-            graceBuffer
+            overageUnitRate: noUpperLimit ? 0 : overageUnitRate,
+            graceBuffer: noUpperLimit ? 0 : graceBuffer
           };
           await saveVolumePricing(ratePlanId, payload);
         } else if (selected === 'Tiered Pricing') {
@@ -133,9 +137,6 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         return false;
       }
     };
-
-    const [tiers, setTiers] = useState<Tier[]>([]);
-    const [noUpperLimit, setNoUpperLimit] = useState(false);
 
     // ---------- Draft hydration ----------
     useEffect(() => {
@@ -191,9 +192,14 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         const t = (volumeObj.tiers || []).map((x: any) => ({
           from: x.usageStart ?? null,
           to: x.usageEnd ?? null,
-          price: x.unitPrice ?? null
+          price: x.unitPrice ?? null,
+          isUnlimited: x.usageEnd == null ? true : false,
         }));
         setTiers(t);
+        const lastUnlimited = t.length > 0 ? !!t[t.length - 1].isUnlimited : false;
+        setNoUpperLimit(lastUnlimited);
+        setRatePlanData('VOLUME_NO_UPPER_LIMIT', lastUnlimited ? 'true' : 'false');
+
         setOverageUnitRate(volumeObj.overageUnitRate || 0);
         setGraceBuffer(volumeObj.graceBuffer || 0);
         setRatePlanData('PRICING_MODEL', 'Volume-Based');
@@ -212,9 +218,17 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         const t = (tieredObj.tiers || []).map((x: any) => ({
           from: x.startRange ?? null,
           to: x.endRange ?? null,
-          price: x.unitPrice ?? null
+          price: x.unitPrice ?? null,
+          isUnlimited: x.endRange == null ? true : false,
         }));
         setTiers(t);
+
+        const savedUnlimited = getRatePlanData('TIERED_NO_UPPER_LIMIT');
+        const lastUnlimited = t.length > 0 ? !!t[t.length - 1].isUnlimited : false;
+        const finalUnlimited = savedUnlimited != null ? savedUnlimited === 'true' : lastUnlimited;
+        setNoUpperLimit(finalUnlimited);
+        setRatePlanData('TIERED_NO_UPPER_LIMIT', finalUnlimited ? 'true' : 'false');
+
         setOverageUnitRate(tieredObj.overageUnitRate || 0);
         setGraceBuffer(tieredObj.graceBuffer || 0);
         setRatePlanData('PRICING_MODEL', 'Tiered Pricing');
@@ -228,7 +242,6 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
       const stairRaw = Array.isArray(draftData.stairStepPricing)
         ? draftData.stairStepPricing[draftData.stairStepPricing.length - 1]
         : draftData.stairStepPricing
-        // also support the list style: stairStepPricings from your payload
         || (Array.isArray(draftData.stairStepPricings)
             ? draftData.stairStepPricings[draftData.stairStepPricings.length - 1]
             : draftData.stairStepPricings);
@@ -238,9 +251,13 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         const t = (stairRaw.tiers || []).map((x: any) => ({
           from: x.usageStart ?? null,
           to: x.usageEnd ?? null,
-          price: x.flatCost ?? null
+          price: x.flatCost ?? null,
+          isUnlimited: x.usageEnd == null ? true : false,
         }));
         setTiers(t);
+        const lastUnlimited = t.length > 0 ? !!t[t.length - 1].isUnlimited : false;
+        setNoUpperLimit(lastUnlimited);
+
         setOverageUnitRate(stairRaw.overageUnitRate || 0);
         setGraceBuffer(stairRaw.graceBuffer || 0);
         setRatePlanData('PRICING_MODEL', 'Stairstep');
@@ -257,30 +274,22 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
     // Initialize from session storage on mount
     useEffect(() => {
-      // Check if there's any existing session data to determine if this is truly fresh
       const savedModel = getRatePlanData('PRICING_MODEL');
       const savedStep = getRatePlanData('WIZARD_STEP');
       const hasExistingData = savedModel || savedStep;
-      
-      console.log('📋 Pricing component mounted. Saved model:', savedModel, 'Saved step:', savedStep, 'Has existing data:', hasExistingData);
-      
+
       if (isFreshCreation && !hasExistingData) {
-        console.log('🆆 True fresh creation - clearing pricing model');
         setSelected('');
       } else {
-        // Load from session storage (either resuming or navigating between steps)
-        console.log('📋 Loading saved pricing model from session:', savedModel);
-        
         if (savedModel) {
           setSelected(savedModel);
-          
-          // Also load the corresponding form data
+
           if (savedModel === 'Flat Fee') {
             const savedAmount = getRatePlanData('FLAT_FEE_AMOUNT');
             const savedCalls = getRatePlanData('FLAT_FEE_API_CALLS');
             const savedOverage = getRatePlanData('FLAT_FEE_OVERAGE');
             const savedGrace = getRatePlanData('FLAT_FEE_GRACE');
-            
+
             if (savedAmount || savedCalls || savedOverage) {
               const restoredData = {
                 flatFeeAmount: Number(savedAmount) || 0,
@@ -289,139 +298,144 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 graceBuffer: Number(savedGrace) || 0
               };
               setFlatFee(restoredData);
-              console.log('💰 Restored Flat Fee data:', restoredData);
-              
-              // Force update the ref if it exists
-              if (flatFeeRef.current) {
-                console.log('🔄 Updating FlatFeeForm ref with restored data');
-              }
             }
           } else if (savedModel === 'Usage-Based') {
             const savedPerUnit = getRatePlanData('USAGE_PER_UNIT_AMOUNT');
             if (savedPerUnit) {
               setUsage({ perUnitAmount: Number(savedPerUnit) || 0 });
-              console.log('📊 Restored Usage-Based data:', savedPerUnit);
             }
           } else if (savedModel === 'Volume-Based') {
             const savedTiers = getRatePlanData('VOLUME_TIERS');
             const savedOverage = getRatePlanData('VOLUME_OVERAGE');
             const savedGrace = getRatePlanData('VOLUME_GRACE');
-            
+            const savedUnlimited = getRatePlanData('VOLUME_NO_UPPER_LIMIT');
+
             if (savedTiers) {
               try {
                 const parsedTiers = JSON.parse(savedTiers);
                 if (Array.isArray(parsedTiers) && parsedTiers.length > 0) {
                   const volumeTiers = parsedTiers.map((t: any) => ({
                     from: Number(t.from) || null,
-                    to: Number(t.to) || null,
+                    to: t.isUnlimited ? null : (Number(t.to) || null),
                     price: Number(t.price) || null,
-                    isUnlimited: t.isUnlimited || false
+                    isUnlimited: !!t.isUnlimited
                   }));
                   setTiers(volumeTiers);
-                  console.log('📊 Restored Volume tiers:', volumeTiers);
+                  const lastUnlimited = volumeTiers.length > 0 ? !!volumeTiers[volumeTiers.length - 1].isUnlimited : false;
+                  const finalUnlimited = savedUnlimited != null ? savedUnlimited === 'true' : lastUnlimited;
+                  setNoUpperLimit(finalUnlimited);
+                  setRatePlanData('VOLUME_NO_UPPER_LIMIT', finalUnlimited ? 'true' : 'false');
                 }
               } catch (e) {
                 console.error('Failed to parse volume tiers:', e);
               }
             }
-            
-            if (savedOverage) {
-              setOverageUnitRate(Number(savedOverage) || 0);
-              console.log('📊 Restored Volume overage:', savedOverage);
-            }
-            
-            if (savedGrace) {
-              const graceValue = Number(savedGrace) || 0;
-              setGraceBuffer(graceValue);
-              console.log('📊 Restored Volume grace buffer:', savedGrace, '-> parsed as:', graceValue);
-            } else {
-              console.log('⚠️ No saved grace buffer found for Volume pricing');
-            }
+            if (savedOverage) setOverageUnitRate(Number(savedOverage) || 0);
+            if (savedGrace) setGraceBuffer(Number(savedGrace) || 0);
           } else if (savedModel === 'Tiered Pricing') {
             const savedTiers = getRatePlanData('TIERED_TIERS');
             const savedOverage = getRatePlanData('TIERED_OVERAGE');
             const savedGrace = getRatePlanData('TIERED_GRACE');
-            
+            const savedUnlimited = getRatePlanData('TIERED_NO_UPPER_LIMIT');
+
             if (savedTiers) {
               try {
                 const parsedTiers = JSON.parse(savedTiers);
                 if (Array.isArray(parsedTiers) && parsedTiers.length > 0) {
                   const tieredTiers = parsedTiers.map((t: any) => ({
                     from: Number(t.from) || null,
-                    to: Number(t.to) || null,
+                    to: t.isUnlimited ? null : (Number(t.to) || null),
                     price: Number(t.price) || null,
-                    isUnlimited: t.isUnlimited || false
+                    isUnlimited: !!t.isUnlimited
                   }));
                   setTiers(tieredTiers);
-                  console.log('🎯 Restored Tiered tiers:', tieredTiers);
+
+                  const lastUnlimited = tieredTiers.length > 0 ? !!tieredTiers[tieredTiers.length - 1].isUnlimited : false;
+                  const finalUnlimited = savedUnlimited != null ? savedUnlimited === 'true' : lastUnlimited;
+                  setNoUpperLimit(finalUnlimited);
+                  setRatePlanData('TIERED_NO_UPPER_LIMIT', finalUnlimited ? 'true' : 'false');
                 }
               } catch (e) {
                 console.error('Failed to parse tiered tiers:', e);
               }
             }
-            
-            if (savedOverage) {
-              setOverageUnitRate(Number(savedOverage) || 0);
-              console.log('🎯 Restored Tiered overage:', savedOverage);
-            }
-            
-            if (savedGrace) {
-              setGraceBuffer(Number(savedGrace) || 0);
-              console.log('🎯 Restored Tiered grace buffer:', savedGrace);
-            }
+            if (savedOverage) setOverageUnitRate(Number(savedOverage) || 0);
+            if (savedGrace) setGraceBuffer(Number(savedGrace) || 0);
           } else if (savedModel === 'Stairstep') {
             const savedStairs = getRatePlanData('STAIR_TIERS');
             const savedOverage = getRatePlanData('STAIR_OVERAGE');
             const savedGrace = getRatePlanData('STAIR_GRACE');
-            
+
             if (savedStairs) {
               try {
                 const parsedStairs = JSON.parse(savedStairs);
                 if (Array.isArray(parsedStairs) && parsedStairs.length > 0) {
                   const stairTiers = parsedStairs.map((s: any) => ({
                     from: Number(s.from) || null,
-                    to: Number(s.to) || null,
-                    price: Number(s.cost) || null, // Note: StairStep uses 'cost' field
-                    isUnlimited: s.isUnlimited || false
+                    to: s.isUnlimited ? null : (Number(s.to) || null),
+                    price: Number(s.cost) || null,
+                    isUnlimited: !!s.isUnlimited
                   }));
                   setTiers(stairTiers);
-                  console.log('🎡 Restored StairStep tiers:', stairTiers);
+                  const lastUnlimited = stairTiers.length > 0 ? !!stairTiers[stairTiers.length - 1].isUnlimited : false;
+                  setNoUpperLimit(lastUnlimited);
                 }
               } catch (e) {
                 console.error('Failed to parse stair tiers:', e);
               }
             }
-            
-            if (savedOverage) {
-              setOverageUnitRate(Number(savedOverage) || 0);
-              console.log('🎡 Restored StairStep overage:', savedOverage);
-            }
-            
-            if (savedGrace) {
-              setGraceBuffer(Number(savedGrace) || 0);
-              console.log('🎡 Restored StairStep grace buffer:', savedGrace);
-            }
+            if (savedOverage) setOverageUnitRate(Number(savedOverage) || 0);
+            if (savedGrace) setGraceBuffer(Number(savedGrace) || 0);
           }
-        } else {
-          console.log('⚠️ No saved pricing model found - keeping empty selection');
         }
       }
-    }, [isFreshCreation]); // Re-run when isFreshCreation changes
+    }, [isFreshCreation]);
 
     useEffect(() => {
       if (selected) setRatePlanData('PRICING_MODEL', selected);
     }, [selected]);
 
-    const handleAddTier = () =>
-      setTiers([...tiers, { from: null, to: null, price: null, isUnlimited: false }]);
+    const handleAddTier = () => {
+      // When adding a new tier, uncheck unlimited since user wants more tiers
+      setNoUpperLimit(false);
+      
+      // Clear unlimited from current last tier if it was unlimited
+      const updated = [...tiers];
+      if (updated.length > 0 && updated[updated.length - 1].isUnlimited) {
+        updated[updated.length - 1].isUnlimited = false;
+      }
+      
+      // Add new tier with unlimited = false
+      updated.push({ from: null, to: null, price: null, isUnlimited: false });
+      setTiers(updated);
+      
+      // Update session storage
+      const isTiered = selected === 'Tiered Pricing';
+      const isVolume = selected === 'Volume-Based';
+      
+      if (isTiered) setRatePlanData('TIERED_NO_UPPER_LIMIT', 'false');
+      if (isVolume) setRatePlanData('VOLUME_NO_UPPER_LIMIT', 'false');
+    };
 
     const handleDeleteTier = (index: number) =>
       setTiers(tiers.filter((_, i) => i !== index));
 
     const handleTierChange = (index: number, field: keyof Tier, value: string) => {
       const updated = [...tiers];
+      const isTiered = selected === 'Tiered Pricing';
+      const isVolume = selected === 'Volume-Based';
+
       if (field === 'isUnlimited') {
         updated[index][field] = value === 'true';
+        if (value === 'true') {
+          updated[index].to = null; // clear 'to' when unlimited
+        }
+        if (index === updated.length - 1) {
+          const flag = value === 'true';
+          setNoUpperLimit(flag);
+          if (isTiered) setRatePlanData('TIERED_NO_UPPER_LIMIT', flag ? 'true' : 'false');
+          if (isVolume) setRatePlanData('VOLUME_NO_UPPER_LIMIT', flag ? 'true' : 'false');
+        }
       } else if (value.trim() === '') {
         (updated[index] as any)[field] = null;
       } else if (field === 'price') {
@@ -429,13 +443,26 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
       } else {
         (updated[index] as any)[field] = parseInt(value, 10);
       }
+
       setTiers(updated);
+
+      const mirror = updated.map(t => ({
+        from: t.from,
+        to: t.isUnlimited ? null : t.to,
+        price: t.price,
+        isUnlimited: !!t.isUnlimited
+      }));
+
+      if (isTiered) {
+        setRatePlanData('TIERED_TIERS', JSON.stringify(mirror));
+      } else if (isVolume) {
+        setRatePlanData('VOLUME_TIERS', JSON.stringify(mirror));
+      }
     };
 
     const toStr = (n: number | null | undefined) =>
       n == null || Number.isNaN(n) ? '' : String(n);
 
-    // mapper to convert Stair (string fields) from child to our numeric Tier[]
     const mapStairsToTiers = (s: Stair[]): Tier[] =>
       (s || []).map(r => ({
         from: r.from?.trim() === '' ? null : parseInt(r.from, 10),
@@ -443,6 +470,19 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         price: r.cost?.trim() === '' ? null : parseFloat(r.cost),
         isUnlimited: r.isUnlimited,
       }));
+
+    // —— filter validationErrors for Volume when unlimited ——
+    const volumeValidationErrors = (() => {
+      if (selected !== 'Volume-Based') return validationErrors;
+      const lastUnlimited = tiers.length > 0 ? !!tiers[tiers.length - 1].isUnlimited : false;
+      if (noUpperLimit || lastUnlimited) {
+        const copy = { ...validationErrors };
+        // prevent “Overage unit rate is required” when unlimited
+        delete (copy as any).volumeOverage;
+        return copy;
+      }
+      return validationErrors;
+    })();
 
     return (
       <div className="pricing-container">
@@ -454,10 +494,9 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             value={selected}
             onChange={e => {
               const v = e.target.value;
-              console.log('📝 Pricing model selected:', v);
               setSelected(v);
               if (v === 'Tiered Pricing' && tiers.length === 0) {
-                setTiers([{ from: null, to: null, price: null }]);
+                setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }
             }}
           >
@@ -499,13 +538,26 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   tiers={tiers.map(t => ({
                     from: toStr(t.from),
                     to: toStr(t.to),
-                    price: toStr(t.price)
+                    price: toStr(t.price),
+                    isUnlimited: !!t.isUnlimited,
                   }))}
                   onAddTier={handleAddTier}
                   onDeleteTier={handleDeleteTier}
                   onChange={handleTierChange}
                   noUpperLimit={noUpperLimit}
-                  setNoUpperLimit={setNoUpperLimit}
+                  setNoUpperLimit={(checked) => {
+                    setNoUpperLimit(checked);
+                    setRatePlanData('TIERED_NO_UPPER_LIMIT', checked ? 'true' : 'false');
+                    if (tiers.length > 0) {
+                      const updated = [...tiers];
+                      const lastIndex = updated.length - 1;
+                      updated[lastIndex].isUnlimited = checked;
+                      if (checked) updated[lastIndex].to = null;
+                      setTiers(updated);
+                      const mirror = updated.map(t => ({ from: t.from, to: t.isUnlimited ? null : t.to, price: t.price, isUnlimited: !!t.isUnlimited }));
+                      setRatePlanData('TIERED_TIERS', JSON.stringify(mirror));
+                    }
+                  }}
                   validationErrors={validationErrors}
                   overageCharge={String(overageUnitRate || '')}
                   graceBuffer={String(graceBuffer || '')}
@@ -525,12 +577,41 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   onDeleteTier={handleDeleteTier}
                   onChange={handleTierChange}
                   noUpperLimit={noUpperLimit}
-                  setNoUpperLimit={setNoUpperLimit}
+                  setNoUpperLimit={(flag:boolean)=>{
+                    setNoUpperLimit(flag);
+                    setRatePlanData('VOLUME_NO_UPPER_LIMIT', flag ? 'true' : 'false');
+
+                    // ✅ keep last tier in sync (like Tiered)
+                    if (tiers.length > 0) {
+                      const updated = [...tiers];
+                      const lastIndex = updated.length - 1;
+                      updated[lastIndex].isUnlimited = flag;
+                      if (flag) updated[lastIndex].to = null;
+                      setTiers(updated);
+
+                      const mirror = updated.map(t => ({
+                        from: t.from,
+                        to: t.isUnlimited ? null : t.to,
+                        price: t.price,
+                        isUnlimited: !!t.isUnlimited
+                      }));
+                      setRatePlanData('VOLUME_TIERS', JSON.stringify(mirror));
+                    }
+
+                    // and clear persisted overage/grace when enabling unlimited
+                    if (flag) {
+                      setOverageUnitRate(0);
+                      setGraceBuffer(0);
+                      setRatePlanData('VOLUME_OVERAGE', '');
+                      setRatePlanData('VOLUME_GRACE', '');
+                    }
+                  }}
                   overageUnitRate={overageUnitRate}
                   setOverageUnitRate={setOverageUnitRate}
                   graceBuffer={graceBuffer}
                   setGraceBuffer={setGraceBuffer}
-                  validationErrors={validationErrors}
+                  // ❌ don’t surface “volumeOverage” when unlimited
+                  validationErrors={volumeValidationErrors}
                 />
               </div>
               {errors.volume && <div className="inline-error">{errors.volume}</div>}
@@ -551,8 +632,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   }))}
                   onStairsChange={(next) => {
                     setTiers(mapStairsToTiers(next));
-                    // also mirror to session for validation elsewhere
-                    const stairTiers = next.map(y => ({ from: y.from, to: y.isUnlimited ? '' : y.to, cost: y.cost }));
+                    const stairTiers = next.map(y => ({ from: y.from, to: y.isUnlimited ? '' : y.to, cost: y.cost, isUnlimited: !!y.isUnlimited }));
                     setRatePlanData('STAIR_TIERS', JSON.stringify(stairTiers));
                   }}
                   overageCharge={String(overageUnitRate || '')}

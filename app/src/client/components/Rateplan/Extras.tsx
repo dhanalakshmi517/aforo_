@@ -40,11 +40,6 @@ const uiToApiFreemium = (ui: UIFreemiumType | '' | undefined): APIFreemiumType =
 };
 
 const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData }, ref) => {
-  // ❌ Removed aggressive clear on null ratePlanId (that was nuking saved values)
-  // React.useEffect(() => {
-  //   if (!ratePlanId) clearExtrasLocalStorage();
-  // }, [ratePlanId]);
-
   // ✅ Optional guarded clear: only when switching between two *different* valid plans
   const prevRatePlanIdRef = useRef<number | null>(null);
   React.useEffect(() => {
@@ -96,7 +91,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     const dStart     = getRatePlanData('DISCOUNT_START');
     const dEnd       = getRatePlanData('DISCOUNT_END');
 
-    // Only expand if there's actual meaningful data (not just empty strings)
     const hasDiscountData = (
       (percentStr && Number(percentStr) > 0) ||
       (flatStr && Number(flatStr) > 0) ||
@@ -125,11 +119,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     const freeStartStr  = getRatePlanData('FREEMIUM_START');
     const freeEndStr    = getRatePlanData('FREEMIUM_END');
 
-    console.log('🔍 Session storage freemium values:', {
-      freeTypeStr, freeUnitsStr, trialDurStr, freeStartStr, freeEndStr
-    });
-
-    // Only expand if there's actual meaningful data (not just empty strings or null/undefined)
     const hasFreemiumData = (
       (freeTypeStr && typeof freeTypeStr === 'string' && freeTypeStr.trim()) ||
       (freeUnitsStr && typeof freeUnitsStr === 'string' && freeUnitsStr.trim() && Number(freeUnitsStr) > 0) ||
@@ -137,8 +126,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       (freeStartStr && typeof freeStartStr === 'string' && freeStartStr.trim()) ||
       (freeEndStr && typeof freeEndStr === 'string' && freeEndStr.trim())
     );
-
-    console.log('🎯 hasFreemiumData result:', hasFreemiumData);
 
     if (hasFreemiumData) {
       const inferredUi: UIFreemiumType =
@@ -171,27 +158,17 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       sections.push('commitment');
     }
 
-    console.log('📋 Session storage sections to expand:', sections);
-    if (sections.length) {
-      setActiveSections(sections);
-      console.log('✅ Expanded sections from session storage:', sections);
-    } else {
-      console.log('✅ No sections to expand - keeping all closed');
-    }
+    if (sections.length) setActiveSections(sections);
   }, [draftData]);
 
   // Initialize from draftData (direct from backend)
   React.useEffect(() => {
     if (!draftData) {
-      // eslint-disable-next-line no-console
       console.log('🎁 Extras component mounted - no draft data, using defaults');
       return;
     }
 
-    // eslint-disable-next-line no-console
     console.log('🚀 Extras component mounted - initializing from backend draft data:', draftData);
-    console.log('🔍 Checking freemium data structure:', draftData.freemium);
-    console.log('🔍 Checking freemiums array:', draftData.freemiums);
 
     const sectionsToExpand: string[] = [];
 
@@ -218,42 +195,27 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       sectionsToExpand.push('discounts');
     }
 
-    // Freemium - check both freemium (object) and freemiums (array)
-    // use loose typing to accommodate various backend shapes
+    // Freemium (object or array)
     let freemiumData: any = null;
     if (draftData.freemium && typeof draftData.freemium === 'object') {
       freemiumData = draftData.freemium;
-      console.log('✅ Found freemium object:', freemiumData);
     } else if (draftData.freemiums && Array.isArray(draftData.freemiums) && draftData.freemiums.length > 0) {
-      freemiumData = draftData.freemiums[0]; // Take first item from array
-      console.log('✅ Found freemiums array, using first item:', freemiumData);
+      freemiumData = draftData.freemiums[0];
     }
 
     if (freemiumData) {
-      // API gives APIFreemiumType → convert to UI for dropdown
       const apiType = (freemiumData.freemiumType || 'FREE_UNITS') as APIFreemiumType;
       const uiType = apiToUiFreemium(apiType);
 
-      console.log('🔄 Converting freemium types:', { apiType, uiType });
-      console.log('📊 Freemium values:', {
-        freeUnits: freemiumData.freeUnits,
-        freeTrialDuration: freemiumData.freeTrialDuration,
-        startDate: freemiumData.startDate,
-        endDate: freemiumData.endDate
-      });
-
-      setFreemiumType(uiType); // UI dropdown value
+      setFreemiumType(uiType);
       setFreemiumPayload({
-        freemiumType: apiType,   // keep API value in payload
+        freemiumType: apiType,
         freeUnits: freemiumData.freeUnits || 0,
         freeTrialDuration: freemiumData.freeTrialDuration || 0,
         startDate: freemiumData.startDate || '',
         endDate: freemiumData.endDate || '',
       });
       sectionsToExpand.push('freemium');
-      console.log('✅ Freemium section will be expanded');
-    } else {
-      console.log('❌ No freemium data found in draftData');
     }
 
     // Minimum Commitment
@@ -263,8 +225,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       sectionsToExpand.push('commitment');
     }
 
-    console.log('📋 Backend draft sections to expand:', sectionsToExpand);
-    setActiveSections(sectionsToExpand); // Always set, even if empty array
+    setActiveSections(sectionsToExpand);
   }, [draftData]);
 
   // Save state for buttons
@@ -622,9 +583,23 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
             <label>Discount Type</label>
             <SelectField
               value={discountForm.discountType}
-              onChange={(val) =>
-                setDiscountForm({ ...discountForm, discountType: val as 'PERCENTAGE' | 'FLAT' })
-              }
+              onChange={(val) => {
+                const nextType = (val as 'PERCENTAGE' | 'FLAT') || 'PERCENTAGE';
+                // clear the opposite field to avoid stale values
+                if (nextType === 'PERCENTAGE') {
+                  setDiscountForm({
+                    ...discountForm,
+                    discountType: 'PERCENTAGE',
+                    flatDiscountAmountStr: '',   // clear flat
+                  });
+                } else {
+                  setDiscountForm({
+                    ...discountForm,
+                    discountType: 'FLAT',
+                    percentageDiscountStr: '',   // clear percent
+                  });
+                }
+              }}
               options={[
                 { label: '--Select--', value: '' },
                 { label: 'PERCENTAGE', value: 'PERCENTAGE' },
@@ -632,21 +607,30 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               ]}
             />
 
-            <label>Enter % discount</label>
-            <InputField
-              type="number"
-              value={discountForm.percentageDiscountStr}
-              onChange={(val)=> setDiscountForm({ ...discountForm, percentageDiscountStr: val })}
-              placeholder="0"
-            />
+            {/* Show only the relevant input */}
+            {discountForm.discountType === 'PERCENTAGE' && (
+              <>
+                <label>Enter % discount</label>
+                <InputField
+                  type="number"
+                  value={discountForm.percentageDiscountStr}
+                  onChange={(val)=> setDiscountForm({ ...discountForm, percentageDiscountStr: val })}
+                  placeholder="e.g., 10"
+                />
+              </>
+            )}
 
-            <label>Enter Flat Discount Amount</label>
-            <InputField
-              type="number"
-              value={discountForm.flatDiscountAmountStr}
-              onChange={(val)=> setDiscountForm({ ...discountForm, flatDiscountAmountStr: val })}
-              placeholder="0"
-            />
+            {discountForm.discountType === 'FLAT' && (
+              <>
+                <label>Enter Flat Discount Amount</label>
+                <InputField
+                  type="number"
+                  value={discountForm.flatDiscountAmountStr}
+                  onChange={(val)=> setDiscountForm({ ...discountForm, flatDiscountAmountStr: val })}
+                  placeholder="e.g., 50"
+                />
+              </>
+            )}
 
             <label>Eligibility</label>
             <InputField
@@ -734,7 +718,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 const ui = val as UIFreemiumType;
                 setFreemiumType(ui);
                 setFreemiumPayload(prev => ({
-                  ...prev,                               // <— keep previously-hydrated numbers
+                  ...prev,                               // keep previously-hydrated numbers
                   freemiumType: uiToApiFreemium(ui),
                 }));
               }}

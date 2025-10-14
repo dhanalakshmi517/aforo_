@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './EditTiered.css';
 
 interface Tier {
@@ -8,21 +8,59 @@ interface Tier {
   isUnlimited?: boolean;
 }
 
-const EditTiered: React.FC = () => {
-  const [tiers, setTiers] = useState<Tier[]>(() => {
-    const saved = localStorage.getItem('tieredTiers');
-    if (saved) return JSON.parse(saved);
-    return [{ from: '', to: '', price: '' }];
-  });
+interface EditTieredProps {
+  tiers?: Tier[];
+  onTiersChange?: (tiers: Tier[]) => void;
+  unlimited?: boolean;
+  onUnlimitedChange?: (unlimited: boolean) => void;
+  overageCharge?: string;
+  onOverageChange?: (overage: string) => void;
+  graceBuffer?: string;
+  onGraceChange?: (grace: string) => void;
+}
 
-  const [unlimited, setUnlimited] = useState(false);
-  const [overageCharge, setOverageCharge] = useState(localStorage.getItem('tieredOverage') || '');
-  const [graceBuffer, setGraceBuffer] = useState(localStorage.getItem('tieredGrace') || '');
+const EditTiered: React.FC<EditTieredProps> = ({
+  tiers: externalTiers,
+  onTiersChange,
+  unlimited: externalUnlimited,
+  onUnlimitedChange,
+  overageCharge: externalOverage,
+  onOverageChange,
+  graceBuffer: externalGrace,
+  onGraceChange
+}) => {
+  const [tiers, setTiers] = useState<Tier[]>(externalTiers || [{ from: '', to: '', price: '' }]);
+  const [unlimited, setUnlimited] = useState(externalUnlimited || false);
+  const [overageCharge, setOverageCharge] = useState(externalOverage || '');
+  const [graceBuffer, setGraceBuffer] = useState(externalGrace || '');
+  const isInternalChange = useRef(false);
 
-  // ✅ Persist the current tiers snapshot only here
+  // Sync with external props (only when not from internal change)
   useEffect(() => {
+    if (externalTiers && !isInternalChange.current) {
+      setTiers(externalTiers);
+    }
+    isInternalChange.current = false;
+  }, [externalTiers]);
+
+  useEffect(() => {
+    if (externalUnlimited !== undefined) setUnlimited(externalUnlimited);
+  }, [externalUnlimited]);
+
+  useEffect(() => {
+    if (externalOverage !== undefined) setOverageCharge(externalOverage);
+  }, [externalOverage]);
+
+  useEffect(() => {
+    if (externalGrace !== undefined) setGraceBuffer(externalGrace);
+  }, [externalGrace]);
+
+  // Notify parent and persist
+  useEffect(() => {
+    isInternalChange.current = true;
+    onTiersChange?.(tiers);
     localStorage.setItem('tieredTiers', JSON.stringify(tiers));
-  }, [tiers]);
+  }, [tiers, onTiersChange]);
 
   useEffect(() => {
     localStorage.setItem('tieredOverage', overageCharge);
@@ -33,7 +71,7 @@ const EditTiered: React.FC = () => {
   }, [graceBuffer]);
 
   const handleAddTier = () => {
-    setTiers(prev => [...prev, { from: '', to: '', price: '' }]);
+    setTiers(prev => [...prev, { from: '', to: '', price: '', isUnlimited: false }]);
   };
 
   const handleDeleteTier = (index: number) => {
@@ -48,7 +86,6 @@ const EditTiered: React.FC = () => {
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
-    // ✅ Functional update to avoid race conditions
     setTiers(prev => {
       const updated = [...prev];
       const t = updated[index] || { from: '', to: '', price: '' };
@@ -59,6 +96,8 @@ const EditTiered: React.FC = () => {
       };
       return updated;
     });
+    setUnlimited(checked);
+    onUnlimitedChange?.(checked);
   };
 
   return (
@@ -104,9 +143,11 @@ const EditTiered: React.FC = () => {
             type="checkbox"
             checked={unlimited}
             onChange={(e) => {
-              setUnlimited(e.target.checked);
-              if (e.target.checked && tiers.length > 0) {
-                handleUnlimitedToggle(true, tiers.length - 1);
+              const checked = e.target.checked;
+              setUnlimited(checked);
+              onUnlimitedChange?.(checked);
+              if (tiers.length > 0) {
+                handleUnlimitedToggle(checked, tiers.length - 1);
               }
             }}
           />
@@ -125,7 +166,10 @@ const EditTiered: React.FC = () => {
                 type="text"
                 className="edit-tiered-input-extra"
                 value={overageCharge}
-                onChange={(e) => setOverageCharge(e.target.value)}
+                onChange={(e) => {
+                  setOverageCharge(e.target.value);
+                  onOverageChange?.(e.target.value);
+                }}
                 placeholder="Enter overage charge"
               />
             </label>
@@ -135,7 +179,10 @@ const EditTiered: React.FC = () => {
                 type="text"
                 className="edit-tiered-input-extra"
                 value={graceBuffer}
-                onChange={(e) => setGraceBuffer(e.target.value)}
+                onChange={(e) => {
+                  setGraceBuffer(e.target.value);
+                  onGraceChange?.(e.target.value);
+                }}
                 placeholder="Enter grace buffer"
               />
             </label>

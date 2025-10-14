@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './EditStair.css';
 
 interface Stair {
@@ -8,14 +8,35 @@ interface Stair {
   isUnlimited?: boolean;
 }
 
-const EditStair: React.FC = () => {
-  // hydrate from localStorage if available
+interface EditStairProps {
+  stairs?: Stair[];
+  onStairsChange?: (stairs: Stair[]) => void;
+  unlimited?: boolean;
+  onUnlimitedChange?: (unlimited: boolean) => void;
+  overageCharge?: string;
+  onOverageChange?: (overage: string) => void;
+  graceBuffer?: string;
+  onGraceChange?: (grace: string) => void;
+}
+
+const EditStair: React.FC<EditStairProps> = ({
+  stairs: externalStairs,
+  onStairsChange,
+  unlimited: externalUnlimited,
+  onUnlimitedChange,
+  overageCharge: externalOverage,
+  onOverageChange,
+  graceBuffer: externalGrace,
+  onGraceChange
+}) => {
+  // Initialize from props or localStorage fallback
   const [stairs, setStairs] = useState<Stair[]>(() => {
+    if (externalStairs) return externalStairs;
+    
     const saved = localStorage.getItem('stairTiers');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // accept both {from,to,cost} and {from,to,price} shapes
         return parsed.map((r: any) => ({
           from: r.from ?? '',
           to: r.to ?? '',
@@ -27,15 +48,36 @@ const EditStair: React.FC = () => {
     return [{ from: '', to: '', cost: '' }];
   });
 
-  const [unlimited, setUnlimited] = useState(false);
+  const [unlimited, setUnlimited] = useState(externalUnlimited ?? false);
   const [overageCharge, setOverageCharge] = useState(
-    localStorage.getItem('stairOverage') || ''
+    externalOverage ?? localStorage.getItem('stairOverage') ?? ''
   );
   const [graceBuffer, setGraceBuffer] = useState(
-    localStorage.getItem('stairGrace') || ''
+    externalGrace ?? localStorage.getItem('stairGrace') ?? ''
   );
+  const isInternalChange = useRef(false);
 
-  // persist stairs snapshot (debounced via microtask so state is latest)
+  // Sync with external props (only when not from internal change)
+  useEffect(() => {
+    if (externalStairs && !isInternalChange.current) {
+      setStairs(externalStairs);
+    }
+    isInternalChange.current = false;
+  }, [externalStairs]);
+
+  useEffect(() => {
+    if (externalUnlimited !== undefined) setUnlimited(externalUnlimited);
+  }, [externalUnlimited]);
+
+  useEffect(() => {
+    if (externalOverage !== undefined) setOverageCharge(externalOverage);
+  }, [externalOverage]);
+
+  useEffect(() => {
+    if (externalGrace !== undefined) setGraceBuffer(externalGrace);
+  }, [externalGrace]);
+
+  // persist stairs snapshot and notify parent
   const persistStairs = (next: Stair[]) => {
     const toSave = next.map(s => ({
       from: s.from,
@@ -43,13 +85,14 @@ const EditStair: React.FC = () => {
       cost: s.cost,
       isUnlimited: s.isUnlimited,
     }));
-    // defer to ensure state is committed before read elsewhere
     setTimeout(() => localStorage.setItem('stairTiers', JSON.stringify(toSave)), 0);
   };
 
   useEffect(() => {
+    isInternalChange.current = true;
+    onStairsChange?.(stairs);
     persistStairs(stairs);
-  }, [stairs]);
+  }, [stairs, onStairsChange]);
 
   useEffect(() => {
     localStorage.setItem('stairOverage', overageCharge);
@@ -60,13 +103,13 @@ const EditStair: React.FC = () => {
   }, [graceBuffer]);
 
   const handleAddStair = () => {
-    const next = [...stairs, { from: '', to: '', cost: '' }];
+    const next = [...stairs, { from: '', to: '', cost: '', isUnlimited: false }];
     setStairs(next);
   };
 
   const handleDeleteStair = (index: number) => {
     const updated = stairs.filter((_, i) => i !== index);
-    setStairs(updated.length ? updated : [{ from: '', to: '', cost: '' }]);
+    setStairs(updated.length ? updated : [{ from: '', to: '', cost: '', isUnlimited: false }]);
   };
 
   const handleChange = (index: number, field: keyof Stair, value: string) => {
@@ -82,6 +125,8 @@ const EditStair: React.FC = () => {
       updated[index].to = '';
     }
     setStairs(updated);
+    setUnlimited(checked);
+    onUnlimitedChange?.(checked);
   };
 
   return (
@@ -127,9 +172,11 @@ const EditStair: React.FC = () => {
             type="checkbox"
             checked={unlimited}
             onChange={(e) => {
-              setUnlimited(e.target.checked);
-              if (e.target.checked && stairs.length > 0) {
-                handleUnlimitedToggle(true, stairs.length - 1);
+              const checked = e.target.checked;
+              setUnlimited(checked);
+              onUnlimitedChange?.(checked);
+              if (stairs.length > 0) {
+                handleUnlimitedToggle(checked, stairs.length - 1);
               }
             }}
           />
@@ -148,7 +195,10 @@ const EditStair: React.FC = () => {
                 type="text"
                 className="edit-input-extra-stairs"
                 value={overageCharge}
-                onChange={(e) => setOverageCharge(e.target.value)}
+                onChange={(e) => {
+                  setOverageCharge(e.target.value);
+                  onOverageChange?.(e.target.value);
+                }}
                 placeholder="Enter overage charge"
               />
             </label>
@@ -158,7 +208,10 @@ const EditStair: React.FC = () => {
                 type="text"
                 className="edit-input-extra-stairs"
                 value={graceBuffer}
-                onChange={(e) => setGraceBuffer(e.target.value)}
+                onChange={(e) => {
+                  setGraceBuffer(e.target.value);
+                  onGraceChange?.(e.target.value);
+                }}
                 placeholder="Enter grace buffer"
               />
             </label>

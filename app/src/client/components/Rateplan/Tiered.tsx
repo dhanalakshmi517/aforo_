@@ -48,7 +48,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   const [overageError, setOverageError] = useState<string | null>(null);
   const [overageTouched, setOverageTouched] = useState(false);
 
-  // Keep internal tiers synced with props; if parent gives an empty array, still render one blank row
+  // Sync incoming tiers (always keep at least one row)
   useEffect(() => {
     if (externalTiers && externalTiers.length > 0) {
       setTiers(externalTiers);
@@ -57,33 +57,36 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     }
   }, [externalTiers]);
 
+  // Hydrate unlimited from either prop or session
   useEffect(() => {
-    if (externalUnlimited !== undefined) {
-      console.log('🎯 Tiered: Updating unlimited from prop:', externalUnlimited);
-      setUnlimited(externalUnlimited);
+    const saved = getRatePlanData('TIERED_NO_UPPER_LIMIT');
+    if (saved != null) {
+      const flag = saved === 'true';
+      setUnlimited(flag);
+    } else if (externalUnlimited !== undefined) {
+      setUnlimited(!!externalUnlimited);
     }
   }, [externalUnlimited]);
-  
-  // Update overage and grace from props
+
+  // Push overage/grace from parent into local fields
   useEffect(() => {
     if (overageFromParent !== undefined && overageFromParent !== null) {
-      console.log('🎯 Tiered: Updating overage from prop:', overageFromParent);
       setOverageCharge(String(overageFromParent));
     }
   }, [overageFromParent]);
-  
+
   useEffect(() => {
     if (graceFromParent !== undefined && graceFromParent !== null) {
-      console.log('🎯 Tiered: Updating grace buffer from prop:', graceFromParent);
       setGraceBuffer(String(graceFromParent));
     }
   }, [graceFromParent]);
 
-  // Persist for review/draft
+  // Persist tiers for review/draft (include isUnlimited)
   useEffect(() => {
     setRatePlanData('TIERED_TIERS', JSON.stringify(tiers));
   }, [tiers]);
 
+  // Persist overage/grace
   useEffect(() => {
     setRatePlanData('TIERED_OVERAGE', overageCharge);
   }, [overageCharge]);
@@ -91,6 +94,11 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   useEffect(() => {
     setRatePlanData('TIERED_GRACE', graceBuffer);
   }, [graceBuffer]);
+
+  // Persist unlimited
+  useEffect(() => {
+    setRatePlanData('TIERED_NO_UPPER_LIMIT', unlimited ? 'true' : 'false');
+  }, [unlimited]);
 
   const validateTier = (tier: Tier): TierError => {
     const error: TierError = {};
@@ -147,6 +155,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     ensureArrays(tiers.length);
     setTierErrors(tiers.map(validateTier));
 
+    // Overage required only when NOT unlimited
     if (!unlimited) {
       setOverageError(validateOverage(overageCharge));
     } else {
@@ -166,14 +175,25 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   };
 
   const handleAddTier = () => {
-    const next = [...tiers, { from: '', to: '', price: '' }];
+    // When adding a new tier, uncheck unlimited since user wants more tiers
+    setUnlimited(false);
+    setRatePlanData('TIERED_NO_UPPER_LIMIT', 'false');
+    
+    // Clear unlimited from current last tier if it was unlimited
+    const updated = [...tiers];
+    if (updated.length > 0 && updated[updated.length - 1].isUnlimited) {
+      updated[updated.length - 1].isUnlimited = false;
+    }
+    
+    // Add new tier with unlimited = false
+    const next = [...updated, { from: '', to: '', price: '', isUnlimited: false }];
     setTiers(next);
     onAddTier?.();
   };
 
   const handleDeleteTier = (index: number) => {
     const updated = tiers.filter((_, i) => i !== index);
-    setTiers(updated);
+    setTiers(updated.length ? updated : [{ from: '', to: '', price: '', isUnlimited: false }]);
     onDeleteTier?.(index);
     setTierTouched(prev => prev.filter((_, i) => i !== index));
   };
@@ -185,14 +205,20 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     onChange?.(index, field, value);
   };
 
-  const handleUnlimitedToggle = (checked: boolean, index: number) => {
+  const handleUnlimitedToggle = (checked: boolean) => {
+    const lastIndex = Math.max(0, tiers.length - 1);
     const updated = [...tiers];
-    updated[index].isUnlimited = checked;
+    updated[lastIndex].isUnlimited = checked;
     if (checked) {
-      updated[index].to = '';
+      updated[lastIndex].to = '';
     }
     setTiers(updated);
+
+    // Local/parent/session sync
+    setUnlimited(checked);
     setNoUpperLimit?.(checked);
+    onChange?.(lastIndex, 'isUnlimited', checked.toString());
+    setRatePlanData('TIERED_NO_UPPER_LIMIT', checked ? 'true' : 'false');
   };
 
   useImperativeHandle(ref, () => ({
@@ -203,10 +229,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
           endRange: tier.isUnlimited ? null : (Number(tier.to) || 0),
           unitPrice: Number(tier.price) || 0,
         })),
-        overageUnitRate: Number(overageCharge) || 0,
+        overageUnitRate: unlimited ? 0 : (Number(overageCharge) || 0), // ignore when unlimited
         graceBuffer: Number(graceBuffer) || 0,
       };
-
       const result = await saveTieredPricing(ratePlanId, payload);
       return result;
     },
@@ -241,10 +266,10 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
 
               <div className="field-col">
                 <input
-                  className={`tiered-input-small ${touched.to && error.to ? 'error-input' : ''}`}
+                  className={`tiered-input-small ${(!tier.isUnlimited && touched.to && error.to) ? 'error-input' : ''}`}
                   value={tier.isUnlimited ? 'Unlimited' : tier.to}
                   placeholder="To"
-                  disabled={tier.isUnlimited}
+                  disabled={!!tier.isUnlimited}
                   onChange={(e) => handleChange(index, 'to', e.target.value)}
                   onBlur={() => markTouched(index, 'to')}
                 />
@@ -262,7 +287,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 {touched.price && error.price && <span className="error-text">{error.price}</span>}
               </div>
 
-              <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)}>
+              <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)} aria-label="Delete tier">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -275,12 +300,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
           <input
             type="checkbox"
             checked={unlimited}
-            onChange={(e) => {
-              setUnlimited(e.target.checked);
-              if (e.target.checked && tiers.length > 0) {
-                handleUnlimitedToggle(true, tiers.length - 1);
-              }
-            }}
+            onChange={(e) => handleUnlimitedToggle(e.target.checked)}
           />
           <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
