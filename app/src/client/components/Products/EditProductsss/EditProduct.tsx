@@ -238,7 +238,8 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
       await updateGeneralDetails(productId, draftPayload as any);
       // If currently on configuration tab also persist configuration
       if (activeTab === 'configuration') {
-        await updateConfiguration(productId, configuration.productType, configuration);
+        const productTypeChanged = localStorage.getItem('editConfigProductTypeChanged') === 'true';
+        await updateConfiguration(productId, configuration.productType, configuration, productTypeChanged);
       }
       setDraftStatus('saved');
       // auto reset label back to normal after 4 s
@@ -357,8 +358,12 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId }: EditPro
           )
         };
         
+        // Check if product type has changed (stored in localStorage by EditConfiguration)
+        const productTypeChanged = localStorage.getItem('editConfigProductTypeChanged') === 'true';
+        console.log('Product type changed:', productTypeChanged);
         console.log('Sending configuration payload:', configurationPayload);
-        await updateConfiguration(productId, configuration.productType, configurationPayload);
+        
+        await updateConfiguration(productId, configuration.productType, configurationPayload, productTypeChanged);
         console.log('Configuration updated successfully');
       } else {
         console.log('Skipping configuration update - no productType or productId');

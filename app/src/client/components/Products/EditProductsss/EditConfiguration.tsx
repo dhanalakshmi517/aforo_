@@ -321,6 +321,8 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [isFetched, setIsFetched] = useState(false); // Track if data has been fetched
     const [hasUserChanges, setHasUserChanges] = useState(false); // Track if user has made changes
+    const [originalProductType, setOriginalProductType] = useState<string>(''); // Track original product type from backend
+    const [productTypeChanged, setProductTypeChanged] = useState(false); // Track if product type has been changed
 
     // Memoized change handlers
     const handleConfigChange = React.useCallback(
@@ -336,17 +338,32 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     const handleProductTypeChange = React.useCallback(
       (type: string) => {
+        console.log('Product type changed from', productType, 'to', type);
+        console.log('Original product type:', originalProductType);
+        
         setProductType(type);
         // Persist product type to localStorage
         localStorage.setItem('editConfigProductType', type);
         onProductTypeChange(type);
+        
+        // Check if product type has changed from original
+        if (originalProductType && type !== originalProductType) {
+          console.log('Product type has changed - will use POST for new configuration');
+          setProductTypeChanged(true);
+          localStorage.setItem('editConfigProductTypeChanged', 'true');
+        } else {
+          console.log('Product type matches original - will use PUT for updates');
+          setProductTypeChanged(false);
+          localStorage.removeItem('editConfigProductTypeChanged');
+        }
+        
         // Clear form data when changing product type
         setFormData({});
         localStorage.removeItem('editConfigFormData');
         setFieldErrors({});
         setError('');
       },
-      [onProductTypeChange]
+      [onProductTypeChange, productType, originalProductType]
     );
 
     // Validation (no network)
@@ -450,6 +467,13 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           
           if (res.ok) {
             console.log('Fetched configuration details:', productId, productType);
+            
+            // Set original product type when successfully fetching configuration
+            if (!originalProductType) {
+              console.log('Setting original product type:', productType);
+              setOriginalProductType(productType);
+              localStorage.setItem('editConfigOriginalProductType', productType);
+            }
 
             const configData = await res.json();
             console.log('Configuration JSON:', configData);
@@ -493,9 +517,17 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               }
               setIsFetched(true);
             }
+          } else if (res.status === 404) {
+            // Configuration doesn't exist for this product type - will need to use POST
+            console.log('No existing configuration found - will use POST for creation');
+            setProductTypeChanged(true); // Treat as new configuration
+            localStorage.setItem('editConfigProductTypeChanged', 'true');
           }
         } catch (err) {
           console.warn('Failed to fetch config data:', err);
+          // On error, assume no configuration exists
+          setProductTypeChanged(true);
+          localStorage.setItem('editConfigProductTypeChanged', 'true');
         }
       };
 

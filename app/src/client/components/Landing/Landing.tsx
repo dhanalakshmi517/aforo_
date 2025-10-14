@@ -7,6 +7,7 @@ import PricingMarquee from "./PricingMarquee";
 import AudienceSection from "./AudienceSection";
 import FAQSection, { FAQItem } from "./FAQSection";
 import Footer from "./Footer";
+import ProductShowcaseScroll from "./ProductShowcaseScroll";
 
 const faqItems: FAQItem[] = [
   {
@@ -44,6 +45,8 @@ const Landing: React.FC = () => {
         <BuiltSection />
         <PricingMarquee />
         <AudienceSection />
+                <ProductShowcaseScroll />
+
         <FAQSection items={faqItems} />
         <Footer />
       </main>

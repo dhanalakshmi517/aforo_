@@ -2,7 +2,7 @@
     --pm-card-w: 320px;     
     --pm-card-h: 500px;
     --pm-gap: 28px;
-    --pm-speed: 26s;        
+    --pm-speed: 35s;        
 }
 
 .pm{
@@ -61,6 +61,12 @@
     object-fit: contain;
     pointer-events: none;
 }
+
+/* Pause marquee on hover */
+.pm__marquee:hover .pm__track {
+  animation-play-state: paused;
+}
+
 
 @keyframes pm-marquee {
     from { transform: translateX(0); }
