@@ -71,12 +71,14 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   // Push overage/grace from parent into local fields
   useEffect(() => {
     if (overageFromParent !== undefined && overageFromParent !== null) {
+      console.log('🔧 Tiered: Updating overage charge from prop:', overageFromParent);
       setOverageCharge(String(overageFromParent));
     }
   }, [overageFromParent]);
 
   useEffect(() => {
     if (graceFromParent !== undefined && graceFromParent !== null) {
+      console.log('🔧 Tiered: Updating grace buffer from prop:', graceFromParent);
       setGraceBuffer(String(graceFromParent));
     }
   }, [graceFromParent]);

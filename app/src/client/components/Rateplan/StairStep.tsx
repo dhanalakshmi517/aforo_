@@ -42,24 +42,61 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
   const [mustHaveOneError, setMustHaveOneError] = useState<string | null>(null);
   const [overageError, setOverageError] = useState<string | null>(null);
 
-  // one-time hydration
+  // Sync incoming stairs (always keep at least one row)
   useEffect(() => {
-    if (!hydrated.current && externalStairs && externalStairs.length > 0) {
-      hydrated.current = true;
-      setStairs(externalStairs);
-      const last = externalStairs[externalStairs.length - 1];
-      setUnlimited(!!last?.isUnlimited);
+    if (externalStairs && externalStairs.length > 0) {
+      // Only hydrate if we haven't hydrated yet, OR if current stairs are empty/default
+      const currentIsEmpty = stairs.length === 1 && stairs[0].from === '' && stairs[0].to === '' && stairs[0].cost === '';
+      
+      if (!hydrated.current || currentIsEmpty) {
+        console.log('🔧 StairStep: Hydrating from external stairs:', externalStairs);
+        hydrated.current = true;
+        setStairs(externalStairs);
+        const last = externalStairs[externalStairs.length - 1];
+        setUnlimited(!!last?.isUnlimited);
+      }
     }
   }, [externalStairs]);
 
+  // Hydrate unlimited from session storage (like Tiered component)
   useEffect(() => {
-    if (!hydrated.current && overageFromParent !== undefined && overageFromParent !== null) {
+    const saved = getRatePlanData('STAIR_NO_UPPER_LIMIT');
+    console.log('🔧 StairStep: Session storage STAIR_NO_UPPER_LIMIT:', saved);
+    if (saved != null) {
+      const flag = saved === 'true';
+      console.log('🔧 StairStep: Restoring unlimited state from session:', flag);
+      setUnlimited(flag);
+      
+      // Also update the last stair's isUnlimited property
+      setStairs(prevStairs => {
+        console.log('🔧 StairStep: Current stairs before update:', prevStairs);
+        if (prevStairs.length > 0) {
+          const updated = [...prevStairs];
+          const lastIndex = updated.length - 1;
+          updated[lastIndex] = { ...updated[lastIndex], isUnlimited: flag };
+          if (flag) {
+            updated[lastIndex].to = '';
+          }
+          console.log('🔧 StairStep: Updated stairs with unlimited state:', updated);
+          return updated;
+        }
+        return prevStairs;
+      });
+    } else {
+      console.log('🔧 StairStep: No session storage unlimited state found');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (overageFromParent !== undefined && overageFromParent !== null) {
+      console.log('🔧 StairStep: Updating overage charge from prop:', overageFromParent);
       setOverageCharge(String(overageFromParent));
     }
   }, [overageFromParent]);
 
   useEffect(() => {
-    if (!hydrated.current && graceFromParent !== undefined && graceFromParent !== null) {
+    if (graceFromParent !== undefined && graceFromParent !== null) {
+      console.log('🔧 StairStep: Updating grace buffer from prop:', graceFromParent);
       setGraceBuffer(String(graceFromParent));
     }
   }, [graceFromParent]);
@@ -68,6 +105,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
   useEffect(() => { setRatePlanData('STAIR_TIERS', JSON.stringify(stairs)); }, [stairs]);
   useEffect(() => { setRatePlanData('STAIR_OVERAGE', overageCharge); }, [overageCharge]);
   useEffect(() => { setRatePlanData('STAIR_GRACE', graceBuffer); }, [graceBuffer]);
+  useEffect(() => { setRatePlanData('STAIR_NO_UPPER_LIMIT', unlimited ? 'true' : 'false'); }, [unlimited]);
 
   const ensureArrays = (len:number) => {
     setTouched(prev => { const n=[...prev]; while(n.length<len) n.push({from:false,to:false,cost:false}); return n.slice(0,len);});
@@ -125,6 +163,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
     
     // When adding a new stair, uncheck unlimited since user wants more stairs
     setUnlimited(false);
+    setRatePlanData('STAIR_NO_UPPER_LIMIT', 'false');
     
     // Clear unlimited from current last stair if it was unlimited
     const updated = [...stairs];
@@ -156,7 +195,17 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
   };
 
   const toggleUnlimited = (checked:boolean, index:number) => {
-    const n=[...stairs]; n[index].isUnlimited=checked; if(checked) n[index].to=''; setStairs(n); setUnlimited(checked);
+    // Set unlimited state first to avoid race conditions
+    setUnlimited(checked);
+    setRatePlanData('STAIR_NO_UPPER_LIMIT', checked ? 'true' : 'false');
+    
+    // Then update stairs with the correct isUnlimited property
+    const n = [...stairs];
+    n[index].isUnlimited = checked;
+    if (checked) {
+      n[index].to = '';
+    }
+    setStairs(n);
     pushChangeUp(n);
   };
 
