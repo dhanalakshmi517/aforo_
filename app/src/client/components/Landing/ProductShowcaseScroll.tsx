@@ -250,9 +250,9 @@ export default function ProductShowcaseScroll() {
                   </div>
                 </div>
                 <div className="ph__ctaButton">
-                  <TertiaryButton onClick={() => { /* route or open doc here */ }}>
+                  {/* <TertiaryButton onClick={() => {}}>
                     Explore Doc
-                  </TertiaryButton>
+                  </TertiaryButton> */}
                 </div>
               </div>
             </aside>

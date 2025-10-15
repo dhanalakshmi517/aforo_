@@ -24,6 +24,7 @@ main {
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 20px;
+
 }
 
 /* Responsive images */
@@ -31,4 +32,13 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+    padding-top: 64px; /* Height of fixed navbar */
+
+}
+
+/* Responsive navbar spacing */
+@media (max-width: 768px) {
+  main {
+    padding-top: 72px; /* Adjusted height for mobile navbar */
+  }
 }

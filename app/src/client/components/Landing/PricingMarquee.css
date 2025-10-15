@@ -1,14 +1,15 @@
+@import "./Variables.css";
 :root{
     --pm-card-w: 320px;     
     --pm-card-h: 500px;
     --pm-gap: 28px;
-    --pm-speed: 35s;        
+    --pm-speed: 10s;        
 }
 
 .pm{
     padding: 20px 40px;
     overflow-x: hidden;  /* horizontal marquee */
-    overflow-y: visible; /* allow vertical cards fully visible */
+    overflow-y: hidden; /* no vertical scrollbar */
     background: white;
 }
 
@@ -20,17 +21,29 @@
 
 .pm__title{ 
     margin:0 0 10px; 
-    font-size:32px; 
-    font-weight:800; 
-    color:#0b2430; 
+   color: var(--color-primary-900);
+text-align: center;
+
+/* heading/h1 */
+font-family: var(--font-family-primary);
+font-size: 48px;
+font-style: normal;
+font-weight: 600;
+line-height: 67.2px; /* 140% */
 }
 
 .pm__subtitle{ 
     margin:0 auto 32px; 
     max-width:900px; 
-    color:#4b5b68; 
-    line-height:1.6; 
-    font-size:15px; 
+    color: var(--color-neutral-1000);
+text-align: center;
+
+/* heading/h5/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h5);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-heading-h5, 28px); /* 140% */
 }
 
 .pm__track{

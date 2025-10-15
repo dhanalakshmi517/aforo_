@@ -1,0 +1,215 @@
+@import "./Variables.css";
+
+/* Section frame */
+.sec {
+  padding: 80px 0;                
+  background: transparent;
+  color: var(--color-neutral-900, #0b2430);
+  font-family: var(--font-family-primary, Inter, system-ui, sans-serif);
+}
+
+.sec__inner {
+  max-width: 1280px;                /* content width; tweak if needed */
+  margin: 0 auto;
+  padding: 0 32px;                  /* side gutters */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 80px;                        /* center gap from your annotated image */
+}
+
+/* ============ LEFT: Glass Card with lock.svg ============ */
+.sec__art { flex: 0 0 auto; }
+
+/* LEFT: wrapper only, NO extra background/card */
+.sec__artCard {
+  display: flex;
+  width: 548px;              /* spec */
+  height: 412px;             /* spec */
+  padding: 49px 97.999px 0 98.07px;  /* spec */
+  justify-content: center;
+  align-items: center;
+
+  /* remove the extra card */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+/* Image size and scaling */
+.sec__artImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  max-width: none;
+  max-height: none;
+}
+
+/* Adjust the art card container */
+.sec__artCard {
+  width: 100%;
+  height: 100%;
+  min-height: 500px; /* Adjust this value as needed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.sec__art {
+  width: 50%;
+  min-width: 500px; /* Ensures minimum width */
+}
+
+/* ============ RIGHT: Content ============ */
+.sec__content {
+  flex: 1 1 auto;
+  min-width: 320px;
+}
+
+.sec__title {
+
+/* heading/h3/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h3);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h3); /* 138.462% */
+  margin: 0 0 24px 0;
+  background: var(--Gradient-blue, linear-gradient(254deg, var(--color-primary-700, #025A94) 26.47%, var(--color-primary-1000, #00365A) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+/* Checklist */
+.sec__list {
+  display: grid;
+  gap: 16px 0;
+  margin: 0 0 24px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sec__listItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 16px;
+}
+
+/* tick-pill (exact numbers you gave) */
+.sec__tickBox {
+  display: flex;
+  width: 54.45px;
+  height: 54.45px;
+  padding: 13.451px 13.745px 13.826px 13.533px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+
+  border-radius: 7.779px;
+  background: linear-gradient(
+    62deg,
+    rgba(255, 255, 255, 0.05) 20.81%,
+    rgba(0, 79, 121, 0.05) 68.16%
+  );
+
+  /* box-shadow:
+    0 1px 0 rgba(0,0,0,0.06),
+    0 6px 20px rgba(0,0,0,0.08);*/
+} 
+
+.sec__text { display: grid; gap: 4px; }
+
+.sec__itemTitle {
+color: var(--color-neutral-1400);
+
+/* body/lg/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg); /* 150% */
+}
+
+.sec__itemNote {
+ color: var(--color-neutral-800);
+
+/* body/lg/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg); /* 150% */
+}
+
+/* CTA */
+.sec__cta {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+padding: 10.107px 20.214px;
+  border: 1px solid rgba(255,255,255,0.45);
+
+border-radius: 6.854px;
+background: var(--color-primary-700);  
+color: var(--color-neutral-white);
+font-family: var(--font-family-primary);
+font-size: 15.161px;
+font-style: normal;
+font-weight: 700;
+line-height: 20.214px; /* 133.333% */  cursor: pointer;
+
+ 
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.sec__cta:hover   { transform: translateY(-1px); filter: brightness(1.03); }
+.sec__cta:active  { transform: translateY(0);     filter: brightness(.98);  }
+.sec__ctaArrow { font-size: 18px; line-height: 0; }
+
+/* ============ Responsive ============ */
+@media (max-width: 1100px) {
+  .sec__inner { gap: 48px; }
+  .sec__artCard { transform: scale(.93); transform-origin: left top; }
+}
+
+@media (max-width: 960px) {
+  .sec__inner {
+    grid-template-columns: 1fr;
+    display: grid;
+    gap: 32px;
+  }
+  .sec__art { order: 1; }
+  .sec__content { order: 2; }
+  .sec__artCard {
+    width: 100%;
+    max-width: 648px;
+    height: 480px;
+    margin-inline: auto;
+    padding: 36px 64px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sec { padding: 64px 0; }
+  .sec__inner { padding: 0 20px; gap: 24px; }
+  .sec__title { font-size: 22px; }
+  .sec__artCard {
+    height: 400px;
+    padding: 28px;
+    border-radius: 28px;
+  }
+  .sec__tickBox {
+    width: 44px; height: 44px; padding: 10px;
+    border-radius: 7px;
+  }
+  .sec__itemTitle { font-size: 15px; }
+  .sec__itemNote  { font-size: 13px; }
+}

@@ -1,3 +1,4 @@
+@import "./Variables.css";
 :root {
     --bfm-gutter-desktop: 40px; /* Reduced side padding */
     --bfm-gutter-mobile: 16px;
