@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useState, useRef } from "react";
 import "./FAQSection.css";
 
-export type FAQItem = { q: string; a: string };
+export type FAQItem = {
+  q: string;
+  a: string;
+};
 
-type FAQSectionProps = {
+type Props = {
   title?: React.ReactNode;
   blurb?: React.ReactNode;
   items: FAQItem[];
@@ -20,99 +23,86 @@ export default function FAQSection({
   blurb = (
     <>
       Find answers to common questions
-      <br /> about our services, project process,
-      <br /> and technical expertise?
+      <br />
+      about our services, project process,
+      <br />
+      and technical expertise.
     </>
   ),
   items,
-}: FAQSectionProps) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [active, setActive] = useState(0);
+}: Props) {
+  const [active, setActive] = useState<number | null>(0);
+  const rowRef = useRef<HTMLDivElement>(null);
 
-  // Create stable ids for observer
-  const ids = useMemo(() => items.map((_, i) => `faq-card-${i}`), [items]);
-
-  // Observe which card is most centered in view
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const cards = Array.from(track.querySelectorAll<HTMLElement>("[data-card-idx]"));
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        // Pick the entry with largest intersection ratio
-        const best = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (best) {
-          const idx = Number((best.target as HTMLElement).dataset.cardIdx || 0);
-          setActive(idx);
-        }
-      },
-      {
-        root: track,
-        threshold: [0.25, 0.5, 0.75, 0.95],
-      }
-    );
-
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, [items]);
-
-  const scrollByOne = (dir: -1 | 1) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector<HTMLElement>("[data-card-idx]");
-    const cardWidth = card ? card.offsetWidth : 320;
-    track.scrollBy({ left: dir * (cardWidth + 24), behavior: "smooth" });
+  const scrollByOne = (direction: -1 | 1) => {
+    const newActive = active !== null ? active + direction : 0;
+    if (newActive >= 0 && newActive < items.length) {
+      setActive(newActive);
+      if (!rowRef.current) return;
+      const cardWidth = 245;
+      rowRef.current.scrollBy({ 
+        left: direction * cardWidth, 
+        behavior: "smooth" 
+      });
+    }
   };
 
   return (
     <section className="faq">
-      <div className="faq__container">
-        <div className="faq__header">
-          <h2 className="faq__title">{title}</h2>
-
-          <div className="faq__aside">
-            <p className="faq__blurb">{blurb}</p>
-            <div className="faq__nav">
-              <button
-                className="faq__navbtn"
-                aria-label="Previous"
-                onClick={() => scrollByOne(-1)}
-              >
-                ←
-              </button>
-              <button
-                className="faq__navbtn"
-                aria-label="Next"
-                onClick={() => scrollByOne(1)}
-              >
-                →
-              </button>
-            </div>
+      <div className="faq__head">
+        <h2 className="faq__title">{title}</h2>
+        <div className="faq__right">
+          <p className="faq__blurb">{blurb}</p>
+          <div className="faq__nav">
+            <button 
+              className="faq__navBtn" 
+              onClick={() => scrollByOne(-1)}
+              aria-label="Previous"
+              disabled={active === 0}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+  <path d="M12.668 8.64583H3.33464M3.33464 8.64583L8.0013 13.3125M3.33464 8.64583L8.0013 3.97917" stroke="#025A94" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+            </button>
+            <button 
+              className="faq__navBtn" 
+              onClick={() => scrollByOne(1)}
+              aria-label="Next"
+              disabled={active === items.length - 1}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="11" viewBox="0 0 12 11" fill="none">
+  <path d="M1.33203 5.64583H10.6654M10.6654 5.64583L5.9987 10.3125M10.6654 5.64583L5.9987 0.979168" stroke="#025A94" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="faq__marquee">
-          <div className="faq__track" ref={trackRef}>
-            {items.map((it, i) => (
-              <article
-                key={ids[i]}
-                data-card-idx={i}
-                className={`faq-card ${active === i ? "is-active" : ""}`}
-              >
-                <div className="faq-card__inner">
-                  <h3 className="faq-card__q">{it.q}</h3>
-                  <p className="faq-card__a">{it.a}</p>
-                </div>
-              </article>
-            ))}
-            {/* optional: ghost spacing at end for nice end snap */}
-            <div className="faq__endpad" aria-hidden="true" />
-          </div>
-        </div>
+      <div
+        ref={rowRef}
+        className={`faq__row ${active !== null ? "has-active" : ""}`}
+        onMouseLeave={() => setActive(null)}
+      >
+        {items.map((it, i) => {
+          const isActive = active === i;
+          return (
+            <article
+              key={i}
+              className={`faq__card ${isActive ? "is-active" : ""}`}
+              onMouseEnter={() => setActive(i)}
+              role="button"
+              tabIndex={0}
+              onFocus={() => setActive(i)}
+              onBlur={() => setActive(null)}
+            >
+              <div className="faq__bg" aria-hidden />
+              <div className="faq__content">
+                <h3 className="faq__q">{it.q}</h3>
+                <p className="faq__a">{it.a}</p>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );

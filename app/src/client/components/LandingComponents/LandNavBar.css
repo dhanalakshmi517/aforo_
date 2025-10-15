@@ -17,10 +17,14 @@ body {
 
 /* ---------- Navbar ---------- */
 .af-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%; /* full-bleed background */
   background: rgba(255, 255, 255, 0.20);
   backdrop-filter: blur(26.75px);
   border-bottom: 1px solid var(--color-neutral-300);
+  z-index: 1000;
 }
 
 /* Content container capped at 1910px */
@@ -91,8 +95,8 @@ body {
 }
 
 .af-nav__link:hover {
-  background: #fff;
-  color: var(--color-primary-800);
+  color: var(--color-primary-1000);
+  font-weight:400;
 }
 
 .af-nav__link--active {

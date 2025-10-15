@@ -1,0 +1,145 @@
+@import "./Variables.css";
+/* Layout tokens */
+:root{
+  --int-maxw: 1280px;             /* content width */
+  --int-pad-x: 48px;              /* left/right padding (screenshot shows 48) */
+  --int-gap-y: 40px;              /* vertical gaps (top/title → panel → buttons) */
+
+  --radius-lg: 28px;
+  --shadow-lg: 0 24px 80px rgba(12, 38, 55, 0.12);
+
+  --bg-panel-a: #F7FBFF;
+  --bg-panel-b: #EAF4FF;
+
+  --text-900: #0b2430;
+  --text-700: rgba(11,36,48,.75);
+
+  --brand-700: #0A5D9A;
+  --brand-800: #0A4D80;
+}
+
+/* Section shell */
+.int{
+  padding: var(--int-gap-y) 0;
+  color: var(--text-900);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: transparent;
+}
+
+.int__inner{
+  max-width: var(--int-maxw);
+  margin: 0 auto;
+  padding: 0 var(--int-pad-x);
+}
+
+/* Header */
+.int__header{
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.int__title{
+  margin: 0 0 8px 0;
+  color: var(--color-primary-900);
+text-align: center;
+
+/* heading/h1 */
+font-family: "IBM Plex Sans";
+font-size: 48px;
+font-style: normal;
+font-weight: 600;
+line-height: 67.2px; /* 140% */
+}
+
+.int__subtitle{
+  margin: 0;
+  color: var(--color-neutral-1000);
+text-align: center;
+
+/* body/lg/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+}
+
+/* Panel with the triangles SVG inside */
+.int__panel{
+  margin: 0;
+  /* Removed background container styling */
+  background: transparent;
+  padding: 0;
+  position: relative;
+}
+
+/* Artwork */
+.int__art{
+  display: block;
+  margin: 0 auto;
+  width: min(920px, calc(100% - 2 * var(--int-pad-x))); /* keep nice margins */
+  height: auto;
+  object-fit: contain;
+  margin-top: -20px;
+}
+
+/* Actions (stacked) */
+.int__actions{
+  display: grid;
+  justify-content: center;
+  gap: 12px; /* space between Explore and View Documentation */
+  margin-top: var(--int-gap-y);
+}
+
+/* Buttons */
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  min-width: 160px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+  border: 1px solid transparent;
+}
+
+.btn--primary{
+  color: #fff;
+  background: linear-gradient(180deg, var(--brand-700) 0%, var(--brand-800) 100%);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow:
+    0 2px 0 rgba(5, 60, 96, 0.25) inset,
+    0 10px 24px rgba(0,0,0,0.10);
+}
+.btn--primary:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+.btn--primary:active{ transform: translateY(0); filter: brightness(.98); }
+
+.btn--ghost{
+  color: var(--text-900);
+  background: #fff;
+  border-color: rgba(11,36,48,0.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+.btn--ghost:hover{ transform: translateY(-1px); }
+.btn--ghost:active{ transform: translateY(0); }
+
+/* ----------------- Responsive ----------------- */
+@media (max-width: 1024px){
+  .int__title{ font-size: 32px; }
+  .int__art{ width: min(820px, calc(100% - 2 * var(--int-pad-x))); }
+}
+
+@media (max-width: 768px){
+  :root{ --int-pad-x: 24px; }
+  .int__title{ font-size: 28px; }
+  .int__subtitle{ font-size: 13px; }
+  .int__art{ width: min(640px, calc(100% - 2 * var(--int-pad-x))); }
+}
+
+@media (max-width: 480px){
+  .int__title{ font-size: 24px; }
+  .int__art{ width: calc(100% - 2 * var(--int-pad-x)); }
+}

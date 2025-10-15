@@ -36,8 +36,7 @@ export default function PricingMarquee() {
         <header className="pm__header">
           <h2 className="pm__title">Flexible Pricing Solutions</h2>
           <p className="pm__subtitle">
-            Not every customer fits into the same box, and neither should your pricing.
-            Mix and match models without the headache.
+           Not every customer fits into the same box, and neither should your pricing.<br />Aforo’s flexible pricing engine gives you the freedom to design plans that match how your<br/>product is actually used. Whether you sell APIs, SaaS features, or data<br/>products, you can mix and match models without the headache.
           </p>
         </header>
 

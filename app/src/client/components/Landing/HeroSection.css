@@ -61,18 +61,59 @@ line-height: var(--line-height-body-lg);
   color:var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
   padding: 12px 24px;
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-heading-h6);
-border:none;
- 
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-heading-h6);
+  border:none;
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(2, 90, 148, 0.25);
+  transition: transform .3s ease, box-shadow .3s ease, filter .3s ease;
+  
+  /* Pulsing glow animation */
+  animation: buttonPulse 2.5s ease-in-out infinite;
 }
-.land-hero__cta:hover { transform: translateY(-1px); filter: brightness(1.03); }
-.land-hero__cta:active { transform: translateY(0); box-shadow: 0 3px 12px rgba(11,128,194,0.18); }
+
+/* Shimmer effect overlay */
+.land-hero__cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.land-hero__cta:hover::before {
+  left: 100%;
+}
+
+.land-hero__cta:hover { 
+  transform: translateY(-2px) scale(1.02); 
+  filter: brightness(1.08);
+  box-shadow: 0 8px 24px rgba(2, 90, 148, 0.35);
+  animation: none; /* Stop pulse on hover */
+}
+
+.land-hero__cta:active { 
+  transform: translateY(0) scale(0.98); 
+  box-shadow: 0 3px 12px rgba(11,128,194,0.18); 
+}
+
+/* Pulse animation keyframes */
+@keyframes buttonPulse {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(2, 90, 148, 0.25);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(2, 90, 148, 0.45), 0 0 0 4px rgba(2, 90, 148, 0.1);
+  }
+}
 
 /* IMAGE */
 .land-hero__img {
