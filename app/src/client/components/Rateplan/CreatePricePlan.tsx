@@ -38,7 +38,7 @@ type ActiveTab = "details" | "billable" | "pricing" | "extras" | "review";
 
 interface CreatePricePlanProps {
   onClose: () => void;
-  registerSaveDraft?: (fn: () => Promise<void>) => void;
+  registerSaveDraft?: (fn: () => Promise<boolean>) => void; // returns whether draft actually saved
   draftData?: any; // Draft data from backend for pre-filling
 }
 
@@ -51,7 +51,7 @@ const steps = [
 ];
 
 const CreatePricePlan = React.forwardRef<
-  { back: () => boolean; getRatePlanId: () => number | null },
+  { back: () => boolean; getRatePlanId: () => number | null; validateBeforeBack: () => boolean },
   CreatePricePlanProps
 >(({ onClose, registerSaveDraft, draftData }, ref) => {
   const navigate = useNavigate();
@@ -85,13 +85,36 @@ const CreatePricePlan = React.forwardRef<
 
   const [draftPricingData, setDraftPricingData] = useState<any>(null);
   const [draftExtrasData, setDraftExtrasData] = useState<any>(null);
-  
+
   // Keep draft data persistent across step navigation
   const [persistentDraftData, setPersistentDraftData] = useState<any>(null);
   const [currentStepData, setCurrentStepData] = useState<any>(null);
   const [isFreshCreation, setIsFreshCreation] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // helper: clear a single error key when value becomes valid
+  const clearErrorIfValid = (key: string, isValid: boolean) => {
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+      if (isValid) {
+        const { [key]: _omit, ...rest } = prev;
+        return rest;
+      }
+      return prev;
+    });
+  };
+
+  // 👉 NEW: pure check that does NOT mutate state
+  const isStep0Filled = () => {
+    const ok =
+      !!planName.trim() &&
+      !!planDescription.trim() &&
+      !!billingFrequency &&
+      !!selectedProductName &&
+      !!paymentMethod;
+    return ok;
+  };
 
   useEffect(() => {
     document.body.classList.add("create-product-page");
@@ -100,7 +123,7 @@ const CreatePricePlan = React.forwardRef<
       getRatePlanData('WIZARD_STEP') ||
       getRatePlanData('PRICING_MODEL') ||
       getRatePlanData('BILLABLE_METRIC_NAME');
-    
+
     if (!isResuming && !draftData && !hasExistingSessionData) {
       setIsFreshCreation(true);
       clearAllRatePlanData();
@@ -194,8 +217,23 @@ const CreatePricePlan = React.forwardRef<
         return false;
       },
       getRatePlanId: () => ratePlanId,
+      // ✅ Only show inline errors if something is actually missing.
+      // If everything is filled, also ensure errors are cleared.
+      validateBeforeBack: () => {
+        if (currentStep !== 0) return true;
+
+        if (isStep0Filled()) {
+          // fields valid → make sure any stale errors are cleared
+          setErrors({});
+          return true;
+        }
+
+        // something missing → populate inline errors
+        validateStep0();
+        return false;
+      },
     }),
-    [currentStep, ratePlanId]
+    [currentStep, ratePlanId, planName, planDescription, billingFrequency, selectedProductName, paymentMethod]
   );
 
   const sectionHeading = steps[currentStep].title;
@@ -365,11 +403,12 @@ const CreatePricePlan = React.forwardRef<
   };
 
   // ===== Save-as-Draft: always try to persist pricing (best-effort) =====
-  const saveDraft = useCallback(async () => {
+  const saveDraft = useCallback(async (): Promise<boolean> => {
     setHasSavedAsDraft(true);
     setRatePlanData("CURRENT_STEP", currentStep.toString());
 
-    if (currentStep === 0 && !validateStep0()) return;
+    // validate step-0 first; if fails, keep wizard open & show inline errors
+    if (currentStep === 0 && !validateStep0()) return false;
 
     try {
       setDraftSaving(true);
@@ -394,7 +433,7 @@ const CreatePricePlan = React.forwardRef<
         await updateRatePlan(currentId, partial as any);
       }
 
-      // ✅ Always attempt to save PRICING (component or session fallback)
+      // ✅ PRICING (best effort)
       try {
         if (currentId && pricingRef.current) {
           await pricingRef.current.save();
@@ -428,7 +467,7 @@ const CreatePricePlan = React.forwardRef<
               const savedTiers = getRatePlanData('VOLUME_TIERS');
               const savedOverage = getRatePlanData('VOLUME_OVERAGE');
               const savedGrace = getRatePlanData('VOLUME_GRACE');
-              
+
               if (savedTiers) {
                 try {
                   const parsedTiers = JSON.parse(savedTiers);
@@ -450,7 +489,7 @@ const CreatePricePlan = React.forwardRef<
               const savedTiers = getRatePlanData('TIERED_TIERS');
               const savedOverage = getRatePlanData('TIERED_OVERAGE');
               const savedGrace = getRatePlanData('TIERED_GRACE');
-              
+
               if (savedTiers) {
                 try {
                   const parsedTiers = JSON.parse(savedTiers);
@@ -472,7 +511,7 @@ const CreatePricePlan = React.forwardRef<
               const savedTiers = getRatePlanData('STAIR_TIERS');
               const savedOverage = getRatePlanData('STAIR_OVERAGE');
               const savedGrace = getRatePlanData('STAIR_GRACE');
-              
+
               if (savedTiers) {
                 try {
                   const parsedTiers = JSON.parse(savedTiers);
@@ -497,7 +536,7 @@ const CreatePricePlan = React.forwardRef<
         console.warn("Pricing draft save warning:", pricingErr);
       }
 
-      // ✅ Best-effort EXTRAS save (component or session fallback)
+      // ✅ EXTRAS (best effort)
       try {
         if (currentId && extrasRef.current) {
           await extrasRef.current.saveAll(currentId);
@@ -541,7 +580,6 @@ const CreatePricePlan = React.forwardRef<
               eligibility,
               startDate: dStart,
               endDate: dEnd,
-              // API expects numeric fields too:
               percentageDiscount: percent,
               flatDiscountAmount: flat,
             } as any);
@@ -558,12 +596,11 @@ const CreatePricePlan = React.forwardRef<
           const fStart = getRatePlanData("FREEMIUM_START") || "";
           const fEnd = getRatePlanData("FREEMIUM_END") || "";
 
-          // ✅ NEW mapping: always output backend enums, but accept legacy
           const mapUiToApi = (ui: string) =>
             ui === "FREE_TRIAL_DURATION" ? "FREE_TRIAL_DURATION"
             : ui === "FREE_UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
-            : ui === "UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION" // tolerate legacy
-            : ui === "FREE_TRIAL" ? "FREE_TRIAL_DURATION"             // tolerate legacy
+            : ui === "UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
+            : ui === "FREE_TRIAL" ? "FREE_TRIAL_DURATION"
             : "FREE_UNITS";
 
           const apiFreeType = mapUiToApi(uiFreeType);
@@ -571,7 +608,7 @@ const CreatePricePlan = React.forwardRef<
             const fp: any = { freemiumType: apiFreeType, freeUnits: 0, freeTrialDuration: 0, startDate: fStart, endDate: fEnd };
             if (apiFreeType === "FREE_UNITS") fp.freeUnits = freeUnits;
             else if (apiFreeType === "FREE_TRIAL_DURATION") fp.freeTrialDuration = freeTrialDuration;
-            else { fp.freeUnits = freeUnits; fp.freeTrialDuration = freeTrialDuration; } // FREE_UNITS_PER_DURATION
+            else { fp.freeUnits = freeUnits; fp.freeTrialDuration = freeTrialDuration; }
             await saveFreemiums(currentId, fp);
           }
 
@@ -588,8 +625,11 @@ const CreatePricePlan = React.forwardRef<
       } catch (extrasErr) {
         console.warn("Extras draft save warning:", extrasErr);
       }
+
+      return true; // saved
     } catch (e) {
       console.error("Failed to save draft", e);
+      return false;
     } finally {
       setDraftSaving(false);
     }
@@ -614,7 +654,6 @@ const CreatePricePlan = React.forwardRef<
     if (currentStep === steps.length - 1) {
       if (!ratePlanId) return;
       try {
-        // Try to save pricing (validates first)
         if (pricingRef.current) {
           const v = validatePricingStep();
           if (!v.isValid) {
@@ -630,7 +669,6 @@ const CreatePricePlan = React.forwardRef<
             return;
           }
         }
-        // Save extras (best effort)
         if (extrasRef.current) {
           setSaving(true);
           await extrasRef.current.saveAll(ratePlanId);
@@ -699,9 +737,13 @@ const CreatePricePlan = React.forwardRef<
     setCurrentStep((s) => s + 1);
   };
 
+  // Back from footer/back on step 0
   const handleBack = () => {
     if (currentStep > 0) setCurrentStep((s) => s - 1);
-    else onClose();
+    else {
+      validateStep0(); // surface inline errors if any
+      onClose();
+    }
   };
 
   const activeTab: ActiveTab =
@@ -717,13 +759,19 @@ const CreatePricePlan = React.forwardRef<
                 label="Rate Plan Name"
                 placeholder="e.g., Individual Plan, Pro Plan"
                 value={planName}
-                onChange={setPlanName}
+                onChange={(v: string) => {
+                  setPlanName(v);
+                  clearErrorIfValid("planName", v.trim().length > 0);
+                }}
                 error={errors.planName}
               />
               <SelectField
                 label="Billing Frequency"
                 value={billingFrequency}
-                onChange={setBillingFrequency}
+                onChange={(v: string) => {
+                  setBillingFrequency(v);
+                  clearErrorIfValid("billingFrequency", !!v);
+                }}
                 placeholder="Select billing cycle"
                 options={[
                   { label: "Monthly", value: "MONTHLY" },
@@ -737,7 +785,10 @@ const CreatePricePlan = React.forwardRef<
               <SelectField
                 label="Select Product"
                 value={selectedProductName}
-                onChange={setSelectedProductName}
+                onChange={(v: string) => {
+                  setSelectedProductName(v);
+                  clearErrorIfValid("selectedProductName", !!v);
+                }}
                 placeholder="Select Product"
                 options={
                   productError
@@ -752,7 +803,10 @@ const CreatePricePlan = React.forwardRef<
               <SelectField
                 label="Payment type"
                 value={paymentMethod}
-                onChange={setPaymentMethod}
+                onChange={(v: string) => {
+                  setPaymentMethod(v);
+                  clearErrorIfValid("paymentMethod", !!v);
+                }}
                 placeholder="Select payment method"
                 options={[
                   { label: "Post-Paid", value: "POSTPAID" },
@@ -764,7 +818,10 @@ const CreatePricePlan = React.forwardRef<
                 label="Rate Plan Description"
                 placeholder="e.g., Best for solo developers using our API"
                 value={planDescription}
-                onChange={setPlanDescription}
+                onChange={(v: string) => {
+                  setPlanDescription(v);
+                  clearErrorIfValid("planDescription", v.trim().length > 0);
+                }}
                 error={errors.planDescription}
               />
             </div>
@@ -776,7 +833,10 @@ const CreatePricePlan = React.forwardRef<
             <Billable
               productName={selectedProductName}
               selectedMetricId={selectedMetricId}
-              onSelectMetric={setSelectedMetricId}
+              onSelectMetric={(id) => {
+                setSelectedMetricId(id);
+                clearErrorIfValid("billableMetric", id !== null);
+              }}
             />
             {errors.billableMetric && (
               <div className="rate-np-error-message" style={{ marginTop: 10 }}>
@@ -873,6 +933,11 @@ const CreatePricePlan = React.forwardRef<
                     <div className="rate-np-form-footer">
                       <div className="rate-np-btn-group rate-np-btn-group--back">
                         {currentStep > 0 && (
+                          <SecondaryButton type="button" onClick={handleBack}>
+                            Back
+                          </SecondaryButton>
+                        )}
+                        {currentStep === 0 && (
                           <SecondaryButton type="button" onClick={handleBack}>
                             Back
                           </SecondaryButton>

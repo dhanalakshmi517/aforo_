@@ -100,20 +100,29 @@ const RatePlans: React.FC<RatePlansProps> = ({
   ratePlans,
   setRatePlans: setRatePlansFromParent
 }) => {
-  const createPlanRef = useRef<{ back: () => boolean; getRatePlanId: () => number | null }>(null);
-  const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<void>)>(null);
+  const createPlanRef = useRef<{
+    back: () => boolean;
+    getRatePlanId: () => number | null;
+    validateBeforeBack: () => boolean;
+  }>(null);
+
+  // saveDraftFn now returns boolean: true when saved, false when validation stopped it
+  const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<boolean>)>(null);
   const [draftSaving, setDraftSaving] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [draftPlanData, setDraftPlanData] = useState<any>(null);
   const [notification, setNotification] = useState<NotificationState | null>(null);
-  
+
   // Toast system (like Products component)
   const { showToast } = useToast();
-  
+
   // Table row delete modal states (like Products component)
   const [showTableDeleteModal, setShowTableDeleteModal] = useState(false);
   const [deleteRatePlanName, setDeleteRatePlanName] = useState<string>('');
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -212,8 +221,6 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, [filteredPlans, detailsById]);
 
   /* ---------- actions ---------- */
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = (id: number) => {
     const plan = ratePlansState.find((p) => p.ratePlanId === id);
@@ -223,62 +230,40 @@ const RatePlans: React.FC<RatePlansProps> = ({
   };
 
   const handleDraft = async (id: number) => {
-    console.log('🎯 handleDraft called for ID:', id);
     try {
       clearAllRatePlanData();
-      console.log('📡 Fetching rate plan details...');
       const fresh = await fetchRatePlanWithDetails(id);
-      console.log('✅ Fetched draft data:', fresh);
-      console.log('🔍 Freemiums in draft data:', fresh.freemiums);
       setDraftPlanData(fresh);
       setShowCreatePlan(true);
-      console.log('🚀 Opening CreatePricePlan with draft data');
     } catch (error) {
       console.error('❌ Failed to fetch detailed draft data:', error);
       const plan = ratePlansState.find((p) => p.ratePlanId === id);
-      if (plan) { 
-        console.log('📋 Using basic plan data as fallback:', plan);
-        setDraftPlanData(plan); 
-        setShowCreatePlan(true); 
+      if (plan) {
+        setDraftPlanData(plan);
+        setShowCreatePlan(true);
       }
     }
   };
 
-  const handleDeleteClick = (id: number) => { 
-    console.log('🗑️ Delete button clicked for rate plan ID:', id);
+  const handleDeleteClick = (id: number) => {
     const plan = ratePlansState.find(p => p.ratePlanId === id);
-    setDeleteTargetId(id); 
+    setDeleteTargetId(id);
     setDeleteRatePlanName(plan?.ratePlanName || 'Unknown Plan');
     setShowTableDeleteModal(true);
-    console.log('📋 ConfirmDeleteModal opened for:', plan?.ratePlanName);
   };
 
   // Table row delete confirmation (like Products component)
   const handleTableDeleteConfirm = async () => {
-    if (deleteTargetId == null) {
-      console.log('❌ No delete target ID set');
-      return;
-    }
-    
-    console.log('🗑️ Confirming delete for plan ID:', deleteTargetId);
-    
+    if (deleteTargetId == null) return;
+
     try {
       setIsDeleting(true);
-      console.log('🔄 Calling deleteRatePlan API...');
       await deleteRatePlan(deleteTargetId);
-      console.log('✅ Delete API successful');
-      
-      // Update the list
       const next = ratePlansState.filter((p) => p.ratePlanId !== deleteTargetId);
       setBoth(next);
-      
-      // Show success toast (like Products)
       showToast?.({ message: 'Rate plan deleted successfully', kind: 'success' });
-      console.log('🎉 Success toast shown');
-      
     } catch (error) {
       console.error('❌ Delete failed:', error);
-      // Show error toast (like Products)
       showToast?.({ message: 'Failed to delete rate plan', kind: 'error' });
     } finally {
       setIsDeleting(false);
@@ -287,9 +272,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
       setDeleteRatePlanName('');
     }
   };
-  
+
   const handleTableDeleteCancel = () => {
-    console.log('❌ Table delete cancelled');
     setShowTableDeleteModal(false);
     setDeleteTargetId(null);
     setDeleteRatePlanName('');
@@ -352,44 +336,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
     );
   };
 
-  /** Rate Plan name chip with full spec icon stack (now shows PRODUCT name below) */
+  /** Rate Plan name chip with product name under it */
   const renderNameChip = (p: RatePlan) => {
     const productName = p.productName ?? p.product?.productName ?? '—';
     return (
       <div className="rp-name-chip">
-        <div className="rp-name-icon" aria-hidden="true">
-          {/* purchase tag (20×26) behind the pink squares */}
-          <svg className="rp-price-tag" xmlns="http://www.w3.org/2000/svg" width="21" height="26" viewBox="0 0 21 26" fill="none">
-            <foreignObject x="3.03359" y="-0.458594" width="14.5773" height="18.7165">
-              <div style={{ backdropFilter:'blur(0.45px)', height:'100%', width:'100%' }} />
-            </foreignObject>
-            <path d="M6.36123 4.79875C6.44251 4.4306 6.66668 4.10981 6.98446 3.90694L11.282 1.16463C11.5999 0.961812 11.9853 0.893563 12.3534 0.974898C12.7216 1.05623 13.0424 1.28049 13.2452 1.59833L15.9875 5.89591C16.1902 6.21377 16.2584 6.59915 16.177 6.96727L14.2896 15.5109C14.1899 15.9554 13.9185 16.3423 13.5345 16.5873C13.1506 16.8323 12.6853 16.9155 12.2402 16.8186L5.78144 15.3917C5.33701 15.2921 4.95007 15.0206 4.70507 14.6367C4.46007 14.2527 4.37691 13.7875 4.47375 13.3424L6.36123 4.79875Z" fill="#EBADCC" fillOpacity="0.3" stroke="#BA5285" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M8.03722 10.771L12.522 11.8373M7.50775 12.7634L10.0001 13.3002M12.0004 2.76365C11.8337 2.76365 11.5004 2.86365 11.5004 3.26365C11.5004 3.6319 12.3139 3.72888 12.5429 3.35494C12.7531 3.01173 12.2848 2.47895 12.0004 2.76365Z" stroke="#BA5285" strokeWidth="0.6" strokeLinecap="round"/>
-          </svg>
-
-          {/* white thread */}
-          <svg className="rp-tag-thread" xmlns="http://www.w3.org/2000/svg" width="13" height="10" viewBox="0 0 13 10" fill="none">
-            <path d="M11.9993 4.13599C9.49904 -0.863765 -2.0007 -0.363798 1.99911 9.13624" stroke="white" strokeWidth="0.6" strokeLinecap="round"/>
-          </svg>
-
-          <div className="rp-icon-bg" />
-          <div className="rp-icon-fg">
-            <div className="rp-icon-inner">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <mask id="mask0_8724_24579" style={{ maskType:'alpha' } as any} maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                  <rect x="0.621094" y="0.518555" width="14.7273" height="14.7273" fill="#D9D9D9"/>
-                </mask>
-                <g mask="url(#mask0_8724_24579)">
-                  <path d="M11.9242 14.1721C11.7929 14.1721 11.6837 14.1279 11.5968 14.0397C11.5099 13.9515 11.4664 13.8422 11.4664 13.7118C11.4664 13.6505 11.4776 13.5886 11.4998 13.5262C11.5221 13.4639 11.5519 13.4133 11.5891 13.3743C12.0391 12.9243 12.3945 12.4002 12.6553 11.8019C12.9161 11.2036 13.0465 10.5618 13.0465 9.87662C13.0465 9.18945 12.9161 8.54717 12.6553 7.9498C12.3945 7.35252 12.0391 6.82889 11.5891 6.37889C11.5519 6.34002 11.5221 6.28945 11.4998 6.22717C11.4776 6.16488 11.4664 6.1026 11.4664 6.04031C11.4664 5.90808 11.5105 5.79849 11.5988 5.71156C11.687 5.62463 11.7962 5.58116 11.9266 5.58116C11.988 5.58116 12.0475 5.59456 12.105 5.62135C12.1625 5.64825 12.2104 5.68088 12.2488 5.71923C12.7806 6.25105 13.1999 6.87235 13.5067 7.58315C13.8136 8.29395 13.967 9.05593 13.967 9.8691C13.967 10.6923 13.8136 11.4593 13.5067 12.1701C13.1999 12.8809 12.7806 13.5022 12.2488 14.034C12.2101 14.0724 12.1619 14.1049 12.104 14.1317C12.046 14.1586 11.9861 14.1721 11.9242 14.1721ZM10.1778 12.4232C10.0474 12.4232 9.93809 12.3791 9.84994 12.2908C9.76167 12.2027 9.71754 12.0934 9.71754 11.963C9.71754 11.9016 9.73099 11.8421 9.75789 11.7846C9.78468 11.7271 9.81726 11.6792 9.85561 11.6408C10.0908 11.4056 10.2724 11.1391 10.4002 10.8413C10.5281 10.5434 10.592 10.2213 10.592 9.87477C10.592 9.52828 10.5281 9.20673 10.4002 8.91014C10.2724 8.61355 10.0908 8.34764 9.85561 8.11241C9.8147 8.0715 9.78146 8.02226 9.7559 7.96468C9.73033 7.9072 9.71754 7.84778 9.71754 7.78642C9.71754 7.65602 9.76167 7.54735 9.84994 7.46042C9.93809 7.37349 10.0474 7.33003 10.1778 7.33003C10.2494 7.33003 10.3133 7.34025 10.3695 7.36071C10.4258 7.38116 10.4744 7.41696 10.5153 7.46809C10.8221 7.77491 11.065 8.13476 11.244 8.54763C11.4229 8.96041 11.5124 9.40274 11.5124 9.87462C11.5124 10.3464 11.4229 10.7894 11.244 11.2036C11.065 11.6178 10.8221 11.9783 10.5153 12.2851C10.4744 12.3363 10.4258 12.3721 10.3695 12.3925C10.3133 12.413 10.2494 12.4232 10.1778 12.4232ZM5.37607 9.6465H3.99538V10.0914C3.99538 10.48 4.11555 10.8252 4.3559 11.1269C4.59624 11.4286 4.90561 11.6306 5.28402 11.7329L5.46811 11.7789C5.80357 11.863 5.99226 12.0732 6.03419 12.4096C6.07612 12.7459 5.94368 13.001 5.63686 13.1749C5.12488 13.4608 4.5878 13.6677 4.02561 13.7958C3.46341 13.9239 2.89084 13.9982 2.30788 14.0187C2.18516 14.0289 2.07777 13.9899 1.98572 13.9016C1.89368 13.8135 1.84766 13.7042 1.84766 13.5738C1.84766 13.4434 1.89112 13.334 1.97805 13.2458C2.06499 13.1576 2.17493 13.1084 2.30788 13.0982C2.73743 13.0778 3.16114 13.025 3.57903 12.9399C3.99702 12.8548 4.41194 12.7337 4.82379 12.5766C4.32266 12.3312 3.90589 11.9937 3.57351 11.5641C3.24112 11.1346 3.07493 10.6437 3.07493 10.0914V9.18628C3.07493 9.05588 3.11906 8.94655 3.20732 8.85829C3.29548 8.77013 3.40476 8.72605 3.53516 8.72605H5.52947V7.19196C5.52947 7.06156 5.57361 6.95223 5.66187 6.86397C5.75003 6.77581 5.8593 6.73173 5.9897 6.73173H7.69254L5.69822 2.8965C5.63686 2.784 5.62919 2.66639 5.67521 2.54366C5.72124 2.42093 5.8005 2.33145 5.913 2.2752C6.0255 2.21895 6.14055 2.20872 6.25817 2.24451C6.37578 2.28031 6.46527 2.35446 6.52663 2.46696L8.52095 6.31752C8.68459 6.62434 8.67722 6.92349 8.49886 7.21497C8.3205 7.50645 8.05684 7.65218 7.70788 7.65218H6.44993V8.57264C6.44993 8.8679 6.34479 9.12072 6.13452 9.33109C5.92425 9.54137 5.67143 9.6465 5.37607 9.6465Z" fill="white"/>
-                </g>
-              </svg>
-            </div>
-          </div>
-        </div>
-
         <div className="rp-name-texts">
           <div className="rp-name-title">{p.ratePlanName || 'N/A'}</div>
-          {/* Product name under Rate Plan name */}
           <div className="rp-name-subtitle" title={productName}>{productName}</div>
         </div>
       </div>
@@ -410,13 +363,30 @@ const RatePlans: React.FC<RatePlansProps> = ({
         <div className="create-plan-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <TopBar
             title="Create New Rate Plan"
-            onBack={() => setShowSaveDraftModal(true)}
+            onBack={() => {
+              // ✅ Only show the modal if step-0 is valid (or we’re not on step-0).
+              const ok = createPlanRef.current?.validateBeforeBack?.() ?? true;
+              if (ok) setShowSaveDraftModal(true);
+              // if not ok, inline errors are already visible; do not open modal
+            }}
             cancel={{ label: 'Delete', onClick: () => setShowConfirmDelete(true) }}
             save={{
               label: 'Save as Draft',
               saving: draftSaving,
               disabled: !saveDraftFn,
-              onClick: async () => { if (!saveDraftFn) return; setDraftSaving(true); await saveDraftFn(); setDraftSaving(false); }
+              onClick: async () => {
+                if (!saveDraftFn) return;
+                setDraftSaving(true);
+                const ok = await saveDraftFn(); // boolean
+                setDraftSaving(false);
+                if (!ok) {
+                  // validation failed; keep wizard open
+                  return;
+                }
+                // saved successfully via top-right button
+                setShowCreatePlan(false);
+                await loadRatePlans();
+              }
             }}
           />
           <div className="create-plan-body" style={{ flex: 1 }}>
@@ -437,8 +407,26 @@ const RatePlans: React.FC<RatePlansProps> = ({
             isOpen={showSaveDraftModal}
             onClose={() => setShowSaveDraftModal(false)}
             onSave={async () => {
-              try { if (saveDraftFn) { setDraftSaving(true); await saveDraftFn(); setDraftSaving(false); } }
-              finally { setShowSaveDraftModal(false); setShowCreatePlan(false); await loadRatePlans(); }
+              if (!saveDraftFn) return;
+              try {
+                setDraftSaving(true);
+                const ok = await saveDraftFn(); // now returns boolean
+                setDraftSaving(false);
+
+                if (!ok) {
+                  // ❗ Validation failed. Close ONLY the modal so the inline errors are visible.
+                  setShowSaveDraftModal(false);
+                  return;
+                }
+
+                // ✅ Draft saved – close modal and wizard, then refresh
+                setShowSaveDraftModal(false);
+                setShowCreatePlan(false);
+                await loadRatePlans();
+              } catch {
+                setDraftSaving(false);
+                // keep modal open on unexpected error
+              }
             }}
             onDelete={async () => {
               setShowSaveDraftModal(false);
@@ -572,7 +560,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             </table>
           </div>
 
-          {/* Table row delete modal (like Products component) */}
+          {/* Table row delete modal */}
           {showTableDeleteModal && (
             <ConfirmDeleteModal
               isOpen={showTableDeleteModal}
