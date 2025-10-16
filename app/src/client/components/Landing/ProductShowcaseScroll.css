@@ -25,7 +25,16 @@ body {
   margin: 0 80px;
 }
 
-/* Internal viewport — hidden scrollbar, we handle paging ourselves */
+/* Container with 3-column grid layout */
+.ph__container{
+  display: grid;
+  grid-template-columns: 180px 1fr 280px;
+  gap: 32px;
+  align-items: start;
+  min-height: 640px;
+}
+
+/* Internal viewport — hidden scrollbar, only for center column */
 .ph__viewport{
   height: 640px;
   overflow: hidden;               /* hide scrollbar */
@@ -34,12 +43,10 @@ body {
   touch-action: pan-y;            /* allow touch; JS paginates */
 }
 
-/* Each slide uses 3-column grid */
+/* Each slide contains only center content */
 .ph__slide{
   min-height: 640px;
-  display: grid;
-  grid-template-columns: 180px 1fr 280px;
-  gap: 32px;
+  display: flex;
   align-items: start;
   padding: 30px 0 0 0;
 
@@ -78,8 +85,8 @@ body {
 }
 
 /* Center */
-.ph__center{ display:flex; flex-direction:column; align-items:center; gap:16px; padding-top:0; }
-.ph__title{ margin:0 0 20px 0;
+.ph__center{ display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:0; margin-top:-20px; }
+.ph__title{ margin:0 0 8px 0;
   text-align: center;
 
 font-family: var(--font-family-primary);
@@ -173,13 +180,16 @@ background-clip: text;
     max-width: calc(100% - 40px);
     padding: 30px 20px;
   }
+  .ph__container{ 
+    grid-template-columns: 1fr; 
+    gap: 20px;
+    min-height: auto;
+  }
   .ph__viewport{
     height: auto;
     min-height: 400px;
   }
-  .ph__slide{ 
-    grid-template-columns: 1fr; 
-    gap: 20px;
+  .ph__slide{
     min-height: auto;
   }
   .ph__left{ 
@@ -199,7 +209,7 @@ background-clip: text;
     min-height: auto;
   }
   .ph__left, .ph__right{ order: 2; }
-  .ph__center{ order: 1; }
+  .ph__viewport{ order: 1; }
 }
 
 /* Small devices (768px - 991px) */
@@ -209,12 +219,12 @@ background-clip: text;
     max-width: calc(100% - 80px);
     padding: 40px 40px;
   }
-  .ph__viewport{
-    height: 560px;
-  }
-  .ph__slide{ 
+  .ph__container{ 
     grid-template-columns: 1fr; 
     gap: 24px;
+  }
+  .ph__viewport{
+    height: 560px;
   }
   .ph__left{ 
     padding-top: 30px;
@@ -232,7 +242,7 @@ background-clip: text;
     padding-top: 30px;
   }
   .ph__left, .ph__right{ order: 2; }
-  .ph__center{ order: 1; }
+  .ph__viewport{ order: 1; }
 }
 
 /* Medium devices (992px - 1199px) */
@@ -242,12 +252,12 @@ background-clip: text;
     max-width: calc(100% - 100px);
     padding: 50px 60px;
   }
-  .ph__viewport{
-    height: 600px;
-  }
-  .ph__slide{ 
+  .ph__container{ 
     grid-template-columns: 160px 1fr 240px;
     gap: 24px;
+  }
+  .ph__viewport{
+    height: 600px;
   }
   .ph__left{ 
     padding-top: 60px;
@@ -269,12 +279,12 @@ background-clip: text;
     max-width: calc(100% - 120px);
     padding: 55px 70px;
   }
-  .ph__viewport{
-    height: 620px;
-  }
-  .ph__slide{ 
+  .ph__container{ 
     grid-template-columns: 170px 1fr 260px;
     gap: 28px;
+  }
+  .ph__viewport{
+    height: 620px;
   }
   .ph__left{ 
     padding-top: 70px;
@@ -296,12 +306,12 @@ background-clip: text;
     max-width: calc(100% - 160px);
     padding: 60px 80px;
   }
-  .ph__viewport{
-    height: 640px;
-  }
-  .ph__slide{ 
+  .ph__container{ 
     grid-template-columns: 180px 1fr 280px;
     gap: 32px;
+  }
+  .ph__viewport{
+    height: 640px;
   }
   .ph__left{ 
     padding-top: 80px;
