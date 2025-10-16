@@ -383,9 +383,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   // validation failed; keep wizard open
                   return;
                 }
-                // saved successfully via top-right button
-                setShowCreatePlan(false);
-                await loadRatePlans();
+                // ✅ Stay on the same page after saving (no redirect, no closing wizard)
+                // Optionally give feedback:
+                showToast?.({ message: 'Draft saved', kind: 'success' });
+                // Do not call setShowCreatePlan(false) and do not reload the table here.
               }
             }}
           />
@@ -419,7 +420,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   return;
                 }
 
-                // ✅ Draft saved – close modal and wizard, then refresh
+                // This modal is the flow for “Back” → save & exit.
                 setShowSaveDraftModal(false);
                 setShowCreatePlan(false);
                 await loadRatePlans();
