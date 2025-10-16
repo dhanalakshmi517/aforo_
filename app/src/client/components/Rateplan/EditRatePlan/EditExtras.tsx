@@ -13,18 +13,26 @@ interface EditExtrasProps {
   registerSaveExtras?: (fn: () => Promise<void>) => void;
 }
 
-/** —— Freemium UI ⇄ API mapping (same as Extras) —— */
+/** —— Freemium UI ⇄ API mapping (aligned with Extras.tsx) —— */
 type UIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION' | '';
-type APIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL' | 'UNITS_PER_DURATION';
 
-const apiToUiFreemium = (api?: APIFreemiumType | '' | null): Exclude<UIFreemiumType, ''> => {
-  if (api === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
-  if (api === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
-  return 'FREE_UNITS';
+/** ✅ Use BACKEND ENUMS here (updated tokens) */
+type APIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
+
+/** Accept legacy tokens but return the UI token set */
+const apiToUiFreemium = (raw?: APIFreemiumType | 'FREE_TRIAL' | 'UNITS_PER_DURATION' | '' | null): UIFreemiumType => {
+  const v = (raw || '').toUpperCase().trim();
+  if (v === 'FREE_TRIAL_DURATION' || v === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
+  if (v === 'FREE_UNITS_PER_DURATION' || v === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
+  if (v === 'FREE_UNITS') return 'FREE_UNITS';
+  return '';
 };
-const uiToApiFreemium = (ui?: UIFreemiumType | '' | null): APIFreemiumType => {
-  if (ui === 'FREE_TRIAL_DURATION') return 'FREE_TRIAL';
-  if (ui === 'FREE_UNITS_PER_DURATION') return 'UNITS_PER_DURATION';
+
+/** Accept legacy UI tokens but ALWAYS output the BACKEND enum */
+const uiToApiFreemium = (raw?: UIFreemiumType | '' | null): APIFreemiumType => {
+  const v = (raw || '').toUpperCase().trim();
+  if (v === 'FREE_TRIAL_DURATION' || v === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
+  if (v === 'FREE_UNITS_PER_DURATION' || v === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
   return 'FREE_UNITS';
 };
 
@@ -103,8 +111,8 @@ export default function EditExtras({
     // Freemium
     if (draftData.freemium) {
       const free = draftData.freemium;
-      const uiType = apiToUiFreemium(free.freemiumType as APIFreemiumType);
-      setFreemiumType(uiType);
+      const uiType = apiToUiFreemium(free.freemiumType as any);
+      setFreemiumType(uiType); // ✅ now recognizes FREE_TRIAL_DURATION / FREE_UNITS_PER_DURATION
       setFreeUnits(String(free.freeUnits ?? ''));
       setFreeTrialDuration(String(free.freeTrialDuration ?? ''));
       setFreeStart(free.startDate ?? '');
@@ -120,13 +128,15 @@ export default function EditExtras({
       sections.push('freemium');
     }
 
-    // Minimum Commitment
+    // Minimum Commitment (treat 0 as "empty")
     if (draftData.minimumCommitment) {
       const min = draftData.minimumCommitment;
-      setMinimumUsage(String(min.minimumUsage ?? ''));
-      setMinimumCharge(String(min.minimumCharge ?? ''));
-      setRatePlanData('MINIMUM_USAGE', String(min.minimumUsage ?? ''));
-      setRatePlanData('MINIMUM_CHARGE', String(min.minimumCharge ?? ''));
+      const usageStr = min.minimumUsage && Number(min.minimumUsage) > 0 ? String(min.minimumUsage) : '';
+      const chargeStr = min.minimumCharge && Number(min.minimumCharge) > 0 ? String(min.minimumCharge) : '';
+      setMinimumUsage(usageStr);
+      setMinimumCharge(chargeStr);
+      setRatePlanData('MINIMUM_USAGE', usageStr);
+      setRatePlanData('MINIMUM_CHARGE', chargeStr);
       sections.push('commitment');
     }
 
@@ -184,47 +194,65 @@ export default function EditExtras({
         });
       }
 
-      // Freemium — map UI → API and only send applicable fields
+      // Freemium — map UI → API (new enums) and only send applicable fields
       if (freemiumType) {
         const apiType = uiToApiFreemium(freemiumType);
-        const cleanPayload: {
-          freemiumType: APIFreemiumType;
-          freeUnits: number;
-          freeTrialDuration: number;
-          startDate: string;
-          endDate: string;
-        } = {
-          freemiumType: apiType,
-          freeUnits: 0,
-          freeTrialDuration: 0,
-          startDate: freeStart,
-          endDate: freeEnd,
-        };
-        if (apiType === 'FREE_UNITS') cleanPayload.freeUnits = Number(freeUnits || 0);
-        else if (apiType === 'FREE_TRIAL') cleanPayload.freeTrialDuration = Number(freeTrialDuration || 0);
-        else {
-          cleanPayload.freeUnits = Number(freeUnits || 0);
-          cleanPayload.freeTrialDuration = Number(freeTrialDuration || 0);
+
+        const freeUnitsNum = Number(freeUnits || 0);
+        const freeTrialNum = Number(freeTrialDuration || 0);
+
+        // skip invalid/empty combos
+        if (apiType === 'FREE_UNITS' && freeUnitsNum <= 0) {
+          // no-op
+        } else if (apiType === 'FREE_TRIAL_DURATION' && freeTrialNum <= 0) {
+          // no-op
+        } else if (apiType === 'FREE_UNITS_PER_DURATION' && (freeUnitsNum <= 0 || freeTrialNum <= 0)) {
+          // no-op
+        } else {
+          const cleanPayload: {
+            freemiumType: APIFreemiumType;
+            freeUnits: number;
+            freeTrialDuration: number;
+            startDate: string;
+            endDate: string;
+          } = {
+            freemiumType: apiType,
+            freeUnits: 0,
+            freeTrialDuration: 0,
+            startDate: freeStart,
+            endDate: freeEnd,
+          };
+
+          if (apiType === 'FREE_UNITS') {
+            cleanPayload.freeUnits = freeUnitsNum;
+          } else if (apiType === 'FREE_TRIAL_DURATION') {
+            cleanPayload.freeTrialDuration = freeTrialNum;
+          } else { // FREE_UNITS_PER_DURATION
+            cleanPayload.freeUnits = freeUnitsNum;
+            cleanPayload.freeTrialDuration = freeTrialNum;
+          }
+
+          // persist UI-side values for navigation continuity
+          setRatePlanData('FREEMIUM_TYPE', freemiumType);
+          setRatePlanData('FREEMIUM_UNITS', cleanPayload.freeUnits ? String(cleanPayload.freeUnits) : '');
+          setRatePlanData('FREE_UNITS', cleanPayload.freeUnits ? String(cleanPayload.freeUnits) : '');
+          setRatePlanData('FREE_TRIAL_DURATION', cleanPayload.freeTrialDuration ? String(cleanPayload.freeTrialDuration) : '');
+          setRatePlanData('FREEMIUM_START', freeStart);
+          setRatePlanData('FREEMIUM_END', freeEnd);
+
+          await saveFreemiums(ratePlanId, cleanPayload as any);
         }
-
-        // persist UI-side values for navigation continuity
-        setRatePlanData('FREEMIUM_TYPE', freemiumType);
-        setRatePlanData('FREEMIUM_UNITS', cleanPayload.freeUnits ? String(cleanPayload.freeUnits) : '');
-        setRatePlanData('FREE_UNITS', cleanPayload.freeUnits ? String(cleanPayload.freeUnits) : '');
-        setRatePlanData('FREE_TRIAL_DURATION', cleanPayload.freeTrialDuration ? String(cleanPayload.freeTrialDuration) : '');
-        setRatePlanData('FREEMIUM_START', freeStart);
-        setRatePlanData('FREEMIUM_END', freeEnd);
-
-        await saveFreemiums(ratePlanId, cleanPayload as any);
       }
 
-      // Minimum Commitment
-      if (minimumUsage || minimumCharge) {
-        setRatePlanData('MINIMUM_USAGE', minimumUsage || '');
-        setRatePlanData('MINIMUM_CHARGE', minimumCharge || '');
+      // Minimum Commitment — only send if a numeric value > 0 exists
+      const minUsageNum = Number(minimumUsage || 0);
+      const minChargeNum = Number(minimumCharge || 0);
+      if (minUsageNum > 0 || minChargeNum > 0) {
+        setRatePlanData('MINIMUM_USAGE', minUsageNum > 0 ? String(minUsageNum) : '');
+        setRatePlanData('MINIMUM_CHARGE', minChargeNum > 0 ? String(minChargeNum) : '');
         await saveMinimumCommitment(ratePlanId, {
-          minimumUsage: Number(minimumUsage || 0),
-          minimumCharge: Number(minimumCharge || 0),
+          minimumUsage: minUsageNum > 0 ? minUsageNum : 0,
+          minimumCharge: minChargeNum > 0 ? minChargeNum : 0,
         });
       }
 
@@ -240,7 +268,14 @@ export default function EditExtras({
       registerSaveExtras(() => handleSaveExtras());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registerSaveExtras, ratePlanId]);
+  }, [
+    registerSaveExtras,
+    ratePlanId,
+    minimumUsage, minimumCharge,
+    setupFee, applicationTiming, invoiceDescription,
+    discountType, percentageDiscount, flatDiscountAmount, eligibility, discountStart, discountEnd,
+    freemiumType, freeUnits, freeTrialDuration, freeStart, freeEnd
+  ]);
 
   /** Icons (same style as Extras) */
   const iconMap: Record<string, JSX.Element> = {
@@ -265,6 +300,10 @@ export default function EditExtras({
       </svg>
     ),
   };
+
+  // convenience booleans to determine lock state (0 does NOT lock)
+  const hasUsage = Number(minimumUsage) > 0;
+  const hasCharge = Number(minimumCharge) > 0;
 
   const renderHeader = (label: string, section: string): JSX.Element => (
     <div className="section-header" onClick={() => toggleSection(section)}>
@@ -461,11 +500,14 @@ export default function EditExtras({
               onChange={e => {
                 const ui = (e.target.value as UIFreemiumType) || '';
                 setFreemiumType(ui);
-                // store UI type like Extras (for navigation continuity)
                 setRatePlanData('FREEMIUM_TYPE', ui);
 
-                // optional: don’t clear numbers so user doesn’t lose input when switching
-                // (keep behavior aligned with Extras)
+                // Clear irrelevant numeric fields to avoid stale values blocking save
+                if (ui === 'FREE_UNITS') {
+                  setFreeTrialDuration('');
+                } else if (ui === 'FREE_TRIAL_DURATION') {
+                  setFreeUnits('');
+                }
               }}
             >
               <option value="">--Select--</option>
@@ -548,14 +590,15 @@ export default function EditExtras({
               placeholder="Enter usage"
               value={minimumUsage}
               onChange={e => {
-                setMinimumUsage(e.target.value);
-                setRatePlanData('MINIMUM_USAGE', e.target.value);
-                if (e.target.value) {
+                const val = e.target.value;
+                setMinimumUsage(val);
+                setRatePlanData('MINIMUM_USAGE', val);
+                if (Number(val) > 0) {
                   setMinimumCharge('');
                   setRatePlanData('MINIMUM_CHARGE', '');
                 }
               }}
-              disabled={!!minimumCharge}
+              disabled={hasCharge}
             />
 
             <label>Minimum Charge</label>
@@ -564,14 +607,15 @@ export default function EditExtras({
               placeholder="Enter charge"
               value={minimumCharge}
               onChange={e => {
-                setMinimumCharge(e.target.value);
-                setRatePlanData('MINIMUM_CHARGE', e.target.value);
-                if (e.target.value) {
+                const val = e.target.value;
+                setMinimumCharge(val);
+                setRatePlanData('MINIMUM_CHARGE', val);
+                if (Number(val) > 0) {
                   setMinimumUsage('');
                   setRatePlanData('MINIMUM_USAGE', '');
                 }
               }}
-              disabled={!!minimumUsage}
+              disabled={hasUsage}
             />
           </div>
         )}

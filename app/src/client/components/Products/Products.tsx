@@ -20,13 +20,11 @@ import {
 } from './api';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 
-// Function to get a random background color for metric cards
 const getRandomBackgroundColor = (index: number) => {
   const colors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
   return colors[index % colors.length];
 };
 
-// Function to get a random border color for metric cards
 const getRandomBorderColor = (index: number) => {
   const colors = ['#E0F2FE', '#DCFCE7', '#EDE9FE', '#FEF3C7', '#FECACA'];
   return colors[index % colors.length];
@@ -63,7 +61,6 @@ interface ProductsProps {
 }
 
 export default function Products({ showNewProductForm, setShowNewProductForm }: ProductsProps) {
-  // Prevent browser scroll for Products page
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -76,29 +73,22 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // resolve backend icon URL (supports absolute, data:, and relative /uploads paths)
   const resolveIconUrl = (icon?: string) => {
     if (!icon) return null;
     if (icon.startsWith('http') || icon.startsWith('data:')) return icon;
-    
-    // If the icon path starts with /uploads, serve it from the base server URL (not /api)
     if (icon.startsWith('/uploads')) {
-      // Remove /api from BASE_URL and use just the server base
       const serverBase = BASE_URL.replace('/api', '');
       return `${serverBase}${icon}`;
     }
-    
     const leadingSlash = icon.startsWith('/') ? '' : '/';
     return `${BASE_URL}${leadingSlash}${icon}`;
   };
 
-  // Fetch products with billable metrics included in the response
   const fetchIconWithAuth = async (iconPath?: string): Promise<string | null> => {
     if (!iconPath) return null;
     const resolved = resolveIconUrl(iconPath);
     if (!resolved) return null;
     try {
-      // Use getAuthHeaders to include both Authorization token and X-Organization-Id
       const authHeaders = getAuthHeaders();
       const response = await axios.get(resolved, {
         responseType: 'blob',
@@ -106,8 +96,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       });
       return URL.createObjectURL(response.data);
     } catch (e: any) {
-      // Silently fail and show fallback icon
-      // Common errors: 404 (file not found), 500 (server error), 401 (auth issue)
       if (e?.response?.status === 500) {
         console.warn(`Icon not available on server: ${iconPath}`);
       }
@@ -119,10 +107,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setIsLoading(true);
     try {
       const products = await getProducts();
-      // Process products and map billableMetrics to metrics
       const productsWithMetricsPromises = products.map(async (product) => {
         const iconUrl = await fetchIconWithAuth((product as any).icon);
-       
         const productWithMetrics = {
           ...product,
           metrics: (product as any).billableMetrics || [],
@@ -152,7 +138,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [deleteProductName, setDeleteProductName] = useState<string>('');
   const [productQuery, setProductQuery] = useState<string>('');
 
-  // products filtered by search term and sorted with drafts at top
   const filteredProducts = products
     .filter((p) => p.productName?.toLowerCase().includes(productQuery.toLowerCase()))
     .sort((a, b) => {
@@ -162,11 +147,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     });
 
   const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
-
-  // get toast API
   const { showToast } = useToast();
 
-  // Memoize cancel handler
   const handleCreateProductCancel = React.useCallback(() => {
     setShowCreateProduct(false);
     setShowNewProductForm(false);
@@ -182,7 +164,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
   const handleConfirmDelete = async () => {
     if (!deleteProductId) return;
-
     setIsDeleting(true);
     try {
       await deleteProductApi(deleteProductId);
@@ -209,7 +190,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setDeleteProductName('');
   };
 
-  // Sync local state with prop
   useEffect(() => {
     if (showCreateProduct !== showNewProductForm) {
       setShowCreateProduct(showNewProductForm);
@@ -261,7 +241,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     </span>
   );
 
-  // Initial fetch on component mount
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
@@ -281,7 +260,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
   const handleDeleteConfirm = async () => {
     if (!deleteProductId) return;
-
     setIsDeleting(true);
     try {
       await deleteProductApi(deleteProductId);
@@ -320,7 +298,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             />
           )}
 
-          {/* Create Product Form */}
           {showCreateProduct && !isEditFormOpen && (
             <CreateProduct
               onClose={handleCreateProductCancel}
@@ -328,14 +305,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             />
           )}
 
-          {/* Kong Integration popup */}
           {showKongIntegration && (
             <div className="products-form-container">
               <KongIntegration onClose={() => setShowKongIntegration(false)} />
             </div>
           )}
 
-          {/* Edit Product Form */}
           {isEditFormOpen && (
             <div className="products-form-container">
               <EditProduct
@@ -349,7 +324,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             </div>
           )}
 
-          {/* Main Content */}
           {!showCreateProduct && !isEditFormOpen && (
             <div className="rate-plan-container">
               <Header
@@ -384,45 +358,47 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   <tbody>
                     {filteredProducts.map((product) => (
                       <tr key={product.productId}>
-                        <td>
-                          <div className="product-name-container">
-                            {(() => {
-                              // Only use iconUrl if it was successfully fetched with auth
-                              // Don't fall back to direct URL to avoid 401 errors
-                              if (product.iconUrl) {
-                                return (
-                                  <div className="product-icon product-icon--image">
-                                    <img
-                                      src={product.iconUrl}
-                                      alt={`${product.productName} icon`}
-                                      onError={(e) => {
-                                        const wrapper = e.currentTarget.parentElement as HTMLElement;
-                                        if (wrapper) wrapper.classList.remove('product-icon--image');
-                                        e.currentTarget.remove();
-                                      }}
-                                    />
-                                  </div>
-                                );
-                              }
-                              // Fallback to initials if icon fetch failed or no icon exists
-                              return (
+                        {/* ===== Product Name cell (spec-accurate) ===== */}
+                        <td className="product-name-td">
+                          <div className="product-name-cell">
+                            <div className="product-name-cell__icon">
+                              {product.iconUrl ? (
+                                <div className="product-avatar product-avatar--image">
+                                  <img
+                                    src={product.iconUrl}
+                                    alt={`${product.productName} icon`}
+                                    onError={(e) => {
+                                      const wrapper = e.currentTarget.parentElement as HTMLElement;
+                                      if (wrapper) wrapper.classList.remove('product-avatar--image');
+                                      e.currentTarget.remove();
+                                    }}
+                                  />
+                                </div>
+                              ) : (
                                 <div
-                                  className="product-icon"
+                                  className="product-avatar"
                                   style={{
                                     backgroundColor:
                                       getRandomBackgroundColor(parseInt(product.productId) || 0),
-                                    borderColor:
+                                    border: `1px solid ${
                                       getRandomBorderColor(parseInt(product.productId) || 0)
+                                    }`
                                   }}
                                 >
                                   {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
                                 </div>
-                              );
-                            })()}
+                              )}
+                            </div>
 
-                            <div className="product-name">{product.productName}</div>
+                            <div className="product-name-cell__content">
+                              <div className="product-name" title={product.productName}>
+                                {product.productName}
+                              </div>
+                              {/* (optional) you can add tiny chips here later */}
+                            </div>
                           </div>
                         </td>
+
                         <td>
                           <span
                             className={`product-type-badge--${
@@ -432,6 +408,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             {getProductTypeName(product.productType || '')}
                           </span>
                         </td>
+
                         <td className="metrics-cell">
                           <div className="metrics-wrapper">
                             {product.metrics && product.metrics.length > 0 ? (
@@ -467,6 +444,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             )}
                           </div>
                         </td>
+
                         <td>
                           <span
                             className={`product-status-badge status-${product.status.toLowerCase()}`}
@@ -474,7 +452,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             {product.status.charAt(0) + product.status.slice(1).toLowerCase()}
                           </span>
                         </td>
+
                         <td>{product.createdOn ?? 'N/A'}</td>
+
                         <td className="actions-cell">
                           <div className="product-action-buttons">
                             {product.status.toLowerCase() === 'draft' ? (

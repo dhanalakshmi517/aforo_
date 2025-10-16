@@ -243,7 +243,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     }
 
     if (activeTab === 'extras')  {
-      // ensure Extras persist on Next as well
       if (saveExtrasFn) {
         try {
           setLoading(true);
@@ -270,6 +269,38 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     else setShowSaveModal(true);
   };
 
+  // === NEW: handle sidebar navigation so it also persists current step ===
+  const handleSidebarStepClick = async (targetIndex: number) => {
+    if (targetIndex === currentStep) return;
+
+    // Persist the step we're LEAVING
+    try {
+      if (activeTab === 'details') {
+        if (!validateDetails()) { setCurrentStep(0); return; }
+        const ok = await persistPlan(false);
+        if (!ok) return;
+      } else if (activeTab === 'pricing') {
+        if (savePricingFn) {
+          setLoading(true);
+          await savePricingFn();
+          setLoading(false);
+        }
+      } else if (activeTab === 'extras') {
+        if (saveExtrasFn) {
+          setLoading(true);
+          await saveExtrasFn();
+          setLoading(false);
+        }
+      }
+    } catch (e) {
+      console.error('Sidebar navigation save failed:', e);
+      setLoading(false);
+      return; // stay on current step if a save failed
+    }
+
+    setCurrentStep(targetIndex);
+  };
+
   // === Save-as-Draft now also saves PRICING + EXTRAS (best-effort) ===
   const handleSaveDraft = async () => {
     if (activeTab === 'details' && !validateDetails()) return;
@@ -277,11 +308,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     const ok = await persistPlan(true);
 
     if (ok) {
-      // best-effort pricing
       if (savePricingFn) {
         try { await savePricingFn(); } catch (e) { console.warn('Pricing draft save warning:', e); }
       }
-      // best-effort extras
       if (saveExtrasFn) {
         try { await saveExtrasFn(); } catch (e) { console.warn('Extras draft save warning:', e); }
       }
@@ -407,7 +436,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                 ratePlanId={ratePlanId}
                 noUpperLimit={false}
                 draftData={draftData}
-                // NEW: let parent save extras when needed
                 registerSaveExtras={(fn) => setSaveExtrasFn(() => fn)}
               />
             </div>
@@ -445,7 +473,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                     <div
                       key={step.id}
                       className={`edit-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                      onClick={() => goToStep(index)}
+                      onClick={() => handleSidebarStepClick(index)}
                       role="button"
                     >
                       <div className="edit-np-step__title">{step.title}</div>
