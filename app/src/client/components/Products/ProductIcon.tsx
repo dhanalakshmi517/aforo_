@@ -15,8 +15,15 @@ const ProductIcon: React.FC<{
   icon: ProductIconData;
   onSelect: (i: ProductIconData) => void;
 }> = ({ icon, onSelect }) => {
-  const outer = icon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
   const tile = icon.tileColor ?? '#CC9434';
+  
+  // Convert hex to rgba with 15% opacity for outer background
+  const hexToRgba = (hex: string, opacity: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  };
 
   return (
     <button
@@ -25,7 +32,7 @@ const ProductIcon: React.FC<{
       onClick={() => onSelect(icon)}
       aria-label={icon.label}
     >
-      {/* OUTER CARD — spec sizes and a soft BR vignette */}
+      {/* OUTER CARD — with layered background (tile color + base white with blue overlay) */}
       <div
         style={{
           width: 50.6537,
@@ -33,36 +40,38 @@ const ProductIcon: React.FC<{
           borderRadius: 12,
           border: '0.6px solid var(--border-border-2, #D5D4DF)',
           background: `
-            linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-            linear-gradient(135deg, ${outer[0]}, ${outer[1]}),
-            radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
+            ${hexToRgba(tile, 0.15)},
+            linear-gradient(0deg, rgba(2, 151, 158, 0.10) 0%, rgba(2, 151, 158, 0.10) 100%),
+            var(--surface-layer-4, #FFF)
           `,
           display: 'flex',
           padding: 8,
           justifyContent: 'center',
           alignItems: 'center',
+          gap: -4,  // added gap as per Figma specs
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* BACK TILE (brand solid) — offset up/left */}
+        {/* BACK TILE (brand solid) — positioned for diagonal peek effect */}
         <div
           style={{
             position: 'absolute',
-            left: 10.5,   // <- slight tweak so it peeks correctly
-            top: 8.2,
-            width: 29.45,
-            height: 25.243,
+            left: 10,   // positioned to peek from behind the glass tile
+            top: 6,     // positioned towards upper area
+            width: 26.6,  // updated to match Figma specs
+            height: 26.6, // updated to match Figma specs
             borderRadius: 5.7,
             background: tile,
+            flexShrink: 0,
           }}
         />
 
-        {/* GLASS FOREGROUND TILE — offset right/down so layers are visible */}
+        {/* GLASS FOREGROUND TILE — centered with slight offset */}
         <div
           style={{
-            width: 29.339,
-            height: 26.571,
+            width: 28,    // updated to match Figma specs
+            height: 28,   // updated to match Figma specs
             padding: '1.661px 3.321px',
             display: 'flex',
             justifyContent: 'center',
@@ -73,26 +82,29 @@ const ProductIcon: React.FC<{
             border: '0.6px solid #FFF',
             background: 'rgba(202, 171, 213, 0.10)',
             backdropFilter: 'blur(3.875px)',
-            // key: push glass slightly so the amber pad peeks
-            transform: 'translate(3px, 2px)',
+            transform: 'translate(3px, 2px)',  // moved up slightly for clearer icon visibility
             boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
           }}
         >
-          {/* ICON — single SVG at 18×18 using the original 400×400 path */}
+          {/* ICON — slightly reduced size for better proportion */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
+            width="14.727"
+            height="14.727"
             viewBox={icon.viewBox ?? "0 0 18 18"}
             fill="none"
-            style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+            style={{ 
+              flexShrink: 0, 
+              aspectRatio: '14.73 / 14.73', 
+              display: 'block' 
+            }}
           >
             <path d={icon.svgPath} fill="#FFFFFF" />
           </svg>
         </div>
       </div>
 
-      <span>{icon.label}</span>
+      <span style={{ textTransform: 'capitalize' }}>{icon.label}</span>
     </button>
   );
 };

@@ -23,19 +23,23 @@ interface ExtrasProps {
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-// 🔁 MAP: API ⇄ UI freemium type
+// 🔁 MAP: API ⇄ UI freemium type (use BACKEND ENUMS)
 type UIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
-type APIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL' | 'UNITS_PER_DURATION';
+type APIFreemiumType = 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
 
-const apiToUiFreemium = (api: APIFreemiumType | '' | undefined): UIFreemiumType => {
-  if (api === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
-  if (api === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
+/** Accept legacy tokens but output the UI token set */
+const apiToUiFreemium = (raw: string | undefined | null): UIFreemiumType => {
+  const v = (raw || '').toUpperCase().trim();
+  if (v === 'FREE_TRIAL_DURATION' || v === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
+  if (v === 'FREE_UNITS_PER_DURATION' || v === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
   return 'FREE_UNITS';
 };
 
-const uiToApiFreemium = (ui: UIFreemiumType | '' | undefined): APIFreemiumType => {
-  if (ui === 'FREE_TRIAL_DURATION') return 'FREE_TRIAL';
-  if (ui === 'FREE_UNITS_PER_DURATION') return 'UNITS_PER_DURATION';
+/** Accept legacy tokens but output the BACKEND enum */
+const uiToApiFreemium = (raw: string | undefined | null): APIFreemiumType => {
+  const v = (raw || '').toUpperCase().trim();
+  if (v === 'FREE_TRIAL_DURATION' || v === 'FREE_TRIAL') return 'FREE_TRIAL_DURATION';
+  if (v === 'FREE_UNITS_PER_DURATION' || v === 'UNITS_PER_DURATION') return 'FREE_UNITS_PER_DURATION';
   return 'FREE_UNITS';
 };
 
@@ -204,8 +208,9 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     }
 
     if (freemiumData) {
-      const apiType = (freemiumData.freemiumType || 'FREE_UNITS') as APIFreemiumType;
-      const uiType = apiToUiFreemium(apiType);
+      // UPDATED: tolerate UI or API token from backend
+      const uiType = apiToUiFreemium(freemiumData.freemiumType);
+      const apiType = uiToApiFreemium(freemiumData.freemiumType);
 
       setFreemiumType(uiType);
       setFreemiumPayload({
@@ -346,6 +351,14 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     ),
   };
 
+  const SavedCheck = () => (
+    <svg className="saved-check" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M5 10.5L8.5 14L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+  const btnClass = (state: SaveState) =>
+    `extras-save-btn ${state === 'saved' ? 'is-saved' : ''} ${state === 'saving' ? 'is-saving' : ''}`;
+
   const renderHeader = (label: string, section: string): JSX.Element => (
     <div className="section-header" onClick={() => toggleSection(section)}>
       <button type="button" className="extras-icon-btn" aria-label={`${label} icon`}>
@@ -355,24 +368,16 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       <span className="dropdown-icon">
         {activeSections.includes(section) ? (
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M15 12.5L10 7.5L5 12.5" stroke="#2B7194" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 12.5L10 7.5L5 12.5" stroke="#2B7194" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : (
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M5 7.5L10 12.5L15 7.5" stroke="#2B7194" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M5 7.5L10 12.5L15 7.5" stroke="#2B7194" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </span>
     </div>
   );
-
-  const SavedCheck = () => (
-    <svg className="saved-check" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M5 10.5L8.5 14L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-  const btnClass = (state: SaveState) =>
-    `extras-save-btn ${state === 'saved' ? 'is-saved' : ''} ${state === 'saving' ? 'is-saving' : ''}`;
 
   useImperativeHandle(ref, () => ({
     saveAll: async (ratePlanId: number) => {
@@ -426,10 +431,12 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       }
       
       const buildFreemiumPayload = (): FreemiumPayload => {
-        const { freemiumType: apiType, freeUnits, freeTrialDuration, startDate, endDate } = freemiumPayload;
+        // ensure we normalize to API token even if UI token sneaks in
+        const apiType = uiToApiFreemium(freemiumPayload.freemiumType);
+        const { freeUnits, freeTrialDuration, startDate, endDate } = freemiumPayload;
         const clean: FreemiumPayload = { freemiumType: apiType, freeUnits: 0, freeTrialDuration: 0, startDate, endDate };
         if (apiType === 'FREE_UNITS') clean.freeUnits = freeUnits;
-        else if (apiType === 'FREE_TRIAL') clean.freeTrialDuration = freeTrialDuration;
+        else if (apiType === 'FREE_TRIAL_DURATION') clean.freeTrialDuration = freeTrialDuration;
         else {
           clean.freeUnits = freeUnits;
           clean.freeTrialDuration = freeTrialDuration;
@@ -437,8 +444,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         return clean;
       };
 
-      if (freemiumPayload.freemiumType && (freemiumPayload.freeUnits > 0 || freemiumPayload.freeTrialDuration > 0)) {
-        setRatePlanData('FREEMIUM_TYPE', freemiumType);
+      if (freemiumPayload.freemiumType && (freemiumPayload.freeUnits > 0 || freemiumPayload.freeTrialDuration > 0 || freemiumPayload.startDate || freemiumPayload.endDate)) {
+        setRatePlanData('FREEMIUM_TYPE', apiToUiFreemium(freemiumPayload.freemiumType));
         setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits ? String(freemiumPayload.freeUnits) : '');
         setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration ? String(freemiumPayload.freeTrialDuration) : '');
         
@@ -719,7 +726,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 setFreemiumType(ui);
                 setFreemiumPayload(prev => ({
                   ...prev,                               // keep previously-hydrated numbers
-                  freemiumType: uiToApiFreemium(ui),
+                  freemiumType: uiToApiFreemium(ui),    // UPDATED: normalize
                 }));
               }}
               options={[
@@ -798,7 +805,13 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                   setRatePlanData('FREEMIUM_START', freemiumPayload.startDate);
                   setRatePlanData('FREEMIUM_END', freemiumPayload.endDate);
 
-                  await saveFreemiums(ratePlanId, freemiumPayload);
+                  // UPDATED: always send canonical API token
+                  const clean = {
+                    ...freemiumPayload,
+                    freemiumType: uiToApiFreemium(freemiumPayload.freemiumType),
+                  } as FreemiumPayload;
+
+                  await saveFreemiums(ratePlanId, clean);
                   setSaveState(s => ({ ...s, freemium: 'saved' }));
                 } catch {
                   setSaveState(s => ({ ...s, freemium: 'error' }));

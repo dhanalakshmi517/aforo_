@@ -360,7 +360,8 @@ export interface DiscountPayload {
   endDate: string;
 }
 export interface FreemiumPayload {
-  freemiumType: 'FREE_UNITS' | 'FREE_TRIAL' | 'UNITS_PER_DURATION';
+  // ✅ Use BACKEND ENUMS here
+  freemiumType: 'FREE_UNITS' | 'FREE_TRIAL_DURATION' | 'FREE_UNITS_PER_DURATION';
   freeUnits: number;
   freeTrialDuration: number;
   startDate: string;

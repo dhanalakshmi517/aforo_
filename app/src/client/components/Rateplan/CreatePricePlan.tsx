@@ -96,17 +96,15 @@ const CreatePricePlan = React.forwardRef<
   useEffect(() => {
     document.body.classList.add("create-product-page");
 
-    // Check if there's any existing session data to determine if this is truly fresh
-    const hasExistingSessionData = getRatePlanData('WIZARD_STEP') || getRatePlanData('PRICING_MODEL') || getRatePlanData('BILLABLE_METRIC_NAME');
+    const hasExistingSessionData =
+      getRatePlanData('WIZARD_STEP') ||
+      getRatePlanData('PRICING_MODEL') ||
+      getRatePlanData('BILLABLE_METRIC_NAME');
     
     if (!isResuming && !draftData && !hasExistingSessionData) {
-      // For truly fresh new rate plan creation, clear all data and start fresh
-      console.log('🆆 Truly fresh creation - clearing all data');
       setIsFreshCreation(true);
       clearAllRatePlanData();
     } else {
-      // For resuming drafts or continuing existing session, preserve data
-      console.log('🔄 Resuming or continuing session - preserving data');
       setIsFreshCreation(false);
       if (!hasExistingSessionData) {
         initializeSession();
@@ -136,18 +134,11 @@ const CreatePricePlan = React.forwardRef<
     };
   }, [currentStep]);
 
-  // Hydrate from draftData prop (from RatePlans component) or legacy resumeDraftId
   useEffect(() => {
-    console.log('🔄 CreatePricePlan useEffect triggered');
-    console.log('📦 draftData prop:', draftData);
-    console.log('🔄 isResuming:', isResuming, 'resumeDraftId:', resumeDraftId);
-    
     if (draftData) {
-      console.log('✅ Using draftData prop for hydration');
       clearAllRatePlanData();
       hydrateFormData(draftData);
     } else if (isResuming && resumeDraftId) {
-      console.log('✅ Using resumeDraftId for hydration');
       (async () => {
         try {
           const plan = await fetchRatePlanWithDetails(resumeDraftId);
@@ -157,7 +148,6 @@ const CreatePricePlan = React.forwardRef<
         }
       })();
     } else {
-      console.log('🆕 Fresh rate plan creation - clearing any stale session data');
       clearAllRatePlanData();
     }
   }, [draftData, isResuming, resumeDraftId]);
@@ -166,17 +156,13 @@ const CreatePricePlan = React.forwardRef<
   useEffect(() => {
     const fetchCurrentDataForStep = async () => {
       if (currentStep === 3 && ratePlanId && !persistentDraftData && !draftExtrasData) {
-        console.log('🔄 Navigated to Extras step, fetching current data for ratePlanId:', ratePlanId);
         try {
           const currentPlan = await fetchRatePlanWithDetails(ratePlanId);
-          console.log('✅ Fetched current plan data for Extras step:', currentPlan);
-          console.log('🔍 Current freemiums:', currentPlan.freemiums);
           setCurrentStepData(currentPlan);
         } catch (error) {
           console.error('❌ Failed to fetch current plan data for step:', error);
         }
       } else if (currentStep !== 3) {
-        // Clear current step data when not on Extras step
         setCurrentStepData(null);
       }
     };
@@ -184,7 +170,6 @@ const CreatePricePlan = React.forwardRef<
   }, [currentStep, ratePlanId, persistentDraftData, draftExtrasData]);
 
   const hydrateFormData = (plan: any) => {
-    console.log('🚀 Hydrating form data with plan:', plan);
     setRatePlanId(plan.ratePlanId);
     setPlanName(plan.ratePlanName ?? "");
     setPlanDescription(plan.description ?? "");
@@ -195,8 +180,7 @@ const CreatePricePlan = React.forwardRef<
 
     setDraftPricingData(plan);
     setDraftExtrasData(plan);
-    setPersistentDraftData(plan); // Keep persistent copy
-    console.log('✅ Draft data set for Extras component');
+    setPersistentDraftData(plan);
   };
 
   React.useImperativeHandle(
@@ -266,7 +250,6 @@ const CreatePricePlan = React.forwardRef<
       const overage = getRatePlanData("VOLUME_OVERAGE");
       const noUpperLimit = getRatePlanData("VOLUME_NO_UPPER_LIMIT") === "true";
       if (volumeTiers.length === 0) e.volumeTiers = "At least one volume tier is required";
-      // Only require overage when NOT unlimited (same logic as Tiered and Stairstep)
       if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
         e.volumeOverage = "Overage unit rate is required when no unlimited tier";
       }
@@ -339,10 +322,46 @@ const CreatePricePlan = React.forwardRef<
     return true;
   };
 
+  // ===== NEW: persist the step we are LEAVING when navigating via sidebar =====
   const onStepClick = async (index: number) => {
     if (index === currentStep) return;
+
+    // First, ensure we are allowed to move forward (creates plan if needed)
     const ok = await canNavigateTo(index);
-    if (ok) setCurrentStep(index);
+    if (!ok) return;
+
+    // Now, persist the current step before switching away
+    try {
+      if (currentStep === 2) { // leaving Pricing
+        const v = validatePricingStep();
+        if (!v.isValid) {
+          setErrors(v.errors);
+          setCurrentStep(2);
+          return;
+        }
+        if (pricingRef.current && ratePlanId) {
+          setSaving(true);
+          const success = await pricingRef.current.save();
+          setSaving(false);
+          if (!success) {
+            setCurrentStep(2);
+            return;
+          }
+        }
+      } else if (currentStep === 3) { // leaving Extras
+        if (extrasRef.current && ratePlanId) {
+          setSaving(true);
+          await extrasRef.current.saveAll(ratePlanId);
+          setSaving(false);
+        }
+      }
+    } catch (e) {
+      console.error("Sidebar navigation save failed:", e);
+      setSaving(false);
+      return; // stay put on failure
+    }
+
+    setCurrentStep(index);
   };
 
   // ===== Save-as-Draft: always try to persist pricing (best-effort) =====
@@ -375,20 +394,13 @@ const CreatePricePlan = React.forwardRef<
         await updateRatePlan(currentId, partial as any);
       }
 
-      // ✅ Always attempt to save pricing (don’t gate on validation snapshot)
+      // ✅ Always attempt to save PRICING (component or session fallback)
       try {
         if (currentId && pricingRef.current) {
-          // Pricing component is mounted, use its save method
           await pricingRef.current.save();
         } else if (currentId) {
-          // Pricing component not mounted, save from session storage
-          console.log('💾 Pricing component not mounted, saving from session storage...');
           const savedModel = getRatePlanData('PRICING_MODEL');
-          console.log('📖 Saved pricing model from session:', savedModel);
-
           if (savedModel) {
-            console.log('✅ Saving pricing model to backend:', savedModel);
-            // Import the pricing save functions and save based on model type
             const { saveFlatFeePricing, saveUsageBasedPricing, saveTieredPricing, saveVolumePricing, saveStairStepPricing } = await import('./api');
 
             if (savedModel === 'Flat Fee') {
@@ -405,14 +417,12 @@ const CreatePricePlan = React.forwardRef<
                   graceBuffer: Number(savedGrace) || 0
                 };
                 await saveFlatFeePricing(currentId, payload);
-                console.log('✅ Saved Flat Fee pricing from session storage');
               }
             } else if (savedModel === 'Usage-Based') {
               const savedPerUnit = getRatePlanData('USAGE_PER_UNIT_AMOUNT');
               if (savedPerUnit) {
                 const payload = { perUnitAmount: Number(savedPerUnit) || 0 };
                 await saveUsageBasedPricing(currentId, payload);
-                console.log('✅ Saved Usage-Based pricing from session storage');
               }
             } else if (savedModel === 'Volume-Based') {
               const savedTiers = getRatePlanData('VOLUME_TIERS');
@@ -432,7 +442,6 @@ const CreatePricePlan = React.forwardRef<
                     graceBuffer: Number(savedGrace) || 0
                   };
                   await saveVolumePricing(currentId, payload);
-                  console.log('✅ Saved Volume-Based pricing from session storage');
                 } catch (e) {
                   console.error('Failed to parse volume tiers for draft save:', e);
                 }
@@ -455,7 +464,6 @@ const CreatePricePlan = React.forwardRef<
                     graceBuffer: Number(savedGrace) || 0
                   };
                   await saveTieredPricing(currentId, payload);
-                  console.log('✅ Saved Tiered pricing from session storage');
                 } catch (e) {
                   console.error('Failed to parse tiered tiers for draft save:', e);
                 }
@@ -478,7 +486,6 @@ const CreatePricePlan = React.forwardRef<
                     graceBuffer: Number(savedGrace) || 0
                   };
                   await saveStairStepPricing(currentId, payload);
-                  console.log('✅ Saved Stairstep pricing from session storage');
                 } catch (e) {
                   console.error('Failed to parse stair tiers for draft save:', e);
                 }
@@ -487,17 +494,99 @@ const CreatePricePlan = React.forwardRef<
           }
         }
       } catch (pricingErr) {
-        // best-effort for drafts: swallow errors so user can continue
         console.warn("Pricing draft save warning:", pricingErr);
       }
 
-      // Best-effort extras save
-      if (currentId && extrasRef.current) {
-        try {
+      // ✅ Best-effort EXTRAS save (component or session fallback)
+      try {
+        if (currentId && extrasRef.current) {
           await extrasRef.current.saveAll(currentId);
-        } catch (extrasErr) {
-          console.warn("Extras draft save warning:", extrasErr);
+        } else if (currentId) {
+          const {
+            saveSetupFee,
+            saveDiscounts,
+            saveFreemiums,
+            saveMinimumCommitment
+          } = await import("./api");
+
+          // Setup Fee
+          const setupFee = Number(getRatePlanData("SETUP_FEE") || 0);
+          const setupTiming = Number(getRatePlanData("SETUP_APPLICATION_TIMING") || 0);
+          const setupDesc = getRatePlanData("SETUP_INVOICE_DESC") || "";
+          if (setupFee > 0) {
+            await saveSetupFee(currentId, {
+              setupFee,
+              applicationTiming: setupTiming,
+              invoiceDescription: setupDesc,
+            });
+          }
+
+          // Discounts
+          const discountType = (getRatePlanData("DISCOUNT_TYPE") || "") as "PERCENTAGE" | "FLAT" | "";
+          const percent = Number(getRatePlanData("DISCOUNT_PERCENT") || 0);
+          const flat = Number(getRatePlanData("DISCOUNT_FLAT") || 0);
+          const eligibility = getRatePlanData("ELIGIBILITY") || "";
+          const dStart = getRatePlanData("DISCOUNT_START") || "";
+          const dEnd = getRatePlanData("DISCOUNT_END") || "";
+          const hasDiscount =
+            (discountType === "PERCENTAGE" && percent > 0) ||
+            (discountType === "FLAT" && flat > 0) ||
+            !!eligibility || !!dStart || !!dEnd;
+
+          if (hasDiscount) {
+            await saveDiscounts(currentId, {
+              discountType: discountType || (percent > 0 ? "PERCENTAGE" : "FLAT"),
+              percentageDiscountStr: String(percent),
+              flatDiscountAmountStr: String(flat),
+              eligibility,
+              startDate: dStart,
+              endDate: dEnd,
+              // API expects numeric fields too:
+              percentageDiscount: percent,
+              flatDiscountAmount: flat,
+            } as any);
+          }
+
+          // Freemium
+          const uiFreeType = (getRatePlanData("FREEMIUM_TYPE") || "") as
+            | "FREE_UNITS"
+            | "FREE_TRIAL_DURATION"
+            | "FREE_UNITS_PER_DURATION"
+            | "";
+          const freeUnits = Number(getRatePlanData("FREEMIUM_UNITS") || 0);
+          const freeTrialDuration = Number(getRatePlanData("FREE_TRIAL_DURATION") || 0);
+          const fStart = getRatePlanData("FREEMIUM_START") || "";
+          const fEnd = getRatePlanData("FREEMIUM_END") || "";
+
+          // ✅ NEW mapping: always output backend enums, but accept legacy
+          const mapUiToApi = (ui: string) =>
+            ui === "FREE_TRIAL_DURATION" ? "FREE_TRIAL_DURATION"
+            : ui === "FREE_UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
+            : ui === "UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION" // tolerate legacy
+            : ui === "FREE_TRIAL" ? "FREE_TRIAL_DURATION"             // tolerate legacy
+            : "FREE_UNITS";
+
+          const apiFreeType = mapUiToApi(uiFreeType);
+          if (freeUnits > 0 || freeTrialDuration > 0 || fStart || fEnd) {
+            const fp: any = { freemiumType: apiFreeType, freeUnits: 0, freeTrialDuration: 0, startDate: fStart, endDate: fEnd };
+            if (apiFreeType === "FREE_UNITS") fp.freeUnits = freeUnits;
+            else if (apiFreeType === "FREE_TRIAL_DURATION") fp.freeTrialDuration = freeTrialDuration;
+            else { fp.freeUnits = freeUnits; fp.freeTrialDuration = freeTrialDuration; } // FREE_UNITS_PER_DURATION
+            await saveFreemiums(currentId, fp);
+          }
+
+          // Minimum Commitment
+          const minUsage = Number(getRatePlanData("MINIMUM_USAGE") || 0);
+          const minCharge = Number(getRatePlanData("MINIMUM_CHARGE") || 0);
+          if (minUsage > 0 || minCharge > 0) {
+            await saveMinimumCommitment(currentId, {
+              minimumUsage: minUsage,
+              minimumCharge: minCharge,
+            });
+          }
         }
+      } catch (extrasErr) {
+        console.warn("Extras draft save warning:", extrasErr);
       }
     } catch (e) {
       console.error("Failed to save draft", e);
@@ -521,9 +610,33 @@ const CreatePricePlan = React.forwardRef<
   }, [registerSaveDraft, saveDraft]);
 
   const handleNext = async () => {
+    // Final submit from Review: persist Pricing + Extras before confirming
     if (currentStep === steps.length - 1) {
       if (!ratePlanId) return;
       try {
+        // Try to save pricing (validates first)
+        if (pricingRef.current) {
+          const v = validatePricingStep();
+          if (!v.isValid) {
+            setErrors(v.errors);
+            setCurrentStep(2);
+            return;
+          }
+          setSaving(true);
+          const ok = await pricingRef.current.save();
+          setSaving(false);
+          if (!ok) {
+            setCurrentStep(2);
+            return;
+          }
+        }
+        // Save extras (best effort)
+        if (extrasRef.current) {
+          setSaving(true);
+          await extrasRef.current.saveAll(ratePlanId);
+          setSaving(false);
+        }
+
         setSaving(true);
         if (!hasSavedAsDraft) {
           await confirmRatePlan(ratePlanId);
@@ -684,7 +797,6 @@ const CreatePricePlan = React.forwardRef<
         );
       case 3: {
         const extrasData = persistentDraftData || draftExtrasData || currentStepData;
-        console.log('📦 Passing to Extras component - persistentDraftData:', persistentDraftData, 'draftExtrasData:', draftExtrasData, 'currentStepData:', currentStepData);
         return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={extrasData} />;
       }
       case 4: {
