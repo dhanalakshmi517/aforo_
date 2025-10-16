@@ -45,20 +45,20 @@ const Footer: React.FC = () => {
           <div className="footer-section">
             <h4>Product</h4>
             <ul>
-              <li>Features</li>
-              <li>Pricing</li>
-              <li>Documentation</li>
-              <li>Guides</li>
+              <li>Home</li>
+              <li>Product</li>
+              <li>RatePlan</li>
+              <li>Subscription</li>
+              <li>Invoices</li>
             </ul>
           </div>
 
           <div className="footer-section">
-            <h4>Company</h4>
+            <h4>Documentation</h4>
             <ul>
-              <li>About Us</li>
-              <li>Careers</li>
-              <li>Blog</li>
-              <li>Contact</li>
+              <li>FAQs</li>
+              <li>Support</li>
+             
             </ul>
           </div>
 
@@ -67,8 +67,7 @@ const Footer: React.FC = () => {
             <ul>
               <li>Privacy Policy</li>
               <li>Terms of Service</li>
-              <li>Cookie Policy</li>
-              <li>GDPR</li>
+              
             </ul>
           </div>
         </div>

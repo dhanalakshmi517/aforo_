@@ -182,82 +182,85 @@ export default function ProductShowcaseScroll() {
     };
   }, [active]);
 
+  const currentSlide = SLIDES[active];
+
   return (
     <section className="ph ph--card">
-      {/* Scrollable slides inside the card */}
-      <div className="ph__viewport" ref={viewportRef}>
-        {SLIDES.map((s, idx) => (
-          <div
-            key={idx}
-            ref={(el) => (slideRefs.current[idx] = el)}
-            data-index={idx}
-            className={`ph__slide ${active === idx ? "is-active" : ""}`}
-          >
-            {/* Left column */}
-            <aside className="ph__left">
-              {s.left.map((li, i) => {
-                const Icon = ICON[li.icon];
-                return (
-                  <div className="ph__leftItem" key={i}>
-                    <Icon className="ph__leftIcon" />
-                    <div className="ph__leftCopy">
-                      <strong>{li.title}</strong>
-                      {li.lines.map((ln, k) => <span key={k}>{ln}</span>)}
-                    </div>
-                  </div>
-                );
-              })}
-            </aside>
-
-            {/* Center column */}
-            <main className="ph__center">
-              <h2 className="ph__title">{s.title}</h2>
-              <div className="ph__artWrap">
-                <img src={s.art} alt={`${s.title} diagram`} className="ph__art" />
-                <div className="ph__shadow" />
-              </div>
-            </main>
-
-            {/* Right column */}
-            <aside className="ph__right">
-              <div className="ph__blurb">
-                <p className="ph__blurbTitle">{s.blurbTitle}</p>
-                {s.blurbLines.map((l, i) => <p className="ph__blurbLine" key={i}>{l}</p>)}
-              </div>
-              <div className="ph__bottomSection">
-                <div className="ph__stepContainer">
-                  <div className="ph__stepNumCenter">
-                    <span className="ph__stepNum">{s.step}</span>
-                  </div>
-                  <div className="ph__stepTicks" aria-hidden="true">
-                    {SLIDES.map((_, tickIdx) => (
-                      <svg 
-                        key={tickIdx}
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width={tickIdx === idx ? "15" : "13"} 
-                        height={tickIdx === idx ? "4" : "2"} 
-                        viewBox={tickIdx === idx ? "0 0 15 4" : "0 0 13 2"} 
-                        fill="none"
-                      >
-                        <path 
-                          d={tickIdx === idx ? "M2 1.97363H13" : "M1 0.973633H12"} 
-                          stroke={tickIdx === idx ? "#025A94" : "#B0CBEE"} 
-                          strokeWidth={tickIdx === idx ? "3" : "1"}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    ))}
-                  </div>
-                </div>
-                <div className="ph__ctaButton">
-                  {/* <TertiaryButton onClick={() => {}}>
-                    Explore Doc
-                  </TertiaryButton> */}
+      <div className="ph__container">
+        {/* Left column - fixed, content changes based on active */}
+        <aside className="ph__left">
+          {currentSlide.left.map((li, i) => {
+            const Icon = ICON[li.icon];
+            return (
+              <div className="ph__leftItem" key={i}>
+                <Icon className="ph__leftIcon" />
+                <div className="ph__leftCopy">
+                  <strong>{li.title}</strong>
+                  {li.lines.map((ln, k) => <span key={k}>{ln}</span>)}
                 </div>
               </div>
-            </aside>
+            );
+          })}
+        </aside>
+
+        {/* Center column - scrollable */}
+        <div className="ph__viewport" ref={viewportRef}>
+          {SLIDES.map((s, idx) => (
+            <div
+              key={idx}
+              ref={(el) => (slideRefs.current[idx] = el)}
+              data-index={idx}
+              className={`ph__slide ${active === idx ? "is-active" : ""}`}
+            >
+              <main className="ph__center">
+                <h2 className="ph__title">{s.title}</h2>
+                <div className="ph__artWrap">
+                  <img src={s.art} alt={`${s.title} diagram`} className="ph__art" />
+                  <div className="ph__shadow" />
+                </div>
+              </main>
+            </div>
+          ))}
+        </div>
+
+        {/* Right column - fixed, content changes based on active */}
+        <aside className="ph__right">
+          <div className="ph__blurb">
+            <p className="ph__blurbTitle">{currentSlide.blurbTitle}</p>
+            {currentSlide.blurbLines.map((l, i) => <p className="ph__blurbLine" key={i}>{l}</p>)}
           </div>
-        ))}
+          <div className="ph__bottomSection">
+            <div className="ph__stepContainer">
+              <div className="ph__stepNumCenter">
+                <span className="ph__stepNum">{currentSlide.step}</span>
+              </div>
+              <div className="ph__stepTicks" aria-hidden="true">
+                {SLIDES.map((_, tickIdx) => (
+                  <svg 
+                    key={tickIdx}
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={tickIdx === active ? "15" : "13"} 
+                    height={tickIdx === active ? "4" : "2"} 
+                    viewBox={tickIdx === active ? "0 0 15 4" : "0 0 13 2"} 
+                    fill="none"
+                  >
+                    <path 
+                      d={tickIdx === active ? "M2 1.97363H13" : "M1 0.973633H12"} 
+                      stroke={tickIdx === active ? "#025A94" : "#B0CBEE"} 
+                      strokeWidth={tickIdx === active ? "3" : "1"}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                ))}
+              </div>
+            </div>
+            <div className="ph__ctaButton">
+              {/* <TertiaryButton onClick={() => {}}>
+                Explore Doc
+              </TertiaryButton> */}
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
   );
