@@ -517,7 +517,7 @@ line-height: var(--line-height-body-lg);
     max-width: 200px;
   }
 
-  .metrics-wrapper{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;align-items:center;}
+  .metrics-wrapper{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-start;align-items:center;}
   .metric-item {
     width: 44px;
     height: 36px;

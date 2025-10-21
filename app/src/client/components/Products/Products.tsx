@@ -663,10 +663,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   metric.metricName.length > 3
                                     ? metric.metricName.substring(0, 3) + '...'
                                     : metric.metricName;
-                                const truncatedUOM =
-                                  metric.unitOfMeasure.length > 3
-                                    ? metric.unitOfMeasure.substring(0, 3) + '...'
-                                    : metric.unitOfMeasure;
+                                const truncatedUOM = metric.unitOfMeasure
+                                    ? metric.unitOfMeasure.substring(0, 2).toUpperCase()
+                                    : '';
 
                                 return (
                                   <div

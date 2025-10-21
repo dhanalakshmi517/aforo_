@@ -36,6 +36,7 @@ export interface DraftProduct {
   status?: string;
   productType?: string;
   productIcon?: string; // JSON string containing icon data
+  iconData?: ProductIconData; // structured icon data when passed directly
 }
 
 interface NewProductProps {
@@ -136,7 +137,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         console.error('Error parsing icon data:', error);
       }
     }
-  }, [activeDraft?.productIcon]);
+    // direct iconData field (already structured)
+    if (!selectedIcon && activeDraft?.iconData) {
+      console.log('Loading icon from direct iconData field');
+      setSelectedIcon(activeDraft.iconData as ProductIconData);
+    }
+  }, [activeDraft?.productIcon, activeDraft?.iconData]);
   const [isSaving, setIsSaving] = useState(false);
   // store existing products for uniqueness checks
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
@@ -231,8 +237,25 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     }
   };
 
-  const gotoStep = (index: number) => {
-    setCurrentStep(index);
+  const gotoStep = async (index: number) => {
+      // when jumping forward, make sure we have a product record
+  if (index > currentStep) {
+    // 1️⃣ From General ➜ Configuration or further: create/update product shell first
+    if (currentStep === 0 && !createdProductId) {
+      const ok = await saveProduct(true); // creates DRAFT product shell only if not yet created
+      if (!ok) return;
+    }
+
+    // 2️⃣ From Configuration ➜ Review : validate + persist configuration draft
+    if (currentStep === 1 && index === 2) {
+      if (configRef.current) {
+        const valid = await configRef.current.submit(false, true); // validate + save to backend
+        if (!valid) return;
+      }
+    }
+  }
+
+  setCurrentStep(index);
     const firstWord = steps[index].title.split(" ")[0].toLowerCase() as ActiveTab;
     setActiveTab(firstWord);
     // Store in localStorage to persist state
@@ -309,6 +332,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       // Add icon data if selected - save both SVG and full icon data for reconstruction
       const payloadWithIcon = selectedIcon ? {
         ...basePayload,
+        icon: JSON.stringify({
+          iconData: selectedIcon,
+          svgContent: (() => {/* placeholder */})()
+        }),
         productIcon: JSON.stringify({
           // Save the full icon data so we can reconstruct it when editing
           iconData: selectedIcon,
@@ -362,6 +389,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           const response = await createProduct(payload);
           setCreatedProductId(response.productId);
           console.log('Product created with ID:', response.productId);
+          // cache snapshot
+          setLastSavedData({ ...formData });
           console.log('🔍 Created product response:', response);
         }
       } else {
@@ -387,7 +416,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
           const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
           const viewBox = selectedIcon.viewBox ?? '0 0 18 18';
-          changes.productIcon = JSON.stringify({
+          changes.icon = JSON.stringify({
+          iconData: selectedIcon,
+          svgContent: (()=>{/*placeholder*/})()
+        });
+        changes.productIcon = JSON.stringify({
             iconData: selectedIcon,
             svgContent: `<svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
               <defs>
@@ -420,6 +453,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         console.log('🔍 Changes productIcon field:', changes.productIcon);
         const updateResponse = await updateProduct(createdProductId, changes);
         console.log('Product updated with changes');
+
+      // cache snapshot to avoid redundant updates
+      setLastSavedData({ ...formData });
         console.log('🔍 Update response:', updateResponse);
       }
       
@@ -449,27 +485,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       setIsSaving(true);
       setIsDraftSaved(false);
 
-      // Create draft data from current form state
-      const draftData = {
-        productName: formData.productName,
-        version: formData.version,
-        internalSkuCode: formData.skuCode, // Map skuCode to internalSkuCode
-        productDescription: formData.description,
-        status: 'DRAFT' as const
-      };
+      const ok = await saveProduct(true); // uses full payload including icon
+      if (!ok) return false;
 
-      let savedProduct;
-      
-      if (createdProductId) {
-        // Update existing product
-        savedProduct = await updateProduct(createdProductId, draftData);
-      } else {
-        // Create new product as draft
-        savedProduct = await createProduct(draftData);
-        setCreatedProductId(savedProduct.productId);
-      }
-
-      // If we're on the configuration tab, save the configuration as well
+      // save configuration too if needed
       if (activeTab === 'configuration' && configRef.current) {
         await configRef.current.submit(true);
       }
@@ -493,21 +512,27 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   const handleSaveAndNext = async () => {
     if (hasErrors()) return;
-    const success = await saveProduct();
-    if (!success) return;
+    // On General step we only validate client side and move on – backend draft created later
+    let success = true;
+    if (activeTab !== 'general') {
+      success = await saveProduct(true);
+      if (!success) return;
+    }
 
-    // Move to the next tab or submit the form if we're on the last tab
+    // Navigate
     if (activeTab === 'general') {
       const configTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('configuration'));
       if (configTabIndex > -1) {
         gotoStep(configTabIndex);
       }
     } else if (activeTab === 'configuration') {
-      // Skip API save here; just move to review after client-side validation
+      // Validate configuration fields; do not hit backend yet
       if (configRef.current) {
-        const reviewTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('review'));
-        if (reviewTabIndex > -1) gotoStep(reviewTabIndex);
+        const ok = await configRef.current.submit(false, false); // client-side validation only
+        if (!ok) return; // field errors now displayed inline
       }
+      const reviewTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('review'));
+      if (reviewTabIndex > -1) gotoStep(reviewTabIndex);
     } else {
       // For other tabs, just move to the next step
       const currentIndex = steps.findIndex(step => step.title.toLowerCase().includes(activeTab));
