@@ -34,7 +34,6 @@ jobs:
         run: |
           rm -rf node_modules package-lock.json
           npm ci || npm install
-          # Ensure the correct Rollup native binary on Linux
           npm install --save-optional @rollup/rollup-linux-x64-gnu
 
       - name: 🛠 Run wasp build from app folder
@@ -54,7 +53,7 @@ jobs:
           ls -la build/
           find build/ -name "index.html" -type f -ls
 
-      # NEW: Use native scp (no tar/strip issues)
+      # 🔑 Prepare SSH key
       - name: 🔑 Prepare SSH key
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -63,25 +62,42 @@ jobs:
           echo "$EC2_SSH_KEY" > key.pem
           chmod 600 key.pem
 
-      - name: 📤 Copy UI build to EC2 (native scp)
+      # 🧹 Ensure remote target exists and is writable by ubuntu
+      - name: 🧹 Prepare remote target dir (fix perms)
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           set -e
-          # Ensure remote target exists and is clean
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'mkdir -p /home/ubuntu/frontend-temp && rm -rf /home/ubuntu/frontend-temp/*'
-          # Copy contents of build folder (no flattening, no strip-components)
-          scp -i key.pem -o StrictHostKeyChecking=no -r app/.wasp/build/web-app/build/* ubuntu@$EC2_HOST:/home/ubuntu/frontend-temp/
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'bash -s' <<'REMOTE'
+          set -e
+          # Create or fix ownership so ubuntu can write
+          sudo mkdir -p /home/ubuntu/frontend-temp
+          sudo chown -R ubuntu:ubuntu /home/ubuntu/frontend-temp
+          # Clean contents to avoid stale files
+          rm -rf /home/ubuntu/frontend-temp/*
+          # Double-check we can write here
+          touch /home/ubuntu/frontend-temp/.write_test && rm /home/ubuntu/frontend-temp/.write_test
+          REMOTE
 
-      - name: 🚀 Deploy UI to Nginx (NO-CACHE) via SSH
+      # 📦➡️🐧 Copy build via tar over SSH (no SFTP/scp quirks)
+      - name: 📤 Transfer build (tar over SSH)
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           set -e
+          # Stream a tarball to the remote and extract into frontend-temp
+          tar -C app/.wasp/build/web-app/build -czf - . \
+            | ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST \
+              'tar -C /home/ubuntu/frontend-temp -xzf -'
 
+      # 🚀 Deploy to Nginx
+      - name: 🚀 Deploy UI to Nginx (NO-CACHE)
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          set -e
           ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'bash -s' << "REMOTE"
           set -e
-
           echo "✅ Cleaning up old files in /var/www/html"
           sudo rm -rf /var/www/html/*
           sudo mkdir -p /var/www/html
