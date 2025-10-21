@@ -728,13 +728,15 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     return (
       <div className="configuration-tab">
         <div className="form-group">
+          {/* Product type dropdown with inline error */}
           <SelectField
-            label=" Type of Product"
+            label="Type of Product"
             value={productType}
             onChange={handleProductTypeChange}
             options={productOptions}
             required
             disabled={readOnly || isLoadingConfig}
+            error={!productType && error ? error : undefined}
           />
         </div>
 
@@ -746,7 +748,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         {!isLoadingConfig && productType && (
           <div className="configuration-fields">
-            {error && <div className="error-message">{error}</div>}
+            {/* keep generic error only for non-field messages */}
             <div className="form-fields">
               {configurationFields[productType]?.map((field: FieldProps) => (
                 <div key={field.label}>

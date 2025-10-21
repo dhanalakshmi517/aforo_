@@ -34,7 +34,10 @@ export interface ProductPayload {
   version: string;
   internalSkuCode: string;
   productDescription: string;
-  productIcon?: string; // JSON string containing icon data
+  /** Structured icon data (legacy) */
+  productIcon?: string;
+  /** Primary icon field used by backend */
+  icon?: string;
 }
 
 interface ApiErrorResponse {
@@ -465,8 +468,12 @@ export const saveProductConfiguration = async (
       case 'api': {
         const apiPayload: Record<string, any> = {};
         if (configData.endpointUrl?.trim()) apiPayload.endpointUrl = configData.endpointUrl.trim();
-        if (configData.authType && configData.authType !== 'NONE') {
+
+        // Always send authType, even when it is "NONE" – backend requires explicit value
+        if (configData.authType) {
           apiPayload.authType = configData.authType;
+
+          // Only attach additional credentials for BASIC or TOKEN auth modes
           if (configData.authType === 'BASIC') {
             if (configData.username?.trim()) apiPayload.username = configData.username.trim();
             if (configData.password?.trim()) apiPayload.password = configData.password;
@@ -474,7 +481,9 @@ export const saveProductConfiguration = async (
             apiPayload.token = configData.token.trim();
           }
         }
-        payload = Object.keys(apiPayload).length > 0 ? apiPayload : {};
+
+        // Ensure we send at least the authType; backend rejects empty object
+        payload = apiPayload;
         break;
       }
       case 'flatfile': {
