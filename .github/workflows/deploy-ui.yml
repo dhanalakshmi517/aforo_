@@ -54,63 +54,71 @@ jobs:
           ls -la build/
           find build/ -name "index.html" -type f -ls
 
-      - name: 📤 Copy UI build to EC2 (flattened)
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "app/.wasp/build/web-app/build/"
-          target: "/home/ubuntu/frontend-temp"
-          strip_components: 5
-          rm: true
-          overwrite: true
+      # NEW: Use native scp (no tar/strip issues)
+      - name: 🔑 Prepare SSH key
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          set -e
+          echo "$EC2_SSH_KEY" > key.pem
+          chmod 600 key.pem
 
-      - name: 🚀 SSH and deploy UI to Nginx (NO-CACHE)
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
+      - name: 📤 Copy UI build to EC2 (native scp)
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          set -e
+          # Ensure remote target exists and is clean
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'mkdir -p /home/ubuntu/frontend-temp && rm -rf /home/ubuntu/frontend-temp/*'
+          # Copy contents of build folder (no flattening, no strip-components)
+          scp -i key.pem -o StrictHostKeyChecking=no -r app/.wasp/build/web-app/build/* ubuntu@$EC2_HOST:/home/ubuntu/frontend-temp/
 
-            echo "✅ Cleaning up old files in /var/www/html"
-            sudo rm -rf /var/www/html/*
-            sudo mkdir -p /var/www/html
+      - name: 🚀 Deploy UI to Nginx (NO-CACHE) via SSH
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          set -e
 
-            echo "📦 Copying new build files to /var/www/html"
-            sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'bash -s' << "REMOTE"
+          set -e
 
-            echo "🔐 Setting ownership and permissions"
-            sudo chown -R www-data:www-data /var/www/html
-            sudo find /var/www/html -type d -exec chmod 755 {} \;
-            sudo find /var/www/html -type f -exec chmod 644 {} \;
+          echo "✅ Cleaning up old files in /var/www/html"
+          sudo rm -rf /var/www/html/*
+          sudo mkdir -p /var/www/html
 
-            echo "📝 Writing NO-CACHE Nginx server block"
-            sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
-            server {
-              listen 80;
-              server_name _;
+          echo "📦 Copying new build files to /var/www/html"
+          sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
 
-              root /var/www/html;
-              index index.html;
+          echo "🔐 Setting ownership and permissions"
+          sudo chown -R www-data:www-data /var/www/html
+          sudo find /var/www/html -type d -exec chmod 755 {} \;
+          sudo find /var/www/html -type f -exec chmod 644 {} \;
 
-              # ZERO-CACHE for everything (HTML + assets)
-              location / {
-                try_files $uri $uri/ /index.html;
-                add_header Cache-Control "no-store" always;
-                expires off;
-                etag off;
-              }
+          echo "📝 Writing NO-CACHE Nginx server block"
+          sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
+          server {
+            listen 80;
+            server_name _;
+
+            root /var/www/html;
+            index index.html;
+
+            # ZERO-CACHE for everything (HTML + assets)
+            location / {
+              try_files $uri $uri/ /index.html;
+              add_header Cache-Control "no-store" always;
+              expires off;
+              etag off;
             }
-            NGINXCONF
+          }
+          NGINXCONF
 
-            echo "🧪 Testing Nginx config & reloading"
-            sudo nginx -t
-            sudo systemctl reload nginx
+          echo "🧪 Testing Nginx config & reloading"
+          sudo nginx -t
+          sudo systemctl reload nginx
 
-            echo "📋 Final file list in /var/www/html"
-            ls -la /var/www/html
+          echo "📋 Final file list in /var/www/html"
+          ls -la /var/www/html
 
-            echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
+          echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
+          REMOTE
