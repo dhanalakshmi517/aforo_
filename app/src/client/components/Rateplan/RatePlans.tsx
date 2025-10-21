@@ -9,6 +9,10 @@ import SaveDraft from '../componenetsss/SaveDraft';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import { clearAllRatePlanData } from './utils/sessionStorage';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
+import { getProducts as getProductsApi, BASE_URL as API_BASE_URL, API_ORIGIN } from '../Products/api';
+import { ProductIconData } from '../Products/ProductIcon';
+import axios from 'axios';
+import { getAuthHeaders } from '../../utils/auth';
 
 /* ---------------- Types ---------------- */
 export interface RatePlan {
@@ -109,6 +113,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   // saveDraftFn now returns boolean: true when saved, false when validation stopped it
   const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<boolean>)>(null);
   const [draftSaving, setDraftSaving] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [draftPlanData, setDraftPlanData] = useState<any>(null);
@@ -123,6 +128,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Product icons state
+  const [productIcons, setProductIcons] = useState<Record<number, { iconData: ProductIconData | null; iconUrl: string | null }>>({});
+  const [loadingProductIcons, setLoadingProductIcons] = useState<Set<number>>(new Set());
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -133,6 +142,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   useEffect(() => {
     if (localStorage.getItem('ratePlanWizardOpen') === 'true') {
       setShowCreatePlan(true);
+      setDraftSaved(false);
       localStorage.removeItem('ratePlanWizardOpen');
     }
   }, []); // eslint-disable-line
@@ -220,6 +230,166 @@ const RatePlans: React.FC<RatePlansProps> = ({
     });
   }, [filteredPlans, detailsById]);
 
+  // ============================================================
+  // Product icon fetch (FIX: correct base/origin for /uploads)
+  // ============================================================
+  const fetchProductIcon = async (productId: number) => {
+    if (loadingProductIcons.has(productId) || productIcons[productId]) {
+      return; // Already loading or loaded
+    }
+
+    setLoadingProductIcons(prev => new Set(prev).add(productId));
+
+    try {
+      // Get all products to find the one we need
+      const products = await getProductsApi();
+      const product = products.find(p => parseInt(p.productId) === productId);
+      
+      if (!product) {
+        console.log(`❌ Product with ID ${productId} not found`);
+        setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
+        return;
+      }
+
+      let iconData: ProductIconData | null = null;
+      let iconUrl: string | null = null;
+
+      // ✅ PRIORITY 1: Check for structured productIcon field (saved during product creation)
+      if (product.productIcon && product.productIcon !== 'null' && product.productIcon !== '') {
+        try {
+          const parsed = typeof product.productIcon === 'string' 
+            ? JSON.parse(product.productIcon) 
+            : product.productIcon;
+          
+          if (parsed?.id && parsed?.svgPath && parsed?.tileColor) {
+            iconData = {
+              id: parsed.id,
+              label: parsed.label || product.productName || 'Product',
+              svgPath: parsed.svgPath,
+              tileColor: parsed.tileColor,
+              viewBox: parsed.viewBox || '0 0 24 24',
+              ...(parsed.outerBg && { outerBg: parsed.outerBg })
+            } as ProductIconData;
+          } else if (parsed?.iconData) {
+            iconData = parsed.iconData as ProductIconData;
+          }
+        } catch (e) {
+          console.error('❌ Error parsing productIcon JSON:', e);
+        }
+      }
+
+      // ✅ PRIORITY 2: Only if no structured data, try to fetch from URL
+      if (!iconData && product.icon) {
+        try {
+          const authHeaders = getAuthHeaders();
+          const resolvedUrl =
+            product.icon.startsWith('http')
+              ? product.icon
+              : product.icon.startsWith('/uploads')
+                ? `${API_ORIGIN}${product.icon}` // <-- key fix: use ORIGIN (no /api) for /uploads
+                : `${API_BASE_URL}${product.icon.startsWith('/') ? '' : '/'}${product.icon}`;
+
+          const response = await axios.get(resolvedUrl, {
+            responseType: 'blob',
+            headers: authHeaders,
+            timeout: 5000
+          });
+          
+          iconUrl = URL.createObjectURL(response.data);
+
+          // Try to parse SVG content to extract icon data
+          const svgText = await (response.data as Blob).text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(svgText, 'image/svg+xml');
+          
+          // Extract tile color from the background rect
+          const rects = doc.querySelectorAll('rect');
+          let tileColor = '#0F6DDA';
+          for (const rect of rects) {
+            const width = rect.getAttribute('width');
+            const fill = rect.getAttribute('fill');
+            if (width && parseFloat(width) > 29 && parseFloat(width) < 30 && fill && fill.startsWith('#')) {
+              tileColor = fill;
+              break;
+            }
+          }
+          
+          // Extract icon path and viewBox
+          const pathElement = doc.querySelector('path[fill="#FFFFFF"]');
+          let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
+          let viewBox = '0 0 24 24';
+          if (pathElement) {
+            svgPath = pathElement.getAttribute('d') || svgPath;
+            const svgElement = pathElement.closest('svg');
+            if (svgElement) {
+              viewBox = svgElement.getAttribute('viewBox') || viewBox;
+            }
+          }
+
+          // Extract gradient colors
+          let outerBg: [string, string] | undefined;
+          const gradientElement = doc.querySelector('linearGradient');
+          if (gradientElement) {
+            const stops = gradientElement.querySelectorAll('stop');
+            if (stops.length >= 2) {
+              const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+              const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+              if (color1 && color2) {
+                outerBg = [color1.trim(), color2.trim()];
+              }
+            }
+          }
+          
+          iconData = {
+            id: `product-${product.productId}`,
+            label: product.productName || 'Product',
+            svgPath,
+            tileColor,
+            viewBox,
+            ...(outerBg && { outerBg })
+          };
+        } catch (e: any) {
+          console.error('❌ Error fetching product icon from URL:', e);
+        }
+      }
+
+      // ✅ PRIORITY 3: Create deterministic fallback only if absolutely no icon data
+      if (!iconData && !iconUrl) {
+        const colors = ['#0F6DDA', '#23A36D', '#CC9434', '#E3ADEB', '#FF6B6B', '#4ECDC4', '#95E77E', '#FFD93D'];
+        const colorIndex = productId % colors.length;
+        
+        iconData = {
+          id: `product-fallback-${productId}`,
+          label: product.productName || 'Product',
+          svgPath: 'M12 2L2 7V12L12 17L22 12V7L12 2ZM12 12L4.53 8.19L12 4.36L19.47 8.19L12 12Z',
+          tileColor: colors[colorIndex],
+          viewBox: '0 0 24 24'
+        };
+      }
+      
+      setProductIcons(prev => ({ ...prev, [productId]: { iconData, iconUrl } }));
+    } catch (e) {
+      console.error('Error loading product icon:', e);
+      setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
+    } finally {
+      setLoadingProductIcons(prev => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
+    }
+  };
+
+  // Fetch icons for visible rate plans
+  useEffect(() => {
+    const productIds = new Set(filteredPlans.map(p => p.productId).filter(Boolean));
+    productIds.forEach(productId => {
+      if (!productIcons[productId] && !loadingProductIcons.has(productId)) {
+        fetchProductIcon(productId);
+      }
+    });
+  }, [filteredPlans]); // eslint-disable-line
+
   /* ---------- actions ---------- */
 
   const handleEdit = (id: number) => {
@@ -234,12 +404,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
       clearAllRatePlanData();
       const fresh = await fetchRatePlanWithDetails(id);
       setDraftPlanData(fresh);
+      setDraftSaved(false);
       setShowCreatePlan(true);
     } catch (error) {
       console.error('❌ Failed to fetch detailed draft data:', error);
       const plan = ratePlansState.find((p) => p.ratePlanId === id);
       if (plan) {
         setDraftPlanData(plan);
+        setDraftSaved(false);
         setShowCreatePlan(true);
       }
     }
@@ -336,14 +508,316 @@ const RatePlans: React.FC<RatePlansProps> = ({
     );
   };
 
-  /** Rate Plan name chip with product name under it */
+  // ============================================================
+  // FIXED: RatePlanIcon Component in RatePlans.tsx
+  // ============================================================
+  const RatePlanIcon: React.FC<{ iconData: ProductIconData | null; iconUrl: string | null }> = ({ iconData, iconUrl }) => {
+    // Fallback UI when no icon is available
+    if (!iconData) {
+      return (
+        <div style={{
+          display: 'flex',
+          padding: '8px 8px 8px 6px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '-4px',
+          borderRadius: '12px',
+          border: '0.6px solid var(--border-border-2, #D5D4DF)',
+          background: 'var(--multi-colors-Products-Fuchsia-opac-1, rgba(227, 173, 235, 0.30))',
+          width: '48px',
+          height: '48px',
+          position: 'relative'
+        }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            fontWeight: 600,
+            backgroundColor: '#E3ADEB',
+            color: '#1A2126'
+          }}>
+            {iconUrl ? (
+              <img src={iconUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+              'PR'
+            )}
+          </div>
+          
+          {/* Front Thread */}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="13" 
+            height="10" 
+            viewBox="0 0 13 10" 
+            fill="none"
+            style={{
+              position: 'absolute',
+              bottom: '3px',
+              right: '3px',
+              width: '10.837px',
+              height: '8.136px',
+              flexShrink: 0,
+              zIndex: 2
+            }}
+          >
+            <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round"/>
+          </svg>
+          
+          {/* Purchase Tag */}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="21" 
+            height="21" 
+            viewBox="0 0 21 21" 
+            fill="none"
+            style={{
+              position: 'absolute',
+              bottom: '-4px',
+              right: '-4px',
+              width: '19.627px',
+              height: '19.627px',
+              flexShrink: 0,
+              zIndex: 3
+            }}
+          >
+            <defs>
+              <clipPath id="bgblur_purchase_tag_clip">
+                <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z"/>
+              </clipPath>
+            </defs>
+            <foreignObject x="3.03555" y="-0.172949" width="14.5764" height="18.7165">
+              <div style={{backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%'}}></div>
+            </foreignObject>
+            <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round"/>
+          </svg>
+          
+          {/* Back Thread */}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="7" 
+            height="4" 
+            viewBox="0 0 7 4" 
+            fill="none"
+            style={{
+              position: 'absolute',
+              bottom: '11px',
+              right: '11px',
+              width: '6px',
+              height: '2.551px',
+              flexShrink: 0,
+              zIndex: 1
+            }}
+          >
+            <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6"/>
+          </svg>
+        </div>
+      );
+    }
+
+    // Main rendering with iconData
+    const tile = iconData.tileColor ?? '#CC9434';
+    const hexToRgba = (hex: string, opacity: number) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    };
+
+    return (
+      <div style={{
+        display: 'flex',
+        padding: '8px 8px 8px 6px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '-4px',
+        borderRadius: '12px',
+        border: '0.6px solid var(--border-border-2, #D5D4DF)',
+        background: hexToRgba(tile, 0.30),
+        position: 'relative'
+      }}>
+        {/* BACK TILE (brand solid) */}
+        <div style={{
+          position: 'absolute',
+          left: '10px',
+          top: '6px',
+          width: '26.6px',
+          height: '26.6px',
+          borderRadius: '5.7px',
+          background: tile,
+          flexShrink: 0
+        }} />
+
+        {/* GLASS FOREGROUND TILE */}
+        <div style={{
+          width: '28px',
+          height: '28px',
+          padding: '1.661px 3.321px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '2.214px',
+          flexShrink: 0,
+          borderRadius: '6px',
+          border: '0.6px solid #FFF',
+          background: hexToRgba(tile, 0.10),
+          backdropFilter: 'blur(3.875px)',
+          transform: 'translate(3px, 2px)',
+          boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {/* ICON */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14.727"
+            height="14.727"
+            viewBox={iconData.viewBox ?? "0 0 18 18"}
+            fill="none"
+            style={{
+              flexShrink: 0,
+              aspectRatio: '14.73 / 14.73',
+              display: 'block'
+            }}
+          >
+            <path d={iconData.svgPath} fill="#FFFFFF" />
+          </svg>
+        </div>
+
+        {/* Front Thread */}
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="13" 
+          height="10" 
+          viewBox="0 0 13 10" 
+          fill="none"
+          style={{
+            position: 'absolute',
+            bottom: '3px',
+            right: '3px',
+            width: '10.837px',
+            height: '8.136px',
+            flexShrink: 0,
+            zIndex: 2
+          }}
+        >
+          <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round"/>
+        </svg>
+        
+        {/* Purchase Tag */}
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="21" 
+          height="21" 
+          viewBox="0 0 21 21" 
+          fill="none"
+          style={{
+            position: 'absolute',
+            bottom: '-4px',
+            right: '-4px',
+            width: '19.627px',
+            height: '19.627px',
+            flexShrink: 0,
+            zIndex: 3
+          }}
+        >
+          <defs>
+            <clipPath id="bgblur_purchase_tag_clip">
+              <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z"/>
+            </clipPath>
+          </defs>
+          <foreignObject x="3.03555" y="-0.172949" width="14.5764" height="18.7165">
+            <div style={{backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%'}}></div>
+          </foreignObject>
+          <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round"/>
+        </svg>
+        
+        {/* Back Thread */}
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="7" 
+          height="4" 
+          viewBox="0 0 7 4" 
+          fill="none"
+          style={{
+            position: 'absolute',
+            bottom: '11px',
+            right: '11px',
+            width: '6px',
+            height: '2.551px',
+            flexShrink: 0,
+            zIndex: 1
+          }}
+        >
+          <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6"/>
+        </svg>
+      </div>
+    );
+  };
+
+  /** Rate Plan name chip with product icon and product name */
   const renderNameChip = (p: RatePlan) => {
     const productName = p.productName ?? p.product?.productName ?? '—';
+    const productIcon = productIcons[p.productId];
+    
     return (
-      <div className="rp-name-chip">
-        <div className="rp-name-texts">
-          <div className="rp-name-title">{p.ratePlanName || 'N/A'}</div>
-          <div className="rp-name-subtitle" title={productName}>{productName}</div>
+      <div style={{
+        display: 'flex',
+        padding: '8px 16px',
+        alignItems: 'center',
+        gap: '4px',
+        alignSelf: 'stretch',
+        borderBottom: '0.4px solid var(--border-border-1, #E9E9EE)'
+      }}>
+        {/* Product Icon with purchase tag */}
+        <RatePlanIcon 
+          iconData={productIcon?.iconData || null}
+          iconUrl={productIcon?.iconUrl || null}
+        />
+        
+        {/* Rate plan name and product name */}
+        <div className="rp-name-texts" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1
+        }}>
+          <div style={{
+            overflow: 'hidden',
+            color: 'var(--text-text-darkest, #1A2126)',
+            textOverflow: 'ellipsis',
+            fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")',
+            fontSize: 'var(--fontsize-body-md, 14px)',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: 'var(--line-height-body-md, 20px)',
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 1,
+            alignSelf: 'stretch'
+          }}>
+            {p.ratePlanName || 'N/A'}
+          </div>
+          <div style={{
+            overflow: 'hidden',
+            color: 'var(--text-text-light, #767183)',
+            textOverflow: 'ellipsis',
+            fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")',
+            fontSize: 'var(--fontsize-body-sm, 12px)',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: 'var(--line-height-body-sm, 16px)',
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 1,
+            alignSelf: 'stretch'
+          }} title={productName}>
+            {productName}
+          </div>
         </div>
       </div>
     );
@@ -372,10 +846,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
             cancel={{ label: 'Delete', onClick: () => setShowConfirmDelete(true) }}
             save={{
               label: 'Save as Draft',
+              labelWhenSaved: 'Saved as Draft',
+              saved: draftSaved,
               saving: draftSaving,
               disabled: !saveDraftFn,
               onClick: async () => {
                 if (!saveDraftFn) return;
+                setDraftSaved(false); // Reset saved state during save
                 setDraftSaving(true);
                 const ok = await saveDraftFn(); // boolean
                 setDraftSaving(false);
@@ -383,10 +860,9 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   // validation failed; keep wizard open
                   return;
                 }
-                // ✅ Stay on the same page after saving (no redirect, no closing wizard)
-                // Optionally give feedback:
+                setDraftSaved(true); // Mark as saved
+                // Stay on the same page after saving
                 showToast?.({ message: 'Draft saved', kind: 'success' });
-                // Do not call setShowCreatePlan(false) and do not reload the table here.
               }
             }}
           />
@@ -395,6 +871,9 @@ const RatePlans: React.FC<RatePlansProps> = ({
               ref={createPlanRef}
               registerSaveDraft={(fn) => setSaveDraftFn(() => fn)}
               draftData={draftPlanData}
+              onFieldChange={() => {
+                if (draftSaved) setDraftSaved(false);
+              }}
               onClose={() => {
                 setDraftPlanData(null);
                 clearAllRatePlanData();
@@ -463,6 +942,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             primaryLabel="+ New Rate Plan"
             onPrimaryClick={() => { 
               clearAllRatePlanData(); 
+              setDraftSaved(false);
               setShowCreatePlan(true); 
               navigate('/get-started/rate-plans'); 
             }}
@@ -547,6 +1027,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                           </p>
                           <button className="empty-new-rate-btn" onClick={() => { 
                             clearAllRatePlanData(); 
+                            setDraftSaved(false);
                             setShowCreatePlan(true); 
                             navigate('/get-started/rate-plans'); 
                           }}>

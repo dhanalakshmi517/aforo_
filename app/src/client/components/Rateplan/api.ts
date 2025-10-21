@@ -23,6 +23,7 @@ export interface Product {
  * Constants
  * ========================= */
 export const BASE_URL = 'http://54.238.204.246:8080/api';
+export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 const BM_BASE = 'http://18.182.19.181:8081/api/billable-metrics';
 
 /* =========================
@@ -107,8 +108,11 @@ export const fetchBillableMetrics = async (productName?: string): Promise<Billab
   return response.data;
 };
 
-// ⬇️ NEW: get billable metric by id
+// ⬇️ UPDATED: guard against invalid/zero ids
 export const fetchBillableMetricById = async (metricId: number) => {
+  if (!Number.isFinite(metricId) || metricId <= 0) {
+    return null;
+  }
   const { data } = await axios.get(nocache(`${BM_BASE}/${metricId}`));
   return data as {
     metricId: number;
@@ -517,15 +521,15 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
     const pricing = pricingResult.status === 'fulfilled' ? pricingResult.value : null;
     const extras: any = extrasResult.status === 'fulfilled' ? extrasResult.value : {};
 
-    // ---------------- Billable Metric lookup by id (NEW) ----------------
+    // ---------------- Billable Metric lookup by id (UPDATED guard) ----------------
     try {
       const bmId = Number(plan?.billableMetricId);
-      if (Number.isFinite(bmId)) {
+      if (Number.isFinite(bmId) && bmId > 0) {
         const bm = await fetchBillableMetricById(bmId);
         if (bm) {
           plan.billableMetric = {
-            name: bm.metricName ?? (bm as any).name ?? '',
-            uomShort: bm.unitOfMeasure ?? (bm as any).uomShort ?? (bm as any).uom ?? ''
+            name: (bm as any).metricName ?? (bm as any).name ?? '',
+            uomShort: (bm as any).unitOfMeasure ?? (bm as any).uomShort ?? (bm as any).uom ?? ''
           };
         }
       }
@@ -588,7 +592,7 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
 }
 
 /* =========================
- * Revenue Estimation API
+ * Revenue Estimation API (unchanged)
  * ========================= */
 
 export interface RevenueEstimationRequest {

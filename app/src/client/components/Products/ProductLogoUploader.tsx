@@ -46,7 +46,7 @@ const ProductLogoUploader: React.FC<ProductLogoUploaderProps> = ({ logo, onChang
           <!-- GLASS FOREGROUND TILE -->
           <g transform="translate(10.657,9.385)">
             <rect width="29.339" height="26.571" rx="6"
-                  fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
+                  fill="rgba(${parseInt(tile.slice(1, 3), 16)}, ${parseInt(tile.slice(3, 5), 16)}, ${parseInt(tile.slice(5, 7), 16)}, 0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
             <!-- ICON PATH (scaled) -->
             <g transform="translate(5.2,4.2) scale(0.08)">
               <g transform="translate(200,200) translate(-200,-200)">

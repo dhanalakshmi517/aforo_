@@ -40,6 +40,7 @@ interface CreatePricePlanProps {
   onClose: () => void;
   registerSaveDraft?: (fn: () => Promise<boolean>) => void; // returns whether draft actually saved
   draftData?: any; // Draft data from backend for pre-filling
+  onFieldChange?: () => void; // Called when any field changes to reset saved state
 }
 
 const steps = [
@@ -53,7 +54,7 @@ const steps = [
 const CreatePricePlan = React.forwardRef<
   { back: () => boolean; getRatePlanId: () => number | null; validateBeforeBack: () => boolean },
   CreatePricePlanProps
->(({ onClose, registerSaveDraft, draftData }, ref) => {
+>(({ onClose, registerSaveDraft, draftData, onFieldChange }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -762,6 +763,7 @@ const CreatePricePlan = React.forwardRef<
                 onChange={(v: string) => {
                   setPlanName(v);
                   clearErrorIfValid("planName", v.trim().length > 0);
+                  onFieldChange?.();
                 }}
                 error={errors.planName}
               />
@@ -771,6 +773,7 @@ const CreatePricePlan = React.forwardRef<
                 onChange={(v: string) => {
                   setBillingFrequency(v);
                   clearErrorIfValid("billingFrequency", !!v);
+                  onFieldChange?.();
                 }}
                 placeholder="Select billing cycle"
                 options={[
@@ -788,6 +791,7 @@ const CreatePricePlan = React.forwardRef<
                 onChange={(v: string) => {
                   setSelectedProductName(v);
                   clearErrorIfValid("selectedProductName", !!v);
+                  onFieldChange?.();
                 }}
                 placeholder="Select Product"
                 options={
@@ -806,6 +810,7 @@ const CreatePricePlan = React.forwardRef<
                 onChange={(v: string) => {
                   setPaymentMethod(v);
                   clearErrorIfValid("paymentMethod", !!v);
+                  onFieldChange?.();
                 }}
                 placeholder="Select payment method"
                 options={[
@@ -821,6 +826,7 @@ const CreatePricePlan = React.forwardRef<
                 onChange={(v: string) => {
                   setPlanDescription(v);
                   clearErrorIfValid("planDescription", v.trim().length > 0);
+                  onFieldChange?.();
                 }}
                 error={errors.planDescription}
               />
@@ -836,6 +842,7 @@ const CreatePricePlan = React.forwardRef<
               onSelectMetric={(id) => {
                 setSelectedMetricId(id);
                 clearErrorIfValid("billableMetric", id !== null);
+                onFieldChange?.();
               }}
             />
             {errors.billableMetric && (
