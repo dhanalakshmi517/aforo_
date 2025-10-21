@@ -34,6 +34,7 @@ jobs:
         run: |
           rm -rf node_modules package-lock.json
           npm ci || npm install
+          # Ensure the correct Rollup native binary on Linux
           npm install --save-optional @rollup/rollup-linux-x64-gnu
 
       - name: 🛠 Run wasp build from app folder
@@ -53,88 +54,63 @@ jobs:
           ls -la build/
           find build/ -name "index.html" -type f -ls
 
-      # 🔑 Prepare SSH key
-      - name: 🔑 Prepare SSH key
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          set -e
-          echo "$EC2_SSH_KEY" > key.pem
-          chmod 600 key.pem
+      - name: 📤 Copy UI build to EC2 (flattened)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "app/.wasp/build/web-app/build/"
+          target: "/home/ubuntu/frontend-temp"
+          strip_components: 5
+          rm: true
+          overwrite: true
 
-      # 🧹 Ensure remote target exists and is writable by ubuntu
-      - name: 🧹 Prepare remote target dir (fix perms)
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          set -e
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'bash -s' <<'REMOTE'
-          set -e
-          # Create or fix ownership so ubuntu can write
-          sudo mkdir -p /home/ubuntu/frontend-temp
-          sudo chown -R ubuntu:ubuntu /home/ubuntu/frontend-temp
-          # Clean contents to avoid stale files
-          rm -rf /home/ubuntu/frontend-temp/*
-          # Double-check we can write here
-          touch /home/ubuntu/frontend-temp/.write_test && rm /home/ubuntu/frontend-temp/.write_test
-          REMOTE
+      - name: 🚀 SSH and deploy UI to Nginx (NO-CACHE)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
 
-      # 📦➡️🐧 Copy build via tar over SSH (no SFTP/scp quirks)
-      - name: 📤 Transfer build (tar over SSH)
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          set -e
-          # Stream a tarball to the remote and extract into frontend-temp
-          tar -C app/.wasp/build/web-app/build -czf - . \
-            | ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST \
-              'tar -C /home/ubuntu/frontend-temp -xzf -'
+            echo "✅ Cleaning up old files in /var/www/html"
+            sudo rm -rf /var/www/html/*
+            sudo mkdir -p /var/www/html
 
-      # 🚀 Deploy to Nginx
-      - name: 🚀 Deploy UI to Nginx (NO-CACHE)
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          set -e
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST 'bash -s' << "REMOTE"
-          set -e
-          echo "✅ Cleaning up old files in /var/www/html"
-          sudo rm -rf /var/www/html/*
-          sudo mkdir -p /var/www/html
+            echo "📦 Copying new build files to /var/www/html"
+            sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
 
-          echo "📦 Copying new build files to /var/www/html"
-          sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
+            echo "🔐 Setting ownership and permissions"
+            sudo chown -R www-data:www-data /var/www/html
+            sudo find /var/www/html -type d -exec chmod 755 {} \;
+            sudo find /var/www/html -type f -exec chmod 644 {} \;
 
-          echo "🔐 Setting ownership and permissions"
-          sudo chown -R www-data:www-data /var/www/html
-          sudo find /var/www/html -type d -exec chmod 755 {} \;
-          sudo find /var/www/html -type f -exec chmod 644 {} \;
+            echo "📝 Writing NO-CACHE Nginx server block"
+            sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
+            server {
+              listen 80;
+              server_name _;
 
-          echo "📝 Writing NO-CACHE Nginx server block"
-          sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
-          server {
-            listen 80;
-            server_name _;
+              root /var/www/html;
+              index index.html;
 
-            root /var/www/html;
-            index index.html;
-
-            # ZERO-CACHE for everything (HTML + assets)
-            location / {
-              try_files $uri $uri/ /index.html;
-              add_header Cache-Control "no-store" always;
-              expires off;
-              etag off;
+              # ZERO-CACHE for everything (HTML + assets)
+              location / {
+                try_files $uri $uri/ /index.html;
+                add_header Cache-Control "no-store" always;
+                expires off;
+                etag off;
+              }
             }
-          }
-          NGINXCONF
+            NGINXCONF
 
-          echo "🧪 Testing Nginx config & reloading"
-          sudo nginx -t
-          sudo systemctl reload nginx
+            echo "🧪 Testing Nginx config & reloading"
+            sudo nginx -t
+            sudo systemctl reload nginx
 
-          echo "📋 Final file list in /var/www/html"
-          ls -la /var/www/html
+            echo "📋 Final file list in /var/www/html"
+            ls -la /var/www/html
 
-          echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
-          REMOTE
+            echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
