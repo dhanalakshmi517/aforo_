@@ -35,6 +35,7 @@ import EmptyBox from './Componenets/empty.svg';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import TertiaryButton from '../componenetsss/TertiaryButton';
+import ProductIcon, { ProductIconData } from './ProductIcon';
 
 interface Product {
   productId: string;
@@ -46,7 +47,9 @@ interface Product {
   category: string;
   createdOn?: string;
   icon?: string; // raw backend path
+  productIcon?: string; // JSON string containing structured icon data from API
   iconUrl?: string | null; // blob url fetched with auth
+  iconData?: ProductIconData | null; // structured icon data from ProductIconPicker
   metrics?: Array<{
     metricName: string;
     unitOfMeasure: string;
@@ -107,13 +110,143 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setIsLoading(true);
     try {
       const products = await getProducts();
+      console.log('📦 Raw products from API:', products);
+      
+      // Check if any products have the productIcon field
+      const productsWithIcon = products.filter((p: any) => p.productIcon);
+      console.log('🎯 Products with productIcon field:', productsWithIcon.length);
+      if (productsWithIcon.length > 0) {
+        console.log('📝 Sample productIcon data:', productsWithIcon[0].productIcon);
+      }
+      
       const productsWithMetricsPromises = products.map(async (product) => {
-        const iconUrl = await fetchIconWithAuth((product as any).icon);
+        console.log('🔍 Processing product:', product.productName, 'ID:', product.productId);
+        console.log('🔍 ALL product fields:', Object.keys(product));
+        console.log('🔍 Full product object:', product);
+        console.log('🖼️ Raw icon field:', product.icon);
+        console.log('🎨 Raw productIcon field:', product.productIcon);
+        
+        // Check for alternative field names
+        const altFields = ['product_icon', 'producticon', 'iconData', 'icon_data'];
+        altFields.forEach(field => {
+          if ((product as any)[field]) {
+            console.log(`🔍 Found alternative field ${field}:`, (product as any)[field]);
+          }
+        });
+        
+        const iconUrl = await fetchIconWithAuth(product.icon);
+        console.log('🌐 Fetched iconUrl:', iconUrl);
+        
+        // Try to parse structured icon data
+        let iconData: ProductIconData | null = null;
+        try {
+          if (product.productIcon) {
+            console.log('📝 Attempting to parse productIcon JSON...');
+            const parsed = JSON.parse(product.productIcon);
+            console.log('✅ Parsed productIcon data:', parsed);
+            if (parsed.iconData) {
+              iconData = parsed.iconData as ProductIconData;
+              console.log('🎯 Extracted iconData:', iconData);
+            } else {
+              console.log('⚠️ No iconData found in parsed object');
+            }
+          } else {
+            console.log('❌ No productIcon field found');
+            // Fallback: Try to fetch and parse the actual SVG content
+            if (product.icon && iconUrl) {
+              console.log('🔧 Attempting to fetch and parse SVG content...');
+              try {
+                // Fetch the SVG content
+                const svgResponse = await fetch(iconUrl);
+                const svgText = await svgResponse.text();
+                console.log('📄 Fetched SVG content length:', svgText.length);
+                
+                // Parse the SVG to extract icon data
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgText, 'image/svg+xml');
+                
+                // Extract the tile color from the rect with specific dimensions (the back tile)
+                // Looking for: <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="#0F6DDA"/>
+                const rects = doc.querySelectorAll('rect');
+                let tileColor = '#0F6DDA'; // default
+                for (const rect of rects) {
+                  const width = rect.getAttribute('width');
+                  const fill = rect.getAttribute('fill');
+                  // Find the back tile rect (width="29.45" or similar)
+                  if (width && parseFloat(width) > 29 && parseFloat(width) < 30 && fill && fill.startsWith('#')) {
+                    tileColor = fill;
+                    console.log('🎨 Extracted tile color:', tileColor);
+                    break;
+                  }
+                }
+                
+                // Extract the icon path
+                const pathElement = doc.querySelector('path[fill="#FFFFFF"]');
+                let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z'; // default
+                let viewBox = '0 0 24 24';
+                if (pathElement) {
+                  svgPath = pathElement.getAttribute('d') || svgPath;
+                  const svgElement = pathElement.closest('svg');
+                  if (svgElement) {
+                    viewBox = svgElement.getAttribute('viewBox') || viewBox;
+                  }
+                  console.log('📐 Extracted path and viewBox');
+                }
+                
+                // Extract gradient colors if available
+                let outerBg: [string, string] | undefined;
+                const gradientElement = doc.querySelector('linearGradient');
+                if (gradientElement) {
+                  const stops = gradientElement.querySelectorAll('stop');
+                  if (stops.length >= 2) {
+                    const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+                    const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+                    if (color1 && color2) {
+                      outerBg = [color1.trim(), color2.trim()];
+                      console.log('🌈 Extracted gradient colors:', outerBg);
+                    }
+                  }
+                }
+                
+                iconData = {
+                  id: `product-${product.productId}`,
+                  label: product.productName || 'Product',
+                  svgPath,
+                  tileColor,
+                  viewBox,
+                  ...(outerBg && { outerBg })
+                };
+                console.log('✅ Reconstructed iconData from SVG:', iconData);
+              } catch (err) {
+                console.error('❌ Failed to parse SVG:', err);
+                // Fallback to default icon
+                iconData = {
+                  id: `product-${product.productId}`,
+                  label: product.productName || 'Product',
+                  svgPath: 'M12 2L2 7L12 12L22 7L12 2Z',
+                  tileColor: '#0F6DDA',
+                  viewBox: '0 0 24 24'
+                };
+              }
+            }
+          }
+        } catch (e) {
+          console.error('💥 Error parsing productIcon JSON:', e);
+          // If parsing fails, iconData remains null and we'll fall back to iconUrl or initials
+        }
+        
         const productWithMetrics = {
           ...product,
           metrics: (product as any).billableMetrics || [],
-          iconUrl
+          iconUrl,
+          iconData
         } as Product;
+        console.log('🏁 Final product with icon data:', {
+          name: productWithMetrics.productName,
+          hasIconUrl: !!productWithMetrics.iconUrl,
+          hasIconData: !!productWithMetrics.iconData,
+          iconData: productWithMetrics.iconData
+        });
         return productWithMetrics;
       });
 
@@ -214,6 +347,79 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const getProductTypeName = (type: string): string => {
     const normalizedType = type.toLowerCase();
     return (productTypeNames as any)[normalizedType] || type;
+  };
+
+  // Mini ProductIcon renderer for the table
+  const TableProductIcon: React.FC<{ iconData: ProductIconData }> = ({ iconData }) => {
+    console.log('🎨 TableProductIcon rendering with iconData:', iconData);
+    const tile = iconData.tileColor ?? '#CC9434';
+    
+    const hexToRgba = (hex: string, opacity: number) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    };
+
+    return (
+      <div
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 8,
+          border: '0.6px solid var(--border-border-2, #D5D4DF)',
+          background: `
+            ${hexToRgba(tile, 0.15)},
+            linear-gradient(0deg, rgba(2, 151, 158, 0.10) 0%, rgba(2, 151, 158, 0.10) 100%),
+            var(--surface-layer-4, #FFF)
+          `,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* BACK TILE */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 6,
+            top: 4,
+            width: 16,
+            height: 16,
+            borderRadius: 3,
+            background: tile,
+          }}
+        />
+        {/* GLASS FOREGROUND TILE */}
+        <div
+          style={{
+            width: 18,
+            height: 18,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 4,
+            border: '0.6px solid #FFF',
+            background: hexToRgba(tile, 0.10),
+            backdropFilter: 'blur(2px)',
+            transform: 'translate(2px, 1px)',
+            boxShadow: 'inset 0 1px 4px rgba(255,255,255,0.35)',
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="10"
+            height="10"
+            viewBox={iconData.viewBox ?? "0 0 18 18"}
+            fill="none"
+          >
+            <path d={iconData.svgPath} fill="#FFFFFF" />
+          </svg>
+        </div>
+      </div>
+    );
   };
 
   const InfoIcon = () => (
@@ -362,32 +568,72 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td className="product-name-td">
                           <div className="product-name-cell">
                             <div className="product-name-cell__icon">
-                              {product.iconUrl ? (
-                                <div className="product-avatar product-avatar--image">
-                                  <img
-                                    src={product.iconUrl}
-                                    alt={`${product.productName} icon`}
-                                    onError={(e) => {
-                                      const wrapper = e.currentTarget.parentElement as HTMLElement;
-                                      if (wrapper) wrapper.classList.remove('product-avatar--image');
-                                      e.currentTarget.remove();
-                                    }}
-                                  />
-                                </div>
-                              ) : (
-                                <div
-                                  className="product-avatar"
-                                  style={{
-                                    backgroundColor:
-                                      getRandomBackgroundColor(parseInt(product.productId) || 0),
-                                    border: `1px solid ${
-                                      getRandomBorderColor(parseInt(product.productId) || 0)
-                                    }`
-                                  }}
-                                >
-                                  {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
-                                </div>
-                              )}
+                              {(() => {
+                                console.log('🎭 Rendering icon for product:', product.productName);
+                                console.log('🎨 Has iconData:', !!product.iconData, product.iconData);
+                                console.log('🖼️ Has iconUrl:', !!product.iconUrl, product.iconUrl);
+                                
+                                if (product.iconData) {
+                                  console.log('✅ Using TableProductIcon with iconData');
+                                  return <TableProductIcon iconData={product.iconData} />;
+                                } else if (product.iconUrl) {
+                                  console.log('🌐 Using iconUrl fallback');
+                                  return (
+                                    <div 
+                                      className="product-avatar product-avatar--image"
+                                      style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: 8,
+                                        overflow: 'hidden',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: '0.6px solid var(--border-border-2, #D5D4DF)',
+                                      }}
+                                    >
+                                      <img
+                                        src={product.iconUrl}
+                                        alt={`${product.productName} icon`}
+                                        style={{
+                                          width: '100%',
+                                          height: '100%',
+                                          objectFit: 'contain',
+                                        }}
+                                        onError={(e) => {
+                                          const wrapper = e.currentTarget.parentElement as HTMLElement;
+                                          if (wrapper) wrapper.classList.remove('product-avatar--image');
+                                          e.currentTarget.remove();
+                                        }}
+                                      />
+                                    </div>
+                                  );
+                                } else {
+                                  console.log('🔤 Using initials fallback');
+                                  return (
+                                    <div
+                                      className="product-avatar"
+                                      style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: 8,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        backgroundColor:
+                                          getRandomBackgroundColor(parseInt(product.productId) || 0),
+                                        border: `1px solid ${
+                                          getRandomBorderColor(parseInt(product.productId) || 0)
+                                        }`
+                                      }}
+                                    >
+                                      {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
+                                    </div>
+                                  );
+                                }
+                              })()}
                             </div>
 
                             <div className="product-name-cell__content">

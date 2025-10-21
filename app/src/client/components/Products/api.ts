@@ -10,6 +10,7 @@ export type Product = {
   category: string;
   createdOn?: string;
   icon?: string; // backend may return "/uploads/icons/<file>.svg" or "api/uploads/..."
+  productIcon?: string; // JSON string containing structured icon data
 };
 
 export const BASE_URL = 'http://54.238.204.246:8080/api';
@@ -163,9 +164,24 @@ export const createProduct = async (
     if (payload.productDescription?.trim())
       requestPayload.productDescription = payload.productDescription.trim();
     if (payload.status) requestPayload.status = payload.status;
+    if (payload.productIcon) {
+      console.log('📤 Adding productIcon to request payload:', payload.productIcon);
+      requestPayload.productIcon = payload.productIcon;
+    }
 
-    const requestJson = JSON.stringify(requestPayload);
+    // Remove productIcon from request payload to send it separately
+    const { productIcon, ...requestWithoutIcon } = requestPayload;
+    
+    const requestJson = JSON.stringify(requestWithoutIcon);
+    console.log('📤 createProduct requestPayload (without icon):', requestWithoutIcon);
+    console.log('📤 createProduct requestJson:', requestJson);
     formData.append('request', requestJson);
+    
+    // Add productIcon as a separate FormData field if it exists
+    if (productIcon) {
+      console.log('📤 Adding productIcon as separate FormData field');
+      formData.append('productIcon', productIcon);
+    }
 
     if (payload.productIcon) {
       try {
@@ -197,6 +213,17 @@ export const createProduct = async (
     }
 
     const api = createApiClient();
+    
+    // Log the FormData contents for debugging
+    console.log('📤 FormData contents:');
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof Blob) {
+        console.log(`  ${key}: [Blob] ${value.type} (${value.size} bytes)`);
+      } else {
+        console.log(`  ${key}:`, value);
+      }
+    }
+    
     const response = await api.post<Product>('/products', formData, {
       headers: {
         // Some backends require org header during creation
@@ -204,7 +231,9 @@ export const createProduct = async (
       }
     });
 
-    return handleApiResponse<Product>(response);
+    const result = handleApiResponse<Product>(response);
+    console.log('📥 createProduct API response:', result);
+    return result;
   } catch (error) {
     console.error('Error creating product:', error);
     if (axios.isAxiosError(error)) {
@@ -227,6 +256,9 @@ export const updateProduct = async (
       cleanPayload[key] = typeof value === 'string' ? value.trim() : value;
     }
   });
+
+  console.log('🔄 updateProduct payload:', payload);
+  console.log('🧹 updateProduct cleanPayload:', cleanPayload);
 
   if (Object.keys(cleanPayload).length === 0) {
     throw new Error('No valid fields to update');

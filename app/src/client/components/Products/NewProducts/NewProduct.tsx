@@ -313,6 +313,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           // Save the full icon data so we can reconstruct it when editing
           iconData: selectedIcon,
           svgContent: (() => {
+            console.log('🎨 Creating SVG content for icon:', selectedIcon);
             const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
             const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
             const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
@@ -326,11 +327,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
               </defs>
               <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-${selectedIcon.id})"/>
               <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
-                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" stroke-width="0.6"/>
+                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" strokeWidth="0.6"/>
               <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${tile}"/>
               <g transform="translate(10.657,9.385)">
                 <rect width="29.339" height="26.571" rx="6"
-                      fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" stroke-width="0.6"/>
+                      fill="rgba(${parseInt(tile.slice(1, 3), 16)}, ${parseInt(tile.slice(3, 5), 16)}, ${parseInt(tile.slice(5, 7), 16)}, 0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
                 <svg x="5.67" y="4.285" width="18" height="18" viewBox="${viewBox}">
                   <path d="${selectedIcon.svgPath}" fill="#FFFFFF"/>
                 </svg>
@@ -339,6 +340,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           })()
         })
       } : basePayload;
+
+      console.log('💾 Final payload being sent:', payloadWithIcon);
 
       if (isDraft || !createdProductId) {
         // For new products or drafts, include all fields
@@ -355,9 +358,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         } else {
           // Create new product (draft or not)
           console.log('Creating new product with payload:', payload);
+          console.log('🔍 Payload productIcon field:', payload.productIcon);
           const response = await createProduct(payload);
           setCreatedProductId(response.productId);
           console.log('Product created with ID:', response.productId);
+          console.log('🔍 Created product response:', response);
         }
       } else {
         // For updates, only include changed fields
@@ -393,11 +398,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
               </defs>
               <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-${selectedIcon.id})"/>
               <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
-                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" stroke-width="0.6"/>
+                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" strokeWidth="0.6"/>
               <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${tile}"/>
               <g transform="translate(10.657,9.385)">
                 <rect width="29.339" height="26.571" rx="6"
-                      fill="rgba(202,171,213,0.10)" stroke="#FFFFFF" stroke-width="0.6"/>
+                      fill="rgba(${parseInt(tile.slice(1, 3), 16)}, ${parseInt(tile.slice(3, 5), 16)}, ${parseInt(tile.slice(5, 7), 16)}, 0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
                 <svg x="5.67" y="4.285" width="18" height="18" viewBox="${viewBox}">
                   <path d="${selectedIcon.svgPath}" fill="#FFFFFF"/>
                 </svg>
@@ -412,8 +417,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         }
         
         console.log('Updating product with changes:', changes);
-        await updateProduct(createdProductId, changes);
+        console.log('🔍 Changes productIcon field:', changes.productIcon);
+        const updateResponse = await updateProduct(createdProductId, changes);
         console.log('Product updated with changes');
+        console.log('🔍 Update response:', updateResponse);
       }
       
       // Update last saved data
@@ -613,9 +620,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                 <div className="np-icon-placeholder">
                                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
                                     <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA"/>
-                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" stroke-width="1.05"/>
-                                    <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" stroke-width="2.1"/>
-                                    <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" stroke-width="2.1"/>
+                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05"/>
+                                    <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1"/>
+                                    <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1"/>
                                   </svg>
                                 </div>
                                 <span className="np-icon-placeholder-text">Add product icon</span>
@@ -713,7 +720,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                       onClick={() => setSelectedIcon(null)}
                                     >
                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14" fill="none">
-  <path d="M0.75 3.7845H11.25M10.0833 3.7845V11.9512C10.0833 12.5345 9.5 13.1178 8.91667 13.1178H3.08333C2.5 13.1178 1.91667 12.5345 1.91667 11.9512V3.7845M3.66667 3.78451V2.61784C3.66667 2.03451 4.25 1.45117 4.83333 1.45117H7.16667C7.75 1.45117 8.33333 2.03451 8.33333 2.61784V3.78451M4.83333 6.70117V10.2012M7.16667 6.70117V10.2012" stroke="#ED5142" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0.75 3.7845H11.25M10.0833 3.7845V11.9512C10.0833 12.5345 9.5 13.1178 8.91667 13.1178H3.08333C2.5 13.1178 1.91667 12.5345 1.91667 11.9512V3.7845M3.66667 3.78451V2.61784C3.66667 2.03451 4.25 1.45117 4.83333 1.45117H7.16667C7.75 1.45117 8.33333 2.03451 8.33333 2.61784V3.78451M4.83333 6.70117V10.2012M7.16667 6.70117V10.2012" stroke="#ED5142" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
 </svg>
                                       <span>Remove</span>
                                     </button>

@@ -80,7 +80,7 @@ const ProductIcon: React.FC<{
             flexShrink: 0,
             borderRadius: 6,
             border: '0.6px solid #FFF',
-            background: 'rgba(202, 171, 213, 0.10)',
+            background: hexToRgba(tile, 0.10),
             backdropFilter: 'blur(3.875px)',
             transform: 'translate(3px, 2px)',  // moved up slightly for clearer icon visibility
             boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
