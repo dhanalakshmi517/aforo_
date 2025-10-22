@@ -143,7 +143,9 @@ export const getProducts = async (): Promise<Product[]> => {
   verifyAuth();
   try {
     const api = createApiClient();
-    const response = await api.get<Product[]>('/products');
+    // Add cache-busting parameter to ensure fresh data
+    const timestamp = Date.now();
+    const response = await api.get<Product[]>(`/products?_t=${timestamp}`);
     return handleApiResponse(response);
   } catch (error) {
     return handleApiError(error);
@@ -584,6 +586,115 @@ export const finalizeProduct = async (
     });
     return { success: true, message: 'Product finalized successfully' };
   } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const updateProductIcon = async (productId: string, iconData: any): Promise<{ success: boolean; message: string }> => {
+  try {
+    const authData = getAuthData();
+    if (!authData?.token) {
+      throw new Error('No authentication token found');
+    }
+
+    console.log('🔄 Updating product icon using same approach as createProduct...');
+
+    if (iconData === null) {
+      // Remove icon - update product with empty productIcon
+      console.log('🗑️ Removing product icon via /api/products/{id}...');
+      
+      const api = createApiClient();
+      await api.patch(`/products/${productId}`, { productIcon: null }, {
+        headers: {
+          'X-Organization-Id': authData?.organizationId?.toString() || ''
+        }
+      });
+      
+      console.log('✅ Product icon removed successfully');
+      return { success: true, message: 'Product icon removed successfully' };
+    } else {
+      // Follow the same approach as createProduct - use FormData with both structured data and file
+      const formData = new FormData();
+      
+      // Create the productIcon JSON - use SIMPLE SVG like createProduct
+      let simpleSvgContent: string;
+      
+      if (iconData.svgContent) {
+        // Use the original SVG content as-is
+        simpleSvgContent = iconData.svgContent;
+      } else if (iconData.svgPath) {
+        // Create a simple SVG from the path - no extra styling or frames
+        simpleSvgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
+          iconData.viewBox || '0 0 24 24'
+        }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+      } else {
+        throw new Error('Invalid icon data: missing svgContent or svgPath');
+      }
+      
+      const productIconJson = JSON.stringify({
+        iconData: iconData,
+        svgContent: simpleSvgContent
+      });
+
+      // Prepare request payload (same structure as createProduct)
+      const requestPayload = { productIcon: productIconJson };
+      const requestJson = JSON.stringify(requestPayload);
+      
+      console.log('📤 updateProductIcon requestPayload:', requestPayload);
+      formData.append('request', requestJson);
+      
+      // Add productIcon as separate FormData field
+      formData.append('productIcon', productIconJson);
+
+      // Create and add the SVG file (EXACT same logic as createProduct)
+      try {
+        // Use the EXACT same SVG generation logic as createProduct - NO CHANGES
+        let svgContent: string;
+        
+        if (iconData.svgContent) {
+          // Use the original SVG content as-is
+          svgContent = iconData.svgContent;
+        } else if (iconData.svgPath) {
+          // Create a simple SVG from the path - no extra styling or frames
+          svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
+            iconData.viewBox || '0 0 24 24'
+          }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+        } else {
+          throw new Error('Invalid icon data: missing svgContent or svgPath');
+        }
+
+        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+        formData.append('icon', svgBlob, 'icon.svg');
+        
+        console.log('📤 Added SVG file to FormData (simple format):', svgContent.length, 'bytes');
+      } catch (e) {
+        console.error('Error processing icon for update:', e);
+      }
+
+      // Log FormData contents
+      console.log('📤 FormData contents for update:');
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof Blob) {
+          console.log(`  ${key}: [Blob] ${value.type} (${value.size} bytes)`);
+        } else {
+          console.log(`  ${key}:`, value);
+        }
+      }
+
+      // Use the correct /icon endpoint that updates both icon URL and productIcon field
+      const api = createApiClient();
+      const response = await api.patch(`/products/${productId}/icon`, formData, {
+        headers: {
+          'X-Organization-Id': authData?.organizationId?.toString() || ''
+          // Don't set Content-Type - let axios handle FormData
+        }
+      });
+
+      console.log('✅ Product icon updated successfully using createProduct approach');
+      return { success: true, message: 'Product icon updated successfully' };
+    }
+  } catch (error) {
+    console.error('❌ Failed to update product icon:', error);
     return handleApiError(error);
   }
 };

@@ -1,109 +1,117 @@
 import { getAuthData } from '../../../utils/auth';
 
-/**
- * Common helper to build authenticated headers.
- */
-export const buildAuthHeaders = async (): Promise<Record<string, string>> => {
-  const authData = getAuthData();
-  if (!authData?.token) throw new Error('No authentication token');
+export const BASE_URL = 'http://54.238.204.246:8080/api';
+
+export const buildAuthHeaders = () => {
+  const auth = getAuthData();
+  if (!auth?.token) throw new Error('No auth token');
   return {
-    'Authorization': `Bearer ${authData.token}`,
+    'Authorization': `Bearer ${auth.token}`,
     'Content-Type': 'application/json',
-    'X-Organization-Id': authData?.organizationId?.toString() || '',
+    'X-Organization-Id': auth?.organizationId?.toString() || ''
   };
 };
 
-/** Update general product details (name, version, sku, description) */
-export const updateGeneralDetails = async (
-  productId: string,
-  payload: { productName: string; version: string; internalSkuCode: string; productDescription: string },
-  method: 'PUT' | 'PATCH' = 'PUT'
-): Promise<void> => {
-  const headers = await buildAuthHeaders();
-  const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}`, {
-    method,
-    headers,
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to update product');
-};
-
-/** Fetch general details for an existing product by ID */
-export const fetchGeneralDetails = async (productId: string): Promise<any> => {
-  const headers = await buildAuthHeaders();
-  const res = await fetch(`http://54.238.204.246:8080/api/products/${productId}`, { headers });
+export const fetchGeneralDetails = async (productId: string) => {
+  const res = await fetch(`${BASE_URL}/products/${productId}`, { headers: buildAuthHeaders() });
   if (!res.ok) throw new Error('Failed to fetch product');
   return res.json();
 };
 
-/** Update configuration section for given product + productType */
-export const updateConfiguration = async (
-  productId: string,
-  productType: string,
-  config: Record<string, string>,
-  usePost: boolean = false // If true, use POST (for new configurations or changed product type)
-): Promise<void> => {
-  // Map UI labels to backend keys first
-  let mapped: Record<string, string | undefined> = {};
-  switch (productType) {
-    case 'FlatFile':
-      mapped = {
-        format: config['File Format'],
-        fileLocation: config['File Location'],
-      };
-      break;
-    case 'API':
-      mapped = {
-        endpointUrl: config['Endpoint URL'],
-        authType: config['Auth Type'],
-      };
-      break;
-    case 'SQLResult':
-      mapped = {
-        connectionString: config['Connection String'],
-        dbType: config['DB Type'],
-        authType: config['Auth Type'],
-      };
-      break;
-    case 'LLMToken':
-      mapped = {
-        modelName: config['Model Name'],
-        endpointUrl: config['Endpoint URL'],
-        authType: config['Auth Type'],
-      };
-      break;
-    default:
-      mapped = config;
-  }
+export const updateGeneralDetails = async (productId: string, payload: any) => {
+  const res = await fetch(`${BASE_URL}/products/${productId}`, {
+    method: 'PATCH',
+    headers: buildAuthHeaders(),
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Failed to update general details');
+  return res.json();
+};
 
-  // Remove empty / undefined values so we only send selected ones
-  const payload: Record<string, string> = Object.entries(mapped).reduce((acc, [k, v]) => {
-    if (v !== undefined && v !== null && v !== '') {
-      acc[k] = v as string;
-    }
-    return acc;
-  }, {} as Record<string, string>);
-
-  const headers = await buildAuthHeaders();
-  const endpointMap: Record<string, string> = {
+// --- Configuration API (edit/create) ---
+const typeToPath = (t: string) => {
+  const m: Record<string,string> = {
     API: 'api',
     FlatFile: 'flatfile',
     SQLResult: 'sql-result',
     LLMToken: 'llm-token',
   };
-  const endpoint = endpointMap[productType] || productType.toLowerCase();
-  const url = `http://54.238.204.246:8080/api/products/${productId}/${endpoint}`;
+  return m[t] || t.replace(/_/g,'-').toLowerCase();
+};
 
-  // Use POST if product type changed or configuration doesn't exist, otherwise PUT
-  const method = usePost ? 'POST' : 'PUT';
-  console.log(`=== CONFIGURATION API CALL (EditProduct) ===`);
-  console.log(`Method: ${method} (usePost: ${usePost})`);
-  console.log(`URL: ${url}`);
-  console.log(`Payload:`, payload);
-  console.log(`===========================================`);
-  
-  const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
+// Map UI labels to backend keys per type
+const mapConfigForBackend = (productType: string, ui: Record<string, any>) => {
+  const lower = (productType || '').toLowerCase();
+  if (lower === 'flatfile') {
+    return {
+      format: ui['File Format'] ?? ui.format,
+      fileLocation: ui['File Location'] ?? ui.fileLocation,
+    };
+  }
+  if (lower === 'api') {
+    return {
+      endpointUrl: ui['Endpoint URL'] ?? ui.endpointUrl,
+      authType: ui['Auth Type'] ?? ui.authType,
+    };
+  }
+  if (lower === 'sqlresult' || lower === 'sql-result') {
+    return {
+      connectionString: ui['Connection String'] ?? ui.connectionString,
+      dbType: ui['DB Type'] ?? ui.dbType,
+      authType: ui['Auth Type'] ?? ui.authType,
+    };
+  }
+  if (lower === 'llmtoken' || lower === 'llm-token') {
+    return {
+      modelName: ui['Model Name'] ?? ui.modelName,
+      endpointUrl: ui['Endpoint URL'] ?? ui.endpointUrl,
+      authType: ui['Auth Type'] ?? ui.authType,
+    };
+  }
+  return ui;
+};
+
+export const updateConfiguration = async (
+  productId: string,
+  productType: string,
+  rawConfig: Record<string, any>,
+  createNew: boolean // true => POST (create), false => PATCH (update)
+) => {
+  const headers = buildAuthHeaders();
+  const path = typeToPath(productType);
+  const url = `${BASE_URL}/products/${productId}/${path}`;
+
+  // choose HTTP method
+  const method = createNew ? 'POST' : 'PATCH';
+
+  // prepare payload
+  const payload = mapConfigForBackend(productType, rawConfig);
+
+  // strip empty values
+  const cleaned = Object.fromEntries(
+    Object.entries(payload).filter(([_, v]) => v !== undefined && v !== null && `${v}`.trim() !== '')
+  );
+
+  // helpful console
+  // eslint-disable-next-line no-console
+  console.log('=== CONFIGURATION API CALL (EditProduct) ===');
+  // eslint-disable-next-line no-console
+  console.log('Method:', method);
+  // eslint-disable-next-line no-console
+  console.log('URL:', url);
+  // eslint-disable-next-line no-console
+  console.log('Payload:', cleaned);
+  // eslint-disable-next-line no-console
+  console.log('===========================================');
+
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: JSON.stringify(cleaned)
+  });
+
   if (!res.ok) {
     throw new Error('Failed to update configuration');
   }
+  return res.json().catch(() => ({}));
 };

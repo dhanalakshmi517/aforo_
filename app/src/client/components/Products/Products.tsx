@@ -75,6 +75,52 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [updatedIcons, setUpdatedIcons] = useState<Record<string, string>>({});
+  const [preserveLocalIcons, setPreserveLocalIcons] = useState(false);
+
+  // Function to handle icon updates from EditProduct
+  const handleIconUpdate = (productId: string, iconData: ProductIconData | null) => {
+    console.log('🔔 handleIconUpdate called:', { productId, iconData });
+    
+    if (iconData) {
+      console.log('📝 Storing updated icon data for product:', productId, iconData);
+      const iconJson = JSON.stringify({ iconData });
+      setUpdatedIcons(prev => ({ ...prev, [productId]: iconJson }));
+    } else {
+      console.log('🗑️ Removing icon data for product:', productId);
+      setUpdatedIcons(prev => {
+        const newIcons = { ...prev };
+        delete newIcons[productId];
+        return newIcons;
+      });
+    }
+    
+    // Update the products list immediately with the new icon data
+    console.log('🔄 Updating products list with new icon data...');
+    setProducts(prevProducts => 
+      prevProducts.map(p => 
+        p.productId === productId 
+          ? { 
+              ...p, 
+              productIcon: iconData ? JSON.stringify({ iconData }) : undefined,
+              iconData: iconData || undefined
+            }
+          : p
+      )
+    );
+    
+    // Set flag to preserve local icons during any future fetchProducts calls
+    setPreserveLocalIcons(true);
+    
+    // Reset preserve flag after 5 seconds to allow normal refreshes later
+    setTimeout(() => {
+      console.log('🔓 Resetting preserve flag - allowing normal refreshes');
+      setPreserveLocalIcons(false);
+    }, 5000);
+    
+    // Don't fetch here - let onClose handle the backend refresh with proper delay
+  };
 
   const resolveIconUrl = (icon?: string) => {
     if (!icon) return null;
@@ -93,7 +139,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     if (!resolved) return null;
     try {
       const authHeaders = getAuthHeaders();
-      const response = await axios.get(resolved, {
+      // Add cache-busting parameter to force fresh icon fetch
+      const cacheBustUrl = resolved.includes('?') 
+        ? `${resolved}&_cb=${Date.now()}` 
+        : `${resolved}?_cb=${Date.now()}`;
+      
+      const response = await axios.get(cacheBustUrl, {
         responseType: 'blob',
         headers: authHeaders
       });
@@ -107,6 +158,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   };
 
   const fetchProducts = React.useCallback(async () => {
+    console.log('🔄 fetchProducts called - starting fresh fetch...');
     setIsLoading(true);
     try {
       const products = await getProducts();
@@ -140,7 +192,17 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         // Try to parse structured icon data
         let iconData: ProductIconData | null = null;
         try {
-          if (product.productIcon) {
+          // First check if we have locally updated icon data - ALWAYS prioritize this
+          const localIconData = updatedIcons[product.productId];
+          if (localIconData) {
+            console.log('🎯 Using locally stored icon data for product:', product.productId);
+            const parsed = JSON.parse(localIconData);
+            if (parsed.iconData) {
+              iconData = parsed.iconData as ProductIconData;
+              console.log('✅ Using local iconData - SKIPPING backend data:', iconData);
+              // Skip all backend processing for this product - use local data only
+            }
+          } else if (product.productIcon) {
             console.log('📝 Attempting to parse productIcon JSON...');
             const parsed = JSON.parse(product.productIcon);
             console.log('✅ Parsed productIcon data:', parsed);
@@ -251,15 +313,36 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       });
 
       const resolved = await Promise.all(productsWithMetricsPromises);
-      setProducts(resolved);
-      setError(null);
+      console.log('✅ Setting products state with resolved data:', resolved.length, 'products');
+      console.log('🎯 Products with iconData after processing:', resolved.filter(p => p.iconData).length);
+      
+      // If we have local icon updates and preserve flag is set, merge them back in
+      if (preserveLocalIcons && Object.keys(updatedIcons).length > 0) {
+        console.log('🔒 Preserving local icon updates during fetchProducts...');
+        const mergedProducts = resolved.map(product => {
+          const localIconData = updatedIcons[product.productId];
+          if (localIconData) {
+            console.log('🔄 Restoring local icon for product:', product.productId);
+            const parsed = JSON.parse(localIconData);
+            return {
+              ...product,
+              productIcon: localIconData,
+              iconData: parsed.iconData
+            };
+          }
+          return product;
+        });
+        setProducts(mergedProducts);
+      } else {
+        setProducts(resolved);
+      }
     } catch (err) {
       setError('Failed to load products');
       console.error('Error fetching products:', err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [updatedIcons, preserveLocalIcons]);
 
   const [error, setError] = useState<string | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
@@ -354,11 +437,24 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     console.log('🎨 TableProductIcon rendering with iconData:', iconData);
     const tile = iconData.tileColor ?? '#CC9434';
     
+    console.log('🎨 TableProductIcon tile color:', tile);
+    console.log('🎨 TableProductIcon outerBg:', iconData.outerBg);
+    
     const hexToRgba = (hex: string, opacity: number) => {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      // Ensure hex starts with #
+      const cleanHex = hex.startsWith('#') ? hex : `#${hex}`;
+      if (cleanHex.length !== 7) {
+        console.warn('Invalid hex color:', hex, 'using fallback');
+        return `rgba(204, 148, 52, ${opacity})`; // fallback color
+      }
+      
+      const r = parseInt(cleanHex.slice(1, 3), 16);
+      const g = parseInt(cleanHex.slice(3, 5), 16);
+      const b = parseInt(cleanHex.slice(5, 7), 16);
+      
+      const rgba = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      console.log('🎨 hexToRgba:', cleanHex, '->', rgba);
+      return rgba;
     };
 
     return (
@@ -368,11 +464,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           height: 32,
           borderRadius: 8,
           border: '0.6px solid var(--border-border-2, #D5D4DF)',
-          background: `
-            ${hexToRgba(tile, 0.15)},
-            linear-gradient(0deg, rgba(2, 151, 158, 0.10) 0%, rgba(2, 151, 158, 0.10) 100%),
-            var(--surface-layer-4, #FFF)
-          `,
+          background: hexToRgba(tile, 0.15),
+          backgroundColor: '#FFF',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -389,6 +482,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             width: 16,
             height: 16,
             borderRadius: 3,
+            backgroundColor: tile,
             background: tile,
           }}
         />
@@ -402,6 +496,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             alignItems: 'center',
             borderRadius: 4,
             border: '0.6px solid #FFF',
+            backgroundColor: hexToRgba(tile, 0.10),
             background: hexToRgba(tile, 0.10),
             backdropFilter: 'blur(2px)',
             transform: 'translate(2px, 1px)',
@@ -521,10 +616,58 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             <div className="products-form-container">
               <EditProduct
                 productId={editingProduct?.productId.toString() || ''}
+                onIconUpdate={handleIconUpdate}
                 onClose={() => {
                   setIsEditFormOpen(false);
                   setEditingProduct(null);
-                  fetchProducts();
+                  // Force refresh products list to show updated data
+                  console.log('🔄 EditProduct closed - checking if refresh needed...');
+                  setRefreshKey(prev => prev + 1); // Force component refresh
+                  
+                  // Only do backend refresh if we don't have local icon updates
+                  const hasLocalIconUpdate = editingProduct?.productId && updatedIcons[editingProduct.productId];
+                  
+                  if (hasLocalIconUpdate) {
+                    console.log('✅ Using local icon data - skipping backend refresh to prevent flickering');
+                    // Don't fetch from backend - we already have the updated data locally
+                  } else {
+                    console.log('🔄 No local icon data - doing backend refresh...');
+                    setTimeout(async () => {
+                      // Try to fetch individual product first to get updated icon data
+                      if (editingProduct?.productId) {
+                        try {
+                          console.log('🔍 Fetching individual product data for updated icon...');
+                          // Add cache-busting to ensure fresh data
+                          const timestamp = Date.now();
+                          const response = await fetch(`${BASE_URL}/products/${editingProduct.productId}?_t=${timestamp}`, {
+                            headers: getAuthHeaders()
+                          });
+                          if (response.ok) {
+                            const updatedProduct = await response.json();
+                            console.log('📦 Individual product data:', updatedProduct);
+                            console.log('🎨 Individual product productIcon field:', updatedProduct.productIcon);
+                            
+                            // Update the specific product in the list if we got icon data
+                            if (updatedProduct.productIcon) {
+                              console.log('✅ Got updated productIcon, updating products list...');
+                              setProducts(prevProducts => 
+                                prevProducts.map(p => 
+                                  p.productId === editingProduct.productId.toString() 
+                                    ? { ...p, productIcon: updatedProduct.productIcon }
+                                    : p
+                                )
+                              );
+                            }
+                          }
+                        } catch (error) {
+                          console.error('❌ Failed to fetch individual product:', error);
+                        }
+                      }
+                      
+                      // Always do the full refresh as backup
+                      fetchProducts();
+                    }, 1000); // Longer delay to ensure backend has fully processed the icon update
+                  }
                 }}
               />
             </div>
@@ -563,7 +706,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   </thead>
                   <tbody>
                     {filteredProducts.map((product) => (
-                      <tr key={product.productId}>
+                      <tr key={`${product.productId}-${refreshKey}`}>
                         {/* ===== Product Name cell (spec-accurate) ===== */}
                         <td className="product-name-td">
                           <div className="product-name-cell">
