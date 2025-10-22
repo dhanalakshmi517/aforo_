@@ -3,28 +3,6 @@ import { useState, useEffect } from 'react';
 import './ConfigurationTab.css';
 import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
 
-/* ------------------------------------
- * EditConfiguration Component
- * ------------------------------------
- * Enhanced with comprehensive localStorage functionality:
- * 
- * LocalStorage Keys:
- * - editConfigFormData: Current form field values
- * - editConfigProductType: Selected product type
- * - editConfigFetchedData: Original data fetched from API (baseline)
- * - editConfigModifiedFields: Array of field names that user has modified
- * 
- * Features:
- * - Auto-saves all changes to localStorage immediately
- * - Tracks which fields have been modified after fetch
- * - Preserves user changes even if data is re-fetched
- * - Provides utilities to check for unsaved changes
- * - Merges fetched data with existing user changes intelligently
- * ------------------------------------*/
-
-/* ------------------------------------
- * Configuration field definitions
- * ------------------------------------*/
 export interface FieldProps {
   label: string;
   type: 'text' | 'number' | 'select' | 'checkbox' | 'textarea' | 'password' | 'email';
@@ -36,7 +14,6 @@ export interface FieldProps {
   step?: number;
 }
 
-// ProductType enum originates from backend DTO – keep in sync here
 export enum ProductTypeEnum {
   API = 'API',
   FlatFile = 'FlatFile',
@@ -82,12 +59,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     { label: 'File Location', type: 'text', placeholder: '/path/to/file or s3://bucket/key', required: true },
   ],
   [ProductTypeEnum.SQLResult]: [
-    {
-      label: 'Connection String',
-      type: 'text',
-      placeholder: 'jdbc:mysql://host:3306/db?user=usr&password=pwd',
-      required: true,
-    },
+    { label: 'Connection String', type: 'text', placeholder: 'jdbc:mysql://host:3306/db?user=usr&password=pwd', required: true },
     {
       label: 'DB Type',
       type: 'select',
@@ -129,117 +101,10 @@ export const configurationFields: Record<string, FieldProps[]> = {
       ],
     },
   ],
-  software: [
-    {
-      label: 'License Type',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Single User', value: 'single' },
-        { label: 'Multi User', value: 'multi' },
-        { label: 'Enterprise', value: 'enterprise' },
-      ],
-    },
-    { label: 'Version', type: 'text', placeholder: 'e.g., 1.0.0', required: true },
-    {
-      label: 'Platform',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Windows', value: 'windows' },
-        { label: 'macOS', value: 'macos' },
-        { label: 'Linux', value: 'linux' },
-        { label: 'Web', value: 'web' },
-      ],
-    },
-    { label: 'System Requirements', type: 'textarea', placeholder: 'Minimum system requirements...' },
-  ],
-  hardware: [
-    { label: 'Model Number', type: 'text', placeholder: 'e.g., HW-2024-001', required: true },
-    { label: 'Warranty Period (months)', type: 'number', min: 1, max: 120, required: true },
-    {
-      label: 'Color',
-      type: 'select',
-      options: [
-        { label: 'Black', value: 'black' },
-        { label: 'White', value: 'white' },
-        { label: 'Silver', value: 'silver' },
-        { label: 'Custom', value: 'custom' },
-      ],
-    },
-    { label: 'Dimensions', type: 'text', placeholder: 'L x W x H (cm)' },
-    { label: 'Weight (kg)', type: 'number', step: 0.1, min: 0 },
-  ],
-  service: [
-    {
-      label: 'Service Type',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Consultation', value: 'consultation' },
-        { label: 'Implementation', value: 'implementation' },
-        { label: 'Support', value: 'support' },
-        { label: 'Training', value: 'training' },
-      ],
-    },
-    { label: 'Duration (hours)', type: 'number', min: 1, required: true },
-    {
-      label: 'Location',
-      type: 'select',
-      options: [
-        { label: 'On-site', value: 'onsite' },
-        { label: 'Remote', value: 'remote' },
-        { label: 'Hybrid', value: 'hybrid' },
-      ],
-    },
-    { label: 'Prerequisites', type: 'textarea', placeholder: 'Any requirements or prerequisites...' },
-  ],
-  digital: [
-    {
-      label: 'File Format',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'PDF', value: 'pdf' },
-        { label: 'Video (MP4)', value: 'mp4' },
-        { label: 'Audio (MP3)', value: 'mp3' },
-        { label: 'Archive (ZIP)', value: 'zip' },
-        { label: 'Other', value: 'other' },
-      ],
-    },
-    { label: 'File Size (MB)', type: 'number', min: 0.1, step: 0.1 },
-    {
-      label: 'Access Type',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Download', value: 'download' },
-        { label: 'Streaming', value: 'streaming' },
-        { label: 'Online Access', value: 'online' },
-      ],
-    },
-    { label: 'DRM Protection', type: 'checkbox' },
-    {
-      label: 'Description',
-      type: 'textarea',
-      placeholder: 'Detailed description of the digital product...',
-      required: true,
-    },
-  ],
 };
 
-export const getSelectOptions = (fieldLabel: string): Array<{ label: string; value: string }> | null => {
-  return null;
-};
+export const getSelectOptions = (_: string) => null;
 
-/* ------------------------------------
- * LocalStorage Utility Functions
- * ------------------------------------*/
-
-/**
- * Clears all localStorage data for edit configuration
- * Removes: form data, product type, fetched data, and modified fields tracking
- */
 export const clearEditConfigStorage = () => {
   localStorage.removeItem('editConfigFormData');
   localStorage.removeItem('editConfigProductType');
@@ -247,89 +112,61 @@ export const clearEditConfigStorage = () => {
   localStorage.removeItem('editConfigModifiedFields');
 };
 
-/**
- * Gets the list of field names that have been modified by the user
- * @returns Array of field label strings that were changed after initial fetch
- */
 export const getModifiedFields = (): string[] => {
   try {
     const modifiedFields = localStorage.getItem('editConfigModifiedFields');
     return modifiedFields ? JSON.parse(modifiedFields) : [];
-  } catch (error) {
-    console.error('Error reading modified fields:', error);
+  } catch {
     return [];
   }
 };
 
-/**
- * Checks if there are unsaved changes by comparing current data with fetched baseline
- * @returns true if current form data differs from originally fetched data
- */
 export const hasUnsavedChanges = (): boolean => {
   try {
     const currentData = localStorage.getItem('editConfigFormData');
     const fetchedData = localStorage.getItem('editConfigFetchedData');
-    
     if (!currentData || !fetchedData) return false;
-    
     return JSON.stringify(JSON.parse(currentData)) !== JSON.stringify(JSON.parse(fetchedData));
-  } catch (error) {
-    console.error('Error checking unsaved changes:', error);
+  } catch {
     return false;
   }
 };
 
-/* ------------------------------------
- * Public API
- * ------------------------------------*/
 export interface ConfigurationTabHandle {
-  submit: () => Promise<boolean>; // now: purely client-side validation
-  clearStorage: () => void; // clear localStorage data
-  getModifiedFields: () => string[]; // get list of modified fields
-  hasUnsavedChanges: () => boolean; // check if there are unsaved changes
-  getCurrentData: () => Record<string, string>; // get current form data
-  getFetchedData: () => Record<string, string> | null; // get original fetched data
+  submit: () => Promise<boolean>;
+  clearStorage: () => void;
+  getModifiedFields: () => string[];
+  hasUnsavedChanges: () => boolean;
+  getCurrentData: () => Record<string, string>;
+  getFetchedData: () => Record<string, string> | null;
 }
 
 export interface ConfigurationTabProps {
   initialProductType?: string;
   onConfigChange: (config: Record<string, string>) => void;
   onProductTypeChange: (type: string) => void;
-  productId?: string; // kept for compatibility; unused
-  onSubmit?: () => Promise<boolean>; // kept for compatibility; optional, called after validation
+  productId?: string;
+  onSubmit?: () => Promise<boolean>;
 }
 
-/* ------------------------------------
- * Component (renamed): EditConfiguration
- * ------------------------------------*/
 const EditConfiguration = React.forwardRef<ConfigurationTabHandle, ConfigurationTabProps>(
-  (
-    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit }: ConfigurationTabProps,
-    ref
-  ) => {
+  ({ onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit }, ref) => {
     const [formData, setFormData] = useState<Record<string, string>>(() => {
-      // Load configuration from localStorage on mount
       const saved = localStorage.getItem('editConfigFormData');
       return saved ? JSON.parse(saved) : {};
     });
     const [productType, setProductType] = useState(() => {
-      // Load product type from localStorage on mount
       const saved = localStorage.getItem('editConfigProductType');
       return saved || initialProductType || '';
     });
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-    const [isFetched, setIsFetched] = useState(false); // Track if data has been fetched
-    const [hasUserChanges, setHasUserChanges] = useState(false); // Track if user has made changes
-    const [originalProductType, setOriginalProductType] = useState<string>(''); // Track original product type from backend
-    const [productTypeChanged, setProductTypeChanged] = useState(false); // Track if product type has been changed
+    const [originalProductType, setOriginalProductType] = useState<string>('');
 
-    // Memoized change handlers
     const handleConfigChange = React.useCallback(
       (updates: Record<string, string>) => {
         const newFormData = { ...formData, ...updates };
         setFormData(newFormData);
-        // Persist to localStorage
         localStorage.setItem('editConfigFormData', JSON.stringify(newFormData));
         onConfigChange(newFormData);
       },
@@ -338,35 +175,26 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     const handleProductTypeChange = React.useCallback(
       (type: string) => {
-        console.log('Product type changed from', productType, 'to', type);
-        console.log('Original product type:', originalProductType);
-        
         setProductType(type);
-        // Persist product type to localStorage
         localStorage.setItem('editConfigProductType', type);
         onProductTypeChange(type);
-        
-        // Check if product type has changed from original
+
+        // Only set the "type changed" flag if user actually changed away from original
         if (originalProductType && type !== originalProductType) {
-          console.log('Product type has changed - will use POST for new configuration');
-          setProductTypeChanged(true);
           localStorage.setItem('editConfigProductTypeChanged', 'true');
         } else {
-          console.log('Product type matches original - will use PUT for updates');
-          setProductTypeChanged(false);
           localStorage.removeItem('editConfigProductTypeChanged');
         }
-        
-        // Clear form data when changing product type
+
+        // Reset fields
         setFormData({});
         localStorage.removeItem('editConfigFormData');
         setFieldErrors({});
         setError('');
       },
-      [onProductTypeChange, productType, originalProductType]
+      [onProductTypeChange, originalProductType]
     );
 
-    // Validation (no network)
     const validate = (): boolean => {
       if (!productType) {
         setError('Please select a product type first');
@@ -384,14 +212,13 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       return Object.keys(errs).length === 0;
     };
 
-    // Expose submit via ref (client-side only)
     React.useImperativeHandle(ref, () => ({
       submit: async () => {
         const ok = validate();
         if (!ok) return false;
         if (onSubmit) {
           try {
-            const res = await onSubmit(); // optional callback
+            const res = await onSubmit();
             return res !== false;
           } catch {
             return false;
@@ -407,38 +234,27 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         setProductType('');
         setFieldErrors({});
         setError('');
-        setIsFetched(false);
-        setHasUserChanges(false);
       },
-      getModifiedFields: () => {
-        return getModifiedFields();
-      },
-      hasUnsavedChanges: () => {
-        return hasUnsavedChanges();
-      },
-      getCurrentData: () => {
-        return formData;
-      },
+      getModifiedFields: () => getModifiedFields(),
+      hasUnsavedChanges: () => hasUnsavedChanges(),
+      getCurrentData: () => formData,
       getFetchedData: () => {
         try {
           const fetchedData = localStorage.getItem('editConfigFetchedData');
           return fetchedData ? JSON.parse(fetchedData) : null;
-        } catch (error) {
-          console.error('Error reading fetched data:', error);
+        } catch {
           return null;
         }
       }
     }));
 
-    // Fetch configuration data when productId and productType are available
+    // Fetch baseline configuration; only mark "type changed" on 404.
     useEffect(() => {
       const fetchConfigData = async () => {
         if (!productId || !productType) return;
-        
         try {
           const { getAuthData } = await import('../../../utils/auth');
           const authData = getAuthData();
-          
           if (!authData?.token) return;
 
           const headers = {
@@ -454,88 +270,63 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             LLMToken: 'llm-token',
           };
           const apiEndpoint = endpointMap[productType as keyof typeof endpointMap] || productType.replace(/_/g,'-').toLowerCase();
-          console.debug('Fetching config', productId, apiEndpoint);
+
           let url = `http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}`;
-          let opts: RequestInit = { headers };
-          if (productType === ProductTypeEnum.SQLResult) {
-            // Ask backend to return only metadata / small payload
+          if (productType === ProductTypeEnum.SQLResult || productType === ProductTypeEnum.LLMToken) {
             url += '?meta=1';
-          } else if (productType === ProductTypeEnum.LLMToken) {
-            url += '?meta=1'; // lightweight metadata only
           }
-          const res = await fetch(url, opts);
-          
+
+          const res = await fetch(url, { headers });
+
           if (res.ok) {
-            console.log('Fetched configuration details:', productId, productType);
-            
-            // Set original product type when successfully fetching configuration
             if (!originalProductType) {
-              console.log('Setting original product type:', productType);
               setOriginalProductType(productType);
               localStorage.setItem('editConfigOriginalProductType', productType);
             }
 
             const configData = await res.json();
-            console.log('Configuration JSON:', configData);
-            if (configData) {
-              // Map backend keys to UI labels for prefill
-              const lowerType = productType.toLowerCase();
-              const mapped: Record<string,string> = {};
-              if (lowerType === 'llmtoken' || lowerType === 'llm-token') {
-                if (configData.modelName) mapped['Model Name'] = configData.modelName;
-                if (configData.endpointUrl) mapped['Endpoint URL'] = configData.endpointUrl;
-                if (configData.authType) mapped['Auth Type'] = configData.authType;
-              } else if (lowerType === 'api') {
-                if (configData.endpointUrl) mapped['Endpoint URL'] = configData.endpointUrl;
-                if (configData.authType) mapped['Auth Type'] = configData.authType;
-              } else if (lowerType === 'flatfile') {
-                if (configData.format) mapped['File Format'] = configData.format;
-                if (configData.fileLocation) mapped['File Location'] = configData.fileLocation;
-              } else if (lowerType === 'sqlresult' || lowerType === 'sql-result') {
-                if (configData.connectionString) mapped['Connection String'] = configData.connectionString;
-                if (configData.dbType) mapped['DB Type'] = configData.dbType;
-                if (configData.authType) mapped['Auth Type'] = configData.authType;
-              }
-              // Check if there are existing user changes in localStorage
-              const existingData = localStorage.getItem('editConfigFormData');
-              const hasExistingChanges = existingData && Object.keys(JSON.parse(existingData)).length > 0;
-              
-              // Only overwrite if there are no existing user changes
-              if (!hasExistingChanges) {
-                setFormData(mapped);
-                localStorage.setItem('editConfigFormData', JSON.stringify(mapped));
-                localStorage.setItem('editConfigFetchedData', JSON.stringify(mapped)); // Store original fetched data
-              } else {
-                // Merge fetched data with existing changes, prioritizing user changes
-                const existingChanges = JSON.parse(existingData);
-                const mergedData = { ...mapped, ...existingChanges };
-                setFormData(mergedData);
-                localStorage.setItem('editConfigFormData', JSON.stringify(mergedData));
-                if (!localStorage.getItem('editConfigFetchedData')) {
-                  localStorage.setItem('editConfigFetchedData', JSON.stringify(mapped));
-                }
-              }
-              setIsFetched(true);
+            const lowerType = productType.toLowerCase();
+            const mapped: Record<string,string> = {};
+            if (lowerType === 'llmtoken' || lowerType === 'llm-token') {
+              if (configData.modelName) mapped['Model Name'] = configData.modelName;
+              if (configData.endpointUrl) mapped['Endpoint URL'] = configData.endpointUrl;
+              if (configData.authType) mapped['Auth Type'] = configData.authType;
+            } else if (lowerType === 'api') {
+              if (configData.endpointUrl) mapped['Endpoint URL'] = configData.endpointUrl;
+              if (configData.authType) mapped['Auth Type'] = configData.authType;
+            } else if (lowerType === 'flatfile') {
+              if (configData.format) mapped['File Format'] = configData.format;
+              if (configData.fileLocation) mapped['File Location'] = configData.fileLocation;
+            } else if (lowerType === 'sqlresult' || lowerType === 'sql-result') {
+              if (configData.connectionString) mapped['Connection String'] = configData.connectionString;
+              if (configData.dbType) mapped['DB Type'] = configData.dbType;
+              if (configData.authType) mapped['Auth Type'] = configData.authType;
             }
+
+            localStorage.setItem('editConfigFetchedData', JSON.stringify(mapped));
+            const existingEdits = localStorage.getItem('editConfigFormData');
+            const merged = existingEdits ? { ...mapped, ...JSON.parse(existingEdits) } : mapped;
+            setFormData(merged);
+            localStorage.setItem('editConfigFormData', JSON.stringify(merged));
+
+            // we DO have existing config → ensure flag is off
+            localStorage.removeItem('editConfigProductTypeChanged');
           } else if (res.status === 404) {
-            // Configuration doesn't exist for this product type - will need to use POST
-            console.log('No existing configuration found - will use POST for creation');
-            setProductTypeChanged(true); // Treat as new configuration
+            // no existing config – will need to POST on save
             localStorage.setItem('editConfigProductTypeChanged', 'true');
+            localStorage.removeItem('editConfigFetchedData');
           }
+          // Do NOT set the flag for other status codes
         } catch (err) {
+          // Important: Do NOT force productTypeChanged=true on generic errors
           console.warn('Failed to fetch config data:', err);
-          // On error, assume no configuration exists
-          setProductTypeChanged(true);
-          localStorage.setItem('editConfigProductTypeChanged', 'true');
         }
       };
 
       fetchConfigData();
-    }, [productId, productType, onConfigChange, initialProductType]);
+    }, [productId, productType, onConfigChange, initialProductType, originalProductType]);
 
     useEffect(() => {
-      // Persist to localStorage whenever formData changes
       if (Object.keys(formData).length > 0) {
         localStorage.setItem('editConfigFormData', JSON.stringify(formData));
       }
@@ -546,20 +337,15 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       (field: string) => (value: string) => {
         const newFormData = { ...formData, [field]: value };
         setFormData(newFormData);
-        setHasUserChanges(true); // Mark that user has made changes
-        
-        // Persist to localStorage immediately
         localStorage.setItem('editConfigFormData', JSON.stringify(newFormData));
-        
-        // Track modified fields separately
+
         const modifiedFields = JSON.parse(localStorage.getItem('editConfigModifiedFields') || '[]');
         if (!modifiedFields.includes(field)) {
           modifiedFields.push(field);
           localStorage.setItem('editConfigModifiedFields', JSON.stringify(modifiedFields));
         }
-        
+
         onConfigChange(newFormData);
-        // inline validation for required fields
         const def = (configurationFields[productType] || []).find((f) => f.label === field);
         if (def?.required && !value) {
           setFieldErrors((prev) => ({ ...prev, [field]: `${field} is required` }));
@@ -573,7 +359,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       [formData, onConfigChange, productType]
     );
 
-    const renderField = (field: FieldProps) => {
+    const renderField = (field: FieldProps, index?: number) => {
       const fieldValue = formData[field.label] || '';
       const fieldError = fieldErrors[field.label];
 
@@ -593,7 +379,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       switch (field.type) {
         case 'select':
           return (
-            <div className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
               <SelectField
                 label={labelText}
                 value={fieldValue}
@@ -608,10 +394,9 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               />
             </div>
           );
-
         case 'checkbox':
           return (
-            <div className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
               <InputField
                 type="checkbox"
                 label={labelText}
@@ -625,10 +410,9 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               />
             </div>
           );
-
         case 'textarea':
           return (
-            <div className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
               <TextareaField
                 label={labelText}
                 value={fieldValue}
@@ -639,10 +423,9 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               />
             </div>
           );
-
         case 'number':
           return (
-            <div className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
               <InputField
                 type="number"
                 label={labelText}
@@ -658,49 +441,31 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               />
             </div>
           );
-
         case 'password':
           return (
-            <div className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
               <InputField
                 type="password"
                 label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
-                placeholder={field.placeholder}
-                error={fieldError}
-              />
-            </div>
-          );
-
-        case 'email':
-          return (
-            <div className="form-group">
-              <InputField
-                type="email"
-                label={labelText}
-                value={fieldValue}
-                onChange={handleInputChange(field.label)}
                 onBlur={handleBlur}
                 placeholder={field.placeholder}
                 error={fieldError}
-                inputMode="email"
-                autoComplete="email"
               />
             </div>
           );
-
         default:
           return (
-            <div className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
               <InputField
+                type={field.type || 'text'}
                 label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
+                onBlur={handleBlur}
                 placeholder={field.placeholder}
                 error={fieldError}
-                onBlur={handleBlur}
-                type={field.type as any}
               />
             </div>
           );
@@ -723,7 +488,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           <div className="configuration-fields">
             {error && <div className="error-message">{error}</div>}
             <div className="form-fields">
-              {configurationFields[productType]?.map((field: FieldProps) => renderField(field))}
+              {configurationFields[productType]?.map((field: FieldProps, index: number) => renderField(field, index))}
             </div>
           </div>
         )}
@@ -733,5 +498,4 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 );
 
 export { EditConfiguration };
-// Compat alias so existing imports keep working:
 export { EditConfiguration as ConfigurationTab };
