@@ -4,6 +4,7 @@ interface Props {
   dimension: string;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
 }
 
 const OP: Record<string, string[]> = {
@@ -33,15 +34,22 @@ const OP: Record<string, string[]> = {
 
 };
 
-const SqlOperatorSelect: React.FC<Props> = ({ dimension, value, onChange }) => {
+const SqlOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error }) => {
   const ops = OP[dimension.toUpperCase()] || [];
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {ops.map(o => (
-        <option key={o} value={o}>{o}</option>
-      ))}
-    </select>
+    <div>
+      <select 
+        className={error ? 'error' : ''} 
+        value={value} 
+        onChange={e => onChange(e.target.value)}
+      >
+        <option value="">--select--</option>
+        {ops.map(o => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
+      {error && <div className="error-message">{error}</div>}
+    </div>
   );
 };
 
