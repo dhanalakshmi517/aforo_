@@ -14,6 +14,7 @@ import axios from 'axios';
 import { getAuthData, getAuthHeaders } from '../../utils/auth';
 import {
   getProducts,
+  getProductById,
   createProduct as createProductApi,
   deleteProduct as deleteProductApi,
   BASE_URL
@@ -81,10 +82,14 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
   // Function to handle icon updates from EditProduct
   const handleIconUpdate = (productId: string, iconData: ProductIconData | null) => {
+    console.log(`🎨 handleIconUpdate called for product ${productId}:`, iconData);
+    
     if (iconData) {
       const iconJson = JSON.stringify({ iconData });
+      console.log(`💾 Storing updated icon in local state for ${productId}`);
       setUpdatedIcons(prev => ({ ...prev, [productId]: iconJson }));
     } else {
+      console.log(`🗑️ Removing icon from local state for ${productId}`);
       setUpdatedIcons(prev => {
         const newIcons = { ...prev };
         delete newIcons[productId];
@@ -93,6 +98,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     }
 
     // Optimistically update UI
+    console.log(`🔄 Optimistically updating UI for product ${productId}`);
     setProducts(prevProducts =>
       prevProducts.map(p =>
         p.productId === productId
@@ -106,8 +112,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     );
 
     // Preserve local icons for a moment
+    console.log(`🔒 Preserving local icons for 5 seconds...`);
     setPreserveLocalIcons(true);
-    setTimeout(() => setPreserveLocalIcons(false), 5000);
+    setTimeout(() => {
+      console.log(`🔓 Local icon preservation expired`);
+      setPreserveLocalIcons(false);
+    }, 5000);
   };
 
   const resolveIconUrl = (icon?: string) => {
@@ -187,6 +197,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setIsLoading(true);
     try {
       const products = await getProducts();
+      console.log('🎯 Products fetched from backend:', products.length);
+      console.log('🎯 Products with productIcon field:', products.filter(p => p.productIcon).length);
+      console.log('🎯 Sample product data:', products[0]);
 
       const productsWithMetricsPromises = products.map(async (product) => {
         const iconUrl = await fetchIconWithAuth(product.icon);
@@ -202,16 +215,43 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
         // Backend `productIcon` (robust parsing)
         if (!iconData && product.productIcon) {
+          console.log(`🔍 Product ${product.productId} has productIcon field:`, product.productIcon);
           try {
             const parsed = parseProductIconField(product.productIcon);
+            console.log(`📊 Parsed productIcon for ${product.productId}:`, parsed);
             iconData = extractIconData(parsed, product.productName || 'Product');
+            if (iconData) {
+              console.log(`✅ Successfully extracted iconData for ${product.productId}:`, iconData);
+            } else {
+              console.log(`❌ Failed to extract iconData for ${product.productId} from parsed:`, parsed);
+            }
           } catch (e) {
-            console.error('Error parsing productIcon:', e);
+            console.error(`❌ Error parsing productIcon for ${product.productId}:`, e);
+          }
+        } else if (!iconData) {
+          console.log(`🚫 Product ${product.productId} has no productIcon field, trying individual fetch...`);
+          
+          // Fallback: Try fetching individual product data if productIcon is missing
+          try {
+            const individualProduct = await getProductById(product.productId);
+            if (individualProduct?.productIcon) {
+              console.log(`🔄 Found productIcon in individual fetch for ${product.productId}`);
+              const parsed = parseProductIconField(individualProduct.productIcon);
+              iconData = extractIconData(parsed, product.productName || 'Product');
+              if (iconData) {
+                console.log(`✅ Successfully extracted iconData from individual fetch for ${product.productId}`);
+              }
+            } else {
+              console.log(`🚫 Individual fetch also has no productIcon for ${product.productId}`);
+            }
+          } catch (e) {
+            console.error(`❌ Error fetching individual product ${product.productId}:`, e);
           }
         }
 
         // Fallback: reconstruct from actual SVG if still no iconData
         if (!iconData && product.icon && iconUrl) {
+          console.log(`🔄 Falling back to SVG reconstruction for product ${product.productId}`);
           try {
             const svgResponse = await fetch(iconUrl);
             const svgText = await svgResponse.text();
@@ -376,6 +416,29 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     }
   }, [showNewProductForm, showCreateProduct]);
 
+  // Additional refresh when component becomes visible (user returns from navigation)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🔄 Page became visible, refreshing products...');
+        fetchProducts();
+      }
+    };
+
+    const handleWindowFocus = () => {
+      console.log('🔄 Window focused, refreshing products...');
+      fetchProducts();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [fetchProducts]);
+
   useEffect(() => {
     if (showCreateProduct || isEditFormOpen) {
       document.body.classList.add('hide-sidebar');
@@ -500,6 +563,48 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     fetchProducts();
   }, [fetchProducts]);
 
+  // Refresh products when user returns from NewProduct page
+  useEffect(() => {
+    console.log('🔄 Location changed, refreshing products list...');
+    fetchProducts();
+  }, [location.pathname, fetchProducts]);
+
+  // Listen for product updates from NewProduct page
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'productUpdated' && e.newValue) {
+        console.log('🔄 Product updated signal received, refreshing products...');
+        fetchProducts();
+        // Clear the signal
+        localStorage.removeItem('productUpdated');
+      }
+    };
+
+    // Also check for the signal on component mount/focus
+    const checkForUpdates = () => {
+      const updateSignal = localStorage.getItem('productUpdated');
+      if (updateSignal) {
+        console.log('🔄 Found product update signal, refreshing products...');
+        fetchProducts();
+        localStorage.removeItem('productUpdated');
+      }
+    };
+
+    // Check immediately
+    checkForUpdates();
+
+    // Listen for storage changes (cross-tab communication)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check when window gains focus
+    window.addEventListener('focus', checkForUpdates);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', checkForUpdates);
+    };
+  }, [fetchProducts]);
+
   const handleNewProductSubmit = async (formData: ProductFormData) => {
     setShowNewProductForm(false);
     try {
@@ -543,33 +648,43 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   setIsEditFormOpen(false);
                   setEditingProduct(null);
                   setRefreshKey(prev => prev + 1);
-                  const hasLocal = editingProduct?.productId && updatedIcons[editingProduct.productId];
-                  if (!hasLocal) {
-                    setTimeout(async () => {
-                      try {
-                        if (editingProduct?.productId) {
-                          const response = await fetch(`${BASE_URL}/products/${editingProduct.productId}?_t=${Date.now()}`, {
-                            headers: getAuthHeaders()
-                          });
-                          if (response.ok) {
-                            const updatedProduct = await response.json();
-                            if (updatedProduct.productIcon) {
-                              setProducts(prev =>
-                                prev.map(p =>
-                                  p.productId === editingProduct.productId!.toString()
-                                    ? { ...p, productIcon: updatedProduct.productIcon }
-                                    : p
-                                )
-                              );
-                            }
-                          }
+                  
+                  // Always refresh products list after edit to ensure latest data
+                  console.log('🔄 EditProduct closed, refreshing products list...');
+                  
+                  // Small delay to allow backend to process any pending updates
+                  setTimeout(async () => {
+                    try {
+                      // First try to get updated individual product data
+                      if (editingProduct?.productId) {
+                        console.log(`🔍 Fetching updated data for product ${editingProduct.productId}...`);
+                        const updatedProduct = await getProductById(editingProduct.productId);
+                        
+                        if (updatedProduct?.productIcon) {
+                          console.log(`✅ Found updated productIcon for ${editingProduct.productId}, updating local state`);
+                          setProducts(prev =>
+                            prev.map(p =>
+                              p.productId === editingProduct.productId!.toString()
+                                ? { 
+                                    ...p, 
+                                    productIcon: updatedProduct.productIcon,
+                                    icon: updatedProduct.icon // Also update icon URL if available
+                                  }
+                                : p
+                            )
+                          );
+                        } else {
+                          console.log(`🚫 No productIcon found for ${editingProduct.productId} in individual fetch`);
                         }
-                      } catch (error) {
-                        console.error('Failed to fetch individual product:', error);
                       }
-                      fetchProducts();
-                    }, 1000);
-                  }
+                    } catch (error) {
+                      console.error('Failed to fetch individual product after edit:', error);
+                    }
+                    
+                    // Always do a full refresh to ensure consistency
+                    console.log('🔄 Doing full products list refresh...');
+                    await fetchProducts();
+                  }, 500); // Reduced delay for better UX
                 }}
               />
             </div>

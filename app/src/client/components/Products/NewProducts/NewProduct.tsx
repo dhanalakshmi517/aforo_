@@ -11,7 +11,7 @@ import ProductReview from "./ProductReview";
 import SaveDraft from "../../componenetsss/SaveDraft";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SecondaryButton from "../../componenetsss/SecondaryButton";
-import { createProduct, updateProduct, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
+import { createProduct, updateProduct, updateProductIcon, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
 import ProductIconPickerModal from "../ProductIconPickerModal";
 import { ProductIconData } from "../ProductIcon";
 
@@ -120,12 +120,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         // Check if we have the full iconData (new format)
         if (parsedIcon.iconData) {
           console.log('Loading icon from iconData field');
+          console.log('🎨 Full iconData structure:', parsedIcon.iconData);
+          console.log('🎨 outerBg colors:', parsedIcon.iconData.outerBg);
+          console.log('🎨 tileColor:', parsedIcon.iconData.tileColor);
           setSelectedIcon(parsedIcon.iconData as ProductIconData);
           console.log('Icon loaded successfully:', parsedIcon.iconData);
         } 
         // Fallback: check if the parsed data itself is the icon (old format)
         else if (parsedIcon.id) {
           console.log('Loading icon from root level (old format)');
+          console.log('🎨 Root level icon structure:', parsedIcon);
+          console.log('🎨 outerBg colors:', parsedIcon.outerBg);
+          console.log('🎨 tileColor:', parsedIcon.tileColor);
           setSelectedIcon(parsedIcon as ProductIconData);
           console.log('Icon loaded successfully');
         }
@@ -323,10 +329,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
       // Helper function to extract color from CSS var() or return as-is
       const extractColor = (colorStr: string): string => {
-        if (!colorStr) return '#CC9434'; // default fallback
+        if (!colorStr) {
+          console.log('⚠️ extractColor: Empty color string, using default #CC9434');
+          return '#CC9434'; // default fallback
+        }
+        console.log('🔍 extractColor input:', colorStr);
         // Match pattern: var(--variable-name, #HEXCODE)
         const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
-        return match ? match[1].trim() : colorStr;
+        const result = match ? match[1].trim() : colorStr;
+        console.log('🔍 extractColor result:', result);
+        return result;
       };
 
       // Add icon data if selected - save both SVG and full icon data for reconstruction
@@ -337,13 +349,30 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           svgContent: (() => {/* placeholder */})()
         }),
         productIcon: JSON.stringify({
-          // Save the full icon data so we can reconstruct it when editing
-          iconData: selectedIcon,
+          // Save the full icon data with extracted colors for proper reconstruction
+          iconData: (() => {
+            const extractedIconData = {
+              ...selectedIcon,
+              // Extract actual color values from CSS variables
+              outerBg: selectedIcon.outerBg ? [
+                extractColor(selectedIcon.outerBg[0]),
+                extractColor(selectedIcon.outerBg[1])
+              ] : ['#F8F7FA', '#E4EEF9'],
+              tileColor: extractColor(selectedIcon.tileColor || '#CC9434')
+            };
+            console.log('💾 Saving iconData with extracted colors:', extractedIconData);
+            console.log('💾 Final outerBg:', extractedIconData.outerBg);
+            console.log('💾 Final tileColor:', extractedIconData.tileColor);
+            return extractedIconData;
+          })(),
           svgContent: (() => {
             console.log('🎨 Creating SVG content for icon:', selectedIcon);
+            console.log('🎨 Raw selectedIcon.outerBg:', selectedIcon.outerBg);
+            console.log('🎨 Raw selectedIcon.tileColor:', selectedIcon.tileColor);
             const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
             const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
             const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
+            console.log('🎨 Extracted colors - outer:', outer, 'tile:', tile);
             const viewBox = selectedIcon.viewBox ?? '0 0 18 18';
             return `<svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
               <defs>
@@ -380,8 +409,43 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         if (createdProductId) {
           // Update existing product as draft
           console.log('Updating product as draft with ID:', createdProductId);
-          await updateProduct(createdProductId, payload);
+          
+          // For draft updates, handle icon separately using the correct endpoint
+          const hasIconInPayload = payload.icon || payload.productIcon;
+          
+          if (hasIconInPayload) {
+            console.log('🎨 Updating icon for draft product using updateProductIcon...');
+            console.log('🔍 selectedIcon data:', selectedIcon);
+            
+            if (selectedIcon) {
+              // Update with new icon
+              await updateProductIcon(createdProductId, selectedIcon);
+              console.log('✅ Draft product icon updated successfully');
+            } else {
+              // Remove icon
+              await updateProductIcon(createdProductId, null);
+              console.log('✅ Draft product icon removed successfully');
+            }
+            
+            // Update other fields (excluding icon fields)
+            const { icon, productIcon, ...payloadWithoutIcon } = payload;
+            if (Object.keys(payloadWithoutIcon).length > 0) {
+              console.log('📝 Updating other draft product fields...');
+              await updateProduct(createdProductId, payloadWithoutIcon);
+              console.log('✅ Draft product fields updated successfully');
+            }
+          } else {
+            // No icon changes, just update other fields normally
+            console.log('📝 No icon changes, updating draft product fields normally...');
+            await updateProduct(createdProductId, payload);
+            console.log('✅ Draft product updated successfully');
+          }
+          
           console.log('Draft updated');
+          
+          // Signal Products component to refresh
+          localStorage.setItem('productUpdated', Date.now().toString());
+          console.log('📡 Set product update signal for Products component');
         } else {
           // Create new product (draft or not)
           console.log('Creating new product with payload:', payload);
@@ -392,6 +456,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           // cache snapshot
           setLastSavedData({ ...formData });
           console.log('🔍 Created product response:', response);
+          
+          // Signal Products component to refresh
+          localStorage.setItem('productUpdated', Date.now().toString());
+          console.log('📡 Set product update signal for Products component');
         }
       } else {
         // For updates, only include changed fields
@@ -453,6 +521,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         console.log('🔍 Changes productIcon field:', changes.productIcon);
         const updateResponse = await updateProduct(createdProductId, changes);
         console.log('Product updated with changes');
+        
+        // Signal Products component to refresh
+        localStorage.setItem('productUpdated', Date.now().toString());
+        console.log('📡 Set product update signal for Products component');
 
       // cache snapshot to avoid redundant updates
       setLastSavedData({ ...formData });
@@ -662,7 +734,27 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             </div>
 
                             {/* Product Icon Field - Selected */}
-                            {selectedIcon && (
+                            {selectedIcon && (() => {
+                              // Helper function to extract color from CSS var() or return as-is
+                              const extractDisplayColor = (colorStr: string): string => {
+                                if (!colorStr) {
+                                  console.log('⚠️ extractDisplayColor: Empty color string, using default #CC9434');
+                                  return '#CC9434';
+                                }
+                                console.log('🔍 extractDisplayColor input:', colorStr);
+                                const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+                                const result = match ? match[1].trim() : colorStr;
+                                console.log('🔍 extractDisplayColor result:', result);
+                                return result;
+                              };
+                              
+                              const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
+                              const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
+                              const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
+                              
+                              console.log('🎨 Display colors - outerBg1:', outerBg1, 'outerBg2:', outerBg2, 'tileColor:', tileColor);
+                              
+                              return (
                               <div className="np-form-group">
                                 <label className="if-label">Product Icon</label>
                                 <div className="np-icon-field-wrapper">
@@ -675,7 +767,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                         border: '0.6px solid var(--border-border-2, #D5D4DF)',
                                         background: `
                                           linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-                                          linear-gradient(135deg, ${selectedIcon.outerBg?.[0] || '#F8F7FA'}, ${selectedIcon.outerBg?.[1] || '#E4EEF9'}),
+                                          linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
                                           radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
                                         `,
                                         display: 'flex',
@@ -694,7 +786,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                           width: 29.45,
                                           height: 25.243,
                                           borderRadius: 5.7,
-                                          background: selectedIcon.tileColor || '#CC9434',
+                                          background: tileColor,
                                         }}
                                       />
                                       <div
@@ -752,7 +844,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   </div>
                                 </div>
                               </div>
-                            )}
+                              );
+                            })()}
 
                             <InputField
                               label="SKU Code"
