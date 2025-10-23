@@ -6,6 +6,7 @@ type Props = {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
 };
 
 const MAP: Record<string, string[]> = {
@@ -16,15 +17,22 @@ const MAP: Record<string, string[]> = {
   ROW: ['ROW_COUNT_ROW','SOURCE_SYSTEM_ROW','SCHEMA_VERSION_ROW','IS_VALID_ROW'],
 };
 
-const FlatfileDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange }) => {
+const FlatfileDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, error }) => {
   const dims = MAP[unitOfMeasure.toUpperCase()] || [];
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {dims.map((d) => (
-        <option key={d} value={d}>{d}</option>
-      ))}
-    </select>
+    <div>
+      <select 
+        className={error ? 'error' : ''} 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">--select--</option>
+        {dims.map((d) => (
+          <option key={d} value={d}>{d}</option>
+        ))}
+      </select>
+      {error && <div className="error-message">{error}</div>}
+    </div>
   );
 };
 

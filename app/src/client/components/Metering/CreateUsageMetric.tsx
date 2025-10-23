@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../componenetsss/TopBar';
@@ -26,7 +26,6 @@ import AggregationFunctionSelect from './AggregationFunctionSelect';
 import AggregationWindowSelect from './AggregationWindowSelect';
 import Review from './Review';
 
-// Reuse the same CSS shell for np-* classes
 import './Usagemetric.css';
 import '../componenetsss/SkeletonForm.css';
 
@@ -44,11 +43,12 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  
+
   // Get draft metric ID from route state if available
   const draftFromState = (location.state as any)?.draftMetricId;
   const activeMetricId = draftFromState || draftMetricId;
-    // helper to delete metric then close
+
+  // helper to delete metric then close
   const deleteAndClose = async () => {
     let ok = true;
     try {
@@ -71,23 +71,23 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   // page class and browser back button handler
   useEffect(() => {
     document.body.classList.add('create-product-page');
-    
+
     // Handle browser back button
     const handleBackButton = (event: PopStateEvent) => {
       event.preventDefault();
       navigate('/get-started/metering');
     };
-    
+
     window.addEventListener('popstate', handleBackButton);
     window.history.pushState(null, '', window.location.pathname);
-    
+
     return () => {
       document.body.classList.remove('create-product-page');
       window.removeEventListener('popstate', handleBackButton);
     };
   }, [navigate]);
 
-  // UI state mirroring NewProduct
+  // UI state
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>('metric');
 
@@ -98,7 +98,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // form states (unchanged semantics)
+  // form states
   const [metricId, setMetricId] = useState<number | null>(null);
   const [metricName, setMetricName] = useState('');
   const [version, setVersion] = useState('');
@@ -113,8 +113,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const [selectedProductName, setSelectedProductName] = useState<string>('');
   const [selectedProductType, setSelectedProductType] = useState<string>('');
 
-  // simple field errors holder (aligned with NewProduct pattern)
+  // errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [conditionErrors, setConditionErrors] = useState<Record<string, string>>({});
 
   // preload existing metric if activeMetricId
   useEffect(() => {
@@ -131,7 +132,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           setAggregationFunction(data.aggregationFunction || '');
           setAggregationWindow(data.aggregationWindow || '');
           setBillingCriteria(data.billingCriteria || '');
-          // usageConditions may be stored elsewhere
         }
       })();
     }
@@ -139,21 +139,10 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
   // load products
   useEffect(() => {
-    console.log('Starting to fetch products...');
-    getProducts()
-      .then((productsData) => {
-        console.log('Products fetched successfully:', productsData);
-        console.log('Number of products:', productsData?.length || 0);
-        console.log('Products data:', JSON.stringify(productsData, null, 2));
-        setProducts(productsData);
-      })
-      .catch((err) => {
-        console.error('Failed to load products - Error:', err);
-        console.error('Error details:', JSON.stringify(err, null, 2));
-      });
+    getProducts().then(setProducts).catch((err) => console.error('Failed to load products', err));
   }, []);
 
-  // once products are loaded, derive product name & type from selectedProductId (needed for UOM options)
+  // once products are loaded, derive product name & type from selectedProductId
   useEffect(() => {
     if (selectedProductId && products.length) {
       const prod = products.find(p => String(p.productId) === selectedProductId);
@@ -164,184 +153,221 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
   }, [products, selectedProductId]);
 
-  // previous values tracker (kept in case you use it later for diffs)
-  const [previousValues, setPreviousValues] = useState<Partial<BillableMetricPayload>>({});
+  // --- NEW: detect if any required field has been touched ---
+  const hasAnyRequiredInput = useMemo(() => {
+    const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
+
+    return Boolean(
+      metricName.trim() ||
+      selectedProductId ||
+      unitOfMeasure ||
+      aggregationFunction ||
+      aggregationWindow ||
+      billingCriteria ||
+      first.dimension || first.operator || first.value
+    );
+  }, [
+    metricName,
+    selectedProductId,
+    unitOfMeasure,
+    aggregationFunction,
+    aggregationWindow,
+    billingCriteria,
+    usageConditions
+  ]);
+
+  // Back button behavior: only prompt to save if something is filled
+  const handleTopbarBack = () => {
+    if (hasAnyRequiredInput || metricId) {
+      setShowSavePrompt(true);
+    } else {
+      // nothing filled -> just navigate back to metrics list
+      navigate('/get-started/metering');
+    }
+  };
 
   const gotoStep = (index: number) => {
     setCurrentStep(index);
-    // map step → tab
     const map: ActiveTab[] = ['metric', 'conditions', 'review'];
     setActiveTab(map[index] || 'metric');
   };
 
+  // clear a specific field error inside UsageConditionForm
+  const clearConditionError = (key: string) => {
+    setConditionErrors(prev => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
   const validateCurrentStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {};
+    const step0Errors: Record<string, string> = {};
+    const step1CondErrors: Record<string, string> = {};
+
     if (step === 0) {
-      if (!metricName.trim()) newErrors.metricName = 'Metric name is required';
-      if (!selectedProductId) newErrors.product = 'Product is required';
-      if (!unitOfMeasure) newErrors.unitOfMeasure = 'Unit of Measure is required';
-      if (!aggregationFunction) newErrors.aggregationFunction = 'Aggregation Function is required';
-    if (!aggregationWindow) newErrors.aggregationWindow = 'Aggregation Window is required';
+      if (!metricName.trim()) step0Errors.metricName = 'Metric name is required';
+      if (!selectedProductId) step0Errors.product = 'Product is required';
+      if (!unitOfMeasure) step0Errors.unitOfMeasure = 'Unit of Measure is required';
+      if (!aggregationFunction) step0Errors.aggregationFunction = 'Aggregation Function is required';
+      if (!aggregationWindow) step0Errors.aggregationWindow = 'Aggregation Window is required';
+      setErrors(step0Errors);
+      return Object.keys(step0Errors).length === 0;
     }
+
+    if (step === 1) {
+      const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
+      if (!first.dimension) step1CondErrors['0.dimension'] = 'Dimension is required';
+      if (!first.operator)  step1CondErrors['0.operator']  = 'Operator is required';
+      if (!first.value)     step1CondErrors['0.value']     = 'Value is required';
+
+      const nextErrors = { ...errors };
+      if (!billingCriteria) nextErrors.billingCriteria = 'Billing criteria is required';
+      else if (nextErrors.billingCriteria) delete nextErrors.billingCriteria;
+
+      setErrors(nextErrors);
+      setConditionErrors(step1CondErrors);
+
+      return Object.keys(step1CondErrors).length === 0 && !nextErrors.billingCriteria;
+    }
+
     if (step === 2) {
       if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !aggregationFunction) {
-        newErrors.form = 'Please fill all required fields';
+        setErrors({ form: 'Please fill all required fields' });
+        return false;
       }
+      setErrors({});
+      return true;
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    return true;
   };
 
   const clean = (obj:any)=>{
     const out:any={};
     Object.entries(obj).forEach(([k,v])=>{
-      if (v===undefined||v===null) return;
-      if (typeof v=== 'string' && v.trim()==='') return;
-      if (Array.isArray(v) && v.length===0) return;
+      if (v === undefined || v === null) return;
+      if (typeof v === 'string' && v.trim() === '') return;
+      if (Array.isArray(v) && v.length === 0) return;
       out[k]=v;
     });
     return out;
   };
 
   const buildPayload = (isDraft: boolean) => {
-    const payload: any = {};
     if (metricId) {
-      // PUT-like body with present values
-      payload.metricName = metricName ?? '';
-      if (selectedProductId) payload.productId = Number(selectedProductId);
-      payload.version = version ?? '';
-      payload.unitOfMeasure = unitOfMeasure ?? '';
-      payload.description = description ?? '';
-    if (billingCriteria) payload.billingCriteria = billingCriteria;
-    if (usageConditions.length) payload.usageConditions = usageConditions;
-      if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
-      if (aggregationWindow)  payload.aggregationWindow  = aggregationWindow;
+      const payload: any = {
+        metricId,
+        metricName: metricName || undefined,
+        productId: selectedProductId ? Number(selectedProductId) : undefined,
+        unitOfMeasure: unitOfMeasure || undefined,
+        aggregationFunction: aggregationFunction || undefined,
+        aggregationWindow: aggregationWindow || undefined,
+        billingCriteria: billingCriteria || undefined,
+        version: version?.trim() ? version.trim() : undefined,
+        description: description?.trim() ? description.trim() : undefined,
+        usageConditions: (usageConditions?.length ? usageConditions : undefined),
+      };
       return clean(payload);
     }
 
-    // New metric: selective for drafts, complete for final
     if (isDraft) {
-      if (metricName.trim())         payload.metricName = metricName;
+      const payload: any = {};
+      if (metricName.trim())         payload.metricName = metricName.trim();
       if (selectedProductId)         payload.productId = Number(selectedProductId);
-      if (version.trim())            payload.version = version;
-      if (unitOfMeasure.trim())      payload.unitOfMeasure = unitOfMeasure;
-      if (description.trim())        payload.description = description;
+      if (version.trim())            payload.version = version.trim();
+      if (unitOfMeasure.trim())      payload.unitOfMeasure = unitOfMeasure.trim();
+      if (description.trim())        payload.description = description.trim();
       if (aggregationFunction)       payload.aggregationFunction = aggregationFunction;
       if (aggregationWindow)         payload.aggregationWindow  = aggregationWindow;
-      if (billingCriteria)        payload.billingCriteria = billingCriteria;
+      if (billingCriteria)           payload.billingCriteria = billingCriteria;
       return clean(payload);
     }
 
-    // final save
-    payload.metricName = metricName.trim();
-    payload.productId = Number(selectedProductId);
-    payload.version = version.trim();
-    payload.unitOfMeasure = unitOfMeasure.trim();
-    payload.description = description.trim();
-  if (billingCriteria) payload.billingCriteria = billingCriteria;
-  if (usageConditions.length) payload.usageConditions = usageConditions;
-    payload.aggregationFunction = aggregationFunction;
-    payload.aggregationWindow = aggregationWindow;
-    return payload;
+    return {
+      metricName:          metricName.trim(),
+      productId:           Number(selectedProductId),
+      version:             version.trim(),
+      unitOfMeasure:       unitOfMeasure.trim(),
+      description:         description.trim(),
+      aggregationFunction,
+      aggregationWindow,
+      billingCriteria:     billingCriteria || undefined,
+      usageConditions:     usageConditions?.length ? usageConditions : undefined
+    };
   };
 
   const saveOrUpdateMetric = async (isDraft = false, skipFinalize = false) => {
     if (!isDraft && !validateCurrentStep(currentStep)) return false;
 
     const payload = buildPayload(isDraft);
-    // If updating an existing metric but there are no changes, skip PUT to avoid server 500
-    if (metricId && Object.keys(payload).length === 0) {
-      // Only finalize if this is not a draft save and caller didn't opt-out
-      if (!isDraft && !skipFinalize) {
-        console.log('No changes detected, directly finalizing metricId', metricId);
-        const finalized = await finalizeBillableMetric(metricId);
-        if (!finalized) {
-          setErrors(prev => ({ ...prev, form: 'Failed to finalize metric' }));
-          return false;
+
+    if (metricId) {
+      const nonIdKeys = Object.keys(payload).filter(k => k !== 'metricId');
+      if (nonIdKeys.length === 0) {
+        if (!isDraft && !skipFinalize) {
+          const finalized = await finalizeBillableMetric(metricId);
+          if (!finalized) {
+            setErrors(prev => ({ ...prev, form: 'Failed to finalize metric' }));
+            return false;
+          }
         }
+        return true;
       }
-      return true;
     }
 
-    // Creating a new metric but no data – nothing to persist.
-    // Silently succeed so the caller can simply close the dialog without showing alerts.
     if (!metricId && Object.keys(payload).length === 0) {
       return true;
     }
 
     try {
       if (metricId) {
-        // update
-        console.log('PUT payload → updateBillableMetric', payload);
         const success = await updateBillableMetric(metricId, payload);
         if (!success) throw new Error('Failed to update metric');
-        setPreviousValues(prev => ({ ...prev, ...payload }));
         if (!isDraft && !skipFinalize) {
-          console.log('Finalize call for metricId', metricId);
           const finalized = await finalizeBillableMetric(metricId);
           if (!finalized) throw new Error('Failed to finalize metric');
         }
         return true;
       } else {
-        // create
-        console.log('POST payload → createBillableMetric', payload);
         const res = await createBillableMetric(payload);
         if (!res.ok || !res.id) throw new Error('Failed to create metric');
         setMetricId(res.id);
         if (!isDraft && !skipFinalize) {
-          console.log('Finalize call for metricId', res.id);
           const finalized = await finalizeBillableMetric(res.id);
           if (!finalized) throw new Error('Failed to finalize metric');
         }
-        setPreviousValues({
-          metricName,
-          productId: selectedProductId ? Number(selectedProductId) : undefined,
-          version,
-          unitOfMeasure,
-          description,
-          aggregationFunction,
-          aggregationWindow,
-          usageConditions
-        });
         return true;
       }
     } catch (e) {
       console.error('Error saving metric:', e);
-      const msg = e instanceof Error ? e.message : 'Unknown error';
-      // silently log backend error without showing inline message
-    console.error('Metric save failed:', msg);
       return false;
     }
   };
 
-  // Footer handlers (mirroring NewProduct)
   const handleSaveAndNext = async () => {
     if (!validateCurrentStep(currentStep)) return;
-    // not a draft, only validate current
+
     if (activeTab === 'metric') {
-      // Save as draft on the first step (no finalize yet)
       setSaving(true);
       const ok = await saveOrUpdateMetric(true);
       setSaving(false);
       if (!ok) return;
-      // move to conditions only if save succeeded
       gotoStep(1);
       return;
     }
     if (activeTab === 'conditions') {
-      // Persist all changes so far with a full PUT, but defer finalization until review
       setSaving(true);
-      const ok = await saveOrUpdateMetric(false, true); // non-draft, skipFinalize = true
+      const ok = await saveOrUpdateMetric(false, true);
       setSaving(false);
       if (!ok) return;
       gotoStep(2);
       return;
     }
     if (activeTab === 'review') {
-      // Finalize metric without re-sending payload
-      if (!metricId) return; // safety guard
+      if (!metricId) return;
       setSaving(true);
-      console.log('Finalize call for metricId', metricId);
       const finalized = await finalizeBillableMetric(metricId);
       setSaving(false);
       if (finalized) onClose();
@@ -366,16 +392,12 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   };
 
   const productOptions = products.map(p => ({ label: p.productName, value: String(p.productId) }));
-  
-  console.log('Products state:', products);
-  console.log('Product options for dropdown:', productOptions);
-  console.log('Selected product ID:', selectedProductId);
 
   return (
     <>
       <TopBar
         title="Create New Usage Metric"
-        onBack={() => setShowSavePrompt(true)}
+        onBack={handleTopbarBack}
         cancel={{ onClick: () => setShowDeleteConfirm(true) }}
         save={{
           onClick: handleSaveDraft,
@@ -424,7 +446,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
             {/* MAIN */}
             <main className="met-np-main">
-              {/* faint separators behind content */}
               <div className="af-skel-rule af-skel-rule--top" />
               <div className="met-np-main__inner">
                 <div className="met-np-body">
@@ -434,7 +455,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                       {activeTab === 'metric' && (
                         <section>
                           <div className="met-np-section-header">
-
                             <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
                           </div>
 
@@ -548,7 +568,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 }}
                                 error={errors.aggregationFunction}
                               />
-                                                          </div>
+                            </div>
 
                             {/* Aggregation Window */}
                             <div className="met-np-field">
@@ -566,7 +586,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 }}
                                 error={errors.aggregationWindow}
                               />
-                                                          </div>
+                            </div>
                           </div>
                         </section>
                       )}
@@ -584,6 +604,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                             setConditions={setUsageConditions}
                             billingCriteria={billingCriteria}
                             onBillingCriteriaChange={setBillingCriteria}
+                            errors={conditionErrors}
+                            onFieldEdited={clearConditionError}
+                            billingError={errors.billingCriteria}
                           />
                         </section>
                       )}
@@ -609,7 +632,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                       )}
                     </div>
 
-                    {/* FOOTER (mirrors NewProduct) */}
+                    {/* FOOTER */}
                     <div className="met-np-form-footer">
                       {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
 
@@ -648,7 +671,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                               onClick={async () => {
                                 if (!metricId) return;
                                 setSaving(true);
-                                console.log('Finalize call for metricId', metricId);
                                 const finalized = await finalizeBillableMetric(metricId);
                                 setSaving(false);
                                 if (finalized) onClose();
@@ -670,7 +692,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
           <div className="af-skel-rule af-skel-rule--bottom" />
 
-          {/* Save Draft confirmation modal (same behavior as NewProduct) */}
+          {/* Save Draft confirmation modal */}
           <SaveDraft
             isOpen={showSavePrompt}
             onClose={async () => {

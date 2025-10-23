@@ -6,6 +6,7 @@ type Props = {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
 };
 
 const MAP: Record<string, string[]> = {
@@ -15,15 +16,22 @@ const MAP: Record<string, string[]> = {
   MB: ['FILE_SIZE_MB', 'COMPRESSED', 'REGION_MB', 'TRANSFER_TYPE'],
 };
 
-const SqlDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange }) => {
+const SqlDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, error }) => {
   const dims = MAP[unitOfMeasure.toUpperCase()] || [];
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {dims.map(d => (
-        <option key={d} value={d}>{d}</option>
-      ))}
-    </select>
+    <div>
+      <select 
+        className={error ? 'error' : ''} 
+        value={value} 
+        onChange={e => onChange(e.target.value)}
+      >
+        <option value="">--select--</option>
+        {dims.map(d => (
+          <option key={d} value={d}>{d}</option>
+        ))}
+      </select>
+      {error && <div className="error-message">{error}</div>}
+    </div>
   );
 };
 
