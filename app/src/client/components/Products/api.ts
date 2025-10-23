@@ -146,7 +146,22 @@ export const getProducts = async (): Promise<Product[]> => {
     // Add cache-busting parameter to ensure fresh data
     const timestamp = Date.now();
     const response = await api.get<Product[]>(`/products?_t=${timestamp}`);
-    return handleApiResponse(response);
+    const products = handleApiResponse(response);
+    
+    // Debug: Check if productIcon field is present in backend response
+    console.log('🔍 Backend GET /products response analysis:');
+    console.log('📊 Total products:', products.length);
+    console.log('🎨 Products with productIcon field:', products.filter(p => p.productIcon).length);
+    console.log('🎨 Products with icon field:', products.filter(p => p.icon).length);
+    
+    if (products.length > 0) {
+      const sampleProduct = products[0];
+      console.log('🎯 Sample product fields:', Object.keys(sampleProduct));
+      console.log('🎨 Raw productIcon field:', sampleProduct.productIcon);
+      console.log('🖼️ Raw icon field:', sampleProduct.icon);
+    }
+    
+    return products;
   } catch (error) {
     return handleApiError(error);
   }
@@ -681,12 +696,17 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
         }
       }
 
-      // Use the correct /icon endpoint that updates both icon URL and productIcon field
+      // Use the regular /products endpoint with JSON payload to update productIcon field
+      // The /icon endpoint only updates the icon file, not the productIcon field
       const api = createApiClient();
-      const response = await api.patch(`/products/${productId}/icon`, formData, {
+      
+      console.log('🔄 Using /products endpoint to update productIcon field...');
+      const response = await api.patch(`/products/${productId}`, {
+        productIcon: productIconJson
+      }, {
         headers: {
+          'Content-Type': 'application/json',
           'X-Organization-Id': authData?.organizationId?.toString() || ''
-          // Don't set Content-Type - let axios handle FormData
         }
       });
 
@@ -696,6 +716,26 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
   } catch (error) {
     console.error('❌ Failed to update product icon:', error);
     return handleApiError(error);
+  }
+};
+
+export const getProductById = async (productId: string): Promise<Product | null> => {
+  try {
+    verifyAuth();
+    const api = createApiClient();
+    const timestamp = Date.now();
+    const response = await api.get<Product>(`/products/${productId}?_t=${timestamp}`);
+    const product = handleApiResponse(response);
+    
+    console.log(`🔍 Individual product ${productId} fetch:`);
+    console.log(`🎨 Has productIcon field:`, !!product.productIcon);
+    console.log(`🖼️ Has icon field:`, !!product.icon);
+    console.log(`🎨 Raw productIcon:`, product.productIcon);
+    
+    return product;
+  } catch (error) {
+    console.error(`Error fetching product ${productId}:`, error);
+    return null;
   }
 };
 
