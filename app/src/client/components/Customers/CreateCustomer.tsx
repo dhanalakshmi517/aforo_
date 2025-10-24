@@ -59,6 +59,38 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [isDraft, setIsDraft] = useState(false);
 
+  // Lock logic - similar to CreateUsageMetric
+  const hasAnyRequiredInput = React.useMemo(() => {
+    return Boolean(
+      companyName.trim() ||
+      customerName.trim() ||
+      companyType.trim() ||
+      companyLogo
+    );
+  }, [companyName, customerName, companyType, companyLogo]);
+
+  const isBillingLocked = !hasAnyRequiredInput;
+
+  const LockBadge = () => (
+    <span
+      style={{
+        borderRadius: '8px',
+        background: '#E9E9EE',
+        display: 'flex',
+        padding: '6px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '5px',
+        marginLeft: '8px'
+      }}
+      aria-label="Locked"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </span>
+  );
+
   // email helpers
   const initialPrimaryEmailRef = useRef<string | null>(null);
   const emailCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -471,8 +503,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                       {/* STEP 2: BILLING */}
                       {activeTab === "billing" && (
                         <section>
-                          <div className="customer-np-section-header">
+                          <div className="customer-np-section-header" style={{display:'flex',alignItems:'center'}}>
                             <h3 className="customer-np-section-title">Account Details</h3>
+                            {isBillingLocked && <LockBadge />}
                           </div>
                           <AccountDetailsForm
                             data={accountDetails ?? undefined}
@@ -482,6 +515,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                             currentCustomerId={customerId ?? undefined}
                             isDraft={isDraft}
                             initialPrimaryEmail={initialPrimaryEmailRef.current ?? undefined}
+                            locked={isBillingLocked}
                           />
                         </section>
                       )}
@@ -503,24 +537,46 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                     </div>
 
                     {/* Footer actions */}
-                    <div className="customer-np-form-footer">
-                      {activeTab !== "general" && (
-                        <div className="customer-np-btn-group customer-np-btn-group--back">
-                          <SecondaryButton type="button" onClick={handleBack}>
-                            Back
-                          </SecondaryButton>
-                        </div>
-                      )}
-
-                      <div className="customer-np-btn-group customer-np-btn-group--next">
-                        <PrimaryButton
-                          type="button"
-                          onClick={handleNext}
-                          disabled={isSubmitting}
+                    <div className="customer-np-form-footer" style={{position:'relative'}}>
+                      {activeTab === "billing" && isBillingLocked ? (
+                        // ONLY the hint when billing step is locked (no buttons)
+                        <div
+                          className="customer-np-footer-hint"
+                          style={{
+                            position: 'absolute',
+                            left: '50%',
+                            bottom: '20px',
+                            transform: 'translateX(-50%)',
+                            color: '#8C8F96',
+                            fontSize: 14,
+                            pointerEvents: 'none',
+                            whiteSpace: 'nowrap'
+                          }}
                         >
-                          {activeTab === "review" ? "Create Customer" : "Save & Next"}
-                        </PrimaryButton>
-                      </div>
+                          Fill the previous steps to unlock this step
+                        </div>
+                      ) : (
+                        // normal buttons when unlocked or not billing step
+                        <>
+                          {activeTab !== "general" && (
+                            <div className="customer-np-btn-group customer-np-btn-group--back">
+                              <SecondaryButton type="button" onClick={handleBack}>
+                                Back
+                              </SecondaryButton>
+                            </div>
+                          )}
+
+                          <div className="customer-np-btn-group customer-np-btn-group--next">
+                            <PrimaryButton
+                              type="button"
+                              onClick={handleNext}
+                              disabled={isSubmitting}
+                            >
+                              {activeTab === "review" ? "Create Customer" : "Save & Next"}
+                            </PrimaryButton>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </form>
                 </div>

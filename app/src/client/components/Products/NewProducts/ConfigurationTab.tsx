@@ -229,11 +229,12 @@ export interface ConfigurationTabProps {
   onSubmit?: (isDraft?: boolean) => Promise<boolean>;
   isSavingDraft?: boolean;
   readOnly?: boolean;
+  locked?: boolean;
 }
 
 const EditConfiguration = React.forwardRef<ConfigurationTabHandle, ConfigurationTabProps>(
   (
-    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit, isSavingDraft, readOnly = false }: ConfigurationTabProps,
+    { onConfigChange, initialProductType = '', onProductTypeChange, productId, onSubmit, isSavingDraft, readOnly = false, locked = false }: ConfigurationTabProps,
     ref
   ) => {
     const [formData, setFormData] = useState<Record<string, string>>(() => {
@@ -633,11 +634,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         value: fieldValue,
         onChange: handleInputChange(field.label),
         onBlur: handleBlur,
-        placeholder: field.placeholder,
-        error: fieldError,
         required: field.required,
-        readOnly,
-        disabled: readOnly
+        placeholder: field.placeholder,
+        disabled: readOnly, // Remove locked from here - we'll handle it per field type
+        error: fieldError,
       };
 
       switch (field.type) {
@@ -647,6 +647,8 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               <SelectField
                 {...commonProps}
                 options={field.options || getSelectOptions(field.label) || []}
+                disabled={readOnly} // Dropdowns stay enabled when locked, only disabled when readOnly
+                onChange={locked ? () => {} : commonProps.onChange} // Prevent changes when locked but allow viewing
               />
             </div>
           );
@@ -657,9 +659,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               <InputField
                 type="checkbox"
                 {...commonProps}
+                disabled={readOnly || locked} // Disable checkboxes when locked
                 checked={fieldValue === 'true'}
                 onChange={(val: string) => {
-                  if (readOnly) return;
+                  if (readOnly || locked) return;
                   const newValue = val === 'true' ? 'false' : 'true';
                   handleInputChange(field.label)(newValue);
                 }}
@@ -672,6 +675,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             <div className="form-group">
               <TextareaField
                 {...commonProps}
+                disabled={readOnly || locked} // Disable textareas when locked
                 rows={4}
               />
             </div>
@@ -683,6 +687,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               <InputField
                 type="number"
                 {...commonProps}
+                disabled={readOnly || locked} // Disable number inputs when locked
                 min={field.min}
                 max={field.max}
                 step={field.step}
@@ -697,6 +702,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               <InputField
                 type="password"
                 {...commonProps}
+                disabled={readOnly || locked} // Disable password inputs when locked
               />
             </div>
           );
@@ -707,6 +713,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
               <InputField
                 type="email"
                 {...commonProps}
+                disabled={readOnly || locked} // Disable email inputs when locked
                 inputMode="email"
                 autoComplete="email"
               />
@@ -718,6 +725,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             <div className="form-group">
               <InputField
                 {...commonProps}
+                disabled={readOnly || locked} // Disable default text inputs when locked
                 type={field.type as any}
               />
             </div>
@@ -726,16 +734,32 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     };
 
     return (
-      <div className="configuration-tab">
+      <div
+        className={`configuration-tab ${locked ? 'is-locked' : ''}`}
+        style={{ position: 'relative', opacity: locked ? 0.8 : 1 }}
+        aria-disabled={locked}
+      >
+        {/* Reduced opacity overlay - allows dropdown interactions */}
+        {locked && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none', // Allow interactions to pass through
+              background: 'rgba(255, 255, 255, 0.1)', // Very subtle overlay
+              borderRadius: 12
+            }}
+          />
+        )}
         <div className="form-group">
           {/* Product type dropdown with inline error */}
           <SelectField
             label="Type of Product"
             value={productType}
-            onChange={handleProductTypeChange}
+            onChange={locked ? () => {} : handleProductTypeChange} // Prevent changes when locked but allow viewing
             options={productOptions}
             required
-            disabled={readOnly || isLoadingConfig}
+            disabled={readOnly || isLoadingConfig} // Only disable for readOnly, not locked
             error={!productType && error ? error : undefined}
           />
         </div>

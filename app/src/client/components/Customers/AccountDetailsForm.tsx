@@ -33,6 +33,8 @@ interface Props {
   isDraft?: boolean;
   /** NEW: for unchanged-email suppression */
   initialPrimaryEmail?: string;
+  /** NEW: lock state from parent */
+  locked?: boolean;
 }
 
 const AccountDetailsForm: React.FC<Props> = ({
@@ -42,7 +44,8 @@ const AccountDetailsForm: React.FC<Props> = ({
   onEmailBlur,
   currentCustomerId,
   isDraft = false,
-  initialPrimaryEmail = ''
+  initialPrimaryEmail = '',
+  locked = false
 }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
@@ -245,7 +248,23 @@ const AccountDetailsForm: React.FC<Props> = ({
   /** ----------------------------------------------- */
 
   return (
-    <div className="account-details-form">
+    <div
+      className={`account-details-form ${locked ? 'is-locked' : ''}`}
+      style={{ position: 'relative', opacity: locked ? 0.8 : 1 }}
+      aria-disabled={locked}
+    >
+      {/* Reduced opacity overlay - allows dropdown interactions */}
+      {locked && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none', // Allow interactions to pass through
+            background: 'rgba(255, 255, 255, 0.1)', // Very subtle overlay
+            borderRadius: 12
+          }}
+        />
+      )}
       {/* Contact Info */}
       <div className="acc-form-group">
         <InputField
@@ -253,6 +272,7 @@ const AccountDetailsForm: React.FC<Props> = ({
           value={phoneNumber}
           placeholder="e.g., +1234567890"
           onChange={(val) => {
+            if (locked) return; // Prevent changes when locked
             if (/^\+?\d*$/.test(val)) setPhoneNumber(val);
           }}
           type="tel"
@@ -269,9 +289,9 @@ const AccountDetailsForm: React.FC<Props> = ({
           placeholder="e.g., johndoe@example.com"
           type="email"
           pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
-          onChange={handlePrimaryEmailChange}
-          onBlur={handlePrimaryEmailBlur}
-          onFocus={handlePrimaryEmailFocus}
+          onChange={locked ? () => {} : handlePrimaryEmailChange} // Prevent changes when locked
+          onBlur={locked ? () => {} : handlePrimaryEmailBlur}
+          onFocus={locked ? () => {} : handlePrimaryEmailFocus}
           error={errors.primaryEmail || primaryEmailError}
         />
       </div>
@@ -285,11 +305,18 @@ const AccountDetailsForm: React.FC<Props> = ({
               placeholder="e.g., johndoe@example.com"
               value={email}
               pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
-              onChange={(val) => updateAdditionalEmail(idx, val)}
+              onChange={locked ? () => {} : (val) => updateAdditionalEmail(idx, val)} // Prevent changes when locked
             />
           </div>
         ))}
-        <button type="button" className="add-email-btn" onClick={addEmailField}>+ Add Additional Email Recipients</button>
+        <button 
+          type="button" 
+          className="add-email-btn" 
+          onClick={locked ? () => {} : addEmailField}
+          disabled={locked}
+        >
+          + Add Additional Email Recipients
+        </button>
       </div>
 
       {/* Billing Address */}
@@ -301,8 +328,9 @@ const AccountDetailsForm: React.FC<Props> = ({
             type="text"
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={billingAddress.line1}
-            onChange={(e) => handleBillingChange('line1', e.target.value)}
+            onChange={locked ? () => {} : (e) => handleBillingChange('line1', e.target.value)} // Prevent changes when locked
             required
+            disabled={locked}
           />
           {errors.billingAddressLine1 && <span className="field-error">{errors.billingAddressLine1}</span>}
         </div>
@@ -312,8 +340,9 @@ const AccountDetailsForm: React.FC<Props> = ({
             type="text"
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={billingAddress.line2}
-            onChange={(e) => handleBillingChange('line2', e.target.value)}
+            onChange={locked ? () => {} : (e) => handleBillingChange('line2', e.target.value)}
             required
+            disabled={locked}
           />
           {errors.billingAddressLine2 && <span className="field-error">{errors.billingAddressLine2}</span>}
         </div>
@@ -323,9 +352,10 @@ const AccountDetailsForm: React.FC<Props> = ({
             <input
               type="text"
               value={billingAddress.city}
-              onChange={(e) => handleBillingChange('city', e.target.value)}
+              onChange={locked ? () => {} : (e) => handleBillingChange('city', e.target.value)}
               placeholder="City"
               required
+              disabled={locked}
             />
             {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
           </div>
@@ -334,9 +364,10 @@ const AccountDetailsForm: React.FC<Props> = ({
             <input
               type="text"
               value={billingAddress.state}
-              onChange={(e) => handleBillingChange('state', e.target.value)}
+              onChange={locked ? () => {} : (e) => handleBillingChange('state', e.target.value)}
               placeholder="State/Province/Region"
               required
+              disabled={locked}
             />
             {errors.billingState && <span className="field-error">{errors.billingState}</span>}
           </div>
@@ -347,9 +378,10 @@ const AccountDetailsForm: React.FC<Props> = ({
             <input
               type="text"
               value={billingAddress.zip}
-              onChange={(e) => handleBillingChange('zip', e.target.value)}
+              onChange={locked ? () => {} : (e) => handleBillingChange('zip', e.target.value)}
               placeholder="ZIP/Postal Code"
               required
+              disabled={locked}
             />
             {errors.billingPostalCode && <span className="field-error">{errors.billingPostalCode}</span>}
           </div>
@@ -359,7 +391,7 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={billingAddress.country}
               required
               placeholder="Select Country"
-              onChange={(val) => handleBillingChange('country', val)}
+              onChange={locked ? () => {} : (val) => handleBillingChange('country', val)}
               options={countryOptions}
             />
             {errors.billingCountry && <span className="field-error">{errors.billingCountry}</span>}
@@ -369,8 +401,8 @@ const AccountDetailsForm: React.FC<Props> = ({
 
       {/* Same as Billing Checkbox */}
       <div className="checkbox-row">
-        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
-        <span className="checkbox-label" onClick={handleToggleSame}>
+        <Checkbox checked={sameAsBilling} onToggle={locked ? () => {} : handleToggleSame} />
+        <span className="checkbox-label" onClick={locked ? () => {} : handleToggleSame}>
           Billing address is same as customer address
         </span>
       </div>
@@ -384,8 +416,8 @@ const AccountDetailsForm: React.FC<Props> = ({
             type="text"
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={customerAddress.line1}
-            onChange={(e) => handleCustomerChange('line1', e.target.value)}
-            disabled={sameAsBilling}
+            onChange={locked ? () => {} : (e) => handleCustomerChange('line1', e.target.value)}
+            disabled={sameAsBilling || locked}
             required
           />
           {errors.customerAddressLine1 && <span className="field-error">{errors.customerAddressLine1}</span>}
@@ -396,8 +428,8 @@ const AccountDetailsForm: React.FC<Props> = ({
             type="text"
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
             value={customerAddress.line2}
-            onChange={(e) => handleCustomerChange('line2', e.target.value)}
-            disabled={sameAsBilling}
+            onChange={locked ? () => {} : (e) => handleCustomerChange('line2', e.target.value)}
+            disabled={sameAsBilling || locked}
             required
           />
           {errors.customerAddressLine2 && <span className="field-error">{errors.customerAddressLine2}</span>}
@@ -408,10 +440,10 @@ const AccountDetailsForm: React.FC<Props> = ({
             <input
               type="text"
               value={customerAddress.city}
-              onChange={(e) => handleCustomerChange('city', e.target.value)}
+              onChange={locked ? () => {} : (e) => handleCustomerChange('city', e.target.value)}
               placeholder="City"
               required
-              disabled={sameAsBilling}
+              disabled={sameAsBilling || locked}
             />
             {errors.customerCity && <span className="field-error">{errors.customerCity}</span>}
           </div>
@@ -420,10 +452,10 @@ const AccountDetailsForm: React.FC<Props> = ({
             <input
               type="text"
               value={customerAddress.state}
-              onChange={(e) => handleCustomerChange('state', e.target.value)}
+              onChange={locked ? () => {} : (e) => handleCustomerChange('state', e.target.value)}
               placeholder="State/Province/Region"
               required
-              disabled={sameAsBilling}
+              disabled={sameAsBilling || locked}
             />
             {errors.customerState && <span className="field-error">{errors.customerState}</span>}
           </div>
@@ -434,10 +466,10 @@ const AccountDetailsForm: React.FC<Props> = ({
             <input
               type="text"
               value={customerAddress.zip}
-              onChange={(e) => handleCustomerChange('zip', e.target.value)}
+              onChange={locked ? () => {} : (e) => handleCustomerChange('zip', e.target.value)}
               placeholder="ZIP/Postal Code"
               required
-              disabled={sameAsBilling}
+              disabled={sameAsBilling || locked}
             />
             {errors.customerPostalCode && <span className="field-error">{errors.customerPostalCode}</span>}
           </div>
@@ -447,9 +479,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={customerAddress.country}
               required
               placeholder="Select Country"
-              onChange={(val) => handleCustomerChange('country', val)}
+              onChange={locked ? () => {} : (val) => handleCustomerChange('country', val)}
               options={countryOptions}
-              disabled={sameAsBilling}
+              disabled={sameAsBilling || locked}
             />
             {errors.customerCountry && <span className="field-error">{errors.customerCountry}</span>}
           </div>

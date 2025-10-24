@@ -5,6 +5,7 @@ interface Props {
   value: string;
   onChange: (val: string) => void;
   error?: string;
+  disabled?: boolean;
 }
 
 const OP: Record<string, string[]> = {
@@ -36,7 +37,7 @@ const OP: Record<string, string[]> = {
   IS_VALID_ROW: ['is true', 'is false'],
 };
 
-const FlatfileOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error }) => {
+const FlatfileOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error, disabled }) => {
   const ops = OP[dimension.toUpperCase()] || [];
   return (
     <div>
@@ -44,6 +45,7 @@ const FlatfileOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, e
         className={error ? 'error' : ''} 
         value={value} 
         onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
       >
         <option value="">--select--</option>
         {ops.map((o) => (

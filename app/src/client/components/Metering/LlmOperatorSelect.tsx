@@ -5,6 +5,7 @@ interface Props {
   value: string;
   onChange: (val: string) => void;
   error?: string;
+  disabled?: boolean;
 }
 
 const OP: Record<string, string[]> = {
@@ -30,7 +31,7 @@ const OP: Record<string, string[]> = {
   USER_ID_PROMPT_TOKEN: ['equals', 'contains'],
 };
 
-const LlmOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error }) => {
+const LlmOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error, disabled }) => {
   const ops = OP[dimension.toUpperCase()] || [];
   return (
     <div>
@@ -38,6 +39,7 @@ const LlmOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error 
         className={error ? 'error' : ''} 
         value={value} 
         onChange={e=>onChange(e.target.value)}
+        disabled={disabled}
       >
         <option value="">--select--</option>
         {ops.map(o => (
