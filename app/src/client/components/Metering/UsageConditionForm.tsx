@@ -42,10 +42,13 @@ interface UsageConditionFormProps {
   billingCriteria: string;
   onBillingCriteriaChange: (val: string) => void;
 
-  // NEW: inline validation support
-  errors?: Record<string, string>;               // keys like "0.dimension", "0.operator", "0.value"
-  billingError?: string;                          // error for billing criteria select
-  onFieldEdited?: (errorKey: string) => void;     // tell parent to clear a specific field error
+  // inline validation
+  errors?: Record<string, string>;
+  billingError?: string;
+  onFieldEdited?: (errorKey: string) => void;
+
+  // NEW: lock state from parent
+  locked?: boolean;
 }
 
 const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
@@ -57,7 +60,8 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
   onBillingCriteriaChange,
   errors = {},
   billingError,
-  onFieldEdited
+  onFieldEdited,
+  locked = false,
 }) => {
   const [filters, setFilters] = useState<FilterCondition[]>(
     conditions.length
@@ -96,12 +100,29 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
   const isLlm  = upperType === 'LLMTOKEN'  && ['TOKEN','PROMPT_TOKEN','COMPLETION_TOKEN'].includes(upperUom);
 
   return (
-    <div className="usage-form-container">
+    <div
+      className={`usage-form-container ${locked ? 'is-locked' : ''}`}
+      style={{ position: 'relative', opacity: locked ? 0.6 : 1 }}
+      aria-disabled={locked}
+    >
+      {/* overlay that blocks all interactions while locked */}
+      {locked && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'auto',
+            background: 'transparent',
+            borderRadius: 12
+          }}
+        />
+      )}
+
       {filters.map((filter, index) => (
         <div key={filter.id} className="filter-box">
           <div className="filter-header">
             <p>FILTER CONDITION {index + 1}</p>
-            <button className="delete-btn" onClick={() => handleRemove(filter.id)}>
+            <button className="delete-btn" onClick={() => handleRemove(filter.id)} disabled={locked}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 3.99992H14M12.6667 3.99992V13.3333C12.6667 13.9999 12 14.6666 11.3333 14.6666H4.66667C4 14.6666 3.33333 13.9999 3.33333 13.3333V3.99992M5.33333 3.99992V2.66659C5.33333 1.99992 6 1.33325 6.66667 1.33325H9.33333C10 1.33325 10.6667 1.99992 10.6667 2.66659V3.99992M6.66667 7.33325V11.3333M9.33333 7.33325V11.3333" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -110,53 +131,18 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
 
           <label>Dimensions</label>
           {(() => {
-            if (isApi) {
-              return (
-                <ApiDimensionSelect
-                  unitOfMeasure={upperUom}
-                  value={filter.usageCondition}
-                  onChange={val => handleChange(filter.id, 'usageCondition', val)}
-                  // show error
-                  error={errors[`${index}.dimension`]}
-                />
-              );
-            }
-            if (isFlat) {
-              return (
-                <FlatfileDimensionSelect
-                  unitOfMeasure={upperUom}
-                  value={filter.usageCondition}
-                  onChange={val => handleChange(filter.id, 'usageCondition', val)}
-                  error={errors[`${index}.dimension`]}
-                />
-              );
-            }
-            if (isSql) {
-              return (
-                <SqlDimensionSelect
-                  unitOfMeasure={upperUom}
-                  value={filter.usageCondition}
-                  onChange={val => handleChange(filter.id, 'usageCondition', val)}
-                  error={errors[`${index}.dimension`]}
-                />
-              );
-            }
-            if (isLlm) {
-              return (
-                <LlmDimensionSelect
-                  unitOfMeasure={upperUom}
-                  value={filter.usageCondition}
-                  onChange={val => handleChange(filter.id, 'usageCondition', val)}
-                  error={errors[`${index}.dimension`]}
-                />
-              );
-            }
+            const commonProps = { value: filter.usageCondition, onChange: (val: string) => handleChange(filter.id, 'usageCondition', val), error: errors[`${index}.dimension`] };
+            if (isApi)   return <ApiDimensionSelect  unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
+            if (isFlat)  return <FlatfileDimensionSelect unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
+            if (isSql)   return <SqlDimensionSelect  unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
+            if (isLlm)   return <LlmDimensionSelect  unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
             return (
               <InputField
                 placeholder="Dimension"
                 value={filter.usageCondition}
                 onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
                 error={errors[`${index}.dimension`]}
+                disabled={locked}
               />
             );
           })()}
@@ -177,52 +163,16 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                     />
                   );
                 }
-                if (isApi) {
-                  return (
-                    <ApiOperatorSelect
-                      dimension={filter.usageCondition}
-                      value={filter.operator}
-                      onChange={val => handleChange(filter.id, 'operator', val)}
-                      error={errors[`${index}.operator`]}
-                    />
-                  );
-                }
-                if (isFlat) {
-                  return (
-                    <FlatfileOperatorSelect
-                      dimension={filter.usageCondition}
-                      value={filter.operator}
-                      onChange={val => handleChange(filter.id, 'operator', val)}
-                      error={errors[`${index}.operator`]}
-                    />
-                  );
-                }
-                if (isSql) {
-                  return (
-                    <SqlOperatorSelect
-                      dimension={filter.usageCondition}
-                      value={filter.operator}
-                      onChange={val => handleChange(filter.id, 'operator', val)}
-                      error={errors[`${index}.operator`]}
-                    />
-                  );
-                }
-                if (isLlm) {
-                  return (
-                    <LlmOperatorSelect
-                      dimension={filter.usageCondition}
-                      value={filter.operator}
-                      onChange={val => handleChange(filter.id, 'operator', val)}
-                      error={errors[`${index}.operator`]}
-                    />
-                  );
-                }
+                if (isApi)  return <ApiOperatorSelect  dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
+                if (isFlat) return <FlatfileOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
+                if (isSql)  return <SqlOperatorSelect  dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
+                if (isLlm)  return <LlmOperatorSelect  dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
                 return (
                   <InputField
                     placeholder="Operator"
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
-                    disabled={!filter.usageCondition}
+                    disabled={locked || !filter.usageCondition}
                     error={errors[`${index}.operator`]}
                   />
                 );
@@ -235,7 +185,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 placeholder="Value"
                 value={filter.value}
                 onChange={(val) => handleChange(filter.id, 'value', val)}
-                disabled={!filter.operator}
+                disabled={locked || !filter.operator}
                 error={errors[`${index}.value`]}
               />
             </div>
@@ -243,7 +193,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
         </div>
       ))}
 
-      <button className="add-btn" onClick={handleAdd}>Add Filter</button>
+      <button className="add-btn" onClick={handleAdd} disabled={locked}>Add Filter</button>
 
       <div className="billing-section">
         <label>Select Billing Criteria</label>
@@ -258,6 +208,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
             {label:'Bill excluding usage conditions',value:'BILL_EXCLUDING_USAGE_CONDITIONS'}
           ]}
           error={billingError}
+          disabled={locked}
         />
         <p className="billing-note">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">

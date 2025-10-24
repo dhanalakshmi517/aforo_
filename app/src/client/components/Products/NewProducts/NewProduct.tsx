@@ -176,6 +176,45 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   const configRef = React.useRef<any>(null);
 
+  // Lock logic - similar to CreateUsageMetric
+  const hasAnyRequiredInput = React.useMemo(() => {
+    return Boolean(
+      formData.productName.trim() ||
+      formData.version.trim() ||
+      formData.skuCode.trim() ||
+      formData.description.trim() ||
+      selectedIcon
+    );
+  }, [
+    formData.productName,
+    formData.version,
+    formData.skuCode,
+    formData.description,
+    selectedIcon
+  ]);
+
+  const isConfigurationLocked = !hasAnyRequiredInput;
+
+  const LockBadge = () => (
+    <span
+      style={{
+        borderRadius: '8px',
+        background: '#E9E9EE',
+        display: 'flex',
+        padding: '6px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '5px',
+        marginLeft: '8px'
+      }}
+      aria-label="Locked"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </span>
+  );
+
   // Generic change handler to update form and clear field error
   const handleFieldChange = (field: keyof typeof formData) => (v: string) => {
     const trimmed = v.trim();
@@ -876,8 +915,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                       {activeTab === "configuration" && (
                         <section>
-                          <div className="np-section-header">
+                          <div className="np-section-header" style={{display:'flex',alignItems:'center'}}>
                             <h3 className="np-section-title">CONFIGURATION</h3>
+                            {isConfigurationLocked && <LockBadge />}
                             {createdProductId && (
                               <div className="text-sm text-gray-500 mt-1">
                               </div>
@@ -901,6 +941,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             initialProductType={configuration.productType}
                             isSavingDraft={isSaving}
                             readOnly={false}
+                            locked={isConfigurationLocked}
                           />
                         </section>
                       )}
@@ -921,6 +962,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               onProductTypeChange={() => {}}
                               isSavingDraft={false}
                               readOnly={true}
+                              locked={false}
                             />
                           </div>
                         </section>
@@ -939,7 +981,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                     </div>
 
                     {/* Footer actions on a line */}
-                    <div className="np-form-footer">
+                    <div className="np-form-footer" style={{position:'relative'}}>
                       {activeTab === "general" && (
                         <>
                           {errors.form && (
@@ -958,40 +1000,62 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                       {activeTab === "configuration" && (
                         <>
-                          <div>
-                            <SecondaryButton
-                              type="button"
-                              onClick={() => gotoStep(0)}
+                          {isConfigurationLocked ? (
+                            // ONLY the hint when locked (no buttons)
+                            <div
+                              className="np-footer-hint"
+                              style={{
+                                position: 'absolute',
+                                left: '50%',
+                                bottom: '20px',
+                                transform: 'translateX(-50%)',
+                                color: '#8C8F96',
+                                fontSize: 14,
+                                pointerEvents: 'none',
+                                whiteSpace: 'nowrap'
+                              }}
                             >
-                              Back
-                            </SecondaryButton>
-                          </div>
-                          <div className="np-btn-group np-btn-group--next">
-                          <PrimaryButton
-                            type="button"
-                            onClick={async () => {
-                              try {
-                                setIsSaving(true);
-                                if (configRef.current) {
-                                  // Validate but don't save to server yet (skipValidation=false, saveToServer=false)
-                                  const success = await configRef.current.submit(false, false);
-                                  if (success) gotoStep(2);
-                                }
-                              } catch (error) {
-                                console.error('Error saving configuration:', error);
-                                setErrors(prev => ({
-                                  ...prev,
-                                  form: 'Failed to save configuration. Please try again.'
-                                }));
-                              } finally {
-                                setIsSaving(false);
-                              }
-                            }}
-                            disabled={isSaving}
-                          >
-                            Save & Next
-                          </PrimaryButton>
-                        </div>
+                              Fill the previous steps to unlock this step
+                            </div>
+                          ) : (
+                            // normal buttons when unlocked
+                            <>
+                              <div>
+                                <SecondaryButton
+                                  type="button"
+                                  onClick={() => gotoStep(0)}
+                                >
+                                  Back
+                                </SecondaryButton>
+                              </div>
+                              <div className="np-btn-group np-btn-group--next">
+                              <PrimaryButton
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    setIsSaving(true);
+                                    if (configRef.current) {
+                                      // Validate but don't save to server yet (skipValidation=false, saveToServer=false)
+                                      const success = await configRef.current.submit(false, false);
+                                      if (success) gotoStep(2);
+                                    }
+                                  } catch (error) {
+                                    console.error('Error saving configuration:', error);
+                                    setErrors(prev => ({
+                                      ...prev,
+                                      form: 'Failed to save configuration. Please try again.'
+                                    }));
+                                  } finally {
+                                    setIsSaving(false);
+                                  }
+                                }}
+                                disabled={isSaving}
+                              >
+                                Save & Next
+                              </PrimaryButton>
+                            </div>
+                            </>
+                          )}
                         </>
                       )}
 

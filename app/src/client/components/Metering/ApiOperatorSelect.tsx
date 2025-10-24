@@ -5,6 +5,7 @@ interface Props {
   value: string;
   onChange: (val: string) => void;
   error?: string;
+  disabled?: boolean;
 }
 
 const OPERATOR_MAP: Record<string, string[]> = {
@@ -46,7 +47,7 @@ const OPERATOR_MAP: Record<string, string[]> = {
   USER_ID_COMPLETION_TOKEN: ['equals', 'contains'],
 };
 
-const ApiOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error }) => {
+const ApiOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error, disabled }) => {
   const ops = OPERATOR_MAP[dimension.toUpperCase()] || [];
   return (
     <div>
@@ -54,6 +55,7 @@ const ApiOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error 
         className={error ? 'error' : ''} 
         value={value} 
         onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
       >
         <option value="">--select--</option>
         {ops.map((o) => (
