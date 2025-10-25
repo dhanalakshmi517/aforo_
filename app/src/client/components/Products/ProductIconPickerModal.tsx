@@ -57,9 +57,26 @@ const ProductIconPickerModal: React.FC<ProductIconPickerModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="pi-overlay" role="dialog" aria-modal="true">
-      <div className="pi-modal">
+    <div 
+      className="pi-overlay" 
+      role="dialog" 
+      aria-modal="true"
+      onClick={handleOverlayClick}
+      onMouseDown={handleMouseDown}
+      style={{ pointerEvents: 'auto' }}
+    >
+      <div className="pi-modal" onMouseDown={handleMouseDown}>
         <button className="pi-close" onClick={onClose} aria-label="Close icon picker">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 5L5 15M5 5L15 15" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
