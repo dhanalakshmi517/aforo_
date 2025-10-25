@@ -42,13 +42,13 @@
   --grey-black: rgba(18, 18, 19, 1);
 
   /* === Red Scale (from brand collection: color/red) === */
-  --red-lightest: rgba(241, 222, 219, 1);
-  --red-lighter: rgba(245, 197, 191, 1);
-  --red-light: rgba(250, 116, 99, 1);
-  --red-default: rgba(227, 73, 53, 1);
-  --red-dark: rgba(175, 42, 26, 1);
-  --red-darker: rgba(96, 30, 23, 1);
-  --red-darkest: rgba(55, 32, 29, 1);
+  --red-lightest: rgba(255, 247, 245, 1);
+  --red-lighter: rgba(255, 243, 240, 1);
+  --red-light: rgba(255, 237, 235, 1);
+  --red-default: rgba(237, 81, 66, 1);
+  --red-dark: rgba(212, 54, 47, 1);
+  --red-darker: rgba(183, 33, 32, 1);
+  --red-darkest: rgba(149, 20, 22, 1);
 
   /* Yellow color */
   --color-yellow-lightest: rgba(255, 251, 239, 1);
@@ -156,20 +156,22 @@
 
   /* ALIAS */
   /* Primary Color Palette (from the image) */
-  --color-primary-000:rgba(225, 244, 251, 1);
+  --color-primary-000:rgba(242, 249, 253, 1);
   /* Assuming a very light shade based on the 000 naming */
-  --color-primary-100: rgba(196, 233, 249, 1);
+  --color-primary-100:rgba(237, 248, 253, 1);
   /* Assuming lighter shades */
-  --color-primary-200: rgba(147, 212, 240, 1);
-  --color-primary-300: rgba(87, 189, 234, 1);
+  --color-primary-200: rgba(226, 242, 249, 1);
+  --color-primary-300:rgba(87, 189, 234, 1);
   --color-primary-400: rgba(34, 167, 229, 1);
   --color-primary-500:rgba(0, 146, 223, 1);
-  --color-primary-600: rgba(0, 130, 204, 1);
-  --color-primary-700: rgba(2, 90, 148, 1);
+  --color-primary-600: rgba(11, 128, 194, 1);
+  --color-primary-700: rgba(2, 98, 161, 1);
+    --color-primary-750:rgba(2, 90, 148, 1);
+
   /* Directly from the image: #4339AC */
   --color-primary-800:rgba(0, 75, 128, 1);
   /* Assuming darker shades */
-  --color-primary-900: rgba(0, 75, 128, 1);
+  --color-primary-900:rgba(0, 64, 105, 1) ;
   --color-primary-1000: rgba(0, 54, 90, 1);
   --color-primary-1100: rgba(0, 40, 67, 1);
   --color-primary-1200: rgba(0, 33, 55, 1);
