@@ -1,4 +1,4 @@
-.pi-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:1000}
+.pi-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:9999;pointer-events:auto;-webkit-user-select:none;user-select:none}
 .pi-modal{position:relative;width:481px;height:426px;border-radius:12px;background:#FFF;padding:24px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px;overflow:hidden}
 .pi-close{position:absolute;top:8px;right:8px;background:transparent;border:0;cursor:pointer;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
 .pi-search{display:flex;align-items:center;gap:8px;border:1px solid #D5D4DF;border-radius:8px;padding:8px 12px;width:100%;background:#FFF;box-sizing:border-box}

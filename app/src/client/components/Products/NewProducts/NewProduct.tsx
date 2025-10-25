@@ -672,7 +672,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         <div className="np-card">
           <div className="np-grid">
             {/* LEFT rail */}
-            <aside className="np-rail">
+            <aside className="np-rail" data-modal-open={isIconPickerOpen ? 'true' : 'false'} style={{
+              pointerEvents: isIconPickerOpen ? 'none' : 'auto',
+              opacity: isIconPickerOpen ? 0.5 : 1,
+              transition: 'opacity 0.2s'
+            }}>
               <nav className="np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
@@ -680,6 +684,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                   const showConnector = i < steps.length - 1;
                   const isReviewTab = step.title.toLowerCase().includes('review');
                   const isDisabled = isReviewTab && (!createdProductId || !configuration.productType);
+                  const isModalOpen = isIconPickerOpen;
                   
                   return (
                     <button
@@ -687,21 +692,21 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       type="button"
                       className={[
                         "np-step",
-                        isActive ? "active" : "",
+                        isActive && !isModalOpen ? "active" : "",
                         isCompleted ? "completed" : "",
-                        isDisabled ? "disabled" : ""
+                        isDisabled || isModalOpen ? "disabled" : ""
                       ].join(" ").trim()}
-                      onClick={() => !isDisabled && gotoStep(i)}
-                      disabled={isDisabled}
-                      title={isDisabled ? "Please complete the configuration first" : ""}
+                      onClick={() => !isDisabled && !isModalOpen && gotoStep(i)}
+                      disabled={isDisabled || isModalOpen}
+                      title={isDisabled ? "Please complete the configuration first" : isModalOpen ? "Close the icon picker first" : ""}
                     >
                       {/* Bullet + connector column */}
                       <span className="np-step__bullet" aria-hidden="true">
                         {/* Circle bullet */}
                         <span className="np-step__icon">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
-                            <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                            <circle cx="12" cy="12" r="11" stroke={isModalOpen ? "#C3C2D0" : (isActive ? "var(--color-primary-800)" : "#C3C2D0")} strokeWidth="2" />
+                            <circle cx="12" cy="12" r="6" fill={isModalOpen ? "#C3C2D0" : (isActive ? "var(--color-primary-800)" : "#C3C2D0")} />
                           </svg>
                         </span>
 
@@ -908,6 +913,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             onSelect={(icon) => {
                               setSelectedIcon(icon);
                               setIsIconPickerOpen(false);
+                              // Prevent any focus on step elements
+                              document.activeElement instanceof HTMLElement && document.activeElement.blur();
                             }}
                           />
                         </section>
@@ -1035,15 +1042,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   try {
                                     setIsSaving(true);
                                     if (configRef.current) {
-                                      // Validate but don't save to server yet (skipValidation=false, saveToServer=false)
+                                      // Only client-side validation - NO API call (saveToServer=false)
+                                      // API will be called in Review tab when finalizing
                                       const success = await configRef.current.submit(false, false);
                                       if (success) gotoStep(2);
                                     }
                                   } catch (error) {
-                                    console.error('Error saving configuration:', error);
+                                    console.error('Error validating configuration:', error);
                                     setErrors(prev => ({
                                       ...prev,
-                                      form: 'Failed to save configuration. Please try again.'
+                                      form: 'Please fill all required fields.'
                                     }));
                                   } finally {
                                     setIsSaving(false);

@@ -29,7 +29,10 @@ const ProductIcon: React.FC<{
     <button
       type="button"
       className="pi-item"
-      onClick={() => onSelect(icon)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(icon);
+      }}
       aria-label={icon.label}
     >
       {/* OUTER CARD — with layered background (tile color + base white with blue overlay) */}
