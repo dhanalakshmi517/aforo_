@@ -55,7 +55,7 @@ const TopBar: React.FC<TopBarProps> = ({
             className="af-topbar__btn af-topbar__btn--cancel"
             onClick={cancel.onClick}
           >
-            {cancel.label ?? "Delete"}
+            {cancel.label ?? "Discard"}
           </button>
         )}
 

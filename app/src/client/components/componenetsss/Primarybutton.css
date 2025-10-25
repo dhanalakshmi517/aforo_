@@ -10,7 +10,7 @@
     padding: 8px 20px;
     border-radius: var(--border-radius-sm);
   
-    background: var(--color-primary-700);
+    background: var(--color-primary-750);
     color: var(--color-neutral-white);
     border: 1px solid transparent;
   
@@ -47,16 +47,16 @@
   
   /* States */
   .af-primary-btn:hover:not(:disabled) {
-     background: var(--color-primary-600);
+     background: var(--color-primary-700);
   }
   .af-primary-btn:active:not(:disabled) {
-    background: var(--color-primary-900);
+    background: var(--color-primary-800);
     transform: translateY(0.5px);
   }
   .af-primary-btn:focus-visible {
     outline: none;
     border:2px solid var(--color-primary-600);
-    background: var(--color-primary-700);
+    background: var(--color-primary-750);
   }
   .af-primary-btn:disabled {
     background: var(--color-neutral-200);

@@ -50,8 +50,8 @@
   }
   .af-secondary-color-btn:focus-visible {
     outline: none;
-    border:2px solid var(--color-primary-200);
-    background: var(--color-primary-000);
+    border:2px solid var(--color-primary-600);
+    background: var(--color-primary-100);
   }
   
   .af-secondary-color-btn:disabled {
