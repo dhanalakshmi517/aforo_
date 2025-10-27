@@ -280,18 +280,24 @@ line-height: var(--line-height-body-md);
   .status-tag {
     padding: 4px 10px;
     border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
+
+/* body/sm/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm);
+  
   }
   
   .status-tag.active {
-    background-color: #e6f4ea;
-    color:var(--color-primary-200);
+    background-color:#E2FFDC;
+    color:#39A424;
   }
   
   .status-tag.inactive {
-    background-color: #f3f4f6;
-    color: #6b7280;
+    background-color:var(--color-neutral-200);
+    color: var(--color-neutral-1000);
   }
   
   .actions {

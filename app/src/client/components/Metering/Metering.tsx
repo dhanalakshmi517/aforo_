@@ -8,6 +8,9 @@ import "../Products/Products.css";
 import PageHeader from "../PageHeader/PageHeader";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import { useToast } from '../componenetsss/ToastProvider';
+import EditIconButton from '../componenetsss/EditIconButton';
+import DeleteIconButton from '../componenetsss/DeleteIconButton';
+import RetryIconButton from '../componenetsss/RetryIconButton';
 import UsageEmptyImg from "./usage.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
@@ -188,7 +191,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         title="Usage Metrics"
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
-        primaryLabel="+New Usage Metric"
+        primaryLabel="+ Usage Metric"
         onPrimaryClick={() => navigate('/get-started/metering/new')}
         showPrimary={metrics.length > 0}
       />
@@ -222,25 +225,21 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               
               <td className="actions-cell"><div className="product-action-buttons">
                 {String(metric.status).toLowerCase() === 'draft' ? (
-                  <button className="product-view-button" onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M7.99967 1.33325C11.6816 1.33325 14.6663 4.31802 14.6663 7.99992C14.6663 11.6818 11.6816 14.6666 7.99967 14.6666C4.31778 14.6666 1.33301 11.6818 1.33301 7.99992H5.33301H10.6663M10.6663 7.99992L7.99967 10.6666M10.6663 7.99992L7.99967 5.33325" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
+                  <RetryIconButton
+                    onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
+                    title="Continue editing draft"
+                  />
                 ) : (
-                  <button className="product-edit-button" onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M7.00031 12.3334H13.0003M9.91764 1.41473C10.183 1.14934 10.543 1.00024 10.9183 1.00024C11.2936 1.00024 11.6536 1.14934 11.919 1.41473C12.1844 1.68013 12.3335 2.04008 12.3335 2.4154C12.3335 2.79072 12.1844 3.15067 11.919 3.41607L3.91231 11.4234C3.75371 11.582 3.55766 11.698 3.34231 11.7607L1.42764 12.3194C1.37028 12.3361 1.30947 12.3371 1.25158 12.3223C1.1937 12.3075 1.14086 12.2774 1.09861 12.2351C1.05635 12.1929 1.02624 12.140 1.01141 12.0821C0.996575 12.0242 0.997578 11.9634 1.01431 11.9061L1.57298 9.9914C1.63579 9.77629 1.75181 9.58048 1.91031 9.42207L9.91764 1.41473Z" stroke="#1D7AFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
+                  <EditIconButton
+                    onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}
+                    title="Edit metric"
+                  />
                 )}
-                <button className="product-delete-button" onClick={() => handleDeleteClick(metric)}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M2 4.00004H14M12.6667 4.00004V13.3334C12.6667 14 12 14.6667 11.3333 14.6667H4.66667C4 14.6667 3.33333 14 3.33333 13.3334V4.00004M5.33333 4.00004V2.66671C5.33333 2.00004 6 1.33337 6.66667 1.33337H9.33333C10 1.33337 10.6667 2.00004 10.6667 2.66671V4.00004M6.66667 7.33337V11.3334M9.33333 7.33337V11.3334" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                </div>
-              </td>
+                <DeleteIconButton
+                  onClick={() => handleDeleteClick(metric)}
+                  title="Delete metric"
+                />
+              </div></td>
             </tr>
           ))}
           {filteredMetrics.length === 0 && (

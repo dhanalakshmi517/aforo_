@@ -48,20 +48,26 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const activeMetricId = draftFromState || draftMetricId;
 
   const deleteAndClose = async () => {
-    let ok = true;
+    if (!metricId) {
+      onClose();
+      return;
+    }
+    
     try {
-      if (metricId) {
-        await deleteUsageMetric(metricId);
-      }
+      await deleteUsageMetric(metricId);
+      showToast({
+        kind: 'success',
+        title: 'Metric Deleted',
+        message: 'Metric deleted successfully.'
+      });
     } catch (e) {
       console.error('Failed to delete metric', e);
-      ok = false;
-    } finally {
       showToast({
-        kind: ok ? 'success' : 'error',
-        title: ok ? 'Metric Deleted' : 'Delete Failed',
-        message: ok ? 'Metric deleted successfully.' : 'Unable to delete metric. Please try again.'
+        kind: 'error',
+        title: 'Delete Failed',
+        message: 'Unable to delete metric. Please try again.'
       });
+    } finally {
       onClose();
     }
   };
@@ -111,8 +117,25 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   useEffect(() => {
     if (activeMetricId) {
       (async () => {
+        console.log('Fetching metric with ID:', activeMetricId);
         const data = await getUsageMetric(activeMetricId);
+        console.log('API Response:', JSON.stringify(data, null, 2));
+        
         if (data) {
+          console.log('Setting form state with data:', {
+            metricId: (data as any).metricId ?? (data as any).billableMetricId ?? null,
+            metricName: (data as any).metricName || '',
+            productId: String((data as any).productId),
+            productType: (data as any).productType || '',
+            unitOfMeasure: (data as any).unitOfMeasure || '',
+            description: (data as any).description || '',
+            aggregationFunction: (data as any).aggregationFunction || '',
+            aggregationWindow: (data as any).aggregationWindow || '',
+            billingCriteria: (data as any).billingCriteria || '',
+            usageConditions: (data as any).usageConditions || [],
+            version: (data as any).version || ''
+          });
+
           setMetricId((data as any).metricId ?? (data as any).billableMetricId ?? null);
           setMetricName((data as any).metricName || '');
           setSelectedProductId(String((data as any).productId));
@@ -122,10 +145,16 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           setAggregationFunction((data as any).aggregationFunction || '');
           setAggregationWindow((data as any).aggregationWindow || '');
           setBillingCriteria((data as any).billingCriteria || '');
-          setUsageConditions((data as any).usageConditions || []);
+          const conditions = (data as any).usageConditions || [];
+          console.log('Setting usage conditions:', conditions);
+          setUsageConditions(conditions);
           if ((data as any).version) setVersion((data as any).version);
+        } else {
+          console.log('No data received from getUsageMetric');
         }
       })();
+    } else {
+      console.log('No activeMetricId provided, starting with empty form');
     }
   }, [activeMetricId]);
 
@@ -244,6 +273,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   };
 
   const buildPayload = (isDraft: boolean) => {
+    // When billing excludes usage conditions, don't send any usage conditions
+    const shouldIncludeUsageConditions = billingCriteria !== 'BILL_EXCLUDING_USAGE_CONDITIONS';
+    
     if (metricId) {
       const payload: any = {
         metricId,
@@ -255,22 +287,23 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         billingCriteria: billingCriteria || undefined,
         version: version?.trim() ? version.trim() : undefined,
         description: description?.trim() ? description.trim() : undefined,
-        usageConditions: (usageConditions?.length ? usageConditions : undefined),
+        usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : [],
       };
       return clean(payload);
     }
 
     if (isDraft) {
-      const payload: any = {};
+      const payload: any = {
+        usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
+      };
       if (metricName.trim())         payload.metricName = metricName.trim();
       if (selectedProductId)         payload.productId = Number(selectedProductId);
       if (version.trim())            payload.version = version.trim();
       if (unitOfMeasure.trim())      payload.unitOfMeasure = unitOfMeasure.trim();
       if (description.trim())        payload.description = description.trim();
       if (aggregationFunction)       payload.aggregationFunction = aggregationFunction;
-      if (aggregationWindow)         payload.aggregationWindow  = aggregationWindow;
+      if (aggregationWindow)         payload.aggregationWindow = aggregationWindow;
       if (billingCriteria)           payload.billingCriteria = billingCriteria;
-      if (usageConditions?.length)   payload.usageConditions = usageConditions;
       return clean(payload);
     }
 
@@ -283,18 +316,16 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       aggregationFunction,
       aggregationWindow,
       billingCriteria:     billingCriteria || undefined,
-      usageConditions:     usageConditions?.length ? usageConditions : undefined
+      usageConditions:     shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
     };
   };
 
   const saveOrUpdateMetric = async (isDraft = false, skipFinalize = false) => {
-    if (isDraft && metricId) {
-      return true;
-    }
-
+    // Only validate if not a draft save or if it's the final submission
     if (!isDraft && !validateCurrentStep(currentStep)) return false;
 
     const payload = buildPayload(isDraft);
+    console.log('Saving metric with payload:', JSON.stringify(payload, null, 2));
 
     if (metricId) {
       const nonIdKeys = Object.keys(payload).filter(k => k !== 'metricId');
@@ -325,6 +356,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         return true;
       } else {
         const res = await createBillableMetric(payload);
+        console.log('Create response:', res);
         if (!res.ok || !res.id) throw new Error('Failed to create metric');
         setMetricId(res.id);
         if (!isDraft && !skipFinalize) {
@@ -335,6 +367,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       }
     } catch (e) {
       console.error('Error saving metric:', e);
+      setErrors(prev => ({ ...prev, form: 'Failed to save metric. Please check all required fields.' }));
       return false;
     }
   };
@@ -373,12 +406,33 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     try {
       setIsDraftSaving(true);
       setIsDraftSaved(false);
-      const ok = await saveOrUpdateMetric(true);
+      
+      console.log('Saving draft, current metricId:', metricId);
+      const payload = buildPayload(true);
+      console.log('Draft payload:', JSON.stringify(payload, null, 2));
+      
+      let ok;
+      if (metricId) {
+        console.log('Updating existing draft with ID:', metricId);
+        ok = await updateBillableMetric(metricId, payload);
+      } else {
+        console.log('Creating new draft');
+        const response = await createBillableMetric(payload);
+        ok = response.ok;
+        if (response.id) {
+          setMetricId(response.id);
+        }
+      }
+      
       if (ok) {
         setIsDraftSaved(true);
-        setTimeout(() => setIsDraftSaved(false), 2500);
+        return true;
+      } else {
+        return false;
       }
-      return ok;
+    } catch (e) {
+      console.error('Error saving draft:', e);
+      return false;
     } finally {
       setIsDraftSaving(false);
     }
@@ -478,29 +532,34 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                           <div className="met-np-grid-2">
                             {/* fields ... (unchanged) */}
                             <InputField label="Metric Name" value={metricName} onChange={setMetricName} placeholder="eg. API Calls" error={errors.metricName}/>
-                            <SelectField
-                              label="Product"
-                              placeholder="eg. Maps API"
-                              value={selectedProductId}
-                              onChange={(v: string) => {
-                                setSelectedProductId(v);
-                                const prod = products.find(p => String(p.productId) === v);
-                                setSelectedProductName(prod ? prod.productName : '');
-                                setSelectedProductType(prod ? prod.productType : '');
-                                setUnitOfMeasure('');
-                                if (errors.product) {
-                                  const { product, ...rest } = errors;
-                                  setErrors(rest);
-                                }
-                              }}
-                              options={productOptions}
-                              error={errors.product}
-                            />
+                            <div className="form-group">
+                              <SelectField
+                                label="Product"
+                                placeholder="Select a product..."
+                                value={selectedProductId}
+                                onChange={(v: string) => {
+                                  setSelectedProductId(v);
+                                  const prod = products.find(p => String(p.productId) === v);
+                                  setSelectedProductName(prod ? prod.productName : '');
+                                  setSelectedProductType(prod ? prod.productType : '');
+                                  setUnitOfMeasure('');
+                                  if (errors.product) {
+                                    const { product, ...rest } = errors;
+                                    setErrors(rest);
+                                  }
+                                }}
+                                options={[
+                                  { label: 'Select a product...', value: '', disabled: true },
+                                  ...productOptions
+                                ]}
+                                error={errors.product}
+                                className="select-product"
+                              />
+                            </div>
                             <InputField label="Version (optional)" value={version} onChange={setVersion} placeholder="eg. v2.0"/>
                             <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month"/>
 
                             <div className="met-np-field">
-                              <label className="met-np-label">Unit of Measure</label>
                               {(() => {
                                 const map: Record<string, string[]> = {
                                   API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
@@ -514,6 +573,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 if (opts) {
                                   return (
                                     <SelectField
+                                      label="Unit of Measure"
                                       placeholder="Select unit (eg. calls, GB, hours)"
                                       value={unitOfMeasure}
                                       onChange={(v: string) => {
@@ -531,6 +591,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                                 return (
                                   <InputField
+                                    label="Unit of Measure"
                                     placeholder="Unit"
                                     value={unitOfMeasure}
                                     onChange={(v: string) => {
@@ -547,8 +608,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                             </div>
 
                             <div className="met-np-field">
-                              <label className="met-np-label">Aggregation Function<span className="required">*</span></label>
                               <AggregationFunctionSelect
+                                label="Aggregation Function"
                                 productType={selectedProductType}
                                 unitOfMeasure={unitOfMeasure}
                                 value={aggregationFunction}
@@ -564,8 +625,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                             </div>
 
                             <div className="met-np-field">
-                              <label className="met-np-label">Aggregation Window<span className="required">*</span></label>
                               <AggregationWindowSelect
+                                label="Aggregation Window"  
                                 productType={selectedProductType}
                                 unitOfMeasure={unitOfMeasure}
                                 value={aggregationWindow}

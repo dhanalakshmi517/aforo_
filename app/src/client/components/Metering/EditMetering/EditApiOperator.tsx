@@ -1,11 +1,13 @@
 // EditApiOperator.tsx
 
 import React from 'react';
+import { SelectField } from '../../componenetsss/Inputs';
 
 interface Props {
   dimension: string;
   value: string;
   onChange: (val: string) => void;
+  label?: string;
 }
 
 const OPERATOR_MAP: Record<string, string[]> = {
@@ -47,15 +49,21 @@ const OPERATOR_MAP: Record<string, string[]> = {
   USER_ID_COMPLETION_TOKEN: ['equals', 'contains'],
 };
 
-const EditApiOperator: React.FC<Props> = ({ dimension, value, onChange }) => {
+const EditApiOperator: React.FC<Props> = ({ dimension, value, onChange, label = "Operator" }) => {
   const ops = OPERATOR_MAP[dimension.toUpperCase()] || [];
+  const options = ops.map(o => ({
+    label: o,
+    value: o,
+  }));
+  
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {ops.map((o) => (
-        <option key={o} value={o}>{o}</option>
-      ))}
-    </select>
+    <SelectField
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      placeholder="--select--"
+    />
   );
 };
 

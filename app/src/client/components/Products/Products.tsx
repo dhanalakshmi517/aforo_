@@ -20,6 +20,9 @@ import {
   BASE_URL
 } from './api';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import EditIconButton from '../componenetsss/EditIconButton';
+import DeleteIconButton from '../componenetsss/DeleteIconButton';
+import RetryIconButton from '../componenetsss/RetryIconButton';
 
 const getRandomBackgroundColor = (index: number) => {
   const colors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
@@ -852,51 +855,28 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td className="actions-cell">
                           <div className="product-action-buttons">
                             {product.status.toLowerCase() === 'draft' ? (
-                              <button
-                                className="product-view-button"
+                              <RetryIconButton
                                 onClick={() => {
                                   navigate('/get-started/products/new', {
                                     state: { draftProduct: product }
                                   });
                                 }}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                  <path
-                                    d="M7.99967 1.33325C11.6816 1.33325 14.6663 4.31802 14.6663 7.99992C14.6663 11.6818 11.6816 14.6666 7.99967 14.6666C4.31778 14.6666 1.33301 11.6818 1.33301 7.99992H5.33301H10.6663M10.6663 7.99992L7.99967 10.6666M10.6663 7.99992L7.99967 5.33325"
-                                    stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                                  />
-                                </svg>
-                              </button>
+                                title="Continue editing draft"
+                              />
                             ) : (
-                              <button
-                                className="product-edit-button"
+                              <EditIconButton
                                 onClick={() => {
-                                  setShowCreateProduct(false);
-                                  setShowNewProductForm(false);
                                   setEditingProduct(product);
                                   setIsEditFormOpen(true);
                                 }}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                  <path
-                                    d="M7.00031 12.3334H13.0003M9.91764 1.41473C10.183 1.14934 10.543 1.00024 10.9183 1.00024C11.2936 1.00024 11.6536 1.14934 11.919 1.41473C12.1844 1.68013 12.3335 2.04008 12.3335 2.4154C12.3335 2.79072 12.1844 3.15067 11.919 3.41607L3.91231 11.4234C3.75371 11.582 3.55766 11.698 3.34231 11.7607L1.42764 12.3194C1.37028 12.3361 1.30947 12.3371 1.25158 12.3223C1.1937 12.3075 1.14086 12.2774 1.09861 12.2351C1.05635 12.1929 1.02624 12.140 1.01141 12.0821C0.996575 12.0242 0.997578 11.9634 1.01431 11.9061L1.57298 9.9914C1.63579 9.77629 1.75181 9.58048 1.91031 9.42207L9.91764 1.41473Z"
-                                    stroke="#1D7AFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                                  />
-                                </svg>
-                              </button>
+                                title="Edit product"
+                              />
                             )}
-                            <button
-                              className="product-delete-button"
+                            <DeleteIconButton
                               onClick={() => handleDeleteClick(product.productId, product.productName)}
                               disabled={isDeleting}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
-                                <path
-                                  d="M2.59961 4.00016H14.5996M13.2663 4.00016V13.3335C13.2663 14.0002 12.5996 14.6668 11.9329 14.6668H5.26628C4.59961 14.6668 3.93294 14.0002 3.93294 13.3335V4.00016M5.93294 4.00016V2.66683C5.93294 2.00016 6.59961 1.3335 7.26628 1.3335H9.93294C10.5996 1.3335 11.2663 2.00016 11.2663 2.66683V4.00016M7.26628 7.3335V11.3335M9.93294 7.3335V11.3335"
-                                  stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
-                                />
-                              </svg>
-                            </button>
+                              title="Delete product"
+                            />
                           </div>
                         </td>
                       </tr>
@@ -949,6 +929,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 </table>
               </div>
             </div>
+          )}
+
+          {/* Kong Integration Modal */}
+          {showKongIntegration && (
+            <KongIntegration
+              onClose={() => setShowKongIntegration(false)}
+            />
           )}
         </div>
       </>

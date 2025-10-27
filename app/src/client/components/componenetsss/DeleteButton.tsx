@@ -12,22 +12,9 @@ export type DeleteButtonProps = {
 };
 
 const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-  >
-    <path
-      d="M3 6h18M9 6V4.8c0-.96 0-1.44.187-1.803a1.8 1.8 0 0 1 .81-.81C10.36 2 10.84 2 11.8 2h.4c.96 0 1.44 0 1.803.187.35.163.647.46.81.81C15 3.36 15 3.84 15 4.8V6m-8 0l1.2 14.4c.08.96.12 1.44.34 1.803.2.329.5.59.86.744C9.71 23 10.19 23 11.16 23h1.68c.97 0 1.45 0 1.76-.053.36-.154.66-.415.86-.744.22-.363.26-.843.34-1.803L17 6M10 10v7M14 10v7"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
+ <svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16" fill="none">
+  <path d="M0.630005 3.42996H13.2299M11.8299 3.42996V13.2298C11.8299 13.9298 11.1299 14.6298 10.4299 14.6298H3.42997C2.72998 14.6298 2.02999 13.9298 2.02999 13.2298V3.42996M4.12996 3.42996V2.02998C4.12996 1.32999 4.82996 0.629993 5.52995 0.629993H8.32992C9.02991 0.629993 9.7299 1.32999 9.7299 2.02998V3.42996M5.52995 6.92992V11.1299M8.32992 6.92992V11.1299" stroke="#ED5142" stroke-width="1.25999" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
 );
 
 const cx = (...c: Array<string | false | undefined>) => c.filter(Boolean).join(" ");

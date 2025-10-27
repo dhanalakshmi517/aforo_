@@ -9,6 +9,9 @@ import SaveDraft from '../componenetsss/SaveDraft';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import { clearAllRatePlanData } from './utils/sessionStorage';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
+import EditIconButton from '../componenetsss/EditIconButton';
+import DeleteIconButton from '../componenetsss/DeleteIconButton';
+import RetryIconButton from '../componenetsss/RetryIconButton';
 import { getProducts as getProductsApi, BASE_URL as API_BASE_URL, API_ORIGIN } from '../Products/api';
 import { ProductIconData } from '../Products/ProductIcon';
 import axios from 'axios';
@@ -985,26 +988,22 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         </span>
                       </td>
                       <td>
-                        <div className="action-buttons">
+                        <div className="product-action-buttons">
                           {plan.status?.toLowerCase() === 'draft' ? (
-                            <button className="resume-button" onClick={() => handleDraft(plan.ratePlanId)} title="Resume Draft" aria-label="Resume Draft">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                <g clipPath="url(#clip0_7416_37004)"><path d="M8 1.333C11.682 1.333 14.666 4.318 14.666 8c0 3.682-2.984 6.667-6.666 6.667S1.333 11.682 1.333 8H5.333H10.666M10.666 8L8 10.667M10.666 8L8 5.333" stroke="#025A94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></g>
-                                <defs><clipPath id="clip0_7416_37004"><rect width="16" height="16" fill="white"/></clipPath></defs>
-                              </svg>
-                            </button>
+                            <RetryIconButton
+                              onClick={() => handleDraft(plan.ratePlanId)}
+                              title="Continue editing draft"
+                            />
                           ) : (
-                            <button className="edit-button" onClick={() => handleEdit(plan.ratePlanId)} title="Edit" aria-label="Edit">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M8 13.333h6M10.917 2.414a1.31 1.31 0 0 1 1.999 1.001c0 .375-.149.735-.414 1L4.911 12.423c-.158.158-.354.274-.569.336l-1.915.559c-.19.056-.362-.116-.306-.306l.559-1.915c.62-.215.178-.411.336-.569l8.006-8.017Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
+                            <EditIconButton
+                              onClick={() => handleEdit(plan.ratePlanId)}
+                              title="Edit rate plan"
+                            />
                           )}
-                          <button className="delete-button" onClick={() => handleDeleteClick(plan.ratePlanId)} title="Delete" aria-label="Delete">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                              <path d="M2 4h12M12.667 4v9.333c0 .666-.667 1.333-1.334 1.333H4.667C4 14.666 3.333 14 3.333 13.333V4m2 0V2.667C5.333 2 6 1.333 6.667 1.333h2.666C10 1.333 10.667 2 10.667 2.667V4M6.667 7.333V11.333M9.333 7.333V11.333" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
+                          <DeleteIconButton
+                            onClick={() => handleDeleteClick(plan.ratePlanId)}
+                            title="Delete rate plan"
+                          />
                         </div>
                       </td>
                     </tr>

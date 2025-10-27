@@ -2,6 +2,7 @@ import React from 'react';
 import { SelectField, InputField } from '../componenetsss/Inputs';
 
 interface AggregationFunctionSelectProps {
+  label?: string;
   productType: string;
   unitOfMeasure: string;
   value: string;
@@ -17,11 +18,19 @@ interface AggregationFunctionSelectProps {
  *   • TRANSACTION            → dropdown with "COUNT" and "DISTINCT_COUNT"
  *   • Anything else          → free-text input so user can type a custom function.
  */
-const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ productType, unitOfMeasure, value, onChange, error }) => {
+const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ 
+  label, 
+  productType, 
+  unitOfMeasure, 
+  value, 
+  onChange, 
+  error 
+}) => {
   // If either field is not yet selected, show a disabled placeholder dropdown so the layout remains consistent
   if (!productType || !unitOfMeasure) {
     return (
       <SelectField
+        label={label}
         value=""
         onChange={() => {}}
         options={[{ label: '-- select product/unit first --', value: '', disabled: true }]}
@@ -77,9 +86,10 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ p
   if (options) {
     return (
       <SelectField
+        label={label}
         value={value}
         onChange={onChange}
-        options={options.map(opt=>({label:opt,value:opt}))}
+        options={options.map(opt => ({ label: opt, value: opt }))}
         placeholderOption="--select--"
         error={error}
       />

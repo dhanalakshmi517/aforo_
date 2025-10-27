@@ -21,6 +21,75 @@
 .met-np-grid-2 .if-field{margin-bottom:8px;}
 .met-np-grid-2 .if-field:last-child{margin-bottom:0;}
 
+/* Form group styling */
+.met-np-grid-2 .form-group {
+  margin-bottom: 8px;
+  position: relative;
+  width: 100%;
+}
+
+/* Select field styling */
+.select-product {
+  width: 100%;
+}
+
+/* Select dropdown menu */
+.select-product .if-select__menu {
+  margin-top: 4px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* Select control */
+.select-product .if-select__control {
+  min-height: 40px;
+  border-radius: 4px;
+  border-color: var(--color-neutral-400);
+}
+
+/* Select control when focused */
+.select-product .if-select__control--is-focused {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 1px var(--color-primary-500);
+}
+
+/* Select placeholder */
+.select-product .if-select__placeholder {
+  color: var(--color-neutral-600);
+}
+
+/* Select option */
+.select-product .if-select__option {
+  padding: 8px 12px;
+  color: var(--color-neutral-900);
+}
+
+/* Selected option */
+.select-product .if-select__option--is-selected {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+/* Hovered option */
+.select-product .if-select__option--is-focused {
+  background-color: var(--color-neutral-100);
+}
+
+/* Disabled option */
+.select-product .if-select__option--is-disabled {
+  color: var(--color-neutral-400);
+  cursor: not-allowed;
+}
+
+.met-np-grid-2 .if-field {
+  margin-bottom: 8px;
+}
+
+.met-np-grid-2 .if-field:last-child {
+  margin-bottom: 0;
+}
+
 /* Spacing between custom met-np-field groups */
 .met-np-field{margin-bottom:8px;display:flex;flex-direction:column;}
 .met-np-field:last-child{margin-bottom:0;}

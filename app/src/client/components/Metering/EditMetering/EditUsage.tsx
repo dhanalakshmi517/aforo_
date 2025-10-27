@@ -9,6 +9,7 @@ import EditSqlOperator from './EditSqlOperator';
 import EditLlmDimension from './EditLlmDimension';
 import EditLlmOperator from './EditLlmOperator';
 import { SelectField, InputField, SelectOption } from '../../componenetsss/Inputs';
+import DeleteIconButton from '../../componenetsss/DeleteIconButton';
 
 interface FilterCondition {
   id: number;
@@ -78,14 +79,9 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
         <div key={filter.id} className="filter-box">
           <div className="filter-header">
             <p>FILTER CONDITION {index + 1}</p>
-            <button className="delete-btn" onClick={() => handleRemove(filter.id)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 3.99992H14M12.6667 3.99992V13.3333C12.6667 13.9999 12 14.6666 11.3333 14.6666H4.66667C4 14.6666 3.33333 13.9999 3.33333 13.3333V3.99992M5.33333 3.99992V2.66659C5.33333 1.99992 6 1.33325 6.66667 1.33325H9.33333C10 1.33325 10.6667 1.99992 10.6667 2.66659V3.99992M6.66667 7.33325V11.3333M9.33333 7.33325V11.3333" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+            <DeleteIconButton onClick={() => handleRemove(filter.id)} />
           </div>
 
-          <label>Dimensions</label>
           {(() => {
             const upperType = productType.toUpperCase();
             const upperUom = unitOfMeasure.toUpperCase();
@@ -93,16 +89,19 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
             const isFlat = upperType === 'FLATFILE' && ['FILE', 'DELIVERY', 'MB', 'RECORD', 'ROW'].includes(upperUom);
             const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION', 'CELL', 'ROW', 'MB'].includes(upperUom);
             const isLlm = upperType === 'LLMTOKEN' && ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'].includes(upperUom);
+            
             if (isApi) return <EditApiDimension unitOfMeasure={upperUom} value={filter.usageCondition} onChange={(val: string) => handleChange(filter.id, 'usageCondition', val)} />;
             if (isFlat) return <EditFlatDimension unitOfMeasure={upperUom} value={filter.usageCondition} onChange={(val: string) => handleChange(filter.id, 'usageCondition', val)} />;
             if (isSql) return <EditSqlDimension unitOfMeasure={upperUom} value={filter.usageCondition} onChange={(val: string) => handleChange(filter.id, 'usageCondition', val)} />;
             if (isLlm) return <EditLlmDimension unitOfMeasure={upperUom} value={filter.usageCondition} onChange={(val: string) => handleChange(filter.id, 'usageCondition', val)} />;
+            
             let genericDims = ['CUSTOM'];
             if (filter.usageCondition && !genericDims.includes(filter.usageCondition)) {
               genericDims = [filter.usageCondition, ...genericDims];
             }
             return (
               <SelectField
+                label="Dimensions"
                 value={filter.usageCondition}
                 onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
                 options={genericDims.map((d) => ({ label: d, value: d } as SelectOption))}
@@ -113,7 +112,6 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
 
           <div className="row">
             <div className="column">
-              <label>Operator</label>
               {(() => {
                 const upperType = productType.toUpperCase();
                 const upperUom = unitOfMeasure.toUpperCase();
@@ -121,16 +119,19 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                 const isFlat = upperType === 'FLATFILE' && ['FILE', 'DELIVERY', 'MB', 'RECORD', 'ROW'].includes(upperUom);
                 const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION', 'CELL', 'ROW', 'MB'].includes(upperUom);
                 const isLlm = upperType === 'LLMTOKEN' && ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'].includes(upperUom);
+                
                 if (isApi) return <EditApiOperator dimension={filter.usageCondition} value={filter.operator} onChange={(val: string) => handleChange(filter.id, 'operator', val)} />;
                 if (isFlat) return <EditFlatOperator dimension={filter.usageCondition} value={filter.operator} onChange={(val: string) => handleChange(filter.id, 'operator', val)} />;
                 if (isSql) return <EditSqlOperator dimension={filter.usageCondition} value={filter.operator} onChange={(val: string) => handleChange(filter.id, 'operator', val)} />;
                 if (isLlm) return <EditLlmOperator dimension={filter.usageCondition} value={filter.operator} onChange={(val: string) => handleChange(filter.id, 'operator', val)} />;
+                
                 let genericOps = ['=', '!=', '>', '<'];
                 if (filter.operator && !genericOps.includes(filter.operator)) {
                   genericOps = [filter.operator, ...genericOps];
                 }
                 return (
                   <SelectField
+                    label="Operator"
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
                     options={genericOps.map((o) => ({ label: o, value: o } as SelectOption))}
@@ -141,10 +142,10 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
             </div>
 
             <div className="column">
-              <label>Value</label>
               <InputField
+                label="Value"
                 type="text"
-                placeholder="--select--"
+                placeholder="Enter value"
                 value={filter.value}
                 onChange={(val) => handleChange(filter.id, 'value', val)}
               />

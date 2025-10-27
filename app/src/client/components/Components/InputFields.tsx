@@ -12,6 +12,7 @@ interface BaseInputProps {
   /** Pass `true` or a string for error. True shows "This field is required" */
   error?: string | boolean;
   className?: string;
+  disabled?: boolean;
 }
 
 interface TextInputProps extends BaseInputProps {

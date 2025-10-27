@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import TopBar from '../../componenetsss/TopBar';
 import SelectableCard from '../../componenetsss/SelectableCard';
 import KongPopup from '../../componenetsss/Kongpopup';
+import PrimaryButton from '../../componenetsss/PrimaryButton';
 import './KongProductPicker.css';
 
 export type Product = {
@@ -269,16 +270,12 @@ export default function KongProductSelect({
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="kps-import"
+              <PrimaryButton
                 onClick={() => onImport?.(selectedList)}
-               
-                // onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1557d5'}
-                // onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#1b69ff'}
+                className="kps-import"
               >
                 Import products
-              </button>
+              </PrimaryButton>
             </aside>
           )}
         </div>

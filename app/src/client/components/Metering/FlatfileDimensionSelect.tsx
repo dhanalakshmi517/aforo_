@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField } from '../componenetsss/Inputs';
 import './ApiDimensionSelect.css';
 
 
@@ -7,6 +8,7 @@ type Props = {
   value: string;
   onChange: (val: string) => void;
   error?: string;
+  label?: string;
 };
 
 const MAP: Record<string, string[]> = {
@@ -17,22 +19,22 @@ const MAP: Record<string, string[]> = {
   ROW: ['ROW_COUNT_ROW','SOURCE_SYSTEM_ROW','SCHEMA_VERSION_ROW','IS_VALID_ROW'],
 };
 
-const FlatfileDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, error }) => {
+const FlatfileDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, error, label }) => {
   const dims = MAP[unitOfMeasure.toUpperCase()] || [];
+  const options = dims.map((d) => ({
+    label: d,
+    value: d,
+  }));
+
   return (
-    <div>
-      <select 
-        className={error ? 'error' : ''} 
-        value={value} 
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">--select--</option>
-        {dims.map((d) => (
-          <option key={d} value={d}>{d}</option>
-        ))}
-      </select>
-      {error && <div className="error-message">{error}</div>}
-    </div>
+    <SelectField
+      label="Dimension"
+      value={value}
+      onChange={onChange}
+      options={options}
+      error={error}
+      placeholder="--select--"
+    />
   );
 };
 
