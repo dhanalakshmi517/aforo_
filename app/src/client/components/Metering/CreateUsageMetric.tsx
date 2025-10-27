@@ -48,11 +48,21 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const activeMetricId = draftFromState || draftMetricId;
 
   const deleteAndClose = async () => {
-    if (!metricId) {
+    // If this is a draft metric (either new or existing), just discard changes and navigate back
+    // without deleting the metric from the database
+    if (activeMetricId) {
+      // This is an existing draft being edited - just navigate back to preserve the draft
       onClose();
       return;
     }
     
+    if (!metricId) {
+      // This is a new metric that was never saved - just navigate back
+      onClose();
+      return;
+    }
+    
+    // This is a finalized metric - delete it from database
     try {
       await deleteUsageMetric(metricId);
       showToast({
