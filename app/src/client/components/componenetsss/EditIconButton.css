@@ -1,0 +1,39 @@
+@import "../Variables/Variables.css";
+
+
+/* Base 28×28 rounded square */
+.af-edit-icon{
+  display:flex;
+  width:28px;
+  height:28px;
+  padding:6px;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  flex-shrink:0;
+  color:#1D7AFC;
+  border:0;
+  border-radius:8px;
+background:  #F5F9FF;
+cursor:pointer;
+}
+
+.af-edit-icon svg{ display:block; }
+
+/* States */
+.af-edit-icon:hover:not(.is-disabled){ background:#F2F7FD; }
+.af-edit-icon:active:not(.is-disabled){ background:#EEF4FB; }
+
+.af-edit-icon:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.85),
+    0 0 0 5px var(--af-blue-ring);
+}
+
+/* Disabled */
+.af-edit-icon.is-disabled,
+.af-edit-icon:disabled{
+  background:#F5F9FF;
+  cursor:not-allowed;
+}

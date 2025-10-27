@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField } from '../Components/InputFields';
 import './ApiDimensionSelect.css';
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
   value: string;
   onChange: (val: string) => void;
   error?: string;
+  label?: string;
 };
 
 const DIMENSION_MAP: Record<string, string[]> = {
@@ -18,22 +20,22 @@ const DIMENSION_MAP: Record<string, string[]> = {
   COMPLETION_TOKEN: ['MODEL_NAME_COMPLETION_TOKEN', 'TOKEN_TYPE_COMPLETION_TOKEN', 'TOKEN_COUNT_COMPLETION_TOKEN', 'COMPUTE_TIER_COMPLETION_TOKEN', 'USER_ID_COMPLETION_TOKEN'],
 };
 
-const ApiDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, error }) => {
+const ApiDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, error, label }) => {
   const dims = DIMENSION_MAP[unitOfMeasure.toUpperCase()] || [];
+  const options = dims.map((d) => ({
+    label: d,
+    value: d,
+  }));
+
   return (
-    <div>
-      <select 
-        className={`dimension-select ${error ? 'error' : ''}`} 
-        value={value} 
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">--select--</option>
-        {dims.map((d) => (
-          <option key={d} value={d}>{d}</option>
-        ))}
-      </select>
-      {error && <div className="error-message">{error}</div>}
-    </div>
+    <SelectField
+      label="Dimension"
+      value={value}
+      onChange={onChange}
+      options={options}
+      error={error}
+      placeholder="--select--"
+    />
   );
 };
 

@@ -27,10 +27,10 @@ const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDelete
         </p>
         <div className="save-modal-buttons">
           <button className="save-modal-btn save-modal-btn-cancel" onClick={onDelete || onClose}>
-            No, Delete
+            Delete
           </button>
           <button className="save-modal-btn save-modal-btn-save" onClick={onSave}>
-            Yes, Save as Draft
+            Save as Draft
           </button>
         </div>
       </div>

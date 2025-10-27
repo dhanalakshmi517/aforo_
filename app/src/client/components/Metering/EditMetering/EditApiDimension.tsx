@@ -1,9 +1,11 @@
 import React from 'react';
+import { SelectField } from '../../componenetsss/Inputs';
 
 type Props = {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  label?: string;
 };
 
 const DIMENSION_MAP: Record<string, string[]> = {
@@ -16,16 +18,22 @@ const DIMENSION_MAP: Record<string, string[]> = {
   COMPLETION_TOKEN: ['MODEL_NAME_COMPLETION_TOKEN', 'TOKEN_TYPE_COMPLETION_TOKEN', 'TOKEN_COUNT_COMPLETION_TOKEN', 'COMPUTE_TIER_COMPLETION_TOKEN', 'USER_ID_COMPLETION_TOKEN'],
 };
 
-const ApiDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange }) => {
+const EditApiDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, label = "Dimension" }) => {
   const dims = DIMENSION_MAP[unitOfMeasure.toUpperCase()] || [];
+  const options = dims.map(d => ({
+    label: d,
+    value: d,
+  }));
+
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {dims.map((d) => (
-        <option key={d} value={d}>{d}</option>
-      ))}
-    </select>
+    <SelectField
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      placeholder="--select--"
+    />
   );
 };
 
-export default ApiDimensionSelect;
+export default EditApiDimension;

@@ -321,6 +321,26 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   // Track the last saved form data to detect changes
   const [lastSavedData, setLastSavedData] = useState<typeof formData | null>(null);
+  const [lastSavedIcon, setLastSavedIcon] = useState<ProductIconData | null>(null);
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = React.useMemo(() => {
+    if (!lastSavedData) return hasAnyRequiredInput; // If never saved, check if any input exists
+    
+    const formDataChanged = 
+      lastSavedData.productName !== formData.productName ||
+      lastSavedData.version !== formData.version ||
+      lastSavedData.skuCode !== formData.skuCode ||
+      lastSavedData.description !== formData.description;
+    
+    const iconChanged = 
+      (lastSavedIcon?.id !== selectedIcon?.id) ||
+      (lastSavedIcon?.svgPath !== selectedIcon?.svgPath) ||
+      (JSON.stringify(lastSavedIcon?.outerBg) !== JSON.stringify(selectedIcon?.outerBg)) ||
+      (lastSavedIcon?.tileColor !== selectedIcon?.tileColor);
+    
+    return formDataChanged || iconChanged;
+  }, [formData, selectedIcon, lastSavedData, lastSavedIcon, hasAnyRequiredInput]);
 
   const saveProduct = async (isDraft: boolean = false) => {
     console.log('Saving product...', { isDraft, formData, selectedIcon });
@@ -496,6 +516,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           console.log('Product created with ID:', response.productId);
           // cache snapshot
           setLastSavedData({ ...formData });
+          setLastSavedIcon(selectedIcon);
           console.log('🔍 Created product response:', response);
           
           // Signal Products component to refresh
@@ -569,11 +590,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
       // cache snapshot to avoid redundant updates
       setLastSavedData({ ...formData });
+      setLastSavedIcon(selectedIcon);
         console.log('🔍 Update response:', updateResponse);
       }
       
       // Update last saved data
       setLastSavedData({ ...formData });
+      setLastSavedIcon(selectedIcon);
       return true;
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -659,14 +682,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     <>
       <TopBar
         title="Create New Product"
-        onBack={() => setShowSavePrompt(true)}
-        cancel={{ onClick: () => setShowDeleteConfirm(true) }}
+        onBack={() => hasUnsavedChanges ? setShowSavePrompt(true) : onClose()}
+        cancel={{ 
+          onClick: () => setShowDeleteConfirm(true),
+          disabled: !hasAnyRequiredInput
+        }}
         save={{ 
           onClick: handleSaveDraft, 
           label: isDraftSaved ? "Saved!" : "Save as Draft",
           saved: isDraftSaved,
           saving: isDraftSaving,
-          labelWhenSaved: "Saved as Draft"
+          labelWhenSaved: "Saved as Draft",
+          disabled: !hasAnyRequiredInput
         }}
       />
 
@@ -757,27 +784,29 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             />
                             
                             {/* Product Icon Field - Add */}
-                            <div className="np-form-group">
-                              <label className="if-label">Product Icon</label>
-                              <div className="np-icon-field-wrapper">
-                                <div className="np-icon-placeholder">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
-                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA"/>
-                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05"/>
-                                    <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1"/>
-                                    <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1"/>
-                                  </svg>
+                            {!selectedIcon && (
+                              <div className="np-form-group">
+                                <label className="if-label">Product Icon</label>
+                                <div className="np-icon-field-wrapper">
+                                  <div className="np-icon-placeholder">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+                                      <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA"/>
+                                      <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05"/>
+                                      <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1"/>
+                                      <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1"/>
+                                    </svg>
+                                  </div>
+                                  <span className="np-icon-placeholder-text">Add product icon</span>
+                                  <button
+                                    type="button"
+                                    className="np-icon-add-btn"
+                                    onClick={() => setIsIconPickerOpen(true)}
+                                  >
+                                    <span>+ Add</span>
+                                  </button>
                                 </div>
-                                <span className="np-icon-placeholder-text">Add product icon</span>
-                                <button
-                                  type="button"
-                                  className="np-icon-add-btn"
-                                  onClick={() => setIsIconPickerOpen(true)}
-                                >
-                                  <span>+ Add</span>
-                                </button>
                               </div>
-                            </div>
+                            )}
 
                             {/* Product Icon Field - Selected */}
                             {selectedIcon && (() => {

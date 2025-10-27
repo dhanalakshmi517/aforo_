@@ -21,14 +21,13 @@
   display: flex;
   justify-content: left;
   align-items: center;
-  margin-bottom: 18px; 
-  margin-top: 22px;
+  margin-top: -45px;
   margin-left: 15px;
 }
 
 .nav {
   flex: 1;
-  padding: 4px 0 16px 0;
+  padding: 14px 0 16px 0;
   overflow-y: auto;
   scrollbar-width: none;
 }

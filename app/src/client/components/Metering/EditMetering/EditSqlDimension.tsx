@@ -1,9 +1,11 @@
 import React from 'react';
+import { SelectField } from '../../componenetsss/Inputs';
 
 type Props = {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  label?: string;
 };
 
 const MAP: Record<string, string[]> = {
@@ -13,18 +15,21 @@ const MAP: Record<string, string[]> = {
   MB: ['FILE_SIZE_MB', 'COMPRESSED', 'REGION_MB', 'TRANSFER_TYPE'],
 };
 
-const EditSqlDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange }) => {
+const EditSqlDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, label = "Dimension" }) => {
   const dims = MAP[unitOfMeasure.toUpperCase()] || [];
+  const options = dims.map(d => ({
+    label: d,
+    value: d,
+  }));
 
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {dims.map(d => (
-        <option key={d} value={d}>
-          {d}
-        </option>
-      ))}
-    </select>
+    <SelectField
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      placeholder="--select--"
+    />
   );
 };
 

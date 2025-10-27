@@ -1,0 +1,42 @@
+@import "../Variables/Variables.css";
+
+
+/* Base 28x28 rounded square */
+.af-del-icon{
+  display:flex;
+  width:28px;
+  height:28px;
+  padding:6px;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  flex-shrink:0;
+
+  border:0;
+  border-radius:8px;
+  background:var(--red-lightest);
+  color:#ED5142;
+  cursor:pointer;
+}
+
+.af-del-icon svg{ display:block; }
+
+/* states */
+.af-del-icon:hover:not(.is-disabled){ background:var(--red-lighter); }
+.af-del-icon:active:not(.is-disabled){ background:var(--red-light); }
+
+.af-del-icon:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.8),
+    0 0 0 5px var(--af-focus-ring);
+}
+
+/* disabled */
+.af-del-icon.is-disabled,
+.af-del-icon:disabled{
+  background:var(--af-disabled-bg);
+  color:var(--af-disabled-fg);
+  cursor:not-allowed;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
+}

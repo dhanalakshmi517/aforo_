@@ -282,17 +282,12 @@
 /* =========================================================
    Row action buttons
    ========================================================= */
-.action-buttons{ display:inline-flex; gap:8px; align-items:center; justify-content:center; }
-.action-buttons .edit-button,
-.action-buttons .resume-button,
-.action-buttons .delete-button{
-  display:flex; padding:6px; justify-content:center; align-items:center; gap:5px;
-  border-radius:8px; border:none; cursor:pointer; width:28px; height:28px;
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 }
-.action-buttons .edit-button{ background:#F5F9FF; }
-.action-buttons .resume-button{ background:#ECECEC; color:var(--resume-chip-fg); }
-.action-buttons .delete-button{ background:#FFEDE9; color:#E34935; }
-.action-buttons .resume-button svg{ width:16px; height:16px; display:block; }
 
 /* =========================================================
    Empty state (shared) & in-table variant

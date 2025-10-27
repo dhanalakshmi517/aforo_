@@ -7,6 +7,10 @@ import CreateCustomer from "./CreateCustomer";
 import SuccessToast from "./SuccessToast";
 import { getCustomers, deleteCustomer } from "./api";
 import { getAuthHeaders, isAuthenticated } from "../../utils/auth";
+import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
+import EditIconButton from '../componenetsss/EditIconButton';
+import DeleteIconButton from '../componenetsss/DeleteIconButton';
+import RetryIconButton from '../componenetsss/RetryIconButton';
 import PrimaryButton from "../componenetsss/PrimaryButton";
 
 interface NotificationState { type: "success" | "error"; message: string; }
@@ -319,38 +323,22 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
 
                       {/* 5) Actions */}
                       <td className="actions-cell">
-                        <div className="action-buttons">
+                        <div className="product-action-buttons">
                           {customer.status?.toLowerCase() === "draft" ? (
-                            // UPDATED: open Create flow with prefill instead of Edit route
-                            <PrimaryButton
-                              type="button"
-                              className="resume-button"
-                              onClick={() => handleResumeDraft(customer)}
-                              aria-label="Resume Draft"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-                                <path d="M11.75 3.25a5.5 5.5 0 1 1-7.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M5.25 8h5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M8.5 6l2.25 2-2.25 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </PrimaryButton>
+                            <RetryIconButton
+                              onClick={() => navigate('/get-started/customers/new', { state: { draftCustomer: customer } })}
+                              title="Continue editing draft"
+                            />
                           ) : (
-                            <Link to={`/get-started/customers/${id}/edit`} className="edit-button" title="Edit" aria-label="Edit">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M7.99933 13.3332H13.9993M10.9167 2.41449C11.1821 2.1491 11.542 2 11.9173 2C12.2927 2 12.6526 2.1491 12.918 2.41449C13.1834 2.67988 13.3325 3.03983 13.3325 3.41516C13.3325 3.79048 13.1834 4.15043 12.918 4.41582L4.91133 12.4232C4.75273 12.5818 4.55668 12.6978 4.34133 12.7605L2.42667 13.3192C2.3693 13.3359 2.30849 13.3369 2.25061 13.3221C2.19272 13.3072 2.13988 13.2771 2.09763 13.2349C2.05538 13.1926 2.02526 13.1398 2.01043 13.0819C1.9956 13.024 1.9966 12.9632 2.01333 12.9058L2.572 10.9912C2.63481 10.776 2.75083 10.5802 2.90933 10.4218L10.9167 2.41449Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </Link>
+                            <EditIconButton
+                              onClick={() => navigate(`/get-started/customers/${id}/edit`)}
+                              title="Edit customer"
+                            />
                           )}
-                          <button
-                            className="delete-button"
-                            title="Delete"
-                            aria-label="Delete"
+                          <DeleteIconButton
                             onClick={() => handleDeleteClick(id!, companyTitle)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                              <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
+                            title="Delete customer"
+                          />
                         </div>
                       </td>
                     </tr>

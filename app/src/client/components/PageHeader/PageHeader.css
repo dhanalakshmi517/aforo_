@@ -199,13 +199,22 @@ line-height: var(--line-height-heading-h5); /* 140% */
   padding: 8px 20px;
   border-radius: var(--border-radius-sm, 8px);
   border: none;
-  background: var(--surface-primary-button-active, #025A94);
-  color: var(--text-primary-button-default, #E1F4FB);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--font-size-lg, 16px);
+  background: var(--color-primary-750);
+  color: var(--color-neutral-white);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
   font-weight: 500;
-  line-height: var(--line-height-body-lg, 24px);
+  line-height: var(--line-height-body-md);
   cursor: pointer;
 }
 .new-rate-button:hover { filter: brightness(0.97); }
+.new-rate-button:active { 
+  background: var(--color-primary-700);
+}
 .new-rate-button svg { width: 16px; height: 16px; }
+
+/* Enhanced active state for PrimaryButton in PageHeader */
+.ph-header-actions .af-primary-btn:active:not(:disabled) {
+  background: var(--color-primary-900) !important;
+  
+}

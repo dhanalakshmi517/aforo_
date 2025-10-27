@@ -1,9 +1,11 @@
 import React from 'react';
+import { SelectField } from '../../componenetsss/Inputs';
 
 type Props = {
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  label?: string;
 };
 
 const MAP: Record<string, string[]> = {
@@ -13,18 +15,21 @@ const MAP: Record<string, string[]> = {
   RECORD: ['ROW_COUNT','SOURCE_SYSTEM','SCHEMA_VERSION','IS_VALID'],
   ROW: ['ROW_COUNT_ROW','SOURCE_SYSTEM_ROW','SCHEMA_VERSION_ROW','IS_VALID_ROW'],
 };
-const EditFlatDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange }) => {
+const EditFlatDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, label = "Dimension" }) => {
   const dims = MAP[unitOfMeasure.toUpperCase()] || [];
+  const options = dims.map(dimension => ({
+    label: dimension,
+    value: dimension,
+  }));
 
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">--select--</option>
-      {dims.map((dimension) => (
-        <option key={dimension} value={dimension}>
-          {dimension}
-        </option>
-      ))}
-    </select>
+    <SelectField
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      placeholder="--select--"
+    />
   );
 };
 

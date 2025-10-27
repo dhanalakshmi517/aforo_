@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField } from '../componenetsss/Inputs';
 
 interface Props {
   dimension: string;
@@ -6,6 +7,7 @@ interface Props {
   onChange: (val: string) => void;
   error?: string;
   disabled?: boolean;
+  label?: string;
 }
 
 const OP: Record<string, string[]> = {
@@ -35,23 +37,23 @@ const OP: Record<string, string[]> = {
 
 };
 
-const SqlOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error, disabled }) => {
+const SqlOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error, disabled, label }) => {
   const ops = OP[dimension.toUpperCase()] || [];
+  const options = ops.map((o) => ({
+    label: o,
+    value: o,
+  }));
+
   return (
-    <div>
-      <select 
-        className={error ? 'error' : ''} 
-        value={value} 
-        onChange={e => onChange(e.target.value)}
-        disabled={disabled}
-      >
-        <option value="">--select--</option>
-        {ops.map(o => (
-          <option key={o} value={o}>{o}</option>
-        ))}
-      </select>
-      {error && <div className="error-message">{error}</div>}
-    </div>
+    <SelectField
+      label="Operator"
+      value={value}
+      onChange={onChange}
+      options={options}
+      error={error}
+      disabled={disabled}
+      placeholder="--select--"
+    />
   );
 };
 

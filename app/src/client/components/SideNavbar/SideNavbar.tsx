@@ -1,6 +1,7 @@
 import React from 'react';
 import './SideNavbar.css';
 import { MdPeople } from 'react-icons/md';
+import aforoLogo from './aforo.ai.svg';
 
 // Define the types for the props that Sidebar component expects
 interface SidebarProps {
@@ -234,9 +235,8 @@ function SideNavbar({ activeTab, onTabClick, hidden }: SidebarProps): JSX.Elemen
     <div className={`sidebar ${hidden ? 'hidden' : ''}`}>
       <div className="sidebar-highlight"></div>
       <div className="logo">
-     
-        <span className="logo-text">aforo.ai</span>
-       </div>
+        <img src={aforoLogo} alt="aforo.ai" />
+      </div>
       <nav className="nav">
         <ul>
           {tabs.map(({ name, icon }) => (

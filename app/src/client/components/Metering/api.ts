@@ -20,6 +20,14 @@ export interface UsageMetricDTO {
   aggregationFunction: string;
   aggregationWindow: string;
   billingCriteria: string;
+  usageConditions?: Array<{
+    dimension: string;
+    operator: string;
+    value: string;
+  }>;
+  productType?: string;
+  status?: string;
+  createdOn?: string;
 }
 
 export interface UsageConditionPayload {
@@ -88,7 +96,15 @@ export async function getUsageMetric(id: number): Promise<UsageMetricDTO | null>
       headers: getAuthHeaders(),
     });
     if (!response.ok) return null;
-    return await response.json();
+    
+    const data = await response.json();
+    
+    // If the API doesn't return usageConditions, initialize it as an empty array
+    if (!data.usageConditions) {
+      data.usageConditions = [];
+    }
+    
+    return data;
   } catch (e) {
     console.error('Error fetching metric', e);
     return null;
@@ -118,6 +134,7 @@ export async function createBillableMetric(
   payload: BillableMetricPayload
 ): Promise<CreateMetricResult> {
   try {
+    console.log('Creating billable metric with payload:', JSON.stringify(payload, null, 2));
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
       method: 'POST',
       headers: {
@@ -127,16 +144,31 @@ export async function createBillableMetric(
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) return { ok: false };
+    console.log('Create response status:', response.status);
+    
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}`;
+      try {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        errorMessage += `: ${JSON.stringify(errorData)}`;
+      } catch {
+        errorMessage += ': No error details available';
+      }
+      console.error('Failed to create billable metric:', errorMessage);
+      return { ok: false };
+    }
 
     try {
       const data = await response.json();
+      console.log('Create success response:', data);
       const id = (data?.metricId ?? data?.id ?? data?.billableMetricId) as
         | number
         | undefined;
       return { ok: true, id };
     } catch {
       // No body / not JSON — still OK
+      console.log('Create successful but no response body');
       return { ok: true };
     }
   } catch (error) {

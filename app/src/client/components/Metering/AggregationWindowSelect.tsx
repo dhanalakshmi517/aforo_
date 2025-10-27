@@ -2,6 +2,7 @@ import React from 'react';
 import { SelectField, InputField } from '../componenetsss/Inputs';
 
 interface AggregationWindowSelectProps {
+  label?: string;
   productType: string;
   unitOfMeasure: string;
   value: string;
@@ -13,11 +14,24 @@ interface AggregationWindowSelectProps {
  * Displays appropriate aggregation-window options based on product type + unit-of-measure.
  * Currently only API product rules are defined as per requirements.
  */
-const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ productType, unitOfMeasure, value, onChange, error }) => {
+const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ 
+  label,
+  productType, 
+  unitOfMeasure, 
+  value, 
+  onChange, 
+  error 
+}) => {
   // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
     return (
-      <SelectField value="" onChange={() => {}} options={[{label:'-- select product/unit first --',value:'',disabled:true}]} disabled />
+      <SelectField 
+        label={label}
+        value="" 
+        onChange={() => {}} 
+        options={[{label:'-- select product/unit first --',value:'',disabled:true}]} 
+        disabled 
+      />
     );
   }
   
@@ -107,10 +121,10 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ produ
   if (options) {
     return (
       <SelectField
+        label={label}
         value={value}
         onChange={onChange}
-        options={options.map(opt=>({label:opt,value:opt}))}
-        placeholderOption="--select--"
+        options={options.map(opt => ({ label: opt, value: opt }))}
         error={error}
       />
     );

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import './UsageConditionForm.css';
 import ApiDimensionSelect from './ApiDimensionSelect';
 import ApiOperatorSelect from './ApiOperatorSelect';
@@ -8,7 +9,8 @@ import SqlDimensionSelect from './SqlDimensionSelect';
 import SqlOperatorSelect from './SqlOperatorSelect';
 import LlmDimensionSelect from './LlmDimensionSelect';
 import LlmOperatorSelect from './LlmOperatorSelect';
-import { InputField, SelectField } from '../componenetsss/Inputs';
+import { InputField, SelectField } from '../Components/InputFields';
+import SecondaryButton from '../componenetsss/SecondaryButton';
 
 interface FilterCondition {
   id: number;
@@ -63,11 +65,36 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
   onFieldEdited,
   locked = false,
 }) => {
-  const [filters, setFilters] = useState<FilterCondition[]>(
-    conditions.length
-      ? conditions.map((c, i) => ({ id: i, usageCondition: c.dimension, customCondition: '', operator: c.operator, value: c.value }))
-      : [defaultCondition()]
-  );
+  // Convert conditions to filters format
+  const conditionsToFilters = (conditions: { dimension: string; operator: string; value: string }[]) => {
+    return conditions.length > 0 
+      ? conditions.map((c, i) => ({
+          id: i,
+          usageCondition: c.dimension,
+          customCondition: '',
+          operator: c.operator || '',
+          value: c.value || ''
+        }))
+      : [defaultCondition()];
+  };
+
+  const [filters, setFilters] = useState<FilterCondition[]>(() => {
+    console.log('Initializing filters with conditions:', conditions);
+    return conditionsToFilters(conditions);
+  });
+
+  // Update local filters when parent conditions change
+  useEffect(() => {
+    console.log('Parent conditions changed:', conditions);
+    if (JSON.stringify(conditions) !== JSON.stringify(filters.map(f => ({
+      dimension: f.usageCondition,
+      operator: f.operator,
+      value: f.value
+    })))) {
+      console.log('Updating filters from parent conditions');
+      setFilters(conditionsToFilters(conditions));
+    }
+  }, [conditions]);
 
   const handleChange = (id: number, field: keyof FilterCondition, val: string) => {
     setFilters((prev) =>
@@ -86,8 +113,9 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
   };
 
   // Sync local filters to parent whenever they change
-  React.useEffect(() => {
+  useEffect(() => {
     const mapped = filters.map(f => ({ dimension: f.usageCondition, operator: f.operator, value: f.value }));
+    console.log('Syncing filters to parent conditions:', mapped);
     setConditions(mapped);
   }, [filters, setConditions]);
 
@@ -122,56 +150,91 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
         <div key={filter.id} className="filter-box">
           <div className="filter-header">
             <p>FILTER CONDITION {index + 1}</p>
-            <button className="delete-btn" onClick={() => handleRemove(filter.id)} disabled={locked}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 3.99992H14M12.6667 3.99992V13.3333C12.6667 13.9999 12 14.6666 11.3333 14.6666H4.66667C4 14.6666 3.33333 13.9999 3.33333 13.3333V3.99992M5.33333 3.99992V2.66659C5.33333 1.99992 6 1.33325 6.66667 1.33325H9.33333C10 1.33325 10.6667 1.99992 10.6667 2.66659V3.99992M6.66667 7.33325V11.3333M9.33333 7.33325V11.3333" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            <DeleteIconButton
+              onClick={() => handleRemove(filter.id)}
+              disabled={locked}
+              title="Delete filter condition"
+            />
           </div>
 
-          <label>Dimensions</label>
-          {(() => {
-            const commonProps = { value: filter.usageCondition, onChange: (val: string) => handleChange(filter.id, 'usageCondition', val), error: errors[`${index}.dimension`] };
-            if (isApi)   return <ApiDimensionSelect  unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
-            if (isFlat)  return <FlatfileDimensionSelect unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
-            if (isSql)   return <SqlDimensionSelect  unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
-            if (isLlm)   return <LlmDimensionSelect  unitOfMeasure={upperUom} {...commonProps as any} disabled={locked} />;
-            return (
-              <InputField
-                placeholder="Dimension"
-                value={filter.usageCondition}
-                onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
-                error={errors[`${index}.dimension`]}
-                disabled={locked}
-              />
-            );
-          })()}
+          <div className="condition-row">
+            <div className="condition-field">
+              {(() => {
+                const commonProps = { 
+                  value: filter.usageCondition, 
+                  onChange: (val: string) => handleChange(filter.id, 'usageCondition', val), 
+                  error: errors[`${index}.dimension`],
+                  disabled: locked,
+                  label: 'Dimension'
+                };
+                
+                if (isApi)   return <ApiDimensionSelect unitOfMeasure={upperUom} {...commonProps} />;
+                if (isFlat)  return <FlatfileDimensionSelect unitOfMeasure={upperUom} {...commonProps} />;
+                if (isSql)   return <SqlDimensionSelect unitOfMeasure={upperUom} {...commonProps} />;
+                if (isLlm)   return <LlmDimensionSelect unitOfMeasure={upperUom} {...commonProps} />;
+                
+                return (
+                  <div className={`input-container ${locked ? 'disabled' : ''}`}>
+                    <InputField
+                      label="Dimensions"
+                      placeholder="Dimension"
+                      value={filter.usageCondition}
+                      onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
+                      error={errors[`${index}.dimension`]}
+                      className={locked ? 'disabled-input' : ''}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
 
-          <div className="row">
-            <div className="column">
-              <label>Operator</label>
+          <div className="operator-value-group">
+            <div className="operator-field">
               {(() => {
                 if (!filter.usageCondition) {
                   return (
-                    <SelectField
-                      placeholder="--select--"
-                      value=""
-                      onChange={() => {}}
-                      options={[{ label:'--select--', value:'', disabled:true }]}
-                      disabled
-                      error={errors[`${index}.operator`]}
-                    />
+                    <div className="select-container">
+                      <SelectField
+                        label="Operator"
+                        placeholder="--select--"
+                        value=""
+                        onChange={() => {}}
+                        options={[{ label:'--select--', value:'' }]}
+                        disabled={true}
+                        error={errors[`${index}.operator`]}
+                      />
+                    </div>
                   );
                 }
-                if (isApi)  return <ApiOperatorSelect  dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
-                if (isFlat) return <FlatfileOperatorSelect dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
-                if (isSql)  return <SqlOperatorSelect  dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
-                if (isLlm)  return <LlmOperatorSelect  dimension={filter.usageCondition} value={filter.operator} onChange={val => handleChange(filter.id, 'operator', val)} error={errors[`${index}.operator`]} disabled={locked} />;
+                
+                const operatorProps = {
+                  dimension: filter.usageCondition,
+                  value: filter.operator,
+                  onChange: (val: string) => handleChange(filter.id, 'operator', val),
+                  error: errors[`${index}.operator`],
+                  disabled: locked,
+                  label: 'Operator'
+                };
+
+                if (isApi)  return <ApiOperatorSelect {...operatorProps} />;
+                if (isFlat) return <FlatfileOperatorSelect {...operatorProps} />;
+                if (isSql)  return <SqlOperatorSelect {...operatorProps} />;
+                if (isLlm)  return <LlmOperatorSelect {...operatorProps} />;
+                
                 return (
-                  <InputField
-                    placeholder="Operator"
+                  <SelectField
+                    label="Operator"
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
+                    options={[
+                      { label: 'Equals', value: '=' },
+                      { label: 'Not Equals', value: '!=' },
+                      { label: 'Greater Than', value: '>' },
+                      { label: 'Less Than', value: '<' },
+                      { label: 'Greater Than or Equal', value: '>=' },
+                      { label: 'Less Than or Equal', value: '<=' }
+                    ]}
                     disabled={locked || !filter.usageCondition}
                     error={errors[`${index}.operator`]}
                   />
@@ -179,31 +242,39 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
               })()}
             </div>
 
-            <div className="column">
-              <label>Value</label>
-              <InputField
-                placeholder="Value"
-                value={filter.value}
-                onChange={(val) => handleChange(filter.id, 'value', val)}
-                disabled={locked || !filter.operator}
-                error={errors[`${index}.value`]}
-              />
+            <div className="value-field">
+              <div className={`input-container ${locked || !filter.operator ? 'disabled' : ''}`}>
+                <InputField
+                  label="Value"
+                  placeholder="Value"
+                  value={filter.value}
+                  onChange={(val) => handleChange(filter.id, 'value', val)}
+                  className={locked || !filter.operator ? 'disabled-input' : ''}
+                  error={errors[`${index}.value`]}
+                  disabled={locked || !filter.operator}
+                />
+              </div>
             </div>
           </div>
         </div>
       ))}
 
-      <button className="add-btn" onClick={handleAdd} disabled={locked}>Add Filter</button>
+      <SecondaryButton 
+        onClick={handleAdd} 
+        disabled={locked}
+        className="add-btn"
+      >
+        + Add Filter
+      </SecondaryButton>
 
       <div className="billing-section">
-        <label>Select Billing Criteria</label>
         <SelectField
+          label="Select Billing Criteria"
           value={billingCriteria}
           onChange={(val) => {
             onBillingCriteriaChange(val);
           }}
           options={[
-            {label:'--select--',value:'',disabled:true},
             {label:'Bill based on usage conditions',value:'BILL_BASED_ON_USAGE_CONDITIONS'},
             {label:'Bill excluding usage conditions',value:'BILL_EXCLUDING_USAGE_CONDITIONS'}
           ]}
