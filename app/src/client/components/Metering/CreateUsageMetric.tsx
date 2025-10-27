@@ -122,6 +122,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           setAggregationFunction((data as any).aggregationFunction || '');
           setAggregationWindow((data as any).aggregationWindow || '');
           setBillingCriteria((data as any).billingCriteria || '');
+          setUsageConditions((data as any).usageConditions || []);
+          if ((data as any).version) setVersion((data as any).version);
         }
       })();
     }
@@ -268,6 +270,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       if (aggregationFunction)       payload.aggregationFunction = aggregationFunction;
       if (aggregationWindow)         payload.aggregationWindow  = aggregationWindow;
       if (billingCriteria)           payload.billingCriteria = billingCriteria;
+      if (usageConditions?.length)   payload.usageConditions = usageConditions;
       return clean(payload);
     }
 

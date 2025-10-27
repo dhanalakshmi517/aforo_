@@ -100,7 +100,7 @@ const TopBar: React.FC<TopBarProps> = ({
             aria-disabled={!!cancel.disabled}
             title={cancel.title}
           >
-            {cancel.label ?? "Delete"}
+            {cancel.label ?? "Discard"}
           </button>
         )}
 

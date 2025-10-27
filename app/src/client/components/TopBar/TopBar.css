@@ -18,6 +18,14 @@
     box-sizing: border-box;
   }
   
+  /* inner container to hold left and right sections */
+  .af-topbar__container{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
   /* left side */
   .af-topbar__left{ display:flex; align-items:center; gap:16px; }
   
@@ -27,8 +35,32 @@
    height: 28px;
     border-radius: var(--border-radius-sm);
     background: var(--color-neutral-white);
-    border: 1px solid var(--color-neutral-200);
+    border: 1px solid var(--color-primary-800);
     display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-neutral-1400);
+  }
+  
+  /* back tile hover state */
+  .af-topbar__back:hover:not(:disabled){
+    border-color: var(--color-primary-800);
+  }
+  
+  /* back tile active/clicked state */
+  .af-topbar__back:active:not(:disabled){
+    border-color: var(--color-primary-800);
+    background-color: var(--color-neutral-100);
+    transform: scale(0.95);
+  }
+  
+  /* back tile disabled state */
+  .af-topbar__back:disabled,
+  .af-topbar__back.is-disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--color-neutral-50);
+    color: var(--color-neutral-400);
   }
   
   /* title */
@@ -81,8 +113,8 @@ line-height: var(--line-height-heading-h4); }
     justify-content:center;
     padding: 4px 16px;
     border:none;
-    color: var(--color-error-400);
-    background-color: #FDF5F4;
+    color: #ED5142;
+    background-color:var(--red-lightest);
      width:111px;
      height:30px;
     border-radius: 6px; /* Explicit pixel value to ensure consistency */
@@ -91,7 +123,38 @@ line-height: var(--line-height-heading-h4); }
     font-size: var(--font-size-md);
     font-style: normal;
     font-weight: 400;
-    line-height: var(--line-height-body-md); /* 142.857% */  }
+    line-height: var(--line-height-body-md); /* 142.857% */
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  /* cancel button hover state */
+  .af-topbar__btn--cancel:hover:not(:disabled):not(.is-disabled){
+    background-color: var(--red-lighter);
+  }
+  
+  /* cancel button active/clicked state */
+  .af-topbar__btn--cancel:active:not(:disabled):not(.is-disabled){
+    background-color: var(--red-light);
+    color: #ED5142;
+    transform: scale(0.98);
+  }
+  
+  /* cancel button focus state */
+  .af-topbar__btn--cancel:focus-visible{
+    outline: 2px solid var(--color-error-400);
+    outline-offset: 2px;
+  }
+  
+  /* cancel button disabled state */
+  .af-topbar__btn--cancel:disabled,
+  .af-topbar__btn--cancel.is-disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--color-neutral-100);
+    color: var(--color-neutral-500);
+  }
+  
   .af-topbar__btn--save {
     background: var(--color-primary-000);
     color: var(--color-primary-800);
@@ -105,7 +168,28 @@ line-height: var(--line-height-heading-h4); }
     font-style: normal;
     font-weight: 400;
     line-height: var(--line-height-body-md); /* 142.857% */
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
+  
+  /* save button hover state */
+  .af-topbar__btn--save:hover:not(:disabled):not(.af-topbar__btn--disabled){
+    background: var(--color-primary-100);
+    border-color: var(--color-primary-900);
+  }
+  
+  /* save button active/clicked state */
+  .af-topbar__btn--save:active:not(:disabled):not(.af-topbar__btn--disabled){
+    background: var(--color-primary-100);
+    border-color: var(--color-primary-1300);
+  }
+  
+  /* save button focus state */
+  .af-topbar__btn--save:focus-visible{
+    outline: 2px solid var(--color-primary-800);
+    outline-offset: 2px;
+  }
+  
   .af-topbar__btn--disabled{
     opacity: .5;
     cursor: not-allowed;
@@ -118,9 +202,9 @@ line-height: var(--line-height-heading-h4); }
     width:auto;
     height:30px;
     border-radius: var(--border-radius-sm);
-    border: 1px solid var(--color-green-dark);
-    background: var(--color-green-lightest);
-    color: var(--color-green-darker);
+    border: 1px solid #389315;
+    background: rgba(237, 247, 230, 1);
+    color: rgba(17, 116, 0, 1);
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -130,8 +214,4 @@ font-weight: 400;
 line-height: var(--line-height-body-md); /* 142.857% */
   }
   
-  /* --------- Optional: CSS-only padding presets (no TSX changes) --------- */
-  .af-topbar--px-96  { --af-topbar-px: 96px; }
-  .af-topbar--px-72  { --af-topbar-px: 72px; }
-  .af-topbar--px-48  { --af-topbar-px: 48px; }
-  
+ 

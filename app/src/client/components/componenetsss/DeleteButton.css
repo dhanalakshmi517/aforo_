@@ -1,0 +1,67 @@
+@import "../Variables/Variables.css";
+
+/* Base pill */
+.af-del-btn {
+  display: inline-flex;
+  height: 30px;
+  padding: 4px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  border: 0;
+  border-radius: 12px;
+  background: var(--red-lightest);
+  cursor: pointer;
+
+color:  #ED5142;
+
+/* body/md/reg */
+font-family: var(--family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); /* 142.857% */}
+
+.af-del-btn__icon { display: block; }
+.af-del-btn__text {
+    color:  #ED5142;
+
+/* body/md/reg */
+font-family: var(--family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md);
+  
+}
+
+/* Hover/active/focus — soft variant */
+.af-del-btn:hover:not(.af-del-btn--disabled):not(.af-del-btn--solid) {
+  background: var(--red-lighter);
+}
+.af-del-btn:active:not(.af-del-btn--disabled) {
+    background:  #FFEDEB;
+    color: #ED5142;
+
+/* body/md/reg */
+font-family: var(--family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md);
+}
+.af-del-btn:focus-visible {
+  outline: none;
+  
+}
+
+
+/* Disabled */
+.af-del-btn--disabled,
+.af-del-btn:disabled {
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-500);
+  cursor: not-allowed;
+}

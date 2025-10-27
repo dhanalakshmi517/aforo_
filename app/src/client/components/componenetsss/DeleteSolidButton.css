@@ -1,0 +1,73 @@
+@import "../Variables/Variables.css";
+
+/* Base */
+.af-del-solid{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height: 40px;
+padding: 4px 16px;
+
+  gap:8px;
+  border:0;
+  border-radius:14px;
+background:  #ED5142;
+color: var(--color-neutral-white);
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md);
+
+
+
+
+  cursor:pointer;
+  
+}
+
+/* Sizes (taller pill as in screenshot) */
+.af-del-solid--sm{ height:34px; padding:8px 14px; font-size:14px; border-radius:12px; }
+.af-del-solid--md{ height:40px; padding:10px 18px; font-size:15px; border-radius:14px; }
+.af-del-solid--lg{ height:48px; padding:12px 22px; font-size:16px; border-radius:16px; }
+
+.af-del-solid__icon,
+.af-del-solid__spinner{ display:block; }
+
+/* Spinner anim */
+.af-del-solid__spinner{
+  animation: af-rotate 1s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes af-rotate{ to { transform: rotate(360deg); } }
+
+.af-del-solid__text{ letter-spacing:.01em; }
+
+/* Interactions */
+.af-del-solid:hover:not(.is-disabled){
+background: var(--surface-error-hover-2, #EE5C4E);
+     }
+.af-del-solid:active:not(.is-disabled){ 
+    background:#ED5142;  }
+
+.af-del-solid:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.6),
+    0 0 0 5px var(--af-ring);
+}
+
+/* Disabled */
+.af-del-solid.is-disabled,
+.af-del-solid:disabled{
+  background:var(--color-neutral-200);
+  color:var(--color-neutral-500);
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+/* Loading keeps red background but lowers opacity slightly */
+.af-del-solid.is-loading{
+  opacity:.95;
+}
