@@ -12,6 +12,8 @@ import TopBar from '../../componenetsss/TopBar';
 import { useToast } from '../../componenetsss/ToastProvider';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
+import EditButton from '../../componenetsss/EditButton';
+import DeleteButton from '../../componenetsss/DeleteButton';
 import ProductIconPickerModal from '../ProductIconPickerModal';
 import { ProductIconData } from '../ProductIcon';
 import './EditProduct.css';
@@ -626,18 +628,15 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                             </div>
                           </div>
                           <div className="np-icon-actions">
-                            <button type="button" className="np-icon-action-btn" onClick={() => setIsIconPickerOpen(true)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                <path d="M5.99942 10.9517H11.2494M8.55208 1.39783C8.7843 1.16562 9.09926 1.03516 9.42767 1.03516C9.75607 1.03516 10.071 1.16562 10.3032 1.39783C10.5355 1.63005 10.6659 1.94501 10.6659 2.27342C10.6659 2.60183 10.5355 2.91678 10.3032 3.149L3.29742 10.1554C3.15864 10.2942 2.9871 10.3957 2.79867 10.4506L1.12333 10.9394C1.07314 10.9541 1.01993 10.9549 0.969281 10.942C0.91863 10.929 0.872399 10.9026 0.835427 10.8657C0.798455 10.8287 0.772102 10.7825 0.759125 10.7318C0.746149 10.6812 0.747027 10.6279 0.761667 10.5778L1.2505 8.90242C1.30546 8.7142 1.40698 8.54286 1.54567 8.40425L8.55208 1.39783Z" stroke="#1D7AFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span>Edit</span>
-                            </button>
-                            <button type="button" className="np-icon-action-btn np-icon-action-btn--remove" onClick={() => setSelectedIcon(null)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14" fill="none">
-                                <path d="M0.75 3.7845H11.25M10.0833 3.7845V11.9512C10.0833 12.5345 9.5 13.1178 8.91667 13.1178H3.08333C2.5 13.1178 1.91667 12.5345 1.91667 11.9512V3.7845M3.66667 3.78451V2.61784C3.66667 2.03451 4.25 1.45117 4.83333 1.45117H7.16667C7.75 1.45117 8.33333 2.03451 8.33333 2.61784V3.78451M4.83333 6.70117V10.2012M7.16667 6.70117V10.2012" stroke="#ED5142" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <span>Remove</span>
-                            </button>
+                            <EditButton
+                              onClick={() => setIsIconPickerOpen(true)}
+                              label="Edit"
+                            />
+                            <DeleteButton
+                              onClick={() => setSelectedIcon(null)}
+                              label="Remove"
+                              variant="soft"
+                            />
                           </div>
                         </div>
                       ) : (

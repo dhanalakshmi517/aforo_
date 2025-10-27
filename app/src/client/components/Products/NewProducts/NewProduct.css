@@ -657,7 +657,7 @@ line-height: var(--line-height-body-md);
 .np-icon-actions {
   display: flex;
   gap: 3px;
-  margin-left: 210px;
+  margin-left: 190px;
 }
 
 .np-icon-action-btn {

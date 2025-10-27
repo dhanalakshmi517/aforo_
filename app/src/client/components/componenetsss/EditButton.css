@@ -1,0 +1,91 @@
+@import "../Variables/Variables.css";
+/* Namespaced to avoid collisions */
+:root {
+  --af-edit-text: #1D7AFC;
+  --af-edit-bg: #EFF6FF;
+  --af-edit-bg-hover: #E6F0FF;
+  --af-edit-ring: rgba(29, 122, 252, 0.35);
+
+  --af-edit-text-disabled: #A9B4C2;
+  --af-edit-bg-disabled: #F2F4F7;
+}
+
+/* Base pill button */
+.af-edit-btn {
+  display: inline-flex;
+  height: 30px;
+  padding: 4px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  border: 0;
+  border-radius: var(--border-radius-sm);
+  background:#F5F9FF;
+  cursor: pointer;
+
+
+/* body/md/reg */
+color:#1D7AFC;
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); /* 142.857% */}
+
+.af-edit-btn__icon {
+  display: block; /* SVG inherits currentColor */
+}
+
+.af-edit-btn__text {
+ color:  #1D7AFC;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); 
+}
+
+/* Interactions */
+.af-edit-btn:hover:not(.af-edit-btn--disabled) {
+  background:#F2F7FD;
+  color: #1D7AFC;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); /* 142.857% */
+}
+
+.af-edit-btn:active:not(.af-edit-btn--disabled) {
+border-radius: var(--border-radius-sm, 8px);
+background: #EEF4FB;
+color: #1D7AFC;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */}
+
+.af-edit-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--af-edit-bg),
+    0 0 0 4px var(--af-edit-ring);
+}
+
+/* Disabled */
+.af-edit-btn--disabled,
+.af-edit-btn:disabled {
+  background: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+  cursor: not-allowed;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+}

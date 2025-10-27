@@ -21,7 +21,7 @@
   display: flex;
   justify-content: left;
   align-items: center;
-  margin-bottom: 32px; 
+  margin-bottom: 18px; 
   margin-top: 22px;
   margin-left: 15px;
 }
@@ -62,13 +62,16 @@
 }
 
 .logo-text {
-  color:white;
-  font-family: "ABC Repro";
-  font-size: 28.441px;
+  font-family: "Modern Gothic";
+  font-size: 28.953px;
   font-style: normal;
-  font-weight: 500; 
-  line-height: 40.302px; 
-  letter-spacing: -1.896px;
+  font-weight: 700;
+  line-height: 36.777px; /* 141.704% */
+  letter-spacing: -1.748px;
+  background: linear-gradient(90deg, var(--surface-surface-lightest, #F8F7FA) 0.01%, var(--surface-background-default, #FFF) 100.55%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .nav-item:hover {
@@ -86,6 +89,7 @@
   padding: 12px 16px;
   color: var(--color-neutral-100);
   font-weight: 500;
+  background-color: var(--color-primary-800);
 }
 
 .nav-item.active .icon-wrapper { color: var(--color-neutral-100 )!important; }
