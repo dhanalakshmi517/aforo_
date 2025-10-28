@@ -76,6 +76,8 @@ const Organization: React.FC = () => {
     }
   };
 
+  // No helper function needed - we'll use flag-icons classes directly in JSX
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     const selected = countries.find(c => c.code === selectedCountry);

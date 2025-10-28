@@ -64,6 +64,8 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     setIsOpen(false);
   };
 
+  // No helper function needed - we'll use flag-icons classes directly in JSX
+
   return (
     <div className="country-selector" ref={dropdownRef}>
       <div
@@ -80,12 +82,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       >
         {selectedCountry ? (
           <div className="selected-option">
-            <img
-              src={`https://flagcdn.com/16x12/${selectedCountry.code.toLowerCase()}.png`}
-              alt={selectedCountry.name}
-              className="flag"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
+            <span className={`fi fi-${selectedCountry.code.toLowerCase()}`}></span>
             <span>{selectedCountry.name}</span>
           </div>
         ) : (
@@ -121,12 +118,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
                   role="option"
                   aria-selected={value === country.code}
                 >
-                  <img
-                    src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
-                    alt={`${country.name} flag`}
-                    className="flag"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
+                  <span className={`fi fi-${country.code.toLowerCase()}`}></span>
                   <span className="truncate">
                     {country.name}
                     {showCountryCode && ` (${country.code})`}
@@ -151,7 +143,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         .country-selector__control {
           position: relative;
           width: 100%;
-          min-height: 40px;
+          height: 40px;
           padding: 8px 44px 8px 16px;
           border: 1px solid var(--color-neutral-300);
           border-radius: 8px;
@@ -160,6 +152,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           align-items: center;
           background: var(--color-neutral-white);
           transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+          overflow: hidden;
         }
         .country-selector__control:hover:not(.error) {
           border-color: var(--color-neutral-200);
@@ -176,8 +169,20 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         }
         .country-selector__control.error { border: 1px solid #ff4d4f; }
 
-        .selected-option { display: flex; align-items: center; gap: 10px; color: var(--color-neutral-1700); }
-        .flag { width: 24px; height: 18px; object-fit: cover; margin-right: 8px; }
+        .selected-option { 
+          display: flex; 
+          align-items: center; 
+          gap: 10px; 
+          color: var(--color-neutral-1700); 
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.5;
+        }
+        .fi { 
+          margin-right: 8px; 
+          flex-shrink: 0;
+        }
 
         .chevron {
           position: absolute;
