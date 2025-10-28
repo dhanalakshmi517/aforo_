@@ -86,11 +86,12 @@ export default function KongIntegration({ onClose }: KongIntegrationProps) {
     navigate('/get-started/products/import');
   };
   return (
-    <>
-      <TopBar title="Kong Integration" onBack={onClose} />
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <TopBar title="Kong Integration" onBack={onClose} />
 
-      <div className="kong-page">
-        <div className="kong-card">
+        <div className="kong-page">
+          <div className="kong-card">
           {/* brand row */}
           <div className="kong-brand-row" aria-hidden="true">
           <Kong size={45} title="Kong" />
@@ -171,14 +172,15 @@ export default function KongIntegration({ onClose }: KongIntegrationProps) {
         </div>
       </div>
 
-      {showConfirm && (
-        <KongPopup
-          isOpen
-          onClose={() => setShowConfirm(false)}
-          onKeep={() => setShowConfirm(false)}
-          onLeave={() => { setShowConfirm(false); onClose(); }}
-        />
-      )}
-    </>
+        {showConfirm && (
+          <KongPopup
+            isOpen
+            onClose={() => setShowConfirm(false)}
+            onKeep={() => setShowConfirm(false)}
+            onLeave={() => { setShowConfirm(false); onClose(); }}
+          />
+        )}
+      </div>
+    </div>
   );
 }
