@@ -168,6 +168,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
             try { data = await getProducts(); } catch { data = []; }
           }
           const mapped = data.map(p => ({ productName: p.productName, skuCode: ((p as any).internalSkuCode ?? (p as any).skuCode ?? '') as string }));
+          console.log('🔍 Existing products for uniqueness check:', mapped);
           setExistingProducts(mapped);
         } catch (e) { /* already logged */ }
       } catch (e) {
@@ -177,6 +178,26 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   }, []);
 
   const configRef = React.useRef<any>(null);
+
+  // Function to refresh existing products list
+  const refreshExistingProducts = async () => {
+    try {
+      let data: any[] = [];
+      try {
+        data = await listAllProducts();
+      } catch {
+        // fallback to authenticated endpoint
+        try { data = await getProducts(); } catch { data = []; }
+      }
+      const mapped = data.map(p => ({ productName: p.productName, skuCode: ((p as any).internalSkuCode ?? (p as any).skuCode ?? '') as string }));
+      console.log('🔄 Refreshed existing products for uniqueness check:', mapped);
+      setExistingProducts(mapped);
+      return mapped;
+    } catch (e) {
+      console.error('Failed to refresh existing products', e);
+      return existingProducts; // return current list if refresh fails
+    }
+  };
 
   // Lock logic - similar to CreateUsageMetric
   const hasAnyRequiredInput = React.useMemo(() => {
@@ -228,6 +249,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         (p.productName || '').toLowerCase() === trimmed.toLowerCase() && 
         p.productName !== activeDraft?.productName
       );
+      console.log('🔍 Uniqueness check for productName:', {
+        inputName: trimmed,
+        existingProducts: existingProducts.map(p => p.productName),
+        activeDraftName: activeDraft?.productName,
+        isDuplicate: duplicate
+      });
       if (duplicate) {
         setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
       } else if (errors.productName === 'Must be unique') {
@@ -284,9 +311,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     }
   };
 
-  const gotoStep = async (index: number) => {
+  const gotoStep = async (index: number, skipSave: boolean = false) => {
       // when jumping forward, make sure we have a product record
-  if (index > currentStep) {
+  if (index > currentStep && !skipSave) {
     // 1️⃣ From General ➜ Configuration or further: create/update product shell first
     if (currentStep === 0 && !createdProductId) {
       const ok = await saveProduct(true); // creates DRAFT product shell only if not yet created
@@ -343,7 +370,19 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   }, [formData, selectedIcon, lastSavedData, lastSavedIcon, hasAnyRequiredInput]);
 
   const saveProduct = async (isDraft: boolean = false) => {
-    console.log('Saving product...', { isDraft, formData, selectedIcon });
+    console.log('Saving product...', { isDraft, formData, selectedIcon, createdProductId });
+    
+    // Prevent concurrent saves
+    if (isSaving) {
+      console.log('⚠️ Save already in progress, skipping...');
+      return false;
+    }
+    
+    // Refresh existing products list to ensure we have latest data
+    if (!createdProductId) {
+      console.log('🔄 Refreshing existing products before creating new product...');
+      await refreshExistingProducts();
+    }
     
     // Only validate required fields if not a draft
     if (!isDraft) {
@@ -354,12 +393,14 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         lower(p.productName||'')===lower(formData.productName) && 
         p.productName !== activeDraft?.productName
       )) {
+        console.log('❌ Frontend uniqueness check failed for productName:', formData.productName);
         newErrors.productName = 'Must be unique';
       }
       if (formData.skuCode && existingProducts.some(p=> 
         lower(p.skuCode||'')===lower(formData.skuCode) && 
         p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
       )) {
+        console.log('❌ Frontend uniqueness check failed for skuCode:', formData.skuCode);
         newErrors.skuCode = 'Must be unique';
       }
       if (activeTab === 'general') {
@@ -460,149 +501,122 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
       console.log('💾 Final payload being sent:', payloadWithIcon);
 
-      if (isDraft || !createdProductId) {
-        // For new products or drafts, include all fields
+      if (createdProductId) {
+        // Update existing product
+        console.log('Updating existing product with ID:', createdProductId);
+        const payload = {
+          ...payloadWithIcon,
+          ...(isDraft ? { status: 'DRAFT' } : {})
+        };
+          
+        // For updates, handle icon separately using the correct endpoint
+        const hasIconInPayload = payload.icon || payload.productIcon;
+        
+        if (hasIconInPayload) {
+          console.log('🎨 Updating icon for product using updateProductIcon...');
+          console.log('🔍 selectedIcon data:', selectedIcon);
+          
+          if (selectedIcon) {
+            // Update with new icon
+            await updateProductIcon(createdProductId, selectedIcon);
+            console.log('✅ Product icon updated successfully');
+          } else {
+            // Remove icon
+            await updateProductIcon(createdProductId, null);
+            console.log('✅ Product icon removed successfully');
+          }
+          
+          // Update other fields (excluding icon fields)
+          const { icon, productIcon, ...payloadWithoutIcon } = payload;
+          if (Object.keys(payloadWithoutIcon).length > 0) {
+            console.log('📝 Updating other product fields...');
+            await updateProduct(createdProductId, payloadWithoutIcon);
+            console.log('✅ Product fields updated successfully');
+          }
+        } else {
+          // No icon changes, just update other fields normally
+          console.log('📝 No icon changes, updating product fields normally...');
+          await updateProduct(createdProductId, payload);
+          console.log('✅ Product updated successfully');
+        }
+        
+        console.log('Product update completed');
+        
+        // Signal Products component to refresh
+        localStorage.setItem('productUpdated', Date.now().toString());
+        console.log('📡 Set product update signal for Products component');
+      } else {
+        // Create new product (draft or not)
         const payload = {
           ...payloadWithIcon,
           ...(isDraft ? { status: 'DRAFT' } : {})
         };
         
-        if (createdProductId) {
-          // Update existing product as draft
-          console.log('Updating product as draft with ID:', createdProductId);
-          
-          // For draft updates, handle icon separately using the correct endpoint
-          const hasIconInPayload = payload.icon || payload.productIcon;
-          
-          if (hasIconInPayload) {
-            console.log('🎨 Updating icon for draft product using updateProductIcon...');
-            console.log('🔍 selectedIcon data:', selectedIcon);
-            
-            if (selectedIcon) {
-              // Update with new icon
-              await updateProductIcon(createdProductId, selectedIcon);
-              console.log('✅ Draft product icon updated successfully');
-            } else {
-              // Remove icon
-              await updateProductIcon(createdProductId, null);
-              console.log('✅ Draft product icon removed successfully');
-            }
-            
-            // Update other fields (excluding icon fields)
-            const { icon, productIcon, ...payloadWithoutIcon } = payload;
-            if (Object.keys(payloadWithoutIcon).length > 0) {
-              console.log('📝 Updating other draft product fields...');
-              await updateProduct(createdProductId, payloadWithoutIcon);
-              console.log('✅ Draft product fields updated successfully');
-            }
-          } else {
-            // No icon changes, just update other fields normally
-            console.log('📝 No icon changes, updating draft product fields normally...');
-            await updateProduct(createdProductId, payload);
-            console.log('✅ Draft product updated successfully');
-          }
-          
-          console.log('Draft updated');
-          
-          // Signal Products component to refresh
-          localStorage.setItem('productUpdated', Date.now().toString());
-          console.log('📡 Set product update signal for Products component');
-        } else {
-          // Create new product (draft or not)
-          console.log('Creating new product with payload:', payload);
-          console.log('🔍 Payload productIcon field:', payload.productIcon);
-          const response = await createProduct(payload);
-          setCreatedProductId(response.productId);
-          console.log('Product created with ID:', response.productId);
-          // cache snapshot
-          setLastSavedData({ ...formData });
-          setLastSavedIcon(selectedIcon);
-          console.log('🔍 Created product response:', response);
-          
-          // Signal Products component to refresh
-          localStorage.setItem('productUpdated', Date.now().toString());
-          console.log('📡 Set product update signal for Products component');
-        }
-      } else {
-        // For updates, only include changed fields
-        const changes: Partial<ProductPayload> & { productIcon?: string } = {};
-        
-        if (lastSavedData?.productName !== formData.productName) {
-          changes.productName = basePayload.productName;
-        }
-        if (lastSavedData?.skuCode !== formData.skuCode) {
-          changes.internalSkuCode = basePayload.internalSkuCode;
-        }
-        if (lastSavedData?.description !== formData.description) {
-          changes.productDescription = basePayload.productDescription;
-        }
-        if (lastSavedData?.version !== formData.version) {
-          changes.version = basePayload.version;
-        }
-        
-        // Include icon if it exists - save both SVG and full icon data
-        if (selectedIcon) {
-          const outerRaw = selectedIcon.outerBg ?? ['#F8F7FA', '#E4EEF9'];
-          const outer = [extractColor(outerRaw[0]), extractColor(outerRaw[1])];
-          const tile = extractColor(selectedIcon.tileColor ?? '#CC9434');
-          const viewBox = selectedIcon.viewBox ?? '0 0 18 18';
-          changes.icon = JSON.stringify({
-          iconData: selectedIcon,
-          svgContent: (()=>{/*placeholder*/})()
-        });
-        changes.productIcon = JSON.stringify({
-            iconData: selectedIcon,
-            svgContent: `<svg xmlns="http://www.w3.org/2000/svg" width="50.6537" height="46.3351" viewBox="0 0 50.6537 46.3351">
-              <defs>
-                <linearGradient id="bg-${selectedIcon.id}" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:${outer[0]}" />
-                  <stop offset="100%" style="stop-color:${outer[1]}" />
-                </linearGradient>
-              </defs>
-              <rect width="50.6537" height="46.3351" rx="12" fill="url(#bg-${selectedIcon.id})"/>
-              <rect x="0.3" y="0.3" width="50.0537" height="45.7351" rx="11.7"
-                    fill="rgba(1,69,118,0.10)" stroke="#D5D4DF" strokeWidth="0.6"/>
-              <rect x="12" y="9" width="29.45" height="25.243" rx="5.7" fill="${tile}"/>
-              <g transform="translate(10.657,9.385)">
-                <rect width="29.339" height="26.571" rx="6"
-                      fill="rgba(${parseInt(tile.slice(1, 3), 16)}, ${parseInt(tile.slice(3, 5), 16)}, ${parseInt(tile.slice(5, 7), 16)}, 0.10)" stroke="#FFFFFF" strokeWidth="0.6"/>
-                <svg x="5.67" y="4.285" width="18" height="18" viewBox="${viewBox}">
-                  <path d="${selectedIcon.svgPath}" fill="#FFFFFF"/>
-                </svg>
-              </g>
-            </svg>`
-          });
-        }
-        
-        if (Object.keys(changes).length === 0) {
-          console.log('No changes to save');
-          return true;
-        }
-        
-        console.log('Updating product with changes:', changes);
-        console.log('🔍 Changes productIcon field:', changes.productIcon);
-        const updateResponse = await updateProduct(createdProductId, changes);
-        console.log('Product updated with changes');
+        console.log('Creating new product with payload:', payload);
+        console.log('🔍 Payload productIcon field:', payload.productIcon);
+        const response = await createProduct(payload);
+        setCreatedProductId(response.productId);
+        console.log('Product created with ID:', response.productId);
+        // cache snapshot
+        setLastSavedData({ ...formData });
+        setLastSavedIcon(selectedIcon);
+        console.log('🔍 Created product response:', response);
         
         // Signal Products component to refresh
         localStorage.setItem('productUpdated', Date.now().toString());
         console.log('📡 Set product update signal for Products component');
-
-      // cache snapshot to avoid redundant updates
-      setLastSavedData({ ...formData });
-      setLastSavedIcon(selectedIcon);
-        console.log('🔍 Update response:', updateResponse);
       }
       
       // Update last saved data
       setLastSavedData({ ...formData });
       setLastSavedIcon(selectedIcon);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save product:', error);
+      
+      // Extract specific error message from API response
+      let errorMessage = 'Failed to save product. Please try again.';
+      
+      if (error?.response?.data?.details) {
+        // Backend returned specific error details
+        errorMessage = error.response.data.details;
+        
+        // If it's a duplicate product name error, refresh the products list and check again
+        if (errorMessage.toLowerCase().includes('productname already exists')) {
+          console.log('⚠️ Backend says productName already exists, refreshing products list...');
+          
+          // Refresh the products list to see if there's a mismatch
+          const refreshedProducts = await refreshExistingProducts();
+          const lower = (s:string)=>s.trim().toLowerCase();
+          const actualDuplicate = refreshedProducts.some(p=> 
+            lower(p.productName||'')===lower(formData.productName) && 
+            p.productName !== activeDraft?.productName
+          );
+          
+          if (actualDuplicate) {
+            console.log('✅ Confirmed: Product name actually exists after refresh');
+            setErrors(prev => ({
+              ...prev,
+              productName: 'A product with this name already exists. Please use a different name.'
+            }));
+          } else {
+            console.log('🤔 Backend says duplicate but frontend doesn\'t see it. This might be a backend caching issue.');
+            setErrors(prev => ({
+              ...prev,
+              form: 'There seems to be a temporary issue with name validation. Please try a slightly different name or try again in a moment.'
+            }));
+          }
+          return false;
+        }
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       setErrors(prev => ({
         ...prev,
-        form: error instanceof Error ? error.message : 'Failed to save product. Please try again.'
+        form: errorMessage
       }));
       return false;
     } finally {
@@ -666,7 +680,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     if (activeTab === 'general') {
       const configTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('configuration'));
       if (configTabIndex > -1) {
-        gotoStep(configTabIndex);
+        gotoStep(configTabIndex, true); // skipSave = true since we just saved
       }
     } else if (activeTab === 'configuration') {
       // Validate configuration fields; do not hit backend yet
@@ -675,12 +689,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         if (!ok) return; // field errors now displayed inline
       }
       const reviewTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('review'));
-      if (reviewTabIndex > -1) gotoStep(reviewTabIndex);
+      if (reviewTabIndex > -1) gotoStep(reviewTabIndex, true); // skipSave = true since we just saved
     } else {
       // For other tabs, just move to the next step
       const currentIndex = steps.findIndex(step => step.title.toLowerCase().includes(activeTab));
       if (currentIndex < steps.length - 1) {
-        gotoStep(currentIndex + 1);
+        gotoStep(currentIndex + 1, true); // skipSave = true since we just saved
       }
     }
   };
