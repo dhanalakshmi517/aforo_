@@ -59,8 +59,16 @@
 .col-actions{ width:97px; }
 
 .products-table thead th{
-  background:#F7F8FA; color:var(--text-dark); font-weight:400;
-  padding:8px 16px; text-align:left; font-size:14px;
+  position: sticky;
+  top: 0;
+  z-index: 1;                    /* stay above rows               */
+  background: var(--color-neutral-100);  /* covers rows under it   */
+  background:#F7F8FA; 
+  color:var(--text-dark); 
+  font-weight:400;
+  padding:8px 16px; 
+  text-align:left; 
+  font-size:14px;
   border-bottom:1px solid #EEE;
 }
 .products-table tbody td{

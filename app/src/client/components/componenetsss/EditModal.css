@@ -57,8 +57,22 @@
   border-radius: var(--border-radius-sm, 8px);
   background: transparent;
   cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
-.editmodal__close:hover{ background: var(--surface-layer-2, #F5F5F7); }
+
+.editmodal__close:hover{ 
+  background: var(--surface-layer-2, #F5F5F7);
+}
+
+.editmodal__close:active {
+  background: var(--surface-layer-3, #E8E8EA);
+  transform: scale(0.95);
+}
+
+.editmodal__close:focus-visible {
+  outline: 2px solid var(--color-primary-600, #025A94);
+  outline-offset: 2px;
+}
 
 /* Body text — specs */
 .editmodal__desc{
@@ -97,6 +111,7 @@
   font-size: var(--fontsize-body-lg, 16px);
   line-height: var(--line-height-body-lg, 24px);
   cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 /* Cancel — specs */
@@ -104,17 +119,64 @@
   background: var(--surface-error, #FFEDE9);
   color: var(--color-error-400, #E34935);
 }
-.editmodal__btn--cancel:hover{ filter: brightness(.98); }
+
+.editmodal__btn--cancel:hover{ 
+  background: #FFD6CD; /* Lighter shade for hover */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(227, 73, 53, 0.2);
+}
+
+.editmodal__btn--cancel:active {
+  background: #FFBDB1; /* Darker shade for active/clicked */
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(227, 73, 53, 0.2);
+}
+
+.editmodal__btn--cancel:focus-visible {
+  outline: 2px solid var(--color-error-400, #E34935);
+  outline-offset: 2px;
+}
 
 /* Primary — specs */
 .editmodal__btn--primary{
   background: var(--surface-primary-button-active, #025A94);
   color: #FFF;
 }
-.editmodal__btn--primary:hover{ filter: brightness(1.03); }
+
+.editmodal__btn--primary:hover{ 
+  background: #036BA6; /* Slightly lighter shade for hover */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(2, 90, 148, 0.3);
+}
+
+.editmodal__btn--primary:active {
+  background: #024D80; /* Darker shade for active/clicked */
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(2, 90, 148, 0.3);
+}
+
+.editmodal__btn--primary:focus-visible {
+  outline: 2px solid var(--color-primary-600, #025A94);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(2, 90, 148, 0.1);
+}
 
 /* Disabled */
 .editmodal__btn:disabled{
   opacity: .6;
   cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+/* Disabled specific states for each button */
+.editmodal__btn--cancel:disabled {
+  background: var(--surface-error, #FFEDE9);
+  opacity: 0.5;
+}
+
+.editmodal__btn--primary:disabled {
+  background: var(--surface-primary-button-active, #025A94);
+  opacity: 0.5;
 }
