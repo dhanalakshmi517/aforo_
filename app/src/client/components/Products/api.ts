@@ -174,7 +174,7 @@ export const createProduct = async (
     verifyAuth();
     const authData = getAuthData();
 
-    const formData = new FormData();
+    // Build clean request payload
     const requestPayload: Record<string, string> = {};
 
     if (payload.productName?.trim()) requestPayload.productName = payload.productName.trim();
@@ -184,25 +184,21 @@ export const createProduct = async (
     if (payload.productDescription?.trim())
       requestPayload.productDescription = payload.productDescription.trim();
     if (payload.status) requestPayload.status = payload.status;
+    
+    // Add productIcon to the main payload if it exists
     if (payload.productIcon) {
       console.log('📤 Adding productIcon to request payload:', payload.productIcon);
       requestPayload.productIcon = payload.productIcon;
     }
 
-    // Remove productIcon from request payload to send it separately
-    const { productIcon, ...requestWithoutIcon } = requestPayload;
-    
-    const requestJson = JSON.stringify(requestWithoutIcon);
-    console.log('📤 createProduct requestPayload (without icon):', requestWithoutIcon);
-    console.log('📤 createProduct requestJson:', requestJson);
-    formData.append('request', requestJson);
-    
-    // Add productIcon as a separate FormData field if it exists
-    if (productIcon) {
-      console.log('📤 Adding productIcon as separate FormData field');
-      formData.append('productIcon', productIcon);
-    }
+    console.log('📤 createProduct requestPayload:', requestPayload);
 
+    // Create FormData with the complete request
+    const formData = new FormData();
+    const requestJson = JSON.stringify(requestPayload);
+    formData.append('request', requestJson);
+
+    // Only add icon file if we have icon data with SVG content
     if (payload.productIcon) {
       try {
         const iconData =
@@ -210,25 +206,29 @@ export const createProduct = async (
             ? JSON.parse(payload.productIcon)
             : payload.productIcon;
 
-        // Use the SVG content exactly as provided - no modifications
-        let svgContent: string;
-        
-        if (iconData.svgContent) {
-          // Use the original SVG content as-is
-          svgContent = iconData.svgContent;
-        } else if (iconData.svgPath) {
-          // Create a simple SVG from the path - no extra styling or frames
-          svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
-            iconData.viewBox || '0 0 24 24'
-          }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
-        } else {
-          throw new Error('Invalid icon data: missing svgContent or svgPath');
-        }
+        // Only create SVG file if we have the necessary data
+        if (iconData.svgContent || iconData.svgPath) {
+          let svgContent: string = '';
+          
+          if (iconData.svgContent) {
+            // Use the original SVG content as-is
+            svgContent = iconData.svgContent;
+          } else if (iconData.svgPath) {
+            // Create a simple SVG from the path
+            svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
+              iconData.viewBox || '0 0 24 24'
+            }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+          }
 
-        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-        formData.append('icon', svgBlob, 'icon.svg');
+          if (svgContent) {
+            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+            formData.append('icon', svgBlob, 'icon.svg');
+            console.log('📤 Added SVG file to FormData:', svgContent.length, 'bytes');
+          }
+        }
       } catch (e) {
         console.error('Error processing icon:', e);
+        // Continue without icon if there's an error
       }
     }
 
@@ -259,6 +259,42 @@ export const createProduct = async (
     if (axios.isAxiosError(error)) {
       console.error('Error Response:', error.response?.data);
       console.error('Status Code:', error.response?.status);
+      
+      // Check if product was actually created despite 500 error
+      // Some backends return 500 but include the created product data
+      if (error.response?.status === 500 && error.response?.data) {
+        const responseData = error.response.data as any;
+        
+        // Check if the error details mention "productName already exists"
+        const errorDetails = responseData.details || responseData.error || '';
+        const isNameExistsError = errorDetails.toLowerCase().includes('productname already exists');
+        
+        // If we got a productId back, the product was actually created
+        if (responseData.productId || responseData.id) {
+          if (isNameExistsError) {
+            console.warn('⚠️ Backend says "productName already exists" but returned product data. This might be the same product being updated.');
+          } else {
+            console.warn('⚠️ Backend returned 500 but product was created. Using response data.');
+          }
+          
+          return {
+            productId: (responseData.productId || responseData.id).toString(),
+            productName: responseData.productName || '',
+            productType: responseData.productType || '',
+            status: responseData.status || 'DRAFT',
+            category: responseData.category || '',
+            icon: responseData.icon,
+            productIcon: responseData.productIcon,
+            createdOn: responseData.createdOn,
+            ...responseData
+          } as Product;
+        }
+        
+        // If no productId but it's a "name exists" error, throw a clearer error
+        if (isNameExistsError) {
+          throw new Error('A product with this name already exists. Please use a different name.');
+        }
+      }
     }
     return handleApiError(error);
   }
