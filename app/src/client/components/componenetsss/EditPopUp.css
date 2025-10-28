@@ -36,7 +36,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+   
+  }
+
+  .popup-close:hover {
+    background-color: #FFF3F0;
+  }
+
+  .popup-close:active {
+    background-color: #FFEDEB;
+  }
+
+  .popup-close:focus-visible {
+    outline: 2px solid var(--color-error-200);
+    outline-offset: 2px;
   }
   
   .popup-close svg {
@@ -86,14 +101,27 @@ line-height: var(--line-height-body-lg, 24px)
     height:40px;
     border: none;
     cursor: pointer;
-    background-color: var(--color-primary-700);
-    color: var(--color-primary-000);
+    background-color: var(--color-primary-750);
+    color: var(--color-neutral-white);
 
 font-family: var(--font-family-primary);
 font-size: var(--font-size-lg);
 font-style: normal;
 font-weight: 500;
 line-height: var(--line-height-body-lg);
+  }
+
+  .pop-btn-save:hover {
+    background-color: var(--color-primary-700);
+  }
+
+  .pop-btn-save:active {
+    background-color: var(--color-primary-800);
+  }
+
+  .pop-btn-save:focus-visible {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: 2px;
   }
   
   
@@ -104,14 +132,51 @@ line-height: var(--line-height-body-lg);
     height:40px;
     border: none;
     cursor: pointer;
-    background-color: var(--color-error-100);
-    color: var(--color-error-300);
+     background-color: #FFF7F5;
+    color: #ED5142;
 
 font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
+font-size: var(--font-size-md);
 font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-lg);
+font-weight: 400;
+line-height: var(--line-height-body-md);
+  }
+
+  .pop-btn-cancel:hover {
+        background-color: #FFF3F0;
+
+  
+  }
+
+  .pop-btn-cancel:active {
+        background-color: #FFEDEB;
+
+  }
+
+  .pop-btn-cancel:focus-visible {
+    outline: 2px solid var(--color-error-400);
+    outline-offset: 2px;
+  }
+
+  /* Disabled states */
+  .pop-btn-save:disabled,
+  .pop-btn-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+    pointer-events: none;
+  }
+
+  .pop-btn-save:disabled {
+    background-color: var(--color-primary-500);
+    opacity: 0.5;
+  }
+
+  .pop-btn-cancel:disabled {
+    background-color: var(--color-error-50);
+    opacity: 0.5;
+    color: var(--color-error-200);
   }
   
   

@@ -1,4 +1,6 @@
 import React from "react";
+import SecondaryButton from "./SecondaryButton";
+import DeleteSolidButton from "./DeleteSolidButton";
 import "./ConfirmDeleteModal.css";
 
 interface ConfirmDeleteModalProps {
@@ -48,12 +50,13 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         <p className="del-modal-subtitle">This action cannot be undone.</p>
 
         <div className="del-modal-actions">
-          <button className="del-modal-btn del-modal-btn-discard" onClick={onCancel}>
+          <SecondaryButton fullWidth onClick={onCancel}>
             Discard
-          </button>
-          <button className="del-modal-btn del-modal-btn-delete" onClick={onConfirm}>
-            Yes, Delete
-          </button>
+          </SecondaryButton>
+          <DeleteSolidButton 
+            label="Yes, Delete"
+            onClick={onConfirm}
+          />
         </div>
       </div>
     </div>

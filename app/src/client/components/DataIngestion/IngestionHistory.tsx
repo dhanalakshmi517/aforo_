@@ -160,12 +160,12 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
       <div className="data-table-scroll">
         <table className="data-table">
           <colgroup>
-            <col style={{ width: "60px" }} />
-            <col style={{ width: "40%" }} />
-            <col style={{ width: "140px" }} />
-            <col style={{ width: "200px" }} />
-            <col style={{ width: "120px" }} />
-            <col style={{ width: "auto" }} />
+            <col className="col-sno" />
+            <col className="col-name" />
+            <col className="col-type" />
+            <col className="col-date" />
+            <col className="col-status" />
+            <col className="col-notes" />
           </colgroup>
 
           <thead>
@@ -175,7 +175,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
               <th>Ingestion Type</th>
               <th>Ingested On</th>
               <th>Status</th>
-              <th>Description / Notes</th>
+              <th>Notes</th>
             </tr>
           </thead>
 

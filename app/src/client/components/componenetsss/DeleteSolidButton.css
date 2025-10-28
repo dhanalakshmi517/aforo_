@@ -10,7 +10,7 @@ padding: 4px 16px;
 
   gap:8px;
   border:0;
-  border-radius:14px;
+  border-radius:8px;
 background:  #ED5142;
 color: var(--color-neutral-white);
 font-family: var(--font-family-primary);

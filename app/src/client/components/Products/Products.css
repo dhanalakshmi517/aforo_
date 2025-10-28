@@ -12,6 +12,7 @@ body {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-y: auto;
+  background: var(--color-neutral-50); /* Light background color for entire page */
 
   /* make it occupy viewport height minus navbar (adjust 64px if needed) */
   height: auto;
@@ -45,11 +46,15 @@ body {
 }
 
 /* FREEZE HEADER */
+.products-table thead {
+  display: table-header-group; /* Ensure proper table header display */
+}
+
 .products-table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;                    /* stay above rows               */
-  background: var(--color-neutral-100);  /* covers rows under it   */
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;                   /* Higher z-index to override any conflicts */
+  background: var(--color-neutral-100) !important;  /* Solid background to cover rows under it */
 }
 .rate-plan-product-container {
   padding: 0;
@@ -58,8 +63,9 @@ body {
   box-sizing: border-box;
   margin-left: 256px;
   padding-right: 10px;
-  background: none;
+  background: var(--color-neutral-50); /* Light background color for entire page */
   box-shadow: none;
+  min-height: 100vh; /* Ensure full height coverage */
 }
 
 
@@ -351,7 +357,7 @@ text-align: center;
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
+font-size: var(--font-size-sm);
 font-style: normal;
 font-weight: 400;
 line-height: var(--line-height-body-md); /* 142.857% */
@@ -377,15 +383,20 @@ font-weight: 400;
 line-height: var(--line-height-body-lg);
 }
 
-.products-empty-state {
-  margin: 40px auto 0;
+/* Empty state table cell */
+.products-table tbody tr:has(.products-empty-state) td {
+  vertical-align: middle;
+  padding: 0;
+}
 
+.products-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  height: 400px; /* Fixed height for better vertical centering */
+  gap: 8px; /* Spacing between elements */
 }
 
 .products-main-content {
@@ -410,8 +421,9 @@ line-height: var(--line-height-body-lg);
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-lg);
   padding: 12px;
-  border: 1px solid var(--color-neutral-200);
-  /* box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00); */
+  /* border: 1px solid var(--color-neutral-200); */
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+  position: relative; /* Create positioning context for sticky headers */
 }
 
 @media (max-width: 991px) {
@@ -470,9 +482,11 @@ line-height: var(--line-height-body-lg);
 }
 
 .products-table {
-  border-collapse: collapse;
+  border-collapse: separate; /* Changed from collapse to separate for sticky headers */
+  border-spacing: 0; /* Keep borders tight */
   background-color: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
+  display: table; /* Ensure proper table display */
 
 
   /* Product Name Container */
@@ -832,14 +846,14 @@ line-height: var(--line-height-body-sm);
 
 
 .products-table th {
-  position: sticky;
-  background-color: var(--color-neutral-100);
+  position: sticky !important;
+  background-color: var(--color-neutral-100) !important;
   height: auto;
   padding: 4px 16px;
   text-align: left;
   border-radius: 0; /* remove rounded corners for seamless look */
-  top: 0;
-  z-index: 1;
+  top: 0 !important;
+  z-index: 100 !important; /* Higher z-index for proper layering */
   color: var(--color-neutral-800);
   border: none; /* remove all borders */
   border-bottom: none !important; /* explicitly remove bottom border */

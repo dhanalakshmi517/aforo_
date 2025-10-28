@@ -5,6 +5,8 @@ import ProgressBar from "../componenetsss/ProgressBar";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
 import TertiaryButton from "../componenetsss/TertiaryButton";
+import { Checkbox } from "../componenetsss/Checkbox";
+import EditIconButton from "../componenetsss/EditIconButton";
 import { ingestFiles } from "./api";
 import "./DataIngestionPage.css";
 import IngestionHistory from "./IngestionHistory";
@@ -36,11 +38,10 @@ const DataIngestionPage: React.FC = () => {
         key: "select", 
         label: (
           <div className="data-checkbox-container">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={allSelected}
-              onChange={(e) => {
-                if (e.target.checked) {
+              onChange={(checked) => {
+                if (checked) {
                   setSelectedRows(new Set(rows.map((_, index) => index)));
                 } else {
                   setSelectedRows(new Set());
@@ -49,13 +50,12 @@ const DataIngestionPage: React.FC = () => {
             />
             <span>S.No</span>
           </div>
-        ),
-        width: "120px"
+        )
       },
-      { key: "name", label: "File Name", width: "42%" },
-      { key: "status", label: "Status", width: "120px" },
-      { key: "uploaded", label: "Uploaded On", width: "220px" },
-      { key: "notes", label: "Description / Notes", width: "auto" },
+      { key: "name", label: "File Name" },
+      { key: "status", label: "Status" },
+      { key: "uploaded", label: "Uploaded On" },
+      { key: "notes", label: " Notes" },
     ],
     [allSelected, rows.length]
   );
@@ -302,11 +302,11 @@ const DataIngestionPage: React.FC = () => {
           <div className="data-table-scroll">
             <table className="data-table">
               <colgroup>
-                <col style={{ width: columns[0].width }} />
-                <col style={{ width: columns[1].width }} />
-                <col style={{ width: columns[2].width }} />
-                <col style={{ width: columns[3].width }} />
-                <col style={{ width: columns[4].width }} />
+                <col className="col-select" />
+                <col className="col-name" />
+                <col className="col-status" />
+                <col className="col-uploaded" />
+                <col className="col-notes" />
               </colgroup>
 
               <thead>
@@ -339,12 +339,11 @@ const DataIngestionPage: React.FC = () => {
                       {/* Checkbox + S.No column */}
                       <td className="data-td-sno" style={{ verticalAlign: 'middle' }}>
                         <div className="data-checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={selectedRows.has(idx)}
-                            onChange={(e) => {
+                            onChange={(checked) => {
                               const newSelected = new Set(selectedRows);
-                              if (e.target.checked) {
+                              if (checked) {
                                 newSelected.add(idx);
                               } else {
                                 newSelected.delete(idx);
@@ -393,23 +392,12 @@ const DataIngestionPage: React.FC = () => {
                           <div className="data-note-container">
                             <span className="data-note-text">{r.note}</span>
                             {r.note && (
-                              <button 
-                                type="button" 
-                                className="data-edit-note-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
+                              <EditIconButton 
+                                onClick={() => {
                                   handleAddNote(r);
-                                  return false;
                                 }}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onMouseUp={(e) => e.stopPropagation()}
-                                aria-label="Edit note"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-  <path d="M6.99933 12.9333H12.9993M9.91667 2.01459C10.1821 1.74919 10.542 1.6001 10.9173 1.6001C11.2927 1.6001 11.6526 1.74919 11.918 2.01459C12.1834 2.27998 12.3325 2.63993 12.3325 3.01525C12.3325 3.39058 12.1834 3.75053 11.918 4.01592L3.91133 12.0233C3.75273 12.1819 3.55668 12.2979 3.34133 12.3606L1.42667 12.9193C1.3693 12.936 1.30849 12.937 1.25061 12.9222C1.19272 12.9073 1.13988 12.8772 1.09763 12.835C1.05538 12.7927 1.02526 12.7399 1.01043 12.682C0.995599 12.6241 0.996602 12.5633 1.01333 12.5059L1.572 10.5913C1.63481 10.3761 1.75083 10.1803 1.90933 10.0219L9.91667 2.01459Z" stroke="#1D7AFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
-                              </button>
+                                title="Edit note"
+                              />
                             )}
                           </div>
                         ) : (

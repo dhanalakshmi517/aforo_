@@ -648,14 +648,21 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   const handleSaveAndNext = async () => {
     if (hasErrors()) return;
-    // On General step we only validate client side and move on – backend draft created later
+    
     let success = true;
-    if (activeTab !== 'general') {
+    
+    // Always save the current step data before moving to next
+    if (activeTab === 'general') {
+      // Save general details as draft before moving to configuration
+      success = await saveProduct(true);
+      if (!success) return;
+    } else {
+      // For other tabs, save their data
       success = await saveProduct(true);
       if (!success) return;
     }
 
-    // Navigate
+    // Navigate after successful save
     if (activeTab === 'general') {
       const configTabIndex = steps.findIndex(step => step.title.toLowerCase().includes('configuration'));
       if (configTabIndex > -1) {
@@ -1239,5 +1246,4 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     </>
   );
 }
-
 

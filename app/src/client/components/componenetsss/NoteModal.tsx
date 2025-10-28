@@ -101,7 +101,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
         setIsApplyToAllChecked(false);
       }}
     >
-      <PlusIcon />
+      {/* <PlusIcon /> */}
       Add same note to all files
     </SecondaryButton>
     <label className="di-notes-checkbox">
