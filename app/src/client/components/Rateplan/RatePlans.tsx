@@ -841,10 +841,12 @@ const RatePlans: React.FC<RatePlansProps> = ({
           <TopBar
             title="Create New Rate Plan"
             onBack={() => {
-              // ✅ Only show the modal if step-0 is valid (or we’re not on step-0).
               const ok = createPlanRef.current?.validateBeforeBack?.() ?? true;
-              if (ok) setShowSaveDraftModal(true);
-              // if not ok, inline errors are already visible; do not open modal
+              if (ok) {
+                setShowSaveDraftModal(true);
+              } else {
+                createPlanRef.current?.back?.() || setShowCreatePlan(false);
+              }
             }}
             cancel={{ label: 'Delete', onClick: () => setShowConfirmDelete(true) }}
             save={{

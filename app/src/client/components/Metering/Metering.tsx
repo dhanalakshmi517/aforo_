@@ -172,10 +172,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
 
   const filteredMetrics = metrics
-    .filter((m) =>
-      m.usageMetric.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.productName.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    .filter((m) => {
+      const q = (searchQuery || '').toLowerCase();
+      const usage = (m.usageMetric ?? '').toLowerCase();
+      const product = (m.productName ?? '').toLowerCase();
+      return usage.includes(q) || product.includes(q);
+    })
     .sort((a, b) => {
       const aDraft = String(a.status).toLowerCase() === 'draft';
       const bDraft = String(b.status).toLowerCase() === 'draft';
