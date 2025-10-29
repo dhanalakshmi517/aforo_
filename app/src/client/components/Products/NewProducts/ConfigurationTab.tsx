@@ -351,7 +351,11 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             }
           } catch (error) {
             console.error('Error loading configuration:', error);
-            // Don't show error to user - just means no config exists yet
+            // Don't show error to user for 404/500 errors - just means no config exists yet
+            // But log the specific error for debugging
+            if (error instanceof Error) {
+              console.log('Configuration fetch error details:', error.message);
+            }
             setHasSaved(false); // On error, assume no configuration exists
             localStorage.setItem(`configHasSaved_${productId}`, 'false');
           } finally {
@@ -490,7 +494,22 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         return true;
       } catch (error) {
         console.error('Error saving configuration:', error);
-        setError(error instanceof Error ? error.message : 'Failed to save configuration');
+        
+        // Provide more user-friendly error messages
+        let errorMessage = 'Failed to save configuration';
+        if (error instanceof Error) {
+          if (error.message.includes('Server error')) {
+            errorMessage = 'Server error occurred. Please check your configuration data and try again.';
+          } else if (error.message.includes('validation failed')) {
+            errorMessage = error.message;
+          } else if (error.message.includes('Network Error')) {
+            errorMessage = 'Network error. Please check your connection and try again.';
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
+        setError(errorMessage);
         return false;
       }
     };

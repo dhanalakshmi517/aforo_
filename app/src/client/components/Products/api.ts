@@ -441,9 +441,15 @@ export const getProductConfiguration = async (
     console.log('Configuration fetched:', response.data);
     return response.data || {};
   } catch (error: any) {
-    // If 404, configuration doesn't exist yet - return empty object
+    // Handle various error scenarios gracefully
     if (error.response?.status === 404) {
       console.log('No configuration found for product, returning empty');
+      return {};
+    } else if (error.response?.status === 500) {
+      console.warn('Server error when fetching configuration, assuming no config exists');
+      return {};
+    } else if (error.response?.status >= 400 && error.response?.status < 500) {
+      console.warn('Client error when fetching configuration, assuming no config exists');
       return {};
     }
     console.error('Error fetching product configuration:', error);
@@ -520,22 +526,26 @@ export const saveProductConfiguration = async (
     switch (normalizedType) {
       case 'api': {
         const apiPayload: Record<string, any> = {};
-        if (configData.endpointUrl?.trim()) apiPayload.endpointUrl = configData.endpointUrl.trim();
+        
+        // Ensure endpointUrl is always present, even if empty
+        apiPayload.endpointUrl = configData.endpointUrl?.trim() || '';
+        
+        // Always send authType, default to 'NONE' if not provided
+        apiPayload.authType = configData.authType || 'NONE';
 
-        // Always send authType, even when it is "NONE" – backend requires explicit value
-        if (configData.authType) {
-          apiPayload.authType = configData.authType;
-
-          // Only attach additional credentials for BASIC or TOKEN auth modes
-          if (configData.authType === 'BASIC') {
-            if (configData.username?.trim()) apiPayload.username = configData.username.trim();
-            if (configData.password?.trim()) apiPayload.password = configData.password;
-          } else if (configData.authType === 'TOKEN' && configData.token?.trim()) {
-            apiPayload.token = configData.token.trim();
-          }
+        // Only attach additional credentials for specific auth modes
+        if (configData.authType === 'BASIC_AUTH') {
+          apiPayload.username = configData.username?.trim() || '';
+          apiPayload.password = configData.password?.trim() || '';
+        } else if (configData.authType === 'API_KEY') {
+          apiPayload.apiKey = configData.apiKey?.trim() || '';
+        } else if (configData.authType === 'OAUTH2') {
+          apiPayload.clientId = configData.clientId?.trim() || '';
+          apiPayload.clientSecret = configData.clientSecret?.trim() || '';
+          apiPayload.tokenUrl = configData.tokenUrl?.trim() || '';
         }
 
-        // Ensure we send at least the authType; backend rejects empty object
+        // Ensure we always have required fields for API configuration
         payload = apiPayload;
         break;
       }
@@ -594,7 +604,7 @@ export const saveProductConfiguration = async (
       }, {} as Partial<T>);
     };
 
-    const cleanedPayload = cleanPayload(payload);
+    let cleanedPayload = cleanPayload(payload);
 
     console.log('=== BACKEND API CALL ===');
     console.log('Endpoint:', apiEndpoint);
@@ -602,13 +612,48 @@ export const saveProductConfiguration = async (
     console.log('Payload sent to backend:', JSON.stringify(cleanedPayload, null, 2));
     console.log('========================');
 
+    // Validate payload before sending
+    if (!cleanedPayload || Object.keys(cleanedPayload).length === 0) {
+      console.warn('Empty payload detected, adding default values');
+      if (normalizedType === 'api') {
+        cleanedPayload = {
+          endpointUrl: '',
+          authType: 'NONE'
+        };
+      }
+    }
+
     let response: AxiosResponse<Product>;
-    if (operationType === 'update') {
-      response = await api.put(apiEndpoint, cleanedPayload, {
-        headers: { 'Content-Type': 'application/json' }
+    try {
+      if (operationType === 'update') {
+        response = await api.put(apiEndpoint, cleanedPayload, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } else {
+        response = await api.post(apiEndpoint, cleanedPayload, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    } catch (apiError: any) {
+      // Log detailed error information for debugging
+      console.error('API Error Details:', {
+        status: apiError.response?.status,
+        statusText: apiError.response?.statusText,
+        data: apiError.response?.data,
+        endpoint: apiEndpoint,
+        method: operationType === 'update' ? 'PUT' : 'POST',
+        payload: cleanedPayload
       });
-    } else {
-      response = await api.post(apiEndpoint, cleanedPayload);
+      
+      // Provide more specific error messages
+      if (apiError.response?.status === 500) {
+        throw new Error(`Server error when saving ${normalizedType} configuration. Please check the data and try again.`);
+      } else if (apiError.response?.status === 400) {
+        const errorMsg = apiError.response?.data?.message || 'Invalid configuration data';
+        throw new Error(`Configuration validation failed: ${errorMsg}`);
+      } else {
+        throw apiError;
+      }
     }
 
     return response.data;
