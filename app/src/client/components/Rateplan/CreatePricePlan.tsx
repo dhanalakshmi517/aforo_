@@ -110,11 +110,21 @@ const CreatePricePlan = React.forwardRef<
   const isStep0Filled = () => {
     const ok =
       !!planName.trim() &&
-      !!planDescription.trim() &&
       !!billingFrequency &&
       !!selectedProductName &&
       !!paymentMethod;
     return ok;
+  };
+
+  // Check if any values have been changed from initial state
+  const hasChanges = () => {
+    return (
+      planName.trim() !== '' ||
+      planDescription.trim() !== '' ||
+      billingFrequency !== '' ||
+      selectedProductName !== '' ||
+      paymentMethod !== ''
+    );
   };
 
   useEffect(() => {
@@ -218,23 +228,19 @@ const CreatePricePlan = React.forwardRef<
         return false;
       },
       getRatePlanId: () => ratePlanId,
-      // ✅ Only show inline errors if something is actually missing.
-      // If everything is filled, also ensure errors are cleared.
+      // ✅ Only show popup if there are actual changes, not when fields are empty
       validateBeforeBack: () => {
         if (currentStep !== 0) return true;
-
-        if (isStep0Filled()) {
-          // fields valid → make sure any stale errors are cleared
-          setErrors({});
-          return true;
+        
+        // If no changes have been made (all fields empty), don't show popup
+        if (!hasChanges()) {
+          return false;
         }
-
-        // something missing → populate inline errors
-        validateStep0();
-        return false;
+        
+        return true;
       },
     }),
-    [currentStep, ratePlanId, planName, planDescription, billingFrequency, selectedProductName, paymentMethod]
+    [currentStep, ratePlanId, planName, planDescription, billingFrequency, selectedProductName, paymentMethod, hasChanges]
   );
 
   const sectionHeading = steps[currentStep].title;
@@ -242,7 +248,6 @@ const CreatePricePlan = React.forwardRef<
   const validateStep0 = (): boolean => {
     const e: Record<string, string> = {};
     if (!planName.trim()) e.planName = "This is required field";
-    if (!planDescription.trim()) e.planDescription = "This is required field";
     if (!billingFrequency) e.billingFrequency = "This is required field";
     if (!selectedProductName) e.selectedProductName = "This is required field";
     if (!paymentMethod) e.paymentMethod = "This is required field";
@@ -408,21 +413,16 @@ const CreatePricePlan = React.forwardRef<
     setHasSavedAsDraft(true);
     setRatePlanData("CURRENT_STEP", currentStep.toString());
 
-    // validate step-0 first; if fails, keep wizard open & show inline errors
-    if (currentStep === 0 && !validateStep0()) return false;
-
     try {
       setDraftSaving(true);
       const selectedProduct = products.find((p) => p.productName === selectedProductName);
 
-      const partial: Partial<RatePlanRequest> & { status?: string } = {
-        status: "DRAFT",
-        ratePlanName: (planName || undefined) as any,
-        productId: selectedProduct ? Number(selectedProduct.productId) : undefined,
-        description: planDescription || undefined,
-        billingFrequency: billingFrequency as any,
-        paymentType: paymentMethod as any,
-      };
+      const partial: Partial<RatePlanRequest> & { status?: string } = { status: "DRAFT" };
+      if (planName.trim()) (partial as any).ratePlanName = planName as any;
+      if (selectedProduct) (partial as any).productId = Number(selectedProduct.productId);
+      if (planDescription.trim()) (partial as any).description = planDescription;
+      if (billingFrequency) (partial as any).billingFrequency = billingFrequency as any;
+      if (paymentMethod) (partial as any).paymentType = paymentMethod as any;
       if (selectedMetricId !== null) (partial as any).billableMetricId = selectedMetricId;
 
       let currentId = ratePlanId;

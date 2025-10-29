@@ -221,6 +221,19 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
 
   const handleCancel = () => setShowDeleteConfirm(true);
 
+  const hasChanges = () => {
+    const payload = buildChangedPayload();
+    return Object.keys(payload).length > 1;
+  };
+
+  const handleBack = () => {
+    if (hasChanges()) {
+      setShowEditPopup(true);
+    } else {
+      onClose();
+    }
+  };
+
   const renderMetricTab = () => {
     const uomOptionsMap: Record<string, string[]> = {
       API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
@@ -342,7 +355,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     <>
       <TopBar
         title="Edit Usage Metric"
-        onBack={() => setShowEditPopup(true)}
+        onBack={handleBack}
       />
 
       <div className="edit-np-viewport">

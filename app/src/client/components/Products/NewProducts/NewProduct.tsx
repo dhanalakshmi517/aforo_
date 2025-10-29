@@ -663,6 +663,41 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const handleSaveAndNext = async () => {
     if (hasErrors()) return;
     
+    // Validate required fields for the current tab before proceeding
+    if (activeTab === 'general') {
+      const newErrors: Record<string, string> = {};
+      
+      // Check required fields
+      if (!formData.productName.trim()) {
+        newErrors.productName = 'This field is required';
+      }
+      if (!formData.skuCode.trim()) {
+        newErrors.skuCode = 'This field is required';
+      }
+      
+      // Check uniqueness - exclude current draft product
+      const lower = (s:string)=>s.trim().toLowerCase();
+      if (formData.productName && existingProducts.some(p=> 
+        lower(p.productName||'')===lower(formData.productName) && 
+        p.productName !== activeDraft?.productName
+      )) {
+        console.log('❌ Frontend uniqueness check failed for productName:', formData.productName);
+        newErrors.productName = 'Must be unique';
+      }
+      if (formData.skuCode && existingProducts.some(p=> 
+        lower(p.skuCode||'')===lower(formData.skuCode) && 
+        p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
+      )) {
+        console.log('❌ Frontend uniqueness check failed for skuCode:', formData.skuCode);
+        newErrors.skuCode = 'Must be unique';
+      }
+      
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+    }
+    
     let success = true;
     
     // Always save the current step data before moving to next

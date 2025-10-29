@@ -537,30 +537,91 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     );
   };
 
-  const InfoIcon = () => (
-    <span
-      className="info-icon-tooltip"
-      title="The unit of usage your customers are billed on, e.g., users, storage, or API calls"
-      style={{ marginLeft: 4, cursor: 'help' }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <g clipPath="url(#clip0_6157_14454)">
-          <path
-            d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z"
-            stroke="#98959A"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip0_6157_14454">
-            <rect width="12" height="12" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-    </span>
-  );
+  const InfoIcon = () => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    const tooltipRef = React.useRef<HTMLDivElement>(null);
+
+    // Close tooltip when clicking outside
+    React.useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+          setShowTooltip(false);
+        }
+      };
+
+      if (showTooltip) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showTooltip]);
+
+    return (
+      <div style={{ position: 'relative', display: 'inline-block', marginLeft: 4 }} ref={tooltipRef}>
+        <span
+          className="info-icon-tooltip"
+          onClick={() => setShowTooltip(!showTooltip)}
+          style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <g clipPath="url(#clip0_6157_14454)">
+              <path
+                d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z"
+                stroke="#98959A"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_6157_14454">
+                <rect width="12" height="12" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+        </span>
+        
+        {showTooltip && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              marginTop: 8,
+              padding: '8px 12px',
+              backgroundColor: '#333',
+              color: 'white',
+              borderRadius: 6,
+              fontSize: 12,
+              whiteSpace: 'nowrap',
+              zIndex: 1000,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              lineHeight: 1.4,
+              minWidth: 'max-content'
+            }}
+          >
+            The unit of usage your customers are billed on, e.g., users, storage, or API calls.
+            <div
+              style={{
+                position: 'absolute',
+                top: -4,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '4px solid transparent',
+                borderRight: '4px solid transparent',
+                borderBottom: '4px solid #333'
+              }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     fetchProducts();

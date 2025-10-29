@@ -536,7 +536,16 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
     <>
       <TopBar
         title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
-        onBack={() => setShowSaveDraftModal(true)}
+        onBack={() => {
+          // Only show save popup if there are actual changes
+          const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
+          if (hasChanges) {
+            setShowSaveDraftModal(true);
+          } else {
+            // No changes, close directly
+            onClose();
+          }
+        }}
       />
       <div className="edit-np-viewport">
         <div className="edit-np-card">
