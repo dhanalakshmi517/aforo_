@@ -7,4 +7,118 @@
   font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}.configuration-tab {
+  padding: 20px;
+  max-width: 470px;
+  margin: 0 ;
+  background-color: var(--color-neutral-white);
 }
+
+.configuration-fields {
+  margin-top: 8px; /* Reduced from 16px to 8px */
+  padding: 8px; /* Reduced from 12px to 8px */
+  /* background: #f8f9fa; */
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.configuration-fields h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #343a40;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 0px; /* Reduced from 8px to 0px */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 2px; /* Reduced from 8px to 2px */
+  color: var(--color-neutral-1700);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500; /* Changed from 400 to 500 for consistency */
+  line-height: var(--line-height-body-md);
+}
+
+.form-control {
+  width: 40%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  font-size: var(--font-size-md);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+
+
+input[type='checkbox'] {
+  margin-right: 8px;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.navigation-buttons .left-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.navigation-buttons .outline-button {
+  padding: 8px 16px;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  background: transparent;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.navigation-buttons .outline-button:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.navigation-buttons .outline-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+
+
+.form-group {
+  margin-bottom: 0px; /* Reduced from 2px to 0px */
+}
+
+.form-group label,
+.form-group .if-label {
+  color: var(--color-neutral-1700);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.form-control {
+  width: 30%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+

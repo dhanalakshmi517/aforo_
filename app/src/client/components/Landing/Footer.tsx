@@ -8,9 +8,9 @@ const Footer: React.FC = () => {
       <div className="footer__inner">
         {/* Company Info - Left side */}
         <div className="company">
-          <img src={logo} alt="aforo" className="logo" />
+          <img src={logo} alt="aforo" className="footer-logo" />
           <p className="description">
-            A billing platform built to capture <br/>every drop — usage-based, <br/>subscription, or hybrid pricing.
+            Powering usage-based billing <br/>for modern enterprises.
           </p>
           
           <div className="social-icons">
@@ -45,29 +45,72 @@ const Footer: React.FC = () => {
           <div className="footer-section">
             <h4>Product</h4>
             <ul>
-              <li>Home</li>
-              <li>Product</li>
-              <li>RatePlan</li>
-              <li>Subscription</li>
-              <li>Invoices</li>
+              <li className="footer-link">
+                <span>Home</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
+              <li className="footer-link">
+                <span>Product</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
+              <li className="footer-link">
+                <span>RatePlan</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
+              <li className="footer-link">
+                <span>Subscription</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
+              <li className="footer-link">
+                <span>Invoices</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4>Documentation</h4>
             <ul>
-              <li>FAQs</li>
-              <li>Support</li>
-             
+              <li className="footer-link">
+                <span>FAQs</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
+              <li className="footer-link">
+                <span>Support</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4>Legal</h4>
             <ul>
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-              
+              <li className="footer-link">
+                <span>Privacy Policy</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
+              <li className="footer-link">
+                <span>Terms of Service</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="arrow-icon">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </li>
             </ul>
           </div>
         </div>

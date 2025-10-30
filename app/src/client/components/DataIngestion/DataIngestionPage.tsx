@@ -7,6 +7,9 @@ import SecondaryButton from "../componenetsss/SecondaryButton";
 import TertiaryButton from "../componenetsss/TertiaryButton";
 import { Checkbox } from "../componenetsss/Checkbox";
 import EditIconButton from "../componenetsss/EditIconButton";
+import DeleteButton from "../componenetsss/DeleteButton";
+import OutlinedButton from "../componenetsss/OutlinedButton";
+import SmartDuplicateDetection from "../componenetsss/SmartDuplicateDetection";
 import { ingestFiles } from "./api";
 import "./DataIngestionPage.css";
 import IngestionHistory from "./IngestionHistory";
@@ -27,6 +30,8 @@ const DataIngestionPage: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [currentNoteFile, setCurrentNoteFile] = useState<FileRow | null>(null);
+  const [showSmartDetection, setShowSmartDetection] = useState(true);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canIngest = selectedRows.size > 0;
@@ -56,6 +61,7 @@ const DataIngestionPage: React.FC = () => {
       { key: "status", label: "Status" },
       { key: "uploaded", label: "Uploaded On" },
       { key: "notes", label: " Notes" },
+      { key: "actions", label: "Actions" },
     ],
     [allSelected, rows.length]
   );
@@ -64,6 +70,29 @@ const DataIngestionPage: React.FC = () => {
   const addMoreFiles = openPicker;
 
   const clearAll = () => setRows([]);
+
+  const downloadSampleFile = () => {
+    const sampleData = {
+      "comment": "8. BILLABLE - STATUS_CODE 301",
+      "timestamp": "2025-09-18T05:08:47Z",
+      "subscriptionId": 100,
+      "billableMetricId": "110",
+      "uom": "API_CALL",
+      "idempotencyKey": "test-sample-008",
+      "dimensions": {"STATUS_CODE": 301}
+    };
+
+    const jsonString = JSON.stringify(sampleData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'sample-usage-event.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const onFilesPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -307,6 +336,7 @@ const DataIngestionPage: React.FC = () => {
                 <col className="col-status" />
                 <col className="col-uploaded" />
                 <col className="col-notes" />
+                <col className="col-actions" />
               </colgroup>
 
               <thead>
@@ -316,17 +346,27 @@ const DataIngestionPage: React.FC = () => {
                   <th>{columns[2].label}</th>
                   <th>{columns[3].label}</th>
                   <th className="data-th-notes">{columns[4].label}</th>
+                  <th className="data-th-actions">{columns[5].label}</th>
                 </tr>
               </thead>
 
               <tbody>
                 {rows.length === 0 ? (
                   <tr className="data-empty-row">
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="data-empty">
                         <SecondaryButton onClick={openPicker}>
                         + Select files
                         </SecondaryButton>
+                        <OutlinedButton 
+                          label="Sample File"
+                          onClick={downloadSampleFile}
+                          iconLeft={
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M6.75 8.75V0.75M6.75 8.75L3.41667 5.41667M6.75 8.75L10.0833 5.41667M12.75 8.75V11.4167C12.75 11.7703 12.6095 12.1094 12.3595 12.3595C12.1094 12.6095 11.7703 12.75 11.4167 12.75H2.08333C1.72971 12.75 1.39057 12.6095 1.14052 12.3595C0.890476 12.1094 0.75 11.7703 0.75 11.4167V8.75" stroke="#004B80" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          }
+                        />
                         <p className="data-empty-hint">
                           You didn't have any files yet. Click on add files to start Ingestion
                         </p>
@@ -417,6 +457,20 @@ const DataIngestionPage: React.FC = () => {
                           </button>
                         )}
                       </td>
+
+                      {/* Actions column */}
+                      <td className="data-td-actions">
+                        <DeleteButton 
+                          onClick={() => removeRow(r.id)}
+                          label="Remove"
+                          variant="soft"
+                          customIcon={
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="#ED5142" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          }
+                        />
+                      </td>
                     </tr>
                   ))
                 )}
@@ -461,6 +515,22 @@ const DataIngestionPage: React.FC = () => {
           onSaveAll={handleSaveNoteToAll}
           onClose={() => setShowNoteModal(false)}
         />
+
+        {showSmartDetection && (
+          <div className="smart-detection-wrapper">
+            <SmartDuplicateDetection
+              onClose={() => setShowSmartDetection(false)}
+              onCheckboxChange={(checked) => {
+                setDontShowAgain(checked);
+                if (checked) {
+                  // Optionally save to localStorage
+                  localStorage.setItem('hideSmartDetection', 'true');
+                }
+              }}
+              checked={dontShowAgain}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

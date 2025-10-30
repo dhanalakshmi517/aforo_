@@ -24,7 +24,11 @@ font-style: normal;
 font-weight: 400;
 line-height: var(--line-height-body-md); /* 142.857% */}
 
-.af-del-btn__icon { display: block; }
+.af-del-btn__icon { 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .af-del-btn__text {
     color:  #ED5142;
 

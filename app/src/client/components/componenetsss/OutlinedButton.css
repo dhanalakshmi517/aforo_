@@ -1,0 +1,53 @@
+@import "../Variables/Variables.css";
+.outlined-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+ min-width: 134px;
+    width: auto;    padding: 8px 20px;
+  border: none; /* Blue border */
+  background-color:var(--color-neutral-white);
+
+  border-radius: var(--border-radius-sm);
+  color: var(--color-primary-800);
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md); 
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.outlined-btn:hover {
+  background-color:var(--color-neutral-white);
+}
+
+.outlined-btn:active {
+  background-color: var(--color-neutral-100);
+}
+
+.outlined-btn.disabled,
+.outlined-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #fff;
+  border-color: #cfd3d7;
+  color: #cfd3d7;
+}
+
+.icon-left,
+.icon-right {
+  display: flex;
+  align-items: center;
+}
+
+.icon-left svg,
+.icon-right svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.8;
+}

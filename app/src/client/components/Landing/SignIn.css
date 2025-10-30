@@ -1,13 +1,18 @@
 @import "./Variables.css";
 .signin-page {
-    position: relative; /* enable pseudo overlay positioning */
-    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, #f7fbfd 0%, #ffffff 100%);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
     padding: 24px;
     box-sizing: border-box;
+    z-index: 1000;
   }
   
   /* Card */
@@ -15,12 +20,14 @@
     width: 100%;
     max-width: 500px;
     background: var(--color-neutral-white);
-    border-radius: var(--border-radius-md);
-    padding: 32px 32px 32px 32px;
+    border-radius:20px;
+    padding: 40px;
     text-align: center;
     height:490px auto;
-    border: 1px solid var(--color-neutral-300);
+box-shadow: 0 1.34px 17.869px 0 rgba(0, 0, 0, 0.04), 0 0.399px 5.32px 0 rgba(0, 0, 0, 0.03);
 
+    position: relative;
+    z-index: 1001;
   }
   
   /* Header logo + emblem inline */
@@ -29,7 +36,7 @@
   align-items:center;
   justify-content:center;
   gap:8px;
-  margin-bottom:16px;
+  margin-bottom:30px;
 }
 
 /* Logo */
@@ -39,7 +46,9 @@
     display: inline-block;
     margin: 0;
     vertical-align: middle;
+    margin-top: -60px;
   }
+  
   
   /* Text next to logo */
   .logo-text {
@@ -58,19 +67,19 @@ letter-spacing: -2.248px;
   /* Title */
   .signin-title {
    
-    margin: 0 0 30px;
+    margin: 0 0 40px;
     text-align: center;
 
     /* heading/bold/h5 */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-h4);
-    font-style: normal;
-    font-weight: 700;
-    line-height: var(--line-height-heading-h4); /* 140% */
-    background: var(--Gradient-blue, linear-gradient(254deg, var(--color-primary-700, #025A94) 26.47%, var(--color-primary-1000, #00365A) 76.37%));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; 
+    color: var(--color-neutral-1700);
+text-align: center;
+
+/* heading/h4/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h4);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h4); /* 145.455% */
   }
   
   /* Form fields */
@@ -102,7 +111,7 @@ letter-spacing: -2.248px;
     
     /* body/regular/xs */
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-lg);
     font-style: normal;
     font-weight: 400;
     line-height: var(--line-height-body-md); /* 160% */
@@ -226,7 +235,7 @@ letter-spacing: -2.248px;
     font-style: normal;
     font-weight: 500;
     line-height: var(--line-height-body-lg);
-    margin-top: 20px;
+    margin-top: 30px;
     cursor: pointer;
   }
   
@@ -303,7 +312,7 @@ line-height: var(--line-height-body-md);
   
   .signin-footer a {
     text-decoration: none;
-    color: var(--color-primary-700);
+    color:#1D7AFC;
 text-align: center;
 
 font-family: var(--type-font-family-primary);
@@ -312,22 +321,11 @@ font-style: normal;
 font-weight: 500;
 line-height: var(--line-height-body-md);
   }
-  
-  /* Backdrop blur overlay */
-html.modal-open::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  backdrop-filter: blur(12px) brightness(0.8);
-  background: rgba(255,255,255,0.1); /* lighter wash */
-  z-index: 0;
-}
-
-/* keep card above overlay */
-.signin-card {
-  position: relative;
-  z-index: 1;
-}
+  .signin-footer a:hover{
+    text-decoration: underline;
+    color:#1D7AFC;
+  }
+  /* Backdrop blur overlay - removed as we're using fixed positioning on signin-page */
 
 /* Responsive */
   @media (max-width: 420px) {

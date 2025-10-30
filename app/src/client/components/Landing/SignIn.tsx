@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api';
 import { setAuthData, type LoginResponse } from '../../utils/auth';
+import PrimaryButton from '../componenetsss/PrimaryButton';
+import aforoLogo from './aforo.aifinal .svg';
 import './SignIn.css';
 
 const PERSONAL_DOMAINS = new Set([
@@ -91,8 +93,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
     <div className="signin-page">
       <div className="signin-card">
         <div className="signin-header">
-        <a className="af-brand">aforo.ai</a>
-
+        <img src={aforoLogo} alt="aforo.ai" className="signin-logo" />
         </div>
 
         <h2 className="signin-title">Sign in to your aforo account</h2>
@@ -137,22 +138,23 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" fill="none">
-  <path d="M1.72006 6.9333C1.65061 6.74621 1.65061 6.5404 1.72006 6.35331C2.39647 4.71318 3.54465 3.31084 5.01903 2.32405C6.49341 1.33727 8.22759 0.810486 10.0017 0.810486C11.7759 0.810486 13.51 1.33727 14.9844 2.32405C16.4588 3.31084 17.607 4.71318 18.2834 6.35331C18.3528 6.5404 18.3528 6.74621 18.2834 6.9333C17.607 8.57343 16.4588 9.97577 14.9844 10.9626C13.51 11.9493 11.7759 12.4761 10.0017 12.4761C8.22759 12.4761 6.49341 11.9493 5.01903 10.9626C3.54465 9.97577 2.39647 8.57343 1.72006 6.9333Z" stroke="#B3B8BC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  <path d="M10.0017 9.1433C11.3824 9.1433 12.5017 8.02402 12.5017 6.64331C12.5017 5.26259 11.3824 4.14331 10.0017 4.14331C8.62101 4.14331 7.50172 5.26259 7.50172 6.64331C7.50172 8.02402 8.62101 9.1433 10.0017 9.1433Z" stroke="#B3B8BC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
               ) : (
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
-  <path d="M8.94394 4.36802C10.8851 4.13669 12.8486 4.54704 14.5347 5.53639C16.2207 6.52575 17.5366 8.03975 18.2814 9.84719C18.3509 10.0343 18.3509 10.2401 18.2814 10.4272C17.9752 11.1697 17.5704 11.8676 17.0781 12.5022M11.7364 11.9364C11.2649 12.3917 10.6334 12.6437 9.97793 12.638C9.32244 12.6323 8.69541 12.3694 8.23189 11.9059C7.76837 11.4424 7.50545 10.8153 7.49975 10.1599C7.49406 9.50436 7.74604 8.87286 8.20144 8.40135M14.5656 14.7205C13.4602 15.3753 12.2268 15.7847 10.9492 15.9208C9.67165 16.057 8.37973 15.9167 7.16113 15.5096C5.94253 15.1024 4.82576 14.4379 3.88661 13.5611C2.94746 12.6844 2.2079 11.6158 1.7181 10.428C1.64865 10.2409 1.64865 10.0351 1.7181 9.84802C2.45696 8.05623 3.757 6.55239 5.4231 5.56219M1.66644 1.80469L18.3331 18.4714" stroke="#706C72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-closed-icon lucide-eye-closed"><path d="m15 18-.722-3.25"/><path d="M2 8a10.645 10.645 0 0 0 20 0"/><path d="m20 15-1.726-2.05"/><path d="m4 15 1.726-2.05"/><path d="m9 18 .722-3.25"/></svg>
               )}
             </button>
             {passwordError && <p id="password-error" className="field-error" role="alert">{passwordError}</p>}
           </div>
 
-          <button className="primary-btn" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Signing in…' : 'Sign In'}
-          </button>
+          <PrimaryButton 
+            type="submit" 
+            disabled={isSubmitting}
+            fullWidth={true}
+            onClick={handleSubmit}
+            className="primary-btn"
+          >
+          Sign In
+          </PrimaryButton>
           {error && <p className="error-msg" role="alert">{error}</p>}
         </form>
 

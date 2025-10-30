@@ -27,16 +27,63 @@
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 48px;
-    align-items: start;
+  }
+  /* Background decoration positioning */
+  .org-background-decoration {
+    position: absolute;
+    top:150px;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .org-background-decoration-2 {
+    position: absolute;
+    top: 250px;
+    left: 50px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .org-background-decoration-3 {
+    position: absolute;
+    top: 400px;
+    left: 100px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .sales-logo {
+   margin-top: -20px;
+ }
+  
+  .contact-sales {
+    margin-top: 30px;
+    margin-left: 100px;
+  }
+
+  .org-polygon-decoration {
+    position: absolute;
+    top: 0;
+    right:0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .polygon-5 {
+    width: 200px;
+    height: auto;
   }
   
   .org-copy {
-    padding-top: 24px;
+    margin-top: -30px;
   }
   
   .org-title {
+       margin-top: -20px;
+
     margin: 0 0 16px;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-primary-800);
 
 /* heading/bold/h1 */
@@ -44,7 +91,7 @@ font-family: var(--font-family-primary);
 font-size: 3rem;
 font-style: normal;
 line-height: 4rem; /* 133.333% */
-background: var(--Gradient-blue, linear-gradient(231deg, var(--color-primary-500, #0092DF) -24.07%, var(--color-primary-700, #025A94) 80.07%));
+background: linear-gradient(263deg, var(--text-text-darker, #373B40) 25.29%, var(--text-text-darkest, #1A2126) 97.11%);
 background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
@@ -184,15 +231,17 @@ background-clip: text;
 
 /* Country code display */
 .dialcode-placeholder {
-  color: var(--color-neutral-500);
+  color: var(--color-neutral-1400);
 }
+
+
 
   .country-code-display {
   display: flex;
   align-items: center;
   padding: 0 12px 0 0; /* remove left padding */
   height: 100%;
-  background: var(--color-neutral-white);
+  background: transparent;
   color: var(--color-neutral-1700);
   font-size: 14px;
   font-weight: 500;
@@ -208,7 +257,6 @@ background-clip: text;
   border: none;
   background: transparent;
   padding: 0 12px;
-  background-color: var(--color-neutral-white);
   font-size: 14px;
   width: 100%;
   min-width: 0; /* Prevents flex-shrink issues */
@@ -217,7 +265,6 @@ background-clip: text;
   font-family: var(--font-family-primary);
   font-weight: 400;
   line-height: 1.5;
-  border: none;
 }
 
 .phone-input::placeholder {
@@ -295,30 +342,30 @@ background-clip: text;
   .org-field input:hover:not(:focus):not(:disabled):not(.error),
   .org-field select:hover:not(:focus):not(:disabled):not(.error),
   .org-field textarea:hover:not(:focus):not(:disabled):not(.error) {
-    border-color:1px solid var(--color-neutral-200);
     background-color: var(--color-neutral-100);
+    border-color: var(--color-neutral-300);
   }
 
   /* Focus / writing state */
   .org-field input:focus,
   .org-field select:focus,
   .org-field textarea:focus {
-    border-color:1px solid var(--color-primary-600);
+    border:1px solid var(--color-primary-600);
     outline: none;
     background-color: var(--color-neutral-white);
-    box-shadow: 0 0 0 1px var(--color-primary-600);
   }
   
   /* Ensure select text color once value chosen or on focus */
   .org-field select:not(:invalid),
   .org-field select:focus {
     color: var(--color-neutral-1700);
+    border: none;
+    border: 1px solid var(--color-primary-600);
   }
 
   /* Phone number composite field */
   .phone-input-wrapper:hover:not(.error) {
-    border-color:1px solid var(--color-neutral-200);
-    background-color: var(--color-neutral-white);
+    background-color: var(--color-neutral-100);
   }
   .phone-input-wrapper:focus-within {
     border-color: var(--color-primary-600);
@@ -435,7 +482,7 @@ background-clip: text;
     border:1px solid var(--color-neutral-300);
     /* match input height */
     min-height: 40px;
-    padding: 8px 12px;
+    padding: 8px 40px 8px 12px; /* Add space for the chevron on the right */
     /* remove custom arrow, use native */
   }
   
@@ -477,12 +524,14 @@ background-clip: text;
     color: var(--color-neutral-900);
   }
   .org-disclaimer a {
-    color: var(--color-primary-800);
+    color: #1D7AFC;
     text-decoration: none;
     font-weight: 500;
   }
   .org-disclaimer a:hover {
     text-decoration: underline;
+        color: #1D7AFC;
+
   }
 
   .org-terms {

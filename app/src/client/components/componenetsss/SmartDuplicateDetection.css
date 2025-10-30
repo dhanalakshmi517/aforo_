@@ -1,0 +1,84 @@
+@import "../Variables/Variables.css";
+.info-box {
+  width: 480px;
+ border-radius: 12px;
+border: 1px solid  #EEF4FB;
+background: var(--color-neutral-white);
+
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary-700);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h6);
+ 
+}
+
+.info-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 11px;
+  border-radius: 8px;
+  background: var(--color-primary-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+
+
+.info-text {
+ color: #000;
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md);
+  margin: 0;
+}
+
+.checkbox-section {
+  margin-top: 6px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
+
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm);
+  cursor: pointer;
+}
+

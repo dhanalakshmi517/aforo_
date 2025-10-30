@@ -3,8 +3,13 @@ import { createOrganization, fetchCountries, type OrganizationPayload } from "./
 import { useNavigate } from "react-router-dom";
 import CountrySelector from "../Common/CountrySelector";
 import { Checkbox } from "../componenetsss/Checkbox";
+import PrimaryButton from "../componenetsss/PrimaryButton";
 import "./Organization.css";
 import SigninLogo from "./signin.svg";
+import logoNew from "../LandingComponents/logo-new.svg";
+import salesLogo from "../LandingComponents/sales-logo.svg";
+import contactSales from "../LandingComponents/contact-sales.svg";
+import polygon5 from "../LandingComponents/Polygon 5.svg";
 import { Link } from "react-router-dom";
 
 interface Country {
@@ -16,6 +21,7 @@ interface Country {
 const Organization: React.FC = () => {
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [selectedCountry, setSelectedCountry] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -230,6 +236,8 @@ const Organization: React.FC = () => {
       return;
     }
     
+    setIsSubmitting(true);
+    
     try {
       // Prepare the payload for the API
       const roleValue = selectedRole === 'OTHER' ? 'OTHERS' : selectedRole;
@@ -281,18 +289,79 @@ const Organization: React.FC = () => {
         // For other errors, show a generic error
         alert(`Failed to submit: ${err.message || 'An error occurred. Please try again.'}`);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <div className="org-page">
-      {/* Decorative background  visual svg is there na remove it i dont wnat */}
-
+      {/* Background decorations */}
+      <div className="org-background-decoration">
+        <svg xmlns="http://www.w3.org/2000/svg" width="386" height="458" viewBox="0 0 386 458" fill="none">
+          <g filter="url(#filter0_f_12072_37366)">
+            <path d="M27 209.534L257 128.8L216.5 329.034L27 209.534Z" fill="url(#paint0_linear_12072_37366)"/>
+          </g>
+          <defs>
+            <filter id="filter0_f_12072_37366" x="-101.8" y="-0.000198364" width="487.6" height="457.834" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feGaussianBlur stdDeviation="64.4" result="effect1_foregroundBlur_12072_37366"/>
+            </filter>
+            <linearGradient id="paint0_linear_12072_37366" x1="142" y1="128.8" x2="142" y2="329.034" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#EDF8FD"/>
+              <stop offset="1" stopColor="#0092DF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      
+      <div className="org-background-decoration-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="471" height="453" viewBox="0 0 471 453" fill="none">
+          <g filter="url(#filter0_f_12072_37362)">
+            <path d="M100 196.373L322.48 100L370.54 352.18L100 196.373Z" fill="url(#paint0_linear_12072_37362)"/>
+          </g>
+          <defs>
+            <filter id="filter0_f_12072_37362" x="0" y="0" width="470.539" height="452.18" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12072_37362"/>
+            </filter>
+            <linearGradient id="paint0_linear_12072_37362" x1="359.738" y1="-46.7607" x2="319.314" y2="463.169" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#F5E6C8"/>
+              <stop offset="1" stopColor="#B57A05"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      
+      <div className="org-background-decoration-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="566" height="427" viewBox="0 0 566 427" fill="none">
+          <g filter="url(#filter0_f_12100_25311)">
+            <path d="M100 254.44L465.04 100L339.22 326.8L100 254.44Z" fill="url(#paint0_linear_12100_25311)"/>
+          </g>
+          <defs>
+            <filter id="filter0_f_12100_25311" x="0" y="0" width="565.039" height="426.8" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12100_25311"/>
+            </filter>
+            <linearGradient id="paint0_linear_12100_25311" x1="282.52" y1="100" x2="282.52" y2="326.8" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#EDF8FD"/>
+              <stop offset="1" stopColor="#0092DF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      
+      <div className="org-polygon-decoration">
+        <img src={polygon5} alt="Polygon decoration" className="polygon-5" />
+      </div>
 
       <div className="org-wrap">
         {/* Left copy */}
         <section className="org-copy">
-                  <a className="af-brand">aforo.ai</a>
+          <img src={salesLogo} alt="Sales illustration" className="sales-logo" />
 
           <h1 className="org-title">
             You Focus on the Product.
@@ -300,9 +369,10 @@ const Organization: React.FC = () => {
             Aforo Will Handle the Billing.
           </h1>
           <p className="org-sub">
-            Get expert help from Aforo’s sales team to set up everything —
-            from subscriptions and usage-based pricing to automated payments.
+Onboarding with Aforo begins with a conversation. 
+contact us to explore how we can help your company get started.
           </p>
+          <img src={contactSales} alt="Contact sales illustration" className="contact-sales" />
         </section>
 
         {/* Right form */}
@@ -547,6 +617,7 @@ const Organization: React.FC = () => {
                           e.preventDefault();
                         }
                       }}
+                      
                       placeholder="123-456-7890"
                     />
                   </div>
@@ -583,7 +654,13 @@ const Organization: React.FC = () => {
               />
             </div>
 
-            <button className="org-btn" type="submit">Contact Sales</button>
+            <PrimaryButton 
+              type="submit" 
+              disabled={isSubmitting}
+              fullWidth={true}
+            >
+              {isSubmitting ? 'Submitting…' : 'Contact Sales'}
+            </PrimaryButton>
           </form>
         </section>
       </div>

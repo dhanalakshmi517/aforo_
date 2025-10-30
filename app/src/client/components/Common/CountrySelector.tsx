@@ -156,7 +156,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         }
         .country-selector__control:hover:not(.error) {
           border-color: var(--color-neutral-200);
-          background-color: var(--color-neutral-white );
+          background-color: var(--color-neutral-100 );
         }
         .country-selector__control.open {
           border-color: var(--color-primary-600);
