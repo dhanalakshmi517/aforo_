@@ -3,7 +3,7 @@ import "./LandNavBar.css";
 // import logo from "./logo.svg"; // optional
 
 type Props = {
-  active?: "home" | "signin";
+  active?: "home" | "signin" | "none";
 };
 
 const LandNavBar: React.FC<Props> = ({ active = "home" }) => {

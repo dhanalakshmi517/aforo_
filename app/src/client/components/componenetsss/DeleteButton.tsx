@@ -9,6 +9,7 @@ export type DeleteButtonProps = {
   title?: string;
   type?: "button" | "submit" | "reset";
   variant?: "soft" | "solid"; // soft = light pill (default), solid = filled red
+  customIcon?: React.ReactNode; // optional custom icon to replace trash icon
 };
 
 const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -27,6 +28,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
   title,
   type = "button",
   variant = "soft",
+  customIcon,
 }) => {
   return (
     <button
@@ -41,7 +43,11 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      <TrashIcon className="af-del-btn__icon" />
+      {customIcon ? (
+        <span className="af-del-btn__icon">{customIcon}</span>
+      ) : (
+        <TrashIcon className="af-del-btn__icon" />
+      )}
       <span className="af-del-btn__text">{label}</span>
     </button>
   );

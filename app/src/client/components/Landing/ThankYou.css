@@ -1,4 +1,14 @@
 @import "./Variables.css";
+/* Background decoration positioning */
+.background-decoration {
+  position: fixed;
+  top: 100px;
+  right: 50px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
 .thankyou {
     display: flex;
     justify-content: center;
@@ -6,6 +16,8 @@
     padding: 100px 20px;
     background: #fff;
     text-align: center;
+    position: relative;
+    z-index: 2;
   }
   
   .thankyou-content {
@@ -13,31 +25,31 @@
   }
   
   .check-icon {
-    width: 81px;
-    height: 80px;
-    margin: 0 auto 20px;
+    width: 146px;
+    height: 146px;
+    margin: 0 auto 40px;
     display: block; /* let internal SVG determine visuals */
   }
   
   .thankyou h1 {
+    margin-top: 0;
   white-space: nowrap;
  
 /* heading/semibold/h1 */
 font-family: var(--font-family-primary);
 font-size: 48px;
 font-style: normal;
-font-weight: 800;
-line-height: 64px; /* 133.333% */
-margin-bottom: 12px;
+font-weight: 700;
+line-height: 60px; /* 133.333% */
 
-background: var(--gradient-blue, linear-gradient(260deg, #286584 27.05%, var(--primary-color-400, #5FB7E2) 117.36%));
+background: linear-gradient(263deg, var(--text-text-darker, #373B40) 25.29%, var(--text-text-darkest, #1A2126) 97.11%);
 background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
   }
   
   .thankyou p {
-    color: var(--color-neutral-800);
+    color: var(--color-neutral-1700);
     text-align: center;
     
     /* heading/regular/h6 */
