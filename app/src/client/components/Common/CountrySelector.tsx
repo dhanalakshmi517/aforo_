@@ -167,7 +167,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           outline: none;
           box-shadow: 0 0 0 1px var(--color-primary-600);
         }
-        .country-selector__control.error { border: 1px solid #ff4d4f; }
+        .country-selector__control.error { border: 1px solid var(--color-error-400); }
 
         .selected-option { 
           display: flex; 

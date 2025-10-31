@@ -316,44 +316,7 @@ const Organization: React.FC = () => {
         </svg>
       </div>
       
-      <div className="org-background-decoration-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="471" height="453" viewBox="0 0 471 453" fill="none">
-          <g filter="url(#filter0_f_12072_37362)">
-            <path d="M100 196.373L322.48 100L370.54 352.18L100 196.373Z" fill="url(#paint0_linear_12072_37362)"/>
-          </g>
-          <defs>
-            <filter id="filter0_f_12072_37362" x="0" y="0" width="470.539" height="452.18" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12072_37362"/>
-            </filter>
-            <linearGradient id="paint0_linear_12072_37362" x1="359.738" y1="-46.7607" x2="319.314" y2="463.169" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#F5E6C8"/>
-              <stop offset="1" stopColor="#B57A05"/>
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-      
-      <div className="org-background-decoration-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="566" height="427" viewBox="0 0 566 427" fill="none">
-          <g filter="url(#filter0_f_12100_25311)">
-            <path d="M100 254.44L465.04 100L339.22 326.8L100 254.44Z" fill="url(#paint0_linear_12100_25311)"/>
-          </g>
-          <defs>
-            <filter id="filter0_f_12100_25311" x="0" y="0" width="565.039" height="426.8" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12100_25311"/>
-            </filter>
-            <linearGradient id="paint0_linear_12100_25311" x1="282.52" y1="100" x2="282.52" y2="326.8" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#EDF8FD"/>
-              <stop offset="1" stopColor="#0092DF"/>
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-      
+     
       <div className="org-polygon-decoration">
         <img src={polygon5} alt="Polygon decoration" className="polygon-5" />
       </div>

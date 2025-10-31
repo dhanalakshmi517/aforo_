@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchRatePlans, deleteRatePlan, fetchRatePlanWithDetails } from './api';
+import { fetchRatePlans, deleteRatePlan, fetchRatePlanWithDetails, fetchBillableMetricById } from './api';
 import './RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import CreatePricePlan from './CreatePricePlan';
-import TopBar from '../TopBar/TopBar';
+import TopBar from '../componenetsss/TopBar';
 import SaveDraft from '../componenetsss/SaveDraft';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import { clearAllRatePlanData } from './utils/sessionStorage';
@@ -151,17 +151,59 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, []); // eslint-disable-line
 
   const [ratePlansState, setRatePlansState] = useState<RatePlan[]>(ratePlans || []);
-  useEffect(() => { if (Array.isArray(ratePlans)) setRatePlansState(ratePlans); }, [ratePlans]);
-  const setBoth = (next: RatePlan[]) => { setRatePlansState(next); if (setRatePlansFromParent) setRatePlansFromParent(next); };
+  const [loading, setLoading] = useState(false);
 
-  const loadRatePlans = React.useCallback(async () => {
+  const loadRatePlans = async () => {
     try {
+      setLoading(true);
       const data = await fetchRatePlans();
-      const list = Array.isArray(data) ? data : [];
-      setBoth(list);
-    } catch (e) {
-      console.error('Failed to fetch rate plans', e);
+      console.log('RatePlans - All Rate Plans:', data);
+      setRatePlansState(data);
+      if (setRatePlansFromParent) setRatePlansFromParent(data);
+    } catch (err) {
+      console.error('Failed to load rate plans', err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Clear cache for specific rate plan to force refresh
+  const clearRatePlanCache = (ratePlanId: number) => {
+    setDetailsById(prev => {
+      const next = { ...prev };
+      delete next[ratePlanId];
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    loadRatePlans();
+  }, []);
+
+  // Clear cache when returning from edit to ensure fresh billable metric data
+  useEffect(() => {
+    const handleFocus = () => {
+      // When window regains focus (user returns from edit), refresh rate plans
+      loadRatePlans();
+      // Clear all cached details to force fresh fetch
+      setDetailsById({});
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Page became visible again, refresh data
+        loadRatePlans();
+        setDetailsById({});
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -170,8 +212,6 @@ const RatePlans: React.FC<RatePlansProps> = ({
     const prod = (p.productName ?? p.product?.productName ?? '').toLowerCase();
     return name.includes(searchTerm.toLowerCase()) || prod.includes(searchTerm.toLowerCase());
   });
-
-  useEffect(() => { loadRatePlans(); }, [loadRatePlans]);
 
   /* ---------- details cache ---------- */
   const [detailsById, setDetailsById] = useState<Record<number, RatePlanDetails | 'loading' | 'error'>>({});
@@ -186,6 +226,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
       setDetailsById(prev => ({ ...prev, [id]: 'loading' }));
       try {
         const d = await fetchRatePlanWithDetails(id);
+        console.log(`RatePlans - Rate Plan ${id} Details:`, d);
 
         // --- Robust normalization for many backend shapes ---
         const pricingModelName = firstNonEmpty(d, [
@@ -198,7 +239,12 @@ const RatePlans: React.FC<RatePlansProps> = ({
           'rateCard.pricingModelName'
         ], '—');
 
-        const bmName = firstNonEmpty(d, [
+        // Extract billable metric details
+        let bmName = '';
+        let uomShort = '';
+        
+        // First try to get from the response directly
+        bmName = firstNonEmpty(d, [
           'billableMetric.name',
           'billableMetric.metricName',
           'billableMetricName',
@@ -206,8 +252,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
           'metric.name',
           'billableMetric.title'
         ], '');
-
-        const uomShort = firstNonEmpty(d, [
+        
+        uomShort = firstNonEmpty(d, [
           'billableMetric.uomShort',
           'billableMetric.uom.short',
           'billableMetric.uom',
@@ -218,6 +264,20 @@ const RatePlans: React.FC<RatePlansProps> = ({
           'billableMetric.uomSymbol'
         ], '');
 
+        // If not found, fetch by billableMetricId
+        if (!bmName && d.billableMetricId) {
+          try {
+            const billableMetric = await fetchBillableMetricById(d.billableMetricId);
+            console.log(`RatePlans - Billable Metric ${d.billableMetricId}:`, billableMetric);
+            if (billableMetric) {
+              bmName = billableMetric.metricName || '';
+              uomShort = billableMetric.unitOfMeasure || billableMetric.uomShort || billableMetric.uom || '';
+            }
+          } catch (bmError) {
+            console.warn(`Failed to fetch billable metric ${d.billableMetricId}:`, bmError);
+          }
+        }
+
         const normalized: RatePlanDetails = {
           ratePlanId: id,
           pricingModelName,
@@ -226,6 +286,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             name: bmName
           }
         };
+        console.log(`RatePlans - Normalized Data for ${id}:`, normalized);
         setDetailsById(prev => ({ ...prev, [id]: normalized }));
       } catch (e) {
         setDetailsById(prev => ({ ...prev, [id]: 'error' }));
@@ -435,7 +496,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
       setIsDeleting(true);
       await deleteRatePlan(deleteTargetId);
       const next = ratePlansState.filter((p) => p.ratePlanId !== deleteTargetId);
-      setBoth(next);
+      setRatePlansState(next);
+      if (setRatePlansFromParent) setRatePlansFromParent(next);
       showToast?.({ message: 'Rate plan deleted successfully', kind: 'success' });
     } catch (error) {
       console.error('❌ Delete failed:', error);
@@ -848,7 +910,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 createPlanRef.current?.back?.() || setShowCreatePlan(false);
               }
             }}
-            cancel={{ label: 'Delete', onClick: () => setShowConfirmDelete(true) }}
+            cancel={{ label: 'Discard', onClick: () => setShowConfirmDelete(true) }}
             save={{
               label: 'Save as Draft',
               labelWhenSaved: 'Saved as Draft',

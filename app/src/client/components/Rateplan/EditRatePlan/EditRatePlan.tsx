@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../../componenetsss/TopBar';
-import SaveDraft from '../../componenetsss/SaveDraft';
+import EditPopup from '../../componenetsss/EditPopUp';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
@@ -79,6 +79,25 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [draftData, setDraftData] = useState<any>(null);
 
+  // CHANGE DETECTION SNAPSHOTS
+  const originalDataRef = useRef<typeof initial | null>(null);
+
+  // --------- CHANGE DETECTION ----------
+  const hasPendingChanges = () => {
+    const orig = originalDataRef.current;
+    if (!orig) return false;
+
+    const currentData = {
+      ratePlanName,
+      description,
+      billingFrequency,
+      productName: selectedProductName,
+      paymentType,
+    };
+
+    return JSON.stringify(orig) !== JSON.stringify(currentData);
+  };
+
   // Save-as-draft modal
   const [showSaveModal, setShowSaveModal] = useState(false);
 
@@ -108,6 +127,15 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         setSelectedProductName(plan.productName || plan.product?.productName || '');
         if (plan.billableMetricId) setSelectedMetricId(Number(plan.billableMetricId));
         setDraftData(plan);
+
+        // Set original data snapshot for change detection
+        originalDataRef.current = {
+          ratePlanName: plan.ratePlanName || '',
+          description: plan.description || '',
+          billingFrequency: plan.billingFrequency || '',
+          productName: plan.productName || plan.product?.productName || '',
+          paymentType: plan.paymentType || '',
+        };
 
         if (plan.flatFeeAmount) localStorage.setItem('pricingModel','Flat Fee');
         else if (plan.volumePricing) localStorage.setItem('pricingModel','Volume-Based');
@@ -196,16 +224,25 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         productId = p?.productId ? Number(p.productId) : undefined;
       }
 
-      const payload: Partial<Omit<RatePlanRequest,'billableMetricId'>> & { status?: string } = {
+      const payload: Partial<RatePlanRequest> & { status?: string } = {
         ratePlanName,
         description,
         billingFrequency: billingFrequency as any,
         paymentType: paymentType as any,
-        productId,
-        productName: productId ? undefined : selectedProductName || undefined,
+        productId: productId || undefined,
+        billableMetricId: selectedMetricId || undefined,
       };
+      
+      // Remove undefined values to avoid backend issues
+      Object.keys(payload).forEach(key => {
+        if (payload[key as keyof typeof payload] === undefined) {
+          delete payload[key as keyof typeof payload];
+        }
+      });
+      
       if (isDraft) payload.status = 'DRAFT';
 
+      console.log('EditRatePlan - API Payload:', payload);
       await updateRatePlan(ratePlanId, payload);
       return true;
     } catch (err: any) {
@@ -219,8 +256,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const handleNextStep = async () => {
     if (activeTab === 'details') {
       if (!validateDetails()) return;
-      const ok = await persistPlan(false);
-      if (!ok) return;
+      // Don't save on navigation - only validate
       goToStep(1);
       return;
     }
@@ -231,6 +267,16 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         try {
           setLoading(true);
           await savePricingFn();
+          // Refresh draft data after saving pricing
+          if (ratePlanId) {
+            try {
+              const freshData = await fetchRatePlanWithDetails(ratePlanId);
+              setDraftData(freshData);
+              console.log('EditRatePlan - Refreshed draft data after pricing save:', freshData);
+            } catch (e) {
+              console.warn('Failed to refresh data after pricing save:', e);
+            }
+          }
         } catch (e: any) {
           console.error('Failed to save pricing:', e);
           setLoading(false);
@@ -247,6 +293,16 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         try {
           setLoading(true);
           await saveExtrasFn();
+          // Refresh draft data after saving extras
+          if (ratePlanId) {
+            try {
+              const freshData = await fetchRatePlanWithDetails(ratePlanId);
+              setDraftData(freshData);
+              console.log('EditRatePlan - Refreshed draft data after extras save:', freshData);
+            } catch (e) {
+              console.warn('Failed to refresh data after extras save:', e);
+            }
+          }
         } catch (e: any) {
           console.error('Failed to save extras:', e);
           setLoading(false);
@@ -273,22 +329,41 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const handleSidebarStepClick = async (targetIndex: number) => {
     if (targetIndex === currentStep) return;
 
-    // Persist the step we're LEAVING
+    // Don't save on navigation - only validate if leaving details
     try {
       if (activeTab === 'details') {
         if (!validateDetails()) { setCurrentStep(0); return; }
-        const ok = await persistPlan(false);
-        if (!ok) return;
+        // Don't call persistPlan - just navigate
       } else if (activeTab === 'pricing') {
         if (savePricingFn) {
           setLoading(true);
           await savePricingFn();
+          // Refresh draft data after saving pricing
+          if (ratePlanId) {
+            try {
+              const freshData = await fetchRatePlanWithDetails(ratePlanId);
+              setDraftData(freshData);
+              console.log('EditRatePlan - Refreshed draft data after pricing save (sidebar):', freshData);
+            } catch (e) {
+              console.warn('Failed to refresh data after pricing save:', e);
+            }
+          }
           setLoading(false);
         }
       } else if (activeTab === 'extras') {
         if (saveExtrasFn) {
           setLoading(true);
           await saveExtrasFn();
+          // Refresh draft data after saving extras
+          if (ratePlanId) {
+            try {
+              const freshData = await fetchRatePlanWithDetails(ratePlanId);
+              setDraftData(freshData);
+              console.log('EditRatePlan - Refreshed draft data after extras save (sidebar):', freshData);
+            } catch (e) {
+              console.warn('Failed to refresh data after extras save:', e);
+            }
+          }
           setLoading(false);
         }
       }
@@ -421,6 +496,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           <div className="edit-np-section">
             <div className="edit-np-configuration-tab">
               <EditPricing
+                key={`pricing-${draftData?.lastUpdated || Date.now()}`}
                 ratePlanId={ratePlanId}
                 draftData={draftData}
                 registerSavePricing={(fn) => setSavePricingFn(() => fn)}
@@ -433,8 +509,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           <div className="edit-np-section">
             <div className="edit-np-configuration-tab">
               <EditExtras
-                ratePlanId={ratePlanId}
+                key={`extras-${draftData?.lastUpdated || Date.now()}`}
                 noUpperLimit={false}
+                ratePlanId={ratePlanId}
                 draftData={draftData}
                 registerSaveExtras={(fn) => setSaveExtrasFn(() => fn)}
               />
@@ -457,8 +534,17 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   return (
     <>
       <TopBar
-        title={ratePlanName?.trim() ? `Edit “${ratePlanName}”` : 'Edit Rate Plan'}
-        onBack={() => setShowSaveModal(true)}
+        title={ratePlanName?.trim() ? `Edit "${ratePlanName}"` : 'Edit Rate Plan'}
+        onBack={() => {
+          // Only show save popup if there are actual changes
+          const hasChanges = hasPendingChanges();
+          if (hasChanges) {
+            setShowSaveModal(true);
+          } else {
+            // No changes, close directly
+            exitToList();
+          }
+        }}
       />
 
       <div className="edit-np-viewport">
@@ -505,7 +591,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                     onClick={handleNextStep}
                     disabled={loading}
                   >
-                    {loading ? 'Saving...' : activeTab === 'review' ? 'Update Rate Plan' : 'Next'}
+                    {loading ? 'Saving...' : activeTab === 'review' ? 'Save Changes' : 'Save &Next'}
                   </PrimaryButton>
                 </div>
               </div>
@@ -514,11 +600,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         </div>
       </div>
 
-      <SaveDraft
+      <EditPopup
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
+        onDismiss={() => setShowSaveModal(false)}
         onSave={handleSaveDraft}
-        onDelete={handleDelete}
       />
     </>
   );

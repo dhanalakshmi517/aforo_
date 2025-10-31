@@ -175,7 +175,15 @@ export const createRatePlan = async (payload: RatePlanRequest): Promise<RatePlan
 };
 
 export const updateRatePlan = async (ratePlanId: number, payload: Partial<RatePlanRequest>) => {
-  return axios.patch(`${BASE_URL}/rateplans/${ratePlanId}`, payload);
+  try {
+    console.log(`API - Updating rate plan ${ratePlanId} with payload:`, payload);
+    const response = await axios.patch(`${BASE_URL}/rateplans/${ratePlanId}`, payload);
+    console.log(`API - Update successful:`, response.data);
+    return response;
+  } catch (error: any) {
+    console.error(`API - Update failed for rate plan ${ratePlanId}:`, error.response?.data || error.message);
+    throw error;
+  }
 };
 
 export const confirmRatePlan = async (ratePlanId: number) => {

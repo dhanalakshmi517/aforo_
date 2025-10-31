@@ -944,11 +944,7 @@ const CreatePricePlan = React.forwardRef<
                             Back
                           </SecondaryButton>
                         )}
-                        {currentStep === 0 && (
-                          <SecondaryButton type="button" onClick={handleBack}>
-                            Back
-                          </SecondaryButton>
-                        )}
+                       
                       </div>
 
                       <div className="rate-np-btn-group rate-np-btn-group--next">
