@@ -156,7 +156,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         }
         .country-selector__control:hover:not(.error) {
           border-color: var(--color-neutral-200);
-          background-color: var(--color-neutral-100 );
+          background-color: var(--color-neutral-50 );
         }
         .country-selector__control.open {
           border-color: var(--color-primary-600);
@@ -197,7 +197,15 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         }
         .country-selector__control.open .chevron { transform: translateY(-50%) rotate(180deg); }
 
-        .placeholder-text { color: var(--color-neutral-500); font-weight: 400; font-family: var(--font-family-primary); }
+        .placeholder-text { 
+          color: var(--color-neutral-500); 
+          font-weight: 400; 
+          font-family: var(--font-family-primary);
+          font-size: var(--font-size-md);
+        }
+        .country-selector__control.open .placeholder-text {
+          display: none;
+        }
         .error-msg { color: #ff4d4f; font-size: 0.8em; margin-top: 4px; }
 
         .dropdown {
@@ -238,7 +246,8 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         /* Move focus ring to the FIELD when search is focused */
         .country-selector:has(.search-input:focus) .country-selector__control {
           border-color: var(--color-primary-600);
-          box-shadow: 0 0 0 1px var(--color-primary-600);
+    box-shadow: 0 0 0 3px rgba(29, 122, 252, 0.1);
+          
           background-color: var(--color-neutral-white);
         }
       `}</style>

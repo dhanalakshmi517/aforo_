@@ -833,7 +833,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               placeholder="eg. Google Maps API"
                             />
                             <InputField
-                              label="Version"
+                              label="Version • Optional"
                               value={formData.version}
                               onChange={handleFieldChange('version')}
                               placeholder="eg., 2.3-VOS"

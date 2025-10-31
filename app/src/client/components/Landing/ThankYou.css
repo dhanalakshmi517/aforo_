@@ -1,20 +1,55 @@
 @import "./Variables.css";
 /* Background decoration positioning */
 .background-decoration {
-  position: fixed;
-  top: 100px;
-  right: 50px;
+  position: absolute;
+  top: 0;
+  right: 0;
   z-index: 1;
   pointer-events: none;
   opacity: 0.8;
 }
+
+/* Centered decoration behind main content */
+.background-decoration-center {
+  position: absolute; /* scrolls with content */
+  left: 30%;
+  margin-top: -10%;
+  z-index: 1; /* behind content (content is z-index:2) */
+  pointer-events: none;
+}
+
+/* Left-side decoration */
+.background-decoration-left {
+  position: absolute; /* scrolls with content */
+  left: 20%;
+  margin-top: 5%;
+  z-index: 1; /* behind content */
+  pointer-events: none;
+}
+
+/* Bottom-left decoration above footer */
+.background-decoration-bottom-left {
+  position: absolute;
+  left: 0;
+  bottom: 140px; /* sit above footer */
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Ensure absolute decorations are scoped to the page wrapper */
+.landing-section {
+  position: relative;
+  overflow: hidden;
+}
+
+
 
 .thankyou {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 100px 20px;
-    background: #fff;
+    background: transparent; /* allow background decoration to be visible */
     text-align: center;
     position: relative;
     z-index: 2;
