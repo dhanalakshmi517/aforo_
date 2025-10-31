@@ -37,11 +37,18 @@
     line-height: 0;
     align-items: center;
     justify-content: center;
-    transition: transform 120ms ease;
+    transition: none;
+    flex: 0 0 24px; /* lock size so layout doesn't shift */
+  }
+  
+  .af-checkbox__box svg {
+    width: 24px;
+    height: 24px;
+    display: block;
   }
   
   .af-checkbox:not(.is-disabled) .af-checkbox__box:hover {
-    transform: scale(1.04);
+    transform: none; /* avoid visual nudge on hover */
   }
   
   .af-checkbox__input:focus-visible + .af-checkbox__box {

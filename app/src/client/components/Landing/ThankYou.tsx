@@ -12,7 +12,7 @@ const ThankYou: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate('/');
-    }, 10000);
+    }, 10000); // 1 hour
     
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -21,8 +21,8 @@ const ThankYou: React.FC = () => {
     <div className="landing-section" style={{ backgroundColor: 'white' }}>
       <LandNavBar active="none" />
 
-      {/* Background decoration */}
-      <div className="background-decoration">
+      {/* Background decoration (top-right) */}
+      <div className="background-decoration" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="316" height="335" viewBox="0 0 316 335" fill="none">
           <g opacity="0.6" filter="url(#filter0_f_12072_37422)">
             <path d="M155.704 232.221C126.521 234.923 111.93 236.274 104.106 230.579C96.2816 224.883 100.572 216.033 109.154 198.334L137.153 140.587C150.513 113.031 157.193 99.2533 170.905 100.031C184.616 100.809 192.886 115.435 209.426 144.687L239.061 197.098C245.943 209.271 249.385 215.357 245.541 219.808C241.697 224.259 232.244 225.134 213.338 226.885L155.704 232.221Z" fill="url(#paint0_linear_12072_37422)"/>
@@ -34,6 +34,68 @@ const ThankYou: React.FC = () => {
               <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12072_37422"/>
             </filter>
             <linearGradient id="paint0_linear_12072_37422" x1="79.8639" y1="114.996" x2="150.935" y2="270.228" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#EDF8FD"/>
+              <stop offset="1" stopColor="#0092DF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+
+      {/* Center background decoration */}
+      <div className="background-decoration-center" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="552" height="635" viewBox="0 0 552 635" fill="none">
+          <g filter="url(#filter0_f_12072_37418)">
+            <path d="M451.026 534.225L99.9966 319.212L436.959 71.9992L451.026 534.225Z" fill="url(#paint0_linear_12072_37418)"/>
+          </g>
+          <defs>
+            <filter id="filter0_f_12072_37418" x="0" y="-28.001" width="551.023" height="662.226" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12072_37418"/>
+            </filter>
+            <linearGradient id="paint0_linear_12072_37418" x1="-314.167" y1="-72.7516" x2="437.072" y2="376.086" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#F9FBFD"/>
+              <stop offset="0.5" stopColor="#F5E6C8"/>
+              <stop offset="1" stopColor="#E2B55A"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Left-side background decoration */}
+      <div className="background-decoration-left" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="425" height="383" viewBox="0 0 425 383" fill="none">
+          <g opacity="0.6" filter="url(#filter0_f_12072_37419)">
+            <path d="M100.207 88.2295C99.7343 57.5296 99.4977 42.1796 106.079 34.7252C112.66 27.2709 121.371 33.0225 138.793 44.5257L288.487 143.367C313.973 160.195 326.716 168.609 324.488 182.125C322.26 195.641 307.077 202.03 276.71 214.807L129.494 276.749C117.195 281.923 111.046 284.511 107.076 280.404C103.106 276.296 102.966 267.202 102.686 249.012L100.207 88.2295Z" fill="url(#paint0_linear_12072_37419)"/>
+          </g>
+          <defs>
+            <filter id="filter0_f_12072_37419" x="0" y="-68.6221" width="424.734" height="451.055" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12072_37419"/>
+            </filter>
+            <linearGradient id="paint0_linear_12072_37419" x1="295.849" y1="29.5753" x2="43.7436" y2="117.973" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#EDF8FD"/>
+              <stop offset="1" stopColor="#0092DF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Bottom-left background decoration (above footer) */}
+      <div className="background-decoration-bottom-left" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="412" height="498" viewBox="0 0 412 498" fill="none">
+          <g opacity="0.1" filter="url(#filter0_f_12072_37421)">
+            <path d="M195.933 341.584C175.928 375.876 165.925 393.023 155.495 397.158C145.064 401.293 142.973 388.942 138.791 364.239L104.029 158.897C99.3224 131.097 96.9693 117.197 107.106 106.978C117.243 96.7583 130.786 99.3776 157.871 104.616L296.755 131.477C306.076 133.279 310.736 134.181 311.206 138.682C311.676 143.183 307.802 149.823 300.055 163.103L195.933 341.584Z" fill="url(#paint0_linear_12072_37421)"/>
+          </g>
+          <defs>
+            <filter id="filter0_f_12072_37421" x="0" y="0" width="411.242" height="497.944" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+              <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_12072_37421"/>
+            </filter>
+            <linearGradient id="paint0_linear_12072_37421" x1="29.7943" y1="288.76" x2="245.192" y2="357.635" gradientUnits="userSpaceOnUse">
               <stop stopColor="#EDF8FD"/>
               <stop offset="1" stopColor="#0092DF"/>
             </linearGradient>
@@ -64,6 +126,9 @@ const ThankYou: React.FC = () => {
           <p>You'll hear from us shortly to help you launch billing your way.</p>
         </div>
       </section>
+
+      {/* Center background decoration */}
+      
 
       {/* Footer */}
       <Footer />

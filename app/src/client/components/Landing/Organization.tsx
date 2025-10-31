@@ -364,7 +364,7 @@ const Organization: React.FC = () => {
           <img src={salesLogo} alt="Sales illustration" className="sales-logo" />
 
           <h1 className="org-title">
-            You Focus on the Product.
+            You Focus on the{"\u00A0"}Product.
             <br />
             Aforo Will Handle the Billing.
           </h1>

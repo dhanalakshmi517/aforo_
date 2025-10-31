@@ -192,6 +192,7 @@
 
   /* Neutrals Color Palette */
   --color-neutral-white:rgba(255, 255, 255, 1);
+  --color-neutral-50:#FBFDFF;
   --color-neutral-100:rgba(248, 247, 250, 1);
   --color-neutral-200: rgba(233, 233, 238, 1);
   --color-neutral-300: rgba(213, 212, 223, 1);
