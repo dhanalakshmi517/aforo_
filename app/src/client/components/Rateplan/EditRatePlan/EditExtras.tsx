@@ -70,6 +70,7 @@ export default function EditExtras({
 
   // Initialize from backend data (prefill)
   useEffect(() => {
+    console.log('EditExtras - draftData changed:', draftData);
     if (!draftData) return;
 
     const sections: string[] = [];

@@ -281,6 +281,8 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
   const hasPendingChanges = () => {
     const origForm = originalFormDataRef.current;
     const origCfg  = originalConfigRef.current;
+    
+    // If original data hasn't loaded yet, consider as no changes
     if (!origForm || !origCfg) return false;
 
     const formChanged = !shallowEqual(origForm, formData);
@@ -539,6 +541,16 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
         onBack={() => {
           // Only show save popup if there are actual changes
           const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
+          console.log('Back button clicked - Changes detected:', { 
+            hasPendingChanges: hasPendingChanges(), 
+            hasIconChanged: hasIconChanged(), 
+            isDraft,
+            formData,
+            originalForm: originalFormDataRef.current,
+            configuration,
+            originalConfig: originalConfigRef.current
+          });
+          
           if (hasChanges) {
             setShowSaveDraftModal(true);
           } else {

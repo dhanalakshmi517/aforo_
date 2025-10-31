@@ -60,6 +60,7 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
 
   // Initialize from backend data
   useEffect(() => {
+    console.log('EditPricing - draftData changed:', draftData);
     if (!draftData) {
       const savedModel = localStorage.getItem('pricingModel');
       if (savedModel) setSelected(savedModel);
