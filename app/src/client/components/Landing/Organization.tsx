@@ -595,10 +595,10 @@ contact us to explore how we can help your company get started.
                 id="help"
                 name="help"
                 rows={4}
-                placeholder="Tell us about your needs and how we can assist you"
+                placeholder="Type your message..."
                 onChange={handleFieldChange}
                 className={errors.help ? 'error' : ''}
-                style={{ width: '100%', padding: '12px', borderRadius: '4px', border: '1px solid #ccc' }}
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #D1D7E0' }}
               />
               {errors.help && <span className="error-msg">{errors.help}</span>}
             </div>

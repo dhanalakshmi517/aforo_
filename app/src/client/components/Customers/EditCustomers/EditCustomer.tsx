@@ -79,6 +79,14 @@ const EditCustomer: React.FC = () => {
   const [showLeavePopup, setShowLeavePopup] = useState(false);
   const [savingLeave, setSavingLeave] = useState(false);
 
+  // Track original data for change detection
+  const [originalData, setOriginalData] = useState<{
+    customerName: string;
+    companyName: string;
+    companyType: string;
+    accountDetails: AccountDetailsData | null;
+  } | null>(null);
+
   // ------- fetch existing customer -------
   useEffect(() => {
     if (!id) return;
@@ -125,6 +133,14 @@ const EditCustomer: React.FC = () => {
           billingCountry: (data as any).billingCountry ?? '',
         };
         setAccountDetails(account);
+        
+        // Store original data for change detection
+        setOriginalData({
+          customerName: data.customerName ?? '',
+          companyName: data.companyName ?? '',
+          companyType: data.companyType ?? '',
+          accountDetails: account
+        });
       })
       .catch((err: unknown) => console.error('Failed to fetch customer', err))
       .finally(() => setLoading(false));
@@ -228,17 +244,51 @@ const EditCustomer: React.FC = () => {
 
   const savePatch = async () => {
     if (!id) return false;
+    
+    console.log('savePatch: companyLogo state:', companyLogo);
+    
+    // Check if we have a logo file to upload - if so, use FormData
+    if (companyLogo) {
+      console.log('Using FormData for save with logo');
+      const formData = new FormData();
+      formData.append('companyName', companyName);
+      formData.append('customerName', customerName);
+      formData.append('companyType', companyType);
+      
+      // Add account details if present
+      if (accountDetails) {
+        Object.entries(accountDetails).forEach(([key, value]) => {
+          if (value !== '' && value !== null && value !== undefined) {
+            formData.append(key, String(value));
+          }
+        });
+      }
+      
+      formData.append('companyLogo', companyLogo);
+      
+      try {
+        await updateCustomer(id, formData);
+        return true;
+      } catch (err) {
+        console.error('Failed to save draft/update with FormData', err);
+        return false;
+      }
+    }
+    
+    // Regular JSON payload when no file
+    console.log('Using JSON payload for save');
     const payload: Record<string, any> = {
       companyName,
       customerName,
       companyType,
       ...(accountDetails ?? {}),
     };
+    console.log('JSON payload:', payload);
     try {
       await updateCustomer(id, payload);
       return true;
     } catch (err) {
-      console.error('Failed to save draft/update', err);
+      console.error('Failed to save draft/update with JSON', err);
       return false;
     }
   };
@@ -271,7 +321,31 @@ const EditCustomer: React.FC = () => {
   };
 
   // ------- leave popup actions -------
-  const openLeavePopup = () => setShowLeavePopup(true);
+  const hasChanges = () => {
+    if (!originalData) return false;
+    
+    // Check basic fields
+    if (originalData.customerName !== customerName ||
+        originalData.companyName !== companyName ||
+        originalData.companyType !== companyType) {
+      return true;
+    }
+    
+    // Check account details
+    if (JSON.stringify(originalData.accountDetails) !== JSON.stringify(accountDetails)) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  const openLeavePopup = () => {
+    if (hasChanges()) {
+      setShowLeavePopup(true);
+    } else {
+      navigate(-1);
+    }
+  };
 
   const handlePopupSave = async () => {
     if (activeTab === 'details' && !validateStep0()) {
@@ -348,6 +422,15 @@ const EditCustomer: React.FC = () => {
                   required
                 />
               </div>
+               <div className="edit-np-form-group">
+                <label className="edit-np-label">Company Logo</label>
+                <LogoUploader
+                  logo={companyLogo}
+                  logoUrl={companyLogoUrl}
+                  onChange={handleLogoChange}
+                  onRemove={handleLogoRemove}
+                />
+              </div>
               <div className="edit-np-form-group">
                 <label className="edit-np-label">Customer Name</label>
                 <InputField
@@ -396,15 +479,7 @@ const EditCustomer: React.FC = () => {
                 />
               </div>
 
-              <div className="edit-np-form-group">
-                <label className="edit-np-label">Company Logo</label>
-                <LogoUploader
-                  logo={companyLogo}
-                  logoUrl={companyLogoUrl}
-                  onChange={handleLogoChange}
-                  onRemove={handleLogoRemove}
-                />
-              </div>
+             
             </div>
           </div>
         );
@@ -445,7 +520,7 @@ const EditCustomer: React.FC = () => {
     <>
       <TopBar
         title="Edit Customer"
-        onBack={() => setShowLeavePopup(true)}
+        onBack={openLeavePopup}
       />
 
       <div className="edit-np-viewport">

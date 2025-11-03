@@ -249,10 +249,41 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
     localStorage.setItem('editConfigProductType', type);
   };
 
+  // Sync configuration state when switching to review tab
+  useEffect(() => {
+    if (activeTab === 'review') {
+      const latestConfigData = localStorage.getItem('editConfigFormData');
+      if (latestConfigData) {
+        try {
+          const parsedConfig = JSON.parse(latestConfigData);
+          console.log('📋 Syncing configuration for review tab:', parsedConfig);
+          setConfiguration(parsedConfig);
+        } catch (e) {
+          console.error('Failed to sync configuration data:', e);
+        }
+      }
+    }
+  }, [activeTab]);
+
   const goToStep = (index: number) => {
     setCurrentStep(index);
     const firstWord = steps[index].title.split(' ')[0].toLowerCase();
     const tab = (firstWord === 'general' ? 'general' : firstWord === 'configuration' ? 'configuration' : 'review') as ActiveTab;
+    
+    // When navigating to review tab, ensure we have the latest configuration data
+    if (tab === 'review') {
+      const latestConfigData = localStorage.getItem('editConfigFormData');
+      if (latestConfigData) {
+        try {
+          const parsedConfig = JSON.parse(latestConfigData);
+          console.log('🔄 Updating configuration state for review:', parsedConfig);
+          setConfiguration(parsedConfig);
+        } catch (e) {
+          console.error('Failed to parse latest config data:', e);
+        }
+      }
+    }
+    
     setActiveTab(tab);
   };
 

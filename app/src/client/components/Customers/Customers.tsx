@@ -4,7 +4,6 @@ import "./Customers.css";
 import "../Rateplan/RatePlan.css";
 import PageHeader from "../PageHeader/PageHeader";
 import CreateCustomer from "./CreateCustomer";
-import SuccessToast from "./SuccessToast";
 import { getCustomers, deleteCustomer } from "./api";
 import { getAuthHeaders, isAuthenticated } from "../../utils/auth";
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
@@ -12,6 +11,7 @@ import EditIconButton from '../componenetsss/EditIconButton';
 import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import RetryIconButton from '../componenetsss/RetryIconButton';
 import PrimaryButton from "../componenetsss/PrimaryButton";
+import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -111,17 +111,24 @@ const absolutizeUpload = (path: string) => {
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
   const url = encodeURI(absolutizeUpload(uploadPath));
+  console.log('Resolving logo URL:', url);
   try {
     const res = await fetch(url, {
       method: "GET",
       headers: { ...getAuthHeaders(), Accept: "image/*" },
-      credentials: "include",
       cache: "no-store",
     });
-    if (!res.ok) return null;
+    console.log('Logo fetch response:', res.status, res.statusText);
+    if (!res.ok) {
+      console.error('Logo fetch failed:', res.status, res.statusText);
+      return null;
+    }
     const blob = await res.blob();
-    return URL.createObjectURL(blob);
-  } catch {
+    const objectUrl = URL.createObjectURL(blob);
+    console.log('Logo blob URL created:', objectUrl);
+    return objectUrl;
+  } catch (error) {
+    console.error('Logo fetch error:', error);
     return null;
   }
 };
@@ -147,8 +154,8 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  
+  const { showToast } = useToast();
 
   // NEW: resume draft payload
   const [resumeDraft, setResumeDraft] = useState<Customer | null>(null);
@@ -187,8 +194,12 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
       await deleteCustomer(deleteId);
       setCustomers(prev => prev.filter(c => (c.customerId ?? c.id) !== deleteId));
       setShowDeleteModal(false);
-      setToastMessage(`The customer "${pendingName.current}" was successfully deleted.`);
-      setShowSuccessToast(true);
+      showToast({
+        kind: "success",
+        title: "Customer Deleted",
+        message: `The customer "${pendingName.current}" was successfully deleted.`,
+        duration: 5000
+      });
     } catch {
       setNotification({ type: "error", message: `Failed to delete the customer "${pendingName.current}". Please try again.` });
     } finally {
@@ -286,6 +297,9 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                   const personTitle  = customer.customerName || "-";
                   const initials = initialsFrom(companyTitle);
                   const imgSrc = customer.__resolvedLogoSrc ?? null;
+                  const logoClass = `customer-logo${imgSrc ? " has-image" : " no-image"}`;
+                  console.log('Customer:', companyTitle, 'imgSrc:', imgSrc, 'companyLogoUrl:', customer.companyLogoUrl);
+                  console.log('Logo container class:', logoClass, 'for', companyTitle);
 
                   return (
                     <tr key={id}>
@@ -293,11 +307,19 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                       <td className="name-cell">
                         <div className="cell-flex">
                           <div
-                            className={`customer-logo${imgSrc ? " has-image" : " no-image"}`}
+                            className={logoClass}
                             aria-label={`${companyTitle} logo`}
                             role="img"
                           >
-                            {imgSrc ? <img className="customer-logo-img" src={imgSrc} alt="" /> : null}
+                            {imgSrc ? (
+                              <img 
+                                className="customer-logo-img" 
+                                src={imgSrc} 
+                                alt="" 
+                                onLoad={() => console.log('Image loaded successfully for', companyTitle)}
+                                onError={(e) => console.error('Image failed to load for', companyTitle, e)}
+                              />
+                            ) : null}
                             <span className="avatar-initials">{initials}</span>
                           </div>
                           <div className="company-block">
@@ -326,7 +348,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                         <div className="product-action-buttons">
                           {customer.status?.toLowerCase() === "draft" ? (
                             <RetryIconButton
-                              onClick={() => navigate('/get-started/customers/new', { state: { draftCustomer: customer } })}
+                              onClick={() => handleResumeDraft(customer)}
                               title="Continue editing draft"
                             />
                           ) : (
@@ -358,29 +380,15 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
       )}
 
       {/* Delete confirmation modal */}
-      {showDeleteModal && (
-        <div className="rate-delete-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cust-delete-title">
-          <div className="rate-delete-modal-content">
-            <div className="rate-delete-modal-body">
-              <h5 id="cust-delete-title">Delete this customer?</h5>
-              <p>This action cannot be undone.</p>
-            </div>
-            <div className="rate-delete-modal-footer">
-              <button className="rate-delete-modal-cancel" onClick={() => setShowDeleteModal(false)}>
-                Cancel
-              </button>
-              <button className="rate-delete-modal-confirm" onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting ? "Deleting…" : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        productName={pendingName.current || "this customer"}
+        entityType="customer"
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
 
       {notification && <Notification type={notification.type} message={notification.message} />}
-      {showSuccessToast && (
-        <SuccessToast title="Customer Deleted" message={toastMessage} onClose={() => setShowSuccessToast(false)} />
-      )}
     </div>
   );
 };

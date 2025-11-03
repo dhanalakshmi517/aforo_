@@ -89,10 +89,16 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           <span className="placeholder-text">{placeholder}</span>
         )}
 
-        {/* SVG chevron */}
-        <svg className="chevron" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        {/* Custom SVG chevron */}
+        {isOpen ? (
+          <svg className="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M15 12.5L10 7.5L5 12.5" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ) : (
+          <svg className="chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none" aria-hidden="true">
+            <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
       </div>
 
       {isOpen && (
@@ -188,14 +194,9 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           position: absolute;
           right: 12px;
           top: 50%;
-          width: 20px;
-          height: 20px;
-          color: var(--color-neutral-500);
           transform: translateY(-50%);
-          transition: transform 0.15s ease;
           pointer-events: none;
         }
-        .country-selector__control.open .chevron { transform: translateY(-50%) rotate(180deg); }
 
         .placeholder-text { 
           color: var(--color-neutral-500); 
