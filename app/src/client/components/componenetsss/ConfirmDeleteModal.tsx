@@ -6,6 +6,7 @@ import "./ConfirmDeleteModal.css";
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
   productName: string;
+  entityType?: string; // e.g., "product", "customer", "item"
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -13,6 +14,7 @@ interface ConfirmDeleteModalProps {
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   isOpen,
   productName,
+  entityType = "product",
   onConfirm,
   onCancel,
 }) => {
@@ -45,7 +47,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         </button>
 
         <p id="del-modal-title" className="del-modal-title">
-          Are you sure you want to delete the <br /> product “{productName}”?
+          Are you sure you want to delete the <br /> {entityType} "{productName}"?
         </p>
         <p className="del-modal-subtitle">This action cannot be undone.</p>
 

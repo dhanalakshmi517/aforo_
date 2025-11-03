@@ -170,7 +170,12 @@ const CreatePricePlan = React.forwardRef<
 
   useEffect(() => {
     if (draftData) {
-      clearAllRatePlanData();
+      // Don't clear session storage when loading draft data for existing session
+      // Only clear if this is a completely fresh draft load (not navigation within wizard)
+      const currentStep = Number(getRatePlanData("WIZARD_STEP"));
+      if (!currentStep || currentStep === 0) {
+        clearAllRatePlanData();
+      }
       hydrateFormData(draftData);
     } else if (isResuming && resumeDraftId) {
       (async () => {
@@ -186,22 +191,31 @@ const CreatePricePlan = React.forwardRef<
     }
   }, [draftData, isResuming, resumeDraftId]);
 
-  // Fetch current data when navigating to Extras step (step 3)
+  // Fetch current data when navigating to Pricing step (step 2) or Extras step (step 3)
   useEffect(() => {
     const fetchCurrentDataForStep = async () => {
-      if (currentStep === 3 && ratePlanId && !persistentDraftData && !draftExtrasData) {
+      if ((currentStep === 2 || currentStep === 3) && ratePlanId && !persistentDraftData) {
         try {
+          console.log('🔄 Fetching current plan data for step:', currentStep);
           const currentPlan = await fetchRatePlanWithDetails(ratePlanId);
+          console.log('📊 Fetched plan data:', currentPlan);
           setCurrentStepData(currentPlan);
+          // Update pricing and extras data to ensure components receive fresh data
+          if (currentStep === 2) {
+            setDraftPricingData(currentPlan);
+          }
+          if (currentStep === 3) {
+            setDraftExtrasData(currentPlan);
+          }
         } catch (error) {
           console.error('❌ Failed to fetch current plan data for step:', error);
         }
-      } else if (currentStep !== 3) {
+      } else if (currentStep < 2) {
         setCurrentStepData(null);
       }
     };
     fetchCurrentDataForStep();
-  }, [currentStep, ratePlanId, persistentDraftData, draftExtrasData]);
+  }, [currentStep, ratePlanId, persistentDraftData]);
 
   const hydrateFormData = (plan: any) => {
     setRatePlanId(plan.ratePlanId);
@@ -855,6 +869,7 @@ const CreatePricePlan = React.forwardRef<
       case 2:
         return (
           <Pricing
+            key={`pricing-${ratePlanId}-${draftPricingData ? JSON.stringify(draftPricingData).substring(0, 50) : 'no-data'}`}
             ref={pricingRef}
             ratePlanId={ratePlanId}
             validationErrors={errors}

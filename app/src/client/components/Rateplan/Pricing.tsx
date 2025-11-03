@@ -152,8 +152,62 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
     // ---------- Draft hydration ----------
     useEffect(() => {
-      if (!draftData) return;
+      if (!draftData) {
+        console.log('🔍 Pricing: No draft data provided');
+        return;
+      }
+      
+      console.log('🔍 Pricing: Processing draft data:', draftData);
+      console.log('🔍 Pricing: Draft data keys:', Object.keys(draftData));
+      console.log('🔍 Pricing: pricingModelName:', draftData.pricingModelName);
+      console.log('🔍 Pricing: pricingModelKey:', draftData.pricingModelKey);
 
+      // PRIORITY 1: Check session storage first (user's most recent selection)
+      const sessionPricingModel = getRatePlanData('PRICING_MODEL');
+      if (sessionPricingModel) {
+        console.log('🎯 Pricing: Using session storage pricing model (user selection):', sessionPricingModel);
+        setSelected(sessionPricingModel);
+        
+        // Load appropriate data based on session selection, not backend detection
+        if (sessionPricingModel === 'Usage-Based') {
+          const usageObj = (Array.isArray(draftData.usageBasedPricing)
+            ? draftData.usageBasedPricing[0]
+            : draftData.usageBasedPricing) ||
+          (draftData.perUnitAmount != null
+            ? { perUnitAmount: draftData.perUnitAmount }
+            : null);
+          if (usageObj && usageObj.perUnitAmount != null) {
+            const amt = Number(usageObj.perUnitAmount) || 0;
+            setUsage({ perUnitAmount: amt });
+            setRatePlanData('USAGE_PER_UNIT_AMOUNT', String(amt));
+          }
+        } else if (sessionPricingModel === 'Flat Fee') {
+          if (draftData.flatFeeAmount != null) {
+            const next = {
+              flatFeeAmount: draftData.flatFeeAmount || 0,
+              numberOfApiCalls: draftData.numberOfApiCalls || 0,
+              overageUnitRate: draftData.overageUnitRate || 0,
+              graceBuffer: draftData.graceBuffer || 0
+            };
+            setFlatFee(next);
+            setRatePlanData('FLAT_FEE_AMOUNT', String(next.flatFeeAmount || ''));
+            setRatePlanData('FLAT_FEE_API_CALLS', String(next.numberOfApiCalls || ''));
+            setRatePlanData('FLAT_FEE_OVERAGE', String(next.overageUnitRate || ''));
+            setRatePlanData('FLAT_FEE_GRACE', String(next.graceBuffer || ''));
+          }
+        }
+        // For other pricing models, continue with existing logic below
+        return;
+      }
+
+      // PRIORITY 2: Check backend pricingModelName if no session storage
+      if (draftData.pricingModelName) {
+        console.log('🎯 Pricing: Found direct pricing model name from backend:', draftData.pricingModelName);
+        setSelected(draftData.pricingModelName);
+        setRatePlanData('PRICING_MODEL', draftData.pricingModelName);
+      }
+
+      // PRIORITY 3: Auto-detect from backend data structure (fallback)
       // Usage
       const usageObj =
         (Array.isArray(draftData.usageBasedPricing)
@@ -164,7 +218,8 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
           : null);
 
       if (usageObj && usageObj.perUnitAmount != null) {
-        setSelected('Usage-Based');
+        console.log('🎯 Pricing: Auto-detected Usage-Based pricing in draft data:', usageObj);
+        if (!sessionPricingModel) setSelected('Usage-Based');
         const amt = Number(usageObj.perUnitAmount) || 0;
         setUsage({ perUnitAmount: amt });
         setRatePlanData('PRICING_MODEL', 'Usage-Based');
@@ -179,7 +234,8 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         !draftData.tieredPricing &&
         !draftData.stairStepPricing
       ) {
-        setSelected('Flat Fee');
+        console.log('🎯 Pricing: Auto-detected Flat Fee pricing in draft data, amount:', draftData.flatFeeAmount);
+        if (!sessionPricingModel) setSelected('Flat Fee');
         const next = {
           flatFeeAmount: draftData.flatFeeAmount || 0,
           numberOfApiCalls: draftData.numberOfApiCalls || 0,
@@ -283,24 +339,41 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         setRatePlanData('STAIR_OVERAGE', String(stairRaw.overageUnitRate || 0));
         setRatePlanData('STAIR_GRACE', String(stairRaw.graceBuffer || 0));
         setRatePlanData('STAIR_NO_UPPER_LIMIT', lastUnlimited ? 'true' : 'false');  // ← Added missing unlimited flag
+      } else {
+        console.log('⚠️ Pricing: No recognizable pricing model found in draft data');
+        console.log('🔍 Pricing: Available fields:', {
+          flatFeeAmount: draftData.flatFeeAmount,
+          usageBasedPricing: draftData.usageBasedPricing,
+          volumePricing: draftData.volumePricing,
+          tieredPricing: draftData.tieredPricing,
+          stairStepPricing: draftData.stairStepPricing,
+          perUnitAmount: draftData.perUnitAmount
+        });
       }
     }, [draftData]);
 
-    // Initialize from session storage on mount
+    // Initialize from session storage on mount (only if no draftData)
     useEffect(() => {
       console.log('🔧 Pricing component mounted - checking session storage...');
       const savedModel = getRatePlanData('PRICING_MODEL');
       const savedStep = getRatePlanData('WIZARD_STEP');
       console.log('📖 Saved pricing model from session:', savedModel);
       console.log('📖 Saved wizard step from session:', savedStep);
+      console.log('📖 Draft data exists:', !!draftData);
       const hasExistingData = savedModel || savedStep;
+
+      // Load from session storage if no current selection is set
+      if (draftData && selected) {
+        console.log('🎯 Draft data exists and selection already set - skipping session storage initialization');
+        return;
+      }
 
       if (isFreshCreation && !hasExistingData) {
         console.log('🆕 Fresh creation with no existing data - clearing selection');
         setSelected('');
       } else {
         if (savedModel) {
-          console.log('✅ Setting pricing model to:', savedModel);
+          console.log('✅ Setting pricing model from session storage to:', savedModel);
           setSelected(savedModel);
 
           if (savedModel === 'Flat Fee') {
@@ -429,7 +502,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
           }
         }
       }
-    }, [isFreshCreation]);
+    }, [isFreshCreation, draftData, selected]);
 
     useEffect(() => {
       console.log('💾 Pricing: Persisting selected model to session storage:', selected);

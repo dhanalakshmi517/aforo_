@@ -124,6 +124,16 @@ const EditReview: React.FC<EditReviewProps> = ({
   configuration, 
   enableLocalStorage = true 
 }) => {
+  // Debug logging to see what data is being received
+  useEffect(() => {
+    console.log('📋 EditReview received data:', {
+      generalDetails,
+      configuration,
+      generalDetailsKeys: Object.keys(generalDetails || {}),
+      configurationKeys: Object.keys(configuration || {})
+    });
+  }, [generalDetails, configuration]);
+
   // Persist to localStorage whenever props change
   useEffect(() => {
     if (enableLocalStorage) {

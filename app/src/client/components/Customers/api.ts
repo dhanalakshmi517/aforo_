@@ -1,5 +1,5 @@
 import type { Customer } from "./Customers";
-import { getAuthHeaders, isAuthenticated, logout } from "../../utils/auth";
+import { getAuthHeaders, getAuthHeadersJSON, isAuthenticated, logout } from "../../utils/auth";
 
 const BASE_URL = "http://43.206.110.213:8081/v1/api";
 
@@ -57,25 +57,37 @@ export async function getCustomer(customerId: number | string): Promise<Customer
   return data as Customer;
 }
 
-/** Update customer (PATCH) */
+/** Update customer (PUT) */
 export async function updateCustomer(customerId: number | string, payload: Record<string, unknown> | FormData) {
   if (!isAuthenticated()) throw new Error('Not authenticated');
 
   const isFormData = payload instanceof FormData;
-  const sanitized = isFormData
-    ? payload
-    : Object.fromEntries(
-        Object.entries(payload as Record<string, unknown>).filter(
-          ([, v]) => v !== '' && v !== null && v !== undefined,
-        ),
-      ) as Record<string, unknown>;
-
-  if (!(sanitized as any).customerCountry) {
-    delete (sanitized as Record<string, unknown>).phoneNumber;
+  console.log('updateCustomer payload type:', typeof payload);
+  console.log('updateCustomer payload instanceof FormData:', isFormData);
+  console.log('updateCustomer payload:', payload);
+  
+  let sanitized: FormData | Record<string, unknown>;
+  
+  if (isFormData) {
+    // For FormData, use as-is
+    sanitized = payload;
+  } else {
+    // For JSON payload, sanitize and apply business logic
+    sanitized = Object.fromEntries(
+      Object.entries(payload as Record<string, unknown>).filter(
+        ([, v]) => v !== '' && v !== null && v !== undefined,
+      ),
+    ) as Record<string, unknown>;
+    
+    // Apply customerCountry/phoneNumber logic only for JSON payloads
+    if (!(sanitized as any).customerCountry) {
+      delete (sanitized as Record<string, unknown>).phoneNumber;
+    }
   }
 
-  const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  if (isFormData && (headers as any)['Content-Type']) delete (headers as any)['Content-Type'];
+  const headers = isFormData ? getAuthHeaders() : getAuthHeadersJSON();
+  console.log('updateCustomer headers:', headers);
+  console.log('isFormData:', isFormData);
 
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
     method: 'PATCH',
@@ -101,8 +113,7 @@ export async function createCustomer(payload: Record<string, unknown> | FormData
   if (!isAuthenticated()) throw new Error('Not authenticated');
 
   const isFormData = payload instanceof FormData;
-  const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  if (isFormData && (headers as any)['Content-Type']) delete (headers as any)['Content-Type'];
+  const headers = isFormData ? getAuthHeaders() : getAuthHeadersJSON();
 
   const res = await fetch(`${BASE_URL}/customers`, {
     method: 'POST',

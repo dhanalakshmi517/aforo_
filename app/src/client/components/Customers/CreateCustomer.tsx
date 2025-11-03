@@ -473,7 +473,10 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                               <LogoUploader
                                 logo={companyLogo}
                                 logoUrl={initialLogoUrl}
-                                onChange={(file) => setCompanyLogo(file)}
+                                onChange={(file) => {
+                                  console.log('CreateCustomer: Logo file selected:', file);
+                                  setCompanyLogo(file);
+                                }}
                               />
                             </div>
 

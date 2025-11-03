@@ -30,12 +30,14 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
+    console.log('LogoUploader: File selected:', file);
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file.');
       return;
     }
     setImgError(false);          // reset any previous image error
+    console.log('LogoUploader: Calling onChange with file:', file);
     onChange(file);
     onEdit?.();
   };
@@ -43,6 +45,8 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({
   // Treat only a valid non-empty URL (and not errored) as “has image”
   const validUrl = isTruthyUrl(logoUrl) ? logoUrl : null;
   const hasImage = !!logo || (!!validUrl && !imgError);
+  
+  console.log('LogoUploader render:', { logo, logoUrl, validUrl, hasImage, imgError });
 
   const previewSrc = useMemo(() => {
     if (logo) return URL.createObjectURL(logo);

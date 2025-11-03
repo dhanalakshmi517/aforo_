@@ -46,6 +46,10 @@ const uiToApiFreemium = (raw: string | undefined | null): APIFreemiumType => {
 const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData }, ref) => {
   // ✅ Optional guarded clear: only when switching between two *different* valid plans
   const prevRatePlanIdRef = useRef<number | null>(null);
+  
+  // Track whether user has made selections to prevent backend data from overriding
+  const userHasSelectedFreemiumRef = useRef<boolean>(false);
+  const userHasSelectedDiscountsRef = useRef<boolean>(false);
   React.useEffect(() => {
     if (
       prevRatePlanIdRef.current !== null &&
@@ -54,6 +58,10 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     ) {
       // We're switching to a different plan explicitly; safe to clear
       clearExtrasLocalStorage();
+      // Reset user selection flags when switching plans
+      userHasSelectedFreemiumRef.current = false;
+      userHasSelectedDiscountsRef.current = false;
+      console.log('🔄 Reset user selection flags for new plan:', ratePlanId);
     }
     if (ratePlanId !== null) {
       prevRatePlanIdRef.current = ratePlanId;
@@ -61,12 +69,15 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   }, [ratePlanId]);
 
   // -------------------------------------------------------
-  // Hydrate from sessionStorage when no backend draft data
+  // Hydrate from sessionStorage (runs alongside backend data loading)
   // -------------------------------------------------------
   React.useEffect(() => {
-    // Skip session storage hydration if we have draftData (even if empty object)
-    if (draftData !== null && draftData !== undefined) {
-      console.log('⏭️ Skipping session storage hydration - draftData exists:', draftData);
+    // Always check session storage for user selections, but don't override if already set
+    console.log('🔍 Checking session storage for user selections...');
+    
+    // Skip if we already have data loaded and this is just a re-render
+    if (draftData !== null && draftData !== undefined && activeSections.length > 0) {
+      console.log('⏭️ Skipping session storage hydration - data already loaded');
       return;
     }
 
@@ -165,19 +176,69 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     if (sections.length) setActiveSections(sections);
   }, [draftData]);
 
-  // Initialize from draftData (direct from backend)
+  // Initialize from draftData (direct from backend) - but prioritize session storage for user selections
   React.useEffect(() => {
     if (!draftData) {
       console.log('🎁 Extras component mounted - no draft data, using defaults');
       return;
     }
 
-    console.log('🚀 Extras component mounted - initializing from backend draft data:', draftData);
+    console.log('🚀 Extras component initializing from backend draft data:', draftData);
+    console.log('🔍 Current component state before update:', {
+      currentFreemiumType: freemiumType,
+      currentDiscountForm: discountForm,
+      userHasSelectedFreemium: userHasSelectedFreemiumRef.current,
+      userHasSelectedDiscounts: userHasSelectedDiscountsRef.current
+    });
+    
+    // DON'T reset user selection flags here - they should persist during navigation
+    // Only reset when switching to a different plan (handled in ratePlanId useEffect)
+    
+    // Check if we have user selections in session storage that should take priority
+    const sessionFreemiumType = getRatePlanData('FREEMIUM_TYPE');
+    const sessionFreemiumUnits = getRatePlanData('FREEMIUM_UNITS');
+    const sessionFreemiumTrialDuration = getRatePlanData('FREE_TRIAL_DURATION');
+    const hasSessionFreemiumData = sessionFreemiumType && sessionFreemiumType.trim() && sessionFreemiumType !== '';
+    
+    const sessionDiscountType = getRatePlanData('DISCOUNT_TYPE');
+    const sessionDiscountPercent = getRatePlanData('DISCOUNT_PERCENT');
+    const sessionDiscountFlat = getRatePlanData('DISCOUNT_FLAT');
+    const hasSessionDiscountData = sessionDiscountType || 
+                                  (sessionDiscountPercent !== null && sessionDiscountPercent !== '') || 
+                                  (sessionDiscountFlat !== null && sessionDiscountFlat !== '');
+    
+    const sessionSetupFee = getRatePlanData('SETUP_FEE');
+    const hasSessionSetupFeeData = sessionSetupFee && Number(sessionSetupFee) > 0;
+    
+    const sessionMinUsage = getRatePlanData('MINIMUM_USAGE');
+    const sessionMinCharge = getRatePlanData('MINIMUM_CHARGE');
+    const hasSessionMinCommitmentData = sessionMinUsage || sessionMinCharge;
+    
+    console.log('🔍 Checking session storage for user selections:', {
+      sessionFreemiumType,
+      hasSessionFreemiumData,
+      sessionDiscountType,
+      sessionDiscountPercent,
+      sessionDiscountFlat,
+      hasSessionDiscountData
+    });
 
     const sectionsToExpand: string[] = [];
 
-    // Setup Fee
-    if (draftData.setupFee && typeof draftData.setupFee === 'object') {
+    // Setup Fee - PRIORITY: session storage over backend data
+    if (hasSessionSetupFeeData) {
+      console.log('🎯 Using session storage setup fee data (user selection)');
+      const sessionTiming = getRatePlanData('SETUP_APPLICATION_TIMING');
+      const sessionDesc = getRatePlanData('SETUP_INVOICE_DESC');
+      
+      setSetupFeePayload({
+        setupFee: Number(sessionSetupFee) || 0,
+        applicationTiming: Number(sessionTiming) || 0,
+        invoiceDescription: sessionDesc || '',
+      });
+      sectionsToExpand.push('setupFee');
+    } else if (draftData.setupFee && typeof draftData.setupFee === 'object') {
+      console.log('📊 Using backend setup fee data:', draftData.setupFee);
       setSetupFeePayload({
         setupFee: draftData.setupFee.setupFee || 0,
         applicationTiming: draftData.setupFee.applicationTiming || 0,
@@ -186,50 +247,192 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       sectionsToExpand.push('setupFee');
     }
 
-    // Discounts
-    if (draftData.discount && typeof draftData.discount === 'object') {
+    // Discounts - PRIORITY: session storage over backend data, but respect user selections
+    if (hasSessionDiscountData) {
+      console.log('🎯 Found session storage discount data');
+      console.log('🔍 User has made manual discount selection:', userHasSelectedDiscountsRef.current);
+      
+      // Only update if user hasn't made a manual selection or if we need to restore from session
+      const shouldUpdate = !userHasSelectedDiscountsRef.current || 
+                          (discountForm.discountType !== sessionDiscountType);
+      
+      if (shouldUpdate) {
+        console.log('🔄 Updating discount state to match session storage');
+        userHasSelectedDiscountsRef.current = true; // Mark that we have user data
+        
+        // Load from session storage (user's selection takes priority)
+        const sessionEligibility = getRatePlanData('ELIGIBILITY');
+        const sessionStartDate = getRatePlanData('DISCOUNT_START');
+        const sessionEndDate = getRatePlanData('DISCOUNT_END');
+        
+        const newDiscountForm = {
+          discountType: (sessionDiscountType as 'PERCENTAGE'|'FLAT') || 'PERCENTAGE',
+          percentageDiscountStr: sessionDiscountPercent || '',
+          flatDiscountAmountStr: sessionDiscountFlat || '',
+          eligibility: sessionEligibility || '',
+          startDate: sessionStartDate || '',
+          endDate: sessionEndDate || '',
+        };
+        
+        console.log('🔧 DISCOUNT FORM - Setting form values from session storage:', {
+          sessionValues: {
+            sessionDiscountType,
+            sessionDiscountPercent,
+            sessionDiscountFlat,
+            sessionEligibility,
+            sessionStartDate,
+            sessionEndDate
+          },
+          formValues: newDiscountForm
+        });
+        
+        setDiscountForm(newDiscountForm);
+      } else {
+        console.log('✅ Preserving current discount state (user has made selections)');
+      }
+      sectionsToExpand.push('discounts');
+    } else if (!userHasSelectedDiscountsRef.current && draftData.discount && typeof draftData.discount === 'object') {
+      console.log('📊 Using backend discount data:', draftData.discount);
+      console.log('🔍 Discount data analysis:', {
+        hasDiscountType: !!draftData.discount.discountType,
+        percentageDiscount: draftData.discount.percentageDiscount,
+        flatDiscountAmount: draftData.discount.flatDiscountAmount,
+        eligibility: draftData.discount.eligibility,
+        startDate: draftData.discount.startDate,
+        endDate: draftData.discount.endDate
+      });
+      
+      // Fallback to backend data if no session storage and user hasn't made selections
       setDiscountForm({
         discountType: draftData.discount.discountType || 'PERCENTAGE',
-        percentageDiscountStr: String(draftData.discount.percentageDiscount || ''),
-        flatDiscountAmountStr: String(draftData.discount.flatDiscountAmount || ''),
+        percentageDiscountStr: draftData.discount.percentageDiscount !== undefined ? String(draftData.discount.percentageDiscount) : '',
+        flatDiscountAmountStr: draftData.discount.flatDiscountAmount !== undefined ? String(draftData.discount.flatDiscountAmount) : '',
         eligibility: draftData.discount.eligibility || '',
         startDate: draftData.discount.startDate || '',
         endDate: draftData.discount.endDate || '',
       });
-      sectionsToExpand.push('discounts');
+      
+      // Expand section if we have any discount data (including zero values)
+      if (draftData.discount.discountType) {
+        console.log('✅ Expanding discounts section - has discount type:', draftData.discount.discountType);
+        sectionsToExpand.push('discounts');
+      } else {
+        console.log('❌ Not expanding discounts section - no discount type');
+      }
     }
 
-    // Freemium (object or array)
-    let freemiumData: any = null;
-    if (draftData.freemium && typeof draftData.freemium === 'object') {
-      freemiumData = draftData.freemium;
-    } else if (draftData.freemiums && Array.isArray(draftData.freemiums) && draftData.freemiums.length > 0) {
-      freemiumData = draftData.freemiums[0];
-    }
-
-    if (freemiumData) {
-      // UPDATED: tolerate UI or API token from backend
-      const uiType = apiToUiFreemium(freemiumData.freemiumType);
-      const apiType = uiToApiFreemium(freemiumData.freemiumType);
-
-      setFreemiumType(uiType);
-      setFreemiumPayload({
-        freemiumType: apiType,
-        freeUnits: freemiumData.freeUnits || 0,
-        freeTrialDuration: freemiumData.freeTrialDuration || 0,
-        startDate: freemiumData.startDate || '',
-        endDate: freemiumData.endDate || '',
-      });
+    // Freemium - PRIORITY: session storage over backend data, but respect user selections
+    if (hasSessionFreemiumData) {
+      console.log('🎯 Found session storage freemium data:', sessionFreemiumType);
+      console.log('🔍 User has made manual selection:', userHasSelectedFreemiumRef.current);
+      
+      // Only update if user hasn't made a manual selection or if current state doesn't match session
+      const currentStateMatchesSession = freemiumType === sessionFreemiumType;
+      const shouldUpdate = !userHasSelectedFreemiumRef.current || !currentStateMatchesSession;
+      
+      if (shouldUpdate) {
+        console.log('🔄 Updating freemium state to match session storage');
+        userHasSelectedFreemiumRef.current = true; // Mark that we have user data
+        
+        // Load from session storage (user's selection takes priority)
+        const freeUnitsStr = getRatePlanData('FREEMIUM_UNITS');
+        const trialDurStr = getRatePlanData('FREE_TRIAL_DURATION');
+        const freeStartStr = getRatePlanData('FREEMIUM_START');
+        const freeEndStr = getRatePlanData('FREEMIUM_END');
+        
+        const uiType = sessionFreemiumType as UIFreemiumType;
+        const apiType = uiToApiFreemium(uiType);
+        
+        const newFreemiumPayload = {
+          freemiumType: apiType,
+          freeUnits: freeUnitsStr ? Number(freeUnitsStr) : 0,
+          freeTrialDuration: trialDurStr ? Number(trialDurStr) : 0,
+          startDate: freeStartStr || '',
+          endDate: freeEndStr || '',
+        };
+        
+        console.log('🔧 FREEMIUM FORM - Setting form values from session storage:', {
+          sessionValues: {
+            sessionFreemiumType,
+            freeUnitsStr,
+            trialDurStr,
+            freeStartStr,
+            freeEndStr
+          },
+          uiType,
+          apiType,
+          formValues: newFreemiumPayload
+        });
+        
+        setFreemiumType(uiType);
+        setFreemiumPayload(newFreemiumPayload);
+      } else {
+        console.log('✅ Preserving current freemium state (user has made selections)');
+      }
       sectionsToExpand.push('freemium');
+    } else if (!userHasSelectedFreemiumRef.current) {
+      // Fallback to backend data if no session storage
+      let freemiumData: any = null;
+      if (draftData.freemium && typeof draftData.freemium === 'object') {
+        freemiumData = draftData.freemium;
+      } else if (draftData.freemiums && Array.isArray(draftData.freemiums) && draftData.freemiums.length > 0) {
+        freemiumData = draftData.freemiums[0];
+      }
+
+      if (freemiumData && freemiumData.freemiumType) {
+        console.log('📊 Using backend freemium data:', freemiumData);
+        console.log('🔍 Freemium data analysis:', {
+          freemiumType: freemiumData.freemiumType,
+          freeUnits: freemiumData.freeUnits,
+          freeTrialDuration: freemiumData.freeTrialDuration,
+          startDate: freemiumData.startDate,
+          endDate: freemiumData.endDate,
+          hasFreemiumType: !!freemiumData.freemiumType
+        });
+        
+        // UPDATED: tolerate UI or API token from backend
+        const uiType = apiToUiFreemium(freemiumData.freemiumType);
+        const apiType = uiToApiFreemium(freemiumData.freemiumType);
+
+        setFreemiumType(uiType);
+        setFreemiumPayload({
+          freemiumType: apiType,
+          freeUnits: freemiumData.freeUnits !== undefined ? freemiumData.freeUnits : 0,
+          freeTrialDuration: freemiumData.freeTrialDuration !== undefined ? freemiumData.freeTrialDuration : 0,
+          startDate: freemiumData.startDate || '',
+          endDate: freemiumData.endDate || '',
+        });
+        
+        console.log('✅ Expanding freemium section - has freemium type:', freemiumData.freemiumType);
+        sectionsToExpand.push('freemium');
+      } else {
+        console.log('❌ Not expanding freemium section:', {
+          hasFreemiumData: !!freemiumData,
+          freemiumType: freemiumData?.freemiumType,
+          dataKeys: freemiumData ? Object.keys(freemiumData) : 'no data'
+        });
+      }
     }
 
-    // Minimum Commitment
-    if (draftData.minimumCommitment && typeof draftData.minimumCommitment === 'object') {
+    // Minimum Commitment - PRIORITY: session storage over backend data
+    if (hasSessionMinCommitmentData) {
+      console.log('🎯 Using session storage minimum commitment data (user selection)');
+      setMinimumUsage(sessionMinUsage || '');
+      setMinimumCharge(sessionMinCharge || '');
+      sectionsToExpand.push('commitment');
+    } else if (draftData.minimumCommitment && typeof draftData.minimumCommitment === 'object') {
+      console.log('📊 Using backend minimum commitment data:', draftData.minimumCommitment);
       setMinimumUsage(String(draftData.minimumCommitment.minimumUsage || ''));
       setMinimumCharge(String(draftData.minimumCommitment.minimumCharge || ''));
       sectionsToExpand.push('commitment');
     }
 
+    console.log('🎯 FINAL SECTIONS TO EXPAND:', {
+      sectionsToExpand,
+      totalSections: sectionsToExpand.length,
+      draftDataKeys: draftData ? Object.keys(draftData) : 'no draftData'
+    });
+    
     setActiveSections(sectionsToExpand);
   }, [draftData]);
 
@@ -259,7 +462,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     flatDiscountAmountStr: string;
   };
   const [discountForm, setDiscountForm] = useState<DiscountForm>({
-    discountType: 'PERCENTAGE',
+    discountType: '' as any, // Start with no selection
     percentageDiscountStr: '',
     flatDiscountAmountStr: '',
     eligibility: '',
@@ -268,10 +471,10 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   });
 
   /** Freemium */
-  const [freemiumType, setFreemiumType] = useState<UIFreemiumType>('FREE_UNITS');
+  const [freemiumType, setFreemiumType] = useState<UIFreemiumType>('' as any); // Start with no selection
 
   const [freemiumPayload, setFreemiumPayload] = useState<FreemiumPayload>({
-    freemiumType: 'FREE_UNITS', // API-type string in your payload type is fine at runtime
+    freemiumType: '' as any, // Start with no selection
     freeUnits: 0,
     freeTrialDuration: 0,
     startDate: '',
@@ -411,13 +614,32 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           setRatePlanData('DISCOUNT_PERCENT', '');
         }
         
+        const bulkDiscountPayload = {
+          ...discountForm,
+          percentageDiscount: percentVal,
+          flatDiscountAmount: flatVal,
+        };
+        
+        console.log('💾 DISCOUNTS - Bulk save (Save & Next) with payload:', {
+          ratePlanId,
+          payload: bulkDiscountPayload,
+          timestamp: new Date().toISOString()
+        });
+        
         savePromises.push(
-          saveDiscounts(ratePlanId, {
-            ...discountForm,
-            percentageDiscount: percentVal,
-            flatDiscountAmount: flatVal,
+          saveDiscounts(ratePlanId, bulkDiscountPayload).then(() => {
+            console.log('✅ DISCOUNTS - Bulk save successful:', {
+              ratePlanId,
+              payload: bulkDiscountPayload,
+              timestamp: new Date().toISOString()
+            });
           }).catch((err: any) => {
-            console.error('Discounts save failed:', err);
+            console.error('❌ DISCOUNTS - Bulk save failed:', {
+              ratePlanId,
+              payload: bulkDiscountPayload,
+              error: err,
+              timestamp: new Date().toISOString()
+            });
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during discounts save - likely duplicate entry, continuing...');
             } else {
@@ -450,9 +672,28 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration ? String(freemiumPayload.freeTrialDuration) : '');
         
         const cleanFreemium = buildFreemiumPayload();
+        
+        console.log('💾 FREEMIUM - Bulk save (Save & Next) with payload:', {
+          ratePlanId,
+          payload: cleanFreemium,
+          originalPayload: freemiumPayload,
+          timestamp: new Date().toISOString()
+        });
+        
         savePromises.push(
-          saveFreemiums(ratePlanId, cleanFreemium).catch((err: any) => {
-            console.error('Freemiums save failed:', err);
+          saveFreemiums(ratePlanId, cleanFreemium).then(() => {
+            console.log('✅ FREEMIUM - Bulk save successful:', {
+              ratePlanId,
+              payload: cleanFreemium,
+              timestamp: new Date().toISOString()
+            });
+          }).catch((err: any) => {
+            console.error('❌ FREEMIUM - Bulk save failed:', {
+              ratePlanId,
+              payload: cleanFreemium,
+              error: err,
+              timestamp: new Date().toISOString()
+            });
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during freemiums save - likely duplicate entry, continuing...');
             } else {
@@ -592,19 +833,13 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               value={discountForm.discountType}
               onChange={(val) => {
                 const nextType = (val as 'PERCENTAGE' | 'FLAT') || 'PERCENTAGE';
+                console.log('👤 User manually selected discount type:', nextType);
+                userHasSelectedDiscountsRef.current = true; // Mark that user has made a selection
                 // clear the opposite field to avoid stale values
                 if (nextType === 'PERCENTAGE') {
-                  setDiscountForm({
-                    ...discountForm,
-                    discountType: 'PERCENTAGE',
-                    flatDiscountAmountStr: '',   // clear flat
-                  });
+                  setDiscountForm({ ...discountForm, discountType: nextType, flatDiscountAmountStr: '' });
                 } else {
-                  setDiscountForm({
-                    ...discountForm,
-                    discountType: 'FLAT',
-                    percentageDiscountStr: '',   // clear percent
-                  });
+                  setDiscountForm({ ...discountForm, discountType: nextType, percentageDiscountStr: '' });
                 }
               }}
               options={[
@@ -674,10 +909,17 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, discounts: 'saving' }));
+                
+                const percentVal = Number(discountForm.percentageDiscountStr || 0);
+                const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
+                
+                const discountPayload = {
+                  ...discountForm,
+                  percentageDiscount: percentVal,
+                  flatDiscountAmount: flatVal,
+                };
+                
                 try {
-                  const percentVal = Number(discountForm.percentageDiscountStr || 0);
-                  const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
-
                   if (discountForm.discountType === 'PERCENTAGE') {
                     if (percentVal > 0) setRatePlanData('DISCOUNT_PERCENT', String(percentVal));
                     setRatePlanData('DISCOUNT_FLAT', '');
@@ -685,14 +927,28 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                     if (flatVal > 0) setRatePlanData('DISCOUNT_FLAT', String(flatVal));
                     setRatePlanData('DISCOUNT_PERCENT', '');
                   }
-
-                  await saveDiscounts(ratePlanId, {
-                    ...discountForm,
-                    percentageDiscount: percentVal,
-                    flatDiscountAmount: flatVal,
+                  
+                  console.log('💾 DISCOUNTS - Saving individual discount with payload:', {
+                    ratePlanId,
+                    payload: discountPayload,
+                    timestamp: new Date().toISOString()
+                  });
+                  
+                  await saveDiscounts(ratePlanId, discountPayload);
+                  
+                  console.log('✅ DISCOUNTS - Individual save successful:', {
+                    ratePlanId,
+                    payload: discountPayload,
+                    timestamp: new Date().toISOString()
                   });
                   setSaveState(s => ({ ...s, discounts: 'saved' }));
-                } catch {
+                } catch (error) {
+                  console.error('❌ DISCOUNTS - Individual save failed:', {
+                    ratePlanId,
+                    payload: discountPayload,
+                    error: error,
+                    timestamp: new Date().toISOString()
+                  });
                   setSaveState(s => ({ ...s, discounts: 'error' }));
                 }
               }}
@@ -723,6 +979,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               value={freemiumType}
               onChange={val => {
                 const ui = val as UIFreemiumType;
+                console.log('👤 User manually selected freemium type:', ui);
+                userHasSelectedFreemiumRef.current = true; // Mark that user has made a selection
                 setFreemiumType(ui);
                 setFreemiumPayload(prev => ({
                   ...prev,                               // keep previously-hydrated numbers
@@ -797,6 +1055,13 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, freemium: 'saving' }));
+                
+                // UPDATED: always send canonical API token
+                const clean = {
+                  ...freemiumPayload,
+                  freemiumType: uiToApiFreemium(freemiumPayload.freemiumType),
+                } as FreemiumPayload;
+                
                 try {
                   // Persist UI type and numbers for back/forward navigation
                   setRatePlanData('FREEMIUM_TYPE', freemiumType);
@@ -805,15 +1070,28 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                   setRatePlanData('FREEMIUM_START', freemiumPayload.startDate);
                   setRatePlanData('FREEMIUM_END', freemiumPayload.endDate);
 
-                  // UPDATED: always send canonical API token
-                  const clean = {
-                    ...freemiumPayload,
-                    freemiumType: uiToApiFreemium(freemiumPayload.freemiumType),
-                  } as FreemiumPayload;
+                  console.log('💾 FREEMIUM - Saving individual freemium with payload:', {
+                    ratePlanId,
+                    payload: clean,
+                    originalPayload: freemiumPayload,
+                    timestamp: new Date().toISOString()
+                  });
 
                   await saveFreemiums(ratePlanId, clean);
+                  
+                  console.log('✅ FREEMIUM - Individual save successful:', {
+                    ratePlanId,
+                    payload: clean,
+                    timestamp: new Date().toISOString()
+                  });
                   setSaveState(s => ({ ...s, freemium: 'saved' }));
-                } catch {
+                } catch (error) {
+                  console.error('❌ FREEMIUM - Individual save failed:', {
+                    ratePlanId,
+                    payload: clean,
+                    error: error,
+                    timestamp: new Date().toISOString()
+                  });
                   setSaveState(s => ({ ...s, freemium: 'error' }));
                 }
               }}
