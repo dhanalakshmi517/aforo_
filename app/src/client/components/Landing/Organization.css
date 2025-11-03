@@ -518,8 +518,20 @@ background-clip: text;
     background-size: 20px 20px;
   }
   
-  .org-field textarea { resize: vertical;    color: var(--color-neutral-500);
- min-height: 112px;border-radius:18px; }
+  .org-field textarea { 
+    resize: vertical;    
+    color: var(--color-neutral-500);
+    min-height: 112px;
+    border-radius:var(--border-radius-sm);
+  }
+  
+  /* Custom resize handle with SVG */
+  .org-field textarea::-webkit-resizer {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none'%3E%3Cpath d='M0.75 9.25L8.75 0.75M5.25 8.75L8.75 4.75' stroke='%23E8ECF3' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: bottom 2px right 2px;
+    background-size: 10px 10px;
+  }
   
   .org-field input::placeholder,
   .org-field textarea::placeholder,
@@ -553,9 +565,8 @@ background-clip: text;
   
   
   .org-disclaimer {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     margin: 0 0 4px;
-    color: #47424A;
     font-family: var(--font-family-primary);
     font-weight: 400;
     
@@ -575,12 +586,22 @@ background-clip: text;
     margin-top: -10px;
     display: flex;
     align-items: flex-start;
-    font-size: var(--font-size-sm);
-    color: #47424A;
-    font-family: var(--font-family-primary);
-    font-weight: 400;
+  
+   
     
   }
+
+  .org-terms span {
+    color: var(--color-neutral-1700);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm); /* 150% */
+  }
+ 
   
   /* Style for the new Checkbox component */
   .org-checkbox .af-checkbox {

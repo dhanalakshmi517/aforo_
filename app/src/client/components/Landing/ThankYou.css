@@ -2,7 +2,7 @@
 /* Background decoration positioning */
 .background-decoration {
   position: absolute;
-  top: 0;
+  top: 10%;
   right: 0;
   z-index: 1;
   pointer-events: none;
@@ -12,8 +12,8 @@
 /* Centered decoration behind main content */
 .background-decoration-center {
   position: absolute; /* scrolls with content */
-  left: 30%;
-  margin-top: -10%;
+  left: 37%;
+  margin-top: -5%;
   z-index: 1; /* behind content (content is z-index:2) */
   pointer-events: none;
 }
@@ -22,7 +22,7 @@
 .background-decoration-left {
   position: absolute; /* scrolls with content */
   left: 20%;
-  margin-top: 5%;
+  margin-top: 0;
   z-index: 1; /* behind content */
   pointer-events: none;
 }
@@ -31,9 +31,11 @@
 .background-decoration-bottom-left {
   position: absolute;
   left: 0;
-  bottom: 140px; /* sit above footer */
+  bottom: 380px; /* sit above footer */
+  margin-top: -40%;
   z-index: 1;
   pointer-events: none;
+ 
 }
 
 /* Ensure absolute decorations are scoped to the page wrapper */
@@ -62,17 +64,16 @@
   .check-icon {
     width: 146px;
     height: 146px;
-    margin: 0 auto 40px;
+    margin: 0 auto 10px;
     display: block; /* let internal SVG determine visuals */
   }
   
   .thankyou h1 {
-    margin-top: 0;
   white-space: nowrap;
  
 /* heading/semibold/h1 */
 font-family: var(--font-family-primary);
-font-size: 48px;
+font-size: 44px;
 font-style: normal;
 font-weight: 700;
 line-height: 60px; /* 133.333% */

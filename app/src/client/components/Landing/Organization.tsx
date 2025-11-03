@@ -306,7 +306,7 @@ const Organization: React.FC = () => {
             <filter id="filter0_f_12072_37366" x="-101.8" y="-0.000198364" width="487.6" height="457.834" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
               <feFlood floodOpacity="0" result="BackgroundImageFix"/>
               <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-              <feGaussianBlur stdDeviation="64.4" result="effect1_foregroundBlur_12072_37366"/>
+              <feGaussianBlur stdDeviation="34.4" result="effect1_foregroundBlur_12072_37366"/>
             </filter>
             <linearGradient id="paint0_linear_12072_37366" x1="142" y1="128.8" x2="142" y2="329.034" gradientUnits="userSpaceOnUse">
               <stop stopColor="#EDF8FD"/>
@@ -548,14 +548,13 @@ contact us to explore how we can help your company get started.
                           return;
                         }
                         
-                        // Format the phone number
-                        const userNumber = input.replace(/\D/g, ''); // Remove all non-digits
-                        const formattedNumber = userNumber.replace(/(\d{3})(?=\d)/g, '$1 '); // Add space after every 3 digits
+                        // Remove all non-digits from user input
+                        const userNumber = input.replace(/\D/g, '');
                         
                         // Only add the dial code if it's not already there
                         const newPhoneNumber = phoneNumber.startsWith(dialCode) 
-                          ? dialCode + (formattedNumber ? ' ' + formattedNumber : '')
-                          : formattedNumber;
+                          ? dialCode + (userNumber ? ' ' + userNumber : '')
+                          : userNumber;
                         
                         setPhoneNumber(newPhoneNumber);
                         
