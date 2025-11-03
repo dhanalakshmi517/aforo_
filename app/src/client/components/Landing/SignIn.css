@@ -231,12 +231,23 @@ line-height: var(--line-height-heading-h4); /* 145.455% */
 
     /* body/regular/lg */
     font-family: var(--type-font-family-primary);
-    font-size: var(--font-size-lg);
+    font-size: 16px;
     font-style: normal;
     font-weight: 500;
     line-height: var(--line-height-body-lg);
     margin-top: 30px;
     cursor: pointer;
+  }
+  .primary-btn-text{
+    color: var(--color-neutral-white);
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md);
+    
   }
   
   /* Divider */

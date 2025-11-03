@@ -102,10 +102,10 @@
   --scale-800: 32px;
   --scale-900: 36px;
 
-  --font-size-xs: 0.5rem;     /* 8px */
-  --font-size-sm: 0.625rem;   /* 10px */
-  --font-size-md: 0.75rem;    /* 12px */
-  --font-size-lg: 0.875rem;   /* 14px */
+  --font-size-xs: 0.625rem;     /* 8px */
+  --font-size-sm: 0.75rem;   /* 10px */
+  --font-size-md: 0.875rem;    /* 12px */
+  --font-size-lg: 1rem;   /* 14px */
 
   /* Heading Font Sizes (Responsive or Base) */
   --font-size-h6: 1.125rem;
