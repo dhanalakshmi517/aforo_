@@ -386,7 +386,13 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     <>
       <TopBar
         title="Create New Customer"
-        onBack={() => setShowSaveDraftModal(true)}
+        onBack={() => {
+          if (hasAnyRequiredInput) {
+            setShowSaveDraftModal(true);
+          } else {
+            onClose();
+          }
+        }}
         cancel={{ onClick: () => setShowDeleteModal(true) }}
         save={{
           label: draftSaved ? "Saved!" : "Save as Draft",
