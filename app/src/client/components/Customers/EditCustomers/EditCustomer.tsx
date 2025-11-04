@@ -28,18 +28,43 @@ const absolutizeUpload = (path: string) => {
 
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
-  const url = encodeURI(absolutizeUpload(uploadPath));
+  const url = absolutizeUpload(uploadPath);
+  console.log('EditCustomer - Resolving logo URL:', url);
+  
+  // First try: Direct URL without authentication (for public uploads)
+  try {
+    const directUrl = url;
+    console.log('EditCustomer - Trying direct URL:', directUrl);
+    const testRes = await fetch(directUrl, { 
+      method: "HEAD",
+      cache: "no-store" 
+    });
+    if (testRes.ok) {
+      console.log('EditCustomer - Direct URL works, using it:', directUrl);
+      return directUrl;
+    }
+  } catch (error) {
+    console.log('EditCustomer - Direct URL failed, trying authenticated fetch:', error);
+  }
+  
+  // Second try: Authenticated fetch with blob conversion
   try {
     const res = await fetch(url, {
-      method: 'GET',
-      headers: { ...getAuthHeaders(), Accept: 'image/*' },
-      credentials: 'include',
-      cache: 'no-store',
+      method: "GET",
+      headers: { ...getAuthHeaders(), Accept: "image/*" },
+      cache: "no-store",
     });
-    if (!res.ok) return null;
+    console.log('EditCustomer - Authenticated fetch response:', res.status, res.statusText);
+    if (!res.ok) {
+      console.error('EditCustomer - Authenticated fetch failed:', res.status, res.statusText);
+      return null;
+    }
     const blob = await res.blob();
-    return URL.createObjectURL(blob);
-  } catch {
+    const objectUrl = URL.createObjectURL(blob);
+    console.log('EditCustomer - Logo blob URL created:', objectUrl);
+    return objectUrl;
+  } catch (error) {
+    console.error('EditCustomer - Logo fetch error:', error);
     return null;
   }
 };
@@ -247,36 +272,8 @@ const EditCustomer: React.FC = () => {
     
     console.log('savePatch: companyLogo state:', companyLogo);
     
-    // Check if we have a logo file to upload - if so, use FormData
-    if (companyLogo) {
-      console.log('Using FormData for save with logo');
-      const formData = new FormData();
-      formData.append('companyName', companyName);
-      formData.append('customerName', customerName);
-      formData.append('companyType', companyType);
-      
-      // Add account details if present
-      if (accountDetails) {
-        Object.entries(accountDetails).forEach(([key, value]) => {
-          if (value !== '' && value !== null && value !== undefined) {
-            formData.append(key, String(value));
-          }
-        });
-      }
-      
-      formData.append('companyLogo', companyLogo);
-      
-      try {
-        await updateCustomer(id, formData);
-        return true;
-      } catch (err) {
-        console.error('Failed to save draft/update with FormData', err);
-        return false;
-      }
-    }
-    
-    // Regular JSON payload when no file
-    console.log('Using JSON payload for save');
+    // First, update customer details (without logo)
+    console.log('Updating customer details');
     const payload: Record<string, any> = {
       companyName,
       customerName,
@@ -286,6 +283,19 @@ const EditCustomer: React.FC = () => {
     console.log('JSON payload:', payload);
     try {
       await updateCustomer(id, payload);
+      
+      // If there's a new logo file, upload it separately
+      if (companyLogo) {
+        console.log('Uploading logo via separate endpoint');
+        try {
+          await updateCustomerLogo(id, companyLogo);
+          console.log('Logo uploaded successfully');
+        } catch (logoErr) {
+          console.error('Failed to upload logo:', logoErr);
+          // Don't fail the whole save if logo upload fails
+        }
+      }
+      
       return true;
     } catch (err) {
       console.error('Failed to save draft/update with JSON', err);

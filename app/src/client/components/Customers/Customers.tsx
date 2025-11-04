@@ -110,17 +110,35 @@ const absolutizeUpload = (path: string) => {
 
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
-  const url = encodeURI(absolutizeUpload(uploadPath));
+  const url = absolutizeUpload(uploadPath);
   console.log('Resolving logo URL:', url);
+  
+  // First try: Direct URL without authentication (for public uploads)
+  try {
+    const directUrl = url;
+    console.log('Trying direct URL:', directUrl);
+    const testRes = await fetch(directUrl, { 
+      method: "HEAD",
+      cache: "no-store" 
+    });
+    if (testRes.ok) {
+      console.log('Direct URL works, using it:', directUrl);
+      return directUrl;
+    }
+  } catch (error) {
+    console.log('Direct URL failed, trying authenticated fetch:', error);
+  }
+  
+  // Second try: Authenticated fetch with blob conversion
   try {
     const res = await fetch(url, {
       method: "GET",
       headers: { ...getAuthHeaders(), Accept: "image/*" },
       cache: "no-store",
     });
-    console.log('Logo fetch response:', res.status, res.statusText);
+    console.log('Authenticated fetch response:', res.status, res.statusText);
     if (!res.ok) {
-      console.error('Logo fetch failed:', res.status, res.statusText);
+      console.error('Authenticated fetch failed:', res.status, res.statusText);
       return null;
     }
     const blob = await res.blob();
@@ -213,11 +231,16 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
       setLoading(true);
       const data = await getCustomers();
       const withLogos: Customer[] = await Promise.all(
-        (data || []).map(async (c: Customer) => ({
-          ...c,
-          __resolvedLogoSrc: await resolveLogoSrc(c.companyLogoUrl),
-        }))
+        (data || []).map(async (c: Customer) => {
+          const resolved = await resolveLogoSrc(c.companyLogoUrl);
+          console.log('📦 FETCHED - Customer:', c.companyName, 'resolved logo:', resolved);
+          return {
+            ...c,
+            __resolvedLogoSrc: resolved,
+          };
+        })
       );
+      console.log('✅ Setting customers state with logos:', withLogos);
       setCustomers(withLogos);
     } catch (err: any) {
       if (err.message?.includes("Session expired") || err.message?.includes("Not authenticated")) return;
@@ -298,8 +321,12 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                   const initials = initialsFrom(companyTitle);
                   const imgSrc = customer.__resolvedLogoSrc ?? null;
                   const logoClass = `customer-logo${imgSrc ? " has-image" : " no-image"}`;
-                  console.log('Customer:', companyTitle, 'imgSrc:', imgSrc, 'companyLogoUrl:', customer.companyLogoUrl);
-                  console.log('Logo container class:', logoClass, 'for', companyTitle);
+                  console.log('🔍 RENDER - Customer:', companyTitle);
+                  console.log('  - __resolvedLogoSrc:', customer.__resolvedLogoSrc);
+                  console.log('  - imgSrc:', imgSrc);
+                  console.log('  - imgSrc truthy?:', !!imgSrc);
+                  console.log('  - companyLogoUrl:', customer.companyLogoUrl);
+                  console.log('  - logoClass:', logoClass);
 
                   return (
                     <tr key={id}>
@@ -310,17 +337,14 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                             className={logoClass}
                             aria-label={`${companyTitle} logo`}
                             role="img"
+                            style={imgSrc ? {
+                              backgroundImage: `url(${imgSrc})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              backgroundRepeat: 'no-repeat'
+                            } : undefined}
                           >
-                            {imgSrc ? (
-                              <img 
-                                className="customer-logo-img" 
-                                src={imgSrc} 
-                                alt="" 
-                                onLoad={() => console.log('Image loaded successfully for', companyTitle)}
-                                onError={(e) => console.error('Image failed to load for', companyTitle, e)}
-                              />
-                            ) : null}
-                            <span className="avatar-initials">{initials}</span>
+                            {!imgSrc && <span className="avatar-initials">{initials}</span>}
                           </div>
                           <div className="company-block">
                             <div className="company-name">{companyTitle}</div>

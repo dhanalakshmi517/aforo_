@@ -54,12 +54,25 @@
 .logo-add-btn svg{ flex-shrink: 0; }
 
 /* PREVIEW state visuals (image + edit/remove) */
-.logo-uploader.is-preview-state .logo-preview{
+.logo-preview-container {
   width: 56px;
   height: 56px;
+  min-width: 56px;
+  min-height: 56px;
   border-radius: 50%;
-  object-fit: cover;
+  overflow: hidden;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F7FA;
+}
+
+.logo-uploader.is-preview-state .logo-preview{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .logo-action-buttons{
   display: flex;

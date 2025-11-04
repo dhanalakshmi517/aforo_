@@ -103,11 +103,23 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({
   // ─────────── PREVIEW STATE ───────────
   return (
     <div className="logo-uploader is-preview-state" onClick={openPicker} role="button" tabIndex={0}>
-      <img
-        src={previewSrc}
-        alt="Company logo"
-        className="logo-preview"
-        onError={() => setImgError(true)}   // if broken -> next render falls back to Add state
+      <div 
+        className="logo-preview-container"
+        style={{
+          width: '56px',
+          height: '56px',
+          minWidth: '56px',
+          minHeight: '56px',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          flexShrink: 0,
+          backgroundImage: `url(${previewSrc})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#F8F7FA'
+        }}
+        aria-label="Company logo preview"
       />
 
       <div className="logo-action-buttons" onClick={(e) => e.stopPropagation()}>
