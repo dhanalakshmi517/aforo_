@@ -102,7 +102,6 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Auth Type',
       type: 'select',
-      required: true,
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },
@@ -180,7 +179,6 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'File Format',
       type: 'select',
-      required: true,
       options: [
         { label: 'PDF', value: 'pdf' },
         { label: 'Video (MP4)', value: 'mp4' },
@@ -193,7 +191,6 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Access Type',
       type: 'select',
-      required: true,
       options: [
         { label: 'Download', value: 'download' },
         { label: 'Streaming', value: 'streaming' },
@@ -205,7 +202,6 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'Description',
       type: 'textarea',
       placeholder: 'Detailed description of the digital product...',
-      required: true,
     },
   ],
 };
@@ -777,7 +773,6 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             value={productType}
             onChange={locked ? () => {} : handleProductTypeChange} // Prevent changes when locked but allow viewing
             options={productOptions}
-            required
             disabled={readOnly || isLoadingConfig} // Only disable for readOnly, not locked
             error={!productType && error ? error : undefined}
           />

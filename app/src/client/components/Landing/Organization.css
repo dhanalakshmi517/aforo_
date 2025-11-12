@@ -31,8 +31,9 @@
   /* Background decoration positioning */
   .org-background-decoration {
     position: absolute;
-    top:90px;
-    left: 0;
+    top:20px;
+
+    left: -100px;
     z-index: 1;
     pointer-events: none;
   }
@@ -56,27 +57,23 @@
   .sales-logo {
    margin-top: 0;
    margin-bottom: 24px;
-   margin-top: -10px;
+   margin-top: -30px;
  }
   
   .contact-sales {
-    margin-left: 50px;
     margin-top: -100px;
+    margin-left: -70px;
   }
 
   .org-polygon-decoration {
     position: absolute;
-    top: -10px;
+    top: -20px;
     right:0;
     z-index: 1;
     pointer-events: none;
   }
 
-  .polygon-5 {
-    width: 500px;
-    height: auto;
-  }
-  
+ 
   .org-copy {
     margin-top: -30px;
   }
@@ -196,6 +193,13 @@ background-clip: text;
     font-weight: 400;
     line-height: var(--line-height-body-md);
   }
+
+  .optional-text {
+    color: var(--color-neutral-500);
+    font-weight: 400;
+    font-size: var(--font-size-sm);
+    margin-left: 4px;
+  }
   
   .req { color:var(--color-neutral-1400); margin-left: 2px; }
 
@@ -224,7 +228,7 @@ background-clip: text;
   border-radius: var(--border-radius-sm);
   background: var(--color-neutral-white);
   overflow: hidden;
-  height: 40px;
+  height: 36px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
   box-sizing: border-box;
@@ -327,7 +331,7 @@ background-clip: text;
   .org-field input,
   .org-field select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 8px 12px;
     border: 1px solid var(--color-neutral-white);
     border-radius: 8px;
     font-family: var(--font-family-primary);
@@ -428,6 +432,13 @@ background-clip: text;
     width: 100%;
     margin-top: 10px;
     padding: 0; /* align with other org-field containers */
+    grid-column: 1 / -1; /* Span across all grid columns */
+  }
+
+  /* Ensure the parent org-row allows the other-role-input to span full width */
+  .org-row .other-role-input {
+    grid-column: 1 / -1;
+    width: 100%;
   }
   
   .other-role-input input {
@@ -440,8 +451,13 @@ background-clip: text;
     font-size: var(--font-size-md);
     color: var(--color-neutral-1700);
     line-height: 1.5;
-    background-color: var(--color-neutral-white); /* ensure white */
-    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: var(--color-neutral-white) !important; /* ensure white */
+  }
+
+  /* Ensure white background in all states */
+  .other-role-input input:focus,
+  .other-role-input input:hover {
+    background-color: var(--color-neutral-white) !important;
   }
   
 
@@ -492,8 +508,8 @@ background-clip: text;
   /* Explicit uniform height for inputs & selects */
   .org-field input,
   .org-field select {
-    height: 40px;
-    min-height: 40px;
+    height: 36px;
+    min-height: 36px;
     background-color: var(--color-neutral-white);
     border:1px solid var(--color-neutral-300);
 
@@ -504,7 +520,7 @@ background-clip: text;
     appearance: none;
     border:1px solid var(--color-neutral-300);
     /* match input height */
-    min-height: 40px;
+    min-height: 36px;
     padding: 8px 32px 8px 12px; /* Space for custom chevron */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7' fill='none'%3E%3Cpath d='M0.75 0.75L5.75 5.75L10.75 0.75' stroke='%23909599' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -520,9 +536,18 @@ background-clip: text;
   
   .org-field textarea { 
     resize: vertical;    
-    color: var(--color-neutral-500);
-    min-height: 112px;
+    color: var(--color-neutral-1700);
+    min-height: 88px;
     border-radius:var(--border-radius-sm);
+  }
+
+  /* Ensure textarea shows border when focused */
+  .org-field textarea:focus {
+    border: 1px solid var(--color-primary-600) !important;
+    outline: none;
+    background-color: var(--color-neutral-white);
+    box-shadow: 0 0 0 3px rgba(29, 122, 252, 0.1);
+    border-radius: var(--border-radius-sm);
   }
   
   /* Custom resize handle with SVG */

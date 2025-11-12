@@ -90,7 +90,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
           name={name}
           type={type}
           value={value ?? ""}
-          placeholder={placeholder}
+          placeholder={writing || (value && String(value).trim()) ? "" : placeholder}
           required={required}
           disabled={disabled}
           readOnly={readOnly}
@@ -234,9 +234,11 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
               error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
             }
         >
-          <option value="" disabled hidden>
-            {placeholderOption}
-          </option>
+          {!value && (
+            <option value="" disabled hidden>
+              {placeholderOption}
+            </option>
+          )}
           {options.map((opt) => (
             <option key={opt.value} value={opt.value} disabled={opt.disabled}>
               {opt.label}
@@ -491,7 +493,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
           name={name}
           rows={rows}
           value={value}
-          placeholder={placeholder}
+          placeholder={value && value.trim() ? "" : placeholder}
           required={required}
           disabled={disabled}
           readOnly={readOnly}

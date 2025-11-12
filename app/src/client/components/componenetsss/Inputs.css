@@ -89,6 +89,8 @@
 .if-control:focus-visible:not(.is-error):not(.is-disabled):not(:disabled){
   border-color: var(--color-primary-600);
   background-color: var(--color-neutral-white);
+      box-shadow: 0 0 0 3px rgba(29, 122, 252, 0.1);
+
 }
 
 /* ---------- ERROR ---------- */
@@ -187,11 +189,17 @@
 }
 
 .if-select:focus,
-.if-select:focus-visible { 
+.if-select:focus-visible,
+select.if-select:focus,
+select.if-select:focus-visible,
+.if-field .if-select:focus,
+.if-field .if-select:focus-visible,
+.if-field select.if-select:focus,
+.if-field select.if-select:focus-visible { 
   outline: none !important; 
   border-color: var(--color-primary-600) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-  background-color: var(--color-neutral-white);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  background-color: var(--color-neutral-white) !important;
 }
 
 .if-select:disabled {
@@ -259,11 +267,13 @@
 }
 
 .if-field .if-select:focus,
-.if-field .if-select:focus-visible { 
+.if-field .if-select:focus-visible,
+.if-field select.if-select:focus,
+.if-field select.if-select:focus-visible { 
   outline: none !important; 
   border-color: var(--color-primary-600) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-  background-color: var(--color-neutral-white);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  background-color: var(--color-neutral-white) !important;
 }
 
 .if-field .if-select:disabled {

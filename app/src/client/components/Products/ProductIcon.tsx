@@ -38,62 +38,58 @@ const ProductIcon: React.FC<{
       {/* OUTER CARD — with layered background (tile color + base white with blue overlay) */}
       <div
         style={{
-          width: 50.6537,
-          height: 46.3351,
+          width: 55.6537,
+          height: 50.3351,
           borderRadius: 12,
           border: '0.6px solid var(--border-border-2, #D5D4DF)',
-          background: `
-            ${hexToRgba(tile, 0.15)},
-            linear-gradient(0deg, rgba(2, 151, 158, 0.10) 0%, rgba(2, 151, 158, 0.10) 100%),
-            var(--surface-layer-4, #FFF)
-          `,
+         
           display: 'flex',
           padding: 8,
           justifyContent: 'center',
           alignItems: 'center',
           gap: -4,  // added gap as per Figma specs
           position: 'relative',
-          overflow: 'hidden',
         }}
       >
         {/* BACK TILE (brand solid) — positioned for diagonal peek effect */}
         <div
-          style={{
+         style={{
             position: 'absolute',
-            left: 10,   // positioned to peek from behind the glass tile
-            top: 6,     // positioned towards upper area
-            width: 26.6,  // updated to match Figma specs
-            height: 26.6, // updated to match Figma specs
-            borderRadius: 5.7,
+            left: 6,
+            top: 4,
+            width: 34,
+            height: 34,
+            borderRadius: 6,
+            backgroundColor: tile,
             background: tile,
-            flexShrink: 0,
           }}
         />
 
         {/* GLASS FOREGROUND TILE — centered with slight offset */}
         <div
           style={{
-            width: 28,    // updated to match Figma specs
-            height: 28,   // updated to match Figma specs
-            padding: '1.661px 3.321px',
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%) translate(5px, 2px)',
+            width: 34,
+            height: 34,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: 2.214,
-            flexShrink: 0,
             borderRadius: 6,
             border: '0.6px solid #FFF',
+            backgroundColor: hexToRgba(tile, 0.10),
             background: hexToRgba(tile, 0.10),
-            backdropFilter: 'blur(3.875px)',
-            transform: 'translate(3px, 2px)',  // moved up slightly for clearer icon visibility
-            boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+            backdropFilter: 'blur(3.875000238418579px)',
+            // boxShadow: 'inset 0 1px 4px rgba(255,255,255,0.35)',
           }}
         >
           {/* ICON — slightly reduced size for better proportion */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="14.727"
-            height="14.727"
+            width="16"
+            height="16"
             viewBox={icon.viewBox ?? "0 0 18 18"}
             fill="none"
             style={{ 

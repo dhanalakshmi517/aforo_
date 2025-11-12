@@ -23,6 +23,7 @@ import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import EditIconButton from '../componenetsss/EditIconButton';
 import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import RetryIconButton from '../componenetsss/RetryIconButton';
+import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 
 const getRandomBackgroundColor = (index: number) => {
   const colors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
@@ -480,17 +481,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return (
       <div
         style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          border: '0.6px solid var(--border-border-2, #D5D4DF)',
-          background: hexToRgba(tile, 0.15),
-          backgroundColor: '#FFF',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          width: 40,
+          height: 40,
           position: 'relative',
-          overflow: 'hidden',
+          background: 'transparent',
         }}
       >
         {/* BACK TILE */}
@@ -499,9 +493,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             position: 'absolute',
             left: 6,
             top: 4,
-            width: 16,
-            height: 16,
-            borderRadius: 3,
+            width: 34,
+            height: 34,
+            borderRadius: 6,
             backgroundColor: tile,
             background: tile,
           }}
@@ -509,24 +503,27 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         {/* GLASS FOREGROUND TILE */}
         <div
           style={{
-            width: 18,
-            height: 18,
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%) translate(9px, 6px)',
+            width: 34,
+            height: 34,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            borderRadius: 4,
+            borderRadius: 6,
             border: '0.6px solid #FFF',
             backgroundColor: hexToRgba(tile, 0.10),
             background: hexToRgba(tile, 0.10),
-            backdropFilter: 'blur(2px)',
-            transform: 'translate(2px, 1px)',
-            boxShadow: 'inset 0 1px 4px rgba(255,255,255,0.35)',
+            backdropFilter: 'blur(3.875000238418579px)',
+            // boxShadow: 'inset 0 1px 4px rgba(255,255,255,0.35)',
           }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
+            width="16"
+            height="16"
             viewBox={iconData.viewBox ?? "0 0 18 18"}
             fill="none"
           >
@@ -798,8 +795,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                 <div
                                   className="product-avatar product-avatar--image"
                                   style={{
-                                    width: 32,
-                                    height: 32,
+                                    width: 40,
+                                    height: 40,
                                     borderRadius: 8,
                                     overflow: 'hidden',
                                     display: 'flex',
@@ -823,13 +820,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                 <div
                                   className="product-avatar"
                                   style={{
-                                    width: 32,
-                                    height: 32,
+                                    width: 40,
+                                    height: 40,
                                     borderRadius: 8,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontSize: '12px',
+                                    fontSize: '14px',
                                     fontWeight: 600,
                                     backgroundColor:
                                       getRandomBackgroundColor(parseInt(product.productId) || 0),
@@ -906,9 +903,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
 
                         <td>
-                          <span className={`product-status-badge status-${product.status.toLowerCase()}`}>
-                            {product.status.charAt(0) + product.status.slice(1).toLowerCase()}
-                          </span>
+                          <StatusBadge
+                            label={product.status.charAt(0) + product.status.slice(1).toLowerCase()}
+                            variant={product.status.toLowerCase() as Variant}
+                            size="sm"
+                          />
                         </td>
 
                         <td>{product.createdOn ?? 'N/A'}</td>

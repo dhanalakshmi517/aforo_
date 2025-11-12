@@ -448,7 +448,10 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
   };
 
-  const productOptions = products.map(p => ({ label: p.productName, value: String(p.productId) }));
+  const productOptions = [
+    { label: 'Select a product...', value: '', disabled: true },
+    ...products.map(p => ({ label: p.productName, value: String(p.productId) }))
+  ];
 
   const topActionsDisabled = !hasAnyRequiredInput && !metricId;
 
@@ -545,7 +548,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                             <div className="form-group">
                               <SelectField
                                 label="Product"
-                                placeholder="Select a product..."
                                 value={selectedProductId}
                                 onChange={(v: string) => {
                                   setSelectedProductId(v);
@@ -558,10 +560,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     setErrors(rest);
                                   }
                                 }}
-                                options={[
-                                  { label: 'Select a product...', value: '', disabled: true },
-                                  ...productOptions
-                                ]}
+                                options={productOptions}
                                 error={errors.product}
                                 className="select-product"
                               />

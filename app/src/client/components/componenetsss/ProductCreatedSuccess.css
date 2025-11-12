@@ -1,0 +1,135 @@
+:root{
+  --pcs-bg: #0b0c0f;
+  --pcs-card: #ffffff;
+  --pcs-text: #1c2430;
+  --pcs-muted: #6b7280;
+  --pcs-green: #3FBE64; /* requested green */
+  --pcs-blue: #0b5cab;
+  --pcs-shadow: 0 10px 25px rgba(16, 24, 40, 0.12);
+}
+
+.pcs-wrap{
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(60% 60% at 50% 40%, #f6f7fb 0%, #eef1f6 100%);
+  padding: 24px;
+}
+
+.pcs-card{
+  width: min(580px, 92vw);
+  background: var(--pcs-card);
+  border-radius: 18px;
+  box-shadow: var(--pcs-shadow);
+  padding: 40px 44px 36px;
+  text-align: center;
+}
+
+.pcs-hero{
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+}
+
+/* Green circle */
+.pcs-circle{
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--pcs-green);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 -8px 20px rgba(0,0,0,0.12), 0 6px 20px rgba(63,190,100,0.35);
+  isolation: isolate;
+  animation: pcs-pop 420ms cubic-bezier(.2, .9, .2, 1.2) both;
+}
+
+@keyframes pcs-pop{
+  0%{ transform: scale(.7); opacity: .0; }
+  60%{ transform: scale(1.06); opacity: 1; }
+  100%{ transform: scale(1); }
+}
+
+/* Orbiting dots around the circle */
+.pcs-dot{
+  --count: 8;
+  --i: 0;
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #dff6e7;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  margin-top: -4px; /* Half of dot height to center it */
+  margin-left: -4px; /* Half of dot width to center it */
+  animation: pcs-pulse 2s ease-in-out infinite;
+  animation-delay: calc((var(--i) * 0.25s));
+  opacity: .9;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.6);
+}
+
+@keyframes pcs-pulse{
+  0%, 100%{ 
+    opacity: .9;
+    transform: scale(1);
+  }
+  50%{ 
+    opacity: .4;
+    transform: scale(0.8);
+  }
+}
+
+/* Animated check path (handled with JS setting dasharray/offset) */
+.pcs-check{
+  width: 80px;
+  height: 80px;
+}
+
+.pcs-check path{
+  stroke-dasharray: 0;  /* set at runtime */
+  stroke-dashoffset: 0; /* set at runtime -> animates to 0 */
+  transition: stroke-dashoffset 800ms cubic-bezier(.22,.9,.2,1);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
+}
+
+.pcs-title{
+  margin: 10px 0 6px;
+  font-weight: 700;
+  color: var(--pcs-text);
+  font-size: clamp(18px, 2.2vw, 22px);
+  line-height: 1.35;
+}
+
+.pcs-sub{
+  margin: 6px 0 2px;
+  color: var(--pcs-muted);
+  font-size: 14px;
+}
+
+.pcs-steps{
+  margin: 0 auto 18px;
+  padding-left: 18px;
+  text-align: left;
+  max-width: 380px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.pcs-btn{
+  margin-top: 8px;
+  background: #0b5cab;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(11, 92, 171, .25);
+  transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.pcs-btn:hover{ box-shadow: 0 8px 22px rgba(11, 92, 171, .33); }
+.pcs-btn:active{ transform: translateY(1px) scale(0.99); }

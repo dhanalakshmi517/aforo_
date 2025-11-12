@@ -7,6 +7,7 @@ import { InputField, TextareaField } from '../../componenetsss/Inputs';
 import EditPopup from '../../componenetsss/EditPopUp';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { ConfigurationTab } from './EditConfiguration';
+import { configurationFields } from './EditConfiguration';
 import EditReview from './EditReview';
 import TopBar from '../../componenetsss/TopBar';
 import { useToast } from '../../componenetsss/ToastProvider';
@@ -14,6 +15,7 @@ import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditButton from '../../componenetsss/EditButton';
 import DeleteButton from '../../componenetsss/DeleteButton';
+import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import ProductIconPickerModal from '../ProductIconPickerModal';
 import { ProductIconData } from '../ProductIcon';
 import './EditProduct.css';
@@ -59,6 +61,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
 
   const [formData, setFormData] = useState({
     productName: '',
@@ -176,6 +179,31 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
   };
 
   const handleCancel = () => setShowDeleteConfirm(true);
+
+  const hasEmptyRequiredFields = () => {
+    // Check General Details tab
+    if (activeTab === 'general') {
+      return !formData.productName.trim() || !formData.skuCode.trim();
+    }
+    
+    // Check Configuration tab
+    if (activeTab === 'configuration') {
+      const currentProductType = configuration.productType || productType;
+      if (!currentProductType) return true; // Product type is required
+      
+      const fields = configurationFields[currentProductType] || [];
+      
+      return fields.some((field: any) => {
+        if (field.required) {
+          const fieldValue = configuration[field.label] || '';
+          return !fieldValue.trim();
+        }
+        return false;
+      });
+    }
+    
+    return false;
+  };
 
   const handleConfirmDelete = async () => {
     setShowDeleteConfirm(false);
@@ -570,6 +598,12 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
       <TopBar
         title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
         onBack={() => {
+          // Check for empty required fields in general details first
+          if (hasEmptyRequiredFields()) {
+            setShowUnsavedChangesModal(true);
+            return;
+          }
+          
           // Only show save popup if there are actual changes
           const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
           console.log('Back button clicked - Changes detected:', { 
@@ -813,6 +847,17 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
         />
+
+        {showUnsavedChangesModal && (
+          <UnsavedChangesModal
+            onDiscard={() => {
+              setShowUnsavedChangesModal(false);
+              onClose();
+            }}
+            onKeepEditing={() => setShowUnsavedChangesModal(false)}
+            onClose={() => setShowUnsavedChangesModal(false)}
+          />
+        )}
       </div>
     </>
   );

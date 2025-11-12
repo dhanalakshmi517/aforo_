@@ -149,7 +149,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         .country-selector__control {
           position: relative;
           width: 100%;
-          height: 40px;
+          height: 36px;
           padding: 8px 44px 8px 16px;
           border: 1px solid var(--color-neutral-300);
           border-radius: 8px;

@@ -16,6 +16,7 @@ import DeleteButton from "../../componenetsss/DeleteButton";
 import { createProduct, updateProduct, updateProductIcon, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
 import ProductIconPickerModal from "../ProductIconPickerModal";
 import { ProductIconData } from "../ProductIcon";
+import ProductCreatedSuccess from "../../componenetsss/ProductCreatedSuccess";
 
 import "./NewProduct.css";
 import "../../componenetsss/SkeletonForm.css";
@@ -96,6 +97,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Initialize form fields with draft values if available
   const [formData, setFormData] = useState({
@@ -282,6 +284,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   };
 
   const handleFinalSubmit = async () => {
+    console.log('🚀 handleFinalSubmit called');
     // First ensure configuration is saved
     if (configRef.current) {
       const ok = await configRef.current.submit();
@@ -294,11 +297,15 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
     setIsSaving(true);
     try {
+      console.log('📞 Calling finalizeProduct with ID:', createdProductId);
       const response = await finalizeProduct(createdProductId);
+      console.log('📞 Finalize product response:', response);
       if (response.success) {
-        // Show success message and close the form
-        console.log('Product created and finalized successfully!');
-        onClose();
+        // Show success component instead of closing
+        console.log('✅ Product created and finalized successfully!');
+        console.log('🎯 Setting showSuccess to true');
+        setShowSuccess(true);
+        console.log('🎯 showSuccess state should now be true');
       } else {
         throw new Error(response.message || 'Failed to finalize product');
       }
@@ -309,6 +316,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleGoToAllProducts = () => {
+    navigate('/get-started/products');
   };
 
   const gotoStep = async (index: number, skipSave: boolean = false) => {
@@ -736,22 +747,34 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   return (
     <>
-      <TopBar
-        title="Create New Product"
-        onBack={() => hasUnsavedChanges ? setShowSavePrompt(true) : onClose()}
-        cancel={{ 
-          onClick: () => setShowDeleteConfirm(true),
-          disabled: !hasAnyRequiredInput
-        }}
-        save={{ 
-          onClick: handleSaveDraft, 
-          label: isDraftSaved ? "Saved!" : "Save as Draft",
-          saved: isDraftSaved,
-          saving: isDraftSaving,
-          labelWhenSaved: "Saved as Draft",
-          disabled: !hasAnyRequiredInput
-        }}
-      />
+      {console.log('🔍 Rendering NewProduct, showSuccess:', showSuccess, 'productName:', formData.productName)}
+      {showSuccess ? (
+        <>
+          {console.log('🎉 Rendering ProductCreatedSuccess component')}
+          <ProductCreatedSuccess
+            productName={formData.productName}
+            onGoAllProducts={handleGoToAllProducts}
+          />
+        </>
+      ) : (
+        <>
+          {console.log('📝 Rendering normal product form')}
+          <TopBar
+            title="Create New Product"
+            onBack={() => hasUnsavedChanges ? setShowSavePrompt(true) : onClose()}
+            cancel={{ 
+              onClick: () => setShowDeleteConfirm(true),
+              disabled: !hasAnyRequiredInput
+            }}
+            save={{ 
+              onClick: handleSaveDraft, 
+              label: isDraftSaved ? "Saved!" : "Save as Draft",
+              saved: isDraftSaved,
+              saving: isDraftSaving,
+              labelWhenSaved: "Saved as Draft",
+              disabled: !hasAnyRequiredInput
+            }}
+          />
 
       <div className="np-viewport">
         <div className="np-card">
@@ -1171,10 +1194,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   const ok = await configRef.current.submit();
                                   if (!ok) return;
                                   // 2️⃣ finalize product
+                                  console.log('📞 Calling finalizeProduct from inline handler with ID:', createdProductId);
                                   const resp = await finalizeProduct(createdProductId);
+                                  console.log('📞 Finalize product response from inline handler:', resp);
                                   if (resp.success) {
-                                    console.log('Product created and finalized successfully!');
-                                    onClose();
+                                    console.log('✅ Product created and finalized successfully from inline handler!');
+                                    console.log('🎯 Setting showSuccess to true from inline handler');
+                                    setShowSuccess(true);
                                   } else {
                                     throw new Error(resp.message || 'Failed to finalize product');
                                   }
@@ -1292,6 +1318,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         }}
         onCancel={() => setShowDeleteConfirm(false)}
       />
+        </>
+      )}
     </>
   );
 }

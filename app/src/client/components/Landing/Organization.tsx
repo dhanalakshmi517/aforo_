@@ -306,11 +306,11 @@ const Organization: React.FC = () => {
             <filter id="filter0_f_12072_37366" x="-101.8" y="-0.000198364" width="487.6" height="457.834" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
               <feFlood floodOpacity="0" result="BackgroundImageFix"/>
               <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-              <feGaussianBlur stdDeviation="34.4" result="effect1_foregroundBlur_12072_37366"/>
+              <feGaussianBlur stdDeviation="30.4" result="effect1_foregroundBlur_12072_37366"/>
             </filter>
             <linearGradient id="paint0_linear_12072_37366" x1="142" y1="128.8" x2="142" y2="329.034" gradientUnits="userSpaceOnUse">
               <stop stopColor="#EDF8FD"/>
-              <stop offset="1" stopColor="#0092DF"/>
+              <stop offset="1" stopColor="#ade1feff"/>
             </linearGradient>
           </defs>
         </svg>
@@ -435,31 +435,32 @@ contact us to explore how we can help your company get started.
   <option value="OTHER">Other</option>
 </select>
 
-                  {selectedRole === 'OTHER' && (
-                    <div className="org-field other-role-input" style={{ marginTop: '8px', width: '100%' }}>
-                      <label htmlFor="otherRole" className="form-label">
-                        Specify your role
-                      </label>
-                      <input
-                        type="text"
-                        id="otherRole"
-                        placeholder="Specify your role"
-                        value={otherRole}
-                        onChange={(e) => setOtherRole(e.target.value)}
-                        className={`field-input ${!otherRole.trim() && errors.role ? 'error' : ''}`}
-                        style={{ width: '100%' }}
-                      />
-                      {!otherRole.trim() && errors.role && (
-                        <span className="error-msg">Specify your role</span>
-                      )}
-                    </div>
-                  )}
                   {errors.role && selectedRole !== 'OTHER' && (
                     <span className="error-msg">{errors.role}</span>
                   )}
                 </div>
               </div>
             </div>
+
+            {selectedRole === 'OTHER' && (
+              <div className="org-field other-role-input" style={{ marginTop: '8px', width: '100%' }}>
+                <label htmlFor="otherRole" className="form-label">
+                  Specify your role
+                </label>
+                <input
+                  type="text"
+                  id="otherRole"
+                  placeholder="Specify your role"
+                  value={otherRole}
+                  onChange={(e) => setOtherRole(e.target.value)}
+                  className={`field-input ${!otherRole.trim() && errors.role ? 'error' : ''}`}
+                  style={{ width: '100%' }}
+                />
+                {!otherRole.trim() && errors.role && (
+                  <span className="error-msg">Specify your role</span>
+                )}
+              </div>
+            )}
             <div className="org-field">
   <label htmlFor="empSize" className="form-label">
     Employee size of the company
@@ -589,7 +590,7 @@ contact us to explore how we can help your company get started.
             </div>
 
             <div className="org-field">
-              <label htmlFor="help" className="form-label">How can we help you?</label>
+              <label htmlFor="help" className="form-label">How can we help you? <span className="optional-text">(optional)</span></label>
               <textarea
                 id="help"
                 name="help"
