@@ -16,6 +16,7 @@ import { getProducts as getProductsApi, BASE_URL as API_BASE_URL, API_ORIGIN } f
 import { ProductIconData } from '../Products/ProductIcon';
 import axios from 'axios';
 import { getAuthHeaders } from '../../utils/auth';
+import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 
 /* ---------------- Types ---------------- */
 export interface RatePlan {
@@ -1047,9 +1048,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
                       <td>{renderPaymentType(plan)}</td>
                       <td>{renderCreatedOn(plan)}</td>
                       <td>
-                        <span className={`status-badge ${String(plan.status || '').toLowerCase() || 'default'}`}>
-                          {formatStatus(plan.status)}
-                        </span>
+                        <StatusBadge
+                          label={formatStatus(plan.status)}
+                          variant={String(plan.status || '').toLowerCase() as Variant}
+                          size="sm"
+                        />
                       </td>
                       <td>
                         <div className="product-action-buttons">

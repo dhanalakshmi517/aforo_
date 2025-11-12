@@ -1,8 +1,6 @@
 .pi-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:9999;pointer-events:auto;-webkit-user-select:none;user-select:none}
-.pi-modal{position:relative;width:481px;height:426px;border-radius:12px;background:#FFF;padding:24px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px;overflow:hidden}
+.pi-modal{position:relative;width:481px;height:426px;border-radius:12px;background:#FFF;padding:24px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;overflow:hidden}
 .pi-close{position:absolute;top:8px;right:8px;background:transparent;border:0;cursor:pointer;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
-.pi-search{display:flex;align-items:center;gap:8px;border:1px solid #D5D4DF;border-radius:8px;padding:8px 12px;width:100%;background:#FFF;box-sizing:border-box}
-.pi-search svg{flex-shrink:0;width:20px;height:20px}
 .pi-search input{border:0;outline:none;flex:1 0 0;min-width:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;text-overflow:ellipsis;background:transparent;font-family:"IBM Plex Sans";font-size:14px;line-height:20px;font-weight:400;color:#1A1A1A}
 .pi-search input::placeholder{color:#C3C2D0}
 .pi-grid{flex:1;max-height:250px;overflow-y:scroll;overflow-x:hidden;margin-top:16px;display:grid;grid-template-columns:repeat(4,92px);justify-content:flex-start;row-gap:24px;column-gap:16px;padding-right:8px;box-sizing:border-box;scrollbar-width:thin;scrollbar-color:#C3C2D0 transparent} .pi-grid::-webkit-scrollbar{width:5px} .pi-grid::-webkit-scrollbar-track{background:transparent} .pi-grid::-webkit-scrollbar-thumb{background:#C3C2D0;border-radius:2px;width:4px}
@@ -17,10 +15,7 @@
     box-sizing: border-box;
   
     border-radius: 12px;
-    border: 0.6px solid var(--border-border-2, #D5D4DF);
-    background:
-      linear-gradient(0deg, rgba(1, 69, 118, 0.10) 0%, rgba(1, 69, 118, 0.10) 100%),
-      var(--surface-layer-4, #FFF);
+    background: transparent;
   
     display: flex;
     padding: 8px;

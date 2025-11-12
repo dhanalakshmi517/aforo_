@@ -5,6 +5,7 @@ import { login } from '../../api';
 import { setAuthData, type LoginResponse } from '../../utils/auth';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import aforoLogo from './aforo.aifinal .svg';
+import dashboardBlurBg from './sign in with dashboard blur.svg';
 import './SignIn.css';
 
 const PERSONAL_DOMAINS = new Set([
@@ -90,8 +91,26 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="signin-page">
+    <div className="signin-page" style={{backgroundImage: `url(${dashboardBlurBg})`}}>
       <div className="signin-card">
+        <div className="signin-background-decoration">
+         <svg xmlns="http://www.w3.org/2000/svg" width="381" height="418" viewBox="0 0 381 418" fill="none">
+  <g opacity="0.4" filter="url(#filter0_f_12301_9099)">
+    <path d="M488.199 376.709C503.63 402.582 511.346 415.518 509.45 425.169C507.555 434.821 497.376 434.425 477.018 433.633L152.062 420.996C121.521 419.809 106.25 419.215 101.278 406.436C96.3046 393.658 106.138 380.281 125.805 353.526L301.044 115.136C309.1 104.176 313.128 98.6966 318.692 100.264C324.256 101.831 328.998 109.781 338.481 125.682L488.199 376.709Z" fill="url(#paint0_linear_12301_9099)"/>
+  </g>
+  <defs>
+    <filter id="filter0_f_12301_9099" x="0" y="0" width="609.734" height="534.002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="30" result="effect1_foregroundBlur_12301_9099"/>
+    </filter>
+    <linearGradient id="paint0_linear_12301_9099" x1="262.252" y1="574.64" x2="524.1" y2="266.911" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EDF8FD"/>
+      <stop offset="1" stop-color="#0092DF"/>
+    </linearGradient>
+  </defs>
+</svg>
+        </div>
         <div className="signin-header">
         <img src={aforoLogo} alt="aforo.ai" className="signin-logo" />
         </div>
@@ -107,7 +126,6 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
             placeholder="name@company.com"
             value={email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setEmail(e.currentTarget.value); if (emailError) setEmailError(null); }}
-            onBlur={() => setEmailError(validateEmail(email))}
             autoComplete="username"
             className={`field-input ${emailError ? 'is-error' : ''}`}
             required
@@ -126,7 +144,6 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
               placeholder="Password"
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.currentTarget.value); if (passwordError) setPasswordError(null); }}
-              onBlur={() => setPasswordError(validatePassword(password))}
               autoComplete="current-password"
               className={`field-input ${passwordError ? 'is-error' : ''}`}
               required

@@ -27,6 +27,7 @@ import Landing from './components/Landing/Landing';
 import Organization from './components/Landing/Organization';
 import { ProtectedRoute } from './components/Common/ProtectedRoute';
 import SideNavbar from './components/SideNavbar/SideNavbar';
+import DashboardGallery from './components/Dashboard/DashboardGallery';
 
 const customersLoader = () => import('./components/Customers/Customers');
 const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
@@ -132,6 +133,7 @@ export default function App() {
     if (location.pathname === '/get-started/metering') return 'Billable Metrics';
     if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
     if (location.pathname === '/get-started/subscriptions') return 'Purchases';
+    if (location.pathname === '/get-started/dashboards') return 'Dashboards';
     if (location.pathname === '/get-started/settings') return 'Settings';
     return 'Get Started';
   })();
@@ -258,6 +260,12 @@ export default function App() {
                     }
                   }}
                   hidden={!showSidebar}
+                />
+                <DashboardGallery
+                  onCardClick={(card) => {
+                    console.log('Dashboard card clicked:', card);
+                    // You can add navigation logic here if needed
+                  }}
                 />
               </ProtectedRoute>
             }

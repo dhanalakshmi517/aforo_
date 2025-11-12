@@ -1,0 +1,178 @@
+:root {
+  --dg-surface: #ffffff;
+  --dg-border: #e6e7eb;
+  --dg-muted: #6b7280;
+  --dg-title: #111827;
+  --dg-bg: #f5f7fb;
+  --dg-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+  --dg-radius-lg: 18px;
+  --dg-radius-sm: 12px;
+  --dg-pill: #fff2f2;
+  --dg-pill-dot: #f04438; /* red dot */
+}
+
+html, body {
+  background: var(--dg-bg);
+}
+
+/* Page container is pushed right to leave space for your left header/sidebar */
+.dg-page {
+  margin-left: 250px;        /* requested left offset */
+  padding: 18px 20px 32px;
+}
+
+/* Topbar row inside the page area */
+.dg-topbar-spacer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 16px;
+}
+
+.dg-page-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dg-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dg-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--dg-border);
+  background: var(--dg-surface);
+  box-shadow: 0 1px 0 #fff inset;
+  cursor: pointer;
+}
+
+/* Grid of cards */
+.dg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+@media (max-width: 1280px) {
+  .dg-grid { grid-template-columns: repeat(3, minmax(240px, 1fr)); }
+}
+@media (max-width: 980px) {
+  .dg-grid { grid-template-columns: repeat(2, minmax(240px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .dg-grid { grid-template-columns: 1fr; }
+}
+
+/* Card */
+.dg-card {
+  background: var(--dg-surface);
+  border: 1px solid var(--dg-border);
+  border-radius: var(--dg-radius-lg);
+  box-shadow: var(--dg-shadow);
+  overflow: hidden;
+  outline: none;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.dg-card:hover {
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.12);
+  border-color: #d9dbe1;
+}
+
+/* Image block */
+.dg-media {
+  position: relative;
+  padding: 0;
+}
+
+.dg-img {
+  width: 100%;
+  height: 140px;
+  object-fit: contain;          /* show full image without distortion */
+  background: #eef1f6;
+  border-radius: calc(var(--dg-radius-lg) - 8px);
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Small icon chip bottom-left over the image */
+.dg-corner {
+  position: absolute;
+  left: 24px;
+  bottom: 22px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  padding: 6px;
+  background: #1f2937;
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SVG icons inside the corner */
+.dg-corner svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Text block */
+.dg-meta {
+  padding: 2px 18px 18px;
+}
+
+.dg-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dg-card-title {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dg-title);
+}
+
+/* Live pill */
+.dg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--dg-pill);
+  border: 1px solid #ffd4d4;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dg-pill-dot);
+  box-shadow: 0 0 0 2px #ffe5e5;
+}
+
+/* Description */
+.dg-desc {
+  margin: 8px 0 4px;
+  color: var(--dg-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}

@@ -15,6 +15,7 @@ import UsageEmptyImg from "./usage.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
 import PrimaryButton from '../componenetsss/PrimaryButton';
+import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 
 // Props for Metering component
 interface MeteringProps {
@@ -173,12 +174,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
 
   const filteredMetrics = metrics
     .filter((m) =>
-      m.usageMetric.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.productName.toLowerCase().includes(searchQuery.toLowerCase())
+      m.usageMetric?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.productName?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      const aDraft = String(a.status).toLowerCase() === 'draft';
-      const bDraft = String(b.status).toLowerCase() === 'draft';
+      const aDraft = a.status?.toLowerCase() === 'draft';
+      const bDraft = b.status?.toLowerCase() === 'draft';
       if (aDraft && !bDraft) return -1;
       if (!aDraft && bDraft) return 1;
       return 0;
@@ -215,16 +216,16 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               <td>{display(metric.productName)}</td>
               <td>{display(metric.unit)}</td>
               <td>
-                <span
-                  className={`status-tag ${String(metric.status).toLowerCase() === "active" ? "active" : "inactive"}`}
-                >
-                  {formatStatus(metric.status)}
-                </span>
+                <StatusBadge
+                  label={formatStatus(metric.status)}
+                  variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
+                  size="sm"
+                />
               </td>
               <td>{display(metric.createdOn)}</td>
               
               <td className="actions-cell"><div className="product-action-buttons">
-                {String(metric.status).toLowerCase() === 'draft' ? (
+                {metric.status?.toLowerCase() === 'draft' ? (
                   <RetryIconButton
                     onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
                     title="Continue editing draft"

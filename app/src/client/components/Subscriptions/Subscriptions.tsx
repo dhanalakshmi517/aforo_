@@ -13,16 +13,10 @@ import '../Rateplan/RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
 import { getAuthHeaders } from '../../utils/auth';
 import PrimaryButton from '../componenetsss/PrimaryButton';
+import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 
 // Empty cart SVG icon (file URL)
 import purchaseSvg from './purchase.svg';
-
-const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const normalized = (status || '').toLowerCase();
-  const variant = normalized.includes('active') ? 'active' : normalized.includes('draft') ? 'draft' : 'default';
-  const label = status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : 'N/A';
-  return <span className={`status-badge status-badge--${variant}`}>{label}</span>;
-};
 
 // ---- helpers (mirror Customers.tsx / RatePlans.tsx) ----
 const initialsFrom = (name?: string) =>
@@ -371,7 +365,13 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                   <td>{purchased}</td>
 
                   {/* Status */}
-                  <td><StatusBadge status={sub.status} /></td>
+                  <td>
+                    <StatusBadge
+                      label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
+                      variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
+                      size="sm"
+                    />
+                  </td>
 
                   {/* Actions (Download, Edit/Resume, Delete) */}
                   <td className="actions-cell">

@@ -12,6 +12,7 @@ import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import RetryIconButton from '../componenetsss/RetryIconButton';
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
+import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -37,13 +38,6 @@ const Notification: React.FC<NotificationState> = ({ type, message }) => {
       </div>
     </div>
   );
-};
-
-const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const normalized = (status || "").toLowerCase();
-  const variant = normalized.includes("active") ? "active" : normalized.includes("draft") ? "draft" : "default";
-  const label = status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "N/A";
-  return <span className={`status-badge status-badge--${variant}`}>{label}</span>;
 };
 
 const InfoIcon: React.FC = () => (
@@ -362,7 +356,13 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                       </td>
 
                       {/* 3) Status */}
-                      <td><StatusBadge status={customer.status} /></td>
+                      <td>
+                        <StatusBadge
+                          label={customer.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1).toLowerCase() : "N/A"}
+                          variant={customer.status?.toLowerCase().includes("active") ? "active" : customer.status?.toLowerCase().includes("draft") ? "draft" : "archived" as Variant}
+                          size="sm"
+                        />
+                      </td>
 
                       {/* 4) Created On */}
                       <td>{formatDateStr(customer.createdOn)}</td>
