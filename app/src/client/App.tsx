@@ -50,6 +50,8 @@ const createSubscriptionLoader = () => import('./components/Subscriptions/Create
 const CreateSubscription = React.lazy(createSubscriptionLoader) as React.ComponentType<any>;
 const dataIngestionLoader = () => import('./components/DataIngestion/DataIngestionPage');
 const DataIngestionPage = React.lazy(dataIngestionLoader) as React.ComponentType<any>;
+const integrationsLoader = () => import('./components/Integrations/Integrations');
+const Integrations = React.lazy(integrationsLoader) as React.ComponentType<any>;
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
@@ -134,6 +136,7 @@ export default function App() {
     if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
     if (location.pathname === '/get-started/subscriptions') return 'Purchases';
     if (location.pathname === '/get-started/dashboards') return 'Dashboards';
+    if (location.pathname === '/get-started/integrations') return 'Integrations';
     if (location.pathname === '/get-started/settings') return 'Settings';
     return 'Get Started';
   })();
@@ -175,6 +178,7 @@ export default function App() {
     editPlanLoader();
     editCustomerLoader();
     dataIngestionLoader(); // Prefetch data ingestion chunk
+    integrationsLoader(); // Prefetch integrations chunk
   }, []);
 
   // Small reusable spinner for route-level Suspense
@@ -227,6 +231,8 @@ export default function App() {
                           ? 'subscriptions'
                           : tab === 'Data Ingetion'
                           ? 'data-ingetion'
+                          : tab === 'Integrations'
+                          ? 'integrations'
                           : tab.toLowerCase().replace(/\s+/g, '-');
                       navigate(`/get-started/${slug}`);
                     }
@@ -255,6 +261,8 @@ export default function App() {
                           ? 'subscriptions'
                           : tab === 'Data Ingetion'
                           ? 'data-ingetion'
+                          : tab === 'Integrations'
+                          ? 'integrations'
                           : tab.toLowerCase().replace(/\s+/g, '-');
                       navigate(`/get-started/${slug}`);
                     }
@@ -337,6 +345,8 @@ export default function App() {
                           ? 'subscriptions'
                           : tab === 'Data Ingetion'
                           ? 'data-ingetion'
+                          : tab === 'Integrations'
+                          ? 'integrations'
                           : tab.toLowerCase().replace(/\s+/g, '-');
                       navigate(`/get-started/${slug}`);
                     }}
@@ -627,6 +637,45 @@ export default function App() {
                     <div className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                       <Suspense fallback={RouteSpinner}>
                         <DataIngestionPage />
+                      </Suspense>
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Integrations */}
+          <Route
+            path="/get-started/integrations"
+            element={
+              <ProtectedRoute>
+                <div className="flex flex-col">
+                  <div className="flex-1">
+                    <SideNavbar
+                      activeTab={currentTab}
+                      onTabClick={(tab) => {
+                        if (tab === 'Settings') {
+                          navigate('/get-started/settings');
+                        } else {
+                          const slug =
+                            tab === 'Billable Metrics'
+                              ? 'metering'
+                              : tab === 'Purchases'
+                              ? 'subscriptions'
+                              : tab === 'Data Ingetion'
+                              ? 'data-ingetion'
+                              : tab === 'Integrations'
+                              ? 'integrations'
+                              : tab.toLowerCase().replace(/\s+/g, '-');
+                          navigate(`/get-started/${slug}`);
+                        }
+                      }}
+                      hidden={!showSidebar}
+                    />
+                    <div className="flex-1">
+                      <Suspense fallback={RouteSpinner}>
+                        <Integrations />
                       </Suspense>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 import type { Customer } from "./Customers";
 import { getAuthHeaders, getAuthHeadersJSON, isAuthenticated, logout } from "../../utils/auth";
 
-const BASE_URL = "http://43.206.110.213:8081/v1/api";
+const BASE_URL = "http://44.201.19.187:8081/v1/api";
 
 /**
  * Handle API response errors and authentication

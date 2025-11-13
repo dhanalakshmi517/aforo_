@@ -1,0 +1,114 @@
+.integrations-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  margin-left: 240px; /* Account for sidebar width */
+  width: calc(100% - 240px);
+}
+
+.integrations-content {
+  padding: 24px 20px 24px 28px; /* Right padding reduced to allow cards to reach edge */
+  max-width: none;
+  margin: 0;
+}
+
+.integrations-grid {
+  display: flex;
+  gap: 16px; /* Gap between each card */
+  margin-top: 0;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Main card container - Layout specs from first image */
+.integration-card {
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0; /* Allow cards to shrink if needed */
+  background: white;
+  border: 1px solid var(--border-border-1, #E8ECF3);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.integration-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Icon container - Second image specs */
+.integration-card-icon {
+  display: flex;
+  padding: 11.636px;
+  align-items: center;
+  gap: 3.879px;
+  border-radius: 11.636px;
+  border: 0.97px solid var(--border-border-1, #E8ECF3);
+}
+
+/* Title - Third image specs */
+.integration-card-title {
+  align-self: stretch;
+  color: var(--text-text-darkest, #1A2126);
+  text-align: center;
+  margin: 0;
+  
+  /* body/md/bold */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+/* Description - Fourth image specs */
+.integration-card-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  align-self: stretch;
+  overflow: hidden;
+  color: var(--text-text-medium, #909599);
+  text-overflow: ellipsis;
+  text-align: center;
+  margin: 0;
+  
+  /* body/sm/reg */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-sm, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+/* Sync button - Fifth image specs */
+.integration-card-sync-btn {
+  display: flex;
+  padding: 11.636px;
+  align-items: center;
+  gap: 3.879px;
+  border-radius: 11.636px;
+  border: 0.97px solid var(--border-border-1, #E8ECF3);
+  background: white;
+  color: var(--text-text-darkest, #1A2126);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  
+  /* body/sm/reg */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-sm, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm, 18px);
+}
+
+.integration-card-sync-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #d1d5db;
+}

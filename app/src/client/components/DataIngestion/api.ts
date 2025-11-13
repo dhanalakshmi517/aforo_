@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthHeaders } from '../../utils/auth';
 
-const INGESTION_BASE_URL = 'http://43.207.67.221:8088/api/ingestion';
+const INGESTION_BASE_URL = 'http://54.175.109.188:8088/api/ingestion';
 
 export interface FileIngestResponse {
   success: boolean;

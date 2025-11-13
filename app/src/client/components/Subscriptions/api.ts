@@ -53,10 +53,10 @@ export interface Subscription {
   [key: string]: any;
 }
 
-const SUBSCRIPTIONS_BASE_URL = 'http://13.113.70.183:8084/api/subscriptions';
-const CUSTOMERS_BASE_URL = 'http://43.206.110.213:8081/v1/api/customers';
-const PRODUCTS_BASE_URL = 'http://54.238.204.246:8080/api/products';
-const RATE_PLANS_URL = 'http://54.238.204.246:8080/api/rateplans';
+const SUBSCRIPTIONS_BASE_URL = 'http://52.90.125.218:8084/api/subscriptions';
+const CUSTOMERS_BASE_URL = 'http://44.201.19.187:8081/v1/api/customers';
+const PRODUCTS_BASE_URL = 'http://3.208.93.68:8080/api/products';
+const RATE_PLANS_URL = 'http://3.208.93.68:8080/api/rateplans';
 
 export const getProducts = async (): Promise<Product[]> => {
   try {

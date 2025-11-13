@@ -28,7 +28,7 @@ export interface OrganizationPayload {
   marketingOptIn: boolean;
 }
 
-const BASE_URL = "http://43.206.110.213:8081";
+const BASE_URL = "http://44.201.19.187:8081";
 
 /**
  * Create a new organization contact from Landing form.

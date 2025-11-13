@@ -14,6 +14,7 @@ export interface HeaderProps {
   statusLabel?: string;
   showPrimary?: boolean;
   showKongButton?: boolean;
+  showSearch?: boolean;
   searchDisabled?: boolean;
   filterDisabled?: boolean;
 }
@@ -30,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({
   onNotificationsClick,
   showPrimary = true,
   showKongButton = true,
+  showSearch = true,
   searchDisabled = false,
   filterDisabled = false
 }) => {
@@ -65,6 +67,7 @@ const Header: React.FC<HeaderProps> = ({
 
       <div className="ph-header-actions">
         {/* Search */}
+        {showSearch && (
         <div className={searchCls} role="search" aria-disabled={searchDisabled}>
           <span className="rp-search-icon" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -96,6 +99,7 @@ const Header: React.FC<HeaderProps> = ({
             </button>
           )}
         </div>
+        )}
 
         {/* Filter */}
         {onFilterClick && (
