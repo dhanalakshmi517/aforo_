@@ -1,7 +1,7 @@
 import type { AccountDetailsData } from './components/Customers/AccountDetailsForm';
 import { getAuthHeaders, isAuthenticated, logout } from './utils/auth';
 
-const BASE_URL = 'http://43.206.110.213:8081/v1/api';
+const BASE_URL = 'http://44.201.19.187:8081/v1/api';
 
 export interface LoginPayload {
   businessEmail: string;

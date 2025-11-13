@@ -8,10 +8,10 @@ type BackAction = {
   ariaLabel?: string;
 };
 
-type CancelAction = { label?: string; onClick?: () => void; disabled?: boolean; title?: string };
+type CancelAction = { label?: React.ReactNode; onClick?: () => void; disabled?: boolean; title?: string };
 type SaveAction = {
-  label?: string;
-  labelWhenSaved?: string;
+  label?: React.ReactNode;
+  labelWhenSaved?: React.ReactNode;
   saved?: boolean;
   saving?: boolean;
   disabled?: boolean;

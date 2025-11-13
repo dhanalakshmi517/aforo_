@@ -1,29 +1,28 @@
 @import "../Variables/Variables.css";
 .rate-plan-header {
-  margin-top: -5px;
+  display: flex;
+  width: 100%;
+  padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 28px);
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-layer-4, #FFF);
   position: relative;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 70px;
-  padding: 0 20px 0 10px; /* match 240px sidebar */
   box-sizing: border-box;
-  background: transparent;
 }
 
 .rate-plan-header h2 {
   margin: 0;
   padding: 0;
-  color: var(--color-neutral-1700);
-
-/* heading/h5/bold */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h5);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-heading-h5); /* 140% */
-  flex: 1 1 auto;
+  color: var(--text-text-darkest, #1A2126);
+  
+  /* heading/h6/bold */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-heading-h6, 18px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+  flex: 0 0 auto;
 }
 
 /* Renamed to avoid conflicts with RatePlan.css */

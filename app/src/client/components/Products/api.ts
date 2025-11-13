@@ -13,7 +13,7 @@ export type Product = {
   productIcon?: string; // JSON string containing structured icon data
 };
 
-export const BASE_URL = 'http://54.238.204.246:8080/api';
+export const BASE_URL = 'http://3.208.93.68:8080/api';
 // Useful if you ever need to build absolute URLs without doubling "/api"
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 
