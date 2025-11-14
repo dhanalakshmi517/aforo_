@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchRatePlans, deleteRatePlan, fetchRatePlanWithDetails, fetchBillableMetricById } from './api';
+import { fetchRatePlans, deleteRatePlan, fetchRatePlanWithDetails, fetchBillableMetricById, checkApiHealth } from './api';
 import './RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
 import { useNavigate } from 'react-router-dom';
@@ -157,6 +157,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const loadRatePlans = async () => {
     try {
       setLoading(true);
+      
+      // First check API health
+      console.log('🏥 Checking API health before fetching rate plans...');
+      const isHealthy = await checkApiHealth();
+      if (!isHealthy) {
+        console.warn('⚠️ API health check failed, but attempting to fetch rate plans anyway...');
+      }
+      
       const data = await fetchRatePlans();
       console.log('RatePlans - All Rate Plans:', data);
       setRatePlansState(data);
