@@ -3,7 +3,7 @@
 /* Section frame */
 .sec {
   padding: 80px 0;                
-  background: transparent;
+  background: #fff;
   color: var(--color-neutral-900, #0b2430);
   font-family: var(--font-family-primary, Inter, system-ui, sans-serif);
 }

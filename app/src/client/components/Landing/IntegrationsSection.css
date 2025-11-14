@@ -23,7 +23,7 @@
   padding: var(--int-gap-y) 0;
   color: var(--text-900);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: transparent;
+  background: #fff;
 }
 
 .int__inner{

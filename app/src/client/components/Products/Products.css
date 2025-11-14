@@ -3,6 +3,12 @@
 
 body {
   font-family: "IBM Plex Sans", sans-serif;
+  background-color: white !important;
+}
+
+/* Global white background override for Products page */
+html, body, #root, .app, .main-content {
+  background-color: white !important;
 }
 .products-container {
   /* Use full available width; add side padding for consistent spacing */
@@ -12,7 +18,7 @@ body {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-y: auto;
-  background: var(--color-neutral-50); /* Light background color for entire page */
+  background: white; /* White background color for entire page */
 
   /* make it occupy viewport height minus navbar (adjust 64px if needed) */
   height: auto;
@@ -63,7 +69,7 @@ body {
   box-sizing: border-box;
   margin-left: 256px;
   padding-right: 10px;
-  background: var(--color-neutral-50); /* Light background color for entire page */
+  background: #FFFFFF; /* White background color for entire page */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height coverage */
 }
@@ -72,6 +78,31 @@ body {
 @media (max-width: 991px) { .rate-plan-product-container { margin-left: 0; width: 100%; } }
 @media (max-width: 768px) {
   .rate-plan-product-container { width: 100%; margin-left: 0; }
+}
+
+.rate-plan-container {
+  padding: 0;
+  width: calc(100% - 256px - 10px);
+  max-width: none;
+  box-sizing: border-box;
+  margin-left: 256px;
+  padding-right: 10px;
+  background: white !important;
+  box-shadow: none;
+  min-height: 100vh;
+}
+
+@media (max-width: 991px) { 
+  .rate-plan-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}
+@media (max-width: 768px) {
+  .rate-plan-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
 }
 .products-table th:first-child {
   border-top-left-radius: var(--border-radius-sm);
@@ -418,7 +449,7 @@ line-height: var(--line-height-body-lg);
   width:100%;
   margin-right: 20px;
   margin-bottom: 20px; /* constant viewport gap */
-  background-color: var(--color-neutral-white);
+  background-color:white;
   border-radius: var(--border-radius-lg);
   padding: 12px;
   /* border: 1px solid var(--color-neutral-200); */
@@ -484,7 +515,7 @@ line-height: var(--line-height-body-lg);
 .products-table {
   border-collapse: separate; /* Changed from collapse to separate for sticky headers */
   border-spacing: 0; /* Keep borders tight */
-  background-color: var(--color-neutral-white);
+  background-color:white;
   border-radius: var(--border-radius-sm);
   display: table; /* Ensure proper table display */
 
@@ -655,6 +686,10 @@ line-height: var(--line-height-body-lg);
   table-layout: auto; /* allow columns to size based on content */
 }
 
+.products-table tr {
+  background-color: #FFFFFF;
+}
+
 /* Apply bottom border radius */
 .products-table tr:last-child td:first-child {
   border-bottom-left-radius: var(--border-radius-sm);
@@ -756,6 +791,7 @@ line-height: var(--line-height-body-lg);
   overflow: hidden;
   color: var(--color-neutral-1700);
   border-bottom: 1px solid var(--color-neutral-200);
+  background-color: #FFFFFF;
 
 
 /* body/sm/med */

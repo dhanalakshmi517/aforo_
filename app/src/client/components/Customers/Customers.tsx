@@ -95,7 +95,7 @@ const formatDateStr = (iso?: string) => {
   return iso;
 };
 
-const FILE_HOST = "http://43.206.110.213:8081";
+const FILE_HOST = "http://44.201.19.187:8081";
 const absolutizeUpload = (path: string) => {
   const clean = path.replace(/\\/g, "/").trim();
   if (/^https?:\/\//i.test(clean)) return clean;

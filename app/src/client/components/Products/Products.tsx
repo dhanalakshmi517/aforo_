@@ -466,6 +466,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   // Mini ProductIcon renderer for the table
   const TableProductIcon: React.FC<{ iconData: ProductIconData }> = ({ iconData }) => {
     const tile = iconData.tileColor ?? '#CC9434';
+    
+    // Determine if this icon should be circular based on its ID
+    const isCircular = iconData.id.includes('circle') || iconData.id.includes('round') || parseInt(iconData.id) % 3 === 0;
+    const borderRadius = isCircular ? '50%' : '6px';
 
     const hexToRgba = (hex: string, opacity: number) => {
       const cleanHex = hex.startsWith('#') ? hex : `#${hex}`;
@@ -495,31 +499,31 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             top: 4,
             width: 34,
             height: 34,
-            borderRadius: 6,
+            borderRadius: borderRadius,
             backgroundColor: tile,
             background: tile,
           }}
         />
         {/* GLASS FOREGROUND TILE */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%) translate(9px, 6px)',
-            width: 34,
-            height: 34,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: 6,
-            border: '0.6px solid #FFF',
-            backgroundColor: hexToRgba(tile, 0.10),
-            background: hexToRgba(tile, 0.10),
-            backdropFilter: 'blur(3.875000238418579px)',
-            // boxShadow: 'inset 0 1px 4px rgba(255,255,255,0.35)',
-          }}
-        >
+       <div
+  style={{
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%) translate(9px, 6px)',
+    width: 34,
+    height: 34,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: '12px', // ⬅️ smoother corners
+    border: '0.6px solid #FFF',
+    backgroundColor: hexToRgba(tile, 0.10),
+    background: hexToRgba(tile, 0.10),
+    backdropFilter: 'blur(3.875000238418579px)',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.15)', // optional: adds soft depth
+  }}
+>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
