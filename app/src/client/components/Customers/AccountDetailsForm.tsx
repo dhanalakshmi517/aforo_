@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { InputField, SelectField } from '../Components/InputFields';
 import { checkEmailExists } from './api';
+import { getAuthHeaders } from '../../utils/auth';
 import './AccountDetailsForm.css';
 
 export interface AccountDetailsData {
@@ -75,16 +76,55 @@ const AccountDetailsForm: React.FC<Props> = ({
 
   // fetch country list once
   useEffect(() => {
-    fetch('http://43.206.110.213:8081/v1/api/meta/countries')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setCountryOptions(
-            data.map((c: { code: string; name: string }) => ({ label: c.name, value: c.code }))
-          );
+    const fetchCountries = async () => {
+      try {
+        console.log('Fetching countries from API...');
+        const response = await fetch('http://44.201.19.187:8081/v1/api/meta/countries', {
+          method: 'GET',
+          headers: getAuthHeaders(),
+        });
+        
+        console.log('Countries API response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-      })
-      .catch((err) => console.error('Failed to load countries', err));
+        
+        const data = await response.json();
+        console.log('Countries API response data:', data);
+        
+        if (Array.isArray(data)) {
+          const options = data.map((c: { code: string; name: string }) => ({ 
+            label: c.name, 
+            value: c.code 
+          }));
+          console.log('Setting country options:', options.length, 'countries');
+          setCountryOptions(options);
+        } else {
+          console.error('Countries API returned non-array data:', data);
+          // Fallback to basic country list
+          setCountryOptions([
+            { label: 'United States', value: 'US' },
+            { label: 'Canada', value: 'CA' },
+            { label: 'United Kingdom', value: 'GB' },
+            { label: 'India', value: 'IN' },
+            { label: 'Australia', value: 'AU' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Failed to load countries:', error);
+        // Fallback to basic country list
+        setCountryOptions([
+          { label: 'United States', value: 'US' },
+          { label: 'Canada', value: 'CA' },
+          { label: 'United Kingdom', value: 'GB' },
+          { label: 'India', value: 'IN' },
+          { label: 'Australia', value: 'AU' },
+        ]);
+      }
+    };
+    
+    fetchCountries();
   }, []);
 
   const Checkbox: React.FC<{ checked: boolean; onToggle: () => void }> = ({ checked, onToggle }) => (

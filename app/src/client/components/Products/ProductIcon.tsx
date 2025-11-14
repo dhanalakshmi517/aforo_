@@ -17,6 +17,10 @@ const ProductIcon: React.FC<{
 }> = ({ icon, onSelect }) => {
   const tile = icon.tileColor ?? '#CC9434';
   
+  // Determine if this icon should be circular based on its ID
+  const isCircular = icon.id.includes('circle') || icon.id.includes('round') || parseInt(icon.id) % 3 === 0;
+  const borderRadius = isCircular ? '50%' : '6px';
+  
   // Convert hex to rgba with 15% opacity for outer background
   const hexToRgba = (hex: string, opacity: number) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -59,7 +63,7 @@ const ProductIcon: React.FC<{
             top: 4,
             width: 34,
             height: 34,
-            borderRadius: 6,
+            borderRadius: borderRadius,
             backgroundColor: tile,
             background: tile,
           }}
@@ -77,7 +81,7 @@ const ProductIcon: React.FC<{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            borderRadius: 6,
+            borderRadius: borderRadius,
             border: '0.6px solid #FFF',
             backgroundColor: hexToRgba(tile, 0.10),
             background: hexToRgba(tile, 0.10),

@@ -13,6 +13,7 @@
   padding: 80px 80px;
   max-width: calc(100% - 160px);
   margin: 0 auto;
+  background: #fff;
 }
 
 /* Internal viewport - hidden scrollbar with wheel/touch pagination */

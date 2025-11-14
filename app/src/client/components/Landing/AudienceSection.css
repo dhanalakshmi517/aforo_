@@ -3,7 +3,7 @@
   --aud-gutter-m: 20px;
 }
 
-.aud { padding: 20px 0 80px; }
+.aud { padding: 20px 0 80px; background: #fff; }
 
 .aud__container {
   width: 100%;
