@@ -3,9 +3,15 @@ import { getAuthHeaders, logout } from './auth';
 
 // Request interceptor adds auth headers
 axios.interceptors.request.use(config => {
+  const authHeaders = getAuthHeaders();
+  console.log('🔧 Adding auth headers to request:', {
+    url: config.url,
+    method: config.method,
+    headers: authHeaders
+  });
   config.headers = {
     ...config.headers,
-    ...getAuthHeaders(),
+    ...authHeaders,
   } as any;
   return config;
 });
