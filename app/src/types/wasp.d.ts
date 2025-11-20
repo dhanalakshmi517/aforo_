@@ -22,11 +22,14 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export function useQuery<T, A>(query: (args: A, context: any) => Promise<T>, args?: A): {
+  export type UseQueryResult<T> = {
     data: T | undefined;
     isLoading: boolean;
     error: Error | undefined;
+    refetch: () => void;
   };
+  
+  export function useQuery<T, A>(query: (args: A, context: any) => Promise<T>, args?: A): UseQueryResult<T>;
 }
 
 declare module '@wasp/actions' {
@@ -60,10 +63,20 @@ declare module 'wasp/client/operations' {
   export { useAction } from '@wasp/actions';
   export function buildAndRegisterQuery<T>(name: string, query: () => Promise<T>): () => Promise<T>;
   export function updateIsUserAdminById(id: string): Promise<void>;
-  export function getPaginatedUsers(page: number): Promise<{
+  export function getPaginatedUsers(args: {
+    skip: number;
+    emailContains?: string;
+    isAdmin?: boolean;
+    subscriptionStatus?: string[];
+  }): Promise<{
     users: any[];
     totalPages: number;
   }>;
+  export function getAllFilesByUser(): Promise<any[]>;
+  export function getDownloadFileSignedURL(key: string): Promise<string>;
+  export function createFile(file: File): Promise<void>;
+  export function generateCheckoutSession(): Promise<void>;
+  export function getCustomerPortalUrl(): Promise<string>;
 }
 
 declare module '@wasp/auth/types' {
@@ -156,7 +169,13 @@ declare module 'wasp/client/router' {
     products: '/products',
     messages: '/messages',
     settings: '/settings',
-    account: '/account'
+    account: '/account',
+    AdminRoute: '/admin',
+    LoginRoute: '/auth/login',
+    AccountRoute: '/account',
+    AdminMessagesRoute: '/admin/messages',
+    LandingPageRoute: '/',
+    AdminDashboardRoute: '/admin/dashboard'
   } as const;
 
   export function Link(props: {
@@ -175,6 +194,11 @@ declare module 'wasp/client/router' {
 declare module 'wasp/client/auth' {
   export { useAuth } from 'wasp/auth';
   export function logout(): Promise<void>;
+  export const LoginForm: React.FC;
+  export const SignupForm: React.FC;
+  export const VerifyEmailForm: React.FC;
+  export const ResetPasswordForm: React.FC;
+  export const ForgotPasswordForm: React.FC;
 }
 
 declare module '@headlessui/react' {
@@ -211,13 +235,18 @@ declare module '@mui/material' {
     children: React.ReactNode;
     className?: string;
     component?: string;
+    sx?: any;
     [key: string]: any;
   }>;
   export const Typography: React.FC<{
-    variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2';
+    variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'subtitle1' | 'caption';
     component?: string;
     className?: string;
     children: React.ReactNode;
+    color?: string;
+    gutterBottom?: boolean;
+    paragraph?: boolean;
+    sx?: any;
   }>;
   export const Grid: React.FC<{
     container?: boolean;
@@ -229,6 +258,7 @@ declare module '@mui/material' {
     spacing?: number;
     className?: string;
     children: React.ReactNode;
+    sx?: any;
   }>;
   export const Card: React.FC<{
     className?: string;
@@ -243,6 +273,7 @@ declare module '@mui/material' {
   export const Chip: React.FC<{
     label: string;
     color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+    size?: 'small' | 'medium';
   }>;
   export const CircularProgress: React.FC<{
     size?: number;
@@ -251,10 +282,12 @@ declare module '@mui/material' {
   export const Alert: React.FC<{
     severity?: 'error' | 'warning' | 'info' | 'success';
     children: React.ReactNode;
+    sx?: any;
   }>;
   export const FormControl: React.FC<{
     fullWidth?: boolean;
     children: React.ReactNode;
+    error?: boolean;
   }>;
   export const InputLabel: React.FC<{
     id?: string;
@@ -264,6 +297,11 @@ declare module '@mui/material' {
     value: any;
     onChange: (event: any) => void;
     children: React.ReactNode;
+    label?: string;
+    name?: string;
+    error?: boolean;
+    onBlur?: () => void;
+    disabled?: boolean;
   }>;
   export const MenuItem: React.FC<{
     value: any;
@@ -273,6 +311,7 @@ declare module '@mui/material' {
     elevation?: number;
     className?: string;
     children: React.ReactNode;
+    sx?: any;
   }>;
   export const Container: React.FC<{
     maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -283,6 +322,9 @@ declare module '@mui/material' {
   }>;
   export const ListItem: React.FC<{
     children: React.ReactNode;
+    className?: string;
+    secondaryAction?: React.ReactNode;
+    key?: any;
   }>;
   export const ListItemText: React.FC<{
     primary: React.ReactNode;
@@ -325,7 +367,14 @@ declare module '@headlessui/react' {
     open: boolean;
     onClose: () => void;
     children: React.ReactNode;
-  }>;
+    className?: string;
+    'aria-hidden'?: string;
+  }> & {
+    Panel: React.FC<{
+      children: React.ReactNode;
+      className?: string;
+    }>;
+  };
   export const Menu: React.FC<{
     children: React.ReactNode;
   }>;
