@@ -71,7 +71,7 @@ const AveragePriceByCategoryChart: React.FC = () => {
         },
         yaxis: {
           categories: prettyCategories,
-        } as ApexYAxis,
+        } as ApexOptions['yaxis'],
       }));
     };
 

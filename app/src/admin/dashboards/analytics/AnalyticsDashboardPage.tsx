@@ -1,4 +1,4 @@
-import { type AuthUser } from 'wasp/auth';
+import { type AuthUser } from '@wasp/auth/types';
 import { useQuery } from 'wasp/client/operations';
 // Commenting out unused imports to fix build errors
 // import TotalSignupsCard from './TotalSignupsCard';
