@@ -26,6 +26,7 @@ declare module '@wasp/queries' {
     data: TData | undefined;
     dataUpdatedAt: number;
     error: TError | null;
+    errorUpdateCount: number;
     errorUpdatedAt: number;
     failureCount: number;
     failureReason: TError | null;
@@ -33,6 +34,7 @@ declare module '@wasp/queries' {
     isFetched: boolean;
     isFetchedAfterMount: boolean;
     isFetching: boolean;
+    isInitialLoading: boolean;
     isLoading: boolean;
     isLoadingError: boolean;
     isPaused: boolean;
@@ -50,8 +52,8 @@ declare module '@wasp/queries' {
 
   export type QueryObserverResult<TData, TError> = UseQueryResult<TData, TError>;
 
-  export type Query<TQueryFnData, TError> = {
-    queryKey: string;
+  export type Query<TQueryFnData, TError = Error> = {
+    queryKey: string | readonly unknown[];
     queryFn: () => Promise<TQueryFnData>;
     retry?: boolean | number;
     retryDelay?: number;
@@ -61,9 +63,12 @@ declare module '@wasp/queries' {
     refetchOnWindowFocus?: boolean;
     refetchOnReconnect?: boolean;
     suspense?: boolean;
+    enabled?: boolean;
+    onSuccess?: (data: TQueryFnData) => void;
+    onError?: (error: TError) => void;
   };
   
-  export function useQuery<T, A>(query: (args: A, context: any) => Promise<T>, args?: A): UseQueryResult<T>;
+  export function useQuery<T, A>(queryFn: string | Query<T>, args?: A): UseQueryResult<T>;
 }
 
 declare module '@wasp/actions' {
@@ -106,9 +111,17 @@ declare module 'wasp/client/operations' {
     users: any[];
     totalPages: number;
   }>;
-  export function getAllFilesByUser(): Promise<any[]>;
-  export function getDownloadFileSignedURL(key: string): Promise<string>;
-  export function createFile(file: File): Promise<void>;
+  export function getAllFilesByUser(): Promise<Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    uploadUrl: string;
+    downloadUrl: string;
+    createdAt: string;
+  }>>;
+  export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
+  export function createFile(file: File & { fileType?: string }): Promise<{ uploadUrl: string }>;
   export function generateCheckoutSession(): Promise<void>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
@@ -259,6 +272,45 @@ declare module 'react-icons/hi2' {
 
 declare module 'vanilla-cookieconsent' {
   export type CookieConsentConfig = {
+    cookies?: {
+      name: string | RegExp;
+      domain?: string;
+      path?: string;
+      [key: string]: any;
+    }[];
+    consentModal?: {
+      title?: string;
+      description?: string;
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      showPreferencesBtn?: boolean;
+      [key: string]: any;
+    };
+    preferencesModal?: {
+      title?: string;
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      savePreferencesBtn?: string;
+      sections?: Array<{
+        title?: string;
+        description?: string;
+        [key: string]: any;
+      }>;
+      [key: string]: any;
+    };
+    categories?: {
+      [key: string]: {
+        enabled?: boolean;
+        readOnly?: boolean;
+        autoClear?: boolean;
+        [key: string]: any;
+      };
+    };
+    language?: {
+      current?: string;
+      [key: string]: any;
+    };
+    
     root?: string;
     autoShow?: boolean;
     disablePageInteraction?: boolean;
@@ -377,6 +429,14 @@ declare module '@mui/material' {
     gutterBottom?: boolean;
     paragraph?: boolean;
     sx?: any;
+    mt?: number;
+    mb?: number;
+    ml?: number;
+    mr?: number;
+    pt?: number;
+    pb?: number;
+    pl?: number;
+    pr?: number;
   }>;
   export const Grid: React.FC<{
     container?: boolean;
