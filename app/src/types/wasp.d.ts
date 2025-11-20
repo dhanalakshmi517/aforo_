@@ -54,7 +54,6 @@ declare module 'wasp/auth' {
 // ---- @wasp/queries (use React Query types) --------------------
 
 declare module '@wasp/queries' {
-  // Simple UseQueryResult type that matches TanStack Query
   export type UseQueryResult<TData = unknown, TError = unknown> = {
     data: TData | null | undefined;
     error: TError | null;
@@ -64,6 +63,22 @@ declare module '@wasp/queries' {
     isFetching: boolean;
     status: 'error' | 'loading' | 'success';
     refetch: () => Promise<void>;
+    // Additional properties required by TanStack Query
+    isLoadingError: boolean;
+    isRefetchError: boolean;
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: TError | null;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    isPaused: boolean;
+    remove: () => void;
+    fetchStatus: 'fetching' | 'idle' | 'paused';
   };
 
   export type QueryFn<TData = unknown, TArgs = void> = (args: TArgs) => Promise<TData>;
@@ -87,8 +102,11 @@ declare module '@wasp/queries' {
   }
 
   // Single simple signature that matches actual usage
-  export function useQuery<TData = unknown>(queryFn: string): UseQueryResult<TData>;
-  export function useQuery<TData = unknown>(queryFn: () => Promise<TData>): UseQueryResult<TData>;
+  // Allow both string queryName and function query with optional args
+  export function useQuery<TData = unknown, TError = unknown>(
+    query: string | ((args?: any) => Promise<TData>),
+    ...rest: any[]
+  ): UseQueryResult<TData, TError>;
 }
 
 // ---- @wasp/actions --------------------------------------------
@@ -156,32 +174,39 @@ declare module 'wasp/client/operations' {
     totalPages: number;
   }>;
 
-  export function getAllFilesByUser(): Promise<Array<{
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    uploadUrl: string;
-    downloadUrl: string;
-    createdAt: Date;
-    userId: string;
-    key: string;
-  }>>;
+  export function getAllFilesByUser(): Promise<{
+    files: Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      uploadUrl: string;
+      downloadUrl: string;
+      createdAt: Date;
+      userId: string;
+      key: string;
+    }>;
+    length: number;
+    message?: string;
+    map: <T>(fn: (file: any) => T) => T[];
+  }>;
 
   export function getDownloadFileSignedURL(
     key: string
   ): Promise<{ downloadUrl: string }>;
   
 
-  // Simple signature for createFile
+  // Expanded createFile signature with properties needed by FileUploadPage
   export function createFile(
     file: any,
-    options?: any
-  ): Promise<any>;
+    options?: any,
+    extra?: any
+  ): { status: string; error: string; data: any } & Promise<{ uploadUrl: string; status: string; error: string; data: any }>;
 
   export function generateCheckoutSession(
-    planId?: string,
-  ): Promise<{ sessionUrl: string }>;
+    planId?: string | object,
+    ...rest: any[]
+  ): Promise<{ sessionUrl: string } | string>;
 
   export function getCustomerPortalUrl(): Promise<string>;
 }
