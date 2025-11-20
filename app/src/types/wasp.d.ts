@@ -75,8 +75,8 @@ declare module '@wasp/queries' {
     onError?: (error: TError) => void;
   };
   
-  export function useQuery<T>(queryFn: QueryFn<T>, args?: any): UseQueryResult<T>;
-  export function useQuery<T>(query: Query<T>, args?: any): UseQueryResult<T>;
+  export function useQuery<T>(queryFn: QueryFn<T>, args?: any, options?: any): UseQueryResult<T>;
+  export function useQuery<T>(query: Query<T>, args?: any, options?: any): UseQueryResult<T>;
 }
 
 declare module '@wasp/actions' {
@@ -129,7 +129,7 @@ declare module 'wasp/client/operations' {
     createdAt: string;
   }>>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
-  export function createFile(file: File | { fileType: string; name: string }): Promise<{ uploadUrl: string; status?: string; error?: string; data?: any }>;
+  export function createFile(file: File | { fileType: string; name: string }): { uploadUrl: string; status?: string; error?: string; data?: any };
   export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
@@ -499,6 +499,7 @@ declare module '@mui/material' {
   export const Card: React.FC<{
     className?: string;
     children: React.ReactNode;
+    sx?: any;
   }>;
   export const CardContent: React.FC<{
     children: React.ReactNode;
