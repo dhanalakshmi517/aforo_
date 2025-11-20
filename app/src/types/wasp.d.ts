@@ -22,32 +22,18 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData, TError = Error> = {
-    data: TData | undefined;
-    dataUpdatedAt: number;
-    error: TError | null;
-    errorUpdateCount: number;
-    errorUpdatedAt: number;
-    failureCount: number;
-    failureReason: TError | null;
-    isError: boolean;
-    isFetched: boolean;
-    isFetchedAfterMount: boolean;
-    isFetching: boolean;
-    isInitialLoading: boolean;
+  export type UseQueryResult<TData> = {
+    data: TData;
     isLoading: boolean;
-    isLoadingError: boolean;
-    isPaused: boolean;
-    isPlaceholderData: boolean;
-    isPreviousData: boolean;
-    isRefetchError: boolean;
-    isRefetching: boolean;
-    isStale: boolean;
-    isSuccess: boolean;
-    refetch: () => Promise<QueryObserverResult<TData, TError>>;
-    remove: () => void;
-    status: 'loading' | 'error' | 'success';
-    fetchStatus: 'fetching' | 'paused' | 'idle';
+    error: Error | null;
+    refetch: () => Promise<void>;
+  };
+
+  export type QueryFn<TData> = (args?: any) => Promise<TData>;
+
+  export type Query<TData> = {
+    queryKey: string;
+    queryFn: QueryFn<TData>;
   };
 
   export type QueryObserverResult<TData, TError> = UseQueryResult<TData, TError>;
@@ -68,7 +54,8 @@ declare module '@wasp/queries' {
     onError?: (error: TError) => void;
   };
   
-  export function useQuery<T, A>(queryFn: string | Query<T>, args?: A): UseQueryResult<T>;
+  export function useQuery<T>(queryFn: QueryFn<T>, args?: any): UseQueryResult<T>;
+  export function useQuery<T>(query: Query<T>, args?: any): UseQueryResult<T>;
 }
 
 declare module '@wasp/actions' {
@@ -111,17 +98,20 @@ declare module 'wasp/client/operations' {
     users: any[];
     totalPages: number;
   }>;
-  export function getAllFilesByUser(): Promise<Array<{
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    uploadUrl: string;
-    downloadUrl: string;
-    createdAt: string;
-  }>>;
+  export function getAllFilesByUser(): Promise<{
+    files: Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      uploadUrl: string;
+      downloadUrl: string;
+      createdAt: string;
+    }>;
+    length: number;
+  }>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
-  export function createFile(file: File & { fileType?: string }): Promise<{ uploadUrl: string }>;
+  export function createFile(file: FormData): Promise<{ uploadUrl: string }>;
   export function generateCheckoutSession(): Promise<void>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
@@ -456,6 +446,8 @@ declare module '@mui/material' {
   }>;
   export const CardContent: React.FC<{
     children: React.ReactNode;
+    sx?: any;
+    className?: string;
   }>;
   export const CardActions: React.FC<{
     children: React.ReactNode;
@@ -494,8 +486,9 @@ declare module '@mui/material' {
     disabled?: boolean;
   }>;
   export const MenuItem: React.FC<{
-    value: any;
+    value?: any;
     children: React.ReactNode;
+    label?: string;
   }>;
   export const Paper: React.FC<{
     elevation?: number;
@@ -508,6 +501,10 @@ declare module '@mui/material' {
     children: React.ReactNode;
     sx?: any;
     className?: string;
+    display?: string;
+    flexDirection?: string;
+    height?: string;
+    flexGrow?: number;
   }>;
   export const List: React.FC<{
     children: React.ReactNode;
