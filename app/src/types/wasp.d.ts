@@ -9,29 +9,17 @@ declare module 'wasp/auth' {
 
 declare module '@wasp/queries' {
   export type UseQueryResult<TData = unknown, TError = unknown> = {
-    data: TData;
-    dataUpdatedAt: number;
+    data: TData | undefined;
     error: TError | null;
-    errorUpdatedAt: number;
-    failureCount: number;
-    failureReason: TError | null;
-    isError: boolean;
-    isFetched: boolean;
-    isFetchedAfterMount: boolean;
-    isFetching: boolean;
-    isInitialLoading: boolean;
     isLoading: boolean;
-    isLoadingError: boolean;
-    isPaused: boolean;
-    isPlaceholderData: boolean;
-    isPreviousData: boolean;
-    isRefetchError: boolean;
-    isRefetching: boolean;
-    isStale: boolean;
+    isError: boolean;
     isSuccess: boolean;
+    isFetching: boolean;
     status: 'error' | 'loading' | 'success';
+    refetch: () => Promise<void>;
+    errorUpdateCount: number;
+    isInitialLoading: boolean;
     fetchStatus: 'fetching' | 'idle' | 'paused';
-    refetch: () => Promise<UseQueryResult<TData, TError>>;
     remove: () => void;
   };
 
@@ -58,27 +46,20 @@ declare module '@wasp/queries' {
 
   export type Query<TData = unknown, TError = unknown> = 
     | string 
-    | (() => Promise<TData>) 
-    | {
-      queryKey: string | readonly unknown[];
-      queryFn: (context: QueryFunctionContext) => Promise<TData>;
+    | ((args?: any) => Promise<TData>);
+
+  export function useQuery<TData = unknown, TError = unknown>(
+    query: Query<TData, TError>,
+    args?: any,
+    options?: {
+      enabled?: boolean;
       retry?: boolean | number;
-      retryDelay?: number;
       staleTime?: number;
       cacheTime?: number;
       refetchInterval?: number | false;
       refetchOnMount?: boolean;
       refetchOnWindowFocus?: boolean;
-      refetchOnReconnect?: boolean;
-      suspense?: boolean;
-      enabled?: boolean;
-      onSuccess?: (data: TData) => void;
-      onError?: (error: TError) => void;
-    };
-
-  export function useQuery<TData = unknown, TError = unknown>(
-    query: Query<TData, TError>,
-    args?: any
+    }
   ): UseQueryResult<TData, TError>;
 
   export type QueryObserverLoadingErrorResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError> & {
@@ -371,6 +352,56 @@ declare module 'react-icons/hi2' {
 
 
 declare module 'vanilla-cookieconsent' {
+  export interface CookieConsentConfig {
+    autoclear_cookies?: boolean | {
+      cookies: Array<{
+        name: string | RegExp;
+        domain?: string;
+        path?: string;
+      }>;
+    };
+    consent_modal?: {
+      title?: string;
+      description?: string;
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      showPreferencesBtn?: string;
+      primary_btn?: {
+        text?: string;
+        role?: 'accept_all' | 'accept_selected';
+      };
+      secondary_btn?: {
+        text?: string;
+        role?: 'accept_necessary' | 'settings';
+      };
+    };
+    settings_modal?: {
+      title?: string;
+      save_settings_btn?: string;
+      accept_all_btn?: string;
+      reject_all_btn?: string;
+      close_btn_label?: string;
+      blocks?: Array<{
+        title?: string;
+        description?: string;
+        toggle?: {
+          value?: string;
+          enabled?: boolean;
+          readonly?: boolean;
+        };
+      }>;
+    };
+    mode?: 'opt-in' | 'opt-out';
+    revision?: number;
+    cookie?: {
+      name?: string;
+      domain?: string;
+      path?: string;
+      sameSite?: 'Lax' | 'None' | 'Strict';
+      expiresAfterDays?: number;
+    };
+  }
+
   export interface CookieConsentConfig {
     current_lang?: string;
     autoclear_cookies?: boolean | {
@@ -798,9 +829,8 @@ declare module '@mui/material' {
     disabled?: boolean;
   }>;
   export const MenuItem: React.FC<{
-    value: any;
+    value?: any;
     children?: React.ReactNode;
-    label: string;
     className?: string;
     disabled?: boolean;
     icon?: React.ReactNode;
