@@ -54,16 +54,18 @@ declare module 'wasp/auth' {
 // ---- @wasp/queries (use React Query types) --------------------
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData = unknown, TError = unknown> = {
-    data: TData | null | undefined;
+  // Type for loading result state
+  export type QueryObserverLoadingErrorResult<TData = unknown, TError = unknown> = {
+    data: undefined;
     error: TError | null;
     isLoading: boolean;
     isError: boolean;
     isSuccess: boolean;
     isFetching: boolean;
-    status: 'error' | 'loading' | 'success';
+    status: 'error' | 'loading';
     refetch: () => Promise<void>;
-    // Additional properties required by TanStack Query
+    errorUpdateCount: number;
+    isInitialLoading: boolean;
     isLoadingError: boolean;
     isRefetchError: boolean;
     dataUpdatedAt: number;
@@ -80,6 +82,40 @@ declare module '@wasp/queries' {
     remove: () => void;
     fetchStatus: 'fetching' | 'idle' | 'paused';
   };
+
+  // Type for refetch error result
+  export type QueryObserverRefetchErrorResult<TData = unknown, TError = unknown> = {
+    data: TData;
+    error: TError | null;
+    isLoading: boolean;
+    isError: boolean;
+    isSuccess: boolean;
+    isFetching: boolean;
+    status: 'error';
+    refetch: () => Promise<void>;
+    errorUpdateCount: number;
+    isInitialLoading: boolean;
+    isLoadingError: boolean;
+    isRefetchError: boolean;
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: TError | null;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    isPaused: boolean;
+    remove: () => void;
+    fetchStatus: 'fetching' | 'idle' | 'paused';
+  };
+  
+  // Main result type
+  export type UseQueryResult<TData = unknown, TError = unknown> =
+    | QueryObserverRefetchErrorResult<TData, TError>
+    | QueryObserverLoadingErrorResult<TData, TError>;
 
   export type QueryFn<TData = unknown, TArgs = void> = (args: TArgs) => Promise<TData>;
 
@@ -101,12 +137,20 @@ declare module '@wasp/queries' {
     refetchOnWindowFocus?: boolean;
   }
 
-  // Single simple signature that matches actual usage
-  // Allow both string queryName and function query with optional args
-  export function useQuery<TData = unknown, TError = unknown>(
-    query: string | ((args?: any) => Promise<TData>),
-    ...rest: any[]
-  ): UseQueryResult<TData, TError>;
+  export function useQuery<TData = unknown>(
+    queryFn: string
+  ): UseQueryResult<TData, unknown>;
+  
+  export function useQuery<TData = unknown, TArgs = void>(
+    queryFn: (args: TArgs) => Promise<TData>,
+    args?: TArgs
+  ): UseQueryResult<TData, unknown>;
+  
+  export function useQuery<TData = unknown>(
+    queryFn: string | ((args?: any) => Promise<TData>),
+    args?: any,
+    options?: any
+  ): UseQueryResult<TData, unknown>;
 }
 
 // ---- @wasp/actions --------------------------------------------
@@ -196,17 +240,23 @@ declare module 'wasp/client/operations' {
   ): Promise<{ downloadUrl: string }>;
   
 
-  // Expanded createFile signature with properties needed by FileUploadPage
+  // Updated for FileUploadPage needs
   export function createFile(
     file: any,
     options?: any,
     extra?: any
-  ): { status: string; error: string; data: any } & Promise<{ uploadUrl: string; status: string; error: string; data: any }>;
+  ): Promise<{ 
+    uploadUrl: string; 
+    status: string; 
+    error: string; 
+    data: any; 
+    message?: string;
+  }>;
 
   export function generateCheckoutSession(
     planId?: string | object,
     ...rest: any[]
-  ): Promise<{ sessionUrl: string } | string>;
+  ): Promise<{ sessionUrl: string }>;
 
   export function getCustomerPortalUrl(): Promise<string>;
 }
