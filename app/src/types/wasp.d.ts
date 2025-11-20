@@ -70,32 +70,34 @@ declare module '@wasp/queries' {
     dataUpdatedAt: number;
     errorUpdatedAt: number;
     fetchStatus: 'fetching' | 'idle' | 'paused';
+    failureCount: number;
+    failureReason: TError | null;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
     remove: () => void;
   };
 
-  export type QueryFn<TData, TArgs = void> = (args: TArgs) => Promise<TData>;
+  export type QueryFn<TData = unknown, TArgs = void> = (args: TArgs) => Promise<TData>;
 
-  // Simple “Query” type used in your auth/useAuth.ts:
-  export type Query<TArgs = void, TData = unknown> = QueryFn<TData, TArgs>;
+  export type Query<TArgs = void, TData = unknown> = string | QueryFn<TData, TArgs>;
 
-  export type Query<TData = unknown, TError = unknown> = 
-    | string
-    | ((args?: any) => Promise<TData>)
-    | {
-      queryKey: string | readonly unknown[];
-      queryFn: (args?: any) => Promise<TData>;
-    };
-
-  export function useQuery<TData = unknown, TError = unknown, TArgs = void>(
-    query: QueryFn<TData, TArgs>,
-    args?: TArgs,
-    options?: UseQueryOptions<TData, TError>,
-  ): UseQueryResult<TData, TError>;
+  export interface QueryOptions<TData = unknown, TError = unknown> {
+    enabled?: boolean;
+    retry?: boolean | number;
+    staleTime?: number;
+    cacheTime?: number;
+    refetchInterval?: number | false;
+    refetchOnMount?: boolean;
+    refetchOnWindowFocus?: boolean;
+  }
 
   export function useQuery<TData = unknown, TError = unknown>(
-    queryKey: QueryKey,
-    args?: undefined,
-    options?: UseQueryOptions<TData, TError>,
+    query: string | ((args?: any) => Promise<TData>),
+    args?: any
   ): UseQueryResult<TData, TError>;
 }
 
@@ -181,7 +183,7 @@ declare module 'wasp/client/operations' {
     status?: string;
     error?: string;
     data?: any;
-  }>;
+  }> & { map: <T>(fn: (file: any) => T) => T[] };
 
   export function getDownloadFileSignedURL(
     key: string,
@@ -538,7 +540,8 @@ declare module '@mui/material' {
   }>;
 
   export const MenuItem: React.FC<{
-    value: any;
+    value?: any;
+    label?: string;
     children?: React.ReactNode;
     className?: string;
     disabled?: boolean;
