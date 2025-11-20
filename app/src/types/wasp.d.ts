@@ -9,13 +9,28 @@ declare module 'wasp/auth' {
 
 declare module '@wasp/queries' {
   export type UseQueryResult<TData = unknown, TError = unknown> = {
-    data: TData;
+    data: TData | undefined;
+    dataUpdatedAt: number;
     error: TError | null;
-    isLoading: boolean;
+    errorUpdatedAt: number;
+    errorUpdateCount: number;
+    failureCount: number;
+    failureReason: TError | null;
     isError: boolean;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isLoading: boolean;
+    isLoadingError: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetchError: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
     isSuccess: boolean;
     status: 'error' | 'loading' | 'success';
-    refetch: () => Promise<void>;
+    refetch: () => Promise<UseQueryResult<TData, TError>>;
   };
 
   export type QueryKey = string | readonly unknown[];
@@ -42,9 +57,9 @@ declare module '@wasp/queries' {
   export type Query<TData = unknown, TError = unknown> = QueryOptions<TData, TError>;
 
   export function useQuery<TData = unknown, TError = unknown>(
-    queryFnOrKey: QueryKey | QueryFn<TData>,
+    queryFn: QueryFn<TData> | string | (() => Promise<TData>),
     args?: any,
-    options?: Omit<QueryOptions<TData, TError>, 'queryKey' | 'queryFn'>
+    options?: QueryOptions<TData, TError>
   ): UseQueryResult<TData, TError>;
 
   export type QueryObserverLoadingErrorResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError> & {
@@ -165,9 +180,11 @@ declare module 'wasp/client/operations' {
       userId: string;
       key: string;
     }>;
+    length: number;
+    message?: string;
   }>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
-  export function createFile(file: File | { fileType: string; name: string }, options?: any): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
+  export function createFile(file: File | { fileType: string; name: string; size: number }, options?: any): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
   export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
@@ -204,20 +221,6 @@ declare module '@wasp/auth/types' {
     error: Error | null;
   }
 
-  export type AuthUser = {
-    id: string;
-    email: string;
-    username: string;
-    lastActiveTimestamp: Date;
-    isAdmin: boolean;
-    paymentProcessorUserId?: string;
-    lemonSqueezyCustomerPortalUrl?: string;
-    subscriptionStatus?: string;
-    subscriptionPlan?: string;
-    sendNewsletter: boolean;
-    datePaid?: Date;
-    credits: number;
-  };
 }
 
 declare module '@wasp/operations' {
@@ -349,7 +352,62 @@ declare module 'react-icons/hi2' {
 
 
 declare module 'vanilla-cookieconsent' {
-  export type CookieConsentConfig = {
+  export interface CookieConsentConfig {
+    current_lang?: string;
+    autoclear_cookies?: boolean | {
+      cookies: Array<{
+        name: string | RegExp;
+        domain?: string;
+        path?: string;
+      }>;
+    };
+    page_scripts?: boolean;
+    mode?: 'opt-in' | 'opt-out';
+    delay?: number;
+    auto_language?: string;
+    autorun?: boolean;
+    force_consent?: boolean;
+    hide_from_bots?: boolean;
+    remove_cookie_tables?: boolean;
+    cookie_name?: string;
+    cookie_expiration?: number;
+    cookie_necessary_only_expiration?: number;
+    cookie_domain?: string;
+    cookie_path?: string;
+    cookie_same_site?: 'Lax' | 'None' | 'Strict';
+    use_rfc_cookie?: boolean;
+    revision?: number;
+    consent_modal?: {
+      title?: string;
+      description?: string;
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      showPreferencesBtn?: string;
+      primary_btn?: {
+        text?: string;
+        role?: 'accept_all' | 'accept_selected';
+      };
+      secondary_btn?: {
+        text?: string;
+        role?: 'accept_necessary' | 'settings';
+      };
+    };
+    settings_modal?: {
+      title?: string;
+      save_settings_btn?: string;
+      accept_all_btn?: string;
+      reject_all_btn?: string;
+      close_btn_label?: string;
+      blocks?: Array<{
+        title?: string;
+        description?: string;
+        toggle?: {
+          value?: string;
+          enabled?: boolean;
+          readonly?: boolean;
+        };
+      }>;
+    };
     autoclear_cookies?: boolean | {
       cookies: Array<{
         name: string | RegExp;
@@ -596,25 +654,24 @@ declare module 'vanilla-cookieconsent' {
         };
       };
     };
-  } & {
-    current_lang: string;
-    autoclear_cookies: boolean;
-    page_scripts: boolean;
-    mode: 'opt-in' | 'opt-out';
-    delay: number;
-    auto_language: string;
-    autorun: boolean;
-    force_consent: boolean;
-    hide_from_bots: boolean;
-    remove_cookie_tables: boolean;
-    cookie_name: string;
-    cookie_expiration: number;
-    cookie_necessary_only_expiration: number;
-    cookie_domain: string;
-    cookie_path: string;
-    cookie_same_site: 'Lax' | 'None' | 'Strict';
-    use_rfc_cookie: boolean;
-    revision: number;
+    current_lang?: string;
+    autoclear_cookies?: boolean;
+    page_scripts?: boolean;
+    mode?: 'opt-in' | 'opt-out';
+    delay?: number;
+    auto_language?: string;
+    autorun?: boolean;
+    force_consent?: boolean;
+    hide_from_bots?: boolean;
+    remove_cookie_tables?: boolean;
+    cookie_name?: string;
+    cookie_expiration?: number;
+    cookie_necessary_only_expiration?: number;
+    cookie_domain?: string;
+    cookie_path?: string;
+    cookie_same_site?: 'Lax' | 'None' | 'Strict';
+    use_rfc_cookie?: boolean;
+    revision?: number;
     [key: string]: any;
   }
   export function run(config: CookieConsentConfig): void;
@@ -684,15 +741,18 @@ declare module '@mui/material' {
   }> & { sx?: any; };
   export const CardActions: React.FC<{
     children: React.ReactNode;
+    className?: string;
   }>;
   export const Chip: React.FC<{
     label: string;
     color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
     size?: 'small' | 'medium';
+    className?: string;
   }>;
   export const CircularProgress: React.FC<{
     size?: number;
     color?: 'inherit' | 'primary' | 'secondary';
+    className?: string;
   }>;
   export const Alert: React.FC<{
     severity?: 'error' | 'warning' | 'info' | 'success';
@@ -760,6 +820,16 @@ declare module '@mui/material' {
     value: any;
     onChange: (event: any, value: any) => void;
     children: React.ReactNode;
+    className?: string;
+    orientation?: 'horizontal' | 'vertical';
+    variant?: 'standard' | 'scrollable' | 'fullWidth';
+  }>;
+  export const Tab: React.FC<{
+    label: string;
+    value: any;
+    className?: string;
+    disabled?: boolean;
+    icon?: React.ReactNode;
   }>;
   export const Button: React.FC<{
     variant?: 'text' | 'outlined' | 'contained';
