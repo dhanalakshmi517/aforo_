@@ -22,11 +22,17 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<T> = {
-    data: T | undefined;
+  export type UseQueryResult<TData> = {
+    data: TData | undefined;
     isLoading: boolean;
     error: Error | undefined;
+    isError: boolean;
+    isLoadingError: boolean;
+    isRefetchError: boolean;
+    isSuccess: boolean;
     refetch: () => void;
+    status: 'loading' | 'error' | 'success';
+    fetchStatus: 'fetching' | 'paused' | 'idle';
   };
   
   export function useQuery<T, A>(query: (args: A, context: any) => Promise<T>, args?: A): UseQueryResult<T>;
@@ -157,26 +163,30 @@ declare module 'wasp/client/operations' {
 }
 
 declare module 'wasp/client/router' {
-  export const routes = {
+  type RouteConfig = {
+    to: string;
+  };
+
+  export const routes: {
     auth: {
-      login: '/auth/login',
-      signup: '/auth/signup',
-      emailVerification: '/auth/email-verification',
-      passwordReset: '/auth/password-reset',
-      requestPasswordReset: '/auth/request-password-reset'
-    },
-    dashboard: '/dashboard',
-    products: '/products',
-    messages: '/messages',
-    settings: '/settings',
-    account: '/account',
-    AdminRoute: '/admin',
-    LoginRoute: '/auth/login',
-    AccountRoute: '/account',
-    AdminMessagesRoute: '/admin/messages',
-    LandingPageRoute: '/',
-    AdminDashboardRoute: '/admin/dashboard'
-  } as const;
+      login: RouteConfig & { to: '/auth/login' };
+      signup: RouteConfig & { to: '/auth/signup' };
+      emailVerification: RouteConfig & { to: '/auth/email-verification' };
+      passwordReset: RouteConfig & { to: '/auth/password-reset' };
+      requestPasswordReset: RouteConfig & { to: '/auth/request-password-reset' };
+    };
+    dashboard: RouteConfig & { to: '/dashboard' };
+    products: RouteConfig & { to: '/products' };
+    messages: RouteConfig & { to: '/messages' };
+    settings: RouteConfig & { to: '/settings' };
+    account: RouteConfig & { to: '/account' };
+    AdminRoute: RouteConfig & { to: '/admin' };
+    LoginRoute: RouteConfig & { to: '/auth/login' };
+    AccountRoute: RouteConfig & { to: '/account' };
+    AdminMessagesRoute: RouteConfig & { to: '/admin/messages' };
+    LandingPageRoute: RouteConfig & { to: '/' };
+    AdminDashboardRoute: RouteConfig & { to: '/admin/dashboard' };
+  };
 
   export function Link(props: {
     to: string;
@@ -220,7 +230,28 @@ declare module 'react-icons/hi2' {
 
 
 declare module 'vanilla-cookieconsent' {
-  export function run(config: any): void;
+  export interface CookieConsentConfig {
+    current_lang: string;
+    autoclear_cookies: boolean;
+    page_scripts: boolean;
+    mode: 'opt-in' | 'opt-out';
+    delay: number;
+    auto_language: string;
+    autorun: boolean;
+    force_consent: boolean;
+    hide_from_bots: boolean;
+    remove_cookie_tables: boolean;
+    cookie_name: string;
+    cookie_expiration: number;
+    cookie_necessary_only_expiration: number;
+    cookie_domain: string;
+    cookie_path: string;
+    cookie_same_site: 'Lax' | 'None' | 'Strict';
+    use_rfc_cookie: boolean;
+    revision: number;
+    [key: string]: any;
+  }
+  export function run(config: CookieConsentConfig): void;
 }
 
 declare module '@google-analytics/data' {
@@ -236,6 +267,13 @@ declare module '@mui/material' {
     className?: string;
     component?: string;
     sx?: any;
+    display?: string;
+    flexDirection?: string;
+    height?: string;
+    flexGrow?: number;
+    mt?: number;
+    mb?: number;
+    textAlign?: string;
     [key: string]: any;
   }>;
   export const Typography: React.FC<{
@@ -316,6 +354,8 @@ declare module '@mui/material' {
   export const Container: React.FC<{
     maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     children: React.ReactNode;
+    sx?: any;
+    className?: string;
   }>;
   export const List: React.FC<{
     children: React.ReactNode;
@@ -325,6 +365,7 @@ declare module '@mui/material' {
     className?: string;
     secondaryAction?: React.ReactNode;
     key?: any;
+    sx?: any;
   }>;
   export const ListItemText: React.FC<{
     primary: React.ReactNode;
@@ -341,6 +382,41 @@ declare module '@mui/material' {
   export const Tab: React.FC<{
     label: string;
     value: any;
+  }>;
+  export const Button: React.FC<{
+    variant?: 'text' | 'outlined' | 'contained';
+    color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+    size?: 'small' | 'medium' | 'large';
+    fullWidth?: boolean;
+    disabled?: boolean;
+    onClick?: () => void;
+    children: React.ReactNode;
+    className?: string;
+    type?: 'button' | 'submit' | 'reset';
+    sx?: any;
+  }>;
+  export const TextField: React.FC<{
+    variant?: 'standard' | 'filled' | 'outlined';
+    label?: string;
+    value?: string | number;
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    error?: boolean;
+    helperText?: string;
+    fullWidth?: boolean;
+    type?: string;
+    multiline?: boolean;
+    rows?: number;
+    disabled?: boolean;
+    placeholder?: string;
+    name?: string;
+    required?: boolean;
+    sx?: any;
+  }>;
+  export const Divider: React.FC<{
+    orientation?: 'horizontal' | 'vertical';
+    variant?: 'fullWidth' | 'inset' | 'middle';
+    light?: boolean;
+    sx?: any;
   }>;
 }
 
