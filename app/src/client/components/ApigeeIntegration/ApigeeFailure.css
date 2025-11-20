@@ -1,0 +1,243 @@
+/* ApigeeFailure.css */
+.apigee-failure-page {
+  min-height: 100vh;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header styles (reused from ApigeeIntegration.css) */
+.apigee-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  gap: 16px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background: #F3F4F6;
+}
+
+.aforo-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 16px;
+  font-weight: 600;
+  color: #025A94;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+}
+
+.apigee-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Failure content layout */
+.failure-content {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 80px);
+}
+
+/* Sidebar styles */
+.apigee-sidebar {
+  width: 280px;
+  background: #F8FAFC;
+  border-right: 1px solid #E5E7EB;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-section {
+  padding: 0 24px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sidebar-item.failed {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+}
+
+.sidebar-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebar-icon {
+  width: 32px;
+  height: 32px;
+  background: #FFFFFF;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-item.failed .sidebar-icon {
+  background: #EF4444;
+}
+
+.sidebar-text h4 {
+  margin: 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #1F2937;
+}
+
+.sidebar-text p {
+  margin: 2px 0 0 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #6B7280;
+}
+
+.sidebar-item.failed .sidebar-text p {
+  color: #DC2626;
+}
+
+.sidebar-footer {
+  padding: 0 24px;
+}
+
+.import-history-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.import-history-btn:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+/* Failure main content */
+.failure-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-icon {
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-icon svg {
+  width: 100px;
+  height: 100px;
+  aspect-ratio: 1/1;
+}
+
+.failure-title {
+  margin: 0 0 16px 0;
+  text-align: center;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-heading-h4, 22px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h4, 32px);
+  background: var(--Gradient-blue, linear-gradient(254deg, var(--color-primary-700, #0262A1) 26.47%, var(--color-primary-1000, #00365A) 76.37%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.failure-description {
+  margin: 0 0 32px 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #6B7280;
+  max-width: 400px;
+}
+
+.failure-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Try Again Button */
+.try-again-btn {
+  display: flex;
+  width: 297px;
+  height: 40px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-primary-button-active, #025A94);
+  color: var(--text-primary-button-default, #F2F9FD);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.try-again-btn:hover {
+  background: #0262A1;
+}
+
+.try-again-btn:active {
+  background: #004B80;
+}
+

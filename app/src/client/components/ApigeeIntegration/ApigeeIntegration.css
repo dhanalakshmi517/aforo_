@@ -1,0 +1,487 @@
+/* Apigee Integration Page Styles */
+.apigee-integration-page {
+  width: 100%;
+  height: 100vh;
+  background: #FAFBFC;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles - Fourth image specs */
+.apigee-header {
+  border-bottom: 1px solid var(--border-border-1, #E8ECF3);
+  display: flex;
+  height: 72px;
+  padding: 16px 40px;
+  align-items: center;
+  gap: 16px;
+  background: white;
+}
+
+/* Back Button Styles - First image specs */
+.back-button {
+  display: flex;
+  width: 46px;
+  height: 46px;
+  padding: 13px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.back-button:hover {
+  background: #F8F9FA;
+}
+
+.back-button svg {
+  flex-shrink: 0;
+}
+
+/* Aforo Logo */
+.aforo-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16px;
+}
+
+/* Separator Line */
+.separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 16px;
+}
+
+/* Apigee Logo */
+.apigee-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Establish Connection Icon Styling */
+.establish-connection-icon {
+  width: 13.333px;
+  height: 13.333px;
+  flex-shrink: 0;
+}
+
+/* Main Content Area */
+.apigee-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar Styles */
+.apigee-sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--border-border-1, #E8ECF3);
+  padding: 24px 0 0 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  padding: 0 24px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-item.active {
+  background: #F0F9FF;
+  border: 1px solid #0EA5E9;
+}
+
+.sidebar-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebar-item:not(.disabled):not(.active):hover {
+  background: #F8F9FA;
+}
+
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: white;
+  flex-shrink: 0;
+}
+
+.sidebar-item.active .sidebar-icon {
+  border-radius: 17.693px;
+  background: var(--surface-primary-button-active, #025A94);
+}
+
+.sidebar-text h4 {
+  margin: 0;
+  color: var(--text-active, #0262A1);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-body-md, 20px);
+}
+
+.sidebar-text p {
+  margin: 4px 0 0 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 12px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 1.2;
+}
+
+.sidebar-item.active .sidebar-text h4 {
+  color: var(--text-active, #0262A1);
+}
+
+.sidebar-item.active .sidebar-text p {
+  color: var(--text-active, #0262A1);
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 24px;
+  margin-top: auto;
+}
+
+/* Import History Button */
+.import-history-btn {
+  display: flex;
+  height: 40px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 100%;
+  
+  border-radius: var(--border-radius-sm, 8px);
+  border: 1px solid var(--border-border-4, #C3C2D0);
+  background: var(--surface-disabled-2, #F0F3F8);
+  
+  color: var(--text-disabled-2, #BCC4D3);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px);
+  
+  cursor: not-allowed;
+  transition: none;
+}
+
+/* Main Content */
+.apigee-main {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+}
+
+/* Main Content Wrapper */
+.main-content-wrapper {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* Connection Section */
+.connection-section {
+  flex: 1;
+  max-width: 520px;
+}
+
+.connection-section h2 {
+  margin: 0 0 24px 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 24px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+/* Connection Form */
+.connection-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Info Card Section */
+.info-card-section {
+  flex-shrink: 0;
+  width: 400px;
+}
+
+/* Info Card */
+.info-card {
+  display: flex;
+  padding: 16px 20px 20px 20px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
+  
+  border-radius: 16px;
+  border: 1px solid var(--billable-metric-stroke---light, #F6F6F6);
+  background: var(--surface-information, #F5F9FF);
+}
+
+/* Info Card Header */
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+}
+
+.info-card-title {
+  color: var(--text-active, #0262A1);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px);
+}
+
+/* Info Card Content */
+.info-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: stretch;
+}
+
+/* Info Card Image */
+.info-card-image {
+  width: 362px;
+  height: 161px;
+  aspect-ratio: 362/161;
+  border-radius: 12px;
+  background: lightgray;
+  box-shadow: 0 6px 80px 0 rgba(0, 0, 0, 0.07), 0 1.34px 17.869px 0 rgba(0, 0, 0, 0.04), 0 0.399px 5.32px 0 rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  position: relative;
+}
+
+.image-placeholder {
+  color: #6B7280;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Image styling now handled inline via background-image */
+
+/* Info Steps */
+.info-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-steps p {
+  margin: 0;
+  color: var(--text-secondary, #6B7280);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+/* Form Field */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  align-self: stretch;
+}
+
+/* Form Label */
+.form-label {
+  color: var(--text-primary, #1F2937);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px);
+}
+
+/* Form Input */
+.form-input {
+  display: flex;
+  height: 40px;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  
+  border-radius: var(--border-radius-sm, 8px);
+  border: 1px solid var(--border-border-2, #E8ECF3);
+  background: var(--surface-surface-1, #FFF);
+  
+  color: var(--text-primary, #1F2937);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
+  
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--border-primary, #0262A1);
+}
+
+.form-input::placeholder {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  flex: 1 0 0;
+  
+  overflow: hidden;
+  color: var(--text-placeholder, #C3C2D0);
+  text-overflow: ellipsis;
+  
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
+}
+
+/* File Upload Wrapper */
+.file-upload-wrapper {
+  position: relative;
+  display: flex;
+  align-self: stretch;
+}
+
+/* File Upload Input */
+.file-upload-input {
+  border: 1px dashed var(--border-primary, #0262A1);
+  padding-right: 100px; /* Make space for the button */
+}
+
+/* Integrated Upload Button */
+.upload-btn-integrated {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: flex;
+  height: 24px;
+  padding: 4px 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  
+  border-radius: var(--border-radius-sm, 8px) !important;
+  border: 1px dashed var(--border-primary, #0262A1);
+  background: var(--surface-secondary-button-active-2, #F2F9FD) !important;
+  
+  color: var(--text-secondary-button-default, #004B80);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+  
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.upload-btn-integrated:hover {
+  background: var(--surface-surface-2, #F8F9FA);
+}
+
+/* External File Info */
+.file-info-external {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  
+  color: var(--text-secondary, #6B7280);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+/* File Info */
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0 0;
+  
+  color: var(--text-secondary, #6B7280);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+/* Connect Button */
+.connect-btn {
+  display: flex;
+  height: 48px;
+  padding: 12px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  
+  border-radius: var(--border-radius-sm, 8px);
+  border: none;
+  background: var(--surface-primary-button, #0262A1);
+  
+  color: var(--text-on-primary, #FFFFFF);
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-body-md, 20px);
+  
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.connect-btn:hover {
+  background: var(--surface-primary-button-hover, #025A94);
+}
+
+.connect-btn:active {
+  background: var(--surface-primary-button-active, #025A94);
+}

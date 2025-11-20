@@ -68,6 +68,10 @@ import LoginPage from '../auth/LoginPage';
 import ThankYou from './components/Landing/ThankYou';
 import Settings from './components/Settings/Settings';
 import KongIntegration from './components/Products/Kong Integration/KongIntegration';
+import ApigeeIntegration from './components/ApigeeIntegration/ApigeeIntegration';
+import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
+import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
+import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 
 export default function App() {
   const navigate = useNavigate();
@@ -359,6 +363,46 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <KongIntegration onClose={() => navigate(-1)} />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Apigee Integration */}
+          <Route
+            path="/apigee-integration"
+            element={
+              <ProtectedRoute>
+                <ApigeeIntegration />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Apigee Success */}
+          <Route
+            path="/apigee-success"
+            element={
+              <ProtectedRoute>
+                <ApigeeSuccess />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Apigee Failure */}
+          <Route
+            path="/apigee-failure"
+            element={
+              <ProtectedRoute>
+                <ApigeeFailure />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Apigee Import */}
+          <Route
+            path="/apigee-import"
+            element={
+              <ProtectedRoute>
+                <ApigeeImport />
               </ProtectedRoute>
             }
           />
