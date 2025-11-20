@@ -24,14 +24,30 @@ declare module 'wasp/auth' {
 declare module '@wasp/queries' {
   export type UseQueryResult<TData, TError = Error> = {
     data: TData | undefined;
+    dataUpdatedAt: number;
     error: TError | null;
+    errorUpdatedAt: number;
+    errorUpdateCount: number;
+    failureCount: number;
+    failureReason: TError | null;
+    fetchStatus: 'fetching' | 'idle' | 'paused';
     isError: boolean;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
     isLoading: boolean;
     isLoadingError: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
     isRefetchError: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
     isSuccess: boolean;
-    status: 'error' | 'loading' | 'success';
     refetch: () => Promise<void>;
+    remove: () => void;
+    status: 'error' | 'loading' | 'success';
   };
 
   export type QueryFn<TData> = (args?: any) => Promise<TData>;
@@ -114,7 +130,7 @@ declare module 'wasp/client/operations' {
   }>>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
   export function createFile(file: File | { fileType: string; name: string }): Promise<{ uploadUrl: string; status?: string; error?: string; data?: any }>;
-  export function generateCheckoutSession(): Promise<{ sessionUrl: string }>;
+  export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
 
@@ -264,7 +280,13 @@ declare module 'react-icons/hi2' {
 
 declare module 'vanilla-cookieconsent' {
   export type CookieConsentConfig = {
-    autoclear_cookies?: boolean;
+    autoclear_cookies?: boolean | {
+      cookies?: Array<{
+        name: string | RegExp;
+        domain?: string;
+        path?: string;
+      }>;
+    };
     page_scripts?: boolean;
     mode?: 'opt-in' | 'opt-out';
     delay?: number;
@@ -298,6 +320,9 @@ declare module 'vanilla-cookieconsent' {
         consent_modal?: {
           title?: string;
           description?: string;
+          acceptAllBtn?: string;
+          acceptNecessaryBtn?: string;
+          showPreferencesBtn?: string;
           primary_btn?: {
             text?: string;
             role?: 'accept_all' | 'accept_selected';
@@ -479,7 +504,7 @@ declare module '@mui/material' {
     children: React.ReactNode;
     sx?: any;
     className?: string;
-  }>;
+  }> & { sx?: any; };
   export const CardActions: React.FC<{
     children: React.ReactNode;
   }>;
@@ -633,6 +658,7 @@ declare module '@headlessui/react' {
     onClose: (value: boolean) => void;
     children: React.ReactNode;
     className?: string;
+    as?: string;
     'aria-hidden'?: string;
   }> & {
     Panel: React.FC<{
