@@ -1,5 +1,5 @@
-// import { type AuthUser } from 'wasp/auth';
-// import { useQuery } from 'wasp/client/operations';
+import { type AuthUser } from 'wasp/auth';
+import { useQuery } from 'wasp/client/operations';
 // Commenting out unused imports to fix build errors
 // import TotalSignupsCard from './TotalSignupsCard';
 // import TotalPageViewsCard from './TotalPageViewsCard';
@@ -12,7 +12,7 @@ import DefaultLayout from '../../layout/DefaultLayout';
 // import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { cn } from '../../../client/cn';
 
-const Dashboard = ({ user }: { user: any }) => {
+const Dashboard = ({ user }: { user: AuthUser }) => {
   // useRedirectHomeUnlessUserIsAdmin({ user });
   // const { data: stats, isLoading, error } = useQuery(() => ({}));
 
