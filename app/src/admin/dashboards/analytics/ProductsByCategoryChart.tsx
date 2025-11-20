@@ -78,7 +78,7 @@ const ProductsByCategoryChart: React.FC = () => {
 
         setSeries([{ name: 'Products', data: counts }]);
         
-        setChartOptions((prevOptions: any) => ({
+        setChartOptions(prevOptions => ({
           ...prevOptions,
           xaxis: {
             ...prevOptions.xaxis,
