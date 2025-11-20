@@ -9,6 +9,9 @@ interface PieChartState {
 const options: ApexOptions = {
   chart: {
     type: 'donut',
+    width: 380,
+    redrawOnParentResize: true,
+    redrawOnWindowResize: true
   },
   colors: ['#10B981', '#375E83', '#259AE6', '#FFA70B'],
   labels: ['Remote', 'Hybrid', 'Onsite', 'Leave'],
@@ -28,24 +31,6 @@ const options: ApexOptions = {
   dataLabels: {
     enabled: false,
   },
-  responsive: [
-    {
-      breakpoint: 2600,
-      options: {
-        chart: {
-          width: 380,
-        },
-      },
-    },
-    {
-      breakpoint: 640,
-      options: {
-        chart: {
-          width: 200,
-        },
-      },
-    },
-  ],
 };
 
 const PieChart: React.FC = () => {

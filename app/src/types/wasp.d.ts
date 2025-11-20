@@ -81,6 +81,77 @@ declare module '@wasp/entities' {
   export type ProductInput = Omit<ProductCreateInput, 'user' | 'userId'>;
 }
 
+declare module 'wasp/auth' {
+  export function useAuth(): {
+    data: import('@wasp/auth/types').AuthUser | null;
+    isLoading: boolean;
+    error: Error | null;
+  };
+}
+
+declare module 'wasp/client/operations' {
+  export { useQuery } from '@wasp/queries';
+  export { useAction } from '@wasp/actions';
+}
+
+declare module 'wasp/client/router' {
+  export function useRouter(): {
+    push: (path: string) => void;
+    replace: (path: string) => void;
+  };
+  export function Link(props: { to: string; children: React.ReactNode }): JSX.Element;
+}
+
+declare module 'wasp/client/auth' {
+  export { useAuth } from 'wasp/auth';
+  export function logout(): Promise<void>;
+}
+
+declare module '@headlessui/react' {
+  export function Menu(props: any): JSX.Element;
+  export function Transition(props: any): JSX.Element;
+}
+
+declare module 'react-icons/ai' {
+  export const AiOutlineMenu: React.FC;
+}
+
+declare module 'react-icons/hi2' {
+  export const HiMiniXMark: React.FC;
+}
+
+declare module 'react-hot-toast' {
+  export function toast(message: string): void;
+}
+
+declare module 'clsx' {
+  export default function clsx(...args: any[]): string;
+}
+
+declare module 'tailwind-merge' {
+  export function twMerge(...args: string[]): string;
+}
+
+declare module '@mui/material' {
+  export const TextField: React.FC<any>;
+  export const Button: React.FC<any>;
+}
+
+declare module '@mui/icons-material' {
+  export const CloudUpload: React.FC;
+}
+
+declare module 'vanilla-cookieconsent' {
+  export function run(config: any): void;
+}
+
+declare module '@google-analytics/data' {
+  export class BetaAnalyticsDataClient {
+    constructor(config: any);
+    runReport(request: any): Promise<any>;
+  }
+}
+
 declare module '@wasp/products/operations/types' {
   import { Product, ProductInput } from '@wasp/entities';
   import { GenericAuthenticatedOperationDefinition } from '@wasp/operations';
