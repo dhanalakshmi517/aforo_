@@ -541,9 +541,13 @@ declare module '@mui/material' {
     onBlur?: () => void;
     disabled?: boolean;
   }>;
+  export const Tab: React.FC<{
+    label?: string;
+    value?: any;
+  }>;
   export const MenuItem: React.FC<{
     value?: any;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     label?: string;
   }>;
   export const Paper: React.FC<{
@@ -642,14 +646,14 @@ declare module '@mui/icons-material' {
 }
 
 declare module 'react-icons/ai' {
-  export const AiOutlineMenu: React.FC;
-  export const AiFillCloseCircle: React.FC;
-  export const AiFillCheckCircle: React.FC;
+  export const AiOutlineMenu: React.FC<{ className?: string; 'aria-hidden'?: string }>;
+  export const AiFillCloseCircle: React.FC<{ className?: string; 'aria-hidden'?: string }>;
+  export const AiFillCheckCircle: React.FC<{ className?: string; 'aria-hidden'?: string }>;
 }
 
 declare module 'react-icons/hi2' {
-  export const HiBars3: React.FC;
-  export const HiMiniXMark: React.FC;
+  export const HiBars3: React.FC<{ className?: string; 'aria-hidden'?: string }>;
+  export const HiMiniXMark: React.FC<{ className?: string; 'aria-hidden'?: string }>;
 }
 
 declare module '@headlessui/react' {
