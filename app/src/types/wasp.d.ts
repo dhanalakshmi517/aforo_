@@ -54,21 +54,37 @@ declare module 'wasp/auth' {
 // ---- @wasp/queries (use React Query types) --------------------
 
 declare module '@wasp/queries' {
-  import type {
-    UseQueryResult as RQUseQueryResult,
-    UseQueryOptions,
-    QueryKey as RQQueryKey,
-  } from '@tanstack/react-query';
-
-  export type UseQueryResult<TData = unknown, TError = unknown> =
-    RQUseQueryResult<TData, TError>;
-
-  export type QueryKey = RQQueryKey;
+  export type UseQueryResult<TData = unknown, TError = unknown> = {
+    data: TData | undefined;
+    error: TError | null;
+    isLoading: boolean;
+    isError: boolean;
+    isSuccess: boolean;
+    isFetching: boolean;
+    status: 'error' | 'loading' | 'success';
+    refetch: () => Promise<void>;
+    errorUpdateCount: number;
+    isInitialLoading: boolean;
+    isLoadingError: boolean;
+    isRefetchError: boolean;
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    fetchStatus: 'fetching' | 'idle' | 'paused';
+    remove: () => void;
+  };
 
   export type QueryFn<TData, TArgs = void> = (args: TArgs) => Promise<TData>;
 
   // Simple “Query” type used in your auth/useAuth.ts:
   export type Query<TArgs = void, TData = unknown> = QueryFn<TData, TArgs>;
+
+  export type Query<TData = unknown, TError = unknown> = 
+    | string
+    | ((args?: any) => Promise<TData>)
+    | {
+      queryKey: string | readonly unknown[];
+      queryFn: (args?: any) => Promise<TData>;
+    };
 
   export function useQuery<TData = unknown, TError = unknown, TArgs = void>(
     query: QueryFn<TData, TArgs>,
@@ -149,7 +165,7 @@ declare module 'wasp/client/operations' {
   }>;
 
   export function getAllFilesByUser(): Promise<{
-    files: {
+    files: Array<{
       id: string;
       name: string;
       size: number;
@@ -159,9 +175,12 @@ declare module 'wasp/client/operations' {
       createdAt: Date;
       userId: string;
       key: string;
-    }[];
+    }>;
     length: number;
     message?: string;
+    status?: string;
+    error?: string;
+    data?: any;
   }>;
 
   export function getDownloadFileSignedURL(
@@ -519,7 +538,7 @@ declare module '@mui/material' {
   }>;
 
   export const MenuItem: React.FC<{
-    value?: any;
+    value: any;
     children?: React.ReactNode;
     className?: string;
     disabled?: boolean;
