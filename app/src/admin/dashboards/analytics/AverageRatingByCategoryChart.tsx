@@ -63,7 +63,7 @@ const AverageRatingByCategoryChart: React.FC = () => {
       );
 
       setSeries([{ name: 'Avg Rating', data: avgRatings }]);
-      setOptions((prev) => ({
+      setOptions((prev: any) => ({
         ...prev,
         xaxis: {
           ...prev.xaxis,

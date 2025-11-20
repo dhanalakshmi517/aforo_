@@ -64,14 +64,14 @@ const AveragePriceByCategoryChart: React.FC = () => {
       );
 
       setSeries([{ name: 'Avg Price', data: avgPrices }]);
-      setOptions((prev) => ({
+      setOptions((prev: any) => ({
         ...prev,
         xaxis: {
           type: 'numeric',
         },
         yaxis: {
           categories: prettyCategories,
-        } as any,
+        },
       }));
     };
 
