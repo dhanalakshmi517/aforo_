@@ -54,8 +54,8 @@ declare module 'wasp/auth' {
 // ---- @wasp/queries (use React Query types) --------------------
 
 declare module '@wasp/queries' {
-  // Base observer result type
-  export type QueryObserverBaseResult<TData = unknown, TError = unknown> = {
+  // Simple UseQueryResult type that matches TanStack Query
+  export type UseQueryResult<TData = unknown, TError = unknown> = {
     data: TData | null | undefined;
     error: TError | null;
     isLoading: boolean;
@@ -64,27 +64,7 @@ declare module '@wasp/queries' {
     isFetching: boolean;
     status: 'error' | 'loading' | 'success';
     refetch: () => Promise<void>;
-    errorUpdateCount: number;
-    isInitialLoading: boolean;
-    isLoadingError: boolean;
-    isRefetchError: boolean;
-    dataUpdatedAt: number;
-    errorUpdatedAt: number;
-    fetchStatus: 'fetching' | 'idle' | 'paused';
-    failureCount: number;
-    failureReason: TError | null;
-    isFetched: boolean;
-    isFetchedAfterMount: boolean;
-    isPlaceholderData: boolean;
-    isPreviousData: boolean;
-    isRefetching: boolean;
-    isStale: boolean;
-    isPaused: boolean;
-    remove: () => void;
   };
-  
-  // Use this type as the main type for UseQueryResult
-  export type UseQueryResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError>;
 
   export type QueryFn<TData = unknown, TArgs = void> = (args: TArgs) => Promise<TData>;
 
@@ -107,10 +87,8 @@ declare module '@wasp/queries' {
   }
 
   // Single simple signature that matches actual usage
-  export function useQuery<TData = unknown, TError = unknown>(
-    query: string | ((args?: any) => Promise<TData>),
-    args?: any
-  ): UseQueryResult<TData, TError>;
+  export function useQuery<TData = unknown>(queryFn: string): UseQueryResult<TData>;
+  export function useQuery<TData = unknown>(queryFn: () => Promise<TData>): UseQueryResult<TData>;
 }
 
 // ---- @wasp/actions --------------------------------------------
@@ -178,33 +156,28 @@ declare module 'wasp/client/operations' {
     totalPages: number;
   }>;
 
-  export function getAllFilesByUser(): Promise<{
-    files: Array<{
-      id: string;
-      name: string;
-      size: number;
-      type: string;
-      uploadUrl: string;
-      downloadUrl: string;
-      createdAt: Date;
-      userId: string;
-      key: string;
-    }>;
-    length: number;
-    message?: string;
-    map: <T>(fn: (file: any) => T) => T[];
-  }>;
+  export function getAllFilesByUser(): Promise<Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    uploadUrl: string;
+    downloadUrl: string;
+    createdAt: Date;
+    userId: string;
+    key: string;
+  }>>;
 
   export function getDownloadFileSignedURL(
     key: string
   ): Promise<{ downloadUrl: string }>;
   
 
-  // Loosened – you were passing { fileType, name } without size.
+  // Simple signature for createFile
   export function createFile(
-    file: File | { fileType: string; name: string; size?: number },
+    file: any,
     options?: any
-  ): { status: string; error?: string; data?: any } & Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
+  ): Promise<any>;
 
   export function generateCheckoutSession(
     planId?: string,
