@@ -1,0 +1,228 @@
+.kong-products-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-color: transparent;
+  position: relative;
+  padding: 10px;
+}
+
+.kong-products-card {
+  width: 100%;
+  background: var(--color-neutral-white, #ffffff);
+  border-radius: var(--border-radius-md, 8px);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 20px);
+  box-shadow: 0 8px 32px rgba(9, 30, 66, 0.08);
+  overflow: hidden;
+}
+
+/* Header */
+
+.kong-products-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 24px 32px 0 32px;
+  flex-shrink: 0;
+}
+
+/* Scrollable content container */
+
+.kong-products-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 32px 100px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  background-color: transparent;
+}
+
+.kong-products-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kong-products-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.kong-products-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.kong-products-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.kong-products-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kong-products-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kong-products-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.kong-products-selected-text {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.kong-products-select-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  justify-content: flex-end;
+}
+
+/* Search */
+
+.kong-products-search-wrapper {
+  position: relative;
+  width: 260px;
+  display: flex;
+  align-items: center;
+}
+
+.kong-products-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.kong-products-search-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 13px;
+  color: #111827;
+  outline: none;
+}
+
+.kong-products-search-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Select All / Clear All */
+
+
+.kong-products-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #111827;
+  cursor: pointer;
+}
+
+.kong-products-checkbox-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.kong-products-clear-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: #4b79ff;
+  cursor: pointer;
+}
+
+/* Grid */
+
+.kong-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  min-height: 200px;
+}
+
+/* Custom styling for SelectableCard to make it more compact */
+.kong-products-grid .selcard {
+  height: auto;
+  min-height: unset;
+  padding: 12px;
+  width: 100%;
+}
+
+.kong-products-grid .selcard__content {
+  width: 100%;
+}
+
+.kong-products-grid .selcard__meta {
+  margin-top: 4px;
+  max-height: 2.7em;
+  overflow: hidden;
+}
+
+.kong-products-grid .selcard__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kong-products-grid .selcard__version {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer */
+
+.kong-products-footer {
+  position: fixed;
+  bottom: 10px;
+  left: 330px;
+  right: 10px;
+  height: 70px;
+  background-color: var(--color-neutral-white);
+  padding: 8px 28px;
+  border-top: 1px solid var(--color-neutral-300);
+  border-radius: 0 0 var(--border-radius-md, 8px) var(--border-radius-md, 8px);
+  z-index: 100;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.kong-products-footer-line {
+  width: 100%;                    /* full width line */
+}
+
+.kong-products-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 0 0;
+}
+
+.kong-products-import-btn {
+  min-width: 150px;
+}
+
