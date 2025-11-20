@@ -6,56 +6,105 @@
 }
 
 .integrations-content {
-  padding: 24px 20px 24px 28px; /* Right padding reduced to allow cards to reach edge */
+  padding: 24px 40px;
   max-width: none;
   margin: 0;
 }
 
 .integrations-grid {
   display: flex;
-  gap: 16px; /* Gap between each card */
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
   margin-top: 0;
   flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: flex-start;
   width: 100%;
 }
 
-/* Main card container - Layout specs from first image */
+/* Main card container - Layout specs from fourth image */
 .integration-card {
   display: flex;
   padding: 16px;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
-  flex: 1;
-  min-width: 0; /* Allow cards to shrink if needed */
-  background: white;
-  border: 1px solid var(--border-border-1, #E8ECF3);
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 1 0 0;
+  border-radius: 8px;
+  background: var(--color-grey-white, #FFF);
+  /* small-card-shadow */
+  box-shadow: 0 1.34px 17.869px 0 rgba(0, 0, 0, 0.04), 0 0.399px 5.32px 0 rgba(0, 0, 0, 0.03);
   transition: box-shadow 0.2s ease;
+}
+
+/* Content row with icon and text - Third image specs */
+.integration-card-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+}
+
+/* Text content container */
+.integration-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
 }
 
 .integration-card:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Icon container - Second image specs */
+/* Icon container - Fourth image specs */
 .integration-card-icon {
+  border-radius: 11.636px;
+  border: 0.97px solid var(--border-border-1, #E8ECF3);
   display: flex;
   padding: 11.636px;
   align-items: center;
+  justify-content: center;
   gap: 3.879px;
-  border-radius: 11.636px;
-  border: 0.97px solid var(--border-border-1, #E8ECF3);
+  overflow: hidden;
 }
 
-/* Title - Third image specs */
+.integration-card-icon img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.integration-card-icon svg {
+  width: 64px;
+  height: 64px;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.placeholder-logo {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #4285F4, #34A853);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+}
+
+/* Title */
 .integration-card-title {
-  align-self: stretch;
   color: var(--text-text-darkest, #1A2126);
-  text-align: center;
+  text-align: left;
   margin: 0;
   
   /* body/md/bold */
@@ -66,17 +115,16 @@
   line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
-/* Description - Fourth image specs */
+/* Description */
 .integration-card-description {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
-  align-self: stretch;
   overflow: hidden;
   color: var(--text-text-medium, #909599);
   text-overflow: ellipsis;
-  text-align: center;
+  text-align: left;
   margin: 0;
   
   /* body/sm/reg */
@@ -87,18 +135,21 @@
   line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
-/* Sync button - Fifth image specs */
+/* Sync button - Third image specs */
 .integration-card-sync-btn {
   display: flex;
-  padding: 11.636px;
+  height: 30px;
+  padding: 4px 16px;
+  justify-content: center;
   align-items: center;
-  gap: 3.879px;
-  border-radius: 11.636px;
-  border: 0.97px solid var(--border-border-1, #E8ECF3);
-  background: white;
+  gap: 4px;
+  align-self: stretch;
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--surface-secondary-button-active-2, #F2F9FD);
+  border: none;
   color: var(--text-text-darkest, #1A2126);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease;
   
   /* body/sm/reg */
   font-family: var(--type-font-family-primary, "IBM Plex Sans");
@@ -109,6 +160,5 @@
 }
 
 .integration-card-sync-btn:hover {
-  background-color: #f8f9fa;
-  border-color: #d1d5db;
+  background-color: #E8F4F8;
 }
