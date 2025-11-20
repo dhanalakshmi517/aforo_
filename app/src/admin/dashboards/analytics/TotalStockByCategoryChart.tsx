@@ -38,7 +38,7 @@ const TotalStockByCategoryChart: React.FC = () => {
       const products = await getProducts();
 
       const stockByCategory: Record<string, number> = {};
-      products.forEach((p) => {
+      products.forEach((p: { category: string; stock: number }) => {
         stockByCategory[p.category] = (stockByCategory[p.category] || 0) + p.stock;
       });
 
@@ -48,12 +48,12 @@ const TotalStockByCategoryChart: React.FC = () => {
       const prettyCategories = categories.map((cat) =>
         cat
           .split('-')
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
           .join(' '),
       );
 
       setSeries([{ name: 'Stock', data: stocks }]);
-      setOptions((prev) => ({
+      setOptions((prev: ApexOptions) => ({
         ...prev,
         xaxis: {
           ...prev.xaxis,

@@ -46,7 +46,7 @@ const AverageRatingByCategoryChart: React.FC = () => {
       const products = await getProducts();
 
       const sums: Record<string, { total: number; count: number }> = {};
-      products.forEach((p) => {
+      products.forEach((p: { category: string; rating: number }) => {
         if (!sums[p.category]) sums[p.category] = { total: 0, count: 0 };
         sums[p.category].total += p.rating;
         sums[p.category].count += 1;
@@ -58,12 +58,12 @@ const AverageRatingByCategoryChart: React.FC = () => {
       const prettyCategories = categories.map((cat) =>
         cat
           .split('-')
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
           .join(' '),
       );
 
       setSeries([{ name: 'Avg Rating', data: avgRatings }]);
-      setOptions((prev) => ({
+      setOptions((prev: ApexOptions) => ({
         ...prev,
         xaxis: {
           ...prev.xaxis,

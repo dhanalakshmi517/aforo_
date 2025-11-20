@@ -47,7 +47,7 @@ const AveragePriceByCategoryChart: React.FC = () => {
       const products = await getProducts();
 
       const sums: Record<string, { total: number; count: number }> = {};
-      products.forEach((p) => {
+      products.forEach((p: { category: string; price: number }) => {
         if (!sums[p.category]) sums[p.category] = { total: 0, count: 0 };
         sums[p.category].total += p.price;
         sums[p.category].count += 1;
@@ -59,19 +59,19 @@ const AveragePriceByCategoryChart: React.FC = () => {
       const prettyCategories = categories.map((cat) =>
         cat
           .split('-')
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
           .join(' '),
       );
 
       setSeries([{ name: 'Avg Price', data: avgPrices }]);
-      setOptions((prev) => ({
+      setOptions((prev: ApexOptions) => ({
         ...prev,
         xaxis: {
           type: 'numeric',
         },
         yaxis: {
           categories: prettyCategories,
-        } as any,
+        } as ApexYAxis,
       }));
     };
 
