@@ -9,17 +9,17 @@ declare module 'wasp/auth' {
 
 declare module '@wasp/queries' {
   export type UseQueryResult<TData = unknown, TError = unknown> = {
-    data: TData | undefined;
+    data: TData;
     dataUpdatedAt: number;
     error: TError | null;
     errorUpdatedAt: number;
-    errorUpdateCount: number;
     failureCount: number;
     failureReason: TError | null;
     isError: boolean;
     isFetched: boolean;
     isFetchedAfterMount: boolean;
     isFetching: boolean;
+    isInitialLoading: boolean;
     isLoading: boolean;
     isLoadingError: boolean;
     isPaused: boolean;
@@ -30,7 +30,9 @@ declare module '@wasp/queries' {
     isStale: boolean;
     isSuccess: boolean;
     status: 'error' | 'loading' | 'success';
+    fetchStatus: 'fetching' | 'idle' | 'paused';
     refetch: () => Promise<UseQueryResult<TData, TError>>;
+    remove: () => void;
   };
 
   export type QueryKey = string | readonly unknown[];
@@ -54,12 +56,29 @@ declare module '@wasp/queries' {
     onError?: (error: TError) => void;
   }
 
-  export type Query<TData = unknown, TError = unknown> = QueryOptions<TData, TError>;
+  export type Query<TData = unknown, TError = unknown> = 
+    | string 
+    | (() => Promise<TData>) 
+    | {
+      queryKey: string | readonly unknown[];
+      queryFn: (context: QueryFunctionContext) => Promise<TData>;
+      retry?: boolean | number;
+      retryDelay?: number;
+      staleTime?: number;
+      cacheTime?: number;
+      refetchInterval?: number | false;
+      refetchOnMount?: boolean;
+      refetchOnWindowFocus?: boolean;
+      refetchOnReconnect?: boolean;
+      suspense?: boolean;
+      enabled?: boolean;
+      onSuccess?: (data: TData) => void;
+      onError?: (error: TError) => void;
+    };
 
   export function useQuery<TData = unknown, TError = unknown>(
-    queryFn: QueryFn<TData> | string | (() => Promise<TData>),
-    args?: any,
-    options?: QueryOptions<TData, TError>
+    query: Query<TData, TError>,
+    args?: any
   ): UseQueryResult<TData, TError>;
 
   export type QueryObserverLoadingErrorResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError> & {
@@ -183,8 +202,8 @@ declare module 'wasp/client/operations' {
     length: number;
     message?: string;
   }>;
-  export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
-  export function createFile(file: File | { fileType: string; name: string; size: number }, options?: any): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
+  export function getDownloadFileSignedURL(key: string): Promise<string>;
+  export function createFile(file: File | { fileType: string; name: string; size: number }, options?: { onUploadProgress?: (progress: number) => void }): Promise<{ uploadUrl: string; status?: string; error?: string; data?: any }>;
   export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
@@ -779,9 +798,12 @@ declare module '@mui/material' {
     disabled?: boolean;
   }>;
   export const MenuItem: React.FC<{
-    value?: any;
+    value: any;
     children?: React.ReactNode;
-    label?: string;
+    label: string;
+    className?: string;
+    disabled?: boolean;
+    icon?: React.ReactNode;
   }>;
   export const Paper: React.FC<{
     elevation?: number;
