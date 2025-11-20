@@ -22,17 +22,45 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData> = {
+  export type UseQueryResult<TData, TError = Error> = {
     data: TData | undefined;
-    isLoading: boolean;
-    error: Error | undefined;
+    dataUpdatedAt: number;
+    error: TError | null;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: TError | null;
     isError: boolean;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isLoading: boolean;
     isLoadingError: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
     isRefetchError: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
     isSuccess: boolean;
-    refetch: () => void;
+    refetch: () => Promise<QueryObserverResult<TData, TError>>;
+    remove: () => void;
     status: 'loading' | 'error' | 'success';
     fetchStatus: 'fetching' | 'paused' | 'idle';
+  };
+
+  export type QueryObserverResult<TData, TError> = UseQueryResult<TData, TError>;
+
+  export type Query<TQueryFnData, TError> = {
+    queryKey: string;
+    queryFn: () => Promise<TQueryFnData>;
+    retry?: boolean | number;
+    retryDelay?: number;
+    staleTime?: number;
+    cacheTime?: number;
+    refetchOnMount?: boolean;
+    refetchOnWindowFocus?: boolean;
+    refetchOnReconnect?: boolean;
+    suspense?: boolean;
   };
   
   export function useQuery<T, A>(query: (args: A, context: any) => Promise<T>, args?: A): UseQueryResult<T>;
@@ -230,7 +258,71 @@ declare module 'react-icons/hi2' {
 
 
 declare module 'vanilla-cookieconsent' {
-  export interface CookieConsentConfig {
+  export type CookieConsentConfig = {
+    root?: string;
+    autoShow?: boolean;
+    disablePageInteraction?: boolean;
+    hideFromBots?: boolean;
+    mode?: 'opt-in' | 'opt-out';
+    revision?: number;
+    cookie?: {
+      name?: string;
+      domain?: string;
+      path?: string;
+      sameSite?: string;
+      expiresAfterDays?: number;
+    };
+    guiOptions?: {
+      consentModal?: {
+        layout?: string;
+        position?: string;
+        equalWeightButtons?: boolean;
+        flipButtons?: boolean;
+      };
+      preferencesModal?: {
+        layout?: string;
+        position?: string;
+        equalWeightButtons?: boolean;
+        flipButtons?: boolean;
+      };
+    };
+    categories?: {
+      [key: string]: {
+        enabled?: boolean;
+        readOnly?: boolean;
+        autoClear?: boolean;
+        services?: {
+          [key: string]: {
+            label?: string;
+            onAccept?: () => void;
+            onReject?: () => void;
+          };
+        };
+      };
+    };
+    language?: {
+      default?: string;
+      translations?: {
+        [key: string]: {
+          consentModal?: {
+            title?: string;
+            description?: string;
+          };
+          preferencesModal?: {
+            title?: string;
+            acceptAllBtn?: string;
+            acceptNecessaryBtn?: string;
+            savePreferencesBtn?: string;
+            closeIconLabel?: string;
+            sections?: Array<{
+              title?: string;
+              description?: string;
+            }>;
+          };
+        };
+      };
+    };
+  } & {
     current_lang: string;
     autoclear_cookies: boolean;
     page_scripts: boolean;
@@ -394,12 +486,16 @@ declare module '@mui/material' {
     className?: string;
     type?: 'button' | 'submit' | 'reset';
     sx?: any;
+    startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
+    component?: React.ElementType;
+    href?: string;
   }>;
   export const TextField: React.FC<{
     variant?: 'standard' | 'filled' | 'outlined';
     label?: string;
     value?: string | number;
-    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     error?: boolean;
     helperText?: string;
     fullWidth?: boolean;
@@ -411,6 +507,11 @@ declare module '@mui/material' {
     name?: string;
     required?: boolean;
     sx?: any;
+    InputProps?: {
+      startAdornment?: React.ReactNode;
+      endAdornment?: React.ReactNode;
+      [key: string]: any;
+    };
   }>;
   export const Divider: React.FC<{
     orientation?: 'horizontal' | 'vertical';
