@@ -28,6 +28,7 @@ import Organization from './components/Landing/Organization';
 import { ProtectedRoute } from './components/Common/ProtectedRoute';
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import DashboardGallery from './components/Dashboard/DashboardGallery';
+import ProductAnalyticsPage from './components/Dashboard/ProductAnalyticsPage';
 
 const customersLoader = () => import('./components/Customers/Customers');
 const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
@@ -128,16 +129,17 @@ export default function App() {
   }, [user]);
 
   const currentTab = (() => {
-    if (location.pathname === '/get-started') return 'Get Started';
-    if (location.pathname === '/get-started/customers') return 'Customers';
-    if (location.pathname === '/get-started/products') return 'Products';
-    if (location.pathname === '/get-started/rate-plans') return 'Rate Plans';
-    if (location.pathname === '/get-started/metering') return 'Billable Metrics';
-    if (location.pathname === '/get-started/data-ingetion') return 'Data Ingetion';
-    if (location.pathname === '/get-started/subscriptions') return 'Purchases';
-    if (location.pathname === '/get-started/dashboards') return 'Dashboards';
-    if (location.pathname === '/get-started/integrations') return 'Integrations';
-    if (location.pathname === '/get-started/settings') return 'Settings';
+    const path = location.pathname;
+    if (path === '/get-started') return 'Get Started';
+    if (path.startsWith('/get-started/customers')) return 'Customers';
+    if (path.startsWith('/get-started/products')) return 'Products';
+    if (path.startsWith('/get-started/rate-plans')) return 'Rate Plans';
+    if (path.startsWith('/get-started/metering')) return 'Billable Metrics';
+    if (path.startsWith('/get-started/data-ingetion')) return 'Data Ingetion';
+    if (path.startsWith('/get-started/subscriptions')) return 'Purchases';
+    if (path.startsWith('/get-started/dashboards')) return 'Dashboards';
+    if (path.startsWith('/get-started/integrations')) return 'Integrations';
+    if (path.startsWith('/get-started/settings')) return 'Settings';
     return 'Get Started';
   })();
 
@@ -271,10 +273,42 @@ export default function App() {
                 />
                 <DashboardGallery
                   onCardClick={(card) => {
-                    console.log('Dashboard card clicked:', card);
-                    // You can add navigation logic here if needed
+                    if (card.id === 'product') {
+                      navigate('/get-started/dashboards/product-analytics');
+                    }
                   }}
                 />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Product Analytics dashboard detail */}
+          <Route
+            path="/get-started/dashboards/product-analytics"
+            element={
+              <ProtectedRoute>
+                <SideNavbar
+                  activeTab={currentTab}
+                  onTabClick={(tab) => {
+                    if (tab === 'Settings') {
+                      navigate('/get-started/settings');
+                    } else {
+                      const slug =
+                        tab === 'Billable Metrics'
+                          ? 'metering'
+                          : tab === 'Purchases'
+                          ? 'subscriptions'
+                          : tab === 'Data Ingetion'
+                          ? 'data-ingetion'
+                          : tab === 'Integrations'
+                          ? 'integrations'
+                          : tab.toLowerCase().replace(/\s+/g, '-');
+                      navigate(`/get-started/${slug}`);
+                    }
+                  }}
+                  hidden={!showSidebar}
+                />
+                <ProductAnalyticsPage />
               </ProtectedRoute>
             }
           />

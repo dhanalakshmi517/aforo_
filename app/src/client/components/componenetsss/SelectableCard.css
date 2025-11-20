@@ -20,9 +20,10 @@
   .selcard {
     display: flex;
     width: 263px auto;
-    padding: 16px;
+    padding: 12px 16px;
     align-items: flex-start;
     gap: 8px;
+    height: auto;
   
     border-radius: var(--scale-200, 8px);
     border: 1px solid var(--border-border-1, var(--af-border-default));
@@ -66,18 +67,10 @@
   }
   
   /* Layout bits */
-  .selcard__checkbox {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    line-height: 0;
-  }
-  
   .selcard__content {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding-right: 28px; /* room for the checkbox */
   }
   
   .selcard__title {

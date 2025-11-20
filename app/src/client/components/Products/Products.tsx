@@ -755,8 +755,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             </div>
           )}
 
-          {/* LIST TABLE */}
-          {!showCreateProduct && !isEditFormOpen && (
+          {/* LIST TABLE (hidden when Kong integration is open) */}
+          {!showCreateProduct && !isEditFormOpen && !showKongIntegration && (
             <div className="rate-plan-container">
               <Header
                 title="Products"

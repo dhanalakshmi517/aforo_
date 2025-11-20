@@ -1,0 +1,37 @@
+.products-donut-wrapper {
+  /* so the card itself doesn’t stretch full screen */
+  display: flex;
+  justify-content: flex-start; /* or center */
+}
+
+.products-donut-card {
+  border: 1px solid #e5e7eb;        /* visible light grey border */
+  border-radius: 10px;
+  padding: 16px 20px 20px;
+  background-color: #ffffff;
+  width: 420px;                      /* tweak as you like */
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+}
+
+.products-donut-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.products-donut-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.products-donut-header span {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.products-donut-chart {
+  display: flex;
+  justify-content: center;
+}

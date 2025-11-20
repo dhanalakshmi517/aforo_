@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import './SelectableCard.css';
 
-import Checkbox from './Checkbox';
-
 export type SelectableCardProps = {
   title: string;                 // e.g., "FGG API Pro"
   version?: string;              // e.g., "version 3.4r"
@@ -49,13 +47,6 @@ const SelectableCard: React.FC<SelectableCardProps> = ({
       onMouseUp={() => setPressed(false)}
       onMouseLeave={() => setPressed(false)}
     >
-      <div className="selcard__checkbox">
-        <Checkbox
-          checked={selected}
-          onChange={(c) => onSelectedChange(c)}
-        />
-      </div>
-
       <div className="selcard__content">
         <div className="selcard__title">{title}</div>
         {version && <div className="selcard__version">{version}</div>}

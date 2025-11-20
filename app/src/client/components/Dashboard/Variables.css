@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap');
+/* Brand Colors */
+:root {
+  --brand-000: rgba(225, 240, 230, 1);
+  --brand-100: rgba(185, 207, 193, 1);
+  --brand-200: rgba(163, 194, 168, 1);
+  --brand-300: rgba(140, 180, 140, 1);
+  --brand-400: rgba(127, 168, 119, 1);
+  --brand-500: rgba(117, 157, 97, 1);
+  --brand-600: rgba(110, 146, 75, 1);
+  --brand-700: rgba(109, 136, 54, 1);
+  --brand-800: rgba(86, 98, 24, 1);
+  --brand-900: rgba(85, 85, 21, 1);
+  --brand-1000: rgba(73, 64, 18, 1);
+  --brand-1100: rgba(66, 49, 16, 1);
+  --brand-1200: rgba(59, 37, 15, 1);
+  --brand-1300: rgba(49, 24, 12, 1);
+  --brand-1400: rgba(40, 15, 10, 1);
+
+
+  
+
+  /* Grey Colors */
+  --grey-white: rgba(255, 255, 255, 1);
+  --grey-100: rgba(245, 244, 245, 1);
+  --grey-200: rgba(234, 233, 234, 1);
+  --grey-300: rgba(214, 213, 215, 1);
+  --grey-400: rgba(193, 191, 194, 1);
+  --grey-500: rgba(173, 171, 174, 1);
+  --grey-600: rgba(152, 149, 154, 1);
+  --grey-700: rgba(132, 128, 134, 1);
+  --grey-800: rgba(112, 108, 114, 1);
+  --grey-900: rgba(90, 86, 93, 1);
+  --grey-1000: rgba(71, 66, 74, 1);
+  --grey-1100: rgba(49, 44, 53, 1);
+  --grey-1200: rgba(39, 35, 42, 1);
+  --grey-1300: rgba(35, 31, 37, 1);
+  --grey-1400: rgba(30, 26, 32, 1);
+  --grey-1500: rgba(30, 26, 32, 1);
+  --grey-1600: rgba(27, 24, 22, 1);
+  --grey-1700: rgba(21, 19, 18, 1);
+  --grey-black: rgba(18, 18, 19, 1);
+
+  /* === Red Scale (from brand collection: color/red) === */
+  --red-lightest: rgba(255, 247, 245, 1);
+  --red-lighter: rgba(255, 243, 240, 1);
+  --red-light: rgba(255, 237, 235, 1);
+  --red-default: rgba(237, 81, 66, 1);
+  --red-dark: rgba(212, 54, 47, 1);
+  --red-darker: rgba(183, 33, 32, 1);
+  --red-darkest: rgba(149, 20, 22, 1);
+
+  /* Yellow color */
+  --color-yellow-lightest: rgba(255, 251, 239, 1);
+  --color-yellow-lighter: rgba(255, 241, 200, 1);
+  --color-yellow-light: rgba(249, 216, 119, 1);
+  --color-yellow-default: rgba(226, 178, 38, 1);
+  --color-yellow-dark: rgba(194, 144, 23, 1);
+  --color-yellow-darker: rgba(117, 89, 14, 1);
+  --color-yellow-darkest: rgba(48, 37, 10, 1);
+
+  /* Green color */
+  --color-green-lightest: rgba(241, 246, 244, 1);
+  --color-green-lighter: rgba(203, 232, 222, 1);
+  --color-green-light: rgba(133, 222, 177, 1);
+  --color-green-default: rgba(70, 206, 154, 1);
+  --color-green-dark: rgba(35, 163, 109, 1);
+  --color-green-darker: rgba(29, 110, 79, 1);
+  --color-green-darkest: rgba(24, 86, 62, 1);
+
+  /* Blue color */
+  --color-blue-lightest: rgba(210, 227, 234, 1);
+  --color-blue-lighter: rgba(141, 190, 255, 1);
+  --color-blue-light: rgba(84, 157, 252, 1);
+  --color-blue-default: rgba(29, 122, 252, 1);
+  --color-blue-dark: rgba(0, 86, 201, 1);
+  --color-blue-darker: rgba(7, 50, 106, 1);
+  --color-blue-darkest: rgba(10, 24, 42, 1);
+
+  /* Font Family */
+  --font-family-primary: "IBM Plex Sans", sans-serif;
+
+  /* Font Weights (string values not specified in the image) */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+
+  /* Scale Values */
+  --scale-0: 0px;
+  --scale-25: 1px;
+  --scale-50: 2px;
+  --scale-100: 4px;
+  --scale-150: 6px;
+  --scale-200: 8px;
+  --scale-300: 12px;
+  --scale-400: 16px;
+  --scale-500: 20px;
+  --scale-600: 24px;
+  --scale-700: 28px;
+  --scale-800: 32px;
+  --scale-900: 36px;
+
+ --font-size-xs: 0.625rem;     /* 8px */
+  --font-size-sm: 0.75rem;   /* 10px */
+  --font-size-md: 0.875rem;    /* 12px */
+  --font-size-lg: 1rem; 
+
+  /* Heading Font Sizes (Responsive or Base) */
+  --font-size-h6: 1.125rem;
+  --font-size-h5: 1.25rem;
+  --font-size-h4: 1.375rem;
+  --font-size-h3: 1.625rem;
+  --font-size-h2: 1.75rem;
+  --font-size-h1: 2rem;
+  --line-height-body-xs: 1rem;
+  --line-height-body-sm: 1.125rem;
+  /* 20 ÷ 16 */
+  --line-height-body-md: 1.25rem;
+  /* 20 ÷*/
+  --line-height-body-lg: 1.5rem;
+
+
+  /* Line Heights for Heading Text (responsive context) */
+  --line-height-heading-h6: 1.5rem;
+  --line-height-heading-h5: 1.75rem;
+  --line-height-heading-h4: 2rem;
+  --line-height-heading-h3: 2.25rem;
+  --line-height-heading-h2: 2.25rem;
+  --line-height-heading-h1: 2.5rem;
+
+  /* General Spacing Scale */
+  --spacing-3xs: 0.125rem;
+  --spacing-2xs: 0.25rem;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.25rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 1.75rem;
+  --spacing-2xl: 2rem;
+  --spacing-3xl: 2.25rem;
+
+  /* Paragraph Spacing for Body Text */
+  --paragraph-spacing-body-sm: 0.875rem;
+  --paragraph-spacing-body-md: 1rem;
+  --paragraph-spacing-body-lg: 1.25rem;
+
+  --paragraph-spacing-heading-h1: 3rem;
+  --paragraph-spacing-heading-h2: 2.5rem;
+  --paragraph-spacing-heading-h3: 2.25rem;
+  --paragraph-spacing-heading-h4: 2rem;
+  --paragraph-spacing-heading-h5: 1.75rem;
+  --paragraph-spacing-heading-h6: 1.5rem;
+
+
+  /* ALIAS */
+  /* Primary Color Palette (from the image) */
+  --color-primary-000:rgba(242, 249, 253, 1);
+  /* Assuming a very light shade based on the 000 naming */
+  --color-primary-100:rgba(237, 248, 253, 1);
+  /* Assuming lighter shades */
+  --color-primary-200: rgba(226, 242, 249, 1);
+  --color-primary-300:rgba(87, 189, 234, 1);
+  --color-primary-400: rgba(34, 167, 229, 1);
+  --color-primary-500:rgba(0, 146, 223, 1);
+  --color-primary-600: rgba(11, 128, 194, 1);
+  --color-primary-700: rgba(2, 98, 161, 1);
+    --color-primary-750:rgba(2, 90, 148, 1);
+
+  /* Directly from the image: #4339AC */
+  --color-primary-800:rgba(0, 75, 128, 1);
+  /* Assuming darker shades */
+  --color-primary-900:rgba(0, 64, 105, 1) ;
+  --color-primary-1000: rgba(0, 54, 90, 1);
+  --color-primary-1100: rgba(0, 40, 67, 1);
+  --color-primary-1200: rgba(0, 33, 55, 1);
+  --color-primary-1300: rgba(0, 31, 49, 1);
+  --color-primary-1400: rgba(0, 21, 32, 1);
+
+  /* Secondary Color Palette */
+  --color-secondary-100: #FFEBD6;
+  --color-secondary-200: #FFDDAE;
+  --color-secondary-300: #FFCF85;
+  --color-secondary-400: #FFC05C;
+  --color-secondary-500: #FFB233;
+  --color-secondary-600: #E69D2E;
+  --color-secondary-700: #CC892A;
+  --color-secondary-800: #B37525;
+  --color-secondary-900: #996120;
+
+
+  /* Neutrals Color Palette */
+  --color-neutral-white:rgba(255, 255, 255, 1);
+  --color-neutral-100:rgba(248, 247, 250, 1);
+  --color-neutral-200: rgba(233, 233, 238, 1);
+  --color-neutral-300: rgba(213, 212, 223, 1);
+  --color-neutral-400: rgba(191, 190, 206, 1);
+  --color-neutral-500: rgba(195, 194, 208, 1);
+  --color-neutral-600: rgba(179, 184, 188, 1);
+  --color-neutral-700: rgba(157, 162, 166, 1);
+  --color-neutral-800: rgba(144, 149, 153, 1);
+  --color-neutral-900: rgba(130, 134, 139, 1);
+  --color-neutral-1000: rgba(117, 121, 126, 1);
+  --color-neutral-1100: rgba(102, 106, 111, 1);
+  --color-neutral-1200: rgba(89, 94, 98, 1);
+  --color-neutral-1300:rgba(74, 78, 83, 1);
+  --color-neutral-1400: rgba(55, 59, 64, 1);
+  --color-neutral-1500: rgba(43, 47, 51, 1);
+  --color-neutral-1600: rgba(32, 37, 41, 1);
+  --color-neutral-1700: rgba(26, 33, 38, 1);
+  --color-neutral-black: rgba(0, 0, 0, 1);
+
+  /* Error Color Palette */
+  --color-error-100:rgba(255, 237, 233, 1);
+  --color-error-200: rgba(255, 205, 192, 1);
+  --color-error-300: rgba(255, 139, 121, 1);
+  --color-error-400: rgba(237, 81, 66, 1);
+  --color-error-500: rgba(212, 54, 47, 1);
+  --color-error-600: rgba(183, 33, 32, 1);
+  --color-error-700: rgba(149, 20, 22, 1);
+
+  /* Success Color Palette */
+  --color-success-100: #E8FCE8;
+  --color-success-200: #D1F9D1;
+  --color-success-300: #B9F6B9;
+  --color-success-400: #A2F3A2;
+  --color-success-500: #8BEF8B;
+  --color-success-600: #74EC74;
+  --color-success-700: #5CE95C;
+
+  /* Information Color Palette */
+  --color-info-100: #E6F3FF;
+  --color-info-200: #CCE5FF;
+  --color-info-300: #B3D8FF;
+  --color-info-400: #99CAFF;
+  --color-info-500: #80BCFF;
+  --color-info-600: #66AEFF;
+  --color-info-700: #4DA0FF;
+
+  /* Warning Color Palette */
+  --color-warning-100: #FFFDE6;
+  --color-warning-200: #FFFAB3;
+  --color-warning-300: #FFF780;
+  --color-warning-400: #FFF54D;
+  --color-warning-500: #FFF21A;
+  --color-warning-600: #FFE600;
+  --color-warning-700: #E5CC00;
+
+
+  /* Border Radius Scale */
+  --border-radius-none: 0.25rem;
+  --border-radius-sm: 0.5rem;
+  --border-radius-md: 0.75rem;
+  --border-radius-lg: 1rem;
+
+  /* Border Width Scale */
+  --border-width-none: 0px;
+  --border-width-sm: 1px;
+  --border-width-md: 2px;
+  --border-width-lg: 4px;
+}
