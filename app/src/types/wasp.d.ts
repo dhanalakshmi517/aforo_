@@ -54,8 +54,9 @@ declare module 'wasp/auth' {
 // ---- @wasp/queries (use React Query types) --------------------
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData = unknown, TError = unknown> = {
-    data: TData | undefined;
+  // Base observer result type
+  export type QueryObserverBaseResult<TData = unknown, TError = unknown> = {
+    data: TData | null | undefined;
     error: TError | null;
     isLoading: boolean;
     isError: boolean;
@@ -81,6 +82,9 @@ declare module '@wasp/queries' {
     isPaused: boolean;
     remove: () => void;
   };
+  
+  // Use this type as the main type for UseQueryResult
+  export type UseQueryResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError>;
 
   export type QueryFn<TData = unknown, TArgs = void> = (args: TArgs) => Promise<TData>;
 
@@ -102,21 +106,10 @@ declare module '@wasp/queries' {
     refetchOnWindowFocus?: boolean;
   }
 
+  // Single simple signature that matches actual usage
   export function useQuery<TData = unknown, TError = unknown>(
-    query: Query<void, TData>,
-    args?: undefined
-  ): UseQueryResult<TData, TError>;
-
-  // Overload for functions with args
-  export function useQuery<TArgs = any, TData = unknown, TError = unknown>(
-    query: QueryFn<TData, TArgs>,
-    args: TArgs
-  ): UseQueryResult<TData, TError>;
-
-  // Actual implementation (not visible to consuming code)
-  export function useQuery<TArgs = any, TData = unknown, TError = unknown>(
-    query: Query<TArgs, TData>,
-    args?: TArgs
+    query: string | ((args?: any) => Promise<TData>),
+    args?: any
   ): UseQueryResult<TData, TError>;
 }
 
@@ -185,27 +178,33 @@ declare module 'wasp/client/operations' {
     totalPages: number;
   }>;
 
-  export function getAllFilesByUser(): Promise<Array<{
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    uploadUrl: string;
-    downloadUrl: string;
-    createdAt: Date;
-    userId: string;
-    key: string;
-  }>>;
+  export function getAllFilesByUser(): Promise<{
+    files: Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      uploadUrl: string;
+      downloadUrl: string;
+      createdAt: Date;
+      userId: string;
+      key: string;
+    }>;
+    length: number;
+    message?: string;
+    map: <T>(fn: (file: any) => T) => T[];
+  }>;
 
   export function getDownloadFileSignedURL(
     key: string
-  ): Promise<string>;
+  ): Promise<{ downloadUrl: string }>;
+  
 
   // Loosened – you were passing { fileType, name } without size.
   export function createFile(
     file: File | { fileType: string; name: string; size?: number },
-    options?: { onUploadProgress?: (progress: number) => void }
-  ): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
+    options?: any
+  ): { status: string; error?: string; data?: any } & Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
 
   export function generateCheckoutSession(
     planId?: string,
