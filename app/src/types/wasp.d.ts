@@ -78,12 +78,19 @@ declare module '@wasp/queries' {
     isPreviousData: boolean;
     isRefetching: boolean;
     isStale: boolean;
+    isPaused: boolean;
     remove: () => void;
   };
 
   export type QueryFn<TData = unknown, TArgs = void> = (args: TArgs) => Promise<TData>;
 
-  export type Query<TArgs = void, TData = unknown> = string | QueryFn<TData, TArgs>;
+  export type QueryMetadata = {
+    queryKey: string | readonly unknown[];
+    queryHash: string;
+    options: any;
+  };
+
+  export type Query<TArgs = void, TData = unknown> = string | QueryFn<TData, TArgs> | QueryMetadata;
 
   export interface QueryOptions<TData = unknown, TError = unknown> {
     enabled?: boolean;
@@ -96,8 +103,20 @@ declare module '@wasp/queries' {
   }
 
   export function useQuery<TData = unknown, TError = unknown>(
-    query: string | ((args?: any) => Promise<TData>),
-    args?: any
+    query: Query<void, TData>,
+    args?: undefined
+  ): UseQueryResult<TData, TError>;
+
+  // Overload for functions with args
+  export function useQuery<TArgs = any, TData = unknown, TError = unknown>(
+    query: QueryFn<TData, TArgs>,
+    args: TArgs
+  ): UseQueryResult<TData, TError>;
+
+  // Actual implementation (not visible to consuming code)
+  export function useQuery<TArgs = any, TData = unknown, TError = unknown>(
+    query: Query<TArgs, TData>,
+    args?: TArgs
   ): UseQueryResult<TData, TError>;
 }
 
@@ -166,34 +185,27 @@ declare module 'wasp/client/operations' {
     totalPages: number;
   }>;
 
-  export function getAllFilesByUser(): Promise<{
-    files: Array<{
-      id: string;
-      name: string;
-      size: number;
-      type: string;
-      uploadUrl: string;
-      downloadUrl: string;
-      createdAt: Date;
-      userId: string;
-      key: string;
-    }>;
-    length: number;
-    message?: string;
-    status?: string;
-    error?: string;
-    data?: any;
-  }> & { map: <T>(fn: (file: any) => T) => T[] };
+  export function getAllFilesByUser(): Promise<Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    uploadUrl: string;
+    downloadUrl: string;
+    createdAt: Date;
+    userId: string;
+    key: string;
+  }>>;
 
   export function getDownloadFileSignedURL(
-    key: string,
-  ): Promise<{ downloadUrl: string }>;
+    key: string
+  ): Promise<string>;
 
   // Loosened – you were passing { fileType, name } without size.
   export function createFile(
-    file: any,
-    options?: { onUploadProgress?: (progress: number) => void },
-  ): Promise<{ uploadUrl: string; status?: string; error?: string; data?: any }>;
+    file: File | { fileType: string; name: string; size?: number },
+    options?: { onUploadProgress?: (progress: number) => void }
+  ): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
 
   export function generateCheckoutSession(
     planId?: string,
@@ -598,7 +610,7 @@ declare module '@mui/material' {
 
   export const Tab: React.FC<{
     label: string;
-    value: any;
+    value?: any;
     className?: string;
     disabled?: boolean;
     icon?: React.ReactNode;
