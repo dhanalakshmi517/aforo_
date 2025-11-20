@@ -52,16 +52,16 @@ const ProductsByCategoryDonutChart: React.FC = () => {
         const prettyLabels = rawLabels.map((cat) =>
           cat
             .split('-')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' '),
         );
 
         setSeries(data);
-        setOptions((prev) => ({
+        setOptions((prev: ApexOptions) => ({
           ...prev,
           labels: prettyLabels,
         }));
-      } catch (e) {
+      } catch (e: unknown) {
         console.error('Error loading product data for donut chart:', e);
       }
     };
@@ -71,7 +71,7 @@ const ProductsByCategoryDonutChart: React.FC = () => {
 
   if (!series.length) return null;
 
-  const total = series.reduce((sum, v) => sum + v, 0);
+  const total = series.reduce((sum: number, v: number) => sum + v, 0);
 
   return (
     <div>

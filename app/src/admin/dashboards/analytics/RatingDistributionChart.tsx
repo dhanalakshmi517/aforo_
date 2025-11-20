@@ -39,8 +39,8 @@ const RatingDistributionChart: React.FC = () => {
     const fetchData = async () => {
       const products = await getProducts();
 
-      const buckets = [0, 0, 0, 0, 0];
-      products.forEach((p) => {
+      const buckets: number[] = [0, 0, 0, 0, 0];
+      products.forEach((p: { rating: number }) => {
         const r = Math.round(p.rating);
         if (r >= 1 && r <= 5) {
           buckets[r - 1] += 1;

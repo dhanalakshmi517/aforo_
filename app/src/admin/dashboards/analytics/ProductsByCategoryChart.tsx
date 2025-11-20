@@ -73,17 +73,17 @@ const ProductsByCategoryChart: React.FC = () => {
           return acc;
         }, {});
 
-        const categories = Object.keys(categoryCounts);
-        const counts = Object.values(categoryCounts);
+        const categories: string[] = Object.keys(categoryCounts);
+        const counts: number[] = Object.values(categoryCounts);
 
         setSeries([{ name: 'Products', data: counts }]);
         
-        setChartOptions(prevOptions => ({
+        setChartOptions((prevOptions: ApexOptions) => ({
           ...prevOptions,
           xaxis: {
             ...prevOptions.xaxis,
-            categories: categories.map(cat => 
-              cat.split('-').map(word => 
+            categories: categories.map((cat: string) => 
+              cat.split('-').map((word: string) => 
                 word.charAt(0).toUpperCase() + word.slice(1)
               ).join(' ')
             ),
