@@ -1,87 +1,115 @@
 declare module 'wasp/auth' {
-  export type AuthUser = {
-    id: string;
-    email: string;
-    username: string;
-    lastActiveTimestamp: Date;
-    isAdmin: boolean;
-    paymentProcessorUserId?: string;
-    lemonSqueezyCustomerPortalUrl?: string;
-    subscriptionStatus?: string;
-    subscriptionPlan?: string;
-    sendNewsletter: boolean;
-    datePaid?: Date;
-    credits: number;
-  };
-
-  export function useAuth(): {
-    data: AuthUser | null;
-    isLoading: boolean;
-    error: Error | null;
-  };
+  import { AuthUser, AuthState } from '@wasp/auth/types';
+  export { AuthUser };
+  export function useAuth(): AuthState;
+  export function login(credentials: { email: string; password: string }): Promise<void>;
+  export function signup(data: { email: string; password: string }): Promise<void>;
+  export function logout(): Promise<void>;
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData, TError = Error> = {
-    data: TData | undefined;
-    dataUpdatedAt: number;
+  export type UseQueryResult<TData = unknown, TError = unknown> = {
+    data: TData;
     error: TError | null;
-    errorUpdatedAt: number;
-    failureCount: number;
-    isError: boolean;
-    isFetched: boolean;
-    isFetchedAfterMount: boolean;
-    isFetching: boolean;
     isLoading: boolean;
-    isLoadingError: boolean;
-    isPaused: boolean;
-    isPlaceholderData: boolean;
-    isRefetchError: boolean;
-    isRefetching: boolean;
-    isStale: boolean;
+    isError: boolean;
     isSuccess: boolean;
     status: 'error' | 'loading' | 'success';
     refetch: () => Promise<void>;
   };
 
+  export type QueryKey = string | readonly unknown[];
+
   export type QueryFn<TData> = (args?: any) => Promise<TData>;
 
-  export type Query<TData, TError = Error> = {
-    queryKey: string | readonly unknown[];
-    queryFn: (args?: any) => Promise<TData>;
+  export interface QueryOptions<TData = unknown, TError = unknown> {
+    queryKey: QueryKey;
+    queryFn: QueryFn<TData>;
     retry?: boolean | number;
     retryDelay?: number;
     staleTime?: number;
     cacheTime?: number;
+    refetchInterval?: number | false;
     refetchOnMount?: boolean;
     refetchOnWindowFocus?: boolean;
     refetchOnReconnect?: boolean;
     suspense?: boolean;
     enabled?: boolean;
+    onSuccess?: (data: TData) => void;
+    onError?: (error: TError) => void;
+  }
+
+  export type Query<TData = unknown, TError = unknown> = QueryOptions<TData, TError>;
+
+  export function useQuery<TData = unknown, TError = unknown>(
+    queryFnOrKey: QueryKey | QueryFn<TData>,
+    args?: any,
+    options?: Omit<QueryOptions<TData, TError>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<TData, TError>;
+
+  export type QueryObserverLoadingErrorResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError> & {
+    status: 'error';
+    error: TError;
+    data: undefined;
   };
+
+  export type QueryObserverLoadingResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError> & {
+    status: 'loading';
+    error: null | TError;
+    data: undefined;
+  };
+
+  export type QueryObserverSuccessResult<TData = unknown, TError = unknown> = QueryObserverBaseResult<TData, TError> & {
+    status: 'success';
+    error: null;
+    data: TData;
+  };
+
+  export type QueryObserverResult<TData = unknown, TError = unknown> =
+    | QueryObserverLoadingErrorResult<TData, TError>
+    | QueryObserverLoadingResult<TData, TError>
+    | QueryObserverSuccessResult<TData, TError>;
+
+  export type UseQueryResult<TData = unknown, TError = unknown> = QueryObserverResult<TData, TError>;
+
+  export type QueryKey = readonly unknown[];
+
+  export interface QueryMetadata {
+    queryKey: QueryKey;
+    queryHash: string;
+    options: QueryOptions<any, any>;
+  }
+
+  export interface QueryOptions<TQueryFnData = unknown, TError = unknown, TData = TQueryFnData> {
+    queryKey?: QueryKey;
+    queryFn?: (context: QueryFunctionContext) => Promise<TQueryFnData>;
+    enabled?: boolean;
+    retry?: boolean | number;
+    retryDelay?: number;
+    staleTime?: number;
+    cacheTime?: number;
+    refetchInterval?: number | false;
+    refetchOnMount?: boolean;
+    refetchOnWindowFocus?: boolean;
+    refetchOnReconnect?: boolean;
+    suspense?: boolean;
+  }
+
+  export interface QueryFunctionContext {
+    queryKey: QueryKey;
+    pageParam?: number;
+  }
+
+  export type Query<TData = unknown, TError = unknown> = QueryOptions<TData, TError> & QueryMetadata;
+
+  export type QueryFn<TData> = (args?: any) => Promise<TData>;
+
 
   export type QueryObserverResult<TData, TError> = UseQueryResult<TData, TError>;
 
-  export type Query<TQueryFnData, TError = Error> = {
-    queryKey: string | readonly unknown[];
-    queryFn: () => Promise<TQueryFnData>;
-    retry?: boolean | number;
-    retryDelay?: number;
-    staleTime?: number;
-    cacheTime?: number;
-    refetchOnMount?: boolean;
-    refetchOnWindowFocus?: boolean;
-    refetchOnReconnect?: boolean;
-    suspense?: boolean;
-    enabled?: boolean;
-    onSuccess?: (data: TQueryFnData) => void;
-    onError?: (error: TError) => void;
-  };
   
   export function useQuery<TData, TError = Error>(
     query: Query<TData, TError> | string | ((args?: any) => Promise<TData>),
-    args?: any,
-    options?: Omit<Query<TData, TError>, 'queryKey' | 'queryFn'>
   ): UseQueryResult<TData, TError>;
 }
 
@@ -125,17 +153,19 @@ declare module 'wasp/client/operations' {
     users: any[];
     totalPages: number;
   }>;
-  export function getAllFilesByUser(): Promise<Array<{
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    uploadUrl: string;
-    downloadUrl: string;
-    createdAt: string;
-    userId: string;
-    key: string;
-  }>>;
+  export function getAllFilesByUser(): Promise<{
+    files: Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      uploadUrl: string;
+      downloadUrl: string;
+      createdAt: Date;
+      userId: string;
+      key: string;
+    }>;
+  }>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
   export function createFile(file: File | { fileType: string; name: string }, options?: any): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
   export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
@@ -143,6 +173,37 @@ declare module 'wasp/client/operations' {
 }
 
 declare module '@wasp/auth/types' {
+  export interface AuthUser {
+    id: string;
+    email: string;
+    username: string;
+    lastActiveTimestamp: Date;
+    isAdmin: boolean;
+    paymentProcessorUserId?: string;
+    lemonSqueezyCustomerPortalUrl?: string;
+    subscriptionStatus?: string;
+    subscriptionPlan?: string;
+    sendNewsletter: boolean;
+    datePaid?: Date;
+    credits: number;
+  }
+
+  export type { AuthUser as default };
+
+  export type AuthUserSignupFields = Omit<AuthUser, 'id' | 'lastActiveTimestamp'> & {
+    password: string;
+  };
+
+  export interface AuthContext {
+    user: AuthUser;
+  }
+
+  export interface AuthState {
+    data: AuthUser | null;
+    isLoading: boolean;
+    error: Error | null;
+  }
+
   export type AuthUser = {
     id: string;
     email: string;
@@ -207,11 +268,12 @@ declare module '@wasp/entities' {
 }
 
 declare module 'wasp/auth' {
-  export function useAuth(): {
-    data: import('@wasp/auth/types').AuthUser | null;
-    isLoading: boolean;
-    error: Error | null;
-  };
+  import { AuthUser, AuthState } from '@wasp/auth/types';
+  export function useAuth(): AuthState;
+  export { AuthUser };
+  export function login(credentials: { email: string; password: string }): Promise<void>;
+  export function signup(data: { email: string; password: string }): Promise<void>;
+  export function logout(): Promise<void>;
 }
 
 declare module 'wasp/client/operations' {
@@ -288,6 +350,48 @@ declare module 'react-icons/hi2' {
 
 declare module 'vanilla-cookieconsent' {
   export type CookieConsentConfig = {
+    autoclear_cookies?: boolean | {
+      cookies: Array<{
+        name: string | RegExp;
+        domain?: string;
+        path?: string;
+      }>;
+    };
+    consent_modal: {
+      title: string;
+      description: string;
+      primary_btn: {
+        text: string;
+        role: 'accept_all' | 'accept_selected';
+      };
+      secondary_btn?: {
+        text: string;
+        role: 'accept_necessary' | 'settings';
+      };
+      revision_message?: string;
+    };
+    settings_modal: {
+      title: string;
+      save_settings_btn: string;
+      accept_all_btn: string;
+      reject_all_btn?: string;
+      close_btn_label?: string;
+      cookie_table_headers?: Array<{
+        col1?: string;
+        col2?: string;
+        col3?: string;
+      }>;
+      blocks: Array<{
+        title: string;
+        description: string;
+        toggle?: {
+          value: string;
+          enabled: boolean;
+          readonly?: boolean;
+        };
+      }>;
+    };
+
     autoclear_cookies?: boolean | {
       cookies: Array<{
         name: string | RegExp;
@@ -614,10 +718,6 @@ declare module '@mui/material' {
     onBlur?: () => void;
     disabled?: boolean;
   }>;
-  export const Tab: React.FC<{
-    label?: string;
-    value?: any;
-  }>;
   export const MenuItem: React.FC<{
     value?: any;
     children?: React.ReactNode;
@@ -660,10 +760,6 @@ declare module '@mui/material' {
     value: any;
     onChange: (event: any, value: any) => void;
     children: React.ReactNode;
-  }>;
-  export const Tab: React.FC<{
-    label: string;
-    value: any;
   }>;
   export const Button: React.FC<{
     variant?: 'text' | 'outlined' | 'contained';
