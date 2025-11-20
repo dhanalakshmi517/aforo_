@@ -22,10 +22,15 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData> = {
-    data: TData;
+  export type UseQueryResult<TData, TError = Error> = {
+    data: TData | undefined;
+    error: TError | null;
+    isError: boolean;
     isLoading: boolean;
-    error: Error | null;
+    isLoadingError: boolean;
+    isRefetchError: boolean;
+    isSuccess: boolean;
+    status: 'error' | 'loading' | 'success';
     refetch: () => Promise<void>;
   };
 
@@ -98,21 +103,18 @@ declare module 'wasp/client/operations' {
     users: any[];
     totalPages: number;
   }>;
-  export function getAllFilesByUser(): Promise<{
-    files: Array<{
-      id: string;
-      name: string;
-      size: number;
-      type: string;
-      uploadUrl: string;
-      downloadUrl: string;
-      createdAt: string;
-    }>;
-    length: number;
-  }>;
+  export function getAllFilesByUser(): Promise<Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    uploadUrl: string;
+    downloadUrl: string;
+    createdAt: string;
+  }>>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
-  export function createFile(file: FormData): Promise<{ uploadUrl: string }>;
-  export function generateCheckoutSession(): Promise<void>;
+  export function createFile(file: File | { fileType: string; name: string }): Promise<{ uploadUrl: string; status?: string; error?: string; data?: any }>;
+  export function generateCheckoutSession(): Promise<{ sessionUrl: string }>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
 
@@ -262,43 +264,72 @@ declare module 'react-icons/hi2' {
 
 declare module 'vanilla-cookieconsent' {
   export type CookieConsentConfig = {
-    cookies?: {
-      name: string | RegExp;
+    autoclear_cookies?: boolean;
+    page_scripts?: boolean;
+    mode?: 'opt-in' | 'opt-out';
+    delay?: number;
+    auto_language?: string;
+    autorun?: boolean;
+    force_consent?: boolean;
+    hide_from_bots?: boolean;
+    remove_cookie_tables?: boolean;
+    cookie?: {
+      name?: string;
       domain?: string;
       path?: string;
-      [key: string]: any;
-    }[];
-    consentModal?: {
-      title?: string;
-      description?: string;
-      acceptAllBtn?: string;
-      acceptNecessaryBtn?: string;
-      showPreferencesBtn?: boolean;
-      [key: string]: any;
+      sameSite?: 'Lax' | 'None' | 'Strict';
+      expiresAfterDays?: number;
     };
-    preferencesModal?: {
-      title?: string;
-      acceptAllBtn?: string;
-      acceptNecessaryBtn?: string;
-      savePreferencesBtn?: string;
-      sections?: Array<{
-        title?: string;
-        description?: string;
-        [key: string]: any;
-      }>;
-      [key: string]: any;
-    };
-    categories?: {
-      [key: string]: {
-        enabled?: boolean;
-        readOnly?: boolean;
-        autoClear?: boolean;
-        [key: string]: any;
+    gui_options?: {
+      consent_modal?: {
+        layout?: 'box' | 'cloud' | 'bar';
+        position?: 'bottom' | 'middle' | 'top';
+        transition?: 'slide' | 'zoom';
+        swap_buttons?: boolean;
+      };
+      settings_modal?: {
+        layout?: 'box' | 'bar';
+        position?: 'left' | 'right';
+        transition?: 'slide' | 'zoom';
       };
     };
-    language?: {
-      current?: string;
-      [key: string]: any;
+    languages?: {
+      [key: string]: {
+        consent_modal?: {
+          title?: string;
+          description?: string;
+          primary_btn?: {
+            text?: string;
+            role?: 'accept_all' | 'accept_selected';
+          };
+          secondary_btn?: {
+            text?: string;
+            role?: 'accept_necessary' | 'settings';
+          };
+        };
+        settings_modal?: {
+          title?: string;
+          save_settings_btn?: string;
+          accept_all_btn?: string;
+          reject_all_btn?: string;
+          close_btn_label?: string;
+          cookie_table_headers?: Array<{
+            col1?: string;
+            col2?: string;
+            col3?: string;
+            col4?: string;
+          }>;
+          blocks?: Array<{
+            title?: string;
+            description?: string;
+            toggle?: {
+              value?: string;
+              enabled?: boolean;
+              readonly?: boolean;
+            };
+          }>;
+        };
+      };
     };
     
     root?: string;
@@ -599,7 +630,7 @@ declare module 'react-icons/hi2' {
 declare module '@headlessui/react' {
   export const Dialog: React.FC<{
     open: boolean;
-    onClose: () => void;
+    onClose: (value: boolean) => void;
     children: React.ReactNode;
     className?: string;
     'aria-hidden'?: string;
@@ -607,6 +638,11 @@ declare module '@headlessui/react' {
     Panel: React.FC<{
       children: React.ReactNode;
       className?: string;
+      'aria-hidden'?: string;
+    }>;
+    Overlay: React.FC<{
+      className?: string;
+      'aria-hidden'?: string;
     }>;
   };
   export const Menu: React.FC<{
