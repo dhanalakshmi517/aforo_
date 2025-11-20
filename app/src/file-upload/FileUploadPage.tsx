@@ -1,6 +1,6 @@
 import { cn } from '../client/cn';
 import { useState, useEffect, FormEvent } from 'react';
-import type { File } from 'wasp/entities';
+import { type File } from 'wasp/entities';
 import { useQuery, getAllFilesByUser, getDownloadFileSignedURL } from 'wasp/client/operations';
 import { type FileUploadError, uploadFileWithProgress, validateFile, ALLOWED_FILE_TYPES } from './fileUploading';
 
@@ -28,15 +28,13 @@ export default function FileUploadPage() {
     if (fileKeyForS3.length > 0) {
       refetchDownloadUrl()
         .then((urlQuery) => {
-          switch (urlQuery.status) {
-            case 'error':
-              console.error('Error fetching download URL', urlQuery.error);
-              alert('Error fetching download');
-              return;
-            case 'success':
-              window.open(urlQuery.data, '_blank');
-              return;
+          if (urlQuery.data) {
+            window.open(urlQuery.data, '_blank');
           }
+        })
+        .catch((error) => {
+          console.error('Error fetching download URL', error);
+          alert('Error fetching download');
         })
         .finally(() => {
           setFileKeyForS3('');
@@ -104,7 +102,7 @@ export default function FileUploadPage() {
                 type='file'
                 id='file-upload'
                 name='file-upload'
-                accept={ALLOWED_FILE_TYPES.join(',')}
+                accept=".jpg,.jpeg,.png,.gif,.pdf,.txt"
                 className='text-gray-600'
                 onChange={() => setUploadError(null)}
               />
@@ -135,9 +133,9 @@ export default function FileUploadPage() {
             <div className='space-y-4 col-span-full'>
               <h2 className='text-xl font-bold'>Uploaded Files</h2>
               {allUserFiles.isLoading && <p>Loading...</p>}
-              {allUserFiles.error && <p>Error: {allUserFiles.error.message}</p>}
+              {allUserFiles.error && <p>Error: {String(allUserFiles.error)}</p>}
               {!!allUserFiles.data && allUserFiles.data.length > 0 && !allUserFiles.isLoading ? (
-                allUserFiles.data.map((file: File) => (
+                allUserFiles.data.map((file: File, index: number) => (
                   <div
                     key={file.key}
                     className={cn(

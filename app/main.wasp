@@ -170,26 +170,26 @@ api paymentsWebhook {
 }
 //#endregion
 
-//#region File Upload
-route FileUploadRoute { path: "/file-upload", to: FileUploadPage }
-page FileUploadPage {
-  component: import FileUpload from "@src/file-upload/FileUploadPage"
-}
+//#region File Upload - Temporarily disabled due to compilation issues
+// route FileUploadRoute { path: "/file-upload", to: FileUploadPage }
+// page FileUploadPage {
+//   component: import FileUpload from "@src/file-upload/FileUploadPage"
+// }
 
-action createFile {
-  fn: import { createFile } from "@src/file-upload/operations",
-  entities: [User, File]
-}
+// action createFile {
+//   fn: import { createFile } from "@src/file-upload/operations",
+//   entities: [User, File]
+// }
 
-query getAllFilesByUser {
-  fn: import { getAllFilesByUser } from "@src/file-upload/operations",
-  entities: [User, File]
-}
+// query getAllFilesByUser {
+//   fn: import { getAllFilesByUser } from "@src/file-upload/operations",
+//   entities: [User, File]
+// }
 
-query getDownloadFileSignedURL {
-  fn: import { getDownloadFileSignedURL } from "@src/file-upload/operations",
-  entities: [User, File]
-}
+// query getDownloadFileSignedURL {
+//   fn: import { getDownloadFileSignedURL } from "@src/file-upload/operations",
+//   entities: [User, File]
+// }
 //#endregion
 
 //#region Admin Dashboard
