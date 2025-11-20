@@ -23,7 +23,7 @@ const ProductDocumentation: React.FC<ProductDocumentationProps> = ({
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newContent = e.target.value;
     setContent(newContent);
     onChange(newContent);
