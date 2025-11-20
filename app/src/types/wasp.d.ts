@@ -22,18 +22,42 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData> = {
-    data: TData;
-    error: Error | null;
+  export type UseQueryResult<TData, TError = Error> = {
+    data: TData | undefined;
+    dataUpdatedAt: number;
+    error: TError | null;
+    errorUpdatedAt: number;
+    failureCount: number;
+    isError: boolean;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
     isLoading: boolean;
+    isLoadingError: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isRefetchError: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    isSuccess: boolean;
+    status: 'error' | 'loading' | 'success';
     refetch: () => Promise<void>;
   };
 
   export type QueryFn<TData> = (args?: any) => Promise<TData>;
 
-  export type Query<TData> = string | {
-    queryKey: string;
-    queryFn: () => Promise<TData>;
+  export type Query<TData, TError = Error> = {
+    queryKey: string | readonly unknown[];
+    queryFn: (args?: any) => Promise<TData>;
+    retry?: boolean | number;
+    retryDelay?: number;
+    staleTime?: number;
+    cacheTime?: number;
+    refetchOnMount?: boolean;
+    refetchOnWindowFocus?: boolean;
+    refetchOnReconnect?: boolean;
+    suspense?: boolean;
+    enabled?: boolean;
   };
 
   export type QueryObserverResult<TData, TError> = UseQueryResult<TData, TError>;
@@ -54,7 +78,11 @@ declare module '@wasp/queries' {
     onError?: (error: TError) => void;
   };
   
-  export function useQuery<T>(query: Query<T> | (() => Promise<T>), args?: any): UseQueryResult<T>;
+  export function useQuery<TData, TError = Error>(
+    query: Query<TData, TError> | string | ((args?: any) => Promise<TData>),
+    args?: any,
+    options?: Omit<Query<TData, TError>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<TData, TError>;
 }
 
 declare module '@wasp/actions' {
@@ -97,22 +125,19 @@ declare module 'wasp/client/operations' {
     users: any[];
     totalPages: number;
   }>;
-  export function getAllFilesByUser(): Promise<{
-    files: Array<{
-      id: string;
-      name: string;
-      size: number;
-      type: string;
-      uploadUrl: string;
-      downloadUrl: string;
-      createdAt: string;
-      userId: string;
-      key: string;
-    }>;
-    length: number;
-  }>;
+  export function getAllFilesByUser(): Promise<Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    uploadUrl: string;
+    downloadUrl: string;
+    createdAt: string;
+    userId: string;
+    key: string;
+  }>>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
-  export function createFile(file: File | { fileType: string; name: string }): { uploadUrl: string; status?: string; error?: string; data?: any };
+  export function createFile(file: File | { fileType: string; name: string }, options?: any): Promise<{ uploadUrl: string; status: string; error?: string; data?: any }>;
   export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
   export function getCustomerPortalUrl(): Promise<string>;
 }
@@ -263,6 +288,45 @@ declare module 'react-icons/hi2' {
 
 declare module 'vanilla-cookieconsent' {
   export type CookieConsentConfig = {
+    autoclear_cookies?: boolean | {
+      cookies: Array<{
+        name: string | RegExp;
+        domain?: string;
+        path?: string;
+      }>;
+    };
+    consent_modal?: {
+      title?: string;
+      description?: string;
+      primary_btn?: {
+        text?: string;
+        role?: 'accept_all' | 'accept_selected';
+      };
+      secondary_btn?: {
+        text?: string;
+        role?: 'accept_necessary' | 'settings';
+      };
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      showPreferencesBtn?: string;
+    };
+    settings_modal?: {
+      title?: string;
+      save_settings_btn?: string;
+      accept_all_btn?: string;
+      reject_all_btn?: string;
+      close_btn_label?: string;
+      blocks?: Array<{
+        title?: string;
+        description?: string;
+        toggle?: {
+          value?: string;
+          enabled?: boolean;
+          readonly?: boolean;
+        };
+      }>;
+    };
+    
     autoclear_cookies: boolean | {
       cookies: Array<{
         name: string | RegExp;
