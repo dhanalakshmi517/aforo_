@@ -22,39 +22,18 @@ declare module 'wasp/auth' {
 }
 
 declare module '@wasp/queries' {
-  export type UseQueryResult<TData, TError = Error> = {
-    data: TData | undefined;
-    dataUpdatedAt: number;
-    error: TError | null;
-    errorUpdatedAt: number;
-    errorUpdateCount: number;
-    failureCount: number;
-    failureReason: TError | null;
-    fetchStatus: 'fetching' | 'idle' | 'paused';
-    isError: boolean;
-    isFetched: boolean;
-    isFetchedAfterMount: boolean;
-    isFetching: boolean;
-    isInitialLoading: boolean;
+  export type UseQueryResult<TData> = {
+    data: TData;
+    error: Error | null;
     isLoading: boolean;
-    isLoadingError: boolean;
-    isPaused: boolean;
-    isPlaceholderData: boolean;
-    isPreviousData: boolean;
-    isRefetchError: boolean;
-    isRefetching: boolean;
-    isStale: boolean;
-    isSuccess: boolean;
     refetch: () => Promise<void>;
-    remove: () => void;
-    status: 'error' | 'loading' | 'success';
   };
 
   export type QueryFn<TData> = (args?: any) => Promise<TData>;
 
-  export type Query<TData> = {
+  export type Query<TData> = string | {
     queryKey: string;
-    queryFn: QueryFn<TData>;
+    queryFn: () => Promise<TData>;
   };
 
   export type QueryObserverResult<TData, TError> = UseQueryResult<TData, TError>;
@@ -75,8 +54,7 @@ declare module '@wasp/queries' {
     onError?: (error: TError) => void;
   };
   
-  export function useQuery<T>(queryFn: QueryFn<T>, args?: any, options?: any): UseQueryResult<T>;
-  export function useQuery<T>(query: Query<T>, args?: any, options?: any): UseQueryResult<T>;
+  export function useQuery<T>(query: Query<T> | (() => Promise<T>), args?: any): UseQueryResult<T>;
 }
 
 declare module '@wasp/actions' {
@@ -119,15 +97,20 @@ declare module 'wasp/client/operations' {
     users: any[];
     totalPages: number;
   }>;
-  export function getAllFilesByUser(): Promise<Array<{
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    uploadUrl: string;
-    downloadUrl: string;
-    createdAt: string;
-  }>>;
+  export function getAllFilesByUser(): Promise<{
+    files: Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      uploadUrl: string;
+      downloadUrl: string;
+      createdAt: string;
+      userId: string;
+      key: string;
+    }>;
+    length: number;
+  }>;
   export function getDownloadFileSignedURL(key: string): Promise<{ downloadUrl: string }>;
   export function createFile(file: File | { fileType: string; name: string }): { uploadUrl: string; status?: string; error?: string; data?: any };
   export function generateCheckoutSession(planId?: string): Promise<{ sessionUrl: string }>;
@@ -280,6 +263,31 @@ declare module 'react-icons/hi2' {
 
 declare module 'vanilla-cookieconsent' {
   export type CookieConsentConfig = {
+    autoclear_cookies: boolean | {
+      cookies: Array<{
+        name: string | RegExp;
+        domain?: string;
+        path?: string;
+      }>;
+    };
+    consent_modal: {
+      title: string;
+      description: string;
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      showPreferencesBtn?: string;
+    };
+    settings_modal: {
+      title: string;
+      acceptAllBtn?: string;
+      acceptNecessaryBtn?: string;
+      savePreferencesBtn?: string;
+      sections: Array<{
+        title: string;
+        description: string;
+      }>;
+    };
+    
     autoclear_cookies?: boolean | {
       cookies?: Array<{
         name: string | RegExp;
