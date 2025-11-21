@@ -1,64 +1,103 @@
 # Fixing TypeScript Errors in Wasp Project
 
-This document outlines how to fix the TypeScript errors in the Wasp project.
+This document explains how to fix the TypeScript errors in the Wasp project, particularly focused on the `useAuth.ts` type compatibility issue.
 
-## 1. Type Error Fixes
+## The Problem
 
-### Fix useAuth.ts Type Errors
+The errors appear when building the project:
 
-The main issue is in the generated `.wasp/out/sdk/wasp/auth/useAuth.ts` file which has incompatible types. After the Wasp build runs, manually patch this file with the following content:
+```
+Error: [  Wasp  ] auth/useAuth.ts(15,3): error TS2322: Type 'UseQueryResult<AuthUser | null, unknown>' is not assignable to type 'UseQueryResult<AuthUser | null>'.
 
-```typescript
-import { useQuery } from '../queries';
-import { AuthUser } from '../types';
-import { API_URL } from '../apiClient';
+[  Wasp  ]   Type 'QueryObserverRefetchErrorResult<AuthUser | null, unknown>' is not assignable to type 'UseQueryResult<AuthUser | null>'.
 
-export function useAuth() {
-  // Cast the result to any to avoid type errors with UseQueryResult
-  const query = useQuery<AuthUser | null>(
-    'auth/me',
-    async () => {
-      const response = await fetch(`${API_URL}/auth/me`, { credentials: 'include' });
-      if (response.status === 200) {
-        const json = await response.json();
-        return json as AuthUser;
-      }
-      return null;
-    }
-  ) as any;
+[  Wasp  ] auth/useAuth.ts(31,3): error TS2322: Type 'QueryFn<AuthUser | null, void>' is not assignable to type 'Query<void, AuthUser | null>'.
 
-  return query;
-}
+[  Wasp  ] auth/useAuth.ts(31,39): error TS2554: Expected 1 arguments, but got 2.
 ```
 
-### Uncomment File Upload in main.wasp
+## Root Cause
 
-The file-upload section was commented out in `main.wasp` due to TypeScript errors. It has been uncommented in this fix.
+These errors occur due to type incompatibilities between:
 
-### Fix FileUploadPage.tsx
+1. The Wasp-generated useAuth.ts file 
+2. The @tanstack/query-core types used in your project
+3. TypeScript's strict type checking
 
-The `FileUploadPage.tsx` had several type errors that have been fixed:
+Specifically, the issue relates to:
+- The `isError` property type (boolean vs true)
+- Function argument counts in QueryFn
+- Type mismatch in UseQueryResult
 
-1. Added type casting for the `useQuery` results to avoid `data` property errors
-2. Fixed the ReactNode type error by handling possible undefined values
-3. Properly typed all the parameters to avoid implicit any types
+## Automated Solution
 
-### Fix operations.ts
+We've created an automated patching system that modifies the Wasp-generated code after build:
 
-The `operations.ts` file was missing type imports from 'wasp/server/operations'. We've added custom type definitions to resolve this issue.
+1. **apply-patches.js**: Script that automatically patches the generated useAuth.ts file
+2. **patch-useAuth.ts**: Template file containing the fixed version of useAuth.ts
 
-## 2. How to Apply These Fixes
+## How to Apply the Fix
 
-1. Make sure the main.wasp file has the file-upload section uncommented
-2. Build the project with `wasp build` or `wasp start`
-3. If you still see TypeScript errors in the generated code, apply the patch for useAuth.ts manually
+1. **Build the project** first to generate the code:
+   ```
+   wasp build
+   ```
 
-## 3. Version Compatibility Note
+2. **Apply the patch** using the npm script:
+   ```
+   npm run apply-patches
+   ```
 
-The current project is using Wasp version ^0.19.0 as specified in main.wasp. Some TypeScript errors might be due to compatibility issues between the TypeScript version (5.8.2) and the Wasp-generated code.
+3. **Start the project**:
+   ```
+   wasp start
+   ```
 
-If issues persist after applying these fixes, consider:
+## Technical Details
 
-1. Checking if there's an updated version of Wasp available
-2. Adjusting the TypeScript version for better compatibility
-3. Using more type assertions (as any) in problematic areas if necessary
+The patch fixes the TypeScript errors by:
+
+1. **Creating a compatible return type** that satisfies TypeScript's type checking:
+   ```typescript
+   type UseAuthQueryResult = {
+     data: AuthUser | null | undefined;
+     isLoading: boolean;
+     error: unknown | null;
+     isError: boolean;
+     refetch: () => Promise<any>;
+     status: 'loading' | 'error' | 'success' | 'idle';
+     fetchStatus: 'fetching' | 'paused' | 'idle';
+     isPending: boolean;
+     isSuccess: boolean;
+     isFetching: boolean;
+   };
+   ```
+
+2. **Restructuring the query function** to avoid parameter count issues:
+   ```typescript
+   const queryFn = async (): Promise<AuthUser | null> => { ... };
+   ```
+
+3. **Using type assertion** to bridge the incompatibility:
+   ```typescript
+   const query = useQuery<AuthUser | null>('auth/me', queryFn) as UseAuthQueryResult;
+   ```
+
+## Testing
+
+You can use the test-patch.js script to verify the patch was applied correctly:
+
+```
+node test-patch.js
+```
+
+## Manual Fix (If Needed)
+
+If the automated patch doesn't work, you can manually copy the content from `patch-useAuth.ts` into the generated file at:
+`.wasp/out/sdk/wasp/auth/useAuth.ts`
+
+## Version Information
+
+- Wasp: ^0.19.0
+- TypeScript: 5.8.2
+- React: ^18.2.0
