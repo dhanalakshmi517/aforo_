@@ -55,6 +55,8 @@
     "vite": "^7.0.6"
   },
   "scripts": {
-    "build:icons": "ts-node ../scripts/buildIcons.ts"
+    "build:icons": "ts-node ../scripts/buildIcons.ts",
+    "apply-patches": "node apply-patches.js",
+    "postbuild": "npm run apply-patches"
   }
 }
