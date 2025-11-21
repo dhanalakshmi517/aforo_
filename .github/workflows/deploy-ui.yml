@@ -42,6 +42,11 @@ jobs:
           cd app
           wasp build
 
+      - name: 🩹 Apply TypeScript fix patch
+        run: |
+          cd app
+          node ci-patch-useauth.js
+
       - name: 🎨 Install frontend deps and build UI
         run: |
           cd app/.wasp/build/web-app
