@@ -57,6 +57,7 @@
   "scripts": {
     "build:icons": "ts-node ../scripts/buildIcons.ts",
     "apply-patches": "node apply-patches.js",
+    "test-patch": "node test-patch.js",
     "postbuild": "npm run apply-patches"
   }
 }
