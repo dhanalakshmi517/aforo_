@@ -1,7 +1,7 @@
 // ProductAnalyticsPage.tsx
 import React from "react";
-import ProductPriceBarChart from "./tremor charts/ProductPriceBarChart";
-import ProductStockBarChart from "./tremor charts/ProductStockBarChart";
+import ProductPriceBarChart from "./tremor-charts/ProductPriceBarChart";
+import ProductStockBarChart from "./tremor-charts/ProductStockBarChart";
 import "./ProductAnalyticsPage.css";
 
 const ProductAnalyticsPage: React.FC = () => {
