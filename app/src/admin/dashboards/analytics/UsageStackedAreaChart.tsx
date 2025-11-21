@@ -1,91 +1,50 @@
-import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
+import { Card, Title, AreaChart, Text, Flex, Grid } from '@tremor/react';
 import { getProducts, Product } from '../../../../src/client/components/Dashboard/productsApi';
 
-const baseOptions: ApexOptions = {
-  chart: {
-    type: 'area',
-    height: 350,
-    stacked: true,
-    toolbar: {
-      show: false,
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 1,
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      opacityFrom: 0.6,
-      opacityTo: 0.1,
-    },
-  },
-  legend: {
-    position: 'top',
-    horizontalAlign: 'right',
-  },
-  xaxis: {
-    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    labels: {
-      style: {
-        fontSize: '12px',
-      },
-    },
-  },
-  yaxis: {
-    title: {
-      text: 'Usage',
-    },
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => `${val} units`,
-    },
-  },
-  grid: {
-    show: false,
-  },
-  colors: ['#3C50E0', '#80CAEE', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
-};
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-// Simulated monthly usage data by category
+// Simulated monthly usage data by category for Tremor format
 const generateMonthlyUsageData = (products: Product[]) => {
   // Get unique categories
   const categories = Array.from(new Set(products.map(p => p.category)));
   
-  // Generate random usage data for each category for each month
-  return categories.map((category, index) => {
+  // Generate data in Tremor's format (array of objects with month and category values)
+  const result: { month: string; [key: string]: string | number }[] = [];
+  
+  // Initialize the result array with month objects
+  months.forEach((month, monthIndex) => {
+    result.push({ month });
+  });
+
+  categories.forEach((category) => {
     // Filter products by this category
     const categoryProducts = products.filter(p => p.category === category);
     const totalStock = categoryProducts.reduce((sum, p) => sum + p.stock, 0);
     
+    // Format category name
+    const formattedCategory = category.split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
     // Base the monthly data on the total stock with some randomness
     const baseValue = totalStock / 12;
     
-    // Generate monthly data with an upward trend and some randomness
-    const monthlyData = Array(12).fill(0).map((_, i) => {
+    // Add this category's data to each month
+    months.forEach((month, i) => {
       // Create an upward trend with some randomness
       const trendFactor = 1 + (i * 0.05); // 5% increase each month
       const randomFactor = 0.8 + Math.random() * 0.4; // Random factor between 0.8 and 1.2
-      return Math.round(baseValue * trendFactor * randomFactor);
+      result[i][formattedCategory] = Math.round(baseValue * trendFactor * randomFactor);
     });
-    
-    return {
-      name: category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      data: monthlyData,
-    };
   });
+  
+  return result;
 };
 
 const UsageStackedAreaChart: React.FC = () => {
-  const [series, setSeries] = useState<any[]>([]);
-  const [options, setOptions] = useState<ApexOptions>(baseOptions);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,17 +52,41 @@ const UsageStackedAreaChart: React.FC = () => {
     const fetchData = async () => {
       try {
         const products = await getProducts();
-        const usageData = generateMonthlyUsageData(products);
         
-        // Take only top 5 categories to avoid overcrowding
-        const topCategories = usageData
-          .sort((a, b) => 
-            b.data.reduce((sum: number, val: number) => sum + val, 0) - 
-            a.data.reduce((sum: number, val: number) => sum + val, 0)
-          )
-          .slice(0, 5);
+        // Get unique categories and format them
+        const uniqueCategories = Array.from(new Set(products.map(p => p.category)))
+          .map(category => category.split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+          );
+
+        // Take top 5 categories based on total products
+        const categoryCounts = products.reduce((acc: {[key: string]: number}, product) => {
+          const formattedCategory = product.category.split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+            
+          acc[formattedCategory] = (acc[formattedCategory] || 0) + 1;
+          return acc;
+        }, {});
         
-        setSeries(topCategories);
+        const topCategories = Object.entries(categoryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(entry => entry[0]);
+        
+        setCategories(topCategories);
+        
+        // Generate data with only top 5 categories
+        const filteredProducts = products.filter(p => {
+          const formattedCategory = p.category.split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          return topCategories.includes(formattedCategory);
+        });
+        
+        const data = generateMonthlyUsageData(filteredProducts);
+        setChartData(data);
       } catch (err) {
         console.error('Error loading product data:', err);
         setError('Failed to load usage data. Please try again later.');
@@ -115,46 +98,53 @@ const UsageStackedAreaChart: React.FC = () => {
     fetchData();
   }, []);
 
+  const colors = {
+    'Smartphones': '#3C50E0',
+    'Laptops': '#80CAEE',
+    'Fragrances': '#10B981',
+    'Skincare': '#F59E0B',
+    'Groceries': '#EF4444',
+    'Home Decoration': '#8B5CF6',
+  };
+
   if (isLoading) {
     return (
-      <div className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <p>Loading usage data...</p>
-      </div>
+      <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text>Loading usage data...</Text>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <p className="text-red-500">{error}</p>
-      </div>
+      <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text className="text-red-500">{error}</Text>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="mb-4 justify-between gap-4 sm:flex">
-        <div>
-          <h4 className="text-xl font-semibold text-black dark:text-white">
-            Monthly Usage by Category
-          </h4>
-          <p className="text-sm text-gray-500 mt-1">
-            Stacked area chart showing simulated monthly usage trends
-          </p>
-        </div>
+    <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="mb-4">
+        <Title className="text-xl font-semibold text-black dark:text-white">
+          Monthly Usage by Category
+        </Title>
+        <Text className="text-sm text-gray-500 mt-1">
+          Stacked area chart showing simulated monthly usage trends
+        </Text>
       </div>
 
-      <div>
-        <div id="usageStackedAreaChart">
-          <ReactApexChart
-            options={options}
-            series={series}
-            type="area"
-            height={350}
-          />
-        </div>
-      </div>
-    </div>
+      <AreaChart
+        className="h-80 mt-4"
+        data={chartData}
+        index="month"
+        categories={categories}
+        colors={['indigo', 'cyan', 'emerald', 'amber', 'rose', 'violet']}
+        valueFormatter={(number) => `${number} units`}
+        stack={true}
+        showLegend
+      />
+    </Card>
   );
 };
 

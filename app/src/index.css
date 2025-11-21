@@ -1,0 +1,35 @@
+/* Global styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #0262A1;
+  --secondary-color: #00365A;
+  --background-color: #f8fafc;
+  --text-color: #1e293b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Satoshi', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Basic reset */
+* {
+  box-sizing: border-box;
+}
+
+/* Tremor specific overrides */
+.tremor-Card-root {
+  border-radius: 0.5rem;
+}
+
+.tremor-BarChart-root {
+  height: 300px !important;
+}
