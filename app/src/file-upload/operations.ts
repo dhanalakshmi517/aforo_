@@ -1,10 +1,15 @@
 import { HttpError } from 'wasp/server';
 import { type File } from 'wasp/entities';
-import {
-  type CreateFile,
-  type GetAllFilesByUser,
-  type GetDownloadFileSignedURL,
-} from 'wasp/server/operations';
+
+// Define the operation types ourselves since they're not exported from wasp/server/operations
+type Context = {
+  user?: { id: string };
+  entities: any;
+};
+
+type CreateFile<Args, Return> = (args: Args, context: Context) => Promise<Return>;
+type GetAllFilesByUser<Args, Return> = (args: Args, context: Context) => Promise<Return>;
+type GetDownloadFileSignedURL<Args, Return> = (args: Args, context: Context) => Promise<Return>;
 
 import { getUploadFileSignedURLFromS3, getDownloadFileSignedURLFromS3 } from './s3Utils';
 
