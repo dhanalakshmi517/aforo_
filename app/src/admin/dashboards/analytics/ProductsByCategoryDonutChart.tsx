@@ -1,37 +1,18 @@
 // ProductsByCategoryDonutChart.tsx
-import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
+import { DonutChart, Title, Text, Flex } from '@tremor/react';
 import { getProducts } from '../../../../src/client/components/Dashboard/productsApi';
 
-const baseOptions: ApexOptions = {
-  chart: { type: 'donut', background: 'transparent' },
-  dataLabels: { enabled: false },
-  legend: { show: true, position: 'bottom' },
-  plotOptions: {
-    pie: {
-      donut: {
-        size: '65%',
-        labels: {
-          show: true,
-          name: { show: true },
-          value: { show: false },
-        },
-      },
-    },
-  },
-  stroke: { show: true, width: 2, colors: ['#ffffff'] },
-  tooltip: {
-    y: {
-      formatter: (val: number) => `${val} products`,
-    },
-  },
-  colors: ['#389315', '#ED5142', '#E2B226', '#6685CC', '#66CCA5', '#00365A'],
+type CategoryData = {
+  category: string;
+  count: number;
 };
 
 const ProductsByCategoryDonutChart: React.FC = () => {
-  const [series, setSeries] = useState<number[]>([]);
-  const [options, setOptions] = useState<ApexOptions>(baseOptions);
+  const [chartData, setChartData] = useState<CategoryData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,49 +27,52 @@ const ProductsByCategoryDonutChart: React.FC = () => {
           {} as { [key: string]: number },
         );
 
-        const rawLabels = Object.keys(categoryCounts);
-        const data = Object.values(categoryCounts);
-
-        const prettyLabels = rawLabels.map((cat) =>
-          cat
+        // Format data for Tremor
+        const formattedData = Object.entries(categoryCounts).map(([category, count]) => ({
+          category: category
             .split('-')
             .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' '),
-        );
-
-        setSeries(data);
-        setOptions((prev: ApexOptions) => ({
-          ...prev,
-          labels: prettyLabels,
+          count
         }));
-      } catch (e: unknown) {
-        console.error('Error loading product data for donut chart:', e);
+
+        // Sort by count (optional)
+        formattedData.sort((a, b) => b.count - a.count);
+        
+        setChartData(formattedData);
+        setTotal(formattedData.reduce((sum, item) => sum + item.count, 0));
+      } catch (err) {
+        console.error('Error loading product data for donut chart:', err);
+        setError('Failed to load category data');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  if (!series.length) return null;
-
-  const total = series.reduce((sum: number, v: number) => sum + v, 0);
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (!chartData.length) return null;
 
   return (
     <div>
-      {/* header lives inside the same card as the chart (card is from parent) */}
       <div className="mb-2 flex flex-col">
-        <h4 className="text-sm font-semibold text-gray-900">Category Share</h4>
-        <span className="text-xs text-gray-600">{total} products</span>
+        <Title className="text-sm font-semibold text-gray-900">Category Share</Title>
+        <Text className="text-xs text-gray-600">{total} products</Text>
       </div>
 
-      <div className="flex justify-center">
-        <ReactApexChart
-          type="donut"
-          options={options}
-          series={series}
-          height={240}
-        />
-      </div>
+      <DonutChart
+        className="mt-6"
+        data={chartData}
+        category="count"
+        index="category"
+        valueFormatter={(value) => `${value} products`}
+        colors={['green', 'red', 'amber', 'blue', 'teal', 'indigo']}
+        variant="pie"
+        label="Products"
+      />
     </div>
   );
 };

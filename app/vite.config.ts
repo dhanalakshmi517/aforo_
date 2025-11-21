@@ -25,11 +25,17 @@ const config = {
       allow: [
         // Default allowed directories
         process.cwd(),
-        // Add the static directory to the allow list
+        // Add the specific directories we need
         path.resolve(__dirname, 'src/client/static'),
-        // Add the assets directory to the allow list
-        path.resolve(__dirname, 'src/assets')
-      ]
+        path.resolve(__dirname, 'src/assets'),
+        path.resolve(__dirname, 'src/client'),
+        path.resolve(__dirname, 'src/admin'),
+        path.resolve(__dirname, 'src'),
+        path.resolve(__dirname, '.wasp/out/web-app'),
+        path.resolve(__dirname, '.wasp/out/sdk/wasp'),
+        path.resolve(__dirname, 'node_modules')
+      ],
+      strict: false
     }
   },
   // Ensure static assets are copied during build

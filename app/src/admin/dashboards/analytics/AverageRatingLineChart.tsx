@@ -1,79 +1,85 @@
-import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
+import { Card, Title, LineChart, Text } from '@tremor/react';
 import { getProducts } from '../../../../src/client/components/Dashboard/productsApi';
 
-const baseOptions: ApexOptions = {
-  chart: {
-    type: 'line',
-    height: 320,
-    toolbar: { show: false },
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 3,
-  },
-  markers: {
-    size: 4,
-  },
-  xaxis: {
-    categories: [],
-  },
-  yaxis: {
-    title: { text: 'Average Rating' },
-    min: 0,
-    max: 5,
-  },
-  grid: {
-    yaxis: { lines: { show: false } },
-  },
-  dataLabels: { enabled: false },
-  colors: ['#10B981'],
+type ChartData = {
+  category: string;
+  'Average Rating': number;
 };
 
 const AverageRatingLineChart: React.FC = () => {
-  const [series, setSeries] = useState([{ name: 'Avg Rating', data: [] as number[] }]);
-  const [options, setOptions] = useState<ApexOptions>(baseOptions);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await getProducts();
+      try {
+        const products = await getProducts();
 
-      const sums: Record<string, { total: number; count: number }> = {};
-      products.forEach((p: { category: string; rating: number }) => {
-        if (!sums[p.category]) sums[p.category] = { total: 0, count: 0 };
-        sums[p.category].total += p.rating;
-        sums[p.category].count += 1;
-      });
+        // Calculate average rating by category
+        const sums: Record<string, { total: number; count: number }> = {};
+        products.forEach((p: { category: string; rating: number }) => {
+          if (!sums[p.category]) sums[p.category] = { total: 0, count: 0 };
+          sums[p.category].total += p.rating;
+          sums[p.category].count += 1;
+        });
 
-      const categories = Object.keys(sums);
-      const avgRatings = categories.map((c) => sums[c].total / sums[c].count);
+        // Format data for Tremor
+        const formattedData: ChartData[] = Object.entries(sums).map(([category, data]) => ({
+          category: category
+            .split('-')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' '),
+          'Average Rating': parseFloat((data.total / data.count).toFixed(2))
+        }));
 
-      const prettyCategories = categories.map((cat) =>
-        cat
-          .split('-')
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' '),
-      );
-
-      setSeries([{ name: 'Avg Rating', data: avgRatings }]);
-      setOptions((prev: ApexOptions) => ({
-        ...prev,
-        xaxis: {
-          ...prev.xaxis,
-          categories: prettyCategories,
-        },
-      }));
+        // Sort by category name for line chart
+        formattedData.sort((a, b) => a.category.localeCompare(b.category));
+        
+        setChartData(formattedData);
+      } catch (err) {
+        console.error('Error loading product data:', err);
+        setError('Failed to load rating data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
   }, []);
 
+  if (isLoading) {
+    return (
+      <Card className="col-span-12 xl:col-span-6 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text>Loading rating data...</Text>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="col-span-12 xl:col-span-6 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text className="text-red-500">{error}</Text>
+      </Card>
+    );
+  }
+
   return (
-    <div className="col-span-12 xl:col-span-6 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">Average Rating (Line)</h4>
-      <ReactApexChart type="line" options={options} series={series} height={320} />
-    </div>
+    <Card className="col-span-12 xl:col-span-6 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <Title className="mb-4 text-lg font-semibold text-black dark:text-white">
+        Average Rating (Line)
+      </Title>
+      
+      <LineChart
+        className="h-72 mt-4"
+        data={chartData}
+        index="category"
+        categories={['Average Rating']}
+        colors={['emerald']}
+        valueFormatter={(number) => number.toFixed(2)}
+      />
+    </Card>
   );
 };
 

@@ -1,3 +1,6 @@
+/* Import custom styles */
+@import './client/tremor-styles.css';
+
 /* Import Tailwind base styles */
 @tailwind base;
 

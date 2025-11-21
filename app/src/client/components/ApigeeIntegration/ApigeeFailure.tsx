@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apigeeLogo } from '../../static/images';
+import './ApigeeSuccess.css';
 import './ApigeeFailure.css';
 
 const ApigeeFailure: React.FC = () => {

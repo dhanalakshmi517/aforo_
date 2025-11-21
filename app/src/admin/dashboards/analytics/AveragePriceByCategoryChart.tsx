@@ -1,88 +1,86 @@
-import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
+import { Card, Title, BarChart, Text } from '@tremor/react';
 import { getProducts } from '../../../../src/client/components/Dashboard/productsApi';
 
-const baseOptions: ApexOptions = {
-  chart: {
-    type: 'bar',
-    height: 320,
-    toolbar: { show: false },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      columnWidth: '45%',
-      borderRadius: 4,
-    },
-  },
-  grid: {
-    xaxis: {
-      lines: { show: false },
-    },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    type: 'category',
-    categories: [],
-    labels: { style: { fontSize: '11px' } },
-  },
-  yaxis: {
-    title: { text: 'Category' },
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => `$${val.toFixed(2)}`,
-    },
-  },
-  colors: ['#7df9ff'],
+type ChartData = {
+  category: string;
+  'Average Price': number;
 };
 
 const AveragePriceByCategoryChart: React.FC = () => {
-  const [series, setSeries] = useState([{ name: 'Avg Price', data: [] as number[] }]);
-  const [options, setOptions] = useState<ApexOptions>(baseOptions);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await getProducts();
+      try {
+        const products = await getProducts();
 
-      const sums: Record<string, { total: number; count: number }> = {};
-      products.forEach((p: { category: string; price: number }) => {
-        if (!sums[p.category]) sums[p.category] = { total: 0, count: 0 };
-        sums[p.category].total += p.price;
-        sums[p.category].count += 1;
-      });
+        // Calculate average price by category
+        const sums: Record<string, { total: number; count: number }> = {};
+        products.forEach((p: { category: string; price: number }) => {
+          if (!sums[p.category]) sums[p.category] = { total: 0, count: 0 };
+          sums[p.category].total += p.price;
+          sums[p.category].count += 1;
+        });
 
-      const categories = Object.keys(sums);
-      const avgPrices = categories.map((c) => sums[c].total / sums[c].count);
+        // Format data for Tremor
+        const formattedData: ChartData[] = Object.entries(sums).map(([category, data]) => ({
+          category: category
+            .split('-')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' '),
+          'Average Price': parseFloat((data.total / data.count).toFixed(2))
+        }));
 
-      const prettyCategories = categories.map((cat) =>
-        cat
-          .split('-')
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' '),
-      );
-
-      setSeries([{ name: 'Avg Price', data: avgPrices }]);
-      setOptions((prev: ApexOptions) => ({
-        ...prev,
-        xaxis: {
-          type: 'numeric',
-        },
-        yaxis: {
-          categories: prettyCategories,
-        } as ApexOptions['yaxis'],
-      }));
+        // Sort by average price in descending order
+        formattedData.sort((a, b) => b['Average Price'] - a['Average Price']);
+        
+        setChartData(formattedData);
+      } catch (err) {
+        console.error('Error loading product data:', err);
+        setError('Failed to load price data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
   }, []);
 
+  if (isLoading) {
+    return (
+      <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text>Loading price data...</Text>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text className="text-red-500">{error}</Text>
+      </Card>
+    );
+  }
+
   return (
-    <div className="col-span-12 xl:col-span-6 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">Average Price by Category</h4>
-      <ReactApexChart type="bar" options={options} series={series} height={320} />
-    </div>
+    <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <Title className="mb-4 text-lg font-semibold text-black dark:text-white">
+        Average Price by Category
+      </Title>
+      
+      <BarChart
+        className="h-72 mt-4"
+        data={chartData}
+        index="category"
+        categories={['Average Price']}
+        colors={['cyan']}
+        layout="horizontal"
+        valueFormatter={(number) => `$${number.toFixed(2)}`}
+      />
+    </Card>
   );
 };
 

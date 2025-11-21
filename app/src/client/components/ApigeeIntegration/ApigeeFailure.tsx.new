@@ -1,0 +1,75 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apigeeLogo } from '../../static/images';
+import './ApigeeFailure.css';
+import './ApigeeSuccess.css'; // Include shared styles as well
+
+const ApigeeFailure: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleBackClick = () => {
+    navigate('/get-started/integrations');
+  };
+
+  const handleTryAgain = () => {
+    // Navigate back to the integration page to try again
+    navigate('/apigee-integration');
+  };
+
+  return (
+    <div className="apigee-failure-page">
+      <div className="apigee-sidebar">
+        <img src={apigeeLogo} alt="Apigee Logo" className="apigee-logo" />
+        <div className="apigee-menu">
+          <div className="apigee-menu-item">
+            <span>Import</span>
+          </div>
+          <div className="apigee-menu-item active">
+            <span>Connect</span>
+          </div>
+        </div>
+      </div>
+      <div className="apigee-content">
+        <div className="apigee-header">
+          <h2>Apigee Integration</h2>
+          <button
+            className="back-button"
+            onClick={handleBackClick}
+          >
+            Back to Integrations
+          </button>
+        </div>
+        <div className="apigee-failure-container">
+          <div className="failure-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="11" stroke="#e53e3e" strokeWidth="2" />
+              <path d="M8 8L16 16M8 16L16 8" stroke="#e53e3e" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
+          <h3 className="failure-title">Connection Failed</h3>
+          <p className="failure-message">
+            We couldn't establish a connection to your Apigee account.
+            Please check your credentials and make sure your Apigee
+            instance is accessible.
+          </p>
+          <div className="failure-actions">
+            <button
+              className="action-button primary"
+              onClick={handleTryAgain}
+            >
+              Try Again
+            </button>
+            <button
+              className="action-button secondary"
+              onClick={handleBackClick}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ApigeeFailure;

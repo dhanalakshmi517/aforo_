@@ -1,6 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { getProducts, Product } from '../../../../src/client/components/Dashboard/productsApi';
-import './ProductDetailTable.css';
+import {
+  Card,
+  Table,
+  TableHead,
+  TableHeaderCell,
+  TableBody,
+  TableRow,
+  TableCell,
+  Text,
+  Title,
+  Badge,
+  TextInput,
+  Flex,
+  Button
+} from '@tremor/react';
 
 interface ExtendedProduct extends Product {
   tags?: string[];
@@ -72,163 +86,157 @@ const ProductsDetailTable: React.FC = () => {
       style: 'currency',
       currency: 'USD',
     }).format(price);
-
-  const getStockClass = (stock: number) => {
-    if (stock > 50) return 'pdt-stock-high';
-    if (stock > 20) return 'pdt-stock-medium';
-    return 'pdt-stock-low';
-  };
-
-  const getDiscountClass = (discount: number) => {
-    if (discount >= 20) return 'pdt-discount-high';   // big discount → strong green
-    if (discount >= 10) return 'pdt-discount-medium'; // medium → orange
-    return 'pdt-discount-low';                        // small → muted
-  };
-
-  const getRatingClass = (rating: number) => {
-    if (rating < 2.5) return 'pdt-rating-low';
-    if (rating < 4) return 'pdt-rating-medium';
-    return 'pdt-rating-high';
-  };
-
   if (isLoading) {
     return (
-      <div className="pdt-card">
-        <p>Loading product data...</p>
-      </div>
+      <Card>
+        <Text>Loading product data...</Text>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="pdt-card">
-        <p className="pdt-error">{error}</p>
-      </div>
+      <Card>
+        <Text className="text-red-500">{error}</Text>
+      </Card>
     );
   }
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
+  // Get formatted category name
+  const formatCategory = (category: string) => {
+    return category
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Get appropriate color for rating badge
+  const getRatingColor = (rating: number) => {
+    if (rating < 2.5) return 'red';
+    if (rating < 4) return 'amber';
+    return 'green';
+  };
+
+  // Get appropriate color for stock badge
+  const getStockColor = (stock: number) => {
+    if (stock <= 20) return 'red';
+    if (stock <= 50) return 'amber';
+    return 'green';
+  };
+
+  // Get appropriate color for discount badge
+  const getDiscountColor = (discount: number) => {
+    if (discount >= 20) return 'green';
+    if (discount >= 10) return 'amber';
+    return 'gray';
+  };
+
   return (
-    <div className="pdt-card">
-      <div className="pdt-header-row">
-        <div>
-          <h4 className="pdt-title">Product Details</h4>
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Search by name, category, brand..."
+    <Card>
+      <Flex justifyContent="between" alignItems="center" className="mb-6">
+        <Title>Product Details</Title>
+        <div className="max-w-xs">
+          <TextInput 
+            placeholder="Search by name, category, brand..." 
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="pdt-search-input"
           />
         </div>
-      </div>
+      </Flex>
 
-      <div className="pdt-table-wrapper">
-        <table className="pdt-table">
-          <thead>
-            <tr>
-              <th className="pdt-th pdt-th-product">Product</th>
-              <th className="pdt-th">Category</th>
-              <th className="pdt-th">Price</th>
-              <th className="pdt-th">Rating</th>
-              <th className="pdt-th">Stock</th>
-              <th className="pdt-th">Brand</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentProducts.map((product) => (
-              <tr key={product.id}>
-                <td className="pdt-td">
-                  <div className="pdt-product-cell">
-                    <span className="pdt-product-title">{product.title}</span>
-                  </div>
-                </td>
-                <td className="pdt-td">
-                  <span className="pdt-text">
-                    {product.category
-                      .split('-')
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(' ')}
-                  </span>
-                </td>
-                <td className="pdt-td">
-                  <span className="pdt-price">{formatPrice(product.price)}</span>
-                  {product.discountPercentage > 0 && (
-                    <span
-                      className={`pdt-discount ${getDiscountClass(
-                        product.discountPercentage
-                      )}`}
-                    >
-                      -{product.discountPercentage.toFixed(1)}%
-                    </span>
-                  )}
-                </td>
-                <td className="pdt-td">
-                  <span className={getRatingClass(product.rating)}>{product.rating.toFixed(1)}</span>
-                  <span className="pdt-subtext">
-                    {product.reviews ? product.reviews.length : 3} reviews
-                  </span>
-                </td>
-                <td className="pdt-td">
-                  <span className={getStockClass(product.stock)}>{product.stock}</span>
-                </td>
-                <td className="pdt-td">
-                  <span className="pdt-text">{product.brand}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Product</TableHeaderCell>
+            <TableHeaderCell>Category</TableHeaderCell>
+            <TableHeaderCell>Price</TableHeaderCell>
+            <TableHeaderCell>Rating</TableHeaderCell>
+            <TableHeaderCell>Stock</TableHeaderCell>
+            <TableHeaderCell>Brand</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {currentProducts.map((product) => (
+            <TableRow key={product.id}>
+              <TableCell>
+                <Text className="font-medium">{product.title}</Text>
+              </TableCell>
+              <TableCell>
+                <Text>{formatCategory(product.category)}</Text>
+              </TableCell>
+              <TableCell>
+                <Text className="font-medium">{formatPrice(product.price)}</Text>
+                {product.discountPercentage > 0 && (
+                  <Badge size="xs" color={getDiscountColor(product.discountPercentage)}>
+                    -{product.discountPercentage.toFixed(1)}%
+                  </Badge>
+                )}
+              </TableCell>
+              <TableCell>
+                <Badge size="sm" color={getRatingColor(product.rating)}>
+                  {product.rating.toFixed(1)}
+                </Badge>
+                <Text className="text-xs text-gray-500 mt-1">
+                  {product.reviews ? product.reviews.length : 3} reviews
+                </Text>
+              </TableCell>
+              <TableCell>
+                <Badge size="sm" color={getStockColor(product.stock)}>
+                  {product.stock}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Text>{product.brand}</Text>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       {/* Pagination */}
-      <div className="pdt-footer">
-        <div className="pdt-footer-text">
-          Showing {indexOfFirstProduct + 1} to{' '}
-          {Math.min(indexOfLastProduct, filteredProducts.length)} of{' '}
-          {filteredProducts.length} entries
-        </div>
-        <div className="pdt-pagination">
-          <button
+      <Flex justifyContent="between" className="mt-6">
+        <Text className="text-sm text-gray-500">
+          Showing {indexOfFirstProduct + 1} to {Math.min(indexOfLastProduct, filteredProducts.length)} of {filteredProducts.length} entries
+        </Text>
+
+        <Flex justifyContent="end" className="gap-2">
+          <Button 
+            size="xs" 
+            variant="secondary" 
             onClick={() => currentPage > 1 && paginate(currentPage - 1)}
             disabled={currentPage === 1}
-            className="pdt-page-btn"
           >
             &lt;
-          </button>
-
+          </Button>
+          
           {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => (
-            <button
+            <Button
               key={i}
+              size="xs"
+              variant={currentPage === i + 1 ? "primary" : "secondary"}
               onClick={() => paginate(i + 1)}
-              className={
-                currentPage === i + 1
-                  ? 'pdt-page-btn pdt-page-btn-active'
-                  : 'pdt-page-btn'
-              }
             >
               {i + 1}
-            </button>
+            </Button>
           ))}
-
-          <button
-            onClick={() =>
-              currentPage < totalPages && paginate(currentPage + 1)
-            }
+          
+          <Button 
+            size="xs" 
+            variant="secondary" 
+            onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="pdt-page-btn"
           >
             &gt;
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Flex>
+      </Flex>
+    </Card>
   );
 };
 

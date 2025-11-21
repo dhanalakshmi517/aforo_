@@ -1,75 +1,82 @@
-import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
+import { Card, Title, BarChart, Text } from '@tremor/react';
 import { getProducts } from '../../../../src/client/components/Dashboard/productsApi';
 
-const baseOptions: ApexOptions = {
-  chart: {
-    type: 'bar',
-    height: 320,
-    toolbar: { show: false },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: [],
-    labels: { style: { fontSize: '11px' } },
-  },
-  yaxis: {
-    title: { text: 'Total Stock' },
-    min: 0,
-  },
-  grid: {
-    show: false,
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => `${val} units`,
-    },
-  },
-  colors: ['#330066'],
+type ChartData = {
+  category: string;
+  'Total Stock': number;
 };
 
 const TotalStockByCategoryChart: React.FC = () => {
-  const [series, setSeries] = useState([{ name: 'Stock', data: [] as number[] }]);
-  const [options, setOptions] = useState<ApexOptions>(baseOptions);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await getProducts();
+      try {
+        const products = await getProducts();
 
-      const stockByCategory: Record<string, number> = {};
-      products.forEach((p: { category: string; stock: number }) => {
-        stockByCategory[p.category] = (stockByCategory[p.category] || 0) + p.stock;
-      });
+        const stockByCategory: Record<string, number> = {};
+        products.forEach((p: { category: string; stock: number }) => {
+          stockByCategory[p.category] = (stockByCategory[p.category] || 0) + p.stock;
+        });
 
-      const categories = Object.keys(stockByCategory);
-      const stocks = categories.map((c) => stockByCategory[c]);
+        // Format data for Tremor
+        const formattedData: ChartData[] = Object.entries(stockByCategory).map(([category, stock]) => ({
+          category: category
+            .split('-')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' '),
+          'Total Stock': stock
+        }));
 
-      const prettyCategories = categories.map((cat) =>
-        cat
-          .split('-')
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' '),
-      );
-
-      setSeries([{ name: 'Stock', data: stocks }]);
-      setOptions((prev: ApexOptions) => ({
-        ...prev,
-        xaxis: {
-          ...prev.xaxis,
-          categories: prettyCategories,
-        },
-      }));
+        // Sort by stock in descending order
+        formattedData.sort((a, b) => b['Total Stock'] - a['Total Stock']);
+        
+        setChartData(formattedData);
+      } catch (err) {
+        console.error('Error loading product data:', err);
+        setError('Failed to load stock data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
   }, []);
 
+  if (isLoading) {
+    return (
+      <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text>Loading stock data...</Text>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <Text className="text-red-500">{error}</Text>
+      </Card>
+    );
+  }
+
   return (
-    <div className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">Total Stock by Category</h4>
-      <ReactApexChart type="bar" options={options} series={series} height={320} />
-    </div>
+    <Card className="rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <Title className="mb-4 text-lg font-semibold text-black dark:text-white">
+        Total Stock by Category
+      </Title>
+      
+      <BarChart
+        className="h-80 mt-4"
+        data={chartData}
+        index="category"
+        categories={['Total Stock']}
+        colors={['purple']}
+        valueFormatter={(number) => `${number} units`}
+      />
+    </Card>
   );
 };
 
