@@ -47,6 +47,7 @@
     "@types/express": "^5.0.0",
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^18.0.37",
+    "autoprefixer": "^10.4.18",
     "nodemailer": "^6.10.1",
     "prisma": "5.19.1",
     "ts-node": "^10.9.2",
