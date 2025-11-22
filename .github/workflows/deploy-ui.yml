@@ -42,21 +42,29 @@ jobs:
           cd app
           
           echo "🔧 First attempt: wasp build"
-          if wasp build; then
+          if wasp build 2>&1; then
             echo "✅ Build succeeded on first try!"
           else
-            echo "❌ Build failed, applying TypeScript patches..."
+            echo "❌ Build failed, applying comprehensive TypeScript patches..."
             
             echo "🔍 Checking generated files structure:"
-            find .wasp -name "*.ts" -type f | head -20
-            echo "🔍 Looking for auth files:"
-            find .wasp -path "*/auth/*" -name "*.ts" -type f
-            echo "🔍 Looking for types files:"
-            find .wasp -path "*/types/*" -name "*.d.ts" -type f
+            find .wasp -name "*.ts" -type f | head -30 || echo "No .ts files found yet"
+            echo "🔍 Looking for useAuth files specifically:"
+            find .wasp -name "*useAuth*" -type f || echo "No useAuth files found"
+            echo "🔍 Looking for auth directory:"
+            find .wasp -path "*/auth/*" -name "*.ts" -type f || echo "No auth directory found"
+            echo "🔍 Checking .wasp directory structure:"
+            ls -la .wasp/ || echo ".wasp directory not found"
             
-            echo "🩹 Applying comprehensive TypeScript patches..."
+            echo "🩹 Making patch script executable and running..."
             chmod +x ci-patch-useauth.cjs
+            ls -la ci-patch-useauth.cjs
+            
+            echo "🔧 Running comprehensive patch script..."
             node ci-patch-useauth.cjs
+            
+            echo "🔍 Verifying patches were applied:"
+            find .wasp -name "*useAuth*" -type f -exec echo "File: {}" \; -exec head -10 {} \; || echo "No useAuth files to verify"
             
             echo "🔧 Second attempt: wasp build after patches"
             wasp build
