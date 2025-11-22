@@ -37,25 +37,30 @@ jobs:
           # Ensure the correct Rollup native binary on Linux
           npm install --save-optional @rollup/rollup-linux-x64-gnu
 
-      - name: 🛠 Run wasp build from app folder
+      - name: 🛠 Run wasp build and apply patches
         run: |
           cd app
-          wasp build
-          echo "🔍 Checking generated files structure:"
-          find .wasp -name "*.ts" -type f | head -20
-          echo "🔍 Looking for auth files:"
-          find .wasp -path "*/auth/*" -name "*.ts" -type f
-          echo "🔍 Looking for types files:"
-          find .wasp -path "*/types/*" -name "*.d.ts" -type f
-
-      - name: 🩹 Apply TypeScript fix patch
-        run: |
-          cd app
-          chmod +x ci-patch-useauth.js
-          node ci-patch-useauth.js
-          echo "Patch applied, verifying files exist:"
-          ls -la .wasp/out/sdk/wasp/auth/ || echo "Auth directory not found"
-          ls -la .wasp/out/sdk/wasp/src/types/ || echo "Types directory not found"
+          
+          echo "🔧 First attempt: wasp build"
+          if wasp build; then
+            echo "✅ Build succeeded on first try!"
+          else
+            echo "❌ Build failed, applying TypeScript patches..."
+            
+            echo "🔍 Checking generated files structure:"
+            find .wasp -name "*.ts" -type f | head -20
+            echo "🔍 Looking for auth files:"
+            find .wasp -path "*/auth/*" -name "*.ts" -type f
+            echo "🔍 Looking for types files:"
+            find .wasp -path "*/types/*" -name "*.d.ts" -type f
+            
+            echo "🩹 Applying comprehensive TypeScript patches..."
+            chmod +x ci-patch-useauth.js
+            node ci-patch-useauth.js
+            
+            echo "🔧 Second attempt: wasp build after patches"
+            wasp build
+          fi
 
       - name: 🎨 Install frontend deps and build UI
         run: |
