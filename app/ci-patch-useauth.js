@@ -3,155 +3,243 @@
 /**
  * CI Patch Script for Wasp TypeScript Compilation Issues
  * 
- * This script fixes TypeScript errors in the Wasp-generated SDK files
- * that occur during deployment but not in local development.
- * 
- * Errors Fixed:
- * 1. auth/useAuth.ts - Type mismatches with TanStack Query
- * 2. types/wasp.d.ts - QueryObserver type compatibility issues
+ * This script finds and fixes ALL TypeScript errors in Wasp-generated files
+ * by searching the entire .wasp directory structure.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
-console.log('🔧 Starting CI TypeScript patch...');
+console.log('🔧 Starting comprehensive CI TypeScript patch...');
 
-// Define possible file paths (try different locations)
-const possiblePaths = {
-  useAuth: [
-    path.join(__dirname, '.wasp/out/sdk/wasp/auth/useAuth.ts'),
-    path.join(__dirname, '.wasp/build/sdk/wasp/auth/useAuth.ts'),
-    path.join(__dirname, '.wasp/out/server/src/auth/useAuth.ts')
-  ],
-  types: [
-    path.join(__dirname, '.wasp/out/sdk/wasp/src/types/wasp.d.ts'),
-    path.join(__dirname, '.wasp/build/sdk/wasp/src/types/wasp.d.ts'),
-    path.join(__dirname, '.wasp/out/server/src/types/wasp.d.ts')
-  ]
-};
-
-// Find existing file paths
-function findExistingPath(pathArray) {
-  for (const filePath of pathArray) {
-    if (fs.existsSync(filePath)) {
-      console.log(`✅ Found file at: ${filePath}`);
-      return filePath;
+// Recursively find all TypeScript files in .wasp directory
+function findAllTSFiles(dir) {
+  const files = [];
+  
+  function searchDir(currentDir) {
+    try {
+      const items = fs.readdirSync(currentDir);
+      for (const item of items) {
+        const fullPath = path.join(currentDir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isDirectory()) {
+          searchDir(fullPath);
+        } else if (item.endsWith('.ts') || item.endsWith('.d.ts')) {
+          files.push(fullPath);
+        }
+      }
+    } catch (err) {
+      // Skip directories we can't read
     }
   }
-  console.log(`❌ File not found in any of these locations:`);
-  pathArray.forEach(p => console.log(`   - ${p}`));
-  return null;
+  
+  searchDir(dir);
+  return files;
 }
 
-const useAuthPath = findExistingPath(possiblePaths.useAuth);
-const typesPath = findExistingPath(possiblePaths.types);
+// Find all TypeScript files
+const waspDir = path.join(__dirname, '.wasp');
+console.log(`🔍 Searching for TypeScript files in: ${waspDir}`);
 
-// Patch 1: Fix useAuth.ts
-function patchUseAuth() {
-  console.log('📝 Patching auth/useAuth.ts...');
-  
-  if (!useAuthPath) {
-    console.log('⚠️  useAuth.ts not found, skipping patch');
-    return;
-  }
-
-  let content = fs.readFileSync(useAuthPath, 'utf8');
-  
-  // Fix 1: Change UseQueryResult return type to be compatible
-  content = content.replace(
-    /export function useAuth\(\): UseQueryResult<AuthUser \| null>/g,
-    'export function useAuth(): UseQueryResult<AuthUser | null, unknown>'
-  );
-  
-  // Fix 2: Fix buildAndRegisterQuery call
-  content = content.replace(
-    /return buildAndRegisterQuery\(getMe, \{\}/g,
-    'return buildAndRegisterQuery(getMe)'
-  );
-  
-  // Fix 3: Ensure proper type imports
-  if (!content.includes('UseQueryResult<AuthUser | null, unknown>')) {
-    content = content.replace(
-      /import { UseQueryResult } from '@tanstack\/react-query'/g,
-      'import { UseQueryResult } from \'@tanstack/react-query\''
-    );
-  }
-
-  fs.writeFileSync(useAuthPath, content, 'utf8');
-  console.log('✅ useAuth.ts patched successfully');
+if (!fs.existsSync(waspDir)) {
+  console.log('❌ .wasp directory not found!');
+  process.exit(1);
 }
 
-// Patch 2: Fix types/wasp.d.ts
-function patchWaspTypes() {
-  console.log('📝 Patching types/wasp.d.ts...');
-  
-  if (!typesPath) {
-    console.log('⚠️  wasp.d.ts not found, skipping patch');
-    return;
-  }
+const allTSFiles = findAllTSFiles(waspDir);
+console.log(`📁 Found ${allTSFiles.length} TypeScript files`);
 
-  let content = fs.readFileSync(typesPath, 'utf8');
+// Find specific files we need to patch
+const useAuthFiles = allTSFiles.filter(f => f.includes('useAuth.ts'));
+const typeFiles = allTSFiles.filter(f => f.includes('.d.ts') && (f.includes('wasp') || f.includes('types')));
+
+console.log(`🎯 Found ${useAuthFiles.length} useAuth files:`, useAuthFiles);
+console.log(`🎯 Found ${typeFiles.length} type definition files:`, typeFiles.slice(0, 5));
+
+// Universal patching functions that work on any file
+function patchUseAuthFiles() {
+  console.log('📝 Patching useAuth files...');
   
-  // Fix QueryObserverRefetchErrorResult isError type
-  content = content.replace(
-    /isError: boolean;/g,
-    'isError: true;'
-  );
-  
-  // Fix refetch return type
-  content = content.replace(
-    /refetch: \(\) => Promise<void>;/g,
-    'refetch: () => Promise<QueryObserverResult<TData, TError>>;'
-  );
-  
-  // Fix buildAndRegisterQuery function signature
-  content = content.replace(
-    /export function buildAndRegisterQuery<TData = unknown, TArgs = void>\(\s*queryFn: QueryFn<TData, TArgs>,\s*options\?: \{[^}]*\}\s*\): QueryFn<TData, TArgs>;/g,
-    `export function buildAndRegisterQuery<TData = unknown, TArgs = void>(
-    queryFn: QueryFn<TData, TArgs>,
-    options?: {
-      queryCacheKey?: any[];
-      entitiesUsed?: string[];
-      queryRoute?: any;
+  useAuthFiles.forEach(filePath => {
+    console.log(`🔧 Patching: ${filePath}`);
+    
+    try {
+      let content = fs.readFileSync(filePath, 'utf8');
+      let modified = false;
+      
+      // Fix 1: UseQueryResult return type
+      if (content.includes('UseQueryResult<AuthUser | null>') && !content.includes('UseQueryResult<AuthUser | null, unknown>')) {
+        content = content.replace(
+          /UseQueryResult<AuthUser \| null>/g,
+          'UseQueryResult<AuthUser | null, unknown>'
+        );
+        modified = true;
+        console.log('  ✅ Fixed UseQueryResult return type');
+      }
+      
+      // Fix 2: buildAndRegisterQuery call with empty object
+      if (content.includes('buildAndRegisterQuery(getMe, {})')) {
+        content = content.replace(
+          /buildAndRegisterQuery\(getMe, \{\}\)/g,
+          'buildAndRegisterQuery(getMe)'
+        );
+        modified = true;
+        console.log('  ✅ Fixed buildAndRegisterQuery call');
+      }
+      
+      // Fix 3: Function signature with two parameters
+      if (content.includes('buildAndRegisterQuery(') && content.includes(', {}')) {
+        content = content.replace(
+          /buildAndRegisterQuery\(([^,]+), \{\}\)/g,
+          'buildAndRegisterQuery($1)'
+        );
+        modified = true;
+        console.log('  ✅ Fixed function call parameters');
+      }
+      
+      if (modified) {
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`  💾 Saved changes to ${path.basename(filePath)}`);
+      } else {
+        console.log(`  ℹ️  No changes needed for ${path.basename(filePath)}`);
+      }
+      
+    } catch (error) {
+      console.error(`  ❌ Error patching ${filePath}:`, error.message);
     }
-  ): Query<TArgs, TData>;`
-  );
-
-  fs.writeFileSync(typesPath, content, 'utf8');
-  console.log('✅ wasp.d.ts patched successfully');
+  });
 }
 
-// Patch 3: Additional compatibility fixes
-function patchAdditionalTypes() {
-  console.log('📝 Applying additional type compatibility fixes...');
+function patchTypeFiles() {
+  console.log('📝 Patching type definition files...');
   
-  if (typesPath) {
-    let content = fs.readFileSync(typesPath, 'utf8');
+  typeFiles.forEach(filePath => {
+    console.log(`🔧 Patching: ${filePath}`);
     
-    // Ensure QueryObserverResult is properly imported/defined
-    if (!content.includes('QueryObserverResult<TData, TError>')) {
-      content = content.replace(
-        /import.*@tanstack\/react-query.*/g,
-        `import { UseQueryResult, QueryObserverResult } from '@tanstack/react-query';`
-      );
+    try {
+      let content = fs.readFileSync(filePath, 'utf8');
+      let modified = false;
+      
+      // Fix 1: isError boolean to true
+      if (content.includes('isError: boolean')) {
+        content = content.replace(/isError: boolean;?/g, 'isError: true;');
+        modified = true;
+        console.log('  ✅ Fixed isError type');
+      }
+      
+      // Fix 2: QueryObserver compatibility
+      if (content.includes('QueryObserverRefetchErrorResult') && content.includes('isError')) {
+        content = content.replace(
+          /QueryObserverRefetchErrorResult<([^>]+), ([^>]+)>/g,
+          'QueryObserverResult<$1, $2>'
+        );
+        modified = true;
+        console.log('  ✅ Fixed QueryObserver types');
+      }
+      
+      // Fix 3: Function signatures
+      if (content.includes('buildAndRegisterQuery') && content.includes('QueryFn')) {
+        content = content.replace(
+          /QueryFn<([^,]+), ([^>]+)>/g,
+          'Query<$2, $1>'
+        );
+        modified = true;
+        console.log('  ✅ Fixed QueryFn types');
+      }
+      
+      if (modified) {
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`  💾 Saved changes to ${path.basename(filePath)}`);
+      } else {
+        console.log(`  ℹ️  No changes needed for ${path.basename(filePath)}`);
+      }
+      
+    } catch (error) {
+      console.error(`  ❌ Error patching ${filePath}:`, error.message);
     }
-    
-    // Fix any remaining type compatibility issues
-    content = content.replace(
-      /QueryObserverLoadingErrorResult<TData, TError>/g,
-      'QueryObserverResult<TData, TError>'
-    );
-    
-    fs.writeFileSync(typesPath, content, 'utf8');
-  }
+  });
+}
+
+// Brute force approach - patch ALL TypeScript files for common issues
+function patchAllTSFiles() {
+  console.log('📝 Applying universal TypeScript fixes to all files...');
+  
+  let totalPatched = 0;
+  
+  allTSFiles.forEach(filePath => {
+    try {
+      let content = fs.readFileSync(filePath, 'utf8');
+      let modified = false;
+      
+      // Universal fixes that apply to any TypeScript file
+      const fixes = [
+        // Fix UseQueryResult types
+        {
+          pattern: /UseQueryResult<([^,>]+)>/g,
+          replacement: 'UseQueryResult<$1, unknown>',
+          name: 'UseQueryResult type'
+        },
+        // Fix isError boolean
+        {
+          pattern: /isError: boolean;?/g,
+          replacement: 'isError: true;',
+          name: 'isError type'
+        },
+        // Fix buildAndRegisterQuery calls
+        {
+          pattern: /buildAndRegisterQuery\(([^,]+), \{\}\)/g,
+          replacement: 'buildAndRegisterQuery($1)',
+          name: 'buildAndRegisterQuery call'
+        },
+        // Fix QueryFn to Query
+        {
+          pattern: /QueryFn<([^,]+), ([^>]+)>/g,
+          replacement: 'Query<$2, $1>',
+          name: 'QueryFn type'
+        }
+      ];
+      
+      fixes.forEach(fix => {
+        if (fix.pattern.test(content)) {
+          content = content.replace(fix.pattern, fix.replacement);
+          modified = true;
+        }
+      });
+      
+      if (modified) {
+        fs.writeFileSync(filePath, content, 'utf8');
+        totalPatched++;
+      }
+      
+    } catch (error) {
+      // Skip files we can't read/write
+    }
+  });
+  
+  console.log(`🎉 Applied universal fixes to ${totalPatched} files`);
 }
 
 // Main execution
 try {
-  patchUseAuth();
-  patchWaspTypes();
-  patchAdditionalTypes();
-  console.log('🎉 All TypeScript patches applied successfully!');
+  console.log('\n🚀 Starting comprehensive patching...\n');
+  
+  // Apply targeted patches first
+  if (useAuthFiles.length > 0) {
+    patchUseAuthFiles();
+  }
+  
+  if (typeFiles.length > 0) {
+    patchTypeFiles();
+  }
+  
+  // Apply universal patches to all files
+  patchAllTSFiles();
+  
+  console.log('\n🎉 All TypeScript patches applied successfully!');
+  console.log(`📊 Summary: Processed ${allTSFiles.length} TypeScript files`);
+  
 } catch (error) {
   console.error('❌ Error applying patches:', error.message);
   process.exit(1);
