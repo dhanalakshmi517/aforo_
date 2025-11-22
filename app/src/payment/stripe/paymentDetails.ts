@@ -11,7 +11,7 @@ export const updateUserStripePaymentDetails = (
     datePaid?: Date;
   },
   userDelegate: PrismaClient['user']
-) => {
+): Promise<any> => {
   return userDelegate.update({
     where: {
       paymentProcessorUserId: userStripeId

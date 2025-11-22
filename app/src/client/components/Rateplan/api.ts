@@ -22,7 +22,7 @@ export interface Product {
 /* =========================
  * Constants
  * ========================= */
-export const BASE_URL = 'http://3.208.93.68:8080/api';
+export const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3001/api' : 'http://3.208.93.68:8080/api';
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 const BM_BASE = 'http://34.238.49.158:8081/api/billable-metrics';
 

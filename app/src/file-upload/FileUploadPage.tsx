@@ -1,11 +1,23 @@
 import { cn } from '../client/cn';
 import { useState, useEffect, FormEvent } from 'react';
-import { type File } from 'wasp/entities';
+// TODO: Uncomment after running 'wasp db migrate-dev'
+// import { type File as WaspFile } from 'wasp/entities';
 import { useQuery, getAllFilesByUser, getDownloadFileSignedURL } from 'wasp/client/operations';
+
+// Temporary type - remove after Wasp regeneration
+type WaspFile = {
+  id: string;
+  createdAt: Date;
+  userId: string;
+  name: string;
+  type: string;
+  key: string;
+  uploadUrl: string;
+};
 import { type FileUploadError, uploadFileWithProgress, validateFile, ALLOWED_FILE_TYPES } from './fileUploading';
 
 export default function FileUploadPage() {
-  const [fileKeyForS3, setFileKeyForS3] = useState<File['key']>('');
+  const [fileKeyForS3, setFileKeyForS3] = useState<WaspFile['key']>('');
   const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
   const [uploadError, setUploadError] = useState<FileUploadError | null>(null);
 
@@ -138,7 +150,7 @@ export default function FileUploadPage() {
               {allUserFiles.isLoading && <p>Loading...</p>}
               {allUserFiles.error && <p>Error: {String(allUserFiles.error || 'Unknown error')}</p>}
               {!!allUserFiles.data && allUserFiles.data.length > 0 && !allUserFiles.isLoading ? (
-                allUserFiles.data.map((file: File, index: number) => (
+                allUserFiles.data.map((file: WaspFile, index: number) => (
                   <div
                     key={file.key}
                     className={cn(
