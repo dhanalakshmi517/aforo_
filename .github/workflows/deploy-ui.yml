@@ -55,8 +55,8 @@ jobs:
             find .wasp -path "*/types/*" -name "*.d.ts" -type f
             
             echo "🩹 Applying comprehensive TypeScript patches..."
-            chmod +x ci-patch-useauth.js
-            node ci-patch-useauth.js
+            chmod +x ci-patch-useauth.cjs
+            node ci-patch-useauth.cjs
             
             echo "🔧 Second attempt: wasp build after patches"
             wasp build
