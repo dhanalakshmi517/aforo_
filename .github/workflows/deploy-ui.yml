@@ -41,11 +41,21 @@ jobs:
         run: |
           cd app
           wasp build
+          echo "🔍 Checking generated files structure:"
+          find .wasp -name "*.ts" -type f | head -20
+          echo "🔍 Looking for auth files:"
+          find .wasp -path "*/auth/*" -name "*.ts" -type f
+          echo "🔍 Looking for types files:"
+          find .wasp -path "*/types/*" -name "*.d.ts" -type f
 
       - name: 🩹 Apply TypeScript fix patch
         run: |
           cd app
+          chmod +x ci-patch-useauth.js
           node ci-patch-useauth.js
+          echo "Patch applied, verifying files exist:"
+          ls -la .wasp/out/sdk/wasp/auth/ || echo "Auth directory not found"
+          ls -la .wasp/out/sdk/wasp/src/types/ || echo "Types directory not found"
 
       - name: 🎨 Install frontend deps and build UI
         run: |
