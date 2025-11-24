@@ -14,7 +14,7 @@
 .failure-description {
   font-size: 16px;
   text-align: center;
-  color: #64748B;
+  color: #64748b;
   max-width: 400px;
   margin: 0 auto 32px auto;
   line-height: 1.5;
@@ -27,7 +27,7 @@
   align-items: center;
   gap: 8px;
   border-radius: 4px;
-  background: #0262A1;
+  background: #0262a1;
   color: white;
   font-weight: 600;
   font-size: 16px;
@@ -45,7 +45,7 @@
 }
 
 .sidebar-item.failed .sidebar-icon svg path {
-  stroke: #E53935;
+  stroke: #e53935;
 }
 
 .sidebar-item.disabled .sidebar-icon {
