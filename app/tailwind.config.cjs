@@ -6,6 +6,12 @@ module.exports = {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
     './public/**/*.html',
+    './.wasp/out/web-app/src/**/*.{js,jsx,ts,tsx}',
+    './.wasp/out/web-app/index.html',
+  ],
+  safelist: [
+    // Common patterns that might be dynamically generated
+    { pattern: /^(bg|text|border|shadow|rounded|p|m|w|h|flex|grid|gap|justify|items|absolute|relative|fixed|sticky|top|right|bottom|left|z)-.*/ },
   ],
   darkMode: 'class',
   theme: {
