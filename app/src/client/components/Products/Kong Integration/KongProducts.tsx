@@ -5,25 +5,28 @@ import PrimaryButton from "../../componenetsss/PrimaryButton";
 import Checkbox from "../../componenetsss/Checkbox";
 
 type Product = {
-  id: number;
+  id: string;
   name: string;
-  subtitle: string;
   description: string;
-  selected: boolean;
+  selected?: boolean;
 };
 
-const initialProducts: Product[] = Array.from({ length: 25 }, (_, i) => ({
-  id: i + 1,
-  name: "Product Name",
-  subtitle: "Product id name or code",
-  description:
-    "Description lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-  selected: false, // No products selected by default
-}));
+interface KongProductsProps {
+  products?: any[];
+  onImport?: (selectedIds: string[]) => void;
+}
 
-interface KongProductsProps {}
+const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = [], onImport }) => {
+  // Transform Kong API products to local Product format
+  const initialProducts: Product[] = kongProducts.length > 0 
+    ? kongProducts.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || "",
+        selected: false,
+      }))
+    : [];
 
-const KongProducts: React.FC<KongProductsProps> = () => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [search, setSearch] = useState("");
 
@@ -45,7 +48,7 @@ const KongProducts: React.FC<KongProductsProps> = () => {
     [products]
   );
 
-  const toggleProduct = (id: number) => {
+  const toggleProduct = (id: string) => {
     setProducts((prev) =>
       prev.map((p) =>
         p.id === id ? { ...p, selected: !p.selected } : p
@@ -62,10 +65,11 @@ const KongProducts: React.FC<KongProductsProps> = () => {
   };
 
   const handleImport = () => {
-    const selected = products.filter((p) => p.selected);
-    console.log("Importing products:", selected);
-    // Import functionality will be implemented here
-    alert("Import functionality will be implemented in the future.");
+    const selectedIds = products.filter((p) => p.selected).map((p) => p.id);
+    console.log("Importing products:", selectedIds);
+    if (onImport) {
+      onImport(selectedIds);
+    }
   };
 
   return (
@@ -135,9 +139,9 @@ const KongProducts: React.FC<KongProductsProps> = () => {
             <SelectableCard
               key={product.id}
               title={product.name}
-              version={product.subtitle}
+              version={product.name}
               meta={product.description}
-              selected={product.selected}
+              selected={product.selected || false}
               onSelectedChange={() => toggleProduct(product.id)}
             />
           ))}

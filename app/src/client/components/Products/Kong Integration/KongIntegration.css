@@ -570,6 +570,44 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   color: var(--color-neutral-1400);
 }
 
+/* Region Grid */
+
+.kong-region-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.kong-region-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-neutral-white);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.kong-region-option:hover {
+  border-color: var(--color-primary-700);
+  background: #f0f7ff;
+}
+
+.kong-region-option--selected {
+  border-color: var(--color-primary-700);
+  background: #e3f0ff;
+}
+
+.kong-region-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-1400);
+}
+
 .kong-error-message {
   padding: 12px 16px;
   background-color: #fee2e2;

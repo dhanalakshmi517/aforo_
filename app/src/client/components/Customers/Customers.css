@@ -4,15 +4,17 @@
 .customers-container {
   padding: 0 16px 16px 16px;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   border-radius: var(--border-radius-md);
+  overflow: hidden;
 }
 
 /* Align header with fixed sidebar */
-.customers-container > .rate-plan-header { margin-left: 256px; width: calc(100% - 256px); }
+.customers-container > .rate-plan-header { width: 100%; max-width: 100%; }
 @media (max-width: 991px) { .customers-container > .rate-plan-header { margin-left: 0; width: 100%; } }
 
 /* ---------------------- Table ---------------------- */
@@ -136,16 +138,18 @@
 
 /* ---------------------- Table wrapper panel ---------------------- */
 .customers-table-wrapper {
-  margin-left: 256px;
-  width: calc(100% - 256px);
+  width: 100%;
+  max-width: 100%;
   padding: 12px;
   margin-top: 12px;
   background-color: var(--color-neutral-white);
   min-height: calc(100vh - 126px);
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: none;
   box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+  box-sizing: border-box;
 }
 .customers-table-wrapper:hover { scrollbar-width: thin; }
 .customers-table-wrapper:hover::-webkit-scrollbar { width: 8px; }

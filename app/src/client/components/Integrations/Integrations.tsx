@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../componenetsss/Header';
 import { kongLogo, razorpayLogo, quickbooksLogo, apigeeLogo } from '../../static/images';
+import KongIntegration from '../Products/Kong Integration/KongIntegration';
 import './Integrations.css';
 
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
+  const [showKongIntegration, setShowKongIntegration] = useState(false);
+
+  const handleKongSync = () => {
+    setShowKongIntegration(true);
+  };
 
   const handleApigeeSync = () => {
     navigate('/apigee-integration');
@@ -49,7 +55,7 @@ const Integrations: React.FC = () => {
                 <p className="integration-card-description">Kong is an API management platform by Google that</p>
               </div>
             </div>
-            <button className="integration-card-sync-btn">+ Sync</button>
+            <button className="integration-card-sync-btn" onClick={handleKongSync}>+ Sync</button>
           </div>
 
           {/* Apigee Integration Card */}
@@ -119,6 +125,10 @@ const Integrations: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {showKongIntegration && (
+        <KongIntegration onClose={() => setShowKongIntegration(false)} />
+      )}
     </div>
   );
 };

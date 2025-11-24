@@ -7,6 +7,7 @@ import SelectableCard from "../../componenetsss/SelectableCard";
 import kongHelperImage from "./kong1.svg";
 import KongProducts from "./KongProducts";
 import KongImportedProducts from "./KongImportedProducts";
+import { clearAuthData, getAuthData } from "../../../utils/auth";
 
 interface KongIntegrationProps {
   onClose: () => void;
@@ -20,6 +21,8 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
   const [selectedCountry, setSelectedCountry] = useState<string>("IN");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [kongProducts, setKongProducts] = useState<any[]>([]);
+  const [connectionId, setConnectionId] = useState<string | null>(null);
 
   const isImportStep = currentStep === "import";
   const isImportedStep = currentStep === "imported";
@@ -44,6 +47,83 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
     setSelectedCountry(country);
   };
 
+  // Fetch Kong products from database
+  const fetchKongProducts = async (id: string) => {
+    try {
+      const authData = getAuthData();
+      const response = await fetch(`http://44.203.209.2:8086/api/kong/fetch/from-db/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(authData?.token && { Authorization: `Bearer ${authData.token}` })
+        }
+      });
+      
+      if (response.status === 401) {
+        clearAuthData();
+        window.location.href = '/login?session_expired=true';
+        throw new Error("Session expired. Please login again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch products with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Kong products:", data);
+      
+      // Extract products from response
+      const products = data[0]?.data || [];
+      setKongProducts(products);
+    } catch (err) {
+      console.error("Error fetching Kong products:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch Kong products");
+    }
+  };
+
+  // Handle importing selected products
+  const handleImportProducts = async (selectedIds: string[]) => {
+    if (selectedIds.length === 0) {
+      setError("Please select at least one product to import");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const authData = getAuthData();
+      const response = await fetch("http://44.203.209.2:8086/api/kong/import-selected", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authData?.token && { Authorization: `Bearer ${authData.token}` })
+        },
+        body: JSON.stringify(selectedIds)
+      });
+
+      if (response.status === 401) {
+        clearAuthData();
+        window.location.href = '/login?session_expired=true';
+        throw new Error("Session expired. Please login again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(`Import failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Import response:", data);
+      
+      // Close modal on successful import
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to import products");
+      console.error("Import error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Handle API call to submit Kong integration details
   const submitKongIntegration = async () => {
     if (!token || !region) {
@@ -55,10 +135,12 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
     setError(null);
 
     try {
+      const authData = getAuthData();
       const response = await fetch("http://44.203.209.2:8086/api/client-api-details", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(authData?.token && { Authorization: `Bearer ${authData.token}` })
         },
         body: JSON.stringify({
           base_url: getBaseUrl(),
@@ -67,12 +149,25 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
         })
       });
 
+      if (response.status === 401) {
+        clearAuthData();
+        window.location.href = '/login?session_expired=true';
+        throw new Error("Session expired. Please login again.");
+      }
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
       const data = await response.json();
       console.log("API response:", data);
+      
+      // Extract connection ID and fetch products
+      const id = data.id;
+      if (id) {
+        setConnectionId(id);
+        await fetchKongProducts(id);
+      }
       
       // Set connected state and move to next step
       setIsConnected(true);
@@ -200,56 +295,6 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
                     {/* FORM SIDE */}
                     <div className="kong-form">
                       <div className="kong-form-group">
-                        <label className="kong-label">
-                          Select Country
-                        </label>
-                        <div className="kong-country-grid">
-                          <div 
-                            className={`kong-country-option ${selectedCountry === "AU" ? "kong-country-option--selected" : ""}`}
-                            onClick={() => handleCountrySelect("AU")}
-                          >
-                            <span className="kong-country-flag">🇦🇺</span>
-                            <span className="kong-country-name">AU (Australia)</span>
-                          </div>
-                          <div 
-                            className={`kong-country-option ${selectedCountry === "EU" ? "kong-country-option--selected" : ""}`}
-                            onClick={() => handleCountrySelect("EU")}
-                          >
-                            <span className="kong-country-flag">🇪🇺</span>
-                            <span className="kong-country-name">EU (Europe)</span>
-                          </div>
-                          <div 
-                            className={`kong-country-option ${selectedCountry === "IN" ? "kong-country-option--selected" : ""}`}
-                            onClick={() => handleCountrySelect("IN")}
-                          >
-                            <span className="kong-country-flag">🇮🇳</span>
-                            <span className="kong-country-name">IN (India)</span>
-                          </div>
-                          <div 
-                            className={`kong-country-option ${selectedCountry === "ME" ? "kong-country-option--selected" : ""}`}
-                            onClick={() => handleCountrySelect("ME")}
-                          >
-                            <span className="kong-country-flag">🇦🇪</span>
-                            <span className="kong-country-name">ME (Middle East)</span>
-                          </div>
-                          <div 
-                            className={`kong-country-option ${selectedCountry === "SG" ? "kong-country-option--selected" : ""}`}
-                            onClick={() => handleCountrySelect("SG")}
-                          >
-                            <span className="kong-country-flag">🇸🇬</span>
-                            <span className="kong-country-name">SG (Singapore)</span>
-                          </div>
-                          <div 
-                            className={`kong-country-option ${selectedCountry === "US" ? "kong-country-option--selected" : ""}`}
-                            onClick={() => handleCountrySelect("US")}
-                          >
-                            <span className="kong-country-flag">🇺🇸</span>
-                            <span className="kong-country-name">US (North America)</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="kong-form-group">
                         <label htmlFor="kong-region" className="kong-label">
                           Select Region
                         </label>
@@ -263,9 +308,12 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
                             <option value="" disabled>
                               Select region
                             </option>
-                            <option value="us">US</option>
-                            <option value="eu">EU</option>
-                            <option value="asia">Asia</option>
+                            <option value="AU">AU (Australia)</option>
+                            <option value="EU">EU (Europe)</option>
+                            <option value="IN">IN (India)</option>
+                            <option value="ME">ME (Middle East)</option>
+                            <option value="SG">SG (Singapore)</option>
+                            <option value="US">US (North America)</option>
                           </select>
                         </div>
                       </div>
@@ -431,7 +479,7 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
               )}
             </div>
           ) : isImportStep ? (
-            <KongProducts />
+            <KongProducts products={kongProducts} onImport={(selectedIds) => handleImportProducts(selectedIds)} />
           ) : isImportedStep ? (
             <KongImportedProducts onBack={() => setCurrentStep("import")} />
           ) : null}

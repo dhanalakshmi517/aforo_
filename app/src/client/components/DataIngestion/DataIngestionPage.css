@@ -1,7 +1,6 @@
 @import "../Variables/Variables.css";
 
 .data-page {
-  margin-left: 246px;             
   height: 100vh;                  
   display: flex;
   flex-direction: column;
@@ -9,6 +8,8 @@
   padding: 8px 16px 0 16px;
   box-sizing: border-box;
   position: relative;
+  width: 100%;
+  max-width: 100%;
 }
 
 :root { --data-header-h: 72px; }
@@ -24,6 +25,8 @@
   gap: 8px;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 .data-tabs {
@@ -139,14 +142,19 @@
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  width: 100%;
+  max-width: 100%;
 }
 
 .data-table-scroll {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px;
   box-sizing: border-box;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 
@@ -259,12 +267,14 @@
 
 .data-table {
   width: 100%;
+  max-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   /* min-width: 920px; */
   table-layout: fixed;
   border: none;
   background-color: var(--color-neutral-white);
+  box-sizing: border-box;
 }
 
 .data-table thead th {

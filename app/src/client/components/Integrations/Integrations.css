@@ -1,8 +1,7 @@
 .integrations-page {
   min-height: 100vh;
   background-color: #f8f9fa;
-  margin-left: 240px; /* Account for sidebar width */
-  width: calc(100% - 240px);
+  width:100% ;
 }
 
 .integrations-content {

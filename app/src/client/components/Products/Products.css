@@ -80,7 +80,7 @@ html, body, #root, .app, .main-content {
   .rate-plan-product-container { width: 100%; margin-left: 0; }
 }
 
-.rate-plan-container {
+.rateproduct-plan-container {
   padding: 0;
   width: calc(100% - 256px - 10px);
   max-width: none;
