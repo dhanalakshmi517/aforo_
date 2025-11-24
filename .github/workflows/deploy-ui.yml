@@ -34,54 +34,25 @@ jobs:
         run: |
           rm -rf node_modules package-lock.json
           npm ci || npm install
-          # Ensure the correct Rollup native binary on Linux
           npm install --save-optional @rollup/rollup-linux-x64-gnu
 
-      - name: 🛠 Run wasp build and apply patches
+      - name: 🛠 Build Wasp app (with auth patch on failure)
         run: |
           cd app
-          
-          echo "🔧 Preparing patch script..."
-          chmod +x ci-patch-useauth.cjs
-          ls -la ci-patch-useauth.cjs
-          
+
+          # ensure patch script is executable
+          chmod +x ci-patch-useauth.cjs || true
+
           echo "🔧 First attempt: wasp build"
           if wasp build 2>&1; then
-            echo "✅ Build succeeded on first try!"
+            echo "✅ Wasp build succeeded on first try!"
           else
-            echo "❌ Build failed, applying comprehensive TypeScript patches..."
-            
-            echo "🔍 Checking generated files structure:"
-            find .wasp -name "*.ts" -type f | head -30 || echo "No .ts files found yet"
-            echo "🔍 Looking for useAuth files specifically:"
-            find .wasp -name "*useAuth*" -type f || echo "No useAuth files found"
-            echo "🔍 Looking for auth directory:"
-            find .wasp -path "*/auth/*" -name "*.ts" -type f || echo "No auth directory found"
-            echo "🔍 Checking .wasp directory structure:"
-            ls -la .wasp/ || echo ".wasp directory not found"
-            
-            echo "🔧 Running comprehensive patch script..."
+            echo "❌ Wasp build failed, patching useAuth.ts and retrying..."
+
             node ci-patch-useauth.cjs
-            
-            echo "🔍 Verifying patches were applied:"
-            find .wasp -name "*useAuth*" -type f -exec echo "File: {}" \; -exec head -15 {} \; || echo "No useAuth files to verify"
-            
-            echo "🔧 Second attempt: wasp build after patches"
-            if wasp build 2>&1; then
-              echo "✅ Build succeeded after patches!"
-            else
-              echo "❌ Build still failing, trying emergency measures..."
-              
-              echo "🚨 Applying emergency fixes to all TypeScript files..."
-              find .wasp -name "*.ts" -type f -exec sed -i 's/UseQueryResult<[^>]*>/any/g' {} \;
-              find .wasp -name "*.ts" -type f -exec sed -i 's/QueryFn<[^>]*>/any/g' {} \;
-              find .wasp -name "*.ts" -type f -exec sed -i 's/QueryObserver[A-Za-z]*<[^>]*>/any/g' {} \;
-              find .wasp -name "*.ts" -type f -exec sed -i 's/buildAndRegisterQuery([^,]*), {}/buildAndRegisterQuery(\1)/g' {} \;
-              find .wasp -name "*.ts" -type f -exec sed -i 's/isError: boolean/isError: true/g' {} \;
-              
-              echo "🔧 Third attempt: wasp build after emergency fixes"
-              wasp build
-            fi
+
+            echo "🔧 Second attempt: wasp build after patch"
+            wasp build
           fi
 
       - name: 🎨 Install frontend deps and build UI
@@ -96,22 +67,17 @@ jobs:
           ls -la build/
           find build/ -name "index.html" -type f -ls
 
-      # 🔐 Decode SSH private key from EC2_SSH_KEY_B64 into a file
       - name: 🔐 Write EC2 SSH key
         run: |
           echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 -d > ec2-key.pem
           chmod 600 ec2-key.pem
 
-      # 📤 Copy built UI to EC2 using plain scp (no appleboy)
       - name: 📤 Copy UI build to EC2
         run: |
           HOST="${{ secrets.EC2_HOST }}"
-          # Prepare temp dir on remote
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no ubuntu@"$HOST" "rm -rf /home/ubuntu/frontend-temp && mkdir -p /home/ubuntu/frontend-temp"
-          # Copy *contents* of build/ (flattened root)
           scp -i ec2-key.pem -o StrictHostKeyChecking=no -r app/.wasp/build/web-app/build/* ubuntu@"$HOST":/home/ubuntu/frontend-temp/
 
-      # 🚀 SSH into EC2 and deploy to Nginx
       - name: 🚀 Deploy UI to Nginx (NO-CACHE)
         run: |
           HOST="${{ secrets.EC2_HOST }}"
@@ -139,7 +105,6 @@ jobs:
               root /var/www/html;
               index index.html;
 
-              # ZERO-CACHE for everything (HTML + assets)
               location / {
                 try_files \$uri \$uri/ /index.html;
                 add_header Cache-Control "no-store" always;
@@ -159,7 +124,6 @@ jobs:
             echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
           EOF
 
-      # 🧹 Clean up the key file from the runner
       - name: 🧹 Clean up SSH key
         if: always()
         run: rm -f ec2-key.pem

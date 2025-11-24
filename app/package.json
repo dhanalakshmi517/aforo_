@@ -60,6 +60,8 @@
     "build:icons": "ts-node ../scripts/buildIcons.ts",
     "apply-patches": "node apply-patches.js",
     "test-patch": "node test-patch.js",
-    "postbuild": "npm run apply-patches"
+    "postbuild": "npm run apply-patches",
+    "wasp:build-fixed": "wasp build || (node ci-patch-useauth.cjs && wasp build)",
+    "wasp:start-fixed": "wasp start || (node ci-patch-useauth.cjs && wasp start)"
   }
 }
