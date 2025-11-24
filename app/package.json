@@ -59,9 +59,13 @@
   "scripts": {
     "build:icons": "ts-node ../scripts/buildIcons.ts",
     "apply-patches": "node apply-patches.js",
+<<<<<<< HEAD
     "test-patch": "node test-patch.js",
     "postbuild": "npm run apply-patches",
     "wasp:build-fixed": "wasp build || (node ci-patch-useauth.cjs && wasp build)",
     "wasp:start-fixed": "wasp start || (node ci-patch-useauth.cjs && wasp start)"
+=======
+    "postbuild": "npm run apply-patches"
+>>>>>>> 9f64b54fcd69db2e7736db0f0b83aab2f8a04905
   }
 }
