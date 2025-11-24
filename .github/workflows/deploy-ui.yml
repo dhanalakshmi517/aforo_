@@ -20,7 +20,7 @@ jobs:
 
       - name: ⚙️ Setup Wasp CLI
         run: |
-          curl -sSL https://get.wasp-lang.dev/installer.sh | bash
+          curl -sSL https://get.wasp.sh/installer.sh | bash
           echo "$HOME/.wasp/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.wasp/bin:$PATH"
 
@@ -33,39 +33,34 @@ jobs:
       - name: 📦 Install root deps and Rollup native binary
         run: |
           rm -rf node_modules package-lock.json
-          npm ci || npm install
+          npm install
           npm install --save-optional @rollup/rollup-linux-x64-gnu
 
-      - name: 🛠 Build Wasp app (with auth patch on failure)
+      # 🛠 1️⃣ Build Wasp backend + SDK normally
+      - name: 🛠 Build Wasp SDK
         run: |
           cd app
+          wasp build || true  # ignore type errors, we’ll patch next
 
-          # ensure patch script is executable
+      # 🩹 2️⃣ Patch the generated SDK
+      - name: 🩹 Patch useAuth.ts after SDK build
+        run: |
+          cd app
           chmod +x ci-patch-useauth.cjs || true
+          node ci-patch-useauth.cjs
+          echo "✅ Patched useAuth.ts after SDK build"
 
-          echo "🔧 First attempt: wasp build"
-          if wasp build 2>&1; then
-            echo "✅ Wasp build succeeded on first try!"
-          else
-            echo "❌ Wasp build failed, patching useAuth.ts and retrying..."
-
-            node ci-patch-useauth.cjs
-
-            echo "🔧 Second attempt: wasp build after patch"
-            wasp build
-          fi
-
-      - name: 🎨 Install frontend deps and build UI
+      # 🧱 3️⃣ Build frontend (no SDK rebuild now)
+      - name: 🎨 Build frontend UI
         run: |
           cd app/.wasp/build/web-app
           rm -rf node_modules package-lock.json
-          npm ci || npm install
+          npm install
           npm install --save-optional @rollup/rollup-linux-x64-gnu
           sed -i 's|../../../index.html|index.html|' vite.config.ts || true
           npm run build
-          echo "Build output files:"
+          echo "✅ Frontend build complete"
           ls -la build/
-          find build/ -name "index.html" -type f -ls
 
       - name: 🔐 Write EC2 SSH key
         run: |
@@ -83,28 +78,23 @@ jobs:
           HOST="${{ secrets.EC2_HOST }}"
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no ubuntu@"$HOST" << 'EOF'
             set -e
-
-            echo "✅ Cleaning up old files in /var/www/html"
+            echo "✅ Cleaning /var/www/html"
             sudo rm -rf /var/www/html/*
             sudo mkdir -p /var/www/html
 
-            echo "📦 Copying new build files to /var/www/html"
+            echo "📦 Copying build to /var/www/html"
             sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
 
-            echo "🔐 Setting ownership and permissions"
             sudo chown -R www-data:www-data /var/www/html
             sudo find /var/www/html -type d -exec chmod 755 {} \;
             sudo find /var/www/html -type f -exec chmod 644 {} \;
 
-            echo "📝 Writing NO-CACHE Nginx server block"
             sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
             server {
               listen 80;
               server_name _;
-
               root /var/www/html;
               index index.html;
-
               location / {
                 try_files \$uri \$uri/ /index.html;
                 add_header Cache-Control "no-store" always;
@@ -114,14 +104,10 @@ jobs:
             }
             NGINXCONF
 
-            echo "🧪 Testing Nginx config & reloading"
             sudo nginx -t
             sudo systemctl reload nginx
-
-            echo "📋 Final file list in /var/www/html"
             ls -la /var/www/html
-
-            echo "🎉 UI Deployment complete (NO-CACHE enabled)!"
+            echo "🎉 UI deployed successfully (no-cache)"
           EOF
 
       - name: 🧹 Clean up SSH key

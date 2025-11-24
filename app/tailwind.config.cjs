@@ -1,11 +1,11 @@
+// app/tailwind.config.cjs
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
-    './public/**/*.html'
+    './public/**/*.html',
   ],
   darkMode: 'class',
   theme: {
@@ -16,8 +16,6 @@ module.exports = {
       colors: {
         current: 'currentColor',
         transparent: 'transparent',
-        // white: '#FFFFFF',
-        // black: '#1C2434',
         'black-2': '#010101',
         body: '#64748B',
         bodydark: '#AEB7C0',
@@ -26,10 +24,6 @@ module.exports = {
         primary: '#D6D5D7',
         secondary: '#80CAEE',
         stroke: '#E2E8F0',
-        // gray: '#000',
-        // graydark: '#333A48',
-        // 'gray-2': '#F7F9FC',
-        // 'gray-3': '#FAFAFA',
         whiten: '#F1F5F9',
         whiter: '#F5F7FD',
         boxdark: '#24303F',
@@ -56,7 +50,6 @@ module.exports = {
         '3xl': '2000px',
         ...defaultTheme.screens,
       },
-
       fontSize: {
         'title-xxl': ['44px', '55px'],
         'title-xl': ['36px', '45px'],
@@ -221,7 +214,8 @@ module.exports = {
         default: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
         card: '0px 1px 3px rgba(0, 0, 0, 0.12)',
         'card-2': '0px 1px 2px rgba(0, 0, 0, 0.05)',
-        switcher: '0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1)',
+        switcher:
+          '0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1)',
         'switch-1': '0px 0px 5px rgba(0, 0, 0, 0.15)',
         1: '0px 1px 3px rgba(0, 0, 0, 0.08)',
         2: '0px 1px 4px rgba(0, 0, 0, 0.12)',
@@ -251,5 +245,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
 };
