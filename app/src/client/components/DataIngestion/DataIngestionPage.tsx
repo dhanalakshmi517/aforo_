@@ -253,7 +253,7 @@ const DataIngestionPage: React.FC = () => {
   const historyData = rows.filter(row => row.status !== "Staged");
 
   return (
-    <div className="products-plan-container">
+    <div className="check-container">
       <div className="data-page">
         <DataHeader
           title="Data Ingestion"

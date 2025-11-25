@@ -298,7 +298,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   };
 
   return (
-    <div className="customers-container">
+    <div className="check-container">
       <PageHeader
         title="Purchases"
         searchTerm={searchQuery}
