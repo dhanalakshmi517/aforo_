@@ -127,15 +127,7 @@ html, body, #root, .app, .main-content {
   border-top-right-radius: var(--border-radius-sm);
 }
 
-.form-container {
-  background: pink;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 600px;
-  margin: 24px auto;
-}
+
 
 .form-group {
   margin-bottom: 1.5rem;
