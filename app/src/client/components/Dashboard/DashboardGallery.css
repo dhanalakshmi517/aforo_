@@ -17,7 +17,6 @@ html, body {
 
 /* Page container is pushed right to leave space for your left header/sidebar */
 .dg-page {
-  margin-left: 250px;        /* requested left offset */
   padding: 18px 20px 32px;
 }
 
