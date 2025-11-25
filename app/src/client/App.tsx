@@ -303,7 +303,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 bg-white" >
                         <DashboardGallery
                           onCardClick={(card) => {
                             if (card.id === 'product') {
@@ -566,7 +566,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 bg-white">
                         <Customers
                           showNewCustomerForm={showNewCustomerForm}
                           setShowNewCustomerForm={setShowNewCustomerForm}
