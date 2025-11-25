@@ -298,7 +298,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   };
 
   return (
-    <div className="subscriptions-container">
+    <div className="products-plan-container">
       <PageHeader
         title="Purchases"
         searchTerm={searchQuery}
@@ -310,8 +310,8 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         showPrimary={!isEmpty}
       />
 
-      <div className="subscriptions-table-wrapper">
-        <table className="subscriptions-table">
+       <div className="products-table-wrapper">
+        <table className="products-table">
           <thead>
             <tr>
               <th>Customer</th>

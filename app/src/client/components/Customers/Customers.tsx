@@ -276,7 +276,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const searchDisabled = customers.length === 0 && !loading && !errorMsg;
 
   return (
-    <div className="customers-container">
+    <div className="products-plan-container">
       {!showNewCustomerForm ? (
         <>
           <PageHeader
@@ -289,15 +289,15 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             searchDisabled={searchDisabled}
           />
 
-          <div className="customers-table-wrapper">
-            <table className="customers-table">
+          <div className="products-table-wrapper">
+        <table className="products-table">
               <thead>
                 <tr>
-                  <th>Company Name <InfoIcon /></th>
-                  <th>Customer <InfoIcon /></th>
-                  <th>Status <InfoIcon /></th>
-                  <th>Created On <InfoIcon /></th>
-                  <th className="actions-cell">Actions <InfoIcon /></th>
+                  <th>Company Name </th>
+                  <th>Customer </th>
+                  <th>Status </th>
+                  <th>Created On </th>
+                  <th className="actions-cell">Actions </th>
                 </tr>
               </thead>
 
