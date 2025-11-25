@@ -1010,7 +1010,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
           />
         </div>
       ) : (
-        <div className="products-plan-container">
+        <div className="customers-container">
           <PageHeader
             title="Rate Plans"
             searchTerm={searchTerm}
@@ -1026,8 +1026,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
             showPrimary={hasRows}
           />
 
-          <div className="products-table-wrapper">
-            <table className="products-table">
+          <div className="customers-table-wrapper">
+            <table className="customers-table">
               <colgroup>
                 <col className="col-rateplan-name" />
                 <col className="col-product" />

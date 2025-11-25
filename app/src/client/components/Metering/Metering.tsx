@@ -186,7 +186,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     });
 
   return (
-    <div className="products-plan-container">
+    <div className="customers-container">
      
       <PageHeader
         title="Usage Metrics"
@@ -196,8 +196,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         onPrimaryClick={() => navigate('/get-started/metering/new')}
         showPrimary={metrics.length > 0}
       />
-      <div className="products-table-wrapper">
-        <table className="products-table">
+      <div className="customers-table-wrapper">
+        <table className="customers-table">
         <thead>
           <tr>
             <th>Usage Metric</th>

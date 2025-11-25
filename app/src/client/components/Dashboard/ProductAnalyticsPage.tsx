@@ -15,13 +15,12 @@ import SolarInverterComboChart from './recharts/SolarInverterComboChart';
 
 const ProductAnalyticsPage: React.FC = () => {
   return (
-    <div className="pa-page" style={{ marginLeft: "250px" }}>
+    <div className="pa-page">
       <div className="pa-container">
         <header className="pa-header">
           <h1>Product Analytics</h1>
           <p>
-            Insights based on products data from dummyjson.com (products by
-            category).
+            Insights based on products data 
           </p>
         </header>
 
