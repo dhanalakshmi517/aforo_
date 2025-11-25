@@ -1,12 +1,13 @@
+// KongBar.tsx
 import React from "react";
-import "./KongTopbar.css";
+import "./KongBar.css"; // keep same CSS file unless you also rename it
 import aforoLogo from "../../Landing/aforo.aifinal .svg";
 
-interface KongTopbarProps {
+interface KongBarProps {
   onBack?: () => void;
 }
 
-const KongTopbar: React.FC<KongTopbarProps> = ({ onBack }) => {
+const KongBar: React.FC<KongBarProps> = ({ onBack }) => {
   return (
     <header className="kong-topbar">
       <button
@@ -134,4 +135,4 @@ const KongTopbar: React.FC<KongTopbarProps> = ({ onBack }) => {
   );
 };
 
-export default KongTopbar;
+export default KongBar;

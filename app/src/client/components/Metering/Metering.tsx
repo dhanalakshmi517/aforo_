@@ -186,7 +186,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     });
 
   return (
-    <div className="rate-plan-container">
+    <div className="products-plan-container">
      
       <PageHeader
         title="Usage Metrics"

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "./KongIntegration.css";
-import KongTopbar from "./KongTopBar";
+import KongBar from "./KongBar";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SecondaryButton from "../../componenetsss/SecondaryButton";
 import SelectableCard from "../../componenetsss/SelectableCard";
@@ -182,7 +182,7 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
 
   return (
     <div className="kong-page">
-      <KongTopbar onBack={onClose} />
+      <KongBar onBack={onClose} />
       <div className="kong-frame">
         {/* LEFT SIDEBAR */}
         <aside className="kong-sidebar">
