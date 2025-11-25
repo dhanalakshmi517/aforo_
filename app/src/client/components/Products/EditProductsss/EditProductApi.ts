@@ -1,6 +1,6 @@
 import { getAuthData } from '../../../utils/auth';
 
-export const BASE_URL = 'http://54.238.204.246:8080/api';
+export const BASE_URL = 'http://3.208.93.68:8080/api';
 
 export const buildAuthHeaders = () => {
   const auth = getAuthData();
