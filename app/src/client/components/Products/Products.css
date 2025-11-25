@@ -62,12 +62,12 @@ html, body, #root, .app, .main-content {
   z-index: 100 !important;                   /* Higher z-index to override any conflicts */
   background: var(--color-neutral-100) !important;  /* Solid background to cover rows under it */
 }
-.rate-plan-product-container {
+.products-plan-container {
   padding: 0;
   width: calc(100% - 256px - 10px);
   max-width: none;
   box-sizing: border-box;
-  margin-left: 256px;
+  margin-left: 20px;
   padding-right: 10px;
   background: #FFFFFF; /* White background color for entire page */
   box-shadow: none;
@@ -75,9 +75,9 @@ html, body, #root, .app, .main-content {
 }
 
 
-@media (max-width: 991px) { .rate-plan-product-container { margin-left: 0; width: 100%; } }
+@media (max-width: 991px) { .products-plan-container { margin-left: 0; width: 100%; } }
 @media (max-width: 768px) {
-  .rate-plan-product-container { width: 100%; margin-left: 0; }
+  .products-plan-container { width: 100%; margin-left: 0; }
 }
 
 .rateproduct-plan-container {
@@ -91,15 +91,26 @@ html, body, #root, .app, .main-content {
   box-shadow: none;
   min-height: 100vh;
 }
+.products-plan-container {
+  padding: 0;
+  width: calc(100% - 256px - 10px);
+  max-width: none;
+  box-sizing: border-box;
+  margin-left: 20px;
+  padding-right: 10px;
+  background: white !important;
+  box-shadow: none;
+  min-height: 100vh;
+}
 
 @media (max-width: 991px) { 
-  .rate-plan-container { 
+  .products-plan-container { 
     margin-left: 0; 
     width: 100%; 
   } 
 }
 @media (max-width: 768px) {
-  .rate-plan-container { 
+  .products-plan-container { 
     width: 100%; 
     margin-left: 0; 
   }
@@ -172,35 +183,9 @@ html, body, #root, .app, .main-content {
   border: 1px solid var(--color-neutral-200);
 }
 
-.products-breadcrumb {
-  margin-left: 20rem;
-  margin-bottom: 1rem;
-}
 
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--color-neutral-1000);
-  margin-left: 256px;
-  margin-bottom: 14px;
-  font-weight: 500;
-  padding: 6px 0;
-  background-color: var(--color-neutral-white);
-  width: calc(100% - 276px);
-  margin-right: 8px;
-  height: 40px;
-  border: 1px solid var(--color-neutral-200);
-}
 
-/* Responsive override: breadcrumb spans full width on small screens */
-@media (max-width: 991px) {
-  .breadcrumb {
-    margin-left: 0;
-    width: 100%;
-  }
-}
+
 
 .breadcrumb-item {
   color: var(--color-neutral-1000);
@@ -451,8 +436,26 @@ line-height: var(--line-height-body-lg);
   margin-bottom: 20px; /* constant viewport gap */
   background-color:white;
   border-radius: var(--border-radius-lg);
-  padding: 12px;
+  padding: 12px 20px 12px 12px;
   /* border: 1px solid var(--color-neutral-200); */
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+  position: relative; /* Create positioning context for sticky headers */
+}
+
+.pr-table-wrapper {
+  flex: 1 1 auto;
+  min-height: calc(100vh - 110px);
+  /* max-height removed to let wrapper size to content */
+  overflow-y: auto; /* enable scroll inside wrapper */
+  scrollbar-width: none; /* Firefox hide scrollbar */
+  /* align with sidebar width */
+  width: calc(100% - 20px);
+  margin-right: 0;
+  margin-bottom: 20px; /* constant viewport gap */
+  background-color:white;
+  border-radius: var(--border-radius-lg);
+  padding: 12px 20px 12px 12px;
+  border: 1px solid var(--color-neutral-200);
   box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
   position: relative; /* Create positioning context for sticky headers */
 }
@@ -518,6 +521,7 @@ line-height: var(--line-height-body-lg);
   background-color:white;
   border-radius: var(--border-radius-sm);
   display: table; /* Ensure proper table display */
+
 
 
   /* Product Name Container */
