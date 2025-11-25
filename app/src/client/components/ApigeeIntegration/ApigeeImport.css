@@ -642,3 +642,8 @@
   font-weight: 400;
   line-height: var(--line-height-body-sm, 18px);
 }
+.product-card-selected {
+  border: 1px solid #0262a1;
+  box-shadow: 0 0 0 1px rgba(2, 98, 161, 0.2);
+}
+
