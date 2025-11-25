@@ -461,7 +461,7 @@ line-height: var(--line-height-body-lg);
   .products-table-wrapper {
     margin-left: 0;
     width: calc(100% - 40px); /* keep 20px side gap */
-    margin-right: 20px;
+    margin-right: 0;
   }}
 /* ensure inner table stretches full wrapper */
 
