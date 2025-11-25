@@ -689,7 +689,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return (
       <ToastProvider>
         <div>
-          <div className="products-plan-container">
+          <div className="customers-container">
             <Header
               title="Products"
               searchTerm=""
@@ -704,8 +704,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               onSettingsClick={() => {}}
               onNotificationsClick={() => {}}
             />
-            <div className="products-table-wrapper">
-              <table className="products-table">
+            <div className="customers-table-wrapper">
+              <table className="customers-table">
                 <thead>
                   <tr>
                     <th>Product Name </th>

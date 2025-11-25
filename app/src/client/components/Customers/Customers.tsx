@@ -276,21 +276,21 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const searchDisabled = customers.length === 0 && !loading && !errorMsg;
 
   return (
-    <div className="products-plan-container">
+    <div className="customers-container">
       {!showNewCustomerForm ? (
         <>
           <PageHeader
             title="Customers"
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            primaryLabel="New Customer"
+            primaryLabel=" + New Customer"
             onPrimaryClick={handleNewCustomer}
             onFilterClick={() => {}}
             searchDisabled={searchDisabled}
           />
 
-          <div className="products-table-wrapper">
-        <table className="products-table">
+          <div className="customers-table-wrapper">
+        <table className="customers-table">
               <thead>
                 <tr>
                   <th>Company Name </th>
