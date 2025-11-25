@@ -62,17 +62,6 @@ html, body, #root, .app, .main-content {
   z-index: 100 !important;                   /* Higher z-index to override any conflicts */
   background: var(--color-neutral-100) !important;  /* Solid background to cover rows under it */
 }
-.products-plan-container {
-  padding: 0;
-  width: calc(100% - 256px - 10px);
-  max-width: none;
-  box-sizing: border-box;
-  margin-left: 20px;
-  padding-right: 10px;
-  background: #FFFFFF; /* White background color for entire page */
-  box-shadow: none;
-  min-height: 100vh; /* Ensure full height coverage */
-}
 
 
 @media (max-width: 991px) { .products-plan-container { margin-left: 0; width: 100%; } }
@@ -80,20 +69,10 @@ html, body, #root, .app, .main-content {
   .products-plan-container { width: 100%; margin-left: 0; }
 }
 
-.rateproduct-plan-container {
+/* Duplicate block updated as well */
+.check-product-container {
   padding: 0;
-  width: calc(100% - 256px - 10px);
-  max-width: none;
-  box-sizing: border-box;
-  margin-left: 256px;
-  padding-right: 10px;
-  background: white !important;
-  box-shadow: none;
-  min-height: 100vh;
-}
-.products-plan-container {
-  padding: 0;
-  width: calc(100% - 256px - 10px);
+  width: 100%;
   max-width: none;
   box-sizing: border-box;
   margin-left: 20px;
@@ -102,6 +81,23 @@ html, body, #root, .app, .main-content {
   box-shadow: none;
   min-height: 100vh;
 }
+
+@media (max-width: 991px) { 
+  .check-product-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}
+
+@media (max-width: 768px) {
+  .check-product-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
+}
+
+
+
 
 @media (max-width: 991px) { 
   .products-plan-container { 
@@ -215,19 +211,7 @@ html, body, #root, .app, .main-content {
   font-size: var(--font-size-sm);
 }
 
-.products-header {
-  display: flex;
-  margin-top: 16px;
-  margin-left: 250px; /* align with sidebar width so heading is visible */
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 8px;
-  position: sticky;
-  top: 0;
-  background-color: var(--color-neutral-white);
-  z-index: 2;
-}
+
 
 /* Responsive override: reset left margin on narrow screens */
 @media (max-width: 991px) {
