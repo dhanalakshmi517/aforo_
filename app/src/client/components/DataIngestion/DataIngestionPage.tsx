@@ -253,21 +253,22 @@ const DataIngestionPage: React.FC = () => {
   const historyData = rows.filter(row => row.status !== "Staged");
 
   return (
-    <div className="data-page">
-      <DataHeader
-        title="Data Ingestion"
-        primaryLabel="New"
-        onPrimaryClick={() => {}}
-        showPrimary={false}
-        showToggle
-        toggleLeftLabel="Manual"
-        toggleRightLabel="API"
-        toggleValue={mode}
-        onToggleChange={setMode}
-        onSettingsClick={() => {}}
-        onNotificationsClick={() => {}}
-      />
-      <div className="data-content">
+    <div className="products-plan-container">
+      <div className="data-page">
+        <DataHeader
+          title="Data Ingestion"
+          primaryLabel="New"
+          onPrimaryClick={() => {}}
+          showPrimary={false}
+          showToggle
+          toggleLeftLabel="Manual"
+          toggleRightLabel="API"
+          toggleValue={mode}
+          onToggleChange={setMode}
+          onSettingsClick={() => {}}
+          onNotificationsClick={() => {}}
+        />
+        <div className="data-content">
         <div className="data-tabs">
           <button
             className={`data-tab ${activeTab === 'ingestion' ? 'is-active' : ''}`}
@@ -533,6 +534,7 @@ const DataIngestionPage: React.FC = () => {
         )}
       </div>
     </div>
+  </div>
   );
 };
 
