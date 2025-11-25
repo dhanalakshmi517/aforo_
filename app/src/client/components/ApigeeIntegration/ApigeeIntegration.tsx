@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { orgIdImage, envImage, jsonImage, apigeeLogo } from '../../static/images';
 import './ApigeeIntegration.css';
-import { saveApigeeConnection } from './api'; // adjust path if needed
+import { saveApigeeConnection } from './api';
 import type { ConnectionResponse } from './api';
 
 const ApigeeIntegration: React.FC = () => {
@@ -63,6 +63,14 @@ const ApigeeIntegration: React.FC = () => {
       return;
     }
 
+    const payloadPreview = {
+      org: orgId.trim(),
+      envs: environment.trim(),
+      analyticsMode,
+      fileName: serviceAccountFile.name,
+    };
+    console.log('[ApigeeIntegration] Submitting connection payload:', payloadPreview);
+
     setIsSubmitting(true);
     try {
       const response: ConnectionResponse = await saveApigeeConnection(
@@ -72,12 +80,33 @@ const ApigeeIntegration: React.FC = () => {
         serviceAccountFile
       );
 
-      // You can log or show message if needed
-      console.log('Apigee connection response:', response);
+      console.log('[ApigeeIntegration] Backend ConnectionResponse:', response);
 
-      navigate('/apigee-success');
+      if (response.connected) {
+        // Success path
+        navigate('/apigee-success');
+      } else {
+        // Backend explicitly said "connected: false"
+        const msg =
+          response.message ||
+          'Unable to connect to Apigee. Please check credentials and try again.';
+        setErrorMessage(msg);
+        navigate('/apigee-failure');
+      }
     } catch (err: any) {
-      console.error('Error while connecting to Apigee:', err);
+      console.error('[ApigeeIntegration] Error while connecting to Apigee:', err);
+
+      // Log what backend actually sent (if available)
+      if (err?.response) {
+        console.error(
+          '[ApigeeIntegration] Error response from backend:',
+          {
+            status: err.response.status,
+            data: err.response.data,
+          }
+        );
+      }
+
       setErrorMessage(
         err?.response?.data?.message ||
           'Failed to connect to Apigee. Please verify your details and try again.'
@@ -584,4 +613,3 @@ const ApigeeIntegration: React.FC = () => {
 };
 
 export default ApigeeIntegration;
-
