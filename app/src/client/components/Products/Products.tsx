@@ -744,7 +744,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   return (
     <ToastProvider>
       <>
-        <div>
+        <div style={{ width: '100%' }}>
           {showConfirmDeleteModal && (
             <ConfirmDeleteModal
               isOpen={showConfirmDeleteModal}
@@ -813,7 +813,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
           {/* LIST TABLE (hidden when Kong integration is open) */}
           {!showCreateProduct && !isEditFormOpen && !showKongIntegration && (
-            <div className="rate-plan-container">
+            <div className="check-product-container">
               <Header
                 title="Products"
                 searchTerm={productQuery}

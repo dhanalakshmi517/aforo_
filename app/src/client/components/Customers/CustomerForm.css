@@ -278,7 +278,7 @@ html, body, #root{
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  gap: 0;
+  gap: 0; /* Remove any gap */
   flex: 1;
   width: 100%;
   max-width: 100%;
@@ -295,7 +295,6 @@ html, body, #root{
 .customer-np-form::-webkit-scrollbar-thumb:active { background-color: #878694; }
 /* Firefox */
 .customer-np-form { scrollbar-width: thin; scrollbar-color: var(--color-neutral-400) transparent; }
-
 .customer-np-form-section {
   flex: 1 1 auto;
   min-height: 0;
@@ -305,7 +304,9 @@ html, body, #root{
   max-width: 100%;
   padding-bottom: 16px;
   margin-bottom: 0;
+  padding-right: 0;
 }
+
 /* custom scrollbar */
 .customer-np-form-section::-webkit-scrollbar      { width: 6px; }
 .customer-np-form-section::-webkit-scrollbar-track{ background: transparent; }
@@ -352,7 +353,8 @@ html, body, #root{
 
 /* Footer actions on a full-bleed line */
 .customer-np-form-footer {
-  position: relative;
+  position: sticky; /* Keep sticky, not relative */
+  bottom: 0;
   background: #fff;
   margin: 0 -24px 0 -24px;
   padding: 10px 24px;
@@ -360,11 +362,10 @@ html, body, #root{
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid var(--color-neutral-300);
-  flex: 0 0 auto;
+  flex: 0 0 auto; /* IMPORTANT: Don't allow it to shrink or grow */
   min-height: 56px;
   z-index: 10;
 }
-
 .customer-np-btn-group { 
   display: flex;
   gap: 12px;
