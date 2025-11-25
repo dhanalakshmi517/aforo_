@@ -28,8 +28,8 @@ export interface BillableMetricDetails {
 // Allow override via Vite env (keeps consistent with other API helpers)
 // Use same default as other metering APIs
 const METRICS_BASE_URL = (import.meta as any).env?.VITE_METRICS_API_URL ||
-  'http://18.182.19.181:8081/api';
-const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://54.238.204.246:8080/api';
+  'http://34.238.49.158:8081/api';
+const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://3.208.93.68:8080/api';
 
 export async function getBillableMetricById(
   metricId: string | number,

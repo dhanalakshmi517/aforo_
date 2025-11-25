@@ -1,0 +1,55 @@
+/* src/components/Common/GlobalLoadingOverlay.css */
+
+.global-loader-backdrop {
+  position: fixed;
+  inset: 0; /* top: 0; right: 0; bottom: 0; left: 0 */
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(15, 23, 42, 0.3); /* dark overlay */
+  backdrop-filter: blur(4px);         /* blur everything behind */
+}
+
+/* Loader pill */
+.global-loader-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 14px 22px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.28);
+
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+/* Spinner */
+.global-loader-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+
+  border: 2px solid rgba(148, 163, 184, 0.5);  /* track */
+  border-top-color: #6366f1;                   /* accent */
+  border-right-color: #6366f1;
+
+  animation: global-loader-spin 0.7s linear infinite;
+}
+
+.global-loader-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Spin animation */
+@keyframes global-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
