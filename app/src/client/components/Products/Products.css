@@ -757,13 +757,7 @@ line-height: var(--line-height-body-lg);
 }
 
 /* Adjust table wrapper bottom spacing and flex behaviour */
-.products-table-wrapper {
-  flex: 1 1 auto;          /* let it stretch */
-  margin-top: 24px;        /* Increased gap between header and table */
-  height: auto;            /* no fixed height so bottom padding visible */
-  height: calc(100vh - 110px);
-  padding-bottom: 10px;    /* bottom gap */
-}
+/* Removed duplicate rule - using the main .products-table-wrapper definition above */
 
 /* Small screens: table uses full width */
 @media (max-width: 991px) {
