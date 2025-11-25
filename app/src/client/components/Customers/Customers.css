@@ -7,8 +7,8 @@
   width: calc(100% - 256px - 10px);
   max-width: none;
   box-sizing: border-box;
-  margin-left: 10px;
-  padding-right: 5px;
+  margin-left: 20px;
+  padding-right: 10px;
   background: #FFFFFF; /* White background color */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
@@ -34,8 +34,8 @@
   width: calc(100% - 256px - 10px);
   max-width: none;
   box-sizing: border-box;
-  margin-left: 10px;
-  padding-right: 5px;
+  margin-left: 20px;
+  padding-right: 10px;
   background: white !important;
   box-shadow: none;
   min-height: 100vh;
@@ -123,16 +123,15 @@
 
 .customers-table-wrapper {
   flex: 1 1 auto;
-  min-height: calc(100vh - 90px);
+  min-height: calc(100vh - 110px);
   overflow-y: auto;
-  overflow-x: hidden;
   scrollbar-width: none; /* Firefox hide scrollbar */
   width: calc(100% - 20px);
   margin-right: 0;
-  margin-bottom: 0px;
+  margin-bottom: 10px;
   background-color: white;
   border-radius: var(--border-radius-lg);
-  padding: 12px 4px 4px 4px;
+  padding: 12px 10px 10px 12px;
   border: 1px solid var(--color-neutral-200);
   box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07),
               0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
@@ -227,10 +226,10 @@
   scrollbar-width: none;
   width: calc(100% - 20px);
   margin-right: 0;
-  margin-bottom: 0px;
+  margin-bottom: 20px;
   background-color: white;
   border-radius: var(--border-radius-lg);
-  padding: 12px 4px 4px 4px;
+  padding: 12px 20px 20px 12px;
   border: 1px solid var(--color-neutral-200);
   box-shadow: 0 18px 54px rgba(0,0,0,0.07), 0 2.254px 43.336px rgba(0,0,0,0);
   position: relative;
