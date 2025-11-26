@@ -572,10 +572,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-<main
-  className="flex-1 bg-white pt-6 pb-2 pl-2 pr-10"
-  style={{ marginLeft: showSidebar ? '15rem' : '0' }}
->
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <Customers
                           showNewCustomerForm={showNewCustomerForm}
                           setShowNewCustomerForm={setShowNewCustomerForm}
