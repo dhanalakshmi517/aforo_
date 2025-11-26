@@ -449,11 +449,3 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   height: 400px;
   gap: 8px;
 }
-
-.customers-empty-state-text {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-neutral-700);
-  text-align: center;
-  line-height: 1.5;
-}
