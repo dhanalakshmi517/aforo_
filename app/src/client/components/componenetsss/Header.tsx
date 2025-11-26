@@ -17,6 +17,7 @@ export interface HeaderProps {
   showSearch?: boolean;
   searchDisabled?: boolean;
   filterDisabled?: boolean;
+  showIntegrations?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -33,7 +34,8 @@ const Header: React.FC<HeaderProps> = ({
   showKongButton = true,
   showSearch = true,
   searchDisabled = false,
-  filterDisabled = false
+  filterDisabled = false,
+  showIntegrations = true
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilterSelected, setIsFilterSelected] = useState(false);
@@ -143,17 +145,29 @@ const Header: React.FC<HeaderProps> = ({
         {showKongButton && (
           <button className="rp-kong-btn" aria-label="Import from Kong" onClick={onSettingsClick}>
             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
-  <path d="M6.6748 15.6748V4.4248C6.6748 4.22589 6.59579 4.03513 6.45513 3.89447C6.31448 3.75382 6.12372 3.6748 5.9248 3.6748H2.1748C1.77698 3.6748 1.39545 3.83284 1.11414 4.11414C0.83284 4.39545 0.674805 4.77698 0.674805 5.1748V14.1748C0.674805 14.5726 0.83284 14.9542 1.11414 15.2355C1.39545 15.5168 1.77698 15.6748 2.1748 15.6748H11.1748C11.5726 15.6748 11.9542 15.5168 12.2355 15.2355C12.5168 14.9542 12.6748 14.5726 12.6748 14.1748V10.4248C12.6748 10.2259 12.5958 10.0351 12.4551 9.89447C12.3145 9.75382 12.1237 9.6748 11.9248 9.6748H0.674805M10.4248 0.674805H14.9248C15.339 0.674805 15.6748 1.01059 15.6748 1.4248V5.9248C15.6748 6.33902 15.339 6.6748 14.9248 6.6748H10.4248C10.0106 6.6748 9.6748 6.33902 9.6748 5.9248V1.4248C9.6748 1.01059 10.0106 0.674805 10.4248 0.674805Z" stroke="#25303D" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+              <path d="M6.6748 15.6748V4.4248C6.6748 4.22589 6.59579 4.03513 6.45513 3.89447C6.31448 3.75382 6.12372 3.6748 5.9248 3.6748H2.1748C1.77698 3.6748 1.39545 3.83284 1.11414 4.11414C0.83284 4.39545 0.674805 4.77698 0.674805 5.1748V14.1748C0.674805 14.5726 0.83284 14.9542 1.11414 15.2355C1.39545 15.5168 1.77698 15.6748 2.1748 15.6748H11.1748C11.5726 15.6748 11.9542 15.5168 12.2355 15.2355C12.5168 14.9542 12.6748 14.5726 12.6748 14.1748V10.4248C12.6748 10.2259 12.5958 10.0351 12.4551 9.89447C12.3145 9.75382 12.1237 9.6748 11.9248 9.6748H0.674805M10.4248 0.674805H14.9248C15.339 0.674805 15.6748 1.01059 15.6748 1.4248V5.9248C15.6748 6.33902 15.339 6.6748 14.9248 6.6748H10.4248C10.0106 6.6748 9.6748 6.33902 9.6748 5.9248V1.4248C9.6748 1.01059 10.0106 0.674805 10.4248 0.674805Z" stroke="#25303D" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
         )}
-        {showPrimary && (
+        {showIntegrations && (
+          <button className="rp-integrations-btn" aria-label="Integrations" onClick={onSettingsClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <g clipPath="url(#clip0_13285_2368)">
+                <path d="M7.5 16.5V5.25C7.5 5.05109 7.42098 4.86032 7.28033 4.71967C7.13968 4.57902 6.94891 4.5 6.75 4.5H3C2.60218 4.5 2.22064 4.65803 1.93934 4.93934C1.65804 5.22064 1.5 5.60217 1.5 6V15C1.5 15.3978 1.65804 15.7794 1.93934 16.0607C2.22064 16.342 2.60218 16.5 3 16.5H12C12.3978 16.5 12.7794 16.342 13.0607 16.0607C13.342 15.7794 13.5 15.3978 13.5 15V11.25C13.5 11.0511 13.421 10.8603 13.2803 10.7197C13.1397 10.579 12.9489 10.5 12.75 10.5H1.5M11.25 1.5H15.75C16.1642 1.5 16.5 1.83579 16.5 2.25V6.75C16.5 7.16421 16.1642 7.5 15.75 7.5H11.25C10.8358 7.5 10.5 7.16421 10.5 6.75V2.25C10.5 1.83579 10.8358 1.5 11.25 1.5Z" stroke="#25303D" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_13285_2368">
+                  <rect width="18" height="18" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </button>
+        )}
           <div className="header-divider" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
               <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
             </svg>
           </div>
-        )}
 
 
 <button className="rp-settings-btn" aria-label="Settings" onClick={onSettingsClick}>

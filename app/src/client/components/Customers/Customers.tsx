@@ -290,6 +290,8 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             searchDisabled={searchDisabled}
             filterDisabled={customers.length === 0}
             showPrimary={customers.length > 0}
+            showIntegrations={customers.length > 0} // Add this line
+
           />
 
           <div className="customers-table-wrapper">

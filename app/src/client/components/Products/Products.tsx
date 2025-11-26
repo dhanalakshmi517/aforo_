@@ -813,7 +813,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 searchTerm={productQuery}
                 onSearchTermChange={setProductQuery}
                 searchDisabled={products.length === 0}
-                filterDisabled={false}
+                filterDisabled={products.length === 0}
                 showPrimary={filteredProducts.length > 0}
                 showKongButton={filteredProducts.length > 0}
                 primaryLabel="+ Create Product"
@@ -821,6 +821,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 onFilterClick={() => {}}
                 onSettingsClick={() => setShowKongIntegration(true)}
                 onNotificationsClick={() => {}}
+                  showIntegrations={products.length > 0} // Add this line
+
               />
 
               <div className="customers-table-wrapper">
@@ -999,15 +1001,15 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
-                            <img src={EmptyBox} alt="No products" style={{ width: 200, height: 200 }} />
-                            <p className="products-empty-state-text" style={{ marginTop: 8 }}>
+                            <img src={EmptyBox} alt="No products" />
+                            <p className="customers-empty-state-text" >
                               No products added yet. Click "New Product" to <br /> create your first product.
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product
                               </PrimaryButton>
-                              <TertiaryButton onClick={() => navigate('/integrations')}>
+                              <TertiaryButton onClick={() => navigate('/get-started/integrations')}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }}>
                                   <path d="M5.83333 13.8333V3.83333C5.83333 3.65652 5.7631 3.48695 5.63807 3.36193C5.51305 3.2369 5.34348 3.16667 5.16667 3.16667H1.83333C1.47971 3.16667 1.14057 3.30714 0.890524 3.55719C0.640476 3.80724 0.5 4.14638 0.5 4.5V12.5C0.5 12.8536 0.640476 13.1928 0.890524 13.4428C1.14057 13.6929 1.47971 13.8333 1.83333 13.8333H9.83333C10.187 13.8333 10.5261 13.6929 10.7761 13.4428C11.0262 13.1928 11.1667 12.8536 11.1667 12.5V9.16667C11.1667 8.98986 11.0964 8.82029 10.9714 8.69526C10.8464 8.57024 10.6768 8.5 10.5 8.5H0.5M9.16667 0.5H13.1667C13.5349 0.5 13.8333 0.798477 13.8333 1.16667V5.16667C13.8333 5.53486 13.5349 5.83333 13.1667 5.83333H9.16667C8.79848 5.83333 8.5 5.53486 8.5 5.16667V1.16667C8.5 0.798477 8.79848 0.5 9.16667 0.5Z" stroke="#2A455E" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>

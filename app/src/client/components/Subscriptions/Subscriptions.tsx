@@ -307,7 +307,10 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
         onFilterClick={() => {}}
         searchDisabled={searchDisabled}
+        filterDisabled={isEmpty}
         showPrimary={!isEmpty}
+          showIntegrations={subscriptions.length > 0} // Add this line
+
       />
 
        <div className="customers-table-wrapper">

@@ -60,12 +60,11 @@ width: calc(100% - 256px - 10px);
 
 
 .check-container {
-  padding: 0;
+  padding: 0 20px 0px 0;
   width: 100%;
   max-width: none;
   box-sizing: border-box;
   margin-left: 20px;
-  padding-right: 20px;
   background: #FFFFFF; /* White background color */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
@@ -359,6 +358,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   background-color: #FFFFFF;
 }
 
+
 /* bottom radius */
 .customers-table tr:last-child td:first-child {
   border-bottom-left-radius: var(--border-radius-sm);
@@ -416,11 +416,12 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 /* First column special spacing */
 .customers-table td.product-name-td {
   padding: 0;
-  border-bottom: 0.4px solid #E9E9EE;
+  border-bottom: 1px solid #E9E9EE;
 }
 
 .customers-table td:not(.product-name-td) {
   padding: 16px;
+  border-bottom: 1px solid #E9E9EE;
 }
 
 /* Empty state table cell */

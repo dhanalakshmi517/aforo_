@@ -166,7 +166,8 @@ line-height: var(--line-height-heading-h5); /* 140% */
 
 /* ================= Settings / Notifications ================= */
 .rp-settings-btn,
-.rp-notification-btn {
+.rp-notification-btn,
+.rp-integrations-btn {
   display: flex;
   width: 36px;
   height: 36px;
@@ -183,6 +184,7 @@ line-height: var(--line-height-heading-h5); /* 140% */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 .rp-settings-icon,
+.rp-integrations-btn svg,
 .rp-notification-btn svg { width: 16px; height: 16px; }
 
 /* ================= Primary CTA ===================== */
