@@ -187,14 +187,17 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
 
   return (
     <div className="check-container">
-     
       <PageHeader
-        title="Usage Metrics"
+        title="Billable Metrics"
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
-        primaryLabel="+ Usage Metric"
+        primaryLabel={metrics.length > 0 ? " + New Billable Metric" : ""}
         onPrimaryClick={() => navigate('/get-started/metering/new')}
+        onFilterClick={() => {}}
+        searchDisabled={metrics.length === 0}
+        filterDisabled={metrics.length === 0}
         showPrimary={metrics.length > 0}
+        showIntegrations={metrics.length > 0}
       />
       <div className="customers-table-wrapper">
         <table className="customers-table">

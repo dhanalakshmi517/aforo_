@@ -1023,8 +1023,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
               navigate('/get-started/rate-plans'); 
             }}
             onFilterClick={() => {}}
+            searchDisabled={!hasRows}
+            filterDisabled={!hasRows}
             showPrimary={hasRows}
-          />
+showIntegrations={filteredPlans.length > 0}          />
 
           <div className="customers-table-wrapper">
             <table className="customers-table">

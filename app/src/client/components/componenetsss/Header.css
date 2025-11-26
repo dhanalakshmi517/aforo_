@@ -168,6 +168,7 @@
 
 /* ================= Settings / Notifications ================= */
 .rp-settings-btn,
+.rp-integrations-btn,
 .rp-notification-btn {
   display: flex;
   width: 36px;
@@ -204,6 +205,7 @@
 }
 .rp
 .rp-settings-icon,
+.rp-integrations-btn svg,
 .rp-notification-btn svg { width: 16px; height: 16px; }
 
 /* ================= Primary CTA ===================== */
