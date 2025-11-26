@@ -212,18 +212,36 @@
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  width: 164px;
+  width: 147px;
   height: 40px;
   padding: 8px 20px;
-  border-radius: var(--border-radius-sm, 8px);
+  border-radius: var(--border-radius-sm);
   border: none;
-  background: var(--surface-primary-button-active, #025A94);
-  color: var(--text-primary-button-default, #E1F4FB);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--font-size-lg, 16px);
+  background: var(--color-primary-750);
+  color: var(--color-neutral-white);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
   font-weight: 500;
-  line-height: var(--line-height-body-lg, 24px);
+  line-height: var(--line-height-body-md);
   cursor: pointer;
 }
-.new-rate-button:hover { filter: brightness(0.97); }
-.new-rate-button svg { width: 16px; height: 16px; }
+
+
+
+.new-rate-btn:hover:not(:disabled) {
+     background: var(--color-primary-700);
+  }
+  .new-rate-btn:active:not(:disabled) {
+    background: var(--color-primary-900);
+  }
+  .new-rate-btn:focus-visible {
+    outline: none;
+    border:2px solid var(--color-primary-600);
+    background: var(--color-primary-750);
+  }
+  .new-rate-btn:disabled {
+    background: var(--color-neutral-200);
+    color: var(--color-neutral-500);
+    cursor: not-allowed;
+    box-shadow: none;
+  }

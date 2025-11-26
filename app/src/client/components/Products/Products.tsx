@@ -466,10 +466,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   // Mini ProductIcon renderer for the table
   const TableProductIcon: React.FC<{ iconData: ProductIconData }> = ({ iconData }) => {
     const tile = iconData.tileColor ?? '#CC9434';
-    
-    // Determine if this icon should be circular based on its ID
-    const isCircular = iconData.id.includes('circle') || iconData.id.includes('round') || parseInt(iconData.id) % 3 === 0;
-    const borderRadius = isCircular ? '50%' : '6px';
 
     const hexToRgba = (hex: string, opacity: number) => {
       const cleanHex = hex.startsWith('#') ? hex : `#${hex}`;
@@ -499,7 +495,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             top: 4,
             width: 34,
             height: 34,
-            borderRadius: borderRadius,
             backgroundColor: tile,
             background: tile,
           }}
@@ -516,7 +511,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: '12px', // ⬅️ smoother corners
     border: '0.6px solid #FFF',
     backgroundColor: hexToRgba(tile, 0.10),
     background: hexToRgba(tile, 0.10),
@@ -689,7 +683,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return (
       <ToastProvider>
         <div>
-          <div className="check-product-container">
+          <div className="customers-container">
             <Header
               title="Products"
               searchTerm=""
@@ -698,7 +692,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               filterDisabled={true}
               showPrimary={true}
               showKongButton={false}
-              primaryLabel="+ Create Product"
+              primaryLabel="+ New Product"
               onPrimaryClick={() => navigate('/get-started/products/new')}
               onFilterClick={() => {}}
               onSettingsClick={() => {}}
@@ -744,7 +738,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   return (
     <ToastProvider>
       <>
-        <div style={{ width: '100%' }}>
+<div style={{ width: 'calc(100% - 10px)' }}>
           {showConfirmDeleteModal && (
             <ConfirmDeleteModal
               isOpen={showConfirmDeleteModal}
@@ -829,8 +823,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 onNotificationsClick={() => {}}
               />
 
-              <div className="products-table-wrapper">
-                <table className="products-table">
+              <div className="customers-table-wrapper">
+                <table className="customers-table">
                   <thead>
                     <tr>
                       <th>Product Name </th>
@@ -1013,32 +1007,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product
                               </PrimaryButton>
-                              <TertiaryButton onClick={() => { setShowKongIntegration(true); }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none" style={{ marginRight: '8px' }}>
-                                  <path d="M0.400391 11.2438V14.1384H2.88147L5.1558 11.0371H7.84363L8.67066 10.0033L5.56931 6.48841L3.50174 8.34922H2.67472L0.400391 11.2438Z" fill="url(#paint0_linear_8506_33340)" />
-                                  <path d="M5.56931 11.8641L5.1558 12.2776L5.98282 13.5181V14.1384H9.29093L9.49769 13.5181L7.84363 11.8641H5.56931Z" fill="url(#paint1_linear_8506_33340)" />
-                                  <path d="M7.43012 3.80057L6.18958 5.86814L12.599 13.3114L12.3923 14.1384H15.0801L15.7004 11.8641L8.87742 3.80057H7.43012Z" fill="url(#paint2_linear_8506_33340)" />
-                                  <path d="M8.4639 1.733L7.63688 2.97354L7.84363 3.1803H9.29093L11.9788 6.07489L13.4261 4.83435V4.42084L13.0126 3.59381V2.76679L10.118 0.699219L8.4639 1.733Z" fill="url(#paint3_linear_8506_33340)" />
-                                  <defs>
-                                    <linearGradient id="paint0_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                                      <stop stopColor="#14A06C" />
-                                      <stop offset="1" stopColor="#2578D1" />
-                                    </linearGradient>
-                                    <linearGradient id="paint1_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                                      <stop stopColor="#14A06C" />
-                                      <stop offset="1" stopColor="#2578D1" />
-                                    </linearGradient>
-                                    <linearGradient id="paint2_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                                      <stop stopColor="#14A06C" />
-                                      <stop offset="1" stopColor="#2578D1" />
-                                    </linearGradient>
-                                    <linearGradient id="paint3_linear_8506_33340" x1="12.8058" y1="3.1803" x2="1.02066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                                      <stop stopColor="#14A06C" />
-                                      <stop offset="1" stopColor="#2578D1" />
-                                    </linearGradient>
-                                  </defs>
+                              <TertiaryButton onClick={() => navigate('/integrations')}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ marginRight: '8px' }}>
+                                  <path d="M5.83333 13.8333V3.83333C5.83333 3.65652 5.7631 3.48695 5.63807 3.36193C5.51305 3.2369 5.34348 3.16667 5.16667 3.16667H1.83333C1.47971 3.16667 1.14057 3.30714 0.890524 3.55719C0.640476 3.80724 0.5 4.14638 0.5 4.5V12.5C0.5 12.8536 0.640476 13.1928 0.890524 13.4428C1.14057 13.6929 1.47971 13.8333 1.83333 13.8333H9.83333C10.187 13.8333 10.5261 13.6929 10.7761 13.4428C11.0262 13.1928 11.1667 12.8536 11.1667 12.5V9.16667C11.1667 8.98986 11.0964 8.82029 10.9714 8.69526C10.8464 8.57024 10.6768 8.5 10.5 8.5H0.5M9.16667 0.5H13.1667C13.5349 0.5 13.8333 0.798477 13.8333 1.16667V5.16667C13.8333 5.53486 13.5349 5.83333 13.1667 5.83333H9.16667C8.79848 5.83333 8.5 5.53486 8.5 5.16667V1.16667C8.5 0.798477 8.79848 0.5 9.16667 0.5Z" stroke="#2A455E" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                Import from Kong
+                                Import Products
                               </TertiaryButton>
                             </div>
                           </div>

@@ -137,42 +137,22 @@ const Header: React.FC<HeaderProps> = ({
         )}
 
         {/* Divider AFTER the New button (right side) */}
+        
+
+        {/* Kong Button */}
+        {showKongButton && (
+          <button className="rp-kong-btn" aria-label="Import from Kong" onClick={onSettingsClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+  <path d="M6.6748 15.6748V4.4248C6.6748 4.22589 6.59579 4.03513 6.45513 3.89447C6.31448 3.75382 6.12372 3.6748 5.9248 3.6748H2.1748C1.77698 3.6748 1.39545 3.83284 1.11414 4.11414C0.83284 4.39545 0.674805 4.77698 0.674805 5.1748V14.1748C0.674805 14.5726 0.83284 14.9542 1.11414 15.2355C1.39545 15.5168 1.77698 15.6748 2.1748 15.6748H11.1748C11.5726 15.6748 11.9542 15.5168 12.2355 15.2355C12.5168 14.9542 12.6748 14.5726 12.6748 14.1748V10.4248C12.6748 10.2259 12.5958 10.0351 12.4551 9.89447C12.3145 9.75382 12.1237 9.6748 11.9248 9.6748H0.674805M10.4248 0.674805H14.9248C15.339 0.674805 15.6748 1.01059 15.6748 1.4248V5.9248C15.6748 6.33902 15.339 6.6748 14.9248 6.6748H10.4248C10.0106 6.6748 9.6748 6.33902 9.6748 5.9248V1.4248C9.6748 1.01059 10.0106 0.674805 10.4248 0.674805Z" stroke="#25303D" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+          </button>
+        )}
         {showPrimary && (
           <div className="header-divider" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
               <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
             </svg>
           </div>
-        )}
-
-        {/* Kong Button */}
-        {showKongButton && (
-          <button className="rp-kong-btn" aria-label="Import from Kong" onClick={onSettingsClick}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
-              <path d="M0.900391 11.2438V14.1384H3.38147L5.6558 11.0371H8.34363L9.17066 10.0033L6.06931 6.48841L4.00174 8.34922H3.17472L0.900391 11.2438Z" fill="url(#paint0_linear_8634_13119)"/>
-              <path d="M6.06931 11.8641L5.6558 12.2776L6.48282 13.5181V14.1384H9.79093L9.99769 13.5181L8.34363 11.8641H6.06931Z" fill="url(#paint1_linear_8634_13119)"/>
-              <path d="M7.93012 3.80057L6.68958 5.86814L13.099 13.3114L12.8923 14.1384H15.5801L16.2004 11.8641L9.37742 3.80057H7.93012Z" fill="url(#paint2_linear_8634_13119)"/>
-              <path d="M8.9639 1.733L8.13688 2.97354L8.34363 3.1803H9.79093L12.4788 6.07489L13.9261 4.83435V4.42084L13.5126 3.59381V2.76679L10.618 0.699219L8.9639 1.733Z" fill="url(#paint3_linear_8634_13119)"/>
-              <defs>
-                <linearGradient id="paint0_linear_8634_13119" x1="13.3058" y1="3.1803" x2="1.52066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#14A06C"/>
-                  <stop offset="1" stopColor="#2578D1"/>
-                </linearGradient>
-                <linearGradient id="paint1_linear_8634_13119" x1="13.3058" y1="3.1803" x2="1.52066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#14A06C"/>
-                  <stop offset="1" stopColor="#2578D1"/>
-                </linearGradient>
-                <linearGradient id="paint2_linear_8634_13119" x1="13.3058" y1="3.1803" x2="1.52066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#14A06C"/>
-                  <stop offset="1" stopColor="#2578D1"/>
-                </linearGradient>
-                <linearGradient id="paint3_linear_8634_13119" x1="13.3058" y1="3.1803" x2="1.52066" y2="13.5181" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#14A06C"/>
-                  <stop offset="1" stopColor="#2578D1"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </button>
         )}
 
 

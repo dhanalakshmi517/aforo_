@@ -187,8 +187,8 @@ width: calc(100% - 256px - 10px);
   margin-bottom: 10px;
   background-color: white;
   border-radius: var(--border-radius-lg);
+
   padding: 12px 10px 10px 12px;
-  border: 1px solid var(--color-neutral-200);
   box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07),
               0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
   position: relative;
@@ -253,7 +253,7 @@ width: calc(100% - 256px - 10px);
   position: sticky !important;
   top: 0 !important;
   z-index: 100 !important;
-  background: var(--color-neutral-100) !important;
+  background: var(--color-neutral-150) !important;
 }
 
 .customers-table th:first-child {
@@ -267,6 +267,18 @@ width: calc(100% - 256px - 10px);
   border-right: none;
 }
 
+
+.customers-empty-state-text{
+  color: var(--color-neutral-1000);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
 /* Empty state */
 .customers-table tbody tr:has(.products-empty-state) td {
   vertical-align: middle;
@@ -283,10 +295,10 @@ width: calc(100% - 256px - 10px);
   width: calc(100% - 20px);
   margin-right: 0;
   margin-bottom: 20px;
+  margin-top: 15px;
   background-color: white;
   border-radius: var(--border-radius-lg);
-  padding: 12px 20px 20px 12px;
-  border: 1px solid var(--color-neutral-200);
+  padding: 12px 20px 10px 12px;
   box-shadow: 0 18px 54px rgba(0,0,0,0.07), 0 2.254px 43.336px rgba(0,0,0,0);
   position: relative;
 }
@@ -380,13 +392,13 @@ width: calc(100% - 256px - 10px);
   width: 16.66%;
   word-wrap: break-word;
   position: sticky !important;
-  background-color: var(--color-neutral-100) !important;
+  background-color: var(--color-neutral-150) !important;
   height: auto;
   padding: 4px 16px;
   border-radius: 0;
   top: 0 !important;
   z-index: 100 !important;
-  color: var(--color-neutral-800);
+  color: var(--color-neutral-1000);
   border: none;
   border-bottom: none !important;
 
@@ -420,4 +432,28 @@ width: calc(100% - 256px - 10px);
 
 .customers-table td:not(.product-name-td) {
   padding: 16px;
+}
+
+/* Empty state table cell */
+.customers-table tbody tr:has(.customers-empty-state) td {
+  vertical-align: middle;
+  padding: 0;
+}
+
+.customers-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 400px;
+  gap: 8px;
+}
+
+.customers-empty-state-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+  text-align: center;
+  line-height: 1.5;
 }
