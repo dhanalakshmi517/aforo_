@@ -77,6 +77,7 @@ import ApigeeIntegration from './components/ApigeeIntegration/ApigeeIntegration'
 import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
 import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
+import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 
 export default function App() {
   const navigate = useNavigate();
@@ -403,6 +404,16 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ApigeeImport />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Apigee imported products list (after import flow) */}
+              <Route
+                path="/get-started/integrations/apigee/imported-products"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeImportedProducts />
                   </ProtectedRoute>
                 }
               />
