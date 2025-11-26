@@ -13,6 +13,7 @@ import RetryIconButton from '../componenetsss/RetryIconButton';
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import CustomersPlat from './customers-plat.svg';
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -283,10 +284,12 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             title="Customers"
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            primaryLabel=" + New Customer"
+            primaryLabel={customers.length > 0 ? " + New Customer" : ""}
             onPrimaryClick={handleNewCustomer}
             onFilterClick={() => {}}
             searchDisabled={searchDisabled}
+            filterDisabled={customers.length === 0}
+            showPrimary={customers.length > 0}
           />
 
           <div className="customers-table-wrapper">
@@ -305,7 +308,21 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                 {loading && <tr><td colSpan={5}>Loading...</td></tr>}
                 {errorMsg && <tr><td colSpan={5}>{errorMsg}</td></tr>}
                 {customers.length === 0 && !loading && !errorMsg && (
-                  <tr><td colSpan={5}>No customers found</td></tr>
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                      <div className="customers-empty-state">
+                        <img src={CustomersPlat} alt="No customers" />
+                        <p className="customers-empty-state-text" >
+                          No Customer created yet. Click "New Customer"<br /> to create your first Customer.
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                          <PrimaryButton onClick={() => setShowNewCustomerForm(true)}>
+                            + New Customer
+                          </PrimaryButton>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
                 )}
 
                 {filteredCustomers.map((customer) => {
