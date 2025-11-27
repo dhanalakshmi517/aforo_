@@ -262,7 +262,7 @@ const DataIngestionPage: React.FC = () => {
           showPrimary={false}
           showToggle
           toggleLeftLabel="Manual"
-          toggleRightLabel="API"
+          toggleRightLabel="Real-Time"
           toggleValue={mode}
           onToggleChange={setMode}
           onSettingsClick={() => {}}
@@ -356,9 +356,12 @@ const DataIngestionPage: React.FC = () => {
                   <tr className="data-empty-row">
                     <td colSpan={6}>
                       <div className="data-empty">
-                        <SecondaryButton onClick={openPicker}>
-                        + Select files
-                        </SecondaryButton>
+                        <p className="data-empty-hint">
+                          You didn't have any files yet. Click on add files to start Ingestion
+                        </p>
+                        <TertiaryButton onClick={openPicker}>
+                        + Upload files
+                        </TertiaryButton>
                         <OutlinedButton 
                           label="Sample File"
                           onClick={downloadSampleFile}
@@ -368,9 +371,7 @@ const DataIngestionPage: React.FC = () => {
                             </svg>
                           }
                         />
-                        <p className="data-empty-hint">
-                          You didn't have any files yet. Click on add files to start Ingestion
-                        </p>
+                        
                       </div>
                     </td>
                   </tr>

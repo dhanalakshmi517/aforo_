@@ -17,6 +17,8 @@ import { ProductIconData } from '../Products/ProductIcon';
 import axios from 'axios';
 import { getAuthHeaders } from '../../utils/auth';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import PrimaryButton from '../componenetsss/PrimaryButton';
+import RatePlansEmptyImg from './rateplans.svg';
 
 /* ---------------- Types ---------------- */
 export interface RatePlan {
@@ -1010,7 +1012,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
           />
         </div>
       ) : (
-        <div className="check-container">
+        <div className="rateplan-check-container">
           <PageHeader
             title="Rate Plans"
             searchTerm={searchTerm}
@@ -1093,22 +1095,21 @@ showIntegrations={filteredPlans.length > 0}          />
                       <div className="pp-empty-area in-table">
                         <div className="rate-empty">
                           <div className="rate-empty-illustration" aria-hidden="true">
-                            <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
-                              <g><path d="M40 30h52l8 14v80H40z" fill="#CACACA"/><path d="M32 38h56l8 14v82H40c-4.4 0-8-3.6-8-8V38z" fill="#BFBFBF"/><rect x="52" y="64" width="38" height="6" rx="3" fill="#8D8D8D"/><rect x="52" y="80" width="38" height="6" rx="3" fill="#8D8D8D"/><rect x="52" y="96" width="30" height="6" rx="3" fill="#8D8D8D"/></g>
-                              <g><circle cx="108" cy="88" r="28" fill="#EFEFEF"/><path d="M96 76l24 24M120 76l-24 24" stroke="#5E5E5E" strokeWidth="6" strokeLinecap="round"/></g>
-                            </svg>
+                            <img src={RatePlansEmptyImg} alt="No rate plans" style={{ width: '190px', height: '190px' }} />
                           </div>
-                          <p className="products-empty-state-text">
+                          <p className="customers-empty-state-text">
                             No Rate Plan created yet. Click ‘New Rate Plan’<br /> to create your First Rate Plan.
                           </p>
-                          <button className="empty-new-rate-btn" onClick={() => { 
-                            clearAllRatePlanData(); 
-                            setDraftSaved(false);
-                            setShowCreatePlan(true); 
-                            navigate('/get-started/rate-plans'); 
-                          }}>
-                            <span className="empty-btn-plus" aria-hidden="true">+</span> New Rate Plan
-                          </button>
+                          <PrimaryButton 
+                            onClick={() => { 
+                              clearAllRatePlanData(); 
+                              setDraftPlanData(null);
+                              setShowCreatePlan(true); 
+                              navigate('/get-started/rate-plans');
+                            }}
+                          >
+                             + New Rate Plan
+                          </PrimaryButton>
                         </div>
                       </div>
                     </td>
