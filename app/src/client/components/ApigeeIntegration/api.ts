@@ -188,7 +188,7 @@ export async function getImportedApigeeProducts(): Promise<
   ImportedApigeeProduct[]
 > {
   try {
-    const response = await axios.get<ImportedApigeeProduct[]>(
+    const response = await axios.get<ApigeeProduct[]>(
       `${APIGEE_BASE_URL}/products`,
       {
         headers: {
@@ -198,7 +198,17 @@ export async function getImportedApigeeProducts(): Promise<
       }
     );
 
-    return response.data;
+    // Transform the API response to match our interface
+    const transformedData: ImportedApigeeProduct[] = response.data.map((product, index) => ({
+      id: product.name || `product-${index}`, // Use name as ID
+      productName: product.display_name || product.name || 'Unknown Product',
+      productType: 'API', // Default to API for all Apigee products
+      importedOn: new Date().toISOString(), // Use current date for now
+    }));
+
+    console.log('[api.getImportedApigeeProducts] Transformed data:', transformedData);
+
+    return transformedData;
   } catch (error: any) {
     console.error('[api.getImportedApigeeProducts] Error:', error);
 
