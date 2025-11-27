@@ -353,7 +353,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" >
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <DashboardGallery
                           onCardClick={(card) => {
                             if (card.id === 'product') {
