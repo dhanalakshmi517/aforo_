@@ -821,7 +821,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 onFilterClick={() => {}}
                 onSettingsClick={() => setShowKongIntegration(true)}
                 onNotificationsClick={() => {}}
-                  showIntegrations={products.length > 0} // Add this line
 
               />
 
@@ -1001,10 +1000,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
-                            <img src={EmptyBox} alt="No products" />
-                            <p className="customers-empty-state-text" >
-                              No products added yet. Click "New Product" to <br /> create your first product.
-                            </p>
+                            <img src={EmptyBox} alt="No products" style={{ width: '190px', height: '190px' }}/>
+                            <p className="customers-empty-state-text">
+No products are available. Click ‘New Product’ to add your first <br/> product manually, or import products from Kong.                            </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product

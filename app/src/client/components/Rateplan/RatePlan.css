@@ -39,6 +39,82 @@
   box-shadow:none;
 }
 
+.rateplan-check-container {
+  padding: 0 20px 0px 0;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  background: #FFFFFF; /* White background color */
+  box-shadow: none;
+  min-height: calc(100vh-10px); /* Ensure full height */
+}
+
+@media (max-width: 991px) { 
+  .rateplan-check-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}
+
+@media (max-width: 768px) {
+  .rateplan-check-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
+}
+
+
+
+@media (max-width: 991px) { 
+  .check-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}
+
+@media (max-width: 768px) {
+  .check-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
+}
+
+
+/* =========================================================
+   Empty State
+   ========================================================= */
+.pp-empty-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.pp-empty-row td {
+  padding: 0 !important;
+  height: calc(100vh - 200px); /* Adjust based on your header height */
+  vertical-align: middle;
+  text-align: center;
+}
+
+.rate-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+
+
+.empty-btn-plus {
+  font-size: 18px;
+  font-weight: 600;
+}
+
 /* =========================================================
    Table
    ========================================================= */

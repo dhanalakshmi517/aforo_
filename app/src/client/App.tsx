@@ -77,6 +77,7 @@ import ApigeeIntegration from './components/ApigeeIntegration/ApigeeIntegration'
 import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
 import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
+import SalesSite from './components/comingsoon/SalesSite';
 
 export default function App() {
   const navigate = useNavigate();
@@ -151,6 +152,8 @@ export default function App() {
     if (path.startsWith('/get-started/dashboards')) return 'Dashboards';
     if (path.startsWith('/get-started/integrations')) return 'Integrations';
     if (path.startsWith('/get-started/settings')) return 'Settings';
+    if (path.startsWith('/get-started/invoices')) return 'Invoices';
+    if (path.startsWith('/get-started/sales-site-builder')) return 'Sales Site Builder';
     return 'Get Started';
   })();
 
@@ -218,9 +221,12 @@ export default function App() {
   const handleSidebarClick = (tab: string) => {
     if (tab === 'Settings') {
       navigate('/get-started/settings');
-    } else if (tab === 'Get Started' || tab === 'Invoices') {
-      // Don't navigate for these tabs - they're handled elsewhere or not yet implemented
-      return;
+    } else if (tab === 'Get Started') {
+      navigate('/get-started');
+    } else if (tab === 'Invoices') {
+      navigate('/get-started/invoices');
+    } else if (tab === 'Sales Site Builder') {
+      navigate('/get-started/sales-site-builder');
     } else {
       const slug = getSlugForTab(tab);
       navigate(`/get-started/${slug}`);
@@ -290,6 +296,47 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <SalesSite />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Invoices -> Coming soon */}
+              <Route
+                path="/get-started/invoices"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <SalesSite />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Sales Site Builder -> Coming soon */}
+              <Route
+                path="/get-started/sales-site-builder"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <SalesSite />
+                      </main>
                     </div>
                   </ProtectedRoute>
                 }
@@ -350,7 +397,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-3 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <RatePlans
                           ratePlans={ratePlans}
                           setRatePlans={setRatePlans}

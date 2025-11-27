@@ -138,17 +138,18 @@
 .integration-card-sync-btn {
   display: flex;
   height: 30px;
+  width: 100%;
   padding: 4px 16px;
   justify-content: center;
   align-items: center;
   gap: 4px;
-  align-self: stretch;
   border-radius: var(--border-radius-sm, 8px);
   background: var(--surface-secondary-button-active-2, #F2F9FD);
   border: none;
   color: var(--text-text-darkest, #1A2126);
   cursor: pointer;
   transition: background-color 0.2s ease;
+  box-sizing: border-box;
   
   /* body/sm/reg */
   font-family: var(--type-font-family-primary, "IBM Plex Sans");
