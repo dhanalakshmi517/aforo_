@@ -61,6 +61,7 @@ const ApigeeImport: React.FC = () => {
   };
 
   const handleLeavePage = () => {
+    setShowLeaveModal(false);
     navigate('/get-started/integrations');
   };
 
@@ -99,16 +100,15 @@ const ApigeeImport: React.FC = () => {
       const res = await importSelectedApigeeProducts(selectedNames);
       console.log('[ApigeeImport] Import selected response:', res);
 
-      // Basic UX for now – you can replace with toast/snackbar later
       const importedCount =
-        typeof res.importedCount === 'number'
-          ? res.importedCount
+        typeof (res as any)?.importedCount === 'number'
+          ? (res as any).importedCount
           : selectedNames.length;
 
-      alert(`Imported ${importedCount} Apigee product(s) successfully.`);
-
-      // You can also navigate to an "Import History" page instead if you want:
-      // navigate('/apigee-import-history');
+      // Navigate to Imported Products page (screen 4)
+      navigate('/get-started/integrations/apigee/imported-products', {
+        state: { importedCount },
+      });
     } catch (err: any) {
       console.error('[ApigeeImport] Failed to import selected products:', err);
       setError(
@@ -143,7 +143,7 @@ const ApigeeImport: React.FC = () => {
         </button>
 
         <div className="aforo-logo">
-          {/* your existing aforo SVG */}
+          {/* your existing aforo SVG / text logo here */}
         </div>
 
         <div className="separator">

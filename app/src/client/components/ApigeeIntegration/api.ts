@@ -1,16 +1,15 @@
 // src/pages/Apigee/api.ts
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
 import { getAuthHeaders, logout } from '../../utils/auth';
 
-const API_BASE_URL = 'http://44.203.209.2:8086';
-
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    Accept: 'application/json',
-  },
-  withCredentials: false,
-});
+// Real Apigee integration backend
+// All endpoints are of the form:
+//   GET    /api/integrations/apigee/products
+//   POST   /api/integrations/apigee/products/import-selected
+//   POST   /api/integrations/apigee/connections?org=...&envs=...&analyticsMode=...
+//   GET    /api/integrations/apigee/products/imported
+//   DELETE /api/integrations/apigee/products/imported/{id}
+export const APIGEE_BASE_URL = 'http://44.203.209.2:8086/api/integrations/apigee';
 
 export interface ConnectionResponse {
   connected: boolean;
@@ -22,13 +21,13 @@ export interface ConnectionResponse {
 
 export interface ApigeeProduct {
   name: string;
-  display_name: string;
-  quota: string;
-  resources: any[];
+  display_name?: string;
+  quota?: string | number | null;
 }
 
 /**
- * POST /api/integrations/apigee/connections
+ * Save / update Apigee connection details.
+ * Mirrors the curl example you provided.
  */
 export async function saveApigeeConnection(
   org: string,
@@ -37,29 +36,25 @@ export async function saveApigeeConnection(
   serviceAccountFile: File
 ): Promise<ConnectionResponse> {
   const formData = new FormData();
-  formData.append('org', org);
-  formData.append('envs', envs);
-  formData.append('analyticsMode', analyticsMode);
+  // Backend expects the file field to be named "serviceAccountFile"
   formData.append('serviceAccountFile', serviceAccountFile);
 
-  console.log('[api.saveApigeeConnection] Request payload (no file contents):', {
+  const query = new URLSearchParams({
     org,
     envs,
     analyticsMode,
-    fileName: serviceAccountFile.name,
   });
 
+  const url = `${APIGEE_BASE_URL}/connections?${query.toString()}`;
+
   try {
-    const response = await apiClient.post<ConnectionResponse>(
-      '/api/integrations/apigee/connections',
-      formData,
-      {
-        headers: {
-          Accept: 'application/json',
-          ...getAuthHeaders(), // browser sets multipart boundary
-        },
-      }
-    );
+    console.log('[api.saveApigeeConnection] POST', url);
+    const response = await axios.post<ConnectionResponse>(url, formData, {
+      headers: {
+        Accept: '*/*',
+        ...getAuthHeaders(), // adds Authorization / org headers if present
+      },
+    });
 
     console.log('[api.saveApigeeConnection] Response:', {
       status: response.status,
@@ -68,10 +63,10 @@ export async function saveApigeeConnection(
 
     return response.data;
   } catch (error: any) {
-    console.error('[api.saveApigeeConnection] Error while calling backend:', error);
+    console.error('[api.saveApigeeConnection] Error:', error);
 
     if (error?.response) {
-      console.error('[api.saveApigeeConnection] Error response details:', {
+      console.error('[api.saveApigeeConnection] Error response:', {
         status: error.response.status,
         data: error.response.data,
       });
@@ -86,13 +81,13 @@ export async function saveApigeeConnection(
 }
 
 /**
- * GET /api/integrations/apigee/products
- * Uses stored connection (org/env/file) on backend.
+ * Fetch raw products from Apigee.
+ * GET http://44.203.209.2:8086/api/integrations/apigee/products
  */
 export async function getApigeeProducts(): Promise<ApigeeProduct[]> {
   try {
-    const response = await apiClient.get<ApigeeProduct[]>(
-      '/api/integrations/apigee/products',
+    const response = await axios.get<ApigeeProduct[]>(
+      `${APIGEE_BASE_URL}/products`,
       {
         headers: {
           Accept: 'application/json',
@@ -108,7 +103,7 @@ export async function getApigeeProducts(): Promise<ApigeeProduct[]> {
 
     return response.data;
   } catch (error: any) {
-    console.error('[api.getApigeeProducts] Error while calling backend:', error);
+    console.error('[api.getApigeeProducts] Error:', error);
 
     if (error?.response?.status === 401) {
       logout();
@@ -132,7 +127,6 @@ export interface ImportSelectedApigeeProductsResponse {
   success?: boolean;
   importedCount?: number;
   message?: string;
-  // backend might return other fields; keep this flexible
   [key: string]: any;
 }
 
@@ -146,14 +140,13 @@ export async function importSelectedApigeeProducts(
   console.log('[api.importSelectedApigeeProducts] Request payload:', payload);
 
   try {
-    const response = await apiClient.post<ImportSelectedApigeeProductsResponse>(
-      '/api/integrations/apigee/products/import-selected',
+    const response = await axios.post<ImportSelectedApigeeProductsResponse>(
+      `${APIGEE_BASE_URL}/products/import-selected`,
       payload,
       {
         headers: {
           Accept: '*/*',
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
+          ...getAuthHeaders({ contentType: 'json' }),
         },
       }
     );
@@ -169,6 +162,70 @@ export async function importSelectedApigeeProducts(
       '[api.importSelectedApigeeProducts] Error while calling backend:',
       error
     );
+
+    if (error?.response?.status === 401) {
+      logout();
+    }
+
+    throw error;
+  }
+}
+
+/* ========= IMPORTED PRODUCTS SCREEN ========= */
+
+export interface ImportedApigeeProduct {
+  id: string;
+  productName: string;
+  productType: string;
+  importedOn: string; // ISO timestamp string from backend
+}
+
+/**
+ * Fetch all imported Apigee products stored in Aforo DB.
+ * GET /api/integrations/apigee/products
+ */
+export async function getImportedApigeeProducts(): Promise<
+  ImportedApigeeProduct[]
+> {
+  try {
+    const response = await axios.get<ImportedApigeeProduct[]>(
+      `${APIGEE_BASE_URL}/products`,
+      {
+        headers: {
+          Accept: '*/*',
+          ...getAuthHeaders(),
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('[api.getImportedApigeeProducts] Error:', error);
+
+    if (error?.response?.status === 401) {
+      logout();
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * Delete a single imported Apigee product by its ID.
+ * DELETE /api/integrations/apigee/products/imported/{id}
+ */
+export async function deleteImportedApigeeProduct(
+  id: string
+): Promise<void> {
+  try {
+    await axios.delete(`${APIGEE_BASE_URL}/products/imported/${id}`, {
+      headers: {
+        Accept: '*/*',
+        ...getAuthHeaders(),
+      },
+    });
+  } catch (error: any) {
+    console.error('[api.deleteImportedApigeeProduct] Error:', error);
 
     if (error?.response?.status === 401) {
       logout();
