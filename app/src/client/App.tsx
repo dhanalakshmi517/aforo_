@@ -77,6 +77,7 @@ import ApigeeIntegration from './components/ApigeeIntegration/ApigeeIntegration'
 import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
 import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
+import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 import SalesSite from './components/comingsoon/SalesSite';
 
 export default function App() {
@@ -209,12 +210,12 @@ export default function App() {
     return tab === 'Billable Metrics'
       ? 'metering'
       : tab === 'Purchases'
-      ? 'subscriptions'
-      : tab === 'Data Ingetion'
-      ? 'data-ingetion'
-      : tab === 'Integrations'
-      ? 'integrations'
-      : tab.toLowerCase().replace(/\s+/g, '-');
+        ? 'subscriptions'
+        : tab === 'Data Ingetion'
+          ? 'data-ingetion'
+          : tab === 'Integrations'
+            ? 'integrations'
+            : tab.toLowerCase().replace(/\s+/g, '-');
   };
 
   // Shared sidebar click handler
@@ -503,10 +504,10 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-<main
-  className="flex-1 bg-white py-6 pl-2 pr-10"
-  style={{ marginLeft: showSidebar ? '15rem' : '0' }}
->
+                      <main
+                        className="flex-1 bg-white py-6 pl-2 pr-10"
+                        style={{ marginLeft: showSidebar ? '15rem' : '0' }}
+                      >
                         <Products
                           showNewProductForm={showNewProductForm}
                           setShowNewProductForm={setShowNewProductForm}
@@ -600,7 +601,7 @@ export default function App() {
                         <CreateSubscription
                           onClose={() => navigate('/get-started/subscriptions')}
                           onCreateSuccess={() => navigate('/get-started/subscriptions')}
-                          onRefresh={() => {}}
+                          onRefresh={() => { }}
                         />
                       </div>
                     </div>
@@ -703,6 +704,48 @@ export default function App() {
                       }}
                       previousRoute={location.state?.from === 'settings' ? 'settings' : 'products'}
                     />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Apigee Integration Routes */}
+              <Route
+                path="/get-started/integrations/apigee"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeIntegration />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apigee-success"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeSuccess />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apigee-failure"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeFailure />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/get-started/integrations/apigee/import"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeImport />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/get-started/integrations/apigee/imported-products"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeImportedProducts />
                   </ProtectedRoute>
                 }
               />
