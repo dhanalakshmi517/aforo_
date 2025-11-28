@@ -102,23 +102,81 @@ jobs:
             sudo find /var/www/html -type d -exec chmod 755 {} \;
             sudo find /var/www/html -type f -exec chmod 644 {} \;
 
-            sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
-            server {
-              listen 80;
-              server_name _;
-              root /var/www/html;
-              index index.html;
-              location / {
-                try_files \$uri \$uri/ /index.html;
-                add_header Cache-Control "no-store" always;
-                expires off;
-                etag off;
-              }
-            }
-            NGINXCONF
+            echo "📝 Creating nginx configuration"
+            sudo tee /etc/nginx/sites-available/default > /dev/null <<'NGINXCONF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    
+    root /var/www/html;
+    index index.html index.htm;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    
+    location / {
+        try_files $uri $uri/ /index.html;
+        
+        # No-cache headers for SPA
+        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
+        add_header Pragma "no-cache" always;
+        expires off;
+        etag off;
+    }
+    
+    # Cache static assets (if any outside the build)
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 1h;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Deny access to hidden files
+    location ~ /\. {
+        deny all;
+    }
+}
+NGINXCONF
 
-            sudo nginx -t
-            sudo systemctl reload nginx
+            echo "🧪 Testing nginx configuration"
+            if ! sudo nginx -t; then
+                echo "❌ Nginx configuration test failed!"
+                sudo nginx -t 2>&1
+                exit 1
+            fi
+
+            echo "🔄 Reloading/Restarting nginx"
+            # Try reload first, if it fails, force restart
+            if sudo systemctl is-active --quiet nginx; then
+                if sudo systemctl reload nginx; then
+                    echo "✅ Nginx reloaded successfully"
+                else
+                    echo "⚠️ Reload failed, attempting restart..."
+                    sudo systemctl stop nginx || true
+                    sleep 2
+                    sudo systemctl start nginx
+                    echo "✅ Nginx restarted"
+                fi
+            else
+                echo "⚠️ Nginx not running, starting fresh..."
+                sudo systemctl stop nginx || true
+                sleep 2
+                sudo systemctl start nginx
+                echo "✅ Nginx started"
+            fi
+
+            # Verify nginx is running
+            if sudo systemctl is-active --quiet nginx; then
+                echo "✅ Nginx is running"
+                sudo systemctl status nginx --no-pager -l
+            else
+                echo "❌ Nginx failed to start!"
+                sudo journalctl -xeu nginx.service --no-pager -n 50
+                exit 1
+            fi
+
             ls -la /var/www/html
             echo "🎉 UI deployed successfully (no-cache)"
           EOF
