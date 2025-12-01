@@ -673,7 +673,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                     </div>
 
                     {/* Product Icon */}
-                    <div className="edit-np-form-group">
+                    {/* <div className="edit-np-form-group">
                       <label className="edit-np-label">Product Icon</label>
                       {selectedIcon ? (
                         <div className="np-icon-field-wrapper">
@@ -740,7 +740,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                       onClose={() => setIsIconPickerOpen(false)}
                       onSelect={(icon) => { setSelectedIcon(icon); setIsIconPickerOpen(false); }}
                       maxCombosPerIcon={24}
-                    />
+                    /> */}
 
                     <div className="edit-np-form-group">
                       <label className="edit-np-label">SKU Code</label>
@@ -805,9 +805,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                   </PrimaryButton>
                 </div>
               </div>
-            </div>
 
-            <div className="af-skel-rule af-skel-rule--bottom" />
+              <div className="af-skel-rule af-skel-rule--bottom" />
+            </div>
           </div>
         </div>
 
