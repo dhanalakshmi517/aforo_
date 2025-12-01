@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../componenetsss/Header';
+import IntegrationHeader from '../componenetsss/IntegrationHeader';
 import SecondaryButton from '../componenetsss/SecondaryButton';
 import { kongLogo, razorpayLogo, quickbooksLogo, apigeeLogo } from '../../static/images';
 import KongIntegration from '../Products/Kong Integration/KongIntegration';
@@ -9,6 +9,7 @@ import './Integrations.css';
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
   const [showKongIntegration, setShowKongIntegration] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleKongSync = () => {
     setShowKongIntegration(true);
@@ -20,11 +21,10 @@ const Integrations: React.FC = () => {
 
   return (
     <div className="integrations-page">
-      <Header
+      <IntegrationHeader
         title="Integrations"
-        showPrimary={false}
-        showKongButton={false}
-        showSearch={false}
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
         onSettingsClick={() => {
           // Handle settings click
           console.log("Settings clicked");

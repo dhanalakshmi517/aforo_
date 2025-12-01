@@ -1,16 +1,16 @@
 @import "../Variables/Variables.css";
 
 .data-header {
-  margin-top: -5px;
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
   width: 100%;
   min-height: 70px;
-  padding: 16px 20px;
+  padding: var(--scale-400, 16px) var(--scale-500, 10px) var(--scale-400, 16px) var(--scale-700, 20px);
   box-sizing: border-box;
   background: transparent;
+  margin-top: -15px;
 }
 
 .data-header h2 {
@@ -22,6 +22,8 @@
   font-weight: 700;
   line-height: var(--line-height-heading-h5);
   flex: 1 1 auto;
+  margin-left: -15px;
+  margin-top: -2px;
 }
 
 .dh-header-actions {
@@ -30,6 +32,7 @@
   gap: 12px;
   flex: 0 0 auto;
   margin-left: 8px;
+  margin-top: -2px;
 }
 
 /* ===== Segmented toggle ===== */

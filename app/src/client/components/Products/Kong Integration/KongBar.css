@@ -44,15 +44,14 @@
 .kong-topbar-center {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   min-width: 0;
-  margin-right: -40px;
+  margin-left: 40px;
 }
 
 .kong-topbar-aforo {
 
   white-space: nowrap;
-  margin-top: -63px;
 }
 
 
