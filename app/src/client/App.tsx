@@ -538,16 +538,14 @@ export default function App() {
                 }
               />
 
-              {/* Edit Product – no sidebar, full width */}
+              {/* Edit Product – full width without wrapper */}
               <Route
                 path="/get-started/products/edit/:id"
                 element={
                   <ProtectedRoute>
-                    <div className="flex min-h-screen bg-white">
-                      <Suspense fallback={RouteSpinner}>
-                        <EditProduct onClose={() => navigate('/get-started/products')} />
-                      </Suspense>
-                    </div>
+                    <Suspense fallback={RouteSpinner}>
+                      <EditProduct onClose={() => navigate('/get-started/products')} />
+                    </Suspense>
                   </ProtectedRoute>
                 }
               />
