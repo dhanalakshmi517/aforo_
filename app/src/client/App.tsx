@@ -41,6 +41,8 @@ const productsLoader = () => import('./components/Products/Products');
 const Products = React.lazy(productsLoader) as React.ComponentType<any>;
 const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
 const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
+const editProductLoader = () => import('./components/Products/EditProductsss/EditProduct');
+const EditProduct = React.lazy(editProductLoader) as React.ComponentType<any>;
 const KongProductSelect = React.lazy(
   () => import('./components/Products/Kong Integration/KongProductSelect')
 ) as React.ComponentType<any>;
@@ -525,7 +527,25 @@ export default function App() {
                   <ProtectedRoute>
                     <div className="flex min-h-screen px-6 py-6 bg-white">
                       <div className="w-full">
-                        <NewProduct onClose={() => navigate('/get-started/products')} />
+                        <Suspense fallback={RouteSpinner}>
+                          <NewProduct onClose={() => navigate('/get-started/products')} />
+                        </Suspense>
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Edit Product – no sidebar */}
+              <Route
+                path="/get-started/products/edit/:id"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen px-6 py-6 bg-white">
+                      <div className="w-full">
+                        <Suspense fallback={RouteSpinner}>
+                          <EditProduct onClose={() => navigate('/get-started/products')} />
+                        </Suspense>
                       </div>
                     </div>
                   </ProtectedRoute>

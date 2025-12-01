@@ -271,7 +271,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           };
           const apiEndpoint = endpointMap[productType as keyof typeof endpointMap] || productType.replace(/_/g,'-').toLowerCase();
 
-          let url = `http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}`;
+          let url = `http://3.208.93.68:8080//api/products/${productId}/${apiEndpoint}`;
           if (productType === ProductTypeEnum.SQLResult || productType === ProductTypeEnum.LLMToken) {
             url += '?meta=1';
           }
