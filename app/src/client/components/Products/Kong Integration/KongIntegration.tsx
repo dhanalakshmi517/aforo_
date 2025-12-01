@@ -5,6 +5,7 @@ import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SecondaryButton from "../../componenetsss/SecondaryButton";
 import SelectableCard from "../../componenetsss/SelectableCard";
 import kongHelperImage from "./kong1.svg";
+import kongImage from "./kong.svg";
 import KongProducts from "./KongProducts";
 import KongImportedProducts from "./KongImportedProducts";
 import { clearAuthData, getAuthData } from "../../../utils/auth";
@@ -23,6 +24,7 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const [kongProducts, setKongProducts] = useState<any[]>([]);
   const [connectionId, setConnectionId] = useState<string | null>(null);
+  const [tokenFieldFocused, setTokenFieldFocused] = useState(false);
 
   const isImportStep = currentStep === "import";
   const isImportedStep = currentStep === "imported";
@@ -162,19 +164,38 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
       const data = await response.json();
       console.log("API response:", data);
       
-      // Extract connection ID and fetch products
+      // Extract connection ID and store it
       const id = data.id;
       if (id) {
         setConnectionId(id);
-        await fetchKongProducts(id);
       }
       
-      // Set connected state and move to next step
+      // Set connected state (show success screen)
       setIsConnected(true);
-      setCurrentStep("import");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect to Kong");
       console.error("Kong integration error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle going to products (calls GET API)
+  const handleGoToProducts = async () => {
+    if (!connectionId) {
+      setError("Connection ID not found");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await fetchKongProducts(connectionId);
+      setCurrentStep("import");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch products");
+      console.error("Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -192,13 +213,15 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
               className={`kong-step ${
 (isStepOneCompleted && !isAssignStep) ? "kong-step--completed" : "kong-step--active"
               }`}
+              onClick={() => isConnected && setCurrentStep("connection")}
+              style={{ cursor: isConnected ? "pointer" : "default" }}
             >
               <div
                 className={`kong-step-icon ${
                   (isStepOneCompleted && !isAssignStep) ? "kong-step-icon--completed" : "kong-step-icon--active"
                 }`}
               >
-                {isImportStep ? (
+                {isConnected ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="14"
@@ -233,9 +256,9 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
                 )}
               </div>
               <div className="kong-step-content">
-                <div className="kong-step-title">Establish Connection</div>
+                <div className="kong-step-title">{isConnected ? "Manage Connection" : "Establish Connection"}</div>
                 <div className="kong-step-subtitle">
-                  {isImportStep || isAssignStep ? "Connected" : "Connecting"}
+                  {isConnected ? "Connected" : "Connecting"}
                 </div>
               </div>
             </div>
@@ -245,6 +268,8 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
               className={`kong-step ${
                 isImportStep || isAssignStep ? "kong-step--active" : "kong-step--inactive"
               }`}
+              onClick={() => isImportStep && setCurrentStep("connection")}
+              style={{ cursor: isImportStep ? "pointer" : "default" }}
             >
               <div
                 className={`kong-step-icon ${
@@ -329,6 +354,8 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
                           className={`kong-control kong-input ${token ? "is-filled" : ""}`}
                           value={token}
                           onChange={(event) => setToken(event.target.value)}
+                          onFocus={() => setTokenFieldFocused(true)}
+                          onBlur={() => setTokenFieldFocused(false)}
                           autoComplete="off"
                           spellCheck={false}
                         />
@@ -371,109 +398,84 @@ const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
                           </svg>
                         </span>
                         <span className="kong-helper-title">
-                          How to Enter Personal Access Token
+                          {tokenFieldFocused ? "Kong Integration Ready" : "How to Enter Personal Access Token"}
                         </span>
                       </div>
 
                       <div className="kong-helper-body">
                         <div className="kong-helper-image-placeholder">
-                          <img src={kongHelperImage} alt="Kong helper" className="kong-helper-img" />
+                          <img src={tokenFieldFocused ? kongImage : kongHelperImage} alt="Kong helper" className="kong-helper-img" />
                         </div>
 
-                        <ol className="kong-helper-steps">
-                          <li>Step 1: Click on the projects.</li>
-                          <li>Step 2: Copy the Id of your project.</li>
-                          <li>Step 3: Paste the Id in the given input field.</li>
-                        </ol>
+                        {tokenFieldFocused ? (
+                          <div className="kong-helper-steps">
+                             <li>Step 1: Log in to Kong Admin Portal.</li>
+                            <li>Step 2: Go to User Profile → API Tokens or Personal Access Tokens.</li>
+                            <li>Step 3: Create or copy your token from there.</li>
+                            
+                          </div>
+                        ) : (
+                          <ol className="kong-helper-steps">
+                            <li>Step 1: Log in to your Kong Admin Portal.</li>
+                            <li>Step 2: Go to Workspace Settings or Cluster Info.</li>
+                            <li>Step 3: Check the Region/Cluster field—it will show which region your workspace or APIs are running in.</li>
+                           
+                          </ol>
+                        )}
                       </div>
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : error ? (
                 <div className="kong-connected-body">
                   <div className="kong-connected-illustration">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="120"
-                      height="120"
-                      viewBox="0 0 100 101"
-                      fill="none"
-                    >
-                      <path
-                        d="M52.328 34.8594C57.2185 35.4793 59.9245 38.3443 63.1927 41.8438C67.8971 48.1692 69.2347 55.274 68.2552 63.0123C66.9312 69.8988 63.9635 74.3976 59.0601 79.3282C57.4522 80.9586 55.8778 82.6196 54.2985 84.2777C53.0124 85.6067 51.7251 86.9345 50.4364 88.261C49.521 89.2213 49.521 89.2213 48.5871 90.2009C42.2107 96.663 35.7807 100.209 26.6215 100.29C21.3505 100.3 17.2584 99.8966 12.7497 96.943C12.2115 96.6139 11.6733 96.2848 11.1188 95.9457C5.60594 92.2395 2.03696 87.0592 0.332988 80.6461C-0.363824 72.4464 -0.404017 64.8644 4.68006 58.0195C6.50491 55.8965 8.44944 53.9164 10.4216 51.9324C11.6484 50.6764 12.8751 49.4204 14.1017 48.1643C15.4445 46.8 16.7884 45.4369 18.1335 44.0749C18.7958 43.4022 19.4582 42.7295 20.1405 42.0365C20.7657 41.4107 21.3909 40.7849 22.035 40.1401C22.6001 39.5718 23.1653 39.0035 23.7476 38.4179C25.1665 37.1875 25.1665 37.1875 26.7185 37.1875C28.1142 42.2804 29.4189 47.4539 28.2706 52.7084C25.3531 57.5067 20.8712 61.0695 16.4897 64.4959C13.7808 67.1922 13.2879 70.2441 13.2347 73.9527C13.3317 78.1885 13.9842 80.4261 16.6299 83.7503C19.6341 86.1288 22.8746 87.5536 26.7185 87.6305C30.6352 86.9363 33.6501 85.5665 36.604 82.8984C37.1392 82.4151 37.6744 81.9318 38.2258 81.4339C41.103 78.7644 43.9478 76.0701 46.7502 73.3221C47.3319 72.7694 47.9137 72.2167 48.513 71.6473C52.5578 67.6675 54.9846 64.3445 55.6535 58.553C55.1914 54.3376 53.8214 51.834 51.067 48.616C49.0578 46.0931 48.973 43.4427 48.9904 40.2978C49.3511 37.8902 50.6483 36.5391 52.328 34.8594Z"
-                        fill="url(#paint0_linear_1)"
-                      />
-                      <path
-                        d="M87.2505 3.8176C87.7887 4.14672 88.3269 4.47585 88.8814 4.81494C94.3943 8.52116 97.9632 13.7014 99.6672 20.1146C100.364 28.3143 100.404 35.8962 95.3202 42.7411C93.4953 44.8641 91.5508 46.8443 89.5786 48.8283C88.3518 50.0842 87.1251 51.3402 85.8985 52.5963C84.5558 53.9606 83.2118 55.3238 81.8667 56.6857C81.2044 57.3584 80.5421 58.0311 79.8597 58.7242C79.2345 59.35 78.6093 59.9757 77.9652 60.6205C77.4001 61.1888 76.8349 61.7572 76.2527 62.3427C74.8338 63.5731 74.8338 63.5731 73.2817 63.5731C73.2347 62.9079 73.1876 62.2426 73.1392 61.5572C73.0742 60.6699 73.0091 59.7826 72.9422 58.8683C72.8791 57.995 72.8161 57.1217 72.7512 56.2219C72.5948 53.4627 72.5948 53.4627 71.7144 50.8229C71.7321 47.5866 72.1375 47.224 74.2881 44.9692C75.425 43.8951 76.5777 42.8376 77.7439 41.7953C83.9171 36.3572 83.9171 36.3572 86.8109 28.8481C86.8181 23.9418 86.4648 20.8984 83.3703 17.0104C80.3619 14.6284 77.1287 13.2056 73.2817 13.1301C66.1564 13.9647 61.8667 18.2949 57.1062 23.2078C55.8699 24.4791 54.6088 25.7212 53.3425 26.9626C48.4925 31.8115 44.687 36.076 44.5164 43.2292C45.3017 46.7779 46.1971 49.1699 48.5452 51.9809C50.8651 54.7898 51.3843 56.8047 51.1462 60.4265C50.5962 62.7977 49.3943 64.2329 47.6722 65.9013C42.7845 65.2731 40.0301 62.4728 36.8075 58.9168C31.9951 51.6808 30.5389 44.1301 32.1513 35.6355C33.6506 29.6921 36.666 25.7283 40.9367 21.4325C42.5516 19.7992 44.1382 18.1397 45.729 16.4829C47.0222 15.1539 48.3166 13.8262 49.6123 12.4996C50.2291 11.8594 50.8459 11.2193 51.4813 10.5597C60.693 1.26271 75.2337 -4.05464 87.2505 3.8176Z"
-                        fill="url(#paint1_linear_1)"
-                      />
-                      <path
-                        d="M79.0106 75.7139C81.619 76.0681 82.3493 76.8783 84.0489 78.8514C84.527 79.3826 85.0052 79.9138 85.4979 80.4611C86.474 82.1981 86.474 82.1981 86.2375 84.3474C86.0595 84.9186 85.8814 85.4898 85.698 86.0783C83.967 86.6179 83.967 86.6179 81.8177 86.8544C80.0807 85.8782 80.0807 85.8782 78.471 84.4292C77.9298 83.9631 77.3886 83.4969 76.831 83.0166C75.6094 81.422 75.6094 81.422 75.3335 79.391C75.7173 76.8184 76.4381 76.0976 79.0106 75.7139Z"
-                        fill="url(#paint2_linear_1)"
-                      />
-                      <path
-                        d="M17.6004 13.9546C20.6285 14.9869 22.5313 16.7513 24.3908 19.3384C24.7788 21.4726 24.7788 21.4726 24.3908 23.2187C22.8387 24.7707 22.8387 24.7707 20.9895 25.0466C18.3811 24.6923 17.6509 23.8822 15.9513 21.9091C15.4731 21.3779 14.995 20.8467 14.5023 20.2994C13.5262 18.5624 13.5262 18.5624 13.6656 16.4616C14.5103 14.1004 15.1343 13.8861 17.6004 13.9546Z"
-                        fill="url(#paint3_linear_1)"
-                      />
-                      <path
-                        d="M61.6619 86.1905C63.1927 86.8544 63.1927 86.8544 64.0324 88.3216C65.9483 94.5098 65.9483 94.5098 64.7448 97.719C63.9688 98.4951 63.9688 98.4951 61.9802 98.5436C61.3559 98.5276 60.7317 98.5116 60.0886 98.4951C58.1896 95.11 57.3703 92.2658 56.9844 88.4065C59.6286 86.0456 59.6286 86.0456 61.6619 86.1905Z"
-                        fill="url(#paint4_linear_1)"
-                      />
-                      <path
-                        d="M37.9226 2.12012C39.9112 2.26563 39.9112 2.26563 41.4633 3.81772C42.009 5.78208 42.009 5.78208 42.4334 8.08597C42.5814 8.84625 42.7295 9.60653 42.882 10.3899C42.926 11.0381 42.9701 11.6863 43.0154 12.3542C41.4633 13.9063 41.4633 13.9063 39.0382 14.0033C38.3019 13.9713 37.5656 13.9393 36.807 13.9063C33.9546 6.50929 33.9546 6.50929 35.2549 3.04167C36.031 2.26563 36.031 2.26563 37.9226 2.12012Z"
-                        fill="url(#paint5_linear_1)"
-                      />
-                      <path
-                        d="M88.0265 57.3647C89.9908 57.4981 89.9908 57.4981 92.2947 57.9468C93.4351 58.1569 93.4351 58.1569 94.5986 58.3712C96.563 58.9168 96.563 58.9168 98.1151 60.4689C98.3091 62.409 98.3091 62.409 98.1151 64.3492C97.6029 64.8613 97.0907 65.3735 96.563 65.9012C92.6966 65.7111 89.4896 65.4354 86.4744 62.7971C86.1348 60.8084 86.1348 60.8084 86.4744 58.9168C86.9866 58.4046 87.4987 57.8925 88.0265 57.3647Z"
-                        fill="url(#paint6_linear_1)"
-                      />
-                      <path
-                        d="M3.4371 34.8594C6.98368 35.0919 10.3962 35.3857 13.5257 37.1875C14.3502 38.6426 14.3502 38.6426 14.3017 40.2917C13.2347 42.1348 13.2347 42.1348 11.1976 43.3959C7.64026 43.1908 4.84029 42.2619 1.88501 40.2917C1.6425 38.3516 1.6425 38.3516 1.88501 36.4115C2.3972 35.8993 2.90939 35.3871 3.4371 34.8594Z"
-                        fill="url(#paint7_linear_1)"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
+                      <g filter="url(#filter0_f_13019_74808)">
+                        <path d="M88.4167 60.9583L95.5833 53.8333H95.5C99.336 49.8585 101.438 44.5239 101.344 39.0007C101.25 33.4776 98.9687 28.2174 95 24.375C91.1123 20.6258 85.9218 18.5308 80.5208 18.5308C75.1198 18.5308 69.9294 20.6258 66.0417 24.375L58.875 31.5M31.4583 58.875L24.3333 66C20.4974 69.9748 18.3955 75.3095 18.4893 80.8326C18.583 86.3558 20.8647 91.616 24.8333 95.4583C28.7211 99.2075 33.9115 101.303 39.3125 101.303C44.7135 101.303 49.9039 99.2075 53.7917 95.4583L60.9167 88.3333M43.25 18.25V30.75M18.25 43.25H30.75M76.5833 89.0833V101.583M89.0833 76.5833H101.583" stroke="url(#paint0_linear_13019_74808)" strokeWidth="12.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </g>
                       <defs>
-                        <linearGradient id="paint0_linear_1" x1="65.2953" y1="100.29" x2="24.849" y2="112.802" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint1_linear_1" x1="96.7427" y1="65.9013" x2="56.2839" y2="78.3136" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint2_linear_1" x1="85.8429" y1="86.8544" x2="79.2719" y2="88.7759" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint3_linear_1" x1="24.1547" y1="25.0466" x2="17.5633" y2="26.9891" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint4_linear_1" x1="65.1652" y1="98.5436" x2="59.8355" y2="99.6331" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint5_linear_1" x1="42.6064" y1="14.0033" x2="37.2913" y2="15.1386" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint6_linear_1" x1="97.6878" y1="65.9012" x2="91.0546" y2="68.6636" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
-                        </linearGradient>
-                        <linearGradient id="paint7_linear_1" x1="13.7187" y1="43.3959" x2="6.86783" y2="46.3851" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#0262A1" />
-                          <stop offset="1" stopColor="#00365A" />
+                        <filter id="filter0_f_13019_74808" x="-2.08301" y="-2.08447" width="124" height="124" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+                          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+                          <feGaussianBlur stdDeviation="6" result="effect1_foregroundBlur_13019_74808"/>
+                        </filter>
+                        <linearGradient id="paint0_linear_13019_74808" x1="97.6192" y1="101.583" x2="48.0694" y2="116.212" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#025A94"/>
+                          <stop offset="1" stopColor="#2A455E"/>
                         </linearGradient>
                       </defs>
                     </svg>
                   </div>
-                  <h2 className="kong-connected-title">Connected to Kong</h2>
+                  <h2 className="kong-connected-title">Connection Failed</h2>
                   <p className="kong-connected-description">
-                    Import products from Kong to aforo seamlessly. Review connections before importing to ensure the
-                    latest services reach monetization.
+                    {error}
                   </p>
-                  <PrimaryButton className="kong-connected-cta" onClick={() => setCurrentStep("import")}>
-                    Import Products
+                  <PrimaryButton className="kong-connected-cta" onClick={() => {
+                    setIsConnected(false);
+                    setError(null);
+                  }}>
+                    Try Again
+                  </PrimaryButton>
+                </div>
+              ) : (
+                <div className="kong-connected-body">
+                  <div className="kong-connected-illustration">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+  <path d="M39.3482 51.8065C41.1375 54.1987 43.4205 56.1781 46.0421 57.6104C48.6638 59.0427 51.5628 59.8945 54.5425 60.1079C57.5223 60.3213 60.5131 59.8914 63.3121 58.8473C66.1111 57.8031 68.6528 56.1693 70.7648 54.0565L83.2648 41.5565C87.0598 37.6273 89.1597 32.3647 89.1122 26.9023C89.0647 21.4399 86.8737 16.2146 83.011 12.3519C79.1484 8.48927 73.9231 6.29825 68.4607 6.25079C62.9982 6.20332 57.7357 8.3032 53.8065 12.0982L46.6398 19.2232M56.0148 43.4732C54.2254 41.081 51.9425 39.1016 49.3209 37.6692C46.6992 36.2369 43.8002 35.3852 40.8205 35.1718C37.8407 34.9584 34.8499 35.3883 32.0509 36.4324C29.2519 37.4765 26.7102 39.1104 24.5982 41.2232L12.0982 53.7232C8.3032 57.6524 6.20332 62.9149 6.25079 68.3774C6.29825 73.8398 8.48927 79.065 12.3519 82.9277C16.2146 86.7904 21.4399 88.9814 26.9023 89.0289C32.3647 89.0763 37.6273 86.9765 41.5565 83.1815L48.6815 76.0565" stroke="url(#paint0_linear_13019_74807)" stroke-width="12.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="paint0_linear_13019_74807" x1="85.1713" y1="89.0297" x2="35.9091" y2="103.588" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#025A94"/>
+      <stop offset="1" stop-color="#2A455E"/>
+    </linearGradient>
+  </defs>
+</svg>
+                  </div>
+                  <h2 className="kong-connected-title">Connected To Kong</h2>
+                  <p className="kong-connected-description">
+                    You are successfully connected to Kong. You can now import API products and manage them seamlessly.
+                  </p>
+                  <PrimaryButton className="kong-connected-cta" onClick={handleGoToProducts} disabled={isLoading}>
+                    {isLoading ? "Loading..." : "Import Products ➜ "}
                   </PrimaryButton>
                 </div>
               )}

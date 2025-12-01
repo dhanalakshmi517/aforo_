@@ -815,7 +815,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 searchDisabled={products.length === 0}
                 filterDisabled={products.length === 0}
                 showPrimary={filteredProducts.length > 0}
-                showKongButton={filteredProducts.length > 0}
+                showKongButton={products.length > 0}
                 primaryLabel="+ Create Product"
                 onPrimaryClick={() => navigate('/get-started/products/new')}
                 onFilterClick={() => {}}

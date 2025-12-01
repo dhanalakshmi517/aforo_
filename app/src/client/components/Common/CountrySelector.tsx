@@ -16,6 +16,12 @@ interface CountrySelectorProps {
   showCountryCode?: boolean;
 }
 
+// Helper function to get flag SVG path
+const getFlagSvgPath = (countryCode: string) => {
+  // Use relative path from the component
+  return new URL(`../../Flags/${countryCode.toLowerCase()}.svg`, import.meta.url).href;
+};
+
 const CountrySelector: React.FC<CountrySelectorProps> = ({
   value,
   onChange,
@@ -82,7 +88,14 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       >
         {selectedCountry ? (
           <div className="selected-option">
-            <span className={`fi fi-${selectedCountry.code.toLowerCase()}`}></span>
+            <img 
+              src={getFlagSvgPath(selectedCountry.code)} 
+              alt={selectedCountry.name}
+              className="flag-icon"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
             <span>{selectedCountry.name}</span>
           </div>
         ) : (
@@ -124,7 +137,14 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
                   role="option"
                   aria-selected={value === country.code}
                 >
-                  <span className={`fi fi-${country.code.toLowerCase()}`}></span>
+                  <img 
+                    src={getFlagSvgPath(country.code)} 
+                    alt={country.name}
+                    className="flag-icon"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                   <span className="truncate">
                     {country.name}
                     {showCountryCode && ` (${country.code})`}
@@ -185,8 +205,11 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           text-overflow: ellipsis;
           line-height: 1.5;
         }
-        .fi { 
-          margin-right: 8px; 
+        .flag-icon { 
+          width: 24px;
+          height: 16px;
+          object-fit: cover;
+          border-radius: 2px;
           flex-shrink: 0;
         }
 
