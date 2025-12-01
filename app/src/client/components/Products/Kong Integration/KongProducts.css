@@ -217,18 +217,19 @@
 }
 
 .kong-products-footer-line {
-  width: 100%;
+  width: calc(100% - 64px);
   height: 1px;
   background-color: var(--color-neutral-300, #e5e7eb);
-  margin: 16px 0;
+  margin: 0 32px;
   flex-shrink: 0;
 }
 
 .kong-products-footer-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 12px 0 0;
+  padding: 16px 32px;
   flex-shrink: 0;
+  background-color: var(--color-neutral-white, #ffffff);
 }
 
 .kong-products-import-btn {
