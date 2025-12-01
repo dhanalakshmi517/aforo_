@@ -106,8 +106,10 @@ export default function App() {
   useEffect(() => {
     setIsNewProductPage(location.pathname === '/get-started/products/new');
 
-    // Reset sidebar visibility when navigating away from edit pages
-    if (!location.pathname.includes('/edit') && !location.pathname.endsWith('/new')) {
+    // Hide sidebar for edit and new pages
+    if (location.pathname.includes('/edit') || location.pathname.endsWith('/new')) {
+      setShowSidebar(false);
+    } else {
       setShowSidebar(true);
     }
   }, [location.pathname]);
@@ -536,17 +538,15 @@ export default function App() {
                 }
               />
 
-              {/* Edit Product – no sidebar */}
+              {/* Edit Product – no sidebar, full width */}
               <Route
                 path="/get-started/products/edit/:id"
                 element={
                   <ProtectedRoute>
-                    <div className="flex min-h-screen px-6 py-6 bg-white">
-                      <div className="w-full">
-                        <Suspense fallback={RouteSpinner}>
-                          <EditProduct onClose={() => navigate('/get-started/products')} />
-                        </Suspense>
-                      </div>
+                    <div className="flex min-h-screen bg-white">
+                      <Suspense fallback={RouteSpinner}>
+                        <EditProduct onClose={() => navigate('/get-started/products')} />
+                      </Suspense>
                     </div>
                   </ProtectedRoute>
                 }

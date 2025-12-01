@@ -533,15 +533,15 @@ line-height: var(--line-height-body-lg);
     max-width: 200px;
   }
 
-  .metrics-wrapper{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-start;align-items:center;}
+  .metrics-wrapper{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;align-items:center;}
   .metric-item {
-    width: 44px;
-    height: 36px;
+    width:50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    padding: 6px 4px;
+    padding: 8px 6px;
     font-size: 10px;
     color: #1F2937;
     text-align: center;
@@ -561,12 +561,13 @@ line-height: var(--line-height-body-lg);
 }
 
 .metric-name {
-    white-space: nowrap;
+    white-space: normal;
     font-weight: 500; /* Medium weight for metric name (bottom) */
-    font-size: 8px;
+    font-size: 10px;
     color: #1F2937;
-    line-height: 1;
+    line-height: 1.2;
     text-align: center;
+    word-break: break-word;
   }
   
   .metric-uom {
@@ -878,8 +879,9 @@ line-height: var(--line-height-body-md);
 
 /* --- Metric card layout overrides --- */
 .metric-item {
-  height: auto;
-  min-height: 48px; /* allow two text rows */
+  height: 50px;
+  width: 50px;
+  min-height: 50px;
 }
 .metric-content {
   flex-direction: column;
@@ -892,8 +894,10 @@ line-height: var(--line-height-body-md);
 }
 .metric-name {
   white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  max-width: 100%;
 }
 /* Align info icon in table headers */
 .products-table th svg {

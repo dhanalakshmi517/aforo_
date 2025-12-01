@@ -494,6 +494,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             left: 6,
             top: 4,
             width: 34,
+            borderRadius:'9px',
+
             height: 34,
             backgroundColor: tile,
             background: tile,
@@ -510,6 +512,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     height: 34,
     display: 'flex',
     justifyContent: 'center',
+    borderRadius:'9px',
     alignItems: 'center',
     border: '0.6px solid #FFF',
     backgroundColor: hexToRgba(tile, 0.10),
@@ -981,8 +984,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             ) : (
                               <EditIconButton
                                 onClick={() => {
-                                  setEditingProduct(product);
-                                  setIsEditFormOpen(true);
+                                  navigate(`/get-started/products/edit/${product.productId}`);
                                 }}
                                 title="Edit product"
                               />
