@@ -126,19 +126,18 @@ const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = []
             />
           ))}
         </div>
-         <div className="kong-products-footer-line" />
-        <div className="kong-products-footer-actions">
-          <PrimaryButton
-            className="kong-products-import-btn"
-            onClick={handleImport}
-          >
-            Import Products
-          </PrimaryButton>
-        </div>
       </div>
 
       {/* Fixed footer with button */}
-      
+      <div className="kong-products-footer-line" />
+      <div className="kong-products-footer-actions">
+        <PrimaryButton
+          className="kong-products-import-btn"
+          onClick={handleImport}
+        >
+          Import Products
+        </PrimaryButton>
+      </div>
       </div>
     </div>
   );
