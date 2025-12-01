@@ -510,6 +510,19 @@ const ApigeeImport: React.FC = () => {
                         }`}
                       onClick={() => toggleSelect(product.name)}
                     >
+                      {/* CUSTOM SVG CHECKBOX */}
+                      <div className="product-checkbox">
+                        {isSelected ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20ZM15.2242 9.57574C15.4586 9.81005 15.4586 10.19 15.2242 10.4242L11.2242 14.4242C10.9899 14.6586 10.6101 14.6586 10.3757 14.4242L8.77574 12.8242C8.54142 12.5899 8.54142 12.2101 8.77574 11.9758C9.01005 11.7414 9.38995 11.7414 9.62426 11.9758L10.8 13.1514L14.3758 9.57574C14.6101 9.34142 14.9899 9.34142 15.2242 9.57574Z" fill="#2A455E" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="5" y="5" width="14" height="14" rx="2" stroke="#CBD5E1" strokeWidth="1.5" fill="none" />
+                          </svg>
+                        )}
+                      </div>
+
                       <h3 className="product-name">
                         {product.display_name || product.name}
                       </h3>
