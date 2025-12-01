@@ -16,7 +16,7 @@
   padding: 5px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 10px);
+  flex: 1;
   box-shadow: 0 8px 32px rgba(9, 30, 66, 0.08);
   overflow: hidden;
 }
@@ -30,12 +30,13 @@
   margin-bottom: 24px;
   padding: 24px 32px 0 32px;
   flex-shrink: 0;
+  order: 0;
 }
 
 /* Scrollable content container */
 
 .kong-products-content {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0 32px 32px 32px;
@@ -44,6 +45,9 @@
   background-color: transparent;
   display: flex;
   flex-direction: column;
+  order: 1;
+  min-height: 0;
+  max-height: calc(100vh - 300px);
 }
 
 .kong-products-content::-webkit-scrollbar {
@@ -227,6 +231,7 @@
   background-color: var(--color-neutral-300, #e5e7eb);
   margin: 0 32px;
   flex-shrink: 0;
+  order: 2;
 }
 
 .kong-products-footer-actions {
@@ -235,6 +240,7 @@
   padding: 16px 32px;
   flex-shrink: 0;
   background-color: var(--color-neutral-white, #ffffff);
+  order: 3;
 }
 
 .kong-products-import-btn {
