@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flag Icons CSS Library */
+@import 'flag-icons/css/flag-icons.min.css';
+
 :root {
   --primary-color: #0262A1;
   --secondary-color: #00365A;

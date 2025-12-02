@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState, Suspense } from 'react';
 import '../index.css';
+import 'flag-icons/css/flag-icons.min.css';
 import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
