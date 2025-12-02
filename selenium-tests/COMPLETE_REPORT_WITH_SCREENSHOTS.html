@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Form - Complete Test Report with Screenshots</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin: 10px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            padding: 50px;
+            background: linear-gradient(to bottom, #f8f9fa, white);
+        }
+
+        .stat-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid;
+        }
+
+        .stat-box.total {
+            border-top-color: #667eea;
+        }
+
+        .stat-box.passed {
+            border-top-color: #10b981;
+        }
+
+        .stat-box.failed {
+            border-top-color: #ef4444;
+        }
+
+        .stat-box.rate {
+            border-top-color: #f59e0b;
+        }
+
+        .stat-number {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .requirement {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 6px solid;
+        }
+
+        .requirement.passed {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #d1fae5 0%, white 15%);
+        }
+
+        .requirement.failed {
+            border-left-color: #ef4444;
+            background: linear-gradient(to right, #fee2e2 0%, white 15%);
+        }
+
+        .requirement.partial {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fef3c7 0%, white 15%);
+        }
+
+        .req-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .req-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #1f2937;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .badge {
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.passed {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge.failed {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge.partial {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .test-stats {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .req-description {
+            color: #4b5563;
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin: 20px 0;
+        }
+
+        .req-description li {
+            margin: 8px 0;
+        }
+
+        .screenshots {
+            margin-top: 30px;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .screenshot-item {
+            background: #f9fafb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .screenshot-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 3px solid #e5e7eb;
+            cursor: pointer;
+        }
+
+        .screenshot-caption {
+            padding: 15px 20px;
+            font-size: 0.95em;
+            color: #374151;
+            font-weight: 600;
+            background: white;
+        }
+
+        .issues-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 3px solid #f59e0b;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+        }
+
+        .issue {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .issue.bug {
+            border-left-color: #f59e0b;
+        }
+
+        .issue.feature {
+            border-left-color: #ef4444;
+        }
+
+        .issue-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+
+        .severity.high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .severity.medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .issue-details {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-top: 12px;
+        }
+
+        .issue-details strong {
+            color: #1f2937;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 8px 0;
+            opacity: 0.9;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .print-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Lightbox for images */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .stat-number {
+                font-size: 2.5em;
+            }
+
+            .screenshot-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content,
+            .stats-grid {
+                padding: 30px 20px;
+            }
+        }
+
+        @media print {
+
+            .print-btn,
+            .lightbox {
+                display: none;
+            }
+
+            .screenshot-item {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Organization Form Test Report</h1>
+            <p>Complete Automated Testing Results with Visual Evidence</p>
+            <p style="font-size: 1em; margin-top: 15px;">November 28, 2025 | 15:04 IST</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box total">
+                <div class="stat-label">Total Tests</div>
+                <div class="stat-number" style="color: #667eea;">24</div>
+                <div class="stat-label">Executed Successfully</div>
+            </div>
+
+            <div class="stat-box passed">
+                <div class="stat-label">Tests Passed</div>
+                <div class="stat-number" style="color: #10b981;">16</div>
+                <div class="stat-label">Working Correctly</div>
+            </div>
+
+            <div class="stat-box failed">
+                <div class="stat-label">Tests Failed</div>
+                <div class="stat-number" style="color: #ef4444;">8</div>
+                <div class="stat-label">Need Attention</div>
+            </div>
+
+            <div class="stat-box rate">
+                <div class="stat-label">Pass Rate</div>
+                <div class="stat-number" style="color: #f59e0b;">67%</div>
+                <div class="stat-label">Quality Score</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Requirement 1 -->
+            <div class="section">
+                <h2 class="section-title">✅ Requirement 1: First Name & Last Name Validation</h2>
+
+                <div class="requirement passed">
+                    <div class="req-header">
+                        <div class="req-title">Mandatory Name Fields</div>
+                        <span class="badge passed">✓ All Tests Passed</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 3 out of 3 tests passed (100%)
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>✅ Form blocks submission when First Name is empty</li>
+                            <li>✅ Form blocks submission when Last Name is empty</li>
+                            <li>✅ Form accepts valid entries for both name fields</li>
+                        </ul>
+                        <strong>Verdict:</strong> Mandatory field validation working perfectly as expected.
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req1-1-firstname-required.png" alt="First Name Required"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 1.1: Error shown when First Name is empty</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req1-2-lastname-required.png" alt="Last Name Required"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 1.2: Error shown when Last Name is empty</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req1-3-both-names-valid.png" alt="Both Names Valid"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 1.3: No errors when both names are provided</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement 2 -->
+            <div class="section">
+                <h2 class="section-title">✅ Requirement 2: Business Email Validation</h2>
+
+                <div class="requirement passed">
+                    <div class="req-header">
+                        <div class="req-title">Email Domain Filtering</div>
+                        <span class="badge passed">✓ All Tests Passed</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 4 out of 4 tests passed (100%)
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>✅ Form correctly rejects @gmail.com email addresses</li>
+                            <li>✅ Form accepts @company.com business email domains</li>
+                            <li>✅ Form accepts @business.io domain emails</li>
+                            <li>✅ Form blocks submission when email field is empty</li>
+                        </ul>
+                        <strong>Verdict:</strong> Email validation successfully blocks common free email providers and
+                        accepts business domains.
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req2-1-gmail-rejected.png" alt="Gmail Rejected"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 2.1: @gmail.com correctly rejected with error</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req2-2-company-email-accepted.png" alt="Company Email Accepted"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 2.2: Business email @company.com accepted</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req2-3-io-email-accepted.png" alt="IO Email Accepted"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 2.3: @business.io domain accepted</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req2-4-empty-email-rejected.png" alt="Empty Email Rejected"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 2.4: Empty email field blocked</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement 3 -->
+            <div class="section">
+                <h2 class="section-title">✅ Requirement 3: Business Information Fields</h2>
+
+                <div class="requirement passed">
+                    <div class="req-header">
+                        <div class="req-title">Company, Role & Employee Size Validation</div>
+                        <span class="badge passed">✓ All Tests Passed</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 4 out of 4 tests passed (100%)
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>✅ Form blocks submission when Company field is empty</li>
+                            <li>✅ Form blocks submission when Role is not selected</li>
+                            <li>✅ Form blocks submission when Employee Size not selected</li>
+                            <li>✅ Form accepts all three fields when properly filled</li>
+                        </ul>
+                        <strong>Verdict:</strong> All mandatory business information fields are properly validated.
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req3-1-company-required.png" alt="Company Required"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 3.1: Company field validation error</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req3-2-role-required.png" alt="Role Required"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 3.2: Role selection validation error</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req3-3-empsize-required.png" alt="Employee Size Required"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 3.3: Employee Size validation error</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req3-4-all-three-valid.png" alt="All Three Valid"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 3.4: All business fields accepted</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement 4 -->
+            <div class="section">
+                <h2 class="section-title">⚠️ Requirement 4: Country Flag Icons</h2>
+
+                <div class="requirement partial">
+                    <div class="req-header">
+                        <div class="req-title">Flag Icon Display</div>
+                        <span class="badge partial">⚠ Partial Pass</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 2 out of 4 tests passed (50%) - BUG FOUND
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>❌ India (IN) - Shows Argentina flag instead (INCORRECT)</li>
+                            <li>❌ United States (US) - Shows Australia flag instead (INCORRECT)</li>
+                            <li>✅ United Kingdom (GB) - Displays correct flag</li>
+                            <li>✅ No country selected - Correctly shows no flag</li>
+                        </ul>
+                        <strong>🐛 BUG FOUND:</strong> Country code to flag icon mapping is incorrect for some
+                        countries.
+                        <br><strong>Impact:</strong> Medium - Visual issue affecting international user experience
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req4-3-uk-flag.png" alt="UK Flag Correct"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 4.3: ✅ UK flag displays correctly</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req4-4-no-flag.png" alt="No Flag"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 4.4: ✅ No flag when country not selected</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement 5 -->
+            <div class="section">
+                <h2 class="section-title">✅ Requirement 5: Optional Help Field</h2>
+
+                <div class="requirement passed">
+                    <div class="req-header">
+                        <div class="req-title">"How can we help you?" Field</div>
+                        <span class="badge passed">✓ All Tests Passed</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 2 out of 2 tests passed (100%)
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>✅ Form submission works with empty help field</li>
+                            <li>✅ Form submission works with filled help field</li>
+                        </ul>
+                        <strong>Verdict:</strong> Help field correctly marked as optional and doesn't block form
+                        submission.
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req5-1-help-empty-allowed.png" alt="Help Empty Allowed"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 5.1: Empty help field doesn't block submission
+                                </div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req5-2-help-filled-works.png" alt="Help Filled Works"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 5.2: Filled help field works correctly</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement 6 -->
+            <div class="section">
+                <h2 class="section-title">❌ Requirement 6: Terms Checkbox State</h2>
+
+                <div class="requirement failed">
+                    <div class="req-header">
+                        <div class="req-title">Checkbox Disabled Until Form Valid</div>
+                        <span class="badge failed">✗ Feature Missing</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 1 out of 4 tests passed (25%) - FEATURE NOT IMPLEMENTED
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>❌ Checkbox NOT disabled on empty form (expected: disabled)</li>
+                            <li>❌ Checkbox NOT disabled with partial data (expected: disabled)</li>
+                            <li>❌ Checkbox NOT disabled with invalid email (expected: disabled)</li>
+                            <li>✅ Checkbox enabled when all fields valid</li>
+                        </ul>
+                        <strong>🚧 MISSING FEATURE:</strong> Checkbox state management is not implemented.
+                        <br><strong>Impact:</strong> High - UX issue, users can check Terms before completing required
+                        fields
+                        <br><strong>Fix Time:</strong> ~4 hours
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req6-4-checkbox-enabled-valid.png" alt="Checkbox Enabled"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">Test 6.4: ✅ Checkbox enabled with valid fields (only
+                                    passing test)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement 7 -->
+            <div class="section">
+                <h2 class="section-title">❌ Requirement 7: Submit Button Activation</h2>
+
+                <div class="requirement failed">
+                    <div class="req-header">
+                        <div class="req-title">Button Disabled Until Terms Checked</div>
+                        <span class="badge failed">✗ Feature Missing</span>
+                    </div>
+
+                    <div class="test-stats">
+                        📊 Test Results: 0 out of 3 tests passed (0%) - FEATURE NOT IMPLEMENTED
+                    </div>
+
+                    <div class="req-description">
+                        <strong>What Was Tested:</strong>
+                        <ul>
+                            <li>❌ Button NOT disabled when checkbox unchecked (expected: disabled)</li>
+                            <li>❌ Cannot verify button enable (checkbox interaction issue)</li>
+                            <li>❌ End-to-end workflow incomplete</li>
+                        </ul>
+                        <strong>🚧 MISSING FEATURE:</strong> Submit button state control is not implemented.
+                        <br><strong>Impact:</strong> High - Critical UX/compliance issue, users can submit without
+                        accepting Terms & Conditions
+                        <br><strong>Fix Time:</strong> ~2 hours
+                    </div>
+
+                    <div class="screenshots">
+                        <h3 style="margin-bottom: 15px; color: #374151;">📸 Visual Evidence:</h3>
+                        <div class="screenshot-grid">
+                            <div class="screenshot-item">
+                                <img src="screenshots/req7-3-step1-fields-filled.png" alt="Fields Filled"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">E2E Test Step 1: All required fields filled</div>
+                            </div>
+                            <div class="screenshot-item">
+                                <img src="screenshots/req7-3-step2-checkbox-state.png" alt="Checkbox State"
+                                    onclick="openLightbox(this.src)">
+                                <div class="screenshot-caption">E2E Test Step 2: Checkbox state verification</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issues Summary -->
+            <div class="section">
+                <h2 class="section-title">⚠️ Issues Found & Recommendations</h2>
+
+                <div class="issues-box">
+                    <h3 style="font-size: 1.5em; margin-bottom: 25px; color: #1f2937;">🐛 Bugs to Fix (1)</h3>
+
+                    <div class="issue bug">
+                        <div class="issue-title">
+                            BUG-001: Country Flag Mapping Incorrect
+                            <span class="severity medium">Medium</span>
+                        </div>
+                        <div class="issue-details">
+                            <strong>Issue:</strong> India (IN) shows Argentina flag, United States (US) shows Australia
+                            flag<br>
+                            <strong>Location:</strong> CountrySelector component or flag mapping logic<br>
+                            <strong>Impact:</strong> Poor user experience for international users<br>
+                            <strong>Fix Time:</strong> ~2 hours<br>
+                            <strong>Action:</strong> Review and correct country code to flag icon class mapping
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 1.5em; margin: 40px 0 25px 0; color: #1f2937;">🚧 Missing Features (2)</h3>
+
+                    <div class="issue feature">
+                        <div class="issue-title">
+                            FEAT-001: Terms Checkbox State Management
+                            <span class="severity high">High Priority</span>
+                        </div>
+                        <div class="issue-details">
+                            <strong>Required:</strong> Disable checkbox until all required fields are valid<br>
+                            <strong>Location:</strong> Organization.tsx form component<br>
+                            <strong>Impact:</strong> UX issue - users can check Terms prematurely<br>
+                            <strong>Fix Time:</strong> ~4 hours<br>
+                            <strong>Action:</strong> Implement form validation state monitoring to control checkbox
+                        </div>
+                    </div>
+
+                    <div class="issue feature">
+                        <div class="issue-title">
+                            FEAT-002: Submit Button State Control
+                            <span class="severity high">High Priority</span>
+                        </div>
+                        <div class="issue-details">
+                            <strong>Required:</strong> Disable submit button until Terms checkbox is checked<br>
+                            <strong>Location:</strong> Organization.tsx form component<br>
+                            <strong>Impact:</strong> Critical - users can bypass Terms & Conditions acceptance<br>
+                            <strong>Fix Time:</strong> ~2 hours<br>
+                            <strong>Action:</strong> Add button disabled state based on checkbox state
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top: 40px; padding: 30px; background: white; border-radius: 12px; border-left: 5px solid #667eea;">
+                        <h4 style="font-size: 1.3em; margin-bottom: 15px; color: #1f2937;">💡 Summary & Recommendations
+                        </h4>
+                        <div style="line-height: 2;">
+                            <strong>Total Estimated Fix Time:</strong> ~8 hours<br>
+                            <strong>Priority Level:</strong> HIGH - Address before production release<br>
+                            <strong>Recommendation:</strong> Implement missing features (FEAT-001 & FEAT-002) to ensure
+                            proper Terms & Conditions acceptance flow and legal compliance.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 50px 0;">
+                <button class="print-btn" onclick="window.print()">🖨️ Print or Save as PDF</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3 style="font-size: 1.5em; margin-bottom: 20px;">Test Environment Details</h3>
+            <p><strong>Browser:</strong> Google Chrome 143.0.7499.40</p>
+            <p><strong>Operating System:</strong> macOS</p>
+            <p><strong>Node.js Version:</strong> v22.12.0</p>
+            <p><strong>Selenium WebDriver:</strong> 4.38.0</p>
+            <p><strong>ChromeDriver:</strong> 142.0.3</p>
+            <p><strong>Test Framework:</strong> Jest 30.2.0</p>
+            <p><strong>Application URL:</strong> http://localhost:3000/contact-sales</p>
+            <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.7;">
+                Report Generated: November 28, 2025 at 15:04 IST
+            </p>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Screenshot">
+    </div>
+
+    <script>
+        function openLightbox(src) {
+            document.getElementById('lightbox').classList.add('active');
+            document.getElementById('lightbox-img').src = src;
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        // Close lightbox with Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import 'flag-icons/css/flag-icons.min.css';
 
 interface Country {
   code: string;
@@ -44,15 +45,28 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
 
   const filteredCountries = searchTerm
     ? countries.filter(country => {
-        const s = searchTerm.toLowerCase();
-        const name = country.name.toLowerCase();
-        const code = country.code.toLowerCase();
-        if (name.startsWith(s)) return true;
-        if (code.startsWith(s)) return true;
-        if (name.includes(s)) return true;
-        if (code.includes(s)) return true;
-        return country.dialCode.includes(searchTerm);
-      })
+      const s = searchTerm.toLowerCase();
+      const name = country.name.toLowerCase();
+      const code = country.code.toLowerCase();
+      if (name.startsWith(s)) return true;
+      if (code.startsWith(s)) return true;
+      if (name.includes(s)) return true;
+      if (code.includes(s)) return true;
+      return country.dialCode.includes(searchTerm);
+    }).sort((a, b) => {
+      const s = searchTerm.toLowerCase();
+      // Exact code match gets top priority (e.g. "US", "IN")
+      if (a.code.toLowerCase() === s && b.code.toLowerCase() !== s) return -1;
+      if (b.code.toLowerCase() === s && a.code.toLowerCase() !== s) return 1;
+
+      // Starts with name gets second priority
+      const aStarts = a.name.toLowerCase().startsWith(s);
+      const bStarts = b.name.toLowerCase().startsWith(s);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+
+      return 0;
+    })
     : countries;
 
   const handleSelect = (countryCode: string) => {
@@ -92,11 +106,11 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         {/* Custom SVG chevron */}
         {isOpen ? (
           <svg className="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M15 12.5L10 7.5L5 12.5" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 12.5L10 7.5L5 12.5" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : (
           <svg className="chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none" aria-hidden="true">
-            <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </div>
