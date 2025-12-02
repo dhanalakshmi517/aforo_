@@ -18,7 +18,7 @@ import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
 
 /* ---------- helpers copied from Customers list ---------- */
-const FILE_HOST = 'http://43.206.110.213:8081';
+const FILE_HOST = 'http://44.201.19.187:8081/';
 
 const absolutizeUpload = (path: string) => {
   const clean = path.replace(/\\/g, '/').trim();
@@ -83,6 +83,7 @@ const EditCustomer: React.FC = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Step data
   const [customerName, setCustomerName] = useState('');
@@ -168,7 +169,10 @@ const EditCustomer: React.FC = () => {
         });
       })
       .catch((err: unknown) => console.error('Failed to fetch customer', err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setIsInitializing(false);
+      });
   }, [id]);
 
   // revoke blob on unmount
@@ -432,7 +436,7 @@ const EditCustomer: React.FC = () => {
                   required
                 />
               </div>
-               <div className="edit-np-form-group">
+               {/* <div className="edit-np-form-group">
                 <label className="edit-np-label">Company Logo</label>
                 <LogoUploader
                   logo={companyLogo}
@@ -440,7 +444,7 @@ const EditCustomer: React.FC = () => {
                   onChange={handleLogoChange}
                   onRemove={handleLogoRemove}
                 />
-              </div>
+              </div> */}
               <div className="edit-np-form-group">
                 <label className="edit-np-label">Customer Name</label>
                 <InputField
@@ -524,8 +528,6 @@ const EditCustomer: React.FC = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-
   return (
     <>
       <TopBar
@@ -559,11 +561,7 @@ const EditCustomer: React.FC = () => {
             <div className="edit-np-content">
               <div className="edit-np-form">
                 {renderStepContent()}
-              </div>
-            </div>
-
-              {/* Footer Buttons */}
-              <div className="edit-np-form-footer">
+                 <div className="edit-np-form-footer">
                 <div className="edit-np-btn-group edit-np-btn-group--back">
                   {activeTab !== 'details' && (
                     <button
@@ -586,6 +584,11 @@ const EditCustomer: React.FC = () => {
                   </button>
                 </div>
               </div>
+              </div>
+
+              {/* Footer Buttons */}
+             
+            </div>
           </div>
 
           <div className="af-skel-rule af-skel-rule--bottom" />
