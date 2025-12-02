@@ -560,6 +560,7 @@ const EditCustomer: React.FC = () => {
               <div className="edit-np-form">
                 {renderStepContent()}
               </div>
+            </div>
 
               {/* Footer Buttons */}
               <div className="edit-np-form-footer">
@@ -585,7 +586,6 @@ const EditCustomer: React.FC = () => {
                   </button>
                 </div>
               </div>
-            </div>
           </div>
 
           <div className="af-skel-rule af-skel-rule--bottom" />
