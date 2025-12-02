@@ -570,9 +570,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             </aside>
 
             <div className="edit-np-content">
-              <div className="edit-np-form">{renderStepContent()}</div>
-
-              <div className="edit-np-form-footer">
+              <div className="edit-np-form">{renderStepContent()}
+                 <div className="edit-np-form-footer">
                 <div className="edit-np-btn-group edit-np-btn-group--back">
                   {currentStep > 0 && (
                     <SecondaryButton
@@ -595,6 +594,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                   </PrimaryButton>
                 </div>
               </div>
+              </div>
+
+             
             </div>
           </div>
         </div>
