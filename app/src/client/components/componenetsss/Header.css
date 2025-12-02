@@ -54,7 +54,6 @@
 .rp-header-search:active { background:#FFF; border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; }
 .rp-header-search.has-value { width:180px; height:36px; background:#FFF; border-color:#D5D4DF; }
 .rp-header-search.has-value:hover { background:#FFF; border-color:#D5D4DF; }
-.rp-header-search.has-value.is-active { border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; background:#FFF; }
 .rp-header-search.is-disabled { width:180px; height:36px; background:var(--color-neutral-250); border-color:#D5D4DF; cursor:not-allowed; box-shadow:none; }
 .rp-header-search.is-disabled:hover,
 .rp-header-search.is-disabled.is-active,
