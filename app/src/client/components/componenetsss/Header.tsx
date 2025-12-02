@@ -141,14 +141,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Divider AFTER the New button (right side) */}
         
 
-        {/* Kong Button */}
-        {showKongButton && (
-          <button className="rp-kong-btn" aria-label="Import from Kong" onClick={onSettingsClick}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
-              <path d="M6.6748 15.6748V4.4248C6.6748 4.22589 6.59579 4.03513 6.45513 3.89447C6.31448 3.75382 6.12372 3.6748 5.9248 3.6748H2.1748C1.77698 3.6748 1.39545 3.83284 1.11414 4.11414C0.83284 4.39545 0.674805 4.77698 0.674805 5.1748V14.1748C0.674805 14.5726 0.83284 14.9542 1.11414 15.2355C1.39545 15.5168 1.77698 15.6748 2.1748 15.6748H11.1748C11.5726 15.6748 11.9542 15.5168 12.2355 15.2355C12.5168 14.9542 12.6748 14.5726 12.6748 14.1748V10.4248C12.6748 10.2259 12.5958 10.0351 12.4551 9.89447C12.3145 9.75382 12.1237 9.6748 11.9248 9.6748H0.674805M10.4248 0.674805H14.9248C15.339 0.674805 15.6748 1.01059 15.6748 1.4248V5.9248C15.6748 6.33902 15.339 6.6748 14.9248 6.6748H10.4248C10.0106 6.6748 9.6748 6.33902 9.6748 5.9248V1.4248C9.6748 1.01059 10.0106 0.674805 10.4248 0.674805Z" stroke="#25303D" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        )}
+       
         {showIntegrations && (
           <button className="rp-integrations-btn" aria-label="Integrations" onClick={onSettingsClick}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">

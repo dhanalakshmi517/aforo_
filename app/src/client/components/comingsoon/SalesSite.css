@@ -1,0 +1,186 @@
+.sales-coming-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background:white;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  color: black;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+}
+
+.sales-coming-card {
+  position: relative;
+  max-width: 520px;
+  width: 100%;
+    padding: 28px 24px 24px;
+  
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.9);
+  margin-left: -20px;
+  
+  overflow: hidden;
+}
+
+/* Glow blob */
+.sales-coming-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 20% 0%, rgba(59, 130, 246, 0.16), transparent 55%),
+;
+  opacity: 0.8;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Top pill */
+.sales-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px; 
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: white;
+  background: linear-gradient(
+    120deg,
+    rgba(37, 99, 235, 0.22),
+    rgba(129, 140, 248, 0.22),
+    rgba(236, 72, 153, 0.22)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  margin-bottom: 18px;
+  backdrop-filter: blur(10px);
+}
+
+.sales-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #025A94;
+  box-shadow: 0 0 12px #025A94;
+}
+
+/* Title with fake typing cursor */
+.sales-title {
+  position: relative;
+  font-size: 30px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+  color: #f9fafb;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sales-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: #f97316;
+  border-radius: 999px;
+  animation: blinkCursor 1s steps(1, start) infinite;
+}
+
+@keyframes blinkCursor {
+  0%, 45% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Subtitle + animated dots */
+.sales-subtitle {
+  position: relative;
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: white;
+}
+
+.sales-dots {
+  display: inline-flex;
+  margin-left: 4px;
+}
+
+.sales-dots span {
+  display: inline-block;
+  font-weight: 700;
+  animation: dotPulse 1.4s infinite ease-in-out;
+}
+
+.sales-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.sales-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dotPulse {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* Progress bar */
+.sales-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.sales-progress-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: linear-gradient(90deg, orange, orange, orange);
+  background-size: 200% 100%;
+  animation: loadingFlow 2.2s linear infinite;
+}
+
+@keyframes loadingFlow {
+  0% {
+    transform: scaleX(0.1);
+    background-position: 0% 50%;
+  }
+  50% {
+    transform: scaleX(0.85);
+    background-position: 100% 50%;
+  }
+  100% {
+    transform: scaleX(0.25);
+    background-position: 0% 50%;
+  }
+}
+
+/* Footnote */
+.sales-footnote {
+  position: relative;
+  margin: 0;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: white;
+  opacity: 0.85;
+}

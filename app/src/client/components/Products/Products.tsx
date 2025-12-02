@@ -494,6 +494,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             left: 6,
             top: 4,
             width: 34,
+            borderRadius:'9px',
+
             height: 34,
             backgroundColor: tile,
             background: tile,
@@ -510,6 +512,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     height: 34,
     display: 'flex',
     justifyContent: 'center',
+    borderRadius:'9px',
     alignItems: 'center',
     border: '0.6px solid #FFF',
     backgroundColor: hexToRgba(tile, 0.10),
@@ -815,13 +818,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 searchDisabled={products.length === 0}
                 filterDisabled={products.length === 0}
                 showPrimary={filteredProducts.length > 0}
-                showKongButton={filteredProducts.length > 0}
+                showKongButton={products.length > 0}
                 primaryLabel="+ Create Product"
                 onPrimaryClick={() => navigate('/get-started/products/new')}
                 onFilterClick={() => {}}
                 onSettingsClick={() => setShowKongIntegration(true)}
                 onNotificationsClick={() => {}}
-                  showIntegrations={products.length > 0} // Add this line
 
               />
 
@@ -982,8 +984,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             ) : (
                               <EditIconButton
                                 onClick={() => {
-                                  setEditingProduct(product);
-                                  setIsEditFormOpen(true);
+                                  navigate(`/get-started/products/edit/${product.productId}`);
                                 }}
                                 title="Edit product"
                               />
@@ -1001,10 +1002,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
-                            <img src={EmptyBox} alt="No products" />
-                            <p className="customers-empty-state-text" >
-                              No products added yet. Click "New Product" to <br /> create your first product.
-                            </p>
+                            <img src={EmptyBox} alt="No products" style={{ width: '190px', height: '190px' }}/>
+                            <p className="customers-empty-state-text">
+No products are available. Click ‘New Product’ to add your first <br/> product manually, or import products from Kong.                            </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product

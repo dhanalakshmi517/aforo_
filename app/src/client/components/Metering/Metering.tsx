@@ -250,7 +250,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
             <tr>
               <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                 <div className="metrics-empty-state">
-                  <img src={UsageEmptyImg} alt="No metrics" style={{ width: 200, height: 200 }} />
+                  <img src={UsageEmptyImg} alt="No metrics" style={{ width: 190, height: 190 }} />
                   <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
                   <div className="new-metric-button-wrapper">
                     <PrimaryButton 

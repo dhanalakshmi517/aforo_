@@ -9,7 +9,7 @@ const ApigeeIntegration: React.FC = () => {
   const navigate = useNavigate();
 
   const [activeField, setActiveField] =
-    useState<'orgId' | 'environment' | 'json' | null>(null);
+    useState<'orgId' | 'environment' | 'json' | 'analytics' | null>(null);
 
   const [orgId, setOrgId] = useState('');
   const [environment, setEnvironment] = useState('');
@@ -109,7 +109,7 @@ const ApigeeIntegration: React.FC = () => {
 
       setErrorMessage(
         err?.response?.data?.message ||
-          'Failed to connect to Apigee. Please verify your details and try again.'
+        'Failed to connect to Apigee. Please verify your details and try again.'
       );
       navigate('/apigee-failure');
     } finally {
@@ -413,6 +413,7 @@ const ApigeeIntegration: React.FC = () => {
                     onChange={(e) =>
                       setAnalyticsMode(e.target.value as 'STANDARD' | 'BASIC')
                     }
+                    onFocus={() => setActiveField('analytics')}
                   >
                     <option value="STANDARD">Standard</option>
                     <option value="BASIC">Basic</option>
@@ -552,8 +553,10 @@ const ApigeeIntegration: React.FC = () => {
                       {activeField === 'orgId'
                         ? 'How to Enter Apigee Org ID'
                         : activeField === 'environment'
-                        ? 'How to Enter Environment'
-                        : 'How to Upload JSON File'}
+                          ? 'How to Enter Environment'
+                          : activeField === 'analytics'
+                            ? 'How to Select  Analytics Mode'
+                            : 'How to Upload JSON File'}
                     </span>
                   </div>
 
@@ -561,13 +564,14 @@ const ApigeeIntegration: React.FC = () => {
                     <div
                       className="info-card-image"
                       style={{
-                        backgroundImage: `url(${
-                          activeField === 'orgId'
+                        backgroundImage: `url(${activeField === 'orgId'
                             ? orgIdImage
                             : activeField === 'environment'
-                            ? envImage
-                            : jsonImage
-                        })`,
+                              ? envImage
+                              : activeField === 'analytics'
+                                ? orgIdImage
+                                : jsonImage
+                          })`,
                         backgroundPosition:
                           activeField === 'orgId'
                             ? '-26.183px -21.054px'
@@ -583,21 +587,27 @@ const ApigeeIntegration: React.FC = () => {
                     <div className="info-steps">
                       {activeField === 'orgId' ? (
                         <>
-                          <p>Step 1: Click on projects.</p>
-                          <p>Step 2: Copy the id of your project.</p>
-                          <p>Step 3: Paste the id in the input field.</p>
+                          <p>Step 1: Go to Google Cloud Console and then Apigee.</p>
+                          <p>Step 2: Check the top-left dropdown for your active org/project.</p>
+                          <p>Step 3: The name shown there is your Apigee Org ID — that's the exact ID you need to enter.</p>
                         </>
                       ) : activeField === 'environment' ? (
                         <>
-                          <p>Step 1: Identify your Apigee environments.</p>
-                          <p>Step 2: Use CSV format like dev,prod.</p>
-                          <p>Step 3: Paste them into the input field.</p>
+                          <p>Step 1: Go to Apigee and open any API Proxy.</p>
+                          <p>Step 2: In the Overview tab, scroll to the Deployments section.</p>
+                          <p>Step 3: The small badge (like eval/test/prod) is your Environment.</p>
+                        </>
+                      ) : activeField === 'analytics' ? (
+                        <>
+                          <p>Step 1: Open Google Cloud Console and go to Apigee.</p>
+                          <p>Step 2: Go to Admin and then Organization Settings.</p>
+                          <p>Step 3: Under Analytics, you'll see whether your org is on Standard or Basic analytics mode.</p>
                         </>
                       ) : (
                         <>
-                          <p>Step 1: Download the service account JSON.</p>
-                          <p>Step 2: Click Upload and select the file.</p>
-                          <p>Step 3: Verify the filename is shown.</p>
+                          <p>Step 1: Go to IAM & Admin, open Service Accounts, and select your Apigee service account.</p>
+                          <p>Step 2: Open Keys, choose Add Key, and create a new JSON key.</p>
+                          <p>Step 3: Download the JSON file and Upload here..</p>
                         </>
                       )}
                     </div>

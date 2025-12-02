@@ -42,6 +42,8 @@ const productsLoader = () => import('./components/Products/Products');
 const Products = React.lazy(productsLoader) as React.ComponentType<any>;
 const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
 const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
+const editProductLoader = () => import('./components/Products/EditProductsss/EditProduct');
+const EditProduct = React.lazy(editProductLoader) as React.ComponentType<any>;
 const KongProductSelect = React.lazy(
   () => import('./components/Products/Kong Integration/KongProductSelect')
 ) as React.ComponentType<any>;
@@ -79,6 +81,7 @@ import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
 import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
+import SalesSite from './components/comingsoon/SalesSite';
 
 export default function App() {
   const navigate = useNavigate();
@@ -104,8 +107,10 @@ export default function App() {
   useEffect(() => {
     setIsNewProductPage(location.pathname === '/get-started/products/new');
 
-    // Reset sidebar visibility when navigating away from edit pages
-    if (!location.pathname.includes('/edit') && !location.pathname.endsWith('/new')) {
+    // Hide sidebar for edit and new pages
+    if (location.pathname.includes('/edit') || location.pathname.endsWith('/new')) {
+      setShowSidebar(false);
+    } else {
       setShowSidebar(true);
     }
   }, [location.pathname]);
@@ -153,6 +158,8 @@ export default function App() {
     if (path.startsWith('/get-started/dashboards')) return 'Dashboards';
     if (path.startsWith('/get-started/integrations')) return 'Integrations';
     if (path.startsWith('/get-started/settings')) return 'Settings';
+    if (path.startsWith('/get-started/invoices')) return 'Invoices';
+    if (path.startsWith('/get-started/sales-site-builder')) return 'Sales Site Builder';
     return 'Get Started';
   })();
 
@@ -220,9 +227,12 @@ export default function App() {
   const handleSidebarClick = (tab: string) => {
     if (tab === 'Settings') {
       navigate('/get-started/settings');
-    } else if (tab === 'Get Started' || tab === 'Invoices') {
-      // Don't navigate for these tabs - they're handled elsewhere or not yet implemented
-      return;
+    } else if (tab === 'Get Started') {
+      navigate('/get-started');
+    } else if (tab === 'Invoices') {
+      navigate('/get-started/invoices');
+    } else if (tab === 'Sales Site Builder') {
+      navigate('/get-started/sales-site-builder');
     } else {
       const slug = getSlugForTab(tab);
       navigate(`/get-started/${slug}`);
@@ -292,6 +302,47 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <SalesSite />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Invoices -> Coming soon */}
+              <Route
+                path="/get-started/invoices"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <SalesSite />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Sales Site Builder -> Coming soon */}
+              <Route
+                path="/get-started/sales-site-builder"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <SalesSite />
+                      </main>
                     </div>
                   </ProtectedRoute>
                 }
@@ -308,7 +359,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" >
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <DashboardGallery
                           onCardClick={(card) => {
                             if (card.id === 'product') {
@@ -352,7 +403,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-3 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <RatePlans
                           ratePlans={ratePlans}
                           setRatePlans={setRatePlans}
@@ -405,16 +456,6 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ApigeeImport />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Apigee imported products list (after import flow) */}
-              <Route
-                path="/get-started/integrations/apigee/imported-products"
-                element={
-                  <ProtectedRoute>
-                    <ApigeeImportedProducts />
                   </ProtectedRoute>
                 }
               />
@@ -489,9 +530,23 @@ export default function App() {
                   <ProtectedRoute>
                     <div className="flex min-h-screen px-6 py-6 bg-white">
                       <div className="w-full">
-                        <NewProduct onClose={() => navigate('/get-started/products')} />
+                        <Suspense fallback={RouteSpinner}>
+                          <NewProduct onClose={() => navigate('/get-started/products')} />
+                        </Suspense>
                       </div>
                     </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Edit Product – full width without wrapper */}
+              <Route
+                path="/get-started/products/edit/:id"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={RouteSpinner}>
+                      <EditProduct onClose={() => navigate('/get-started/products')} />
+                    </Suspense>
                   </ProtectedRoute>
                 }
               />
@@ -668,6 +723,48 @@ export default function App() {
                       }}
                       previousRoute={location.state?.from === 'settings' ? 'settings' : 'products'}
                     />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Apigee Integration Routes */}
+              <Route
+                path="/get-started/integrations/apigee"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeIntegration />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apigee-success"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeSuccess />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apigee-failure"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeFailure />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/get-started/integrations/apigee/import"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeImport />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/get-started/integrations/apigee/imported-products"
+                element={
+                  <ProtectedRoute>
+                    <ApigeeImportedProducts />
                   </ProtectedRoute>
                 }
               />

@@ -5,7 +5,7 @@
   box-sizing: border-box;
   background-color: transparent;
   position: relative;
-  padding: 10px;
+  padding: 5px;
   width: 100%;
 }
 
@@ -13,10 +13,10 @@
   width: 100%;
   background: var(--color-neutral-white, #ffffff);
   border-radius: var(--border-radius-md, 8px);
-  padding: 0;
+  padding: 5px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 20px);
+  flex: 1;
   box-shadow: 0 8px 32px rgba(9, 30, 66, 0.08);
   overflow: hidden;
 }
@@ -30,18 +30,24 @@
   margin-bottom: 24px;
   padding: 24px 32px 0 32px;
   flex-shrink: 0;
+  order: 0;
 }
 
 /* Scrollable content container */
 
 .kong-products-content {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 32px 100px 32px;
+  padding: 0 32px 32px 32px;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
   background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  order: 1;
+  min-height: 0;
+  max-height: calc(100vh - 300px);
 }
 
 .kong-products-content::-webkit-scrollbar {
@@ -165,6 +171,7 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   min-height: 200px;
+  flex: 1;
 }
 
 /* Custom styling for SelectableCard to make it more compact */
@@ -173,6 +180,7 @@
   min-height: unset;
   padding: 12px;
   width: 100%;
+  max-height: 140px;
 }
 
 .kong-products-grid .selcard__content {
@@ -181,20 +189,24 @@
 
 .kong-products-grid .selcard__meta {
   margin-top: 4px;
-  max-height: 2.7em;
+  max-height: 1.5em;
   overflow: hidden;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 .kong-products-grid .selcard__title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 12px;
 }
 
 .kong-products-grid .selcard__version {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 11px;
 }
 
 /* Footer */
@@ -214,13 +226,21 @@
 }
 
 .kong-products-footer-line {
-  width: 100%;                    /* full width line */
+  width: calc(100% - 64px);
+  height: 1px;
+  background-color: var(--color-neutral-300, #e5e7eb);
+  margin: 0 32px;
+  flex-shrink: 0;
+  order: 2;
 }
 
 .kong-products-footer-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 12px 0 0;
+  padding: 16px 32px;
+  flex-shrink: 0;
+  background-color: var(--color-neutral-white, #ffffff);
+  order: 3;
 }
 
 .kong-products-import-btn {
