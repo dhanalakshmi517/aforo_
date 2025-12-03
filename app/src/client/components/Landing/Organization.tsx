@@ -591,6 +591,7 @@ const Organization: React.FC = () => {
                     error={errors.country}
                     onDialCodeChange={handleDialCodeChange}
                     showCountryCode={false}
+                    showDialCode={false}
                   />
                 )}
               </div>
