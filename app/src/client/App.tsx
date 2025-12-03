@@ -31,6 +31,11 @@ import { ProtectedRoute } from './components/Common/ProtectedRoute';
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import DashboardGallery from './components/Dashboard/DashboardGallery';
 import ProductAnalyticsPage from './components/Dashboard/ProductAnalyticsPage';
+import CustomerOverviewHeader from './components/Dashboard/customeranalysis/CustomerOverviewHeader';
+import CustomerOverviewStats from './components/Dashboard/customeranalysis/CustomerOverviewStats';
+import CustomerHealthOverview from './components/Dashboard/customeranalysis/CustomerHealthOverview';
+import TopAtRiskCustomers from './components/Dashboard/customeranalysis/TopAtRiskCustomers';
+
 
 const customersLoader = () => import('./components/Customers/Customers');
 const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
@@ -82,6 +87,10 @@ import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 import SalesSite from './components/comingsoon/SalesSite';
+import TopHealthyCustomers from './components/Dashboard/customeranalysis/TopHealthyCustomers';
+import TopChurningCustomers from './components/Dashboard/customeranalysis/TopChurningCustomers';
+import CustomerSegmentation from './components/Dashboard/customeranalysis/CustomerSegmentation';
+import NewVsExistingAndIndustries from './components/Dashboard/customeranalysis/NewVsExistingAndIndustries';
 
 export default function App() {
   const navigate = useNavigate();
@@ -386,6 +395,34 @@ export default function App() {
                       />
                       <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <ProductAnalyticsPage />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Customer Analysis dashboard detail */}
+              <Route
+                path="/get-started/dashboards/customer-analysis"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 bg-white overflow-y-auto" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <CustomerOverviewHeader />
+                        <div style={{ padding: '20px' }}>
+                          <CustomerOverviewStats />
+                          <CustomerHealthOverview />
+                          <TopAtRiskCustomers />
+                          <TopHealthyCustomers/>
+                          <TopChurningCustomers />
+                          <CustomerSegmentation />
+                          <NewVsExistingAndIndustries />
+                        </div>
                       </main>
                     </div>
                   </ProtectedRoute>

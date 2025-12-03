@@ -18,7 +18,6 @@ html, body {
 /* Page container is pushed right to leave space for your left header/sidebar */
 .dg-page {
   padding: 18px 20px 32px;
-  margin-left: 256px;
 }
 
 /* Topbar row inside the page area */
