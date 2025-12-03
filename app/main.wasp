@@ -20,7 +20,6 @@ app OpenSaaS {
     "<meta name='twitter:image:width' content='800' />",
     "<meta name='twitter:image:height' content='400' />",
     "<meta name='twitter:card' content='summary_large_image' />",
-    "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css' />",
     "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.js'></script>",
     "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.local.js'></script>"
   ],
