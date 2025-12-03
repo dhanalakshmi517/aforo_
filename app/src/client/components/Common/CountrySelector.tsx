@@ -17,11 +17,7 @@ interface CountrySelectorProps {
   showCountryCode?: boolean;
 }
 
-// Helper function to get flag SVG path
-const getFlagSvgPath = (countryCode: string) => {
-  // Use relative path from the component
-  return new URL(`../../Flags/${countryCode.toLowerCase()}.svg`, import.meta.url).href;
-};
+// No helper function needed - we'll use flag-icons classes directly
 
 const CountrySelector: React.FC<CountrySelectorProps> = ({
   value,
@@ -84,8 +80,6 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     setIsOpen(false);
   };
 
-  // No helper function needed - we'll use flag-icons classes directly in JSX
-
   return (
     <div className="country-selector" ref={dropdownRef}>
       <div
@@ -102,15 +96,10 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       >
         {selectedCountry ? (
           <div className="selected-option">
-            <img 
-              src={getFlagSvgPath(selectedCountry.code)} 
-              alt={selectedCountry.name}
-              className="flag-icon"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            <span className={`fi fi-${selectedCountry.code.toLowerCase()}`}></span>
             <span>{selectedCountry.name}</span>
+            {showCountryCode && <span className="country-code-text">({selectedCountry.code})</span>}
+            {showDialCode && <span className="dial-code-text">{selectedCountry.dialCode}</span>}
           </div>
         ) : (
           <span className="placeholder-text">{placeholder}</span>
@@ -151,14 +140,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
                   role="option"
                   aria-selected={value === country.code}
                 >
-                  <img 
-                    src={getFlagSvgPath(country.code)} 
-                    alt={country.name}
-                    className="flag-icon"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
+                  <span className={`fi fi-${country.code.toLowerCase()}`}></span>
                   <span className="truncate">
                     {country.name}
                     {showCountryCode && ` (${country.code})`}
@@ -219,11 +201,25 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           text-overflow: ellipsis;
           line-height: 1.5;
         }
-        .flag-icon { 
+        .selected-option .fi { 
           width: 24px;
           height: 16px;
-          object-fit: cover;
-          border-radius: 2px;
+          font-size: 24px;
+          flex-shrink: 0;
+        }
+        .country-code-text {
+          color: var(--color-neutral-500);
+          font-size: 0.9em;
+        }
+        .dial-code-text {
+          margin-left: auto;
+          color: var(--color-neutral-500);
+          font-size: 0.9em;
+        }
+        .dropdown-item .fi {
+          width: 24px;
+          height: 16px;
+          font-size: 24px;
           flex-shrink: 0;
         }
 
