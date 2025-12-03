@@ -451,6 +451,13 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
       if (!productId) return;
       try {
         setLoading(true);
+        // Clear configuration storage when loading a new product
+        localStorage.removeItem('editConfigFormData');
+        localStorage.removeItem('editConfigProductType');
+        localStorage.removeItem('editConfigFetchedData');
+        localStorage.removeItem('editConfigModifiedFields');
+        localStorage.removeItem('editConfigProductTypeChanged');
+        
         const data = await fetchGeneralDetails(productId);
 
         const originalProductName = data.productName ?? '';
