@@ -600,13 +600,7 @@ const Organization: React.FC = () => {
                   <div className={`phone-input-wrapper ${errors.phone ? 'error' : ''}`}>
                     <div className="country-code-display">
                       {selectedCountry ? (
-                        <>
-                          <span
-                            className={`fi fi-${selectedCountry.toLowerCase()}`}
-                            style={{ marginRight: '8px', fontSize: '1.2em' }}
-                          ></span>
-                          <span>{countries.find(c => c.code === selectedCountry)?.dialCode}</span>
-                        </>
+                        <span>{countries.find(c => c.code === selectedCountry)?.dialCode}</span>
                       ) : (
                         <span className="dialcode-placeholder">+00</span>
                       )}
