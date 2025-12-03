@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import "./KongProducts.css";
 import SelectableCard from "../../componenetsss/SelectableCard";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import Checkbox from "../../componenetsss/Checkbox";
-import SearchInput from "../../componenetsss/SearchInput";
 
 type Product = {
   id: string;
@@ -73,43 +72,80 @@ const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = []
     }
   };
 
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleClear = () => {
+    setSearch('');
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  let searchCls = 'kong-search';
+  if (search) searchCls += ' has-value';
+  if (isFocused) searchCls += ' is-active';
+
   return (
     <div className="kong-products-page">
       <div className="kong-products-card">
         {/* Top header row */}
         <div className="kong-products-header">
-        <div className="kong-products-header-top">
-          <div className="kong-products-header-left">
-            <h1 className="kong-products-title">Import Kong Products</h1>
-            <p className="kong-products-selected-text">
-              {selectedCount} Products selected
-            </p>
+          <div className="kong-products-header-top">
+            <div className="kong-products-header-left">
+              <h1 className="kong-products-title">Import Kong Products</h1>
+              <p className="kong-products-selected-text">
+                {selectedCount} Products selected
+              </p>
+            </div>
           </div>
 
-          <SearchInput
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search"
-          />
+          <div className={searchCls} role="search">
+            <span className="kong-search-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+
+            <input
+              ref={inputRef}
+              className="kong-search-input"
+              aria-label="Search products"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+            />
+            {search && (
+              <button
+                type="button"
+                className="kong-clear-btn"
+                onClick={handleClear}
+                aria-label="Clear search"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M15 5L5 15M5 5L15 15" stroke="#1A2126" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          <div className="kong-products-select-actions">
+            <Checkbox
+              label="Select All"
+              checked={allSelected}
+              onChange={(checked) =>
+                checked ? handleSelectAll() : handleClearAll()
+              }
+            />
+            <button
+              type="button"
+              className="kong-products-clear-btn"
+              onClick={handleClearAll}
+            >
+              Clear All
+            </button>
+          </div>
         </div>
-        
-        <div className="kong-products-select-actions">
-          <Checkbox
-            label="Select All"
-            checked={allSelected}
-            onChange={(checked) =>
-              checked ? handleSelectAll() : handleClearAll()
-            }
-          />
-          <button
-            type="button"
-            className="kong-products-clear-btn"
-            onClick={handleClearAll}
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
 
       {/* Scrollable content container */}
       <div className="kong-products-content">
@@ -128,16 +164,16 @@ const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = []
         </div>
       </div>
 
-      {/* Fixed footer with button */}
-      <div className="kong-products-footer-line" />
-      <div className="kong-products-footer-actions">
-        <PrimaryButton
-          className="kong-products-import-btn"
-          onClick={handleImport}
-        >
-          Import Products
-        </PrimaryButton>
-      </div>
+        {/* Fixed footer with button */}
+        <div className="kong-products-footer-line" />
+        <div className="kong-products-footer-actions">
+          <PrimaryButton
+            className="kong-products-import-btn"
+            onClick={handleImport}
+          >
+            Import Products
+          </PrimaryButton>
+        </div>
       </div>
     </div>
   );

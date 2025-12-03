@@ -533,17 +533,14 @@ line-height: var(--line-height-body-lg);
     max-width: 200px;
   }
 
-  .metrics-wrapper{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;align-items:center;}
+  .metrics-wrapper{display:flex;flex-direction:column;gap:8px;justify-content:flex-start;align-items:flex-start;}
   .metric-item {
-    width:50px;
-    height: 50px;
+    width:44px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    padding: 8px 6px;
-    font-size: 10px;
-    color: #1F2937;
+    padding: 12px 4px 12px 8px;
     text-align: center;
     box-sizing: border-box;
   }
@@ -562,9 +559,8 @@ line-height: var(--line-height-body-lg);
 
 .metric-name {
     white-space: normal;
-    font-weight: 500; /* Medium weight for metric name (bottom) */
+    font-weight: 600; /* Bold weight for metric name (bottom) */
     font-size: 10px;
-    color: #1F2937;
     line-height: 1.2;
     text-align: center;
     word-break: break-word;
@@ -572,8 +568,7 @@ line-height: var(--line-height-body-lg);
   
   .metric-uom {
     font-weight: 700; /* Bold weight for unit of measure (top) */
-    font-size: 9px;
-    color: #1F2937;
+    font-size: 11px;
     line-height: 1;
     white-space: nowrap;
     text-align: center;
@@ -911,6 +906,25 @@ line-height: var(--line-height-body-md);
 }
 .products-table th.actions-cell {
   text-align: center;
+}
+
+/* Metrics wrapper - display metrics vertically */
+.metrics-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+}
+
+/* Products metrics wrapper - display metrics horizontally */
+.products-metrics-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
 }
 
 
