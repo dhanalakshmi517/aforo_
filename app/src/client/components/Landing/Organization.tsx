@@ -601,15 +601,10 @@ const Organization: React.FC = () => {
                     <div className="country-code-display">
                       {selectedCountry ? (
                         <>
-                          {/* Flag icon removed as per requirement */}
-                          <img 
-                            src={new URL(`../Flags/${selectedCountry.toLowerCase()}.svg`, import.meta.url).href}
-                            alt={selectedCountry}
-                            style={{width: '24px', height: '16px', marginRight: '8px', objectFit: 'cover', borderRadius: '2px'}}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
+                          <span
+                            className={`fi fi-${selectedCountry.toLowerCase()}`}
+                            style={{ marginRight: '8px', fontSize: '1.2em' }}
+                          ></span>
                           <span>{countries.find(c => c.code === selectedCountry)?.dialCode}</span>
                         </>
                       ) : (
