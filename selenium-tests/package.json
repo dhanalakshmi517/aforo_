@@ -1,0 +1,21 @@
+{
+    "name": "aforo-selenium-tests",
+    "version": "1.0.0",
+    "description": "Selenium E2E tests for Aforo Organization form",
+    "scripts": {
+        "test": "jest --config jest.config.js",
+        "test:org": "jest tests/organization-complete-validation.test.js",
+        "test:requirements": "jest tests/organization-requirements-validation.test.js",
+        "test:headless": "HEADLESS=true jest --config jest.config.js",
+        "test:watch": "jest --config jest.config.js --watch",
+        "test:verbose": "jest --config jest.config.js --verbose"
+    },
+    "keywords": [
+        "selenium",
+        "e2e",
+        "testing",
+        "organization-form"
+    ],
+    "author": "",
+    "license": "ISC"
+}

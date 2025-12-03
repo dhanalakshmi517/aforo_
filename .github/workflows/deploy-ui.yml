@@ -42,7 +42,7 @@ jobs:
           cd app
           wasp build || true  # ignore SDK TS errors, we patch after
 
-      # 🩹 2️⃣ Patch the generated SDK (useAuth & auth-styles.css)
+      # 🩹 2️⃣ Patch the generated Wasp SDK (useAuth & auth-styles.css)
       - name: 🩹 Patch generated Wasp SDK
         run: |
           cd app
@@ -86,11 +86,13 @@ jobs:
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no ubuntu@"$HOST" "rm -rf /home/ubuntu/frontend-temp && mkdir -p /home/ubuntu/frontend-temp"
           scp -i ec2-key.pem -o StrictHostKeyChecking=no -r app/.wasp/build/web-app/build/* ubuntu@"$HOST":/home/ubuntu/frontend-temp/
 
-      - name: 🚀 Deploy UI to Nginx (NO-CACHE)
+      # 🚀 4️⃣ Deploy ONLY static files + reload Nginx (no config rewrite)
+      - name: 🚀 Deploy UI to Nginx (NO-CACHE, NO CONFIG CHANGE)
         run: |
           HOST="${{ secrets.EC2_HOST }}"
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no ubuntu@"$HOST" << 'EOF'
             set -e
+
             echo "✅ Cleaning /var/www/html"
             sudo rm -rf /var/www/html/*
             sudo mkdir -p /var/www/html
@@ -98,29 +100,21 @@ jobs:
             echo "📦 Copying build to /var/www/html"
             sudo cp -r /home/ubuntu/frontend-temp/. /var/www/html/
 
+            echo "🔐 Setting permissions"
             sudo chown -R www-data:www-data /var/www/html
             sudo find /var/www/html -type d -exec chmod 755 {} \;
             sudo find /var/www/html -type f -exec chmod 644 {} \;
 
-            sudo bash -c 'cat >/etc/nginx/sites-available/default' << "NGINXCONF"
-            server {
-              listen 80;
-              server_name _;
-              root /var/www/html;
-              index index.html;
-              location / {
-                try_files \$uri \$uri/ /index.html;
-                add_header Cache-Control "no-store" always;
-                expires off;
-                etag off;
-              }
-            }
-            NGINXCONF
-
+            echo "🧪 Testing Nginx config"
             sudo nginx -t
+
+            echo "♻️ Reloading Nginx"
             sudo systemctl reload nginx
+
+            echo "📂 Final contents of /var/www/html:"
             ls -la /var/www/html
-            echo "🎉 UI deployed successfully (no-cache)"
+
+            echo "🎉 UI deployed successfully (no-cache, config unchanged)"
           EOF
 
       - name: 🧹 Clean up SSH key

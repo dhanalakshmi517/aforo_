@@ -95,20 +95,12 @@ const KongImportedProducts: React.FC<KongImportedProductsProps> = ({ onBack }) =
                 <span className="kong-imported-products-select-chevron">⌄</span>
               </div>
             </div>
+            
           ))}
         </div>
       </div>
 
-      <div className="kong-imported-products-bottom-bar">
-        <div className="kong-imported-products-bottom-inner">
-          <SecondaryButton onClick={handleBack}>
-            Back
-          </SecondaryButton>
-          <PrimaryButton onClick={handleImport}>
-            Import Products
-          </PrimaryButton>
-        </div>
-      </div>
+     
     </div>
   );
 };

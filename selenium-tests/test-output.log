@@ -1,0 +1,3185 @@
+
+> aforo-selenium-tests@1.0.0 test
+> jest --config jest.config.js
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚀 Setting up Complete Validation Tests
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:22:17)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    🍪 Cookie popup detected
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:60:21)
+
+  console.log
+    ✅ Cookie consent accepted
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:66:21)
+
+  console.log
+    🧪 Testing: First Name Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:41:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Last Name Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:63:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Company Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:84:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Role Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:105:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Employee Size Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:126:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Country Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:147:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Phone Number Required
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:166:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Reject @gmail.com
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:200:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Accept @company.com
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:222:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ @company.com correctly accepted
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:240:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Accept @business.io
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:244:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ @business.io correctly accepted
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:261:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Accept @startup.net
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:265:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ @startup.net correctly accepted
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:282:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: India Flag Correctness
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:292:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-in"
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:298:21)
+
+  console.log
+    ✅ India flag check complete
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:305:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: UK Flag Correctness
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:309:21)
+
+  console.log
+    🌍 Selecting country: GB
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-gb"
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:315:21)
+
+  console.log
+    ✅ UK flag check complete
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:320:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Phone Disabled Without Country
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:330:21)
+
+  console.log
+    📱 Phone value: ""
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:339:21)
+
+  console.log
+    ✅ Phone correctly blocked without country
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:345:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Submit Disabled - Incomplete Form
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:355:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Submit Enabled - Complete Valid Form
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:376:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🔘 Submit button enabled: false
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:393:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Submit Disabled - Gmail Email
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:401:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Testing: Submit Disabled - No Country
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:423:21)
+
+  console.log
+    🧪 Testing: Complete Workflow
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:445:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    📝 Step 1: Filling all required fields
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:450:21)
+
+  console.log
+    🌍 Step 2: Selecting country
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:461:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-in"
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:466:21)
+
+  console.log
+    📞 Step 3: Filling phone number
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:471:21)
+
+  console.log
+    🔘 Step 4: Checking submit button
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:477:21)
+
+  console.log
+    Submit button enabled: false
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:481:21)
+
+  console.log
+    🧹 Cleaning up tests
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:29:17)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+FAIL Selenium E2E Tests tests/organization-complete-validation.test.js (341.571 s)
+  Organization Page - Complete Validation Tests
+    ✅ REQUIREMENT 1: All Required Fields Validation
+      ✕ should validate First Name is required (13671 ms)
+      ✕ should validate Last Name is required (21852 ms)
+      ✕ should validate Company is required (21966 ms)
+      ✕ should validate Role is required (21901 ms)
+      ✕ should validate Employee Size is required (22063 ms)
+      ✕ should validate Country is required (21033 ms)
+      ✕ should validate Phone Number is required (21941 ms)
+    ✅ REQUIREMENT 2: Business Email Validation
+      ✕ should REJECT @gmail.com emails (11991 ms)
+      ✓ should ACCEPT @company.com emails (22075 ms)
+      ✓ should ACCEPT @business.io emails (22510 ms)
+      ✓ should ACCEPT @startup.net emails (22589 ms)
+    ✅ REQUIREMENT 3: Country Flag Validation
+      ✓ should display correct flag for India (IN) (12098 ms)
+      ✓ should display correct flag for United Kingdom (GB) (12437 ms)
+    ✅ REQUIREMENT 4: Phone Field Disabled Without Flag
+      ✓ should not accept phone input without country selection (10971 ms)
+    ✅ REQUIREMENT 5: Submit Button Enabled Only When All Valid
+      ✕ should keep submit button disabled with incomplete form (20815 ms)
+      ✕ should enable submit button with ALL valid fields (12704 ms)
+      ✕ should disable submit with @gmail.com email (12235 ms)
+      ✕ should disable submit without country selection (20840 ms)
+    ✅ COMPLETE WORKFLOW: End-to-End Validation
+      ✕ should complete full form submission workflow (13437 ms)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate First Name is required
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+      54 |
+      55 |             const errors = await orgPage.getErrors();
+    > 56 |             expect(errors).toContain('This field is required');
+         |                            ^
+      57 |
+      58 |             await orgPage.takeScreenshot('validation-firstname-required.png');
+      59 |             console.log('✅ First Name validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:56:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate Last Name is required
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+      75 |
+      76 |             const errors = await orgPage.getErrors();
+    > 77 |             expect(errors).toContain('This field is required');
+         |                            ^
+      78 |
+      79 |             await orgPage.takeScreenshot('validation-lastname-required.png');
+      80 |             console.log('✅ Last Name validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:77:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate Company is required
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+       96 |
+       97 |             const errors = await orgPage.getErrors();
+    >  98 |             expect(errors).toContain('This field is required');
+          |                            ^
+       99 |
+      100 |             await orgPage.takeScreenshot('validation-company-required.png');
+      101 |             console.log('✅ Company validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:98:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate Role is required
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+      117 |
+      118 |             const errors = await orgPage.getErrors();
+    > 119 |             expect(errors).toContain('This field is required');
+          |                            ^
+      120 |
+      121 |             await orgPage.takeScreenshot('validation-role-required.png');
+      122 |             console.log('✅ Role validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:119:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate Employee Size is required
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+      138 |
+      139 |             const errors = await orgPage.getErrors();
+    > 140 |             expect(errors).toContain('This field is required');
+          |                            ^
+      141 |
+      142 |             await orgPage.takeScreenshot('validation-empsize-required.png');
+      143 |             console.log('✅ Employee Size validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:140:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate Country is required
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+      157 |
+      158 |             const errors = await orgPage.getErrors();
+    > 159 |             expect(errors).toContain('This field is required');
+          |                            ^
+      160 |
+      161 |             await orgPage.takeScreenshot('validation-country-required.png');
+      162 |             console.log('✅ Country validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:159:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 1: All Required Fields Validation › should validate Phone Number is required
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      185 |             ];
+      186 |             const hasValidError = errors.some(error => validErrors.includes(error));
+    > 187 |             expect(hasValidError).toBe(true);
+          |                                   ^
+      188 |
+      189 |             await orgPage.takeScreenshot('validation-phone-required.png');
+      190 |             console.log('✅ Phone Number validation works');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:187:35)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 2: Business Email Validation › should REJECT @gmail.com emails
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "Invalid business email"
+    Received array: ["Invalid email id"]
+
+      213 |
+      214 |             const errors = await orgPage.getErrors();
+    > 215 |             expect(errors).toContain('Invalid business email');
+          |                            ^
+      216 |
+      217 |             await orgPage.takeScreenshot('validation-gmail-rejected.png');
+      218 |             console.log('✅ @gmail.com correctly rejected');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:215:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 5: Submit Button Enabled Only When All Valid › should keep submit button disabled with incomplete form
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      367 |             // Should show errors
+      368 |             const errors = await orgPage.getErrors();
+    > 369 |             expect(errors.length).toBeGreaterThan(0);
+          |                                   ^
+      370 |
+      371 |             await orgPage.takeScreenshot('validation-submit-incomplete.png');
+      372 |             console.log('✅ Submit correctly blocked for incomplete form');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:369:35)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 5: Submit Button Enabled Only When All Valid › should enable submit button with ALL valid fields
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      392 |
+      393 |             console.log(`🔘 Submit button enabled: ${isEnabled}`);
+    > 394 |             expect(isEnabled).toBe(true);
+          |                               ^
+      395 |
+      396 |             await orgPage.takeScreenshot('validation-submit-all-valid.png');
+      397 |             console.log('✅ Submit correctly enabled with all valid fields');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:394:31)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 5: Submit Button Enabled Only When All Valid › should disable submit with @gmail.com email
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "Invalid business email"
+    Received array: ["Invalid email id"]
+
+      414 |
+      415 |             const errors = await orgPage.getErrors();
+    > 416 |             expect(errors).toContain('Invalid business email');
+          |                            ^
+      417 |
+      418 |             await orgPage.takeScreenshot('validation-submit-gmail-blocked.png');
+      419 |             console.log('✅ Submit correctly blocked with gmail');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:416:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ REQUIREMENT 5: Submit Button Enabled Only When All Valid › should disable submit without country selection
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "This field is required"
+    Received array: []
+
+      434 |
+      435 |             const errors = await orgPage.getErrors();
+    > 436 |             expect(errors).toContain('This field is required');
+          |                            ^
+      437 |
+      438 |             await orgPage.takeScreenshot('validation-submit-no-country.png');
+      439 |             console.log('✅ Submit correctly blocked without country');
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:436:28)
+
+  ● Organization Page - Complete Validation Tests › ✅ COMPLETE WORKFLOW: End-to-End Validation › should complete full form submission workflow
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      480 |
+      481 |             console.log(`Submit button enabled: ${isEnabled}`);
+    > 482 |             expect(isEnabled).toBe(true);
+          |                               ^
+      483 |
+      484 |             await orgPage.takeScreenshot('workflow-step4-ready-to-submit.png');
+      485 |
+
+      at Object.<anonymous> (tests/organization-complete-validation.test.js:482:31)
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚨 Setting up FAILED test cases for Organization Page
+
+      at Object.<anonymous> (tests/organization-failed.test.js:21:17)
+
+  console.log
+    ⚠️ These tests are EXPECTED to FAIL - they demonstrate bugs
+
+      at Object.<anonymous> (tests/organization-failed.test.js:22:17)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    🍪 Cookie popup detected
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:60:21)
+
+  console.log
+    ✅ Cookie consent accepted
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:66:21)
+
+  console.log
+    🧪 Running: Flag Correctness Test for US
+
+      at Object.<anonymous> (tests/organization-failed.test.js:41:21)
+
+  console.log
+    📋 Requirement: Flag must show "fi fi-us" for United States
+
+      at Object.<anonymous> (tests/organization-failed.test.js:42:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Expected: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:50:21)
+
+  console.log
+    🚩 Actual: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:51:21)
+
+  console.log
+    ❌ TEST FAILED: Wrong flag displayed!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:58:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Flag Correctness Test for India
+
+      at Object.<anonymous> (tests/organization-failed.test.js:62:21)
+
+  console.log
+    📋 Requirement: Flag must show "fi fi-in" for India
+
+      at Object.<anonymous> (tests/organization-failed.test.js:63:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Expected: "fi fi-in"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:71:21)
+
+  console.log
+    🚩 Actual: "fi fi-in"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:72:21)
+
+  console.log
+    ❌ TEST FAILED: Wrong flag displayed!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:79:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Flag Existence Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:83:21)
+
+  console.log
+    📋 Requirement: Flag icon must be visible and have correct class
+
+      at Object.<anonymous> (tests/organization-failed.test.js:84:21)
+
+  console.log
+    🌍 Selecting country: GB
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ❌ TEST FAILED: Flag missing or incorrect!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:98:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Phone Disabled Without Country Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:108:21)
+
+  console.log
+    📋 Requirement: Phone field must NOT accept input without country
+
+      at Object.<anonymous> (tests/organization-failed.test.js:109:21)
+
+  console.log
+    📱 Phone input value: ""
+
+      at Object.<anonymous> (tests/organization-failed.test.js:119:25)
+
+  console.log
+    ❌ TEST FAILED: Phone field accepts input without country!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:125:25)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Phone Disabled With Wrong Flag Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:133:21)
+
+  console.log
+    📋 Requirement: Phone field must be disabled if flag is incorrect
+
+      at Object.<anonymous> (tests/organization-failed.test.js:134:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:141:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Phone Input Rejection Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:159:21)
+
+  console.log
+    📋 Requirement: Phone must not accept ANY input without valid flag
+
+      at Object.<anonymous> (tests/organization-failed.test.js:160:21)
+
+  console.log
+    📱 Phone value after typing: ""
+
+      at Object.<anonymous> (tests/organization-failed.test.js:169:21)
+
+  console.log
+    ❌ TEST FAILED: Phone accepts input without valid flag!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:175:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Submit Button Disabled With Wrong Flag Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:185:21)
+
+  console.log
+    📋 Requirement: Button must be disabled if flag is incorrect
+
+      at Object.<anonymous> (tests/organization-failed.test.js:186:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:201:21)
+
+  console.log
+    🔘 Submit button disabled: true
+
+      at Object.<anonymous> (tests/organization-failed.test.js:210:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Submit Button Disabled Without Country Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:222:21)
+
+  console.log
+    📋 Requirement: Button must be disabled without country
+
+      at Object.<anonymous> (tests/organization-failed.test.js:223:21)
+
+  console.log
+    🔘 Submit button enabled: false
+
+      at Object.<anonymous> (tests/organization-failed.test.js:239:21)
+
+  console.log
+    ❌ TEST FAILED: Submit button enabled without country!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:245:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Submit Button Both Conditions Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:249:21)
+
+  console.log
+    📋 Requirement: Button enabled ONLY when flag is correct AND phone is valid
+
+      at Object.<anonymous> (tests/organization-failed.test.js:250:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:265:21)
+
+  console.log
+    🔘 Submit button enabled: false
+
+      at Object.<anonymous> (tests/organization-failed.test.js:273:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Form Submission Prevention Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:290:21)
+
+  console.log
+    📋 Requirement: Form must NOT submit with wrong flag
+
+      at Object.<anonymous> (tests/organization-failed.test.js:291:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-failed.test.js:306:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Combined Requirements Test
+
+      at Object.<anonymous> (tests/organization-failed.test.js:333:21)
+
+  console.log
+    📋 Testing all 3 requirements simultaneously:
+
+      at Object.<anonymous> (tests/organization-failed.test.js:334:21)
+
+  console.log
+       1. Correct flag display
+
+      at Object.<anonymous> (tests/organization-failed.test.js:335:21)
+
+  console.log
+       2. Phone field disabled without valid flag
+
+      at Object.<anonymous> (tests/organization-failed.test.js:336:21)
+
+  console.log
+       3. Submit button disabled without valid conditions
+
+      at Object.<anonymous> (tests/organization-failed.test.js:337:21)
+
+  console.log
+    
+    📍 STEP 1: No country selected
+
+      at Object.<anonymous> (tests/organization-failed.test.js:340:21)
+
+  console.log
+       Phone value: "" (should be empty)
+
+      at Object.<anonymous> (tests/organization-failed.test.js:347:21)
+
+  console.log
+    
+    📍 STEP 2: Select US (triggers wrong flag)
+
+      at Object.<anonymous> (tests/organization-failed.test.js:352:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+       Flag class: "fi fi-us" (should be "fi fi-us")
+
+      at Object.<anonymous> (tests/organization-failed.test.js:357:21)
+
+  console.log
+       Phone enabled: true (should be false)
+
+      at Object.<anonymous> (tests/organization-failed.test.js:362:21)
+
+  console.log
+    
+    📍 STEP 3: Fill all required fields
+
+      at Object.<anonymous> (tests/organization-failed.test.js:367:21)
+
+  console.log
+       Submit enabled: false (should be false with wrong flag)
+
+      at Object.<anonymous> (tests/organization-failed.test.js:381:21)
+
+  console.log
+    
+    📊 FINAL VALIDATION:
+
+      at Object.<anonymous> (tests/organization-failed.test.js:386:21)
+
+  console.log
+       ✓ Flag correct: true
+
+      at Object.<anonymous> (tests/organization-failed.test.js:390:21)
+
+  console.log
+    
+    ❌ TEST FAILED: Requirements not enforced!
+
+      at Object.<anonymous> (tests/organization-failed.test.js:405:21)
+
+  console.log
+    🧹 Cleaning up failed tests
+
+      at Object.<anonymous> (tests/organization-failed.test.js:29:17)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+FAIL Selenium E2E Tests tests/organization-failed.test.js (127.852 s)
+  Organization Page - FAILED Requirements Tests
+    ❌ REQUIREMENT 1: Correct Country Flag Display
+      ✓ SHOULD FAIL: Country flag must match selected country (US) (3907 ms)
+      ✓ SHOULD FAIL: Country flag must match selected country (India) (12588 ms)
+      ✓ SHOULD FAIL: Flag must exist when country is selected (12166 ms)
+    ❌ REQUIREMENT 2: Phone Field Must Be Disabled Without Valid Flag
+      ✓ SHOULD FAIL: Phone input must be disabled when no country selected (10938 ms)
+      ✓ SHOULD FAIL: Phone input must be disabled when wrong flag is shown (11913 ms)
+      ✓ SHOULD FAIL: Phone input must reject typing when flag is missing (11103 ms)
+    ❌ REQUIREMENT 3: Submit Button Must Be Disabled
+      ✓ SHOULD FAIL: Submit button disabled when flag is wrong (12882 ms)
+      ✓ SHOULD FAIL: Submit button disabled without country selection (11196 ms)
+      ✕ SHOULD FAIL: Submit button only enabled with BOTH conditions met (12458 ms)
+      ✓ SHOULD FAIL: Cannot submit form with incorrect flag (12758 ms)
+    ❌ COMBINED REQUIREMENTS: All Conditions Together
+      ✓ SHOULD FAIL: All three requirements must be enforced together (13563 ms)
+
+  ● Organization Page - FAILED Requirements Tests › ❌ REQUIREMENT 3: Submit Button Must Be Disabled › SHOULD FAIL: Submit button only enabled with BOTH conditions met
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      280 |                 console.log('❌ TEST FAILED: Button enabled even though flag is wrong!');
+      281 |             } else {
+    > 282 |                 expect(isEnabled).toBe(true);
+          |                                   ^
+      283 |                 console.log('✅ Button correctly enabled with valid flag');
+      284 |             }
+      285 |
+
+      at Object.<anonymous> (tests/organization-failed.test.js:282:35)
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚀 Setting up Selenium tests for Organization Page
+
+      at Object.<anonymous> (tests/organization.test.js:10:17)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🧪 Running: Organization Page Loading Test
+
+      at Object.<anonymous> (tests/organization.test.js:25:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    🍪 Cookie popup detected
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:60:21)
+
+  console.log
+    ✅ Cookie consent accepted
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:66:21)
+
+  console.log
+    ✅ Passed: Organization Page Loading Test
+
+      at Object.<anonymous> (tests/organization.test.js:30:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Empty Fields Validation Test
+
+      at Object.<anonymous> (tests/organization.test.js:40:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Business Email Validation Test
+
+      at Object.<anonymous> (tests/organization.test.js:52:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Flag Icon Verification Test
+
+      at Object.<anonymous> (tests/organization.test.js:70:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class found: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization.test.js:86:21)
+
+  console.log
+    ✅ Flag icon is correctly displayed
+
+      at Object.<anonymous> (tests/organization.test.js:93:25)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Dial Code Update Test
+
+      at Object.<anonymous> (tests/organization.test.js:103:21)
+
+  console.log
+    📞 Dial code displayed: "+00"
+
+      at Object.<anonymous> (tests/organization.test.js:108:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Other Role Input Test
+
+      at Object.<anonymous> (tests/organization.test.js:121:21)
+
+  console.log
+    ✅ Passed: Other Role Input Test
+
+      at Object.<anonymous> (tests/organization.test.js:130:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Phone Input Disabled Without Country Test
+
+      at Object.<anonymous> (tests/organization.test.js:140:21)
+
+  console.log
+    📱 Phone input placeholder: "123-456-7890"
+
+      at Object.<anonymous> (tests/organization.test.js:148:21)
+
+  console.log
+    ✅ Passed: Phone Input State Test
+
+      at Object.<anonymous> (tests/organization.test.js:151:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Phone Input Enabled After Country Test
+
+      at Object.<anonymous> (tests/organization.test.js:155:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    📞 Dial code after selection: "+91"
+
+      at Object.<anonymous> (tests/organization.test.js:165:21)
+
+  console.log
+    ✅ Passed: Phone Input Enabled Test
+
+      at Object.<anonymous> (tests/organization.test.js:171:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Submit Button Disabled With Wrong Flag Test
+
+      at Object.<anonymous> (tests/organization.test.js:175:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization.test.js:190:21)
+
+  console.log
+    ✅ Passed: Submit Button State Test
+
+      at Object.<anonymous> (tests/organization.test.js:203:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Running: Submit Button Enabled With Valid Data Test
+
+      at Object.<anonymous> (tests/organization.test.js:207:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-in"
+
+      at Object.<anonymous> (tests/organization.test.js:225:21)
+
+  console.log
+    🔘 Submit button enabled: false
+
+      at Object.<anonymous> (tests/organization.test.js:234:21)
+
+  console.log
+    ✅ Passed: Submit Button Enabled Test
+
+      at Object.<anonymous> (tests/organization.test.js:237:21)
+
+  console.log
+    🧹 Cleaning up Organization tests
+
+      at Object.<anonymous> (tests/organization.test.js:17:17)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+FAIL Selenium E2E Tests tests/organization.test.js (115.736 s)
+  Organization Page Tests
+    Page Loading
+      ✓ should load organization page successfully (2294 ms)
+    Form Validation
+      ✕ should show errors for empty required fields (20500 ms)
+      ✕ should validate business email (10763 ms)
+    Country Selector & Flag Icon
+      ✓ should show flag icon when country is selected (11292 ms)
+      ✓ should update dial code when country is selected (10477 ms)
+    Role Selection
+      ✓ should show other role input when Other is selected (11087 ms)
+    Form Submission Rules
+      ✓ should disable phone input when no country is selected (10863 ms)
+      ✓ should enable phone input after valid country selection (12349 ms)
+      ✓ should disable submit button when flag is missing or incorrect (11624 ms)
+      ✓ should enable submit button only when all conditions are met (12746 ms)
+
+  ● Organization Page Tests › Form Validation › should show errors for empty required fields
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      42 |
+      43 |             const errors = await orgPage.getErrors();
+    > 44 |             expect(errors.length).toBeGreaterThan(0);
+         |                                   ^
+      45 |             expect(errors).toContain('This field is required');
+      46 |
+      47 |             await orgPage.takeScreenshot('organization-empty-errors.png');
+
+      at Object.<anonymous> (tests/organization.test.js:44:35)
+
+  ● Organization Page Tests › Form Validation › should validate business email
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "Invalid business email"
+    Received array: ["Invalid email id"]
+
+      55 |
+      56 |             const errors = await orgPage.getErrors();
+    > 57 |             expect(errors).toContain('Invalid business email');
+         |                            ^
+      58 |
+      59 |             await orgPage.takeScreenshot('organization-email-error.png');
+      60 |             console.log('✅ Passed: Business Email Validation Test');
+
+      at Object.<anonymous> (tests/organization.test.js:57:28)
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚀 Setting up Selenium tests for Rate Plans
+
+      at Object.<anonymous> (tests/rateplans.test.js:11:13)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🌐 Navigating to http://localhost:3000
+
+      at WebDriverManager.navigateToApp (config/webdriver.js:71:13)
+
+  console.log
+    ⚠️ Title does not contain "Aforo", checking if page loaded...
+
+      at WebDriverManager.navigateToApp (config/webdriver.js:79:15)
+
+  console.log
+    📄 Actual page title: "aforo.ai"
+
+      at WebDriverManager.navigateToApp (config/webdriver.js:81:15)
+
+  console.log
+    ✅ Page loaded successfully
+
+      at WebDriverManager.navigateToApp (config/webdriver.js:85:15)
+
+  console.log
+    🔐 Attempting to login...
+
+      at RatePlansPage.login (pages/RatePlansPage.js:66:13)
+
+  console.log
+    ❌ Login failed: invalid selector: An invalid or illegal selector was specified
+      (Session info: chrome=143.0.7499.40)
+
+      at RatePlansPage.login (pages/RatePlansPage.js:99:15)
+
+  console.log
+    🧹 Cleaning up Selenium tests
+
+      at Object.<anonymous> (tests/rateplans.test.js:32:13)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+FAIL Selenium E2E Tests tests/rateplans.test.js (9.344 s)
+  Rate Plans Component Tests
+    Page Loading
+      ✕ should load Rate Plans page successfully
+      ✕ should display page header or main content
+    Rate Plans List
+      ✕ should display rate plans list or empty state
+      ✕ should handle search functionality if available
+    Create Rate Plan Functionality
+      ✕ should have Create Rate Plan button (1 ms)
+    Rate Plan Actions
+      ✕ should handle rate plan actions if plans exist
+    Error Handling
+      ✕ should handle non-existent rate plan gracefully
+      ✕ should handle network delays gracefully
+
+  ● Rate Plans Component Tests › Page Loading › should load Rate Plans page successfully
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Page Loading › should display page header or main content
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Rate Plans List › should display rate plans list or empty state
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Rate Plans List › should handle search functionality if available
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Create Rate Plan Functionality › should have Create Rate Plan button
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Rate Plan Actions › should handle rate plan actions if plans exist
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Error Handling › should handle non-existent rate plan gracefully
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  ● Rate Plans Component Tests › Error Handling › should handle network delays gracefully
+
+    Failed to login - tests cannot continue
+
+      21 |     const loginSuccess = await ratePlansPage.login();
+      22 |     if (!loginSuccess) {
+    > 23 |       throw new Error('Failed to login - tests cannot continue');
+         |             ^
+      24 |     }
+      25 |     
+      26 |     // Navigate directly to Rate Plans page
+
+      at Object.<anonymous> (tests/rateplans.test.js:23:13)
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚀 Setting up Requirements Validation Tests
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:24:17)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    🍪 Cookie popup detected
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:60:21)
+
+  console.log
+    ✅ Cookie consent accepted
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:66:21)
+
+  console.log
+    🧪 Test 1.1: First Name Required
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:60:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 1.1 Passed: Form disabled when First Name missing
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:80:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 1.2: Last Name Required
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:84:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 1.2 Passed: Form disabled when Last Name missing
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:104:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 1.3: Both Names Valid
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:108:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 1.3 Passed: Form accepts valid names
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:120:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 2.1: Reject @gmail.com
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:134:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 2.1 Passed: Form disabled with @gmail.com
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:155:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 2.2: Accept @company.com
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:159:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 2.2 Passed: @company.com correctly accepted
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:176:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 2.3: Accept @business.io
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:180:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 2.3 Passed: @business.io correctly accepted
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:197:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 2.4: Reject Empty Email
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:201:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 2.4 Passed: Form disabled with empty email
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:221:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 3.1: Company Required
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:235:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 3.1 Passed: Form disabled when Company is missing
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:256:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 3.2: Role Required
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:260:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 3.2 Passed: Form disabled when Role is missing
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:281:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 3.3: Employee Size Required
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:285:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 3.3 Passed: Form disabled when Employee Size missing
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:306:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 3.4: All Three Fields Valid
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:310:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 3.4 Passed: Company, Role, and Employee Size accepted
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:321:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 4.1: India Flag Icon
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:335:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-in"
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:341:21)
+
+  console.log
+    ✅ Test 4.1 Passed: India flag icon displayed
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:347:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 4.2: US Flag Icon
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:351:21)
+
+  console.log
+    🌍 Selecting country: US
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-us"
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:357:21)
+
+  console.log
+    ✅ Test 4.2 Passed: US flag icon displayed
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:363:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 4.3: UK Flag Icon
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:367:21)
+
+  console.log
+    🌍 Selecting country: GB
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🚩 Flag class: "fi fi-gb"
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:373:21)
+
+  console.log
+    ✅ Test 4.3 Passed: UK flag icon displayed
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:379:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 4.4: No Flag Without Country
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:383:21)
+
+  console.log
+    🚩 Flag class when no country: "null"
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:387:21)
+
+  console.log
+    ✅ Test 4.4 Passed: No flag without country selection
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:393:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 5.1: Empty Help Field Allowed
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:407:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 5.1 Passed: Empty help field does not block
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:418:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 5.2: Help Field Filled
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:422:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Test 5.2 Passed: Filled help field works fine
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:432:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 6.1: Checkbox Disabled - Empty Form
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:447:21)
+
+  console.log
+    📋 Checkbox enabled state (empty form): false
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:452:21)
+
+  console.log
+    ✅ Test 6.1 Passed: Checkbox disabled on empty form
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:459:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 6.2: Checkbox Disabled - Partial Data
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:463:21)
+
+  console.log
+    📋 Checkbox enabled state (partial data): false
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:471:21)
+
+  console.log
+    ✅ Test 6.2 Passed: Checkbox disabled with partial data
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:476:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 6.3: Checkbox Disabled - Invalid Email
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:480:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    📋 Checkbox enabled state (invalid email): false
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:493:21)
+
+  console.log
+    ✅ Test 6.3 Passed: Checkbox disabled with invalid email
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:498:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 6.4: Checkbox Enabled - All Valid
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:502:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    📋 Checkbox enabled state (all valid): true
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:508:21)
+
+  console.log
+    ✅ Test 6.4 Passed: Checkbox enabled with all valid fields
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:513:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 7.1: Button Disabled - Checkbox Unchecked
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:528:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✔️ Checkbox checked: false
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:537:21)
+
+  console.log
+    🔘 Button enabled: false
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:538:21)
+
+  console.log
+    ✅ Test 7.1 Passed: Button disabled when checkbox unchecked
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:546:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 7.2: Button Enabled - Checkbox Checked
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:550:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✔️ Checkbox checked: true
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:562:21)
+
+  console.log
+    🔘 Button enabled: true
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:563:21)
+
+  console.log
+    ✅ Test 7.2 Passed: Button enabled after checkbox checked
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:569:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 Test 7.3: Complete E2E Workflow
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:573:21)
+
+  console.log
+    📝 Step 1: Filling all required fields
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:576:21)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    📋 Step 2: Checking checkbox state
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:582:21)
+
+  console.log
+    Checkbox enabled: true
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:584:21)
+
+  console.log
+    ✔️ Step 3: Checking Terms checkbox
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:588:21)
+
+  console.log
+    🔘 Step 4: Verifying button state
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:594:21)
+
+  console.log
+    Button enabled: true
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:596:21)
+
+  console.log
+    ✅ Test 7.3 Passed: Complete workflow validated
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:601:21)
+
+  console.log
+    🧹 Cleaning up tests
+
+      at Object.<anonymous> (tests/organization-requirements-validation.test.js:31:17)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+PASS Selenium E2E Tests tests/organization-requirements-validation.test.js (359.125 s)
+  Organization Form - Complete Requirements Validation
+    ✅ REQUIREMENT 1: First Name and Last Name Mandatory
+      ✓ 1.1: Form blocks progression when First Name is empty (3631 ms)
+      ✓ 1.2: Form blocks progression when Last Name is empty (12489 ms)
+      ✓ 1.3: Form allows progression when both names are valid (22077 ms)
+    ✅ REQUIREMENT 2: Business Email Validation
+      ✓ 2.1: Form rejects @gmail.com emails (12292 ms)
+      ✓ 2.2: Form accepts @company.com emails (22360 ms)
+      ✓ 2.3: Form accepts @business.io emails (22298 ms)
+      ✓ 2.4: Form rejects empty email (12319 ms)
+    ✅ REQUIREMENT 3: Company, Role, and Employee Size Mandatory
+      ✓ 3.1: Form blocks when Company is missing (12389 ms)
+      ✓ 3.2: Form blocks when Role is missing (12348 ms)
+      ✓ 3.3: Form blocks when Employee Size is missing (12481 ms)
+      ✓ 3.4: Form allows when all three are valid (22350 ms)
+    ✅ REQUIREMENT 4: Country Flag Icon Display
+      ✓ 4.1: Verify flag icon appears for India (IN) (12528 ms)
+      ✓ 4.2: Verify flag icon appears for United States (US) (12183 ms)
+      ✓ 4.3: Verify flag icon appears for United Kingdom (GB) (12402 ms)
+      ✓ 4.4: Verify no flag when country not selected (20904 ms)
+    ✅ REQUIREMENT 5: "How can we help you?" is Optional
+      ✓ 5.1: Form submission works with empty help field (22227 ms)
+      ✓ 5.2: Form submission works with help field filled (22376 ms)
+    ✅ REQUIREMENT 6: Terms Checkbox Disabled Until Valid
+      ✓ 6.1: Checkbox is disabled when form is empty (10841 ms)
+      ✓ 6.2: Checkbox is disabled with partial data (11002 ms)
+      ✓ 6.3: Checkbox is disabled with invalid email (@gmail) (12360 ms)
+      ✓ 6.4: Checkbox becomes enabled when all required fields valid (13218 ms)
+    ✅ REQUIREMENT 7: Contact Sales Button Activation
+      ✓ 7.1: Button is disabled when checkbox not checked (12814 ms)
+      ✓ 7.2: Button becomes enabled after checkbox checked (13342 ms)
+      ✓ 7.3: Complete end-to-end workflow test (14477 ms)
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚀 Setting up Detailed Test Suite
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:25:17)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    🍪 Cookie popup detected
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:60:21)
+
+  console.log
+    ✅ Cookie consent accepted
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:66:21)
+
+  console.log
+    🧪 TC-001: First & Last Name positive progression
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:45:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-002: First Name missing blocks progression
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:64:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-003: Last Name missing blocks progression
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:80:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-004: Business Email accepts non-gmail domain
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:98:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-005: Business Email rejects @gmail.com
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:113:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-006: Business Email rejects empty local-part
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:127:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-015: Paste invalid email
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:141:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-007: Company/Role/Employee Size positive flow
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:159:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-008: Company/Role/Employee Size negative checks
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:176:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-009: Country selector must display flag
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:199:17)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    Flag class found: fi fi-in
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:205:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-010: Country selector missing flag blocks progression
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:213:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-017: Country flag network failure simulation
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:233:17)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    Terms enabled after removing flag class: true
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:265:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-011: Help text optional
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:273:17)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-012: Terms & Conditions enablement
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:303:17)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-013: Contact Sales active only after Terms checked
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:340:17)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-014: End-to-end positive submission
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:370:17)
+
+  console.log
+    🌍 Selecting country: IN
+
+      at OrganizationPage.selectCountry (pages/OrganizationPage.js:130:17)
+
+  console.log
+    ✅ Navigated to thank-you page
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:391:21)
+
+  console.log
+    🏢 Navigating to Organization page
+
+      at OrganizationPage.navigateToOrganization (pages/OrganizationPage.js:47:17)
+
+  console.log
+    ℹ️ No cookie consent popup found (already accepted or not shown)
+
+      at OrganizationPage.dismissCookieConsent (pages/OrganizationPage.js:72:21)
+
+  console.log
+    🧪 TC-016: Long input checks
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:402:17)
+
+  console.log
+    🧹 Cleaning up tests
+
+      at Object.<anonymous> (tests/organization-detailed-tcs.test.js:32:17)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+PASS Selenium E2E Tests tests/organization-detailed-tcs.test.js (221.779 s)
+  Organization Page - Detailed Test Cases (TC-001 to TC-017)
+    ✓ TC-001: First & Last Name positive progression (12606 ms)
+    ✓ TC-002: First Name missing blocks progression (11075 ms)
+    ✓ TC-003: Last Name missing blocks progression (10931 ms)
+    ✓ TC-004: Business Email accepts non-gmail domain (20935 ms)
+    ✓ TC-005: Business Email rejects @gmail.com (11065 ms)
+    ✓ TC-006: Business Email rejects empty local-part (10979 ms)
+    ✓ TC-015: Paste invalid email (edge) (10816 ms)
+    ✓ TC-007: Company/Role/Employee Size required positive flow (21155 ms)
+    ✓ TC-008: Company/Role/Employee Size required negative checks (11214 ms)
+    ✓ TC-009: Country selector must display flag (positive) (12276 ms)
+    ✓ TC-010: Country selector missing flag blocks progression (negative) (10966 ms)
+    ✓ TC-017: Country flag network failure simulation (flaky scenario) (12305 ms)
+    ✓ TC-011: "How can we help you?" optional (11935 ms)
+    ✓ TC-012: Terms & Conditions enablement (12138 ms)
+    ✓ TC-013: Contact Sales active only after Terms checked (11996 ms)
+    ✓ TC-014: End-to-end positive submission (14646 ms)
+    ✓ TC-016: Long input / boundary checks (12188 ms)
+
+  console.log
+    🔧 Setting up Selenium test environment
+
+      at Object.<anonymous> (setup.js:5:9)
+
+  console.log
+    ✅ Selenium test environment setup complete
+
+      at Object.<anonymous> (setup.js:78:9)
+
+  console.log
+    🌐 Base URL: http://localhost:3000
+
+      at Object.<anonymous> (setup.js:79:9)
+
+  console.log
+    🌍 Browser: chrome
+
+      at Object.<anonymous> (setup.js:80:9)
+
+  console.log
+    👻 Headless: false
+
+      at Object.<anonymous> (setup.js:81:9)
+
+  console.log
+    🚀 Setting up Selenium tests for Login Page
+
+      at Object.<anonymous> (tests/login.test.js:11:13)
+
+  console.log
+    ✅ WebDriver initialized for chrome
+
+      at WebDriverManager.createDriver (config/webdriver.js:29:15)
+
+  console.log
+    🧪 Running: Page Loading Test
+
+      at Object.<anonymous> (tests/login.test.js:29:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    ✅ Passed: Page Loading Test
+
+      at Object.<anonymous> (tests/login.test.js:39:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Empty Email Test
+
+      at Object.<anonymous> (tests/login.test.js:50:15)
+
+  console.log
+    ✅ Passed: Empty Email Test
+
+      at Object.<anonymous> (tests/login.test.js:56:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Invalid Email Format Test
+
+      at Object.<anonymous> (tests/login.test.js:60:15)
+
+  console.log
+    ✅ Passed: Invalid Email Format Test
+
+      at Object.<anonymous> (tests/login.test.js:66:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Personal Email Test
+
+      at Object.<anonymous> (tests/login.test.js:70:15)
+
+  console.log
+    ✅ Passed: Personal Email Test
+
+      at Object.<anonymous> (tests/login.test.js:76:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Empty Password Test
+
+      at Object.<anonymous> (tests/login.test.js:80:15)
+
+  console.log
+    ✅ Passed: Empty Password Test
+
+      at Object.<anonymous> (tests/login.test.js:87:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Password Toggle Test
+
+      at Object.<anonymous> (tests/login.test.js:98:15)
+
+  console.log
+    ✅ Passed: Password Toggle Test
+
+      at Object.<anonymous> (tests/login.test.js:118:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Contact Sales Link Test
+
+      at Object.<anonymous> (tests/login.test.js:122:15)
+
+  console.log
+    ✅ Passed: Contact Sales Link Test
+
+      at Object.<anonymous> (tests/login.test.js:127:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Invalid Login Test
+
+      at Object.<anonymous> (tests/login.test.js:138:15)
+
+  console.log
+    ✅ Error displayed: Invalid email or password. Please try again.
+
+      at Object.<anonymous> (tests/login.test.js:149:17)
+
+  console.log
+    ✅ Passed: Invalid Login Test
+
+      at Object.<anonymous> (tests/login.test.js:153:15)
+
+  console.log
+    🔐 Navigating to Login page
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:42:13)
+
+  console.log
+    ⏳ Waiting for Login page to load
+
+      at LoginPage.navigateToLogin (pages/LoginPage.js:45:13)
+
+  console.log
+    🧪 Running: Valid Login Test
+
+      at Object.<anonymous> (tests/login.test.js:157:15)
+
+  console.log
+    ⚠️ Skipping valid login test - no real credentials provided
+
+      at Object.<anonymous> (tests/login.test.js:164:17)
+
+  console.log
+    🧹 Cleaning up Login tests
+
+      at Object.<anonymous> (tests/login.test.js:20:13)
+
+  console.log
+    ✅ WebDriver closed
+
+      at WebDriverManager.quitDriver (config/webdriver.js:62:15)
+
+PASS Selenium E2E Tests tests/login.test.js (15.34 s)
+  Login Page Tests
+    Page Loading and Content
+      ✓ should load login page with correct elements (1390 ms)
+    Form Validation
+      ✓ should show error for empty email (638 ms)
+      ✓ should show error for invalid email format (894 ms)
+      ✓ should show error for personal email domains (761 ms)
+      ✓ should show error for empty password (1022 ms)
+    UI Interactions
+      ✓ should toggle password visibility (847 ms)
+      ✓ should have working Contact Sales link (1097 ms)
+    Login Attempts
+      ✓ should handle invalid credentials (6296 ms)
+      ✓ should login with valid credentials (if available) (467 ms)
+
+📦 report is created on: /Users/shyambodicherla/Desktop/A_test/aforo_/selenium-tests/selenium-tests/reports/selenium-test-report.html
+Test Suites: 4 failed, 3 passed, 7 total
+Tests:       24 failed, 74 passed, 98 total
+Snapshots:   0 total
+Time:        1191.018 s
+Ran all test suites.

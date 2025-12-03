@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import './ConfigurationTab.css';
 import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
+import { getProductConfiguration } from '../api';
 
 export interface FieldProps {
   label: string;
@@ -253,38 +254,15 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       const fetchConfigData = async () => {
         if (!productId || !productType) return;
         try {
-          const { getAuthData } = await import('../../../utils/auth');
-          const authData = getAuthData();
-          if (!authData?.token) return;
+          // Use the proper API client instead of direct fetch to avoid CORS issues
+          const configData = await getProductConfiguration(productId, productType);
 
-          const headers = {
-            'Authorization': `Bearer ${authData.token}`,
-            'Content-Type': 'application/json',
-            'X-Organization-Id': authData?.organizationId?.toString() || ''
-          };
-
-          const endpointMap: Record<string,string> = {
-            API: 'api',
-            FlatFile: 'flatfile',
-            SQLResult: 'sql-result',
-            LLMToken: 'llm-token',
-          };
-          const apiEndpoint = endpointMap[productType as keyof typeof endpointMap] || productType.replace(/_/g,'-').toLowerCase();
-
-          let url = `http://54.238.204.246:8080/api/products/${productId}/${apiEndpoint}`;
-          if (productType === ProductTypeEnum.SQLResult || productType === ProductTypeEnum.LLMToken) {
-            url += '?meta=1';
-          }
-
-          const res = await fetch(url, { headers });
-
-          if (res.ok) {
+          if (configData && Object.keys(configData).length > 0) {
             if (!originalProductType) {
               setOriginalProductType(productType);
               localStorage.setItem('editConfigOriginalProductType', productType);
             }
 
-            const configData = await res.json();
             const lowerType = productType.toLowerCase();
             const mapped: Record<string,string> = {};
             if (lowerType === 'llmtoken' || lowerType === 'llm-token') {
@@ -311,15 +289,16 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
             // we DO have existing config → ensure flag is off
             localStorage.removeItem('editConfigProductTypeChanged');
-          } else if (res.status === 404) {
+          } else {
             // no existing config – will need to POST on save
             localStorage.setItem('editConfigProductTypeChanged', 'true');
             localStorage.removeItem('editConfigFetchedData');
           }
-          // Do NOT set the flag for other status codes
         } catch (err) {
           // Important: Do NOT force productTypeChanged=true on generic errors
           console.warn('Failed to fetch config data:', err);
+          localStorage.setItem('editConfigProductTypeChanged', 'true');
+          localStorage.removeItem('editConfigFetchedData');
         }
       };
 

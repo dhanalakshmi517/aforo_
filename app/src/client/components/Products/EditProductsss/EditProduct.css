@@ -25,11 +25,10 @@ html, body, #root{
 /* Viewport fills screen */
 .edit-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
-  padding: var(--np-gap-top) var(--np-gap-right) 0 ;
+  padding: 0;
   box-sizing: border-box;
   height: calc(100vh - 40px);
   width: 100%;
-  max-width: 100%;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -46,66 +45,24 @@ html, body, #root{
 }
 /* Card */
 .edit-np-card {
-  margin-bottom: 40px;          /* gap beneath card */
-  padding-bottom: 32px; /* space below footer */
+  margin-bottom: 0;
+  padding-bottom: 0;
   background: var(--color-neutral-white);
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   width: 100%;
+  box-sizing: border-box;
   position: relative;
-  border-radius: var(--border-radius-lg);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 20px);
+  height: 100%;
   overflow: hidden;
 }
 
 
 
 
-/* ====== Logo Uploader (copied from Create) ====== */
-/* Constrain the logo uploader form group */
-.edit-np-form-group:has(.logo-uploader) {
-  flex: 0 0 456px !important;
-  max-width: 456px !important;
-  min-width: 456px !important;
-}
-
-/* Constrain the logo uploader itself */
-.logo-uploader {
-  width: 456px !important;
-  max-width: 456px !important;
-}
-
-.logo-box{
-  width: 456px;
-  height: 36px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:0 12px;
-  background: var(--surface-layer-4, #FFF);
-  border: 1px solid var(--border-border-2, #D5D4DF);
-  border-radius: var(--border-radius-sm, 8px);
-  cursor:pointer;
-  transition:border-color .2s ease, background .2s ease;
-}
-.logo-box:hover{ border-color: var(--color-neutral-300); }
-
-/* Small action row under the logo (for Remove) */
-.logo-actions{
-  margin-top:8px;
-}
-.logo-remove-btn{
-  border:none;
-  background: rgba(255, 86, 48, 0.12);
-  color:#FF5630;
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-}
 
 /* Grid fills height */
 .edit-np-grid{
@@ -118,171 +75,55 @@ html, body, #root{
 /* ===== Rail with vertical connector line ===== */
 .edit-np-rail{
   background: var(--color-neutral-white);
-  height: auto;
   align-self: stretch;
   padding: 16px;
   box-sizing: border-box;
   border-right: 1px solid var(--color-neutral-300);
   display: flex;
   flex-direction: column;
-  height:100vh;
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* Steps container */
 .edit-np-steps {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 8px 8px 8px 0;
-  background-color: var(--color-neutral-white);
-}
-
-/* Steps container */
-.edit-np-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* Remove gap between steps */
+  gap: 0;
   padding: 8px 8px 8px 0;
   position: relative;
 }
 
 /* Each step card */
 .edit-np-step {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 8px;
-  background: var(--color-neutral-white);
-  border: 0;
-  width: 100%;
-  text-align: left;
-  position: relative;
-  min-height: 70px; /* Reduced height for better alignment */
+  gap: 8px;
+  padding: 8px 4px;
+  background-color: var(--color-neutral-white);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: background-color .2s ease;
 }
 
-/* Bullet container */
-.edit-np-step__bullet {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 24px;
-  flex: 0 0 24px;
-  position: relative;
-  z-index: 2;
+.edit-np-step:hover {
+  background-color: var(--color-neutral-white);
 }
 
-/* Icon container */
-.edit-np-step__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  position: relative;
-  z-index: 2;
+.edit-np-step.active {
+  border-left-width: 3px;
+  border-left-color: var(--color-primary-800);
+  background-color: var(--color-neutral-white);
 }
 
-/* Connector line container */
-.edit-np-step__connector {
-  position: absolute;
-  top: 24px; /* Start from the bottom of the circle */
-  left: 11px;
-  z-index: 1;
-  width: 2px;
-  content: '';
-  display: block;
-}
-
-/* Different heights for each connector */
-.edit-np-step:nth-child(1) .edit-np-step__connector {
-  height: 88px; /* Height for first connector */
-}
-
-.edit-np-step:nth-child(2) .edit-np-step__connector {
-  height: 98px; /* Height for second connector */
-}
-
-
-
-/* Vertical tweaks for steps after the first */
-
-/* Step container */
-.edit-np-step {
-  position: relative;
-  padding: 0 0 12px 0;
-  min-height: 50px; /* Increased to accommodate the tallest connector */
-  display: flex;
-  align-items: flex-start;
-}
-
-/* Remove connector from last step */
-.edit-np-step:last-child .edit-np-step__connector {
-  display: none;
-}
-
-/* Remove bottom padding from last step */
-.edit-np-step:last-child {
-  padding-bottom: 0;
-}
-
-/* Text content */
-.edit-np-step__text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-top: 2px; /* Align text with circle */
-}
-
-.edit-np-step__connector svg {
-  display: block;
-  height: 100%;
-}
-
-.edit-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
-.edit-np-step__title{
-   color: var(--color-neutral-1400);
-
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg); /* 150% */
-text-align: left;
-margin-bottom: 2px;
-}
-.edit-np-step__desc{ color: var(--color-neutral-1400);
-
-  /* body/md/reg */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md); /* 142.857% */
-}
-
-/* States */
-/* .np-step.active{
-   border:1px solid var(--color-neutral-300); 
-   border-radius: var(--border-radius-sm);
-    } */
-
-.np-step.completed .np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
-.np-step.completed .np-step__icon svg{ visibility:hidden; }
-.np-step.active .np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
-.np-step.active .np-step__connector{ background-color: var(--color-primary-800); }
-.np-step.active .np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
-
-.edit-np-step.active{ border-left:2px solid var(--color-primary-800); background-color:var(--color-neutral-white); }
-.edit-np-step__title{ 
+.edit-np-step__title {
   color: var(--color-neutral-800);
-
-  /* body/md/med */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
   font-weight: 500;
-  line-height: var(--line-height-body-lg); /* 150% */
+  line-height: var(--line-height-body-lg);
   transition: color 0.2s ease;
 }
 
@@ -293,41 +134,6 @@ margin-bottom: 2px;
 
 
 
-/* Main area */
-.edit-np-main { 
-  border-radius: var(--border-radius-sm); 
-  position: relative; 
-  background:var(--color-neutral-white);
-  display: flex;
-  flex-direction: column;
-  height: calc(100% - 24px);
-  min-height: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  padding-bottom: var(--np-gap-bottom);
-}
-
-/* Make inner area a column so footer can stick to bottom */
-.edit-np-main__inner {
-  position: relative;
-  z-index: 1;
-  padding: 24px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-.edit-np-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
 .edit-np-form {
   display: flex;
   flex-direction: column;
@@ -370,29 +176,6 @@ margin-bottom: 2px;
   padding-bottom: 15px;
 }
 
-/* Section title above a full-bleed faint line */
-.edit-np-section-header{
-  position:relative;
-  margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
-  padding:0 24px;   
- 
-}
-.edit-np-section-title{
-  color: var(--color-neutral-800);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h6);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-heading-h6);
-text-transform: uppercase;
-}
-.edit-np-section-header::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-5px;
-  height:1px;
-  background:var(--color-neutral-300);
-}
 
 /* Content column ensures footer pushes to bottom */
 .edit-np-content {
@@ -421,19 +204,14 @@ text-transform: uppercase;
   border-radius: 3px;
 }
 
-/* Adjust skeleton faint rules just for Edit Product main area */
-.edit-np-card .af-skel-rule--bottom { bottom: 70px; left: 300px; }
-
 /* Footer actions on a full-bleed line */
 .edit-np-form-footer {
-  position: absolute;
-  bottom: 0;
-  left: 324px; /* 300px rail + 24px card padding */
-  right: 24px;
-  padding: 16px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 0;
+  margin-top: auto;
+  border-top: 1px solid var(--color-neutral-300);
 }
 
 .edit-np-btn-group { 
@@ -447,86 +225,6 @@ text-transform: uppercase;
 }
 
 
-/* Ensure the next button is on the right */
-/* Base Button Styles */
-/* Shared button selectors so we can reuse components styled as `np-btn` or `edit-np-btn` */
-.np-btn,
-.edit-np-btn {
-/* Base button styles with no flash */
-/* older selector kept for backwards compatibility */
-/* .edit-np-btn {  <-- merged above */
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  outline: none;
-  height: 40px;
-  padding: 8px 20px;
-  font-family: var(--type-font-family-primary);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  line-height: var(--line-height-body-md);
-  border-radius: var(--border-radius-sm);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 144px auto;
-  text-align: center;
-}
-
-
-
-/* Active state with no transform */
-.edit-np-btn:active {
-  transform: none !important;
-  transition: none !important;
-}
-
-.edit-np-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Primary Button */
-.np-btn--primary, .edit-np-btn--primary { 
-  background-color: var(--color-primary-700);
-  color: white;
-}
-
-.np-btn--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-800);
-}
-
-.np-btn--primary:active:not(:disabled) {
-  background-color: var(--color-primary-900);
-}
-
-.np-btn--primary:disabled {
-  background-color: var(--color-neutral-300);
-  color: var(--color-neutral-600);
-}
-
-/* Ghost Button */
-.np-btn--ghost, .edit-np-btn--ghost { 
-  background-color: var(--color-primary-000);
-  border: 1px solid var(--color-neutral-400);
-  color: var(--color-primary-800);
-  width: 144px auto;
-  height: 40px;
-}
-
-.np-btn--ghost:hover:not(:disabled) {
-  background-color: var(--color-neutral-100);
-  border-color: var(--color-neutral-500);
-}
-
-.np-btn--ghost:active:not(:disabled) {
-  background-color: var(--color-neutral-200);
-}
-
-.np-btn--ghost:disabled {
-  background-color: transparent;
-  border-color: var(--color-neutral-300);
-  color: var(--color-neutral-400);
-}
 
 /* responsive */
 @media (max-width: 1200px){
@@ -546,57 +244,3 @@ text-transform: uppercase;
 }
 
 
-/* --- tuneable sizes so math stays correct --- */
-:root{
-  --np-step-icon: 24px;      /* circle size */
-  --np-steps-pl: 16px;       /* left padding on .np-steps */
-  --np-conn-w: 2px;          /* SVG line width */
-}
-
-/* Steps container (keep your existing look) */
-.edit-np-steps{
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding-left: var(--np-steps-pl);
-  background-color: var(--color-neutral-white);
-}
-
-/* Remove any old line rules if present */
-.edit-np-steps::before,
-.edit-np-step:not(:last-child)::after { background: none; }
-
-/* Vertical line is now handled by individual step connectors in JSX */
-
-/* Step row (keep your existing styles—just ensure the icon uses the same size) */
-.edit-np-step {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px 4px;
-  background-color: var(--color-neutral-white);
-  border-left: 2px solid transparent;
-  cursor: pointer;
-  transition: background-color .2s ease;
-}
-
-.edit-np-step:hover {
-  background-color:var(--color-neutral-white);
-}
-
-.edit-np-step.active {
-  border-left-width: 3px;
-  border-left-color: var(--color-primary-800);
-  background-color: var(--color-neutral-white);
-}
-
-/* hide old step icon */
-.edit-np-step__icon {
-  display: none;
-  width: var(--np-step-icon);
-  height: var(--np-step-icon);
-  border-radius: 50%;
-  flex-shrink: 0;
-}

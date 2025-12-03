@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import "./KongProducts.css";
 import SelectableCard from "../../componenetsss/SelectableCard";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
@@ -72,64 +72,80 @@ const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = []
     }
   };
 
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleClear = () => {
+    setSearch('');
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  let searchCls = 'kong-search';
+  if (search) searchCls += ' has-value';
+  if (isFocused) searchCls += ' is-active';
+
   return (
     <div className="kong-products-page">
       <div className="kong-products-card">
         {/* Top header row */}
         <div className="kong-products-header">
-        <div className="kong-products-header-top">
-          <div className="kong-products-header-left">
-            <h1 className="kong-products-title">Import Apigee Products</h1>
-            <p className="kong-products-selected-text">
-              {selectedCount} Products selected
-            </p>
+          <div className="kong-products-header-top">
+            <div className="kong-products-header-left">
+              <h1 className="kong-products-title">Import Kong Products</h1>
+              <p className="kong-products-selected-text">
+                {selectedCount} Products selected
+              </p>
+            </div>
           </div>
 
-          <div className="kong-products-search-wrapper">
-            <span className="kong-products-search-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 20 20"
-                fill="none"
-              >
-                <path
-                  d="M18.3334 18.3332L15.0001 14.9998M17.5001 9.1665C17.5001 13.3086 14.1422 16.6665 10.0001 16.6665C5.85794 16.6665 2.50008 13.3086 2.50008 9.1665C2.50008 5.02436 5.85794 1.6665 10.0001 1.6665C14.1422 1.6665 17.5001 5.02436 17.5001 9.1665Z"
-                  stroke="#8DA0C5"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+          <div className={searchCls} role="search">
+            <span className="kong-search-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </span>
+
             <input
-              type="text"
-              className="kong-products-search-input"
+              ref={inputRef}
+              className="kong-search-input"
+              aria-label="Search products"
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
             />
+            {search && (
+              <button
+                type="button"
+                className="kong-clear-btn"
+                onClick={handleClear}
+                aria-label="Clear search"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M15 5L5 15M5 5L15 15" stroke="#1A2126" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          <div className="kong-products-select-actions">
+            <Checkbox
+              label="Select All"
+              checked={allSelected}
+              onChange={(checked) =>
+                checked ? handleSelectAll() : handleClearAll()
+              }
+            />
+            <button
+              type="button"
+              className="kong-products-clear-btn"
+              onClick={handleClearAll}
+            >
+              Clear All
+            </button>
           </div>
         </div>
-        
-        <div className="kong-products-select-actions">
-          <Checkbox
-            label="Select All"
-            checked={allSelected}
-            onChange={(checked) =>
-              checked ? handleSelectAll() : handleClearAll()
-            }
-          />
-          <button
-            type="button"
-            className="kong-products-clear-btn"
-            onClick={handleClearAll}
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
 
       {/* Scrollable content container */}
       <div className="kong-products-content">
@@ -148,8 +164,7 @@ const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = []
         </div>
       </div>
 
-      {/* Fixed footer with button */}
-      <div className="kong-products-footer">
+        {/* Fixed footer with button */}
         <div className="kong-products-footer-line" />
         <div className="kong-products-footer-actions">
           <PrimaryButton
@@ -159,7 +174,6 @@ const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = []
             Import Products
           </PrimaryButton>
         </div>
-      </div>
       </div>
     </div>
   );

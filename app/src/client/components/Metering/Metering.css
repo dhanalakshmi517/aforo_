@@ -723,6 +723,7 @@ line-height: var(--line-height-body-sm);
   gap:8px;
   color:var(--color-neutral-600);
   font-family:var(--font-family-primary);
+  min-height:calc(100vh - 300px);
 }
 .metrics-empty-state-text{
   font-size:14px;

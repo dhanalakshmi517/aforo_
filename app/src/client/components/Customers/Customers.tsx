@@ -313,7 +313,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                   <tr>
                     <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                       <div className="customers-empty-state">
-                        <img src={CustomersPlat} alt="No customers" />
+                        <img src={CustomersPlat} alt="No customers" style={{ width: '190px', height: '190px' }} />
                         <p className="customers-empty-state-text" >
                           No Customer created yet. Click "New Customer"<br /> to create your first Customer.
                         </p>

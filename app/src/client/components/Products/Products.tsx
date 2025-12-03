@@ -494,6 +494,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             left: 6,
             top: 4,
             width: 34,
+            borderRadius:'9px',
+
             height: 34,
             backgroundColor: tile,
             background: tile,
@@ -510,6 +512,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     height: 34,
     display: 'flex',
     justifyContent: 'center',
+    borderRadius:'9px',
     alignItems: 'center',
     border: '0.6px solid #FFF',
     backgroundColor: hexToRgba(tile, 0.10),
@@ -815,13 +818,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 searchDisabled={products.length === 0}
                 filterDisabled={products.length === 0}
                 showPrimary={filteredProducts.length > 0}
-                showKongButton={filteredProducts.length > 0}
+                showKongButton={products.length > 0}
                 primaryLabel="+ Create Product"
                 onPrimaryClick={() => navigate('/get-started/products/new')}
                 onFilterClick={() => {}}
                 onSettingsClick={() => setShowKongIntegration(true)}
                 onNotificationsClick={() => {}}
-                  showIntegrations={products.length > 0} // Add this line
 
               />
 
@@ -924,7 +926,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
 
                         <td className="metrics-cell">
-                          <div className="metrics-wrapper">
+                          <div className="products-metrics-wrapper">
                             {product.metrics && product.metrics.length > 0 ? (
                               product.metrics.map((metric, index) => {
                                 const truncatedName =
@@ -935,17 +937,85 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   ? metric.unitOfMeasure.substring(0, 2).toUpperCase()
                                   : '';
 
+                                // Use product icon color if available, otherwise use random color
+                                const metricTileColor = product.iconData?.tileColor || '#0F6DDA';
+                                
+                                // Convert hex to RGB for light background
+                                const hexToRgb = (hex: string) => {
+                                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                                  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
+                                };
+                                const rgbColor = hexToRgb(metricTileColor);
+
                                 return (
                                   <div
                                     key={index}
-                                    className="metric-item"
-                                    style={{ backgroundColor: getRandomBackgroundColor(index) }}
+                                    className="product-metric-item"
+                                    style={{
+                                      '--metric-tile-color': metricTileColor,
+                                      '--metric-tile-color-rgb': rgbColor,
+                                      backgroundColor: `rgba(${rgbColor}, 0.15)`,
+                                      borderRadius: '8px',
+                                      width: '44px',
+                                      height: '36px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                      padding: '2px',
+                                      border: '1px solid #F6F6F6'
+                                    } as React.CSSProperties}
                                   >
-                                    <div className="metric-content">
-                                      <div className="metric-uom" title={metric.unitOfMeasure}>
+                                    <div className="metric-content" style={{
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: '100%',
+                                      height: '100%',
+                                      gap: '0px'
+                                    }}>
+                                      <div 
+                                        className="metric-uom" 
+                                        title={metric.unitOfMeasure}
+                                        style={{ 
+                                          color: metricTileColor, 
+                                          opacity: 1,
+                                          textAlign: 'center',
+                                          width: '100%',
+                                          margin: '0',
+                                          padding: '0',
+                                          fontFamily: '"Aeonik Mono VF"',
+                                          fontSize: '14px',
+                                          fontStyle: 'normal',
+                                          fontWeight: 700,
+                                          lineHeight: '20.996px',
+                                          letterSpacing: '-1px'
+                                        } as React.CSSProperties}
+                                      >
                                         {truncatedUOM}
                                       </div>
-                                      <div className="metric-name" title={metric.metricName}>
+                                      <div 
+                                        className="metric-name" 
+                                        title={metric.metricName}
+                                        style={{ 
+                                          color: metricTileColor, 
+                                          opacity: 0.9,
+                                          textAlign: 'center',
+                                          width: '100%',
+                                          margin: '0',
+                                          padding: '0',
+                                          textOverflow: 'ellipsis',
+                                          textShadow: 'rgba(45, 43, 3, 0.10) 0 0 2px',
+                                          fontFamily: '"DM Sans"',
+                                          fontSize: '10px',
+                                          fontStyle: 'normal',
+                                          fontWeight: 300,
+                                          lineHeight: '10px',
+                                          letterSpacing: '-0.2px',
+                                          marginTop:'-2px'
+                                        } as React.CSSProperties}
+                                      >
                                         {truncatedName}
                                       </div>
                                     </div>
@@ -982,8 +1052,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             ) : (
                               <EditIconButton
                                 onClick={() => {
-                                  setEditingProduct(product);
-                                  setIsEditFormOpen(true);
+                                  navigate(`/get-started/products/edit/${product.productId}`);
                                 }}
                                 title="Edit product"
                               />
@@ -1001,10 +1070,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
-                            <img src={EmptyBox} alt="No products" />
-                            <p className="customers-empty-state-text" >
-                              No products added yet. Click "New Product" to <br /> create your first product.
-                            </p>
+                            <img src={EmptyBox} alt="No products" style={{ width: '190px', height: '190px' }}/>
+                            <p className="customers-empty-state-text">
+No products are available. Click ‘New Product’ to add your first <br/> product manually, or import products from Kong.                            </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product

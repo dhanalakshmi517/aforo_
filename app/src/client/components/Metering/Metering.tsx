@@ -32,6 +32,8 @@ interface Metric {
   unit: string;
   status: string;
   createdOn?: string;
+  productId?: number;
+  iconData?: any;
 }
 
 interface NotificationState {
@@ -134,14 +136,28 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const fetchMetrics = React.useCallback(async () => {
     try {
       const data: UsageMetricDTO[] = await getUsageMetrics();
-      const mapped: Metric[] = data.map((m) => ({
-        id: (m as any).metricId ?? (m as any).billableMetricId,
-        usageMetric: m.metricName,
-        productName: m.productName,
-        unit: m.unitOfMeasure,
-        status: (m as any).status ?? (m as any).metricStatus ?? "Active",
-        createdOn: (m as any).createdOn,
-      }));
+      const mapped: Metric[] = data.map((m) => {
+        let iconData = null;
+        try {
+          if ((m as any).iconData) {
+            iconData = typeof (m as any).iconData === 'string' 
+              ? JSON.parse((m as any).iconData) 
+              : (m as any).iconData;
+          }
+        } catch (e) {
+          console.error('Error parsing iconData:', e);
+        }
+        return {
+          id: (m as any).metricId ?? (m as any).billableMetricId,
+          usageMetric: m.metricName,
+          productName: m.productName,
+          unit: m.unitOfMeasure,
+          status: (m as any).status ?? (m as any).metricStatus ?? "Active",
+          createdOn: (m as any).createdOn,
+          productId: m.productId,
+          iconData: iconData
+        };
+      });
       setMetrics(mapped);
     } catch (err) {
       console.error(err);
@@ -161,16 +177,11 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     return <EditMetrics metricId={selectedMetricId.toString()} onClose={() => { setShowEditMetricForm(false); fetchMetrics(); }} />;
   }
 
-  const metricColors = [
-    'rgba(234, 212, 174, 0.15)',
-    'rgba(226, 182, 190, 0.15)',
-    'rgba(226, 182, 204, 0.15)',
-    'rgba(220, 182, 226, 0.15)',
-    'rgba(204, 183, 225, 0.15)',
-    'rgba(196, 183, 225, 0.15)',
-    'rgba(174, 234, 214, 0.15)'
-  ];
-  const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
+  // Helper function to convert hex to RGB
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
+  };
 
   const filteredMetrics = metrics
     .filter((m) =>
@@ -215,7 +226,76 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         <tbody>
           {filteredMetrics.map((metric, idx) => (
             <tr key={metric.id}>
-              <td className="metrics-cell"><div className="metrics-wrapper" style={{display:'flex',alignItems:'center',justifyContent:'flex-start'}}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom" title={metric.unit}>{display(metric.unit && metric.unit.length > 3 ? `${metric.unit.substring(0, 3)}...` : metric.unit)}</div><div className="metric-name" title={metric.usageMetric}>{display(metric.usageMetric && metric.usageMetric.length > 3 ? `${metric.usageMetric.substring(0, 3)}...` : metric.usageMetric)}</div></div></div><span style={{marginLeft:4}}>{display(metric.usageMetric)}</span></div></td>
+              <td className="metrics-cell">
+                <div className="metrics-wrapper" style={{display:'flex',alignItems:'center',justifyContent:'flex-start'}}>
+                  {(() => {
+                    const metricTileColor = metric.iconData?.tileColor || '#0F6DDA';
+                    const rgbColor = hexToRgb(metricTileColor);
+                    return (
+                      <div 
+                        className="metric-item" 
+                        style={{ 
+                          backgroundColor: `rgba(${rgbColor}, 0.1)`,
+                          borderRadius: '6px',
+                          width: '44px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          padding: '2px'
+                        }}
+                      >
+                        <div className="metric-content" style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '100%',
+                          gap: '0px'
+                        }}>
+                          <div 
+                            className="metric-uom" 
+                            title={metric.unit}
+                            style={{
+                              color: metricTileColor,
+                              opacity: 0.9,
+                              fontWeight: 800,
+                              fontSize: '11px',
+                              textAlign: 'center',
+                              width: '100%',
+                              lineHeight: '1',
+                              margin: '0',
+                              padding: '0'
+                            }}
+                          >
+                            {display(metric.unit && metric.unit.length > 3 ? `${metric.unit.substring(0, 3)}...` : metric.unit)}
+                          </div>
+                          <div 
+                            className="metric-name" 
+                            title={metric.usageMetric}
+                            style={{
+                              color: metricTileColor,
+                              opacity: 0.8,
+                              fontWeight: 600,
+                              fontSize: '9px',
+                              textAlign: 'center',
+                              width: '100%',
+                              lineHeight: '1',
+                              margin: '0',
+                              padding: '0'
+                            }}
+                          >
+                            {display(metric.usageMetric && metric.usageMetric.length > 3 ? `${metric.usageMetric.substring(0, 3)}...` : metric.usageMetric)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <span style={{marginLeft:4}}>{display(metric.usageMetric)}</span>
+                </div>
+              </td>
               <td>{display(metric.productName)}</td>
               <td>{display(metric.unit)}</td>
               <td>
@@ -250,7 +330,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
             <tr>
               <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                 <div className="metrics-empty-state">
-                  <img src={UsageEmptyImg} alt="No metrics" style={{ width: 200, height: 200 }} />
+                  <img src={UsageEmptyImg} alt="No metrics" style={{ width: 190, height: 190 }} />
                   <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
                   <div className="new-metric-button-wrapper">
                     <PrimaryButton 

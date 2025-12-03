@@ -1,0 +1,60 @@
+@import "../Variables/Variables.css";
+.search-input-container {
+  width: 203px;
+  display: flex;
+  height:30px;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+  background: var(--color-neutral-white);
+
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+
+}
+
+/* Hover */
+.search-input-container.hover {
+  border-color: var(--color-neutral-200);
+  background-color: var(--color-neutral-100);
+}
+
+/* Focus */
+.search-input-container.focused {
+  border-color: var(--color-primary-600);
+  background-color: var(--color-neutral-white);
+}
+
+/* Disabled */
+.search-input-container.disabled {
+  pointer-events: none;
+  background-color: var(--color-neutral-200);
+  border: 1px solid var(--color-neutral-400);
+}
+
+.search-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  min-width: 0;
+
+  font-size: 14px;
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+}
+
+.search-input:focus {
+  color: var(--color-neutral-1700);
+}
+
+.search-input::placeholder {
+  color: var(--color-neutral-500);
+}

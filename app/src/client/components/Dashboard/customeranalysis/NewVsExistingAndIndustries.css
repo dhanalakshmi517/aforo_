@@ -1,0 +1,225 @@
+@import "../Variables.css";
+
+.nve-section {
+  margin-top: 20px;
+}
+
+.nve-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* shared card */
+.nve-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  flex: 1;
+  min-width: 300px;
+}
+
+.nve-left {
+  max-width: 420px;
+}
+
+.nve-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.nve-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nve-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.nve-updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* LEFT ---------------------------- */
+
+.nve-left-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nve-bubble-chart {
+  width: 100%;
+  height: 180px;
+}
+
+.nve-left-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nve-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nve-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.nve-legend-text {
+  font-size: 11px;
+  color: #475569;
+}
+
+.nve-info-text {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.nve-blue-text {
+  color: #2563eb;
+}
+
+.nve-bottom-grid {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.nve-bottom-box {
+  background: #f3f6ff;
+  padding: 14px;
+  border-radius: 16px;
+  flex: 1;
+}
+
+.nve-bottom-label {
+  font-size: 11px;
+  color: #475569;
+}
+
+.nve-bottom-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* RIGHT ---------------------------- */
+
+.nve-right-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nve-trophy {
+  background: #ecfdf3;
+  color: #16a34a;
+  padding: 6px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.nve-view-btn {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.nve-table-wrapper {
+  margin-top: 12px;
+  background: #f9fbff;
+  border-radius: 16px;
+  max-height: 270px;
+  overflow: hidden;
+}
+
+.nve-table-wrapper:hover {
+  overflow-y: auto;
+}
+
+.nve-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.nve-table thead th {
+  background: #f3f6ff;
+  font-size: 11px;
+  color: #64748b;
+  padding: 10px;
+  text-align: left;
+}
+
+.nve-table tbody td {
+  padding: 12px;
+}
+
+.nve-bold {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* customer avatars stack */
+.nve-customers-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nve-avatar-stack {
+  display: flex;
+}
+
+.nve-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #020617;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -6px;
+  font-size: 11px;
+  border: 2px solid #fff;
+}
+
+.nve-avatar:first-child {
+  margin-left: 0;
+}
+
+.nve-customer-count {
+  font-size: 12px;
+  color: #111827;
+}
+
+.nve-scroll-fade {
+  pointer-events: none;
+  height: 12px;
+  background: linear-gradient(to bottom, transparent, #f9fbff);
+  position: sticky;
+  bottom: 0;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .nve-bottom-grid {
+    flex-direction: column;
+  }
+}

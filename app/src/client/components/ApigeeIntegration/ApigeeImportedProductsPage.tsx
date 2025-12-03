@@ -7,14 +7,11 @@ import {
   ImportedApigeeProduct,
 } from './api';
 
-const initialsFromName = (name: string) => {
-  if (!name) return 'AP';
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
+// single letter from product name
+const productLetterFromName = (name: string) => {
+  if (!name) return 'P';
+  return name.trim().charAt(0).toUpperCase();
 };
-
-const avatarColors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
 
 const ApigeeImportedProducts: React.FC = () => {
   const navigate = useNavigate();
@@ -134,22 +131,20 @@ const ApigeeImportedProducts: React.FC = () => {
             )}
 
             {!loading &&
-              items.map((item, index) => {
-                const initials = initialsFromName(item.productName);
-                const color = avatarColors[index % avatarColors.length];
-
+              items.map(item => {
+                const letter = productLetterFromName(item.productName);
                 const importedDate = new Date(item.importedOn);
                 const isValidDate = !Number.isNaN(importedDate.getTime());
                 const formattedDate = isValidDate
                   ? importedDate.toLocaleString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                      timeZoneName: 'short',
-                    })
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                    timeZoneName: 'short',
+                  })
                   : '-';
 
                 return (
@@ -157,16 +152,18 @@ const ApigeeImportedProducts: React.FC = () => {
                     {/* PRODUCT NAME CELL */}
                     <div className="apigee-imported-product-cell">
                       <div className="apigee-imported-product-row">
+                        {/* PRODUCT ICON STACK */}
                         <div className="apigee-imported-logo-container">
-                          <div
-                            className="apigee-imported-avatar"
-                            style={{ backgroundColor: color }}
-                          >
-                            <span className="apigee-imported-avatar-text">
-                              {initials}
-                            </span>
+                          <div className="apigee-imported-logo-stack">
+                            <div className="apigee-imported-logo-back" />
+                            <div className="apigee-imported-logo-foreground">
+                              <span className="apigee-imported-logo-letter">
+                                {letter}
+                              </span>
+                            </div>
                           </div>
                         </div>
+
                         <div className="apigee-imported-product-name-container">
                           <div className="apigee-imported-product-name">
                             {item.productName}

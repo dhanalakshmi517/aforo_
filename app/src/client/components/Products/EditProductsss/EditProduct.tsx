@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { InputField, TextareaField } from '../../componenetsss/Inputs';
 import EditPopup from '../../componenetsss/EditPopUp';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
@@ -39,9 +39,13 @@ interface EditProductProps {
 
 type ActiveTab = 'general' | 'configuration' | 'review';
 
-const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpdate }: EditProductProps) => {
+const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProductId, onIconUpdate }: EditProductProps) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { id: urlProductId } = useParams<{ id: string }>();
+  
+  // Use URL param if available, otherwise use prop
+  const productId = urlProductId || propProductId;
 
   useEffect(() => {
     document.body.classList.add('edit-product-page');
@@ -447,6 +451,13 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
       if (!productId) return;
       try {
         setLoading(true);
+        // Clear configuration storage when loading a new product
+        localStorage.removeItem('editConfigFormData');
+        localStorage.removeItem('editConfigProductType');
+        localStorage.removeItem('editConfigFetchedData');
+        localStorage.removeItem('editConfigModifiedFields');
+        localStorage.removeItem('editConfigProductTypeChanged');
+        
         const data = await fetchGeneralDetails(productId);
 
         const originalProductName = data.productName ?? '';
@@ -673,7 +684,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                     </div>
 
                     {/* Product Icon */}
-                    <div className="edit-np-form-group">
+                    {/* <div className="edit-np-form-group">
                       <label className="edit-np-label">Product Icon</label>
                       {selectedIcon ? (
                         <div className="np-icon-field-wrapper">
@@ -740,7 +751,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                       onClose={() => setIsIconPickerOpen(false)}
                       onSelect={(icon) => { setSelectedIcon(icon); setIsIconPickerOpen(false); }}
                       maxCombosPerIcon={24}
-                    />
+                    /> */}
 
                     <div className="edit-np-form-group">
                       <label className="edit-np-label">SKU Code</label>
@@ -787,7 +798,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                     </div>
                   </div>
                 )}
-              </div>
+
 
               {/* Footer */}
               <div className="edit-np-form-footer">
@@ -799,66 +810,68 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId, onIconUpd
                   )}
                 </div>
 
+
                 <div className="edit-np-btn-group edit-np-btn-group--next">
                   <PrimaryButton type="button" onClick={handleNextStep} disabled={loading}>
-                    {loading ? 'Saving...' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Save Changes') : 'Save & Next'}
+                    {loading ? '' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Save Changes') : 'Save & Next'}
                   </PrimaryButton>
                 </div>
               </div>
-            </div>
+                                                            </div>
 
-            <div className="af-skel-rule af-skel-rule--bottom" />
+              <div className="af-skel-rule af-skel-rule--bottom" />
+            </div>
           </div>
         </div>
+      </div>
 
-        <EditPopup
-          isOpen={showSaveDraftModal}
-          onClose={() => {
-            localStorage.removeItem('editConfigFormData');
-            localStorage.removeItem('editConfigProductType');
-            setShowSaveDraftModal(false);
+      <EditPopup
+        isOpen={showSaveDraftModal}
+        onClose={() => {
+          localStorage.removeItem('editConfigFormData');
+          localStorage.removeItem('editConfigProductType');
+          setShowSaveDraftModal(false);
+          onClose();
+        }}
+        onDismiss={() => setShowSaveDraftModal(false)}
+        onSave={async () => {
+          if (!validateForm()) { setShowSaveDraftModal(false); return; }
+          setShowSaveDraftModal(false);
+
+          if (!hasPendingChanges() && !hasIconChanged() && !isDraft) {
+            onClose(); return;
+          }
+
+          const success = await saveAllChanges({
+            includeGeneral: true,
+            includeConfig: activeTab !== 'general'
+          });
+          if (success) {
+            showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
+            onClose();
+          } else {
+            showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update product. Please try again.' });
+          }
+        }}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        productName={formData.productName || 'this product'}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+
+      {showUnsavedChangesModal && (
+        <UnsavedChangesModal
+          onDiscard={() => {
+            setShowUnsavedChangesModal(false);
             onClose();
           }}
-          onDismiss={() => setShowSaveDraftModal(false)}
-          onSave={async () => {
-            if (!validateForm()) { setShowSaveDraftModal(false); return; }
-            setShowSaveDraftModal(false);
-
-            if (!hasPendingChanges() && !hasIconChanged() && !isDraft) {
-              onClose(); return;
-            }
-
-            const success = await saveAllChanges({
-              includeGeneral: true,
-              includeConfig: activeTab !== 'general'
-            });
-            if (success) {
-              showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
-              onClose();
-            } else {
-              showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update product. Please try again.' });
-            }
-          }}
+          onKeepEditing={() => setShowUnsavedChangesModal(false)}
+          onClose={() => setShowUnsavedChangesModal(false)}
         />
-
-        <ConfirmDeleteModal
-          isOpen={showDeleteConfirm}
-          productName={formData.productName || 'this product'}
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setShowDeleteConfirm(false)}
-        />
-
-        {showUnsavedChangesModal && (
-          <UnsavedChangesModal
-            onDiscard={() => {
-              setShowUnsavedChangesModal(false);
-              onClose();
-            }}
-            onKeepEditing={() => setShowUnsavedChangesModal(false)}
-            onClose={() => setShowUnsavedChangesModal(false)}
-          />
-        )}
-      </div>
+      )}
     </>
   );
 };

@@ -1,5 +1,179 @@
 @import "../../Variables/Variables.css";
 
+:root {
+  /* Outer gaps */
+  --np-gap-left: 100px;
+  --np-gap-right: 100px;
+  --np-gap-top: 10px;
+  --np-gap-bottom: 15px;
+}
+
+/* Ensure full page height */
+html, body, #root{ 
+  height: 100%; 
+  margin: 0;
+  padding: 0;
+  overflow: visible; 
+}
+
+/* Viewport fills screen */
+.edit-np-viewport {
+  border-bottom: 1px solid var(--color-neutral-300);
+  padding: 0;
+  box-sizing: border-box;
+  height: calc(100vh - 40px);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Card */
+.edit-np-card {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  background: var(--color-neutral-white);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Grid fills height */
+.edit-np-grid{
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ===== Rail with vertical connector line ===== */
+.edit-np-rail{
+  background: var(--color-neutral-white);
+  align-self: stretch;
+  padding: 16px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--color-neutral-300);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Steps container */
+.edit-np-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 8px 8px 0;
+  position: relative;
+}
+
+/* Each step card */
+.edit-np-step {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 4px;
+  background-color: var(--color-neutral-white);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.edit-np-step:hover {
+  background-color: var(--color-neutral-white);
+}
+
+.edit-np-step.active {
+  border-left-width: 3px;
+  border-left-color: var(--color-primary-800);
+  background-color: var(--color-neutral-white);
+}
+
+.edit-np-step__title {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-lg);
+  transition: color 0.2s ease;
+}
+
+.edit-np-step.active .edit-np-step__title {
+  color: var(--color-neutral-1700);
+  font-weight: 600;
+}
+
+/* Content column ensures footer pushes to bottom */
+.edit-np-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-400) transparent;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 30px 40px 16px 28px;
+  box-sizing: border-box;
+}
+
+.edit-np-content::-webkit-scrollbar {
+  width: 6px;
+}
+.edit-np-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.edit-np-content::-webkit-scrollbar-thumb {
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-position: center;
+  border-radius: 3px;
+}
+
+.edit-np-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 20px;
+}
+
+/* Footer actions on a full-bleed line */
+.edit-np-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px 16px 0;
+  margin-top: auto;
+  border-top: 1px solid var(--color-neutral-300);
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-np-btn-group { 
+  display: flex;
+  gap: 12px;
+}
+
+/* Back button group - align to left */
+.edit-np-btn-group--back {
+  margin-right: 12px;
+}
+
 /* ===== Layout wrapper ===== */
 .cus-wrapper{
   display:grid;
@@ -351,9 +525,9 @@
 /* ====== Logo Uploader (copied from Create) ====== */
 /* Constrain the logo uploader form group */
 .edit-np-form-group:has(.logo-uploader) {
-  flex: 0 0 456px !important;
-  max-width: 456px !important;
-  min-width: 456px !important;
+  flex: 0 0 400px !important;
+  max-width: 400px !important;
+  min-width: 400px !important;
 }
 
 /* Constrain the logo uploader itself */
@@ -389,6 +563,78 @@
   padding:6px 10px;
   border-radius:8px;
   cursor:pointer;
+}
+
+/* ====== Button Styles ====== */
+/* Base Button Styles */
+.np-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  outline: none;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Active state with no transform */
+.np-btn:active {
+  transform: none !important;
+  transition: none !important;
+}
+
+.np-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.np-btn--primary { 
+  background-color: var(--color-primary-700);
+  color: white;
+}
+
+.np-btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-800);
+}
+
+.np-btn--primary:active:not(:disabled) {
+  background-color: var(--color-primary-900);
+}
+
+.np-btn--primary:disabled {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+}
+
+/* Ghost Button */
+.np-btn--ghost { 
+  background-color: var(--color-primary-000);
+  border: 1px solid var(--color-neutral-400);
+  color: var(--color-primary-800);
+  padding: 9px 16px;
+  height: 40px;
+}
+
+.np-btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-500);
+}
+
+.np-btn--ghost:active:not(:disabled) {
+  background-color: var(--color-neutral-200);
+}
+
+.np-btn--ghost:disabled {
+  background-color: transparent;
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-400);
 }
 
 /* Mobile */

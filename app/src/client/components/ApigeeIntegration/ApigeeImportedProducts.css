@@ -70,7 +70,6 @@
 /* ============ CARD / TABLE WRAPPER ============ */
 
 .apigee-imported-card {
-  /* Card stretches across main content width */
   display: flex;
   padding: 20px 24px;
   flex-direction: column;
@@ -79,13 +78,10 @@
   gap: 12px;
   width: 100%;
   background: var(--color-grey-white, #fff);
-
-  /* feather shadow */
   box-shadow: 0 18px 30px 0 var(--shadow-shadow-1, #e8ecf3);
   border-radius: 16px;
 }
 
-/* Make header + body stretch full card width */
 .apigee-imported-card-header,
 .apigee-imported-card-body {
   width: 100%;
@@ -95,18 +91,16 @@
 
 .apigee-imported-card-header {
   display: grid;
-  grid-template-columns: 3fr 1.4fr 2fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 0;
 }
 
-/* Common header cell styles from Figma */
 .apigee-imported-header-cell {
   display: flex;
   padding: 6px 16px;
   align-items: center;
   gap: 4px;
   align-self: stretch;
-
   background: var(--surface-layer-150, #f0f3f8);
   font-family: var(--font-family-primary, "IBM Plex Sans", sans-serif);
   font-size: 12px;
@@ -114,22 +108,20 @@
   color: var(--color-neutral-800, #475467);
 }
 
-/* Product Name header: rounded left */
 .apigee-imported-header-name {
-  border-radius: var(--border-radius-none, 4px) 0 0 var(--border-radius-none, 4px);
+  border-radius: 4px 0 0 4px;
 }
 
-/* Product Type header: no radius, same background */
+/* shift Product Type header a bit right */
 .apigee-imported-header-type {
   border-radius: 0;
+  padding-left: 80px;
 }
 
-/* Imported On header: rounded right */
 .apigee-imported-header-imported {
-  border-radius: 0 var(--border-radius-none, 4px) var(--border-radius-none, 4px) 0;
+  border-radius: 0 4px 4px 0;
 }
 
-/* Actions header: background only (no radius) */
 .apigee-imported-header-actions {
   justify-content: center;
 }
@@ -143,7 +135,7 @@
 
 .apigee-imported-row {
   display: grid;
-  grid-template-columns: 3fr 1.4fr 2fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   padding: 14px 8px;
   border-bottom: 1px solid #e8ecf3;
@@ -166,82 +158,90 @@
 
 .apigee-imported-product-cell {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex: 1 0 0;
+  align-items: center;
+  padding-right: 8px;
 }
 
 .apigee-imported-product-row {
   display: flex;
-  align-items: center;
-  gap: 0;
-  align-self: stretch;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  min-height: 56px;
 }
 
+/* outer logo container – matches Figma specs */
 .apigee-imported-logo-container {
   display: flex;
-  width: 52.232px;
-  padding: 12px 12px 8px 8px;
-  justify-content: space-between;
+  padding: 8px;
+  justify-content: center;
   align-items: center;
+  gap: -4px;
   align-self: stretch;
+  min-height: 56px;
 
   border-radius: 12px 0 0 12px;
   border: 0.6px solid var(--border-border-2, #CFD7E2);
-  background: var(
-    --multi-colors-Products-Fuchsia-opac-2,
-    rgba(220, 182, 226, 0.15)
-  );
+  background: var(--surface-products-pink---opac,
+      rgba(226, 182, 204, 0.15));
 }
 
-.apigee-imported-avatar {
+/* small stack that holds both tiles */
+.apigee-imported-logo-stack {
+  position: relative;
   width: 32px;
   height: 32px;
-  border-radius: 999px;
+}
+
+/* back pink tile (behind, slightly up/left) */
+.apigee-imported-logo-back {
+  position: absolute;
+  width: 26.6px;
+  height: 26.6px;
+  border-radius: 5.7px;
+  background: var(--multi-colors-Products-Pink---light, #e06ca5);
+  top: 4px;
+  left: 0;
+}
+
+/* frosted foreground tile (front, slightly down/right) */
+.apigee-imported-logo-foreground {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  padding: 1.661px 3.321px;
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  gap: 2.214px;
+
+  border-radius: 6px;
+  border: 0.6px solid #fff;
+  background: rgba(202, 171, 213, 0.1);
+  backdrop-filter: blur(3.8750002384px);
+  top: 0;
+  left: 4px;
 }
 
-.apigee-imported-avatar-text {
-  font-family: var(--font-family-primary, "IBM Plex Sans", sans-serif);
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.apigee-imported-product-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.apigee-imported-product-name {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-  align-self: stretch;
-
-  overflow: hidden;
-  color: var(--text-text-darkest, #19222D);
-  text-overflow: ellipsis;
-
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+/* letter inside icon */
+.apigee-imported-logo-letter {
+  color: var(--surface-background-default, #fbfdff);
+  font-family: "IBM Plex Mono", monospace;
   font-size: var(--fontsize-body-md, 14px);
   font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-body-md, 20px);
 }
 
+/* name side */
+
 .apigee-imported-product-name-container {
   display: flex;
-  padding: 8px 12px;
+  padding: 12px 12px;
   align-items: center;
   gap: 8px;
-  flex: 1 0 0;
-  align-self: stretch;
+  flex: 1;
+  min-height: 56px;
 
   border-radius: 0 12px 12px 0;
   border-top: 0.4px solid var(--border-border-1, #E8ECF3);
@@ -250,11 +250,27 @@
   background: var(--surface-layer-50, #FBFDFF);
 }
 
+.apigee-imported-product-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+  color: var(--text-text-darkest, #19222D);
+  text-overflow: ellipsis;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-body-md, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md, 20px);
+}
+
 /* ============ TYPE CELL ============ */
 
 .apigee-imported-type-cell {
   display: flex;
   align-items: center;
+  padding-left: 80px;
 }
 
 .apigee-imported-type-pill {
@@ -287,9 +303,9 @@
 .apigee-imported-delete-btn {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--border-radius-sm, 8px);
   border: none;
-  background: rgba(254, 226, 226, 0.9);
+  background: var(--surface-error, #FFF7F5);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -325,6 +341,7 @@
 }
 
 @media (max-width: 768px) {
+
   .apigee-imported-card-header,
   .apigee-imported-row {
     grid-template-columns: 2.4fr 1.2fr 1.6fr 0.8fr;
