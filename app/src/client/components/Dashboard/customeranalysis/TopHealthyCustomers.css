@@ -1,0 +1,238 @@
+@import "../Variables.css";
+
+.thc-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px 20px 16px 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+/* header */
+.thc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.thc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.thc-trophy-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background: #ecfdf3;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thc-trophy-symbol {
+  font-size: 16px;
+}
+
+.thc-header-title {
+  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.thc-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.thc-updated-text {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.thc-view-btn {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #16a34a;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.thc-view-arrow {
+  font-size: 14px;
+}
+
+/* table wrapper */
+.thc-table-wrapper {
+  margin-top: 8px;
+  background: #f9fbff;
+  border-radius: 16px;
+  max-height: 320px;
+  overflow: hidden;
+}
+
+.thc-card .thc-table-wrapper:hover {
+  overflow-y: auto;
+}
+
+/* table */
+.thc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.thc-table thead {
+  background: #f3f6ff;
+}
+
+.thc-table th,
+.thc-table td {
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.thc-table th {
+  font-weight: 500;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.thc-table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+/* customer cell */
+.thc-customer-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.thc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.thc-customer-name {
+  font-size: 12px;
+  color: #0f172a;
+}
+
+/* health bar */
+.thc-health-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thc-health-bar-bg {
+  width: 90px;
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.thc-health-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.thc-health-percent {
+  font-size: 11px;
+  color: #16a34a;
+}
+
+/* common numeric cols */
+.thc-col-text {
+  color: #111827;
+}
+
+/* usage */
+.thc-usage-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.thc-usage-value {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* pill */
+.thc-pill-low {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #ecfdf3;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+/* scroll fade */
+.thc-scroll-fade {
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(249, 250, 251, 0), #f9fbff);
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .thc-table {
+    font-size: 11px;
+  }
+
+  .thc-table th,
+  .thc-table td {
+    padding: 8px 8px;
+  }
+}
+
+@media (max-width: 700px) {
+  .thc-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .thc-header-right {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .thc-table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .thc-table {
+    min-width: 640px;
+  }
+}

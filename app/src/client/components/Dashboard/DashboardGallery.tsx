@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./DashboardGallery.css";
 import PageHeader from "../PageHeader/PageHeader";
 import CustomerInsights from "./CustomerInsights";
@@ -23,30 +24,30 @@ type Props = {
 };
 
 const defaultCards: DashboardCard[] = [
-  // {
-  //   id: "cust",
-  //   title: "Customer Analysis",
-  //   description: "Understand customer health, growth, churn, and segmentation",
-  //   imageSrc: customerAnalysisImg,
-  //   icon: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" width="19" height="17" viewBox="0 0 19 17" fill="none">
-  //       <path d="M12.4167 15.75V14.0833C12.4167 13.1993 12.0655 12.3514 11.4404 11.7263C10.8152 11.1012 9.96739 10.75 9.08333 10.75H4.08333C3.19928 10.75 2.35143 11.1012 1.72631 11.7263C1.10119 12.3514 0.75 13.1993 0.75 14.0833V15.75M12.4167 0.856667C13.1315 1.04197 13.7645 1.45939 14.2164 2.04339C14.6683 2.62738 14.9135 3.34491 14.9135 4.08333C14.9135 4.82176 14.6683 5.53928 14.2164 6.12328C13.7645 6.70728 13.1315 7.12469 12.4167 7.31M17.4167 15.75V14.0833C17.4161 13.3448 17.1703 12.6273 16.7178 12.0436C16.2653 11.4599 15.6318 11.043 14.9167 10.8583M9.91667 4.08333C9.91667 5.92428 8.42428 7.41667 6.58333 7.41667C4.74238 7.41667 3.25 5.92428 3.25 4.08333C3.25 2.24238 4.74238 0.75 6.58333 0.75C8.42428 0.75 9.91667 2.24238 9.91667 4.08333Z" stroke="#F9FBFD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  //     </svg>
-  //   ),
-  //   live: true,
-  // },
-  // {
-  //   id: "realtime",
-  //   title: "Real-Time Tracking",
-  //   description: "Live view of usage, billing events, and activity",
-  //   imageSrc: realTimeImg,
-  //   icon: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
-  //       <path d="M15.75 8.25037C15.7499 9.83419 15.2484 11.3773 14.3174 12.6586C13.3864 13.9399 12.0737 14.8936 10.5674 15.383C9.06108 15.8724 7.4385 15.8723 5.9322 15.3829C4.42591 14.8934 3.11323 13.9396 2.1823 12.6583C1.25138 11.3769 0.749989 9.83377 0.75 8.24995C0.750011 6.66612 1.25142 5.12296 2.18237 3.84162C3.11331 2.56028 4.426 1.60654 5.9323 1.1171C7.4386 0.627656 9.06119 0.627633 10.5675 1.11703" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  //     </svg>
-  //   ),
-  //   live: true,
-  // },
+  {
+    id: "cust",
+    title: "Customer Analysis",
+    description: "Understand customer health, growth, churn, and segmentation",
+    imageSrc: customerAnalysisImg,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="19" height="17" viewBox="0 0 19 17" fill="none">
+        <path d="M12.4167 15.75V14.0833C12.4167 13.1993 12.0655 12.3514 11.4404 11.7263C10.8152 11.1012 9.96739 10.75 9.08333 10.75H4.08333C3.19928 10.75 2.35143 11.1012 1.72631 11.7263C1.10119 12.3514 0.75 13.1993 0.75 14.0833V15.75M12.4167 0.856667C13.1315 1.04197 13.7645 1.45939 14.2164 2.04339C14.6683 2.62738 14.9135 3.34491 14.9135 4.08333C14.9135 4.82176 14.6683 5.53928 14.2164 6.12328C13.7645 6.70728 13.1315 7.12469 12.4167 7.31M17.4167 15.75V14.0833C17.4161 13.3448 17.1703 12.6273 16.7178 12.0436C16.2653 11.4599 15.6318 11.043 14.9167 10.8583M9.91667 4.08333C9.91667 5.92428 8.42428 7.41667 6.58333 7.41667C4.74238 7.41667 3.25 5.92428 3.25 4.08333C3.25 2.24238 4.74238 0.75 6.58333 0.75C8.42428 0.75 9.91667 2.24238 9.91667 4.08333Z" stroke="#F9FBFD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    live: true,
+  },
+  {
+    id: "realtime",
+    title: "Real-Time Tracking",
+    description: "Live view of usage, billing events, and activity",
+    imageSrc: realTimeImg,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+        <path d="M15.75 8.25037C15.7499 9.83419 15.2484 11.3773 14.3174 12.6586C13.3864 13.9399 12.0737 14.8936 10.5674 15.383C9.06108 15.8724 7.4385 15.8723 5.9322 15.3829C4.42591 14.8934 3.11323 13.9396 2.1823 12.6583C1.25138 11.3769 0.749989 9.83377 0.75 8.24995C0.750011 6.66612 1.25142 5.12296 2.18237 3.84162C3.11331 2.56028 4.426 1.60654 5.9323 1.1171C7.4386 0.627656 9.06119 0.627633 10.5675 1.11703" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    live: true,
+  },
   {
     id: "product",
     title: "Product Analysis",
@@ -59,26 +60,39 @@ const defaultCards: DashboardCard[] = [
     ),
     live: true,
   },
-  // {
-  //   id: "revenue",
-  //   title: "Revenue Analysis",
-  //   description: "Monitor recurring revenue, ARPC, and billing trends",
-  //   imageSrc: revenueDashImg,
-  //   icon: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 19 19" fill="none">
-  //       <path d="M14.1583 7.725C14.9461 8.01869 15.6471 8.50627 16.1965 9.14266C16.7458 9.77905 17.1259 10.5437 17.3015 11.3659C17.477 12.1881 17.4424 13.0413 17.2009 13.8465C16.9593 14.6518 16.5186 15.3832 15.9195 15.973C15.3204 16.5628 14.5823 16.9921 13.7733 17.221C12.9644 17.45 12.1108 17.4712 11.2914 17.2829C10.4721 17.0945 9.71343 16.7026 9.08569 16.1433C8.45795 15.5841 7.98136 14.8756 7.7 14.0833M4.91667 4.08333H5.75V7.41667M13.0083 10.65L13.5917 11.2417L11.2417 13.5917M10.75 5.75C10.75 8.51142 8.51142 10.75 5.75 10.75C2.98858 10.75 0.75 8.51142 0.75 5.75C0.75 2.98858 2.98858 0.75 5.75 0.75C8.51142 0.75 10.75 2.98858 10.75 5.75Z" stroke="#F9FBFD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  //     </svg>
-  //   ),
-  //   live: true,
-  // },
+  {
+    id: "revenue",
+    title: "Revenue Analysis",
+    description: "Monitor recurring revenue, ARPC, and billing trends",
+    imageSrc: revenueDashImg,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 19 19" fill="none">
+        <path d="M14.1583 7.725C14.9461 8.01869 15.6471 8.50627 16.1965 9.14266C16.7458 9.77905 17.1259 10.5437 17.3015 11.3659C17.477 12.1881 17.4424 13.0413 17.2009 13.8465C16.9593 14.6518 16.5186 15.3832 15.9195 15.973C15.3204 16.5628 14.5823 16.9921 13.7733 17.221C12.9644 17.45 12.1108 17.4712 11.2914 17.2829C10.4721 17.0945 9.71343 16.7026 9.08569 16.1433C8.45795 15.5841 7.98136 14.8756 7.7 14.0833M4.91667 4.08333H5.75V7.41667M13.0083 10.65L13.5917 11.2417L11.2417 13.5917M10.75 5.75C10.75 8.51142 8.51142 10.75 5.75 10.75C2.98858 10.75 0.75 8.51142 0.75 5.75C0.75 2.98858 2.98858 0.75 5.75 0.75C8.51142 0.75 10.75 2.98858 10.75 5.75Z" stroke="#F9FBFD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    live: true,
+  },
 ];
 
 const DashboardGallery: React.FC<Props> = ({
   cards = defaultCards,
   onCardClick,
 }) => {
+  const navigate = useNavigate();
+
   const handleCardClick = (card: DashboardCard) => {
     onCardClick?.(card);
+    
+    // Navigate based on card ID
+    if (card.id === "cust") {
+      navigate("/get-started/dashboards/customer-analysis");
+    } else if (card.id === "realtime") {
+      navigate("/get-started/dashboards/real-time-tracking");
+    } else if (card.id === "product") {
+      navigate("/get-started/dashboards/product-analytics");
+    } else if (card.id === "revenue") {
+      navigate("/get-started/dashboards/revenue-analysis");
+    }
   };
 
   return (
