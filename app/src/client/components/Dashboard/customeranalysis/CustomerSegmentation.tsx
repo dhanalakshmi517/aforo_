@@ -27,21 +27,22 @@ type RevenueBucket = {
 };
 
 const companySizeData: CompanySlice[] = [
-  { name: "Startups", value: 35, color: "#2DD4BF" },
-  { name: "SMB", value: 40, color: "#4F46E5" },
-  { name: "Enterprise", value: 25, color: "#A855F7" },
+  { name: "Startups", value: 35, color: "#66CCA5" },
+  { name: "SMB", value: 40, color: "#66B1CC" },
+  { name: "Enterprise", value: 25, color: "#6685CC" },
 ];
 
 const revenueBuckets: RevenueBucket[] = [
-  { band: "Low", label: "Low (<10K$)", customers: 32446, color: "#BFDBFE" },
+  { band: "Low", label: "Low (<10K$)", customers: 32446, color: "#6685CC" },
   {
     band: "Med",
     label: "Medium (10K$ - 100K$)",
     customers: 82446,
-    color: "#1F2937",
+    color: "#8566CC",
   },
-  { band: "High", label: "High (>100K$)", customers: 22446, color: "#E5E7EB" },
+  { band: "High", label: "High (>100K$)", customers: 22446, color: "#66CCA5" },
 ];
+
 
 const CustomerSegmentation: React.FC = () => {
   return (
@@ -84,6 +85,8 @@ const CustomerSegmentation: React.FC = () => {
                     innerRadius="55%"
                     outerRadius="80%"
                     paddingAngle={2}
+                            cornerRadius={6}
+
                   >
                     {companySizeData.map((slice) => (
                       <Cell key={slice.name} fill={slice.color} />
@@ -169,6 +172,7 @@ const CustomerSegmentation: React.FC = () => {
                     dataKey="customers"
                     radius={[6, 6, 6, 6]}
                     isAnimationActive={false}
+                    maxBarSize={40}
                   >
                     {revenueBuckets.map((row) => (
                       <Cell key={row.band} fill={row.color} />

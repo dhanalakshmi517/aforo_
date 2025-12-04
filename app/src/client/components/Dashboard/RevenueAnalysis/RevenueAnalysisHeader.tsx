@@ -101,7 +101,7 @@ const RevenueAnalysisHeader: React.FC = () => {
 
       {/* Bottom row */}
       <div className="co-header-bottom">
-        <h1 className="co-title">Customer overview</h1>
+        <h1 className="co-title">Revenue Analytics</h1>
 
         <div className="co-controls">
           <div className="co-filter-group">

@@ -58,12 +58,12 @@ const RevenueSummaryCards: React.FC = () => {
         >
           <div className="rev-card-header">
             <span className="rev-label">{m.label}</span>
-            <button
+            {/* <button
               className="rev-checkbox"
               aria-label={`Toggle ${m.label} in chart`}
             >
               <span className="rev-checkbox-inner" />
-            </button>
+            </button> */}
           </div>
 
           <div className="rev-value-row">

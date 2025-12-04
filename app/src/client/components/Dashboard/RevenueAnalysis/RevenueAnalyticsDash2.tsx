@@ -18,15 +18,15 @@ type GrowthPoint = {
 };
 
 const growthData: GrowthPoint[] = [
-  { month: "Apr", value: 92, color: "#22C55E" },
-  { month: "May", value: 90, color: "#3B82F6" },
-  { month: "Jun", value: 93, color: "#22C55E" },
-  { month: "Jul", value: 85, color: "#38BDF8" },
-  { month: "Aug", value: 92, color: "#6366F1" },
-  { month: "Sep", value: 88, color: "#8B5CF6" },
-  { month: "Oct", value: 96, color: "#22C55E" },
-  { month: "Nov", value: 82, color: "#60A5FA" },
-  { month: "Dec", value: 94, color: "#2DD4BF" },
+  { month: "Apr", value: 92, color: "#66CCA5" },
+  { month: "May", value: 90, color: "#6685CC" },
+  { month: "Jun", value: 93, color: "#66CCA5" },
+  { month: "Jul", value: 85, color: "#66B1CC" },
+  { month: "Aug", value: 92, color: "#6685CC" },
+  { month: "Sep", value: 88, color: "#8566CC" },
+  { month: "Oct", value: 96, color: "#66CCA5" },
+  { month: "Nov", value: 82, color: "#A8C5DA" },
+  { month: "Dec", value: 94, color: "#A1E3CB" },
 ];
 
 const RevenuAnalyticsDash2: React.FC = () => {

@@ -29,8 +29,8 @@
 }
 
 .ra4-icon-box {
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 52px;
   border-radius: 12px;
   background: #e0f2fe;
   display: flex;
@@ -55,8 +55,14 @@
 }
 
 .ra4-updated {
-  font-size: 11px;
-  color: #9ca3af;
+ color:  #A6B9C9;
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .ra4-view-all {
@@ -76,7 +82,8 @@
 
 /* table */
 .ra4-table-wrapper {
-  background: #f9fbff;
+  margin-top: 12px;
+  background: transparent;
   border-radius: 16px;
   max-height: 260px;
   overflow: hidden;
@@ -93,25 +100,27 @@
 }
 
 .ra4-table thead {
-  background: #f3f6ff;
+  background: var(--color-neutral-100);
 }
 
 .ra4-table th,
 .ra4-table td {
-  padding: 10px 12px;
+  padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }
 
 .ra4-table th {
-  font-size: 11px;
-  font-weight: 500;
-  color: #64748b;
+ color:  #44576F;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
-.ra4-table tbody tr:nth-child(even) {
-  background: #fbfdff;
-}
 
 /* customer cell */
 .ra4-name-cell {

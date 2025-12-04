@@ -58,10 +58,10 @@
 }
 
 .go-icon-box {
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 52px;
   border-radius: 12px;
-  background: #e0f2fe;
+  background: #EEF3F7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,15 +84,21 @@
 }
 
 .go-updated {
-  font-size: 11px;
-  color: #9ca3af;
+ color:  #A6B9C9;
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .go-view-all {
   border: none;
   background: transparent;
   font-size: 12px;
-  color: #2563eb;
+  color:var(--color-neutral-900);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -105,7 +111,7 @@
 
 /* table */
 .go-table-wrapper {
-  background: #f9fbff;
+  background:transparent;
   border-radius: 16px;
   max-height: 260px;
   overflow: hidden;
@@ -122,25 +128,28 @@
 }
 
 .go-table thead {
-  background: #f3f6ff;
+  background:var(--color-neutral-100);
 }
 
 .go-table th,
 .go-table td {
-  padding: 10px 12px;
+  padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }
 
 .go-table th {
-  font-size: 11px;
-  font-weight: 500;
-  color: #64748b;
+ color:  #44576F;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
-.go-table tbody tr:nth-child(even) {
-  background: #fbfdff;
-}
+
 
 /* customer cell */
 .go-name-cell {
@@ -163,8 +172,14 @@
 }
 
 .go-name-text {
-  font-size: 12px;
-  color: #0f172a;
+  color:  #19222D;
+
+/* body/md/med */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--fontsize-body-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* usage limit */

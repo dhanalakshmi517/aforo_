@@ -108,6 +108,7 @@ export default function App() {
 
   const [isNewProductPage, setIsNewProductPage] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
 
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showNewProductForm, setShowNewProductForm] = useState(false);
@@ -416,12 +417,18 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <div className="flex min-h-screen">
-                      <SideNavbar
-                        activeTab={currentTab}
-                        onTabClick={handleSidebarClick}
-                        hidden={!showSidebar}
-                      />
-                      <main className="flex-1 bg-white overflow-y-auto" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#FBFDFF", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
                         <CustomerOverviewHeader />
                         <div style={{ padding: '20px' }}>
                           <CustomerOverviewStats />
@@ -444,14 +451,20 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <div className="flex min-h-screen">
-                      <SideNavbar
-                        activeTab={currentTab}
-                        onTabClick={handleSidebarClick}
-                        hidden={!showSidebar}
-                      />
-                      <main className="flex-1 bg-white overflow-y-auto" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#FBFDFF", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
                         <RevenueAnalysisHeader />
-                         <div style={{ padding: '20px' }}>
+                        <div style={{ padding: '20px' }}>
                           <RevenueSummaryCards />
                           <RevenueAnalytics />
                           <RevenuAnalyticsDash1/>

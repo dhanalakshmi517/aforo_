@@ -74,8 +74,14 @@
 }
 
 .rad1-updated {
-  font-size: 11px;
-  color: #9ca3af;
+  color: var(--color-neutral-600);
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */;
 }
 
 .rad1-concentration-body {
@@ -127,11 +133,11 @@
 }
 
 .rad1-growth-card {
-  background: #f6fbff;
+  background: white;
 }
 
 .rad1-decline-card {
-  background: #fff7f6;
+  background: white;
 }
 
 .rad1-list-header {
@@ -148,8 +154,8 @@
 }
 
 .rad1-badge {
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 52px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -193,9 +199,9 @@
 
 /* table */
 .rad1-table-wrapper {
-  background: #ffffff;
+  background: transparent;
   border-radius: 16px;
-  padding: 2px 0;
+  padding: 20px;
   max-height: 260px;
   overflow: hidden;
 }
@@ -211,12 +217,12 @@
 }
 
 .rad1-table thead {
-  background: #f3f6ff;
+  background: var(--color-neutral-100);
 }
 
 .rad1-table th,
 .rad1-table td {
-  padding: 10px 12px;
+  padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }

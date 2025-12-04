@@ -25,9 +25,8 @@
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #64748b;
+  border: none;
+  background: none;
   font-size: 11px;
   display: inline-flex;
   align-items: center;
@@ -47,9 +46,9 @@
   flex: 1 1 0;
   min-width: 280px;
   background: #ffffff;
-  border-radius: 24px;
-  padding: 20px 20px 18px 20px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  border-radius: 16px;
+  padding: 20px;
+box-shadow: 0 1.34px 17.869px 0  #EEF1F6, 0 0.399px 5.32px 0  #EEF1F6;
   box-sizing: border-box;
 }
 
@@ -66,24 +65,35 @@
 }
 
 .ch-card-title {
-  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui;
-  font-size: 14px;
-  font-weight: 600;
+  font-family: var(--font-family-primary);
   color: #111827;
+  color: var(--black-100, #1C1C1C);
+
+/* body/lg/med */
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
 }
 
 .ch-updated-text {
-  font-size: 11px;
-  color: #9ca3af;
+  color: var(--color-grey-600);
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .ch-left-body {
   display: flex;
-  gap: 16px;
+  gap: 28px;
 }
 
 .ch-donut-column {
-  flex: 0 0 52%;
+  flex: 0 0 50%;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -98,6 +108,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+
 }
 
 .ch-legend-item {
@@ -118,12 +129,12 @@
   flex: 0 0 48%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 20px;
 }
 
 .ch-health-stat {
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: 16px;
+  padding: 16px;
   box-sizing: border-box;
 }
 
@@ -165,8 +176,7 @@
 .ch-info-inline {
   width: 18px;
   height: 18px;
-  border-radius: 999px;
-  border: 1px solid #cbd5e1;
+  border: none;
   background: #ffffff;
   color: #64748b;
   font-size: 11px;
@@ -183,13 +193,18 @@
 }
 
 .ch-pill {
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
+padding: 4px 12px 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--color-neutral-300);
   background: #f9fafb;
-  font-size: 11px;
-  color: #4b5563;
-  cursor: pointer;
+color: var(--color-neutral-1700);
+
+/* body/sm/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-sm, 18px); /* 150% */  cursor: pointer;
 }
 
 .ch-kebab {
