@@ -91,6 +91,15 @@ import TopHealthyCustomers from './components/Dashboard/customeranalysis/TopHeal
 import TopChurningCustomers from './components/Dashboard/customeranalysis/TopChurningCustomers';
 import CustomerSegmentation from './components/Dashboard/customeranalysis/CustomerSegmentation';
 import NewVsExistingAndIndustries from './components/Dashboard/customeranalysis/NewVsExistingAndIndustries';
+import RevenueAnalysisHeader from './components/Dashboard/RevenueAnalysis/RevenueAnalysisHeader';
+import RevenueAnalytics from './components/Dashboard/RevenueAnalysis/RevenueAnalytics';
+import RevenueSummaryCards from './components/Dashboard/RevenueAnalysis/RevenueSummaryCards';
+import RevenuAnalyticsDash1 from './components/Dashboard/RevenueAnalysis/RevenuAnalyticsDash1';
+import RevenueAnalyticsDash2 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash2';
+import RevenueAnalyticsDash3 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash3';
+import RevenueAnalyticsDash4 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash4';
+import GrowthOpportunities from './components/Dashboard/RevenueAnalysis/GrowthOpportunities';
+import RevenueAnalyticsDash5 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash5';
 
 export default function App() {
   const navigate = useNavigate();
@@ -422,6 +431,35 @@ export default function App() {
                           <TopChurningCustomers />
                           <CustomerSegmentation />
                           <NewVsExistingAndIndustries />
+                        </div>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Revenue Analysis dashboard detail */}
+              <Route
+                path="/get-started/dashboards/revenue-analysis"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 bg-white overflow-y-auto" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <RevenueAnalysisHeader />
+                         <div style={{ padding: '20px' }}>
+                          <RevenueSummaryCards />
+                          <RevenueAnalytics />
+                          <RevenuAnalyticsDash1/>
+                          <RevenueAnalyticsDash2/>
+                          <RevenueAnalyticsDash3/>
+                          <GrowthOpportunities/>
+                          <RevenueAnalyticsDash4 />
+                          <RevenueAnalyticsDash5 />
                         </div>
                       </main>
                     </div>
