@@ -3,21 +3,23 @@
 /* Row container */
 .co-metrics-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 16px;
   margin-top: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* CARD */
 .co-metric-card {
   position: relative;
   display: flex;
-  min-width: 200px;
+  min-width: 180px;
+  flex: 0 0 calc(20% - 12.8px);
   padding: var(--border-radius-lg, 16px);
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  flex: 1 0 0;
 
   border-radius: 16px;
   background: #f6f8ff;
@@ -110,15 +112,5 @@ line-height: var(--line-height-heading-h2, 36px); /* 128.571% */
 @media (max-width: 900px) {
   .co-metrics-row {
     gap: 12px;
-  }
-
-  .co-metric-card {
-    flex: 1 1 calc(50% - 12px);
-  }
-}
-
-@media (max-width: 600px) {
-  .co-metric-card {
-    flex: 1 1 100%;
   }
 }

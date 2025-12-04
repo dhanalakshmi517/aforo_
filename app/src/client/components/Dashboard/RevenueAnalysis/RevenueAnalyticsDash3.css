@@ -1,0 +1,268 @@
+@import "../Variables.css";
+
+.rad3-section {
+  margin-top: 24px;
+}
+
+/* layout */
+.rad3-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* shared card */
+.rad3-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+.rad3-left-col {
+  flex: 0 1 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rad3-industries-card {
+  flex: 1 1 420px;
+}
+
+/* header shared */
+.rad3-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rad3-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rad3-updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Revenue by Plan */
+.rad3-plan-card {
+  padding: 18px;
+}
+
+.rad3-plan-body {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.rad3-plan-chart {
+  width: 170px;
+  height: 170px;
+}
+
+.rad3-plan-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rad3-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.rad3-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+/* bottom tiles */
+.rad3-bottom-tiles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rad3-mini-card {
+  flex: 1 1 0;
+  min-width: 150px;
+  background: #f3f6ff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+}
+
+.rad3-mini-label {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.rad3-mini-value {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rad3-mini-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* industries card */
+.rad3-industries-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rad3-industries-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rad3-trophy {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: #ecfdf3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.rad3-industries-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rad3-view-btn {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #2563eb;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.rad3-view-arrow {
+  font-size: 14px;
+}
+
+/* table */
+.rad3-table-wrapper {
+  margin-top: 12px;
+  background: #f9fbff;
+  border-radius: 16px;
+  max-height: 260px;
+  overflow: hidden;
+}
+
+.rad3-table-wrapper:hover {
+  overflow-y: auto;
+}
+
+.rad3-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.rad3-table thead {
+  background: #f3f6ff;
+}
+
+.rad3-table th,
+.rad3-table td {
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rad3-table th {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.rad3-table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+.rad3-bold {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* customers cell */
+.rad3-customer-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rad3-avatar-stack {
+  display: flex;
+}
+
+.rad3-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #020617;
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -6px;
+  border: 2px solid #ffffff;
+  font-size: 11px;
+}
+
+.rad3-avatar:first-child {
+  margin-left: 0;
+}
+
+.rad3-customer-count {
+  font-size: 12px;
+  color: #111827;
+}
+
+/* responsive */
+@media (max-width: 960px) {
+  .rad3-grid {
+    flex-direction: column;
+  }
+
+  .rad3-left-col,
+  .rad3-industries-card {
+    flex: 1 1 100%;
+  }
+
+  .rad3-plan-body {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 640px) {
+  .rad3-plan-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

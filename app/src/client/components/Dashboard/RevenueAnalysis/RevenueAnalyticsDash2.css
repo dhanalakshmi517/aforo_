@@ -1,0 +1,48 @@
+@import "../Variables.css";
+
+.rad2-section {
+  margin-top: 24px;
+}
+
+/* main card */
+.rad2-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px 20px 18px 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+/* header */
+.rad2-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.rad2-title {
+  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* chart area */
+.rad2-chart-wrapper {
+  width: 100%;
+  height: 260px;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .rad2-card {
+    padding: 16px;
+  }
+
+  .rad2-chart-wrapper {
+    height: 220px;
+  }
+}

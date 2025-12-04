@@ -1,0 +1,295 @@
+@import "../Variables.css";
+
+.rad1-section {
+  margin-top: 24px;
+}
+
+/* main 3-column layout */
+.rad1-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.1fr) minmax(260px, 1fr) minmax(260px, 1fr);
+  gap: 16px;
+}
+
+/* shared card base */
+.rad1-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+/* LEFT COLUMN */
+.rad1-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* mini metrics */
+.rad1-mini-metrics {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rad1-mini-card {
+  flex: 1 1 0;
+  min-width: 160px;
+  background: #f5f7ff;
+  border-radius: 20px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+}
+
+.rad1-mini-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.rad1-mini-value {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Revenue Concentration card */
+.rad1-concentration-card {
+  padding: 18px 18px 16px 18px;
+}
+
+.rad1-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.rad1-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rad1-updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.rad1-concentration-body {
+  margin-top: 4px;
+}
+
+.rad1-donut {
+  width: 100%;
+  height: 190px;
+}
+
+.rad1-concentration-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.rad1-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.rad1-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.rad1-concentration-note {
+  margin: 10px 0 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.rad1-concentration-strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* LIST CARDS (middle + right) */
+.rad1-list-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rad1-growth-card {
+  background: #f6fbff;
+}
+
+.rad1-decline-card {
+  background: #fff7f6;
+}
+
+.rad1-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rad1-list-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rad1-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rad1-badge-growth {
+  background: #ecfdf3;
+  color: #16a34a;
+}
+
+.rad1-badge-decline {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.rad1-badge-icon {
+  font-size: 16px;
+}
+
+.rad1-list-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rad1-view-btn {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #2563eb;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.rad1-view-arrow {
+  font-size: 14px;
+}
+
+/* table */
+.rad1-table-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2px 0;
+  max-height: 260px;
+  overflow: hidden;
+}
+
+.rad1-table-wrapper:hover {
+  overflow-y: auto;
+}
+
+.rad1-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.rad1-table thead {
+  background: #f3f6ff;
+}
+
+.rad1-table th,
+.rad1-table td {
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rad1-table th {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.rad1-table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+/* name cell */
+.rad1-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rad1-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #020617;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rad1-name-text {
+  font-size: 12px;
+  color: #0f172a;
+}
+
+/* MoM cells */
+.rad1-mom-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rad1-mom-value {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rad1-mom-up .rad1-mom-value {
+  color: #16a34a;
+}
+
+.rad1-mom-down .rad1-mom-value {
+  color: #ef4444;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .rad1-grid {
+    grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .rad1-decline-card {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 800px) {
+  .rad1-grid {
+    grid-template-columns: minmax(260px, 1fr);
+  }
+}

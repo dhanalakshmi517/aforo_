@@ -1,0 +1,167 @@
+@import "../Variables.css";
+
+.ra5-section {
+  margin-top: 24px;
+}
+
+/* card shell */
+.ra5-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+/* header */
+.ra5-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.ra5-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ra5-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background: #f4e9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ra5-icon {
+  font-size: 18px;
+}
+
+.ra5-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ra5-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ra5-updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.ra5-view-all {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #2563eb;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.ra5-view-arrow {
+  font-size: 14px;
+}
+
+/* table */
+.ra5-table-wrapper {
+  background: #f9fbff;
+  border-radius: 16px;
+  max-height: 260px;
+  overflow: hidden;
+}
+
+.ra5-table-wrapper:hover {
+  overflow-y: auto;
+}
+
+.ra5-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.ra5-table thead {
+  background: #f3f6ff;
+}
+
+.ra5-table th,
+.ra5-table td {
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ra5-table th {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.ra5-table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+/* customer cell */
+.ra5-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ra5-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #020617;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ra5-name-text {
+  font-size: 12px;
+  color: #0f172a;
+}
+
+/* action button */
+.ra5-view-btn {
+  min-width: 56px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 11px;
+  color: #111827;
+  cursor: pointer;
+}
+
+.ra5-view-btn:hover {
+  background: #f3f4f6;
+}
+
+/* responsive tweaks */
+@media (max-width: 900px) {
+  .ra5-card {
+    padding: 16px;
+  }
+
+  .ra5-table th,
+  .ra5-table td {
+    padding: 8px 10px;
+  }
+}

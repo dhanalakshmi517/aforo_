@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CustomerOverviewHeader.css";
+import "./RevenueAnalysisHeader.css";
 
-const CustomerOverviewHeader: React.FC = () => {
+const RevenueAnalysisHeader: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
+ const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClear = () => {
@@ -39,16 +39,17 @@ const CustomerOverviewHeader: React.FC = () => {
               />
             </svg>
           </button>
+
           <span className="co-breadcrumb-text">
-            <button 
-              className="co-breadcrumb-link" 
+            <button
+              className="co-breadcrumb-link"
               onClick={handleDashboardClick}
               aria-label="Go to Dashboards"
             >
               Dashboard
             </button>
             <span className="co-breadcrumb-separator">/</span>
-            <span className="co-breadcrumb-current">Customer overview</span>
+            <span className="co-breadcrumb-current">Revenue Analysis</span>
           </span>
         </div>
 
@@ -98,53 +99,32 @@ const CustomerOverviewHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom row: title + search + filters */}
+      {/* Bottom row */}
       <div className="co-header-bottom">
         <h1 className="co-title">Customer overview</h1>
 
         <div className="co-controls">
-          {/* <div className={`co-search ${searchQuery ? "has-value" : ""} ${isFocused ? "is-active" : ""}`} role="search">
-            <span className="co-search-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-
-            <input
-              ref={inputRef}
-              className="co-search-input"
-              aria-label="Search customers"
-              placeholder="Search customers..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                className="co-clear-btn"
-                onClick={handleClear}
-                aria-label="Clear search"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M15 5L5 15M5 5L15 15" stroke="#1A2126" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            )}
-          </div> */}
-
           <div className="co-filter-group">
             <button className="co-filter-pill">
               <span>Time</span>
-              <span className="co-filter-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none">
-  <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#7B97AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg></span>
+              <span className="co-filter-chevron">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none">
+                  <path
+                    d="M0.75 0.75L5.75 5.75L10.75 0.75"
+                    stroke="#7B97AE"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
             </button>
+
             <button className="co-filter-pill">
               <span>Environment</span>
               <span className="co-filter-chevron">▾</span>
             </button>
+
             <button className="co-filter-pill">
               <span>All Regions</span>
               <span className="co-filter-chevron">▾</span>
@@ -156,4 +136,4 @@ const CustomerOverviewHeader: React.FC = () => {
   );
 };
 
-export default CustomerOverviewHeader;
+export default RevenueAnalysisHeader;
