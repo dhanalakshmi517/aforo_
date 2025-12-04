@@ -69,7 +69,16 @@ const GrowthOpportunities: React.FC = () => {
       <div className="go-header">
         <h2>Growth Opportunities</h2>
         <button className="go-info-btn" aria-label="Growth opportunities info">
-          i
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <g clip-path="url(#clip0_13844_23246)">
+    <path d="M8.00016 10.6668V8.00016M8.00016 5.3335H8.00683M14.6668 8.00016C14.6668 11.6821 11.6821 14.6668 8.00016 14.6668C4.31826 14.6668 1.3335 11.6821 1.3335 8.00016C1.3335 4.31826 4.31826 1.3335 8.00016 1.3335C11.6821 1.3335 14.6668 4.31826 14.6668 8.00016Z" stroke="#0262A1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_13844_23246">
+      <rect width="16" height="16" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
         </button>
       </div>
 
@@ -78,7 +87,9 @@ const GrowthOpportunities: React.FC = () => {
           <div className="go-card-header-left">
             <div className="go-icon-box">
               {/* simple growth icon; swap for SVG if you want */}
-              <span className="go-icon">📈</span>
+              <span className="go-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 22 20" fill="none">
+  <path d="M10.75 13.75V18.75M14.75 11.75V18.75M18.75 7.75V18.75M20.75 0.75L12.104 9.396C12.0576 9.44256 12.0024 9.47951 11.9416 9.50471C11.8809 9.52992 11.8158 9.54289 11.75 9.54289C11.6842 9.54289 11.6191 9.52992 11.5584 9.50471C11.4976 9.47951 11.4424 9.44256 11.396 9.396L8.104 6.104C8.01024 6.01026 7.88308 5.95761 7.7505 5.95761C7.61792 5.95761 7.49076 6.01026 7.397 6.104L0.75 12.75M2.75 15.75V18.75M6.75 11.75V18.75" stroke="#66B1CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
             </div>
             <span className="go-card-title">
               Top 10 Expansion Candidates (ready to upgrade)

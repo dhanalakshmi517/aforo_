@@ -16,8 +16,8 @@ type CustomerRow = {
 };
 
 const revenueConcentrationData = [
-  { name: "Top 20% Customers", value: 68, color: "#4F46E5" },
-  { name: "Rest of the Customers", value: 32, color: "#C7D2FE" },
+  { name: "Top 20% Customers", value: 68, color: "#66CCA5" },
+  { name: "Rest of the Customers", value: 32, color: "#6685CC" },
 ];
 
 const growthCustomers: CustomerRow[] = [
@@ -121,7 +121,9 @@ const RevenuAnalyticsDash1: React.FC = () => {
             <div className="rad1-list-header-left">
               <div className="rad1-badge rad1-badge-growth">
                 {/* simple growth icon */}
-                <span className="rad1-badge-icon">📈</span>
+                <span className="rad1-badge-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
+  <path d="M10.75 7.286V4.75C10.75 3.68913 11.1714 2.67172 11.9216 1.92157C12.6717 1.17143 13.6891 0.75 14.75 0.75H16.25C16.3826 0.75 16.5098 0.802679 16.6036 0.896447C16.6973 0.990215 16.75 1.11739 16.75 1.25V2.75C16.75 3.81087 16.3286 4.82828 15.5784 5.57843C14.8283 6.32857 13.8109 6.75 12.75 6.75C11.6891 6.75 10.6717 7.17143 9.92157 7.92157C9.17143 8.67172 8.75 9.68913 8.75 10.75M8.75 10.75C8.75 12.75 9.75 13.75 9.75 15.75C9.75 16.8319 9.39911 17.8845 8.75 18.75M8.75 10.75C8.75 9.82144 8.49143 8.91122 8.00325 8.12134C7.51508 7.33146 6.8166 6.69313 5.98607 6.27786C5.15554 5.8626 4.22578 5.68681 3.30097 5.7702C2.37616 5.85359 1.49285 6.19286 0.75 6.75C0.75 7.67856 1.00857 8.58877 1.49675 9.37866C1.98492 10.1685 2.6834 10.8069 3.51393 11.2221C4.34446 11.6374 5.27422 11.8132 6.19903 11.7298C7.12384 11.6464 8.00715 11.3071 8.75 10.75ZM1.75 18.75H15.75" stroke="#389315" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
               </div>
               <span className="rad1-card-title">Revenue Growth Customers</span>
             </div>
@@ -185,7 +187,9 @@ const RevenuAnalyticsDash1: React.FC = () => {
           <div className="rad1-list-header">
             <div className="rad1-list-header-left">
               <div className="rad1-badge rad1-badge-decline">
-                <span className="rad1-badge-icon">📉</span>
+                <span className="rad1-badge-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18" fill="none">
+  <path d="M0.75 12.75L4.75 16.75M4.75 16.75L8.75 12.75M4.75 16.75V0.75M8.75 0.75H18.75M8.75 4.75H15.75M8.75 8.75H12.75" stroke="#ED5142" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
               </div>
               <span className="rad1-card-title">Revenue Decline Customers</span>
             </div>

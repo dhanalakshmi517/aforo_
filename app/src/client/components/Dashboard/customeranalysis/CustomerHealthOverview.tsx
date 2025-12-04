@@ -26,9 +26,9 @@ type HealthPoint = {
 };
 
 const donutData: DonutSlice[] = [
-  { name: "Healthy Customers", value: 70, color: "#32C25B" },
-  { name: "At-Risk Customers", value: 20, color: "#F5C542" },
-  { name: "Churn Customers", value: 10, color: "#F97373" },
+  { name: "Healthy Customers", value: 70, color: "#389315" },
+  { name: "At-Risk Customers", value: 20, color: "#E2B226" },
+  { name: "Churn Customers", value: 10, color: "#ED5142" },
 ];
 
 const healthStats = [
@@ -36,22 +36,22 @@ const healthStats = [
     title: "Healthy Customers",
     value: "2,456",
     desc: "Strong engagement & payments",
-    color: "#DDF6E6",
-    textColor: "#166534",
+    color: "#EDF7E6",
+    textColor: "#19222D",
   },
   {
     title: "Customers At-Risk",
     value: "456",
     desc: "Delayed Payments",
-    color: "#FFF5D6",
-    textColor: "#854D0E",
+    color: "#FFF1C8",
+    textColor: "#19222D",
   },
   {
     title: "Churning Customers",
     value: "56",
     desc: "Low activity & ignored payments",
-    color: "#FFE4E0",
-    textColor: "#B91C1C",
+    color: "#FFF7F5",
+    textColor: "#19222D",
   },
 ];
 
@@ -109,6 +109,7 @@ const CustomerHealthOverview: React.FC = () => {
         innerRadius="55%"
         outerRadius="80%"
         paddingAngle={2}
+        cornerRadius={6}
       >
         {donutData.map((slice) => (
           <Cell key={slice.name} fill={slice.color} />
@@ -169,16 +170,25 @@ const CustomerHealthOverview: React.FC = () => {
             <div className="ch-card-title-row">
               <span className="ch-card-title">Customer Health Overview</span>
               <button className="ch-info-inline" aria-label="Chart info">
-                i
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <g clip-path="url(#clip0_13808_20917)">
+    <path d="M8.00016 10.6666V7.99992M8.00016 5.33325H8.00683M14.6668 7.99992C14.6668 11.6818 11.6821 14.6666 8.00016 14.6666C4.31826 14.6666 1.3335 11.6818 1.3335 7.99992C1.3335 4.31802 4.31826 1.33325 8.00016 1.33325C11.6821 1.33325 14.6668 4.31802 14.6668 7.99992Z" stroke="#1D7AFC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_13808_20917">
+      <rect width="16" height="16" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
               </button>
+                            <button className="ch-pill">MoM</button>
+
             </div>
 
-            <div className="ch-right-actions">
+            {/* <div className="ch-right-actions">
               <button className="ch-pill">MoM</button>
-              <span className="ch-kebab" aria-hidden="true">
-                ⋮
-              </span>
-            </div>
+             
+            </div> */}
           </div>
 
           <div className="ch-chart-wrapper">
@@ -245,9 +255,7 @@ const CustomerHealthOverview: React.FC = () => {
                         <g>
                           <foreignObject x={x - 40} y={y - 60} width={120} height={40}>
                             <div className="ch-point-label">
-                              <div className="ch-point-label-date">
-                                Apr 10, 2025
-                              </div>
+                              
                               <div className="ch-point-label-value">
                                 {lastPoint.score}%
                               </div>

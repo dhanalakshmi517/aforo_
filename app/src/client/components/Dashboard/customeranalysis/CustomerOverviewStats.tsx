@@ -24,7 +24,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
     <div className={`co-metric-card co-metric-card--${trend}`}>
       <div className="co-metric-header">
         <span className="co-metric-label">{label}</span>
-        <span className="co-metric-toggle" />
       </div>
 
       <div className="co-metric-value">{value}</div>

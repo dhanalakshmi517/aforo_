@@ -136,6 +136,20 @@
   margin-top: 6px;
 }
 
+/* Hide default recharts hover background for bars */
+.cs-revenue-chart .recharts-bar-background {
+  display: none !important;
+}
+
+/* Ensure bars only show their actual height on hover */
+.cs-revenue-chart .recharts-bar-rectangles rect {
+  transition: opacity 0.2s ease;
+}
+
+.cs-revenue-chart .recharts-bar-rectangles rect:hover {
+  opacity: 0.8;
+}
+
 /* responsive behaviour */
 @media (max-width: 960px) {
   .cs-card-company,

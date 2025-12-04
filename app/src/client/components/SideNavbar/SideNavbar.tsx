@@ -1,13 +1,14 @@
 import React from 'react';
 import './SideNavbar.css';
 import { MdPeople } from 'react-icons/md';
-import aforoLogo from './aforo.ai.svg';
+import AforoLogoComponent from '../componenetsss/AforoLogoComponent';
 
 // Define the types for the props that Sidebar component expects
 interface SidebarProps {
   activeTab: string;
   onTabClick: (tabName: string) => void;
   hidden: boolean;
+  collapsible?: boolean;
 }
 
 interface Tab {
@@ -15,7 +16,7 @@ interface Tab {
   icon: JSX.Element; 
 }
 
-function SideNavbar({ activeTab, onTabClick, hidden }: SidebarProps): JSX.Element {
+function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: SidebarProps): JSX.Element {
   const tabs: Tab[] = [
     {
       name: 'Get Started',
@@ -244,10 +245,10 @@ function SideNavbar({ activeTab, onTabClick, hidden }: SidebarProps): JSX.Elemen
   ];
 
   return (
-    <div className={`sidebar ${hidden ? 'hidden' : ''}`}>
+    <div className={`sidebar ${hidden ? 'hidden' : ''} ${collapsible ? 'collapsible' : ''}`}>
       <div className="sidebar-highlight"></div>
       <div className="logo">
-        <img src={aforoLogo} alt="aforo.ai" />
+      <AforoLogoComponent />
       </div>
       <nav className="nav">
         <ul>

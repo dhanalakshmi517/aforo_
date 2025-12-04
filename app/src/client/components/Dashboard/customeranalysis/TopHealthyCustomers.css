@@ -1,12 +1,14 @@
 @import "../Variables.css";
 
 .thc-card {
-  width: 100%;
+width: 100%;
   background: #ffffff;
   border-radius: 24px;
-  padding: 20px 20px 16px 20px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  padding: 20px 28px 28px 28px;
+box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
+
   box-sizing: border-box;
+  margin-top: 20px;
 }
 
 /* header */
@@ -25,9 +27,9 @@
 }
 
 .thc-trophy-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--border-radius-sm);
   background: #ecfdf3;
   color: #16a34a;
   display: flex;
@@ -40,11 +42,14 @@
 }
 
 .thc-header-title {
-  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
-    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+ color: var(--color-neutral-black);
+
+/* body/lg/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
 }
 
 .thc-header-right {
@@ -54,15 +59,21 @@
 }
 
 .thc-updated-text {
-  font-size: 11px;
-  color: #9ca3af;
+  color: #A6B9C9;
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .thc-view-btn {
-  border: none;
+   border: none;
   background: transparent;
   font-size: 12px;
-  color: #16a34a;
+  color:#2A455E;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -97,22 +108,33 @@
 }
 
 .thc-table thead {
-  background: #f3f6ff;
+  background: #F9FBFD;
 }
 
+
+.thc-table tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+.thc-table tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-sm);
+}
 .thc-table th,
 .thc-table td {
-  padding: 10px 12px;
+  padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }
 
 .thc-table th {
-  font-weight: 500;
-  color: #64748b;
-  font-size: 11px;
-}
+color: var(--color-neutral-1000);
 
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
 .thc-table tbody tr:nth-child(even) {
   background: #fbfdff;
 }
@@ -138,8 +160,14 @@
 }
 
 .thc-customer-name {
-  font-size: 12px;
-  color: #0f172a;
+ color: var(--color-neutral-black);
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* health bar */
@@ -163,13 +191,15 @@
 }
 
 .thc-health-percent {
-  font-size: 11px;
+  font-size: 13px;
   color: #16a34a;
 }
 
 /* common numeric cols */
 .thc-col-text {
   color: #111827;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
 }
 
 /* usage */
@@ -188,7 +218,7 @@
 .thc-pill-low {
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   background: #ecfdf3;
   color: #15803d;

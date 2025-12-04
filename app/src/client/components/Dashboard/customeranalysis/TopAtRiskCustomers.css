@@ -4,9 +4,11 @@
   width: 100%;
   background: #ffffff;
   border-radius: 24px;
-  padding: 20px 20px 16px 20px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  padding: 20px 28px 28px 28px;
+box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
+
   box-sizing: border-box;
+  margin-top: 20px;
 }
 
 /* header */
@@ -25,11 +27,11 @@
 }
 
 .tar-warning-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
-  background: #fff7e6;
-  color: #eab308;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--border-radius-sm);
+  background:#FFF6DE;
+  color: #C29017;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,11 +43,14 @@
 }
 
 .tar-header-title {
-  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
-    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+ color: var(--color-neutral-black);
+
+/* body/lg/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
 }
 
 .tar-header-right {
@@ -55,15 +60,21 @@
 }
 
 .tar-updated-text {
-  font-size: 11px;
-  color: #9ca3af;
+  color: #A6B9C9;
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .tar-view-btn {
   border: none;
   background: transparent;
   font-size: 12px;
-  color: #4f46e5;
+  color:#2A455E;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -99,28 +110,46 @@
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
+
+}
+.tar-table tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+.tar-table tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-sm);
 }
 
 .tar-table thead {
-  background: #f3f6ff;
+  background: #F9FBFD;
+}
+
+.tar-table thead tr:last-child th:first-child {
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+
+.tar-table thead tr:last-child th:last-child {
+  border-bottom-right-radius: var(--border-radius-sm);
 }
 
 .tar-table th,
 .tar-table td {
-  padding: 10px 12px;
+  padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }
 
 .tar-table th {
-  font-weight: 500;
-  color: #64748b;
-  font-size: 11px;
+ color: var(--color-neutral-1000);
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
-.tar-table tbody tr:nth-child(even) {
-  background: #fbfdff;
-}
+
 
 /* Customer cell */
 .tar-customer-cell {
@@ -143,8 +172,14 @@
 }
 
 .tar-customer-name {
-  font-size: 12px;
-  color: #0f172a;
+color: var(--color-neutral-black);
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* Health score bar */
@@ -169,12 +204,15 @@
 
 .tar-health-percent {
   font-size: 11px;
-  color: #6b7280;
+  color: black;
 }
 
 /* numeric columns */
 .tar-col-text {
   color: #111827;
+  font-weight: 400;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
 }
 
 /* Usage decline */
@@ -191,23 +229,24 @@
 
 /* churn pill */
 .tar-pill {
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
-.tar-pill-At\ Risk {
+[class*="tar-pill-At"] {
   background: #fef3c7;
   color: #92400e;
 }
 
-.tar-pill-High {
+[class*="tar-pill-High"] {
   background: #fee2e2;
   color: #b91c1c;
 }
 
-.tar-pill-Very\ High {
+[class*="tar-pill-Very"] {
   background: #fee2e2;
   color: #7f1d1d;
 }
