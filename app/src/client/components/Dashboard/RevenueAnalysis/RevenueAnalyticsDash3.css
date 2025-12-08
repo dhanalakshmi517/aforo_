@@ -140,8 +140,8 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .rad3-trophy {
-  width: 30px;
-  height: 30px;
+  width: 52px;
+  height: 52px;
   border-radius: 10px;
   background: #ecfdf3;
   display: flex;
@@ -152,15 +152,22 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 
 .rad3-industries-right {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .rad3-view-btn {
   border: none;
   background: transparent;
-  font-size: 12px;
-  color: #2563eb;
+color: var(--color-primary-800);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -184,6 +191,36 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   overflow-y: auto;
 }
 
+.rad3-table-container {
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  height: 260px;
+}
+
+.rad3-scroll-area {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* hide native scrollbars */
+.rad3-scroll-area::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.rad3-scroll-area {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.rad3-vertical-scrollbar {
+  flex: 0 0 auto;
+  display: none;
+}
+
 .rad3-table {
   width: 100%;
   border-collapse: collapse;
@@ -194,15 +231,25 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: var(--color-neutral-100);
 }
 
-.rad3-table th,
-.rad3-table td {
+.rad3-table th {
   padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }
 
+.rad3-table td {
+  padding:18px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+
+.rad3-table tbody td {
+  border-bottom: 1px solid #E5E7EB;
+}
+
 .rad3-table th {
-  color:  #44576F;
+  color:var(--color-neutral-1400) ;
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -212,9 +259,7 @@ font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
-.rad3-table tbody tr:nth-child(even) {
-  background: #fbfdff;
-}
+
 
 .rad3-bold {
   font-weight: 600;

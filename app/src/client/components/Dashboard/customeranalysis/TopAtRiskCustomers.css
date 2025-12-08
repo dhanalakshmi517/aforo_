@@ -55,8 +55,9 @@ line-height: var(--line-height-body-lg, 24px); /* 150% */
 
 .tar-header-right {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .tar-updated-text {
@@ -91,15 +92,48 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   border-radius: 16px;
   background: #f9fbff;
   padding: 0;
+  position: relative;
 }
 
 /* when expanded, make inner scroll but keep card height pleasant */
 .tar-table-wrapper {
   max-height: 320px;
-  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
 }
-.tar-card .tar-table-wrapper:hover {
-  overflow-y: auto;
+
+/* Hide scrollbar for Chrome, Safari, Edge */
+.tar-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* when showing all, remove max-height to show full content */
+.tar-table-wrapper.tar-show-all {
+  max-height: none;
+  overflow-y: hidden;
+}
+
+/* scrollbar container */
+.tar-scrollbar-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-right: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tar-table-wrapper:hover .tar-scrollbar-container {
+  display: none;
+}
+
+/* hide scrollbar when showing all */
+.tar-table-wrapper.tar-show-all .tar-scrollbar-container {
+  display: none;
 }
 
 /* table */
@@ -112,6 +146,14 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   overflow: hidden;
 
 }
+.tar-table thead tr:first-child th:first-child {
+  border-top-left-radius:var(--border-radius-sm);
+}
+
+.tar-table thead tr:first-child th:last-child {
+  border-top-right-radius: var(--border-radius-sm);
+}
+
 .tar-table tr:last-child td:first-child {
   border-bottom-left-radius: var(--border-radius-sm);
 }
@@ -123,19 +165,19 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: #F9FBFD;
 }
 
-.tar-table thead tr:last-child th:first-child {
-  border-bottom-left-radius: var(--border-radius-sm);
-}
-
-.tar-table thead tr:last-child th:last-child {
-  border-bottom-right-radius: var(--border-radius-sm);
-}
-
 .tar-table th,
 .tar-table td {
   padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
+}
+
+.tar-table tbody tr {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.tar-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .tar-table th {
@@ -229,26 +271,32 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* churn pill */
 .tar-pill {
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 500;
+height: 24px;
+padding: 4px 12px 6px 12px;
+align-items: center;  border-radius:20px;
+
+/* body/sm/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
   white-space: nowrap;
 }
 
 [class*="tar-pill-At"] {
-  background: #fef3c7;
-  color: #92400e;
+  background: #FFF6DE;
+  color: #CF9C1B;
 }
 
 [class*="tar-pill-High"] {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #FFECEC;
+  color: #C33235;
 }
 
 [class*="tar-pill-Very"] {
-  background: #fee2e2;
-  color: #7f1d1d;
+  background: #FFECEC;
+  color: #C33235;
 }
 
 /* subtle fade for scroll bottom */

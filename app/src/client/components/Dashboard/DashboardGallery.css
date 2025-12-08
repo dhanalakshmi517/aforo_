@@ -4,10 +4,22 @@
   min-height: 100vh;
   box-sizing: border-box;
   padding: 24px 32px;
-  background: #f5f7fb; /* soft app background */
+  background: white; /* soft app background */
   display: flex;
   flex-direction: column;
 }
+
+/* Header wrapper for left/right positioning */
+.dg-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  width: 100%;
+  margin-top:-10px;
+}
+
+
 
 /* Top bar */
 .dg-topbar {
@@ -15,15 +27,24 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+
 }
 
 .dg-page-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
+  color: var(--color-neutral-1700);
 
+/* body/lg/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+margin-top:-10px;
+}
+.dg-header-right{
+  margin-top:-10px;
+}
 /* Actions (add / bell) */
 .dg-actions {
   display: flex;
@@ -87,39 +108,41 @@
   width: 100%;
   border-radius: 14px;
   display: block;
+  margin-top: -45px;
 }
 
-/* Icon pill in corner of image */
-.dg-corner {
-  position: absolute;
-  left: 16px;
-  bottom: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: #0b1220;
+/* Icon section */
+.dg-icon-section {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
+
+
 
 /* Text area */
 .dg-meta {
   padding: 12px 16px 16px;
 }
 
-.dg-title-row {
+.dg-icon-title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 4px;
 }
 
 .dg-card-title {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+ color: var(--color-neutral-1700);
+
+/* heading/h6/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h6);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
 }
 
 .dg-live-badge {
@@ -134,9 +157,16 @@
 .dg-desc {
   margin: 0;
   margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #6b7280;
+overflow: hidden;
+color: var(--color-neutral-800);
+text-overflow: ellipsis;
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
 /* Keyboard focus */

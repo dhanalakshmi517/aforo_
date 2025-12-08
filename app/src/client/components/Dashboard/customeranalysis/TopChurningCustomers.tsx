@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./TopChurningCustomers.css";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 
 type ChurnRiskLevel = "High" | "Very High";
 
@@ -75,10 +76,52 @@ const churningRows: ChurningCustomerRow[] = [
     usageDecline: "-9.15%",
     churnRisk: "Very High",
   },
+    {
+    id: 7,
+    name: "Customer 7",
+    logoText: "AF",
+    healthScore: 25,
+    lastActivity: "A week ago",
+    avgMRR: "$2,400",
+    usageDecline: "-6.08%",
+    churnRisk: "Very High",
+  },
+    {
+    id: 8,
+    name: "Customer 8",
+    logoText: "AF",
+    healthScore: 25,
+    lastActivity: "A week ago",
+    avgMRR: "$2,400",
+    usageDecline: "-6.08%",
+    churnRisk: "Very High",
+  },
+    {
+    id: 9,
+    name: "Customer 9",
+    logoText: "AF",
+    healthScore: 25,
+    lastActivity: "A week ago",
+    avgMRR: "$2,400",
+    usageDecline: "-6.08%",
+    churnRisk: "Very High",
+  },
+    {
+    id: 10,
+    name: "Customer 10",
+    logoText: "AF",
+    healthScore: 25,
+    lastActivity: "A week ago",
+    avgMRR: "$2,400",
+    usageDecline: "-6.08%",
+    churnRisk: "Very High",
+  },
+  
 ];
 
 const TopChurningCustomers: React.FC = () => {
   const [showAll, setShowAll] = useState(false);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const visibleRows = showAll ? churningRows : churningRows.slice(0, 4);
 
@@ -93,24 +136,29 @@ const TopChurningCustomers: React.FC = () => {
 </svg></span>
           </div>
           <div className="tcc-header-text">
-            <div className="tcc-header-title">Top 10 Churning Customers</div>
+            <div className="tcc-header-title">Top Churning Customers</div>
           </div>
         </div>
 
         <div className="tcc-header-right">
-          <span className="tcc-updated-text">Updated 3 mins ago</span>
+          {/* <span className="tcc-updated-text">Updated 3 mins ago</span> */}
           <button
             className="tcc-view-btn"
             type="button"
             onClick={() => setShowAll((prev) => !prev)}
           >
             {showAll ? "View Less" : "View All"}
-            <span className="tcc-view-arrow">↗</span>
+            <span className="tcc-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
           </button>
         </div>
       </div>
 
-      <div className="tcc-table-wrapper">
+      <div className={`tcc-table-wrapper ${showAll ? 'tcc-show-all' : ''}`} ref={tableWrapperRef}>
+        <div className="tcc-scrollbar-container">
+          <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+        </div>
         <table className="tcc-table">
           <thead>
             <tr>

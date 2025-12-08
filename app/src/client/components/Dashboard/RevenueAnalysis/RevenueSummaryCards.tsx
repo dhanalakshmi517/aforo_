@@ -19,7 +19,7 @@ const metrics: RevenueMetric[] = [
     value: "38,985",
     change: "+2.15",
     direction: "up",
-    bg: "#E7F5F7",
+    bg: "#EEF6F7",
   },
   {
     id: "mrr",
@@ -27,7 +27,7 @@ const metrics: RevenueMetric[] = [
     value: "$38,985",
     change: "+2.15",
     direction: "up",
-    bg: "#F3EFFF",
+    bg: "#F0EEF7",
   },
   {
     id: "net-new",
@@ -35,7 +35,7 @@ const metrics: RevenueMetric[] = [
     value: "$18,985",
     change: "+2.15",
     direction: "up",
-    bg: "#EAF6FF",
+    bg: "#EEF3F7",
   },
   {
     id: "growth",
@@ -43,7 +43,7 @@ const metrics: RevenueMetric[] = [
     value: "22%",
     change: "-2.15",
     direction: "down",
-    bg: "#F5F3FF",
+    bg: "#EEEFF7",
   },
 ];
 

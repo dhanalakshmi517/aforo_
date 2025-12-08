@@ -14,8 +14,12 @@
   box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
   padding: 24px 28px;
   box-sizing: border-box;
-}
+    margin-top: 40px;
 
+}
+.nei-card nei-right-card{
+  margin-top: 40px;
+}
 .nei-left-card {
   width: 389px;      /* like the Figma frame */
   min-width: 389px;
@@ -23,6 +27,7 @@
 
 .nei-right-card {
   flex: 1;
+
 }
 
 /* Card headers */
@@ -41,8 +46,14 @@
 }
 
 .nei-updated {
-  font-size: 11px;
-  color: #9ca3af;
+color: var(--color-neutral-600);
+
+/* body/xs/thin */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 /* Left card main */
@@ -220,6 +231,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-top: -20px;
 }
 
 .nei-link-btn {
@@ -231,6 +243,32 @@
   align-items: center;
   gap: 4px;
   cursor: pointer;
+}
+
+.nei-view-btn {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #2A455E;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 0;
+}
+
+.nei-view-btn:hover {
+  color: #1a3a52;
+}
+
+.nei-view-arrow {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.nei-view-btn:hover .nei-view-arrow {
+  transform: translateX(2px);
 }
 
 /* Table */
@@ -248,7 +286,7 @@
 
 .nei-table-header {
  background-color: var(--color-neutral-100);
- color: var(--color-neutral-1000);
+ color: var(--color-neutral-1700);
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -317,8 +355,16 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 .nei-customers-count {
-  font-size: 12px;
-  color: #111827;
+ overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* Basic responsiveness */

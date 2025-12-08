@@ -16,6 +16,8 @@ export interface PageHeaderProps {
   searchDisabled?: boolean;
   filterDisabled?: boolean;
   showIntegrations?: boolean;
+  showSearch?: boolean;
+  showDivider?: boolean;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -31,7 +33,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   showPrimary = true,
   searchDisabled = false,
   filterDisabled = false,
-  showIntegrations = true
+  showIntegrations = true,
+  showSearch = true,
+  showDivider = true
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilterSelected, setIsFilterSelected] = useState(false);
@@ -65,37 +69,39 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
       <div className="ph-header-actions">
         {/* Search */}
-        <div className={searchCls} role="search" aria-disabled={searchDisabled}>
-          <span className="rp-search-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
-
-          <input
-            ref={inputRef}
-            className="rp-search-input"
-            aria-label={`Search ${title.toLowerCase()}`}
-            placeholder="Search"
-            value={searchTerm || ''}
-            onChange={(e) => onSearchTermChange?.(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            disabled={searchDisabled}
-          />
-          {!searchDisabled && searchTerm && (
-            <button
-              type="button"
-              className="rp-clear-btn"
-              onClick={handleClear}
-              aria-label="Clear search"
-            >
+        {showSearch && (
+          <div className={searchCls} role="search" aria-disabled={searchDisabled}>
+            <span className="rp-search-icon" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M15 5L5 15M5 5L15 15" stroke="#1A2126" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </button>
-          )}
-        </div>
+            </span>
+
+            <input
+              ref={inputRef}
+              className="rp-search-input"
+              aria-label={`Search ${title.toLowerCase()}`}
+              placeholder="Search"
+              value={searchTerm || ''}
+              onChange={(e) => onSearchTermChange?.(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              disabled={searchDisabled}
+            />
+            {!searchDisabled && searchTerm && (
+              <button
+                type="button"
+                className="rp-clear-btn"
+                onClick={handleClear}
+                aria-label="Clear search"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M15 5L5 15M5 5L15 15" stroke="#1A2126" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Filter */}
         {onFilterClick && (
@@ -114,7 +120,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         )}
 
         {/* Divider AFTER Filter (left side) */}
-        {onFilterClick && showPrimary && (
+        {showDivider && onFilterClick && showPrimary && (
           <div className="header-divider" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
               <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
@@ -146,11 +152,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           </button>
         )}
         {/* Divider AFTER the New button (right side) */}
-        <div className="header-divider" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
-            <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
-          </svg>
-        </div>
+        {showDivider && (
+          <div className="header-divider" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
+              <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
+            </svg>
+          </div>
+        )}
 
         {/* Settings */}
         <button className="rp-settings-btn" aria-label="Settings" onClick={onSettingsClick}>

@@ -1,0 +1,55 @@
+@import "../Variables/Variables.css";
+
+.dash-header {
+  display: flex;
+  width: 100%;
+  padding: 16px 20px 16px 28px;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-neutral-50);
+  box-sizing: border-box;
+  height:68px;
+}
+
+.dash-header-left h2 {
+  margin: 0;
+ color: var(--color-neutral-1700);
+
+/* body/lg/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+}
+
+.dash-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.dash-header-new-btn .plus {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Icon buttons on the right */
+.dash-header-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: var(--color-neutral-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 10px;
+  box-shadow: 0 0 8px 10px var(--shadow-shadow-1, #EEF1F6)
+}
+
+.dash-header-icon-btn svg {
+  display: block;
+}

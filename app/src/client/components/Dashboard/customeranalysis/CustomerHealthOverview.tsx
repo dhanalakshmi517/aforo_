@@ -10,7 +10,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceDot,
 } from "recharts";
 import "./CustomerHealthOverview.css";
 
@@ -60,9 +59,10 @@ const healthTrendData: HealthPoint[] = [
   { month: "Feb", score: 62 },
   { month: "Mar", score: 71 },
   { month: "Apr", score: 64 },
-  { month: "May", score: 79 },
+  { month: "May", score: 60 },
   { month: "Jun", score: 72 },
-  { month: "Jul", score: 87 },
+    { month: "Jul", score: 77 },
+
 ];
 
 const CustomerHealthOverview: React.FC = () => {
@@ -92,7 +92,7 @@ const CustomerHealthOverview: React.FC = () => {
         <div className="ch-card ch-card-left">
           <div className="ch-card-top">
             <div className="ch-card-title">Customer Health Score</div>
-            <div className="ch-updated-text">Updated 3 mins ago</div>
+            {/* <div className="ch-updated-text">Updated 3 mins ago</div> */}
           </div>
 
           <div className="ch-left-body">
@@ -200,7 +200,6 @@ const CustomerHealthOverview: React.FC = () => {
                 <CartesianGrid
                   vertical={false}
                   stroke="#E5E7EB"
-                  strokeDasharray="3 3"
                 />
                 <XAxis
                   dataKey="month"
@@ -239,40 +238,13 @@ const CustomerHealthOverview: React.FC = () => {
                     fill: "#ffffff",
                   }}
                 />
-                {/* Highlight last point with a dot + label bubble */}
-                <ReferenceDot
-                  x={lastPoint.month}
-                  y={lastPoint.score}
-                  r={0}
-                  isFront
-                  label={{
-                    position: "top",
-                    content: (props: any) => {
-                      const { viewBox } = props;
-                      if (!viewBox) return null;
-                      const { x, y } = viewBox;
-                      return (
-                        <g>
-                          <foreignObject x={x - 40} y={y - 60} width={120} height={40}>
-                            <div className="ch-point-label">
-                              
-                              <div className="ch-point-label-value">
-                                {lastPoint.score}%
-                              </div>
-                            </div>
-                          </foreignObject>
-                        </g>
-                      );
-                    },
-                  }}
-                />
               </LineChart>
             </ResponsiveContainer>
 
-            <div className="ch-chart-footnote">
+            {/* <div className="ch-chart-footnote">
               MRR is the predictable revenue your business earns every month
               from active subscriptions.
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

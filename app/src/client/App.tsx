@@ -428,9 +428,9 @@ export default function App() {
                           collapsible={true}
                         />
                       </div>
-                      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#FBFDFF", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
+                      <main className="flex-1 flex flex-col overflow-y-auto" style={{ backgroundColor: "#F9FBFD", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
                         <CustomerOverviewHeader />
-                        <div style={{ padding: '20px' }}>
+                        <div className="flex-1" style={{ padding: '20px' }}>
                           <CustomerOverviewStats />
                           <CustomerHealthOverview />
                           <TopAtRiskCustomers />

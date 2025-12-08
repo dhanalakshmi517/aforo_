@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RevenueAnalysisHeader.css";
 
@@ -7,6 +7,32 @@ const RevenueAnalysisHeader: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [isLive, setIsLive] = useState(false);
+  const [lastRefreshTs, setLastRefreshTs] = useState<number>(
+    Date.now() - 3 * 60 * 1000
+  );
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (isLive) return;
+    const id = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(id);
+  }, [isLive]);
+
+  const minutesAgo = Math.max(
+    0,
+    Math.floor((Date.now() - lastRefreshTs) / 60000)
+  );
+
+  const onClickRefreshPill = () => {
+    if (isLive) {
+      setIsLive(false);
+      setLastRefreshTs(Date.now());
+    } else {
+      setIsLive(true);
+    }
+  };
 
   const handleClear = () => {
     setSearchQuery("");
@@ -22,7 +48,7 @@ const RevenueAnalysisHeader: React.FC = () => {
       {/* Top row: breadcrumb + icon buttons */}
       <div className="co-header-top">
         <div className="co-breadcrumb">
-          <button className="co-back-btn" aria-label="Back to Dashboard">
+          <button className="co-back-btn" aria-label="Back to Dashboard" onClick={handleDashboardClick}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -105,6 +131,28 @@ const RevenueAnalysisHeader: React.FC = () => {
 
         <div className="co-controls">
           <div className="co-filter-group">
+            <button
+              type="button"
+              className={`co-refresh-pill ${isLive ? "is-live" : ""}`}
+              onClick={onClickRefreshPill}
+              aria-pressed={isLive}
+            >
+              {isLive ? (
+                <>
+                  <span className="co-refresh-dot" />
+                  <span>Live</span>
+                </>
+              ) : (
+                <>
+                  <span className="co-refresh-clock" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+  <path d="M0.75 6.75C0.75 7.93669 1.10189 9.09673 1.76118 10.0834C2.42047 11.0701 3.35754 11.8392 4.4539 12.2933C5.55026 12.7474 6.75666 12.8662 7.92054 12.6347C9.08443 12.4032 10.1535 11.8318 10.9926 10.9926C11.8318 10.1535 12.4032 9.08443 12.6347 7.92054C12.8662 6.75666 12.7474 5.55026 12.2933 4.4539C11.8392 3.35754 11.0701 2.42047 10.0834 1.76118C9.09673 1.10189 7.93669 0.75 6.75 0.75C5.07263 0.75631 3.46265 1.41082 2.25667 2.57667L0.75 4.08333M0.75 4.08333V0.75M0.75 4.08333H4.08333" stroke="#2A455E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+                  </span>
+                  <span>{minutesAgo} min ago</span>
+                </>
+              )}
+            </button>
             <button className="co-filter-pill">
               <span>Time</span>
               <span className="co-filter-chevron">
@@ -122,12 +170,15 @@ const RevenueAnalysisHeader: React.FC = () => {
 
             <button className="co-filter-pill">
               <span>Environment</span>
-              <span className="co-filter-chevron">▾</span>
+              <span className="co-filter-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none">
+  <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#7B97AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
             </button>
-
             <button className="co-filter-pill">
               <span>All Regions</span>
-              <span className="co-filter-chevron">▾</span>
+              <span className="co-filter-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none">
+  <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#7B97AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
             </button>
           </div>
         </div>

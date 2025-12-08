@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import "./GrowthOpportunities.css";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 
 type AlertLevel = "Moderate" | "High" | "Very High";
 
@@ -41,6 +42,7 @@ const rows: GrowthRow[] = [
     usagePercent: 90,
     alert: "Very High",
   },
+ 
 ];
 
 const getUsageClass = (percent: number): string => {
@@ -63,6 +65,9 @@ const getAlertClass = (alert: AlertLevel): string => {
 };
 
 const GrowthOpportunities: React.FC = () => {
+  const [showAll, setShowAll] = useState(false);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
+
   return (
     <section className="go-section">
       {/* Section heading */}
@@ -92,19 +97,24 @@ const GrowthOpportunities: React.FC = () => {
 </svg></span>
             </div>
             <span className="go-card-title">
-              Top 10 Expansion Candidates (ready to upgrade)
+              Top Expansion Candidates (ready to upgrade)
             </span>
           </div>
 
           <div className="go-card-header-right">
-            <span className="go-updated">Updated 3 mins ago</span>
-            <button className="go-view-all">
-              View All <span className="go-view-arrow">↗</span>
+            {/* <span className="go-updated">Updated 3 mins ago</span> */}
+            <button className="go-view-all" onClick={() => setShowAll((prev) => !prev)}>
+              {showAll ? "View Less" : "View All"} <span className="go-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
             </button>
           </div>
         </div>
 
-        <div className="go-table-wrapper">
+        <div className={`go-table-wrapper ${showAll ? 'go-show-all' : ''}`} ref={tableWrapperRef}>
+          <div className="go-scrollbar-container">
+            <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+          </div>
           <table className="go-table">
             <thead>
               <tr>

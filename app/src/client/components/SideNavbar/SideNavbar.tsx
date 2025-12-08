@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './SideNavbar.css';
 import { MdPeople } from 'react-icons/md';
 import AforoLogoComponent from '../componenetsss/AforoLogoComponent';
+import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
 
 // Define the types for the props that Sidebar component expects
 interface SidebarProps {
@@ -17,6 +18,45 @@ interface Tab {
 }
 
 function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: SidebarProps): JSX.Element {
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [scrollbarHeight, setScrollbarHeight] = useState(0);
+  const navRef = React.useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (navRef.current) {
+        const isOverflowing = navRef.current.scrollHeight > navRef.current.clientHeight;
+        setHasOverflow(isOverflowing);
+        
+        // Calculate scrollbar height based on viewport ratio
+        if (isOverflowing) {
+          const ratio = navRef.current.clientHeight / navRef.current.scrollHeight;
+          setScrollbarHeight(navRef.current.clientHeight * ratio);
+        }
+      }
+    };
+
+    const handleScroll = () => {
+      if (navRef.current) {
+        setScrollPosition(navRef.current.scrollTop);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    navRef.current?.addEventListener('scroll', handleScroll);
+    
+    // Also check after a small delay to ensure DOM is fully rendered
+    const timer = setTimeout(checkOverflow, 100);
+    
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      navRef.current?.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
+  }, []);
+
   const tabs: Tab[] = [
     {
       name: 'Get Started',
@@ -250,7 +290,7 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
       <div className="logo">
       <AforoLogoComponent />
       </div>
-      <nav className="nav">
+      <nav ref={navRef} className="nav">
         <ul>
           {tabs.map(({ name, icon }) => (
             <li
@@ -269,6 +309,16 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
           ))}
         </ul>
       </nav>
+      {hasOverflow && navRef.current && (
+        <div 
+          className="scrollbar-container"
+          style={{
+            transform: `translateY(${(scrollPosition / (navRef.current.scrollHeight - navRef.current.clientHeight)) * (navRef.current.clientHeight - scrollbarHeight)}px)`
+          }}
+        >
+          <VerticalScrollbar height={scrollbarHeight} color="#D9DFE8" thickness={4} />
+        </div>
+      )}
     </div>
   );
 

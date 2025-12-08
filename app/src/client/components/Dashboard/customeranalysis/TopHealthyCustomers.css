@@ -54,17 +54,17 @@ line-height: var(--line-height-body-lg, 24px); /* 150% */
 
 .thc-header-right {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .thc-updated-text {
-  color: #A6B9C9;
+  color: var(--color-primary-800);
 
 /* body/xs/thin */
 font-family: var(--font-family-primary);
 font-size: var(--font-size-xs, 10px);
-font-style: italic;
 font-weight: 300;
 line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
@@ -90,11 +90,43 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: #f9fbff;
   border-radius: 16px;
   max-height: 320px;
-  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  position: relative;
 }
 
-.thc-card .thc-table-wrapper:hover {
-  overflow-y: auto;
+/* Hide scrollbar for Chrome, Safari, Edge */
+.thc-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* when showing all, remove max-height to show full content */
+.thc-table-wrapper.thc-show-all {
+  max-height: none;
+  overflow-y: hidden;
+}
+
+/* scrollbar container */
+.thc-scrollbar-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-right: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.thc-table-wrapper:hover .thc-scrollbar-container {
+  display: none;
+}
+
+/* hide scrollbar when showing all */
+.thc-table-wrapper.thc-show-all .thc-scrollbar-container {
+  display: none;
 }
 
 /* table */
@@ -125,6 +157,14 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   white-space: nowrap;
 }
 
+.thc-table tbody tr {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.thc-table tbody tr:last-child {
+  border-bottom: none;
+}
+
 .thc-table th {
 color: var(--color-neutral-1000);
 
@@ -135,9 +175,7 @@ font-style: normal;
 font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
-.thc-table tbody tr:nth-child(even) {
-  background: #fbfdff;
-}
+
 
 /* customer cell */
 .thc-customer-cell {
@@ -216,13 +254,23 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* pill */
 .thc-pill-low {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 500;
-  background: #ecfdf3;
+  color:  #66AF17;
+
+/* body/sm/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+
+  background:#F3FAEE;
   color: #15803d;
-  border: 1px solid #bbf7d0;
+border: 1px solid rgba(102, 175, 23, 0.40);
+height: 24px;
+padding: 4px 12px;
+border-radius: 20px;
+
+
 }
 
 /* scroll fade */
