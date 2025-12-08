@@ -32,6 +32,8 @@ interface Metric {
   unit: string;
   status: string;
   createdOn?: string;
+  productId?: number;
+  iconData?: any;
 }
 
 interface NotificationState {
@@ -134,14 +136,28 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const fetchMetrics = React.useCallback(async () => {
     try {
       const data: UsageMetricDTO[] = await getUsageMetrics();
-      const mapped: Metric[] = data.map((m) => ({
-        id: (m as any).metricId ?? (m as any).billableMetricId,
-        usageMetric: m.metricName,
-        productName: m.productName,
-        unit: m.unitOfMeasure,
-        status: (m as any).status ?? (m as any).metricStatus ?? "Active",
-        createdOn: (m as any).createdOn,
-      }));
+      const mapped: Metric[] = data.map((m) => {
+        let iconData = null;
+        try {
+          if ((m as any).iconData) {
+            iconData = typeof (m as any).iconData === 'string' 
+              ? JSON.parse((m as any).iconData) 
+              : (m as any).iconData;
+          }
+        } catch (e) {
+          console.error('Error parsing iconData:', e);
+        }
+        return {
+          id: (m as any).metricId ?? (m as any).billableMetricId,
+          usageMetric: m.metricName,
+          productName: m.productName,
+          unit: m.unitOfMeasure,
+          status: (m as any).status ?? (m as any).metricStatus ?? "Active",
+          createdOn: (m as any).createdOn,
+          productId: m.productId,
+          iconData: iconData
+        };
+      });
       setMetrics(mapped);
     } catch (err) {
       console.error(err);
@@ -161,16 +177,11 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     return <EditMetrics metricId={selectedMetricId.toString()} onClose={() => { setShowEditMetricForm(false); fetchMetrics(); }} />;
   }
 
-  const metricColors = [
-    'rgba(234, 212, 174, 0.15)',
-    'rgba(226, 182, 190, 0.15)',
-    'rgba(226, 182, 204, 0.15)',
-    'rgba(220, 182, 226, 0.15)',
-    'rgba(204, 183, 225, 0.15)',
-    'rgba(196, 183, 225, 0.15)',
-    'rgba(174, 234, 214, 0.15)'
-  ];
-  const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
+  // Helper function to convert hex to RGB
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
+  };
 
   const filteredMetrics = metrics
     .filter((m) =>

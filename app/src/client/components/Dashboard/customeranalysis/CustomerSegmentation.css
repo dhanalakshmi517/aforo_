@@ -1,0 +1,171 @@
+@import "../Variables.css";
+
+.cs-section {
+  margin-top: 24px;
+}
+
+/* top header */
+.cs-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.cs-header h2 {
+  margin: 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cs-info-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* two-card layout */
+.cs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.cs-card {
+  flex: 1 1 0;
+  min-width: 280px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px 20px 18px 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+.cs-card-company {
+  max-width: 420px;
+}
+
+.cs-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cs-card-title {
+  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cs-updated-text {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* company size */
+.cs-company-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-company-donut {
+  width: 100%;
+  height: 190px;
+}
+
+.cs-company-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cs-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.cs-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+/* customers by revenue */
+.cs-revenue-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cs-revenue-chart {
+  width: 100%;
+  height: 220px;
+}
+
+.cs-revenue-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: -4px;
+}
+
+.cs-revenue-legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+/* Hide default recharts hover background for bars */
+.cs-revenue-chart .recharts-bar-background {
+  display: none !important;
+}
+
+/* Ensure bars only show their actual height on hover */
+.cs-revenue-chart .recharts-bar-rectangles rect {
+  transition: opacity 0.2s ease;
+}
+
+.cs-revenue-chart .recharts-bar-rectangles rect:hover {
+  opacity: 0.8;
+}
+
+/* responsive behaviour */
+@media (max-width: 960px) {
+  .cs-card-company,
+  .cs-card-revenue {
+    max-width: 100%;
+  }
+
+  .cs-grid {
+    flex-direction: column;
+  }
+
+  .cs-company-body {
+    align-items: flex-start;
+  }
+
+  .cs-company-donut {
+    height: 180px;
+  }
+}

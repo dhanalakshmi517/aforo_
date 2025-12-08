@@ -4,7 +4,7 @@ class LoginPage {
   constructor(driver) {
     this.driver = driver;
     this.baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    
+
     // Test credentials
     this.testUser = {
       email: process.env.TEST_EMAIL || 'test@example.com',
@@ -14,22 +14,25 @@ class LoginPage {
     // Login page selectors
     this.selectors = {
       // Login form elements
-      loginForm: By.css('form, .login-form, [data-testid="login-form"]'),
-      emailInput: By.css('input[type="email"], input[name="email"], #email, [data-testid="email-input"]'),
-      passwordInput: By.css('input[type="password"], input[name="password"], #password, [data-testid="password-input"]'),
-      loginButton: By.css('button[type="submit"], button:contains("Log in"), button:contains("Sign in"), [data-testid="login-button"]'),
-      
+      loginForm: By.css('.signin-form'),
+      emailInput: By.id('email'),
+      passwordInput: By.id('password'),
+      loginButton: By.css('.primary-btn'),
+
+      // Validation errors
+      emailError: By.id('email-error'),
+      passwordError: By.id('password-error'),
+      generalError: By.css('.error-msg'),
+
       // Page elements
-      pageTitle: By.css('h1, h2, .title, [data-testid="login-title"]'),
-      errorMessage: By.css('.error, .error-message, [data-testid="error-message"]'),
-      successMessage: By.css('.success, .success-message, [data-testid="success-message"]'),
-      
-      // Links
-      signupLink: By.css('a[href*="signup"], a:contains("Sign up"), a:contains("Register")'),
-      forgotPasswordLink: By.css('a[href*="forgot"], a[href*="reset"], a:contains("Forgot password")'),
-      
+      pageTitle: By.css('.signin-title'),
+
+      // Links and Buttons
+      togglePasswordButton: By.css('.toggle-password'),
+      forgotPasswordLink: By.css('.forgot-link'),
+      contactSalesLink: By.css('a[href="/contact-sales"]'),
+
       // Loading states
-      loadingSpinner: By.css('.loading, .spinner, [data-testid="loading"]'),
       submitButton: By.css('button[type="submit"]')
     };
   }
@@ -38,7 +41,7 @@ class LoginPage {
   async navigateToLogin() {
     console.log('🔐 Navigating to Login page');
     await this.driver.get(`${this.baseUrl}/signin`);
-    
+
     console.log('⏳ Waiting for Login page to load');
     await this.waitForPageLoad();
   }
@@ -47,20 +50,10 @@ class LoginPage {
     try {
       // Wait for login form to be present
       await this.driver.wait(until.elementLocated(this.selectors.loginForm), 10000);
-      console.log('✅ Login form found');
-      
+
       // Wait for email input to be present
       await this.driver.wait(until.elementLocated(this.selectors.emailInput), 5000);
-      console.log('✅ Email input found');
-      
-      // Wait for password input to be present
-      await this.driver.wait(until.elementLocated(this.selectors.passwordInput), 5000);
-      console.log('✅ Password input found');
-      
-      // Wait for login button to be present
-      await this.driver.wait(until.elementLocated(this.selectors.loginButton), 5000);
-      console.log('✅ Login button found');
-      
+
       return true;
     } catch (error) {
       console.log('❌ Login page elements not found:', error.message);
@@ -70,21 +63,21 @@ class LoginPage {
 
   // Login methods
   async fillEmail(email) {
-    console.log(`📧 Filling email: ${email}`);
     const emailInput = await this.driver.findElement(this.selectors.emailInput);
     await emailInput.clear();
-    await emailInput.sendKeys(email);
+    // Send keys one by one to ensure React state updates
+    for (const char of email) {
+      await emailInput.sendKeys(char);
+    }
   }
 
   async fillPassword(password) {
-    console.log('🔒 Filling password');
     const passwordInput = await this.driver.findElement(this.selectors.passwordInput);
     await passwordInput.clear();
     await passwordInput.sendKeys(password);
   }
 
   async clickLoginButton() {
-    console.log('🖱️ Clicking login button');
     const loginButton = await this.driver.findElement(this.selectors.loginButton);
     await loginButton.click();
   }
@@ -92,45 +85,71 @@ class LoginPage {
   async login(email = null, password = null) {
     const loginEmail = email || this.testUser.email;
     const loginPassword = password || this.testUser.password;
-    
-    console.log('🔐 Starting login process...');
-    
+
     try {
-      // Fill credentials
       await this.fillEmail(loginEmail);
       await this.fillPassword(loginPassword);
-      
-      // Click login
       await this.clickLoginButton();
-      
+
       // Wait for redirect or error
-      console.log('⏳ Waiting for login result...');
-      
-      // Check if we're redirected away from signin page (success)
-      const loginSuccess = await this.driver.wait(async () => {
-        const currentUrl = await this.driver.getCurrentUrl();
-        return !currentUrl.includes('/signin');
-      }, 10000);
-      
-      if (loginSuccess) {
-        console.log('✅ Login successful - redirected from login page');
-        return true;
-      }
-      
-    } catch (error) {
-      console.log('❌ Login failed:', error.message);
-      
-      // Check for error messages
       try {
-        const errorElement = await this.driver.findElement(this.selectors.errorMessage);
-        const errorText = await errorElement.getText();
-        console.log('❌ Error message:', errorText);
+        await this.driver.wait(async () => {
+          const currentUrl = await this.driver.getCurrentUrl();
+          return !currentUrl.includes('/signin');
+        }, 5000);
+        return true;
       } catch (e) {
-        console.log('❌ No error message found');
+        return false;
       }
-      
+
+    } catch (error) {
+      console.log('❌ Login interaction failed:', error.message);
       return false;
     }
+  }
+
+  // Validation methods
+  async getEmailError() {
+    try {
+      const errorElement = await this.driver.findElement(this.selectors.emailError);
+      return await errorElement.getText();
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getPasswordError() {
+    try {
+      const errorElement = await this.driver.findElement(this.selectors.passwordError);
+      return await errorElement.getText();
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getGeneralError() {
+    try {
+      const errorElement = await this.driver.findElement(this.selectors.generalError);
+      return await errorElement.getText();
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Interaction methods
+  async togglePasswordVisibility() {
+    const toggleBtn = await this.driver.findElement(this.selectors.togglePasswordButton);
+    await toggleBtn.click();
+  }
+
+  async getPasswordInputType() {
+    const passwordInput = await this.driver.findElement(this.selectors.passwordInput);
+    return await passwordInput.getAttribute('type');
+  }
+
+  async clickContactSales() {
+    const link = await this.driver.findElement(this.selectors.contactSalesLink);
+    await link.click();
   }
 
   // Utility methods
@@ -152,15 +171,14 @@ class LoginPage {
       const screenshot = await this.driver.takeScreenshot();
       const fs = require('fs');
       const path = require('path');
-      
+
       const screenshotDir = path.join(__dirname, '..', 'screenshots');
       if (!fs.existsSync(screenshotDir)) {
         fs.mkdirSync(screenshotDir, { recursive: true });
       }
-      
+
       const filepath = path.join(screenshotDir, filename);
       fs.writeFileSync(filepath, screenshot, 'base64');
-      console.log(`📸 Screenshot saved: ${filename}`);
       return filepath;
     } catch (error) {
       console.log('❌ Failed to take screenshot:', error.message);
@@ -168,7 +186,6 @@ class LoginPage {
     }
   }
 
-  // Validation methods
   async isLoginFormVisible() {
     try {
       const form = await this.driver.findElement(this.selectors.loginForm);

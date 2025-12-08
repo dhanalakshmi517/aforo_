@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Form - Test Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .passed { color: #10b981; }
+        .failed { color: #ef4444; }
+        .total { color: #667eea; }
+        .coverage { color: #f59e0b; }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .requirement-card {
+            background: white;
+            border-left: 5px solid #ddd;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .requirement-card.passed {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #d1fae5 0%, white 100%);
+        }
+        
+        .requirement-card.failed {
+            border-left-color: #ef4444;
+            background: linear-gradient(to right, #fee2e2 0%, white 100%);
+        }
+        
+        .requirement-card.partial {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fef3c7 0%, white 100%);
+        }
+        
+        .requirement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .requirement-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.passed {
+            background: #10b981;
+            color: white;
+        }
+        
+        .status-badge.failed {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .status-badge.partial {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .requirement-description {
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+        
+        .test-count {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .issues-section {
+            background: #fffbeb;
+            border: 2px solid #fbbf24;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .issue-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .issue-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .issue-description {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .severity {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .severity.high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .severity.medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .stat-number {
+                font-size: 2em;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+        
+        .print-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .print-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Organization Form Test Report</h1>
+            <p>Automated Selenium Testing Results</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">November 28, 2025</p>
+        </div>
+        
+        <div class="summary">
+            <div class="stat-card">
+                <div class="stat-label">Total Tests</div>
+                <div class="stat-number total">24</div>
+                <div class="stat-label">Executed</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Passed</div>
+                <div class="stat-number passed">16</div>
+                <div class="stat-label">67% Pass Rate</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Failed</div>
+                <div class="stat-number failed">8</div>
+                <div class="stat-label">33% Failure Rate</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Coverage</div>
+                <div class="stat-number coverage">7</div>
+                <div class="stat-label">Requirements Tested</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>📈 Test Results Overview</h2>
+                <div class="chart-container">
+                    <canvas id="overviewChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📊 Results by Requirement</h2>
+                <div class="chart-container">
+                    <canvas id="requirementsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>✅ Detailed Requirements Status</h2>
+                
+                <div class="requirement-card passed">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 1: First Name & Last Name Validation</div>
+                        <span class="status-badge passed">✓ Passed</span>
+                    </div>
+                    <div class="test-count">3 out of 3 tests passed (100%)</div>
+                    <div class="requirement-description">
+                        ✅ Form correctly validates mandatory name fields<br>
+                        ✅ Blocks submission when First Name is empty<br>
+                        ✅ Blocks submission when Last Name is empty
+                    </div>
+                </div>
+                
+                <div class="requirement-card passed">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 2: Business Email Validation</div>
+                        <span class="status-badge passed">✓ Passed</span>
+                    </div>
+                    <div class="test-count">4 out of 4 tests passed (100%)</div>
+                    <div class="requirement-description">
+                        ✅ Successfully rejects @gmail.com addresses<br>
+                        ✅ Accepts valid business domains (@company.com, @business.io)<br>
+                        ✅ Blocks empty email submissions
+                    </div>
+                </div>
+                
+                <div class="requirement-card passed">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 3: Company, Role & Employee Size</div>
+                        <span class="status-badge passed">✓ Passed</span>
+                    </div>
+                    <div class="test-count">4 out of 4 tests passed (100%)</div>
+                    <div class="requirement-description">
+                        ✅ All three mandatory business fields properly validated<br>
+                        ✅ Form correctly blocks when any field is missing
+                    </div>
+                </div>
+                
+                <div class="requirement-card partial">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 4: Country Flag Icons</div>
+                        <span class="status-badge partial">⚠ Partial</span>
+                    </div>
+                    <div class="test-count">2 out of 4 tests passed (50%)</div>
+                    <div class="requirement-description">
+                        ⚠️ BUG FOUND: Flag mapping incorrect for some countries<br>
+                        ❌ India (IN) shows Argentina flag<br>
+                        ❌ United States (US) shows Australia flag<br>
+                        ✅ UK flag displays correctly
+                    </div>
+                </div>
+                
+                <div class="requirement-card passed">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 5: Optional Help Field</div>
+                        <span class="status-badge passed">✓ Passed</span>
+                    </div>
+                    <div class="test-count">2 out of 2 tests passed (100%)</div>
+                    <div class="requirement-description">
+                        ✅ "How can we help you?" field correctly optional<br>
+                        ✅ Form submits with or without this field filled
+                    </div>
+                </div>
+                
+                <div class="requirement-card failed">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 6: Terms Checkbox State</div>
+                        <span class="status-badge failed">✗ Failed</span>
+                    </div>
+                    <div class="test-count">1 out of 4 tests passed (25%)</div>
+                    <div class="requirement-description">
+                        🚧 MISSING FEATURE: Checkbox state management not implemented<br>
+                        ❌ Checkbox always enabled (should disable until form valid)<br>
+                        ⚠️ UX Issue: Users can check Terms before filling required fields
+                    </div>
+                </div>
+                
+                <div class="requirement-card failed">
+                    <div class="requirement-header">
+                        <div class="requirement-title">Requirement 7: Submit Button Activation</div>
+                        <span class="status-badge failed">✗ Failed</span>
+                    </div>
+                    <div class="test-count">0 out of 3 tests passed (0%)</div>
+                    <div class="requirement-description">
+                        🚧 MISSING FEATURE: Button state control not implemented<br>
+                        ❌ Button always enabled (should disable until Terms checked)<br>
+                        ⚠️ High Priority: Users can submit without accepting Terms
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="issues-section">
+                    <h2 style="color: #d97706; border: none; margin-bottom: 20px;">⚠️ Issues & Recommendations</h2>
+                    
+                    <h3 style="margin: 20px 0 10px 0;">🐛 Bugs (1)</h3>
+                    <div class="issue-item">
+                        <div class="issue-title">
+                            BUG-001: Country Flag Mapping Incorrect
+                            <span class="severity medium">Medium</span>
+                        </div>
+                        <div class="issue-description">
+                            <strong>Issue:</strong> India shows Argentina flag, US shows Australia flag<br>
+                            <strong>Impact:</strong> Poor user experience for international users<br>
+                            <strong>Fix Time:</strong> ~2 hours<br>
+                            <strong>Action:</strong> Review country code to flag icon mapping in CountrySelector
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin: 30px 0 10px 0;">🚧 Missing Features (2)</h3>
+                    <div class="issue-item" style="border-left-color: #ef4444;">
+                        <div class="issue-title">
+                            FEAT-001: Terms Checkbox State Management
+                            <span class="severity high">High</span>
+                        </div>
+                        <div class="issue-description">
+                            <strong>Required:</strong> Disable checkbox until all required fields are valid<br>
+                            <strong>Impact:</strong> UX issue - users can check Terms prematurely<br>
+                            <strong>Fix Time:</strong> ~4 hours<br>
+                            <strong>Action:</strong> Implement form validation monitoring
+                        </div>
+                    </div>
+                    
+                    <div class="issue-item" style="border-left-color: #ef4444;">
+                        <div class="issue-title">
+                            FEAT-002: Submit Button State Control
+                            <span class="severity high">High</span>
+                        </div>
+                        <div class="issue-description">
+                            <strong>Required:</strong> Disable button until Terms checkbox is checked<br>
+                            <strong>Impact:</strong> Critical - users can bypass Terms & Conditions<br>
+                            <strong>Fix Time:</strong> ~2 hours<br>
+                            <strong>Action:</strong> Add button state control based on checkbox
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 10px;">
+                        <strong style="font-size: 1.1em;">💡 Summary:</strong><br>
+                        <div style="margin-top: 10px; line-height: 1.8;">
+                            Total Estimated Fix Time: <strong>~8 hours</strong><br>
+                            Priority: <strong>High</strong> - Address before production release<br>
+                            Recommendation: Implement missing features (FEAT-001, FEAT-002) to ensure proper Terms & Conditions flow
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Test Environment:</strong> Chrome 143.0 | Node.js v22.12.0 | Selenium 4.38.0</p>
+            <p><strong>Application:</strong> http://localhost:3000/contact-sales</p>
+            <p style="margin-top: 15px; font-size: 0.9em;">Generated: November 28, 2025 at 15:04 IST</p>
+        </div>
+    </div>
+    
+    <script>
+        // Overview Pie Chart
+        const ctx1 = document.getElementById('overviewChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed'],
+                datasets: [{
+                    data: [16, 8],
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14,
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Overall Test Results (24 Total Tests)',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    }
+                }
+            }
+        });
+        
+        // Requirements Bar Chart
+        const ctx2 = document.getElementById('requirementsChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Req 1\nNames', 'Req 2\nEmail', 'Req 3\nBusiness', 'Req 4\nFlags', 'Req 5\nHelp', 'Req 6\nCheckbox', 'Req 7\nButton'],
+                datasets: [{
+                    label: 'Passed',
+                    data: [3, 4, 4, 2, 2, 1, 0],
+                    backgroundColor: '#10b981'
+                }, {
+                    label: 'Failed',
+                    data: [0, 0, 0, 2, 0, 3, 3],
+                    backgroundColor: '#ef4444'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14,
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Test Results by Requirement',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

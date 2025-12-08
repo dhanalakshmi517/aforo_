@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState, Suspense } from 'react';
 import '../index.css';
+import 'flag-icons/css/flag-icons.min.css';
 import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
@@ -30,6 +31,11 @@ import { ProtectedRoute } from './components/Common/ProtectedRoute';
 import SideNavbar from './components/SideNavbar/SideNavbar';
 import DashboardGallery from './components/Dashboard/DashboardGallery';
 import ProductAnalyticsPage from './components/Dashboard/ProductAnalyticsPage';
+import CustomerOverviewHeader from './components/Dashboard/customeranalysis/CustomerOverviewHeader';
+import CustomerOverviewStats from './components/Dashboard/customeranalysis/CustomerOverviewStats';
+import CustomerHealthOverview from './components/Dashboard/customeranalysis/CustomerHealthOverview';
+import TopAtRiskCustomers from './components/Dashboard/customeranalysis/TopAtRiskCustomers';
+
 
 const customersLoader = () => import('./components/Customers/Customers');
 const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
@@ -81,6 +87,19 @@ import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 import SalesSite from './components/comingsoon/SalesSite';
+import TopHealthyCustomers from './components/Dashboard/customeranalysis/TopHealthyCustomers';
+import TopChurningCustomers from './components/Dashboard/customeranalysis/TopChurningCustomers';
+import CustomerSegmentation from './components/Dashboard/customeranalysis/CustomerSegmentation';
+import NewVsExistingAndIndustries from './components/Dashboard/customeranalysis/NewVsExistingAndIndustries';
+import RevenueAnalysisHeader from './components/Dashboard/RevenueAnalysis/RevenueAnalysisHeader';
+import RevenueAnalytics from './components/Dashboard/RevenueAnalysis/RevenueAnalytics';
+import RevenueSummaryCards from './components/Dashboard/RevenueAnalysis/RevenueSummaryCards';
+import RevenuAnalyticsDash1 from './components/Dashboard/RevenueAnalysis/RevenuAnalyticsDash1';
+import RevenueAnalyticsDash2 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash2';
+import RevenueAnalyticsDash3 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash3';
+import RevenueAnalyticsDash4 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash4';
+import GrowthOpportunities from './components/Dashboard/RevenueAnalysis/GrowthOpportunities';
+import RevenueAnalyticsDash5 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash5';
 
 export default function App() {
   const navigate = useNavigate();
@@ -89,6 +108,7 @@ export default function App() {
 
   const [isNewProductPage, setIsNewProductPage] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
 
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showNewProductForm, setShowNewProductForm] = useState(false);
@@ -385,6 +405,75 @@ export default function App() {
                       />
                       <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <ProductAnalyticsPage />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Customer Analysis dashboard detail */}
+              <Route
+                path="/get-started/dashboards/customer-analysis"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#FBFDFF", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
+                        <CustomerOverviewHeader />
+                        <div style={{ padding: '20px' }}>
+                          <CustomerOverviewStats />
+                          <CustomerHealthOverview />
+                          <TopAtRiskCustomers />
+                          <TopHealthyCustomers/>
+                          <TopChurningCustomers />
+                          <CustomerSegmentation />
+                          <NewVsExistingAndIndustries />
+                        </div>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Revenue Analysis dashboard detail */}
+              <Route
+                path="/get-started/dashboards/revenue-analysis"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#FBFDFF", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
+                        <RevenueAnalysisHeader />
+                        <div style={{ padding: '20px' }}>
+                          <RevenueSummaryCards />
+                          <RevenueAnalytics />
+                          <RevenuAnalyticsDash1/>
+                          <RevenueAnalyticsDash2/>
+                          <RevenueAnalyticsDash3/>
+                          <GrowthOpportunities/>
+                          <RevenueAnalyticsDash4 />
+                          <RevenueAnalyticsDash5 />
+                        </div>
                       </main>
                     </div>
                   </ProtectedRoute>

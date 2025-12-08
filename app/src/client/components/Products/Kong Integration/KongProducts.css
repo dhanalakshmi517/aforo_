@@ -1,12 +1,13 @@
 .kong-products-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
   box-sizing: border-box;
   background-color: transparent;
   position: relative;
   padding: 5px;
   width: 100%;
+  overflow: hidden;
 }
 
 .kong-products-card {
@@ -16,7 +17,7 @@
   padding: 5px;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  height: 100%;
   box-shadow: 0 8px 32px rgba(9, 30, 66, 0.08);
   overflow: hidden;
 }
@@ -24,13 +25,15 @@
 /* Header */
 
 .kong-products-header {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
   gap: 16px;
-  margin-bottom: 24px;
-  padding: 24px 32px 0 32px;
+  padding: 24px 32px 16px 32px;
   flex-shrink: 0;
   order: 0;
+  background: var(--color-neutral-white, #ffffff);
+  border-bottom: 1px solid var(--color-neutral-200);
 }
 
 /* Scrollable content container */
@@ -39,7 +42,7 @@
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 32px 32px 32px;
+  padding: 24px 32px 24px 32px;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
   background-color: transparent;
@@ -47,7 +50,6 @@
   flex-direction: column;
   order: 1;
   min-height: 0;
-  max-height: calc(100vh - 300px);
 }
 
 .kong-products-content::-webkit-scrollbar {
@@ -70,14 +72,83 @@
 
 .kong-products-header-top {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+/* Search */
+
+.kong-search {
+  display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  transition: all 0.2s ease;
+  min-width: 200px;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.kong-search:hover {
+  border-color: var(--color-neutral-200);
+  background-color: var(--color-neutral-50);
+}
+
+.kong-search.is-active {
+  border-color: var(--color-primary-600);
+  background-color: var(--color-neutral-white);
+  box-shadow: 0 0 0 3px rgba(2, 98, 161, 0.1);
+}
+
+.kong-search-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.kong-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+}
+
+.kong-search-input::placeholder {
+  color: var(--color-neutral-500);
+}
+
+.kong-clear-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.kong-clear-btn:hover {
+  opacity: 0.7;
 }
 
 .kong-products-header-left {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .kong-products-title {
@@ -100,52 +171,26 @@
   font-size: 13px;
   white-space: nowrap;
   justify-content: flex-end;
+  flex-shrink: 0;
+  grid-column: 2;
+  grid-row: 2;
 }
 
-/* Search */
-
-.kong-products-search-wrapper {
-  position: relative;
-  width: 260px;
-  display: flex;
-  align-items: center;
-}
-
-.kong-products-search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.kong-products-search-input {
-  width: 100%;
-  height: 36px;
-  padding: 0 12px 0 36px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  background-color: #ffffff;
-  font-size: 13px;
-  color: #111827;
-  outline: none;
-}
-
-.kong-products-search-input::placeholder {
-  color: #9ca3af;
-}
-
-/* Select All / Clear All */
+ Select All / Clear All */
 
 
 .kong-products-checkbox-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #111827;
+  color: var(--color-primary-700);
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
   cursor: pointer;
 }
 
@@ -157,10 +202,15 @@
 
 .kong-products-clear-btn {
   background: none;
+  color: var(--color-primary-800);
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
   border: none;
   padding: 0;
-  font-size: 13px;
-  color: #4b79ff;
+ 
   cursor: pointer;
 }
 
@@ -169,9 +219,8 @@
 .kong-products-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  min-height: 200px;
-  flex: 1;
+  gap: 10px;
+  align-content: start;
 }
 
 /* Custom styling for SelectableCard to make it more compact */
@@ -180,7 +229,7 @@
   min-height: unset;
   padding: 12px;
   width: 100%;
-  max-height: 140px;
+  max-height: 110px;
 }
 
 .kong-products-grid .selcard__content {
@@ -209,20 +258,63 @@
   font-size: 11px;
 }
 
+/* Card Title Styling */
+.kong-products-grid .selcard__title {
+ color: var(--color-neutral-1700);
+
+/* body/lg/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+}
+
+/* Card Version Styling */
+.kong-products-grid .selcard__version {
+ overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-xs, 16px); /* 150% */
+}
+
+/* Card Description/Meta Styling */
+.kong-products-grid .selcard__meta {
+  overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+/* Selection Border Styling */
+.kong-products-grid .selcard.is-selected {
+  border: 2px solid var(--color-primary-500, #0262A1);
+  background-color: var(--color-neutral-white, #ffffff);
+}
+
 /* Footer */
 
 .kong-products-footer {
-  position: fixed;
-  bottom: 10px;
-  left: 330px;
-  right: 10px;
-  height: 70px;
+  position: relative;
+  height: auto;
   background-color: var(--color-neutral-white);
   padding: 8px 28px;
   border-top: 1px solid var(--color-neutral-300);
   border-radius: 0 0 var(--border-radius-md, 8px) var(--border-radius-md, 8px);
   z-index: 100;
   box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 .kong-products-footer-line {
@@ -232,18 +324,21 @@
   margin: 0 32px;
   flex-shrink: 0;
   order: 2;
+  display: none;
 }
 
 .kong-products-footer-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 16px 32px;
+  align-items: center;
+  padding: 16px 32px 32px 32px;
   flex-shrink: 0;
   background-color: var(--color-neutral-white, #ffffff);
+  border-top: 1px solid var(--color-neutral-200);
   order: 3;
+  gap: 12px;
 }
 
 .kong-products-import-btn {
   min-width: 150px;
 }
-

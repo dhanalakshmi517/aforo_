@@ -14,16 +14,30 @@
   flex-direction: column;
 }
 
+.sidebar.collapsible {
+  width: 80px;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsible:hover {
+  width: 15rem;
+}
+
 .sidebar.hidden { display: none; }
 
 .logo {
-  padding: 16px 24px 8px;
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  margin-top: -45px;
-  margin-left: 15px;
+  margin-left: 33px;
+  margin-top: 20px;
 }
+
+.sidebar.collapsible .logo svg:last-child {
+  display: none;
+}
+
+.sidebar.collapsible:hover .logo svg:last-child {
+  display: block;
+}
+
 
 .nav {
   flex: 1;
@@ -56,6 +70,20 @@
   transition: all 0.2s ease;
   /* spacing between items should be 2px as per design */
   margin-bottom: 2px;
+  margin-right: 16px;
+  margin-left: 16px;
+}
+
+.sidebar.collapsible .nav-item {
+  padding: 12px;
+  justify-content: center;
+  margin-right: 8px;
+  margin-left: 8px;
+}
+
+.sidebar.collapsible:hover .nav-item {
+  padding: 12px 16px;
+  justify-content: flex-start;
   margin-right: 16px;
   margin-left: 16px;
 }
@@ -132,6 +160,17 @@
   display: flex;
   align-items: center;
   margin-left: -10px;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsible .tab-name {
+  opacity: 0;
+  display: none;
+}
+
+.sidebar.collapsible:hover .tab-name {
+  opacity: 1;
+  display: flex;
 }
 
 .tab-name svg {

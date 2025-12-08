@@ -1,0 +1,334 @@
+@import "../Variables.css";
+.nei-wrapper {
+  display: flex;
+  gap: 28px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+}
+
+/* Shared card styles */
+.nei-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+  padding: 24px 28px;
+  box-sizing: border-box;
+}
+
+.nei-left-card {
+  width: 389px;      /* like the Figma frame */
+  min-width: 389px;
+}
+
+.nei-right-card {
+  flex: 1;
+}
+
+/* Card headers */
+.nei-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.nei-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.nei-updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Left card main */
+.nei-left-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nei-donut-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  align-items: center;
+}
+
+/* Donut chart */
+.nei-donut {
+  position: relative;
+  width: 240px;
+  height: 240px;
+}
+
+.nei-donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.nei-donut-track {
+  fill: none;
+  stroke: #e0f2f1;
+  stroke-width: 24;
+}
+
+.nei-donut-segment {
+  fill: none;
+  stroke: #34d399; /* mint-green */
+  stroke-width: 24;
+  stroke-linecap: round;
+}
+
+/* inner label */
+.nei-donut-inner {
+  position: absolute;
+  inset: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: #f9fffd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.nei-donut-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.nei-donut-value {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #059669;
+}
+
+/* pill overlay */
+.nei-donut-pill {
+  background: rgba(22, 163, 74, 0.06);
+  border-radius: 999px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.nei-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+}
+
+.nei-pill-text {
+  font-size: 11px;
+  color: #065f46;
+}
+
+/* Legend */
+.nei-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: center;
+}
+
+.nei-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nei-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.nei-legend-dot-new {
+  background: #22c55e;
+}
+
+.nei-legend-dot-total {
+  background: #a7f3d0;
+}
+
+.nei-legend-label {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+/* Bottom stat cards */
+.nei-bottom-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.nei-stat-card {
+  background: #f9fafb;
+  border-radius: 18px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nei-stat-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.nei-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Right header – icon + title + meta */
+.nei-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nei-trophy-pill {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--border-radius-sm);
+  background: #ecfdf3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nei-trophy {
+  font-size: 16px;
+}
+
+.nei-right-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nei-link-btn {
+   border: none;
+  background: transparent;
+  font-size: 12px;
+  color:#2A455E;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+/* Table */
+.nei-table {
+  margin-top: 4px;
+}
+
+.nei-table-header,
+.nei-table-row {
+  display: grid;
+  grid-template-columns: 2.1fr 1.2fr 1.1fr 1.4fr;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.nei-table-header {
+ background-color: var(--color-neutral-100);
+ color: var(--color-neutral-1000);
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.nei-table-row {
+color: var(--color-neutral-1400);
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.nei-table-row + .nei-table-row {
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Header MRR with info icon */
+.nei-header-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nei-info-icon {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Customers cell */
+.nei-customers-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.nei-avatar-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nei-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #f9fafb;
+  border: 2px solid #ffffff;
+  margin-left: -6px;
+}
+
+.nei-avatar:first-child {
+  margin-left: 0;
+}
+
+.nei-customers-count {
+  font-size: 12px;
+  color: #111827;
+}
+
+/* Basic responsiveness */
+@media (max-width: 1040px) {
+  .nei-wrapper {
+    flex-direction: column;
+  }
+
+  .nei-left-card {
+    width: 100%;
+    min-width: 0;
+  }
+}

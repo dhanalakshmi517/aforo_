@@ -1,0 +1,288 @@
+@import "../Variables.css";
+
+.revA-section {
+  margin-top: 24px;
+}
+
+/* section header */
+.revA-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.revA-header h2 {
+  margin: 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.revA-info-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* grid */
+.revA-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* cards */
+.revA-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px 20px 18px 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-width: 280px;
+}
+
+.revA-card-left {
+  max-width: 520px;
+}
+
+.revA-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.revA-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.revA-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.revA-info-inline {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.revA-kebab {
+  font-size: 18px;
+  color: #cbd5e1;
+}
+
+/* chart */
+.revA-chart-wrapper {
+  margin-top: 12px;
+}
+
+.revA-footnote {
+  margin: 8px 0 0 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* custom bubble for reference point */
+.revA-point-label {
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+}
+
+.revA-point-label-date {
+  opacity: 0.9;
+}
+
+.revA-point-label-value {
+  font-weight: 600;
+}
+
+/* right card */
+.revA-right-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.revA-right-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.revA-trophy {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--border-radius-sm);
+  background: #ecfdf3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.revA-right-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.revA-updated {
+ color: var(--color-neutral-600);
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
+}
+
+.revA-view-btn {
+  border: none;
+  background: transparent;
+  
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--color-primary-800);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+.revA-view-arrow {
+  font-size: 14px;
+}
+
+/* table */
+.revA-table-wrapper {
+  margin-top: 12px;
+  background: white;
+  border-radius: 20px;
+  max-height: 260px;
+  overflow: hidden;
+  box-shadow: 0 18px 30px 0 var(--shadow-shadow-1, #EEF1F6);
+}
+
+.revA-card-right .revA-table-wrapper:hover {
+  overflow-y: auto;
+}
+
+.revA-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.revA-table thead {
+  background:var(--color-neutral-100);
+}
+
+.revA-table th,
+.revA-table td {
+  padding: 6px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.revA-table th {
+  overflow: hidden;
+color: var(--color-neutral-1000);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+
+
+/* name cell */
+.revA-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.revA-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #020617;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.revA-name-text {
+ overflow: hidden;
+color: var(--color-neutral-1000);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+/* fade at bottom when scrolling */
+.revA-scroll-fade {
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(249, 250, 251, 0), #f9fbff);
+}
+
+/* responsive tweaks */
+@media (max-width: 960px) {
+  .revA-card-left,
+  .revA-card-right {
+    max-width: 100%;
+  }
+
+  .revA-grid {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,262 @@
+@import "../Variables.css";
+
+.ch-section {
+  margin-top: 24px;
+}
+
+/* Header */
+.ch-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ch-header h2 {
+  margin: 0;
+  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ch-info-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: none;
+  background: none;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Grid */
+.ch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Shared card styles */
+.ch-card {
+  flex: 1 1 0;
+  min-width: 280px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+box-shadow: 0 1.34px 17.869px 0  #EEF1F6, 0 0.399px 5.32px 0  #EEF1F6;
+  box-sizing: border-box;
+}
+
+/* Left card */
+.ch-card-left {
+  max-width: 480px;
+}
+
+.ch-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.ch-card-title {
+  font-family: var(--font-family-primary);
+  color: #111827;
+  color: var(--black-100, #1C1C1C);
+
+/* body/lg/med */
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+}
+
+.ch-updated-text {
+  color: var(--color-grey-600);
+
+/* body/xs/thin */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
+}
+
+.ch-left-body {
+  display: flex;
+  gap: 28px;
+}
+
+.ch-donut-column {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ch-donut-chart {
+  width: 100%;
+  height: 220px;
+}
+
+.ch-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+}
+
+.ch-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.ch-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.ch-stats-column {
+  flex: 0 0 48%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ch-health-stat {
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.ch-health-stat-title {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.ch-health-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.ch-health-stat-desc {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* Right card */
+.ch-card-right {
+  flex: 1 1 0;
+}
+
+.ch-right-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ch-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ch-info-inline {
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ch-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ch-pill {
+padding: 4px 12px 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--color-neutral-300);
+  background: #f9fafb;
+color: var(--color-neutral-1700);
+
+/* body/sm/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-sm, 18px); /* 150% */  cursor: pointer;
+}
+
+.ch-kebab {
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.ch-chart-wrapper {
+  margin-top: 8px;
+}
+
+.ch-chart-footnote {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Bubble above last point */
+.ch-point-label {
+  background: #111827;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 11px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.4);
+}
+
+.ch-point-label-date {
+  opacity: 0.75;
+}
+
+.ch-point-label-value {
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .ch-card-left,
+  .ch-card-right {
+    max-width: 100%;
+  }
+
+  .ch-grid {
+    flex-direction: column;
+  }
+
+  .ch-left-body {
+    flex-direction: column;
+  }
+
+  .ch-donut-column,
+  .ch-stats-column {
+    flex: 1 1 100%;
+  }
+}

@@ -924,7 +924,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
 
                         <td className="metrics-cell">
-                          <div className="metrics-wrapper">
+                          <div className="products-metrics-wrapper">
                             {product.metrics && product.metrics.length > 0 ? (
                               product.metrics.map((metric, index) => {
                                 const truncatedName =
@@ -935,17 +935,85 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   ? metric.unitOfMeasure.substring(0, 2).toUpperCase()
                                   : '';
 
+                                // Use product icon color if available, otherwise use random color
+                                const metricTileColor = product.iconData?.tileColor || '#0F6DDA';
+                                
+                                // Convert hex to RGB for light background
+                                const hexToRgb = (hex: string) => {
+                                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                                  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
+                                };
+                                const rgbColor = hexToRgb(metricTileColor);
+
                                 return (
                                   <div
                                     key={index}
-                                    className="metric-item"
-                                    style={{ backgroundColor: getRandomBackgroundColor(index) }}
+                                    className="product-metric-item"
+                                    style={{
+                                      '--metric-tile-color': metricTileColor,
+                                      '--metric-tile-color-rgb': rgbColor,
+                                      backgroundColor: `rgba(${rgbColor}, 0.15)`,
+                                      borderRadius: '8px',
+                                      width: '44px',
+                                      height: '36px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                      padding: '2px',
+                                      border: '1px solid #F6F6F6'
+                                    } as React.CSSProperties}
                                   >
-                                    <div className="metric-content">
-                                      <div className="metric-uom" title={metric.unitOfMeasure}>
+                                    <div className="metric-content" style={{
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: '100%',
+                                      height: '100%',
+                                      gap: '0px'
+                                    }}>
+                                      <div 
+                                        className="metric-uom" 
+                                        title={metric.unitOfMeasure}
+                                        style={{ 
+                                          color: metricTileColor, 
+                                          opacity: 1,
+                                          textAlign: 'center',
+                                          width: '100%',
+                                          margin: '0',
+                                          padding: '0',
+                                          fontFamily: '"Aeonik Mono VF"',
+                                          fontSize: '14px',
+                                          fontStyle: 'normal',
+                                          fontWeight: 700,
+                                          lineHeight: '20.996px',
+                                          letterSpacing: '-1px'
+                                        } as React.CSSProperties}
+                                      >
                                         {truncatedUOM}
                                       </div>
-                                      <div className="metric-name" title={metric.metricName}>
+                                      <div 
+                                        className="metric-name" 
+                                        title={metric.metricName}
+                                        style={{ 
+                                          color: metricTileColor, 
+                                          opacity: 0.9,
+                                          textAlign: 'center',
+                                          width: '100%',
+                                          margin: '0',
+                                          padding: '0',
+                                          textOverflow: 'ellipsis',
+                                          textShadow: 'rgba(45, 43, 3, 0.10) 0 0 2px',
+                                          fontFamily: '"DM Sans"',
+                                          fontSize: '10px',
+                                          fontStyle: 'normal',
+                                          fontWeight: 300,
+                                          lineHeight: '10px',
+                                          letterSpacing: '-0.2px',
+                                          marginTop:'-2px'
+                                        } as React.CSSProperties}
+                                      >
                                         {truncatedName}
                                       </div>
                                     </div>

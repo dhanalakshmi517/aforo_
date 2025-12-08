@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import 'flag-icons/css/flag-icons.min.css';
 
 interface Country {
   code: string;
@@ -16,11 +17,7 @@ interface CountrySelectorProps {
   showCountryCode?: boolean;
 }
 
-// Helper function to get flag SVG path
-const getFlagSvgPath = (countryCode: string) => {
-  // Use relative path from the component
-  return new URL(`../../Flags/${countryCode.toLowerCase()}.svg`, import.meta.url).href;
-};
+// No helper function needed - we'll use flag-icons classes directly
 
 const CountrySelector: React.FC<CountrySelectorProps> = ({
   value,
@@ -50,15 +47,28 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
 
   const filteredCountries = searchTerm
     ? countries.filter(country => {
-        const s = searchTerm.toLowerCase();
-        const name = country.name.toLowerCase();
-        const code = country.code.toLowerCase();
-        if (name.startsWith(s)) return true;
-        if (code.startsWith(s)) return true;
-        if (name.includes(s)) return true;
-        if (code.includes(s)) return true;
-        return country.dialCode.includes(searchTerm);
-      })
+      const s = searchTerm.toLowerCase();
+      const name = country.name.toLowerCase();
+      const code = country.code.toLowerCase();
+      if (name.startsWith(s)) return true;
+      if (code.startsWith(s)) return true;
+      if (name.includes(s)) return true;
+      if (code.includes(s)) return true;
+      return country.dialCode.includes(searchTerm);
+    }).sort((a, b) => {
+      const s = searchTerm.toLowerCase();
+      // Exact code match gets top priority (e.g. "US", "IN")
+      if (a.code.toLowerCase() === s && b.code.toLowerCase() !== s) return -1;
+      if (b.code.toLowerCase() === s && a.code.toLowerCase() !== s) return 1;
+
+      // Starts with name gets second priority
+      const aStarts = a.name.toLowerCase().startsWith(s);
+      const bStarts = b.name.toLowerCase().startsWith(s);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+
+      return 0;
+    })
     : countries;
 
   const handleSelect = (countryCode: string) => {
@@ -69,8 +79,6 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     }
     setIsOpen(false);
   };
-
-  // No helper function needed - we'll use flag-icons classes directly in JSX
 
   return (
     <div className="country-selector" ref={dropdownRef}>
@@ -88,15 +96,10 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       >
         {selectedCountry ? (
           <div className="selected-option">
-            <img 
-              src={getFlagSvgPath(selectedCountry.code)} 
-              alt={selectedCountry.name}
-              className="flag-icon"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            <span className={`fi fi-${selectedCountry.code.toLowerCase()}`}></span>
             <span>{selectedCountry.name}</span>
+            {showCountryCode && <span className="country-code-text">({selectedCountry.code})</span>}
+            {showDialCode && <span className="dial-code-text">{selectedCountry.dialCode}</span>}
           </div>
         ) : (
           <span className="placeholder-text">{placeholder}</span>
@@ -105,11 +108,11 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         {/* Custom SVG chevron */}
         {isOpen ? (
           <svg className="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M15 12.5L10 7.5L5 12.5" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 12.5L10 7.5L5 12.5" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : (
           <svg className="chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="7" viewBox="0 0 12 7" fill="none" aria-hidden="true">
-            <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M0.75 0.75L5.75 5.75L10.75 0.75" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </div>
@@ -137,14 +140,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
                   role="option"
                   aria-selected={value === country.code}
                 >
-                  <img 
-                    src={getFlagSvgPath(country.code)} 
-                    alt={country.name}
-                    className="flag-icon"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
+                  <span className={`fi fi-${country.code.toLowerCase()}`}></span>
                   <span className="truncate">
                     {country.name}
                     {showCountryCode && ` (${country.code})`}
@@ -205,11 +201,25 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           text-overflow: ellipsis;
           line-height: 1.5;
         }
-        .flag-icon { 
+        .selected-option .fi { 
           width: 24px;
           height: 16px;
-          object-fit: cover;
-          border-radius: 2px;
+          font-size: 24px;
+          flex-shrink: 0;
+        }
+        .country-code-text {
+          color: var(--color-neutral-500);
+          font-size: 0.9em;
+        }
+        .dial-code-text {
+          margin-left: auto;
+          color: var(--color-neutral-500);
+          font-size: 0.9em;
+        }
+        .dropdown-item .fi {
+          width: 24px;
+          height: 16px;
+          font-size: 24px;
           flex-shrink: 0;
         }
 
