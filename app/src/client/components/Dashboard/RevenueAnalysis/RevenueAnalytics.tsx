@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   LineChart,
   Line,
@@ -10,6 +10,7 @@ import {
   ReferenceDot,
 } from "recharts";
 import "./RevenueAnalytics.css";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 
 type MonthlyRevenue = {
   month: string;
@@ -47,6 +48,7 @@ const topCustomers: TopCustomer[] = [
 
 const RevenueAnalytics: React.FC = () => {
   const [showAll, setShowAll] = useState(false);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
   const visibleCustomers = showAll ? topCustomers : topCustomers.slice(0, 4);
 
   return (
@@ -90,7 +92,6 @@ const RevenueAnalytics: React.FC = () => {
 </svg>
               </button>
             </div>
-            <span className="revA-kebab">⋯</span>
           </div>
 
           <div className="revA-chart-wrapper">
@@ -102,7 +103,6 @@ const RevenueAnalytics: React.FC = () => {
                 <CartesianGrid
                   vertical={false}
                   stroke="#E5E7EB"
-                  strokeDasharray="3 3"
                 />
                 <XAxis
                   dataKey="month"
@@ -175,10 +175,10 @@ const RevenueAnalytics: React.FC = () => {
               </LineChart>
             </ResponsiveContainer>
 
-            <p className="revA-footnote">
+            {/* <p className="revA-footnote">
               MRR is the predictable revenue your business earns every month
               from active subscriptions.
-            </p>
+            </p> */}
           </div>
         </article>
 
@@ -192,23 +192,29 @@ const RevenueAnalytics: React.FC = () => {
 </svg>
               </div>
               <span className="revA-card-title">
-                Top 10 Customers by Revenue
+                Top Customers by Revenue
               </span>
             </div>
 
             <div className="revA-right-header-right">
-              <span className="revA-updated">Updated 3 mins ago</span>
+              {/* <span className="revA-updated">Updated 3 mins ago</span> */}
               <button
                 className="revA-view-btn"
                 onClick={() => setShowAll((prev) => !prev)}
               >
                 {showAll ? "View Less" : "View All"}
-                <span className="revA-view-arrow">↗</span>
+                <span className="revA-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
               </button>
             </div>
           </div>
 
-          <div className="revA-table-wrapper">
+          <div className="revA-scrollbar-container">
+            <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+          </div>
+
+          <div className={`revA-table-wrapper ${showAll ? 'revA-show-all' : ''}`} ref={tableWrapperRef}>
             <table className="revA-table">
               <thead>
                 <tr>

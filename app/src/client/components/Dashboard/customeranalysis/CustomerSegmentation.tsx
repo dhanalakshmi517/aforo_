@@ -26,6 +26,11 @@ type RevenueBucket = {
   color: string;
 };
 
+type LocationBucket = {
+  name: string;
+  customers: number;
+};
+
 const companySizeData: CompanySlice[] = [
   { name: "Startups", value: 35, color: "#66CCA5" },
   { name: "SMB", value: 40, color: "#66B1CC" },
@@ -43,6 +48,36 @@ const revenueBuckets: RevenueBucket[] = [
   { band: "High", label: "High (>100K$)", customers: 22446, color: "#66CCA5" },
 ];
 
+const locationBuckets: LocationBucket[] = [
+  { name: "Indonesia", customers: 1486 },
+  { name: "China", customers: 1320 },
+  { name: "UAE", customers: 1098 },
+  { name: "Canada", customers: 1023 },
+  { name: "Brazil", customers: 988 },
+    { name: "USA", customers: 988 },
+
+];
+
+const maxLocationCustomers = Math.max(
+  ...locationBuckets.map((l) => l.customers)
+);
+
+const renderCustomLabel = (props: any) => {
+  const { x, y, width, height, value } = props;
+  return (
+    <text
+      x={x + width + 8}
+      y={y + height / 2}
+      fill="#1C1C1C"
+      textAnchor="start"
+      dominantBaseline="middle"
+      fontSize="12"
+      fontWeight="500"
+    >
+      {value.toLocaleString()}
+    </text>
+  );
+};
 
 const CustomerSegmentation: React.FC = () => {
   return (
@@ -50,17 +85,32 @@ const CustomerSegmentation: React.FC = () => {
       {/* Section heading */}
       <div className="cs-header">
         <h2>Customer Segmentation</h2>
-        <button className="cs-info-btn" aria-label="Customer segmentation info">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-  <g clip-path="url(#clip0_13772_22068)">
-    <path d="M7.99992 10.6668V8.00016M7.99992 5.3335H8.00659M14.6666 8.00016C14.6666 11.6821 11.6818 14.6668 7.99992 14.6668C4.31802 14.6668 1.33325 11.6821 1.33325 8.00016C1.33325 4.31826 4.31802 1.3335 7.99992 1.3335C11.6818 1.3335 14.6666 4.31826 14.6666 8.00016Z" stroke="#0262A1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-  <defs>
-    <clipPath id="clip0_13772_22068">
-      <rect width="16" height="16" fill="white"/>
-    </clipPath>
-  </defs>
-</svg>
+        <button
+          className="cs-info-btn"
+          aria-label="Customer segmentation info"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <g clipPath="url(#clip0_13772_22068)">
+              <path
+                d="M7.99992 10.6668V8.00016M7.99992 5.3335H8.00659M14.6666 8.00016C14.6666 11.6821 11.6818 14.6668 7.99992 14.6668C4.31802 14.6668 1.33325 11.6821 1.33325 8.00016C1.33325 4.31826 4.31802 1.3335 7.99992 1.3335C11.6818 1.3335 14.6666 4.31826 14.6666 8.00016Z"
+                stroke="#0262A1"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_13772_22068">
+                <rect width="16" height="16" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
         </button>
       </div>
 
@@ -69,7 +119,7 @@ const CustomerSegmentation: React.FC = () => {
         <div className="cs-card cs-card-company">
           <div className="cs-card-top">
             <span className="cs-card-title">Company Size</span>
-            <span className="cs-updated-text">Updated 7 mins ago</span>
+            {/* <span className="cs-updated-text">Updated 7 mins ago</span> */}
           </div>
 
           <div className="cs-company-body">
@@ -85,8 +135,7 @@ const CustomerSegmentation: React.FC = () => {
                     innerRadius="55%"
                     outerRadius="80%"
                     paddingAngle={2}
-                            cornerRadius={6}
-
+                    cornerRadius={6}
                   >
                     {companySizeData.map((slice) => (
                       <Cell key={slice.name} fill={slice.color} />
@@ -126,7 +175,7 @@ const CustomerSegmentation: React.FC = () => {
         <div className="cs-card cs-card-revenue">
           <div className="cs-card-top">
             <span className="cs-card-title">Customers by Revenue</span>
-            <span className="cs-updated-text">Updated 7 mins ago</span>
+            {/* <span className="cs-updated-text">Updated 7 mins ago</span> */}
           </div>
 
           <div className="cs-revenue-body">
@@ -135,13 +184,12 @@ const CustomerSegmentation: React.FC = () => {
                 <BarChart
                   data={revenueBuckets}
                   layout="vertical"
-                  margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+                  margin={{ top: 10, right: 80, left: 0, bottom: 20 }}
                 >
                   <CartesianGrid
                     stroke="#E5E7EB"
                     horizontal={true}
                     vertical={false}
-                    strokeDasharray="3 3"
                   />
                   <YAxis
                     dataKey="band"
@@ -173,6 +221,7 @@ const CustomerSegmentation: React.FC = () => {
                     radius={[6, 6, 6, 6]}
                     isAnimationActive={false}
                     maxBarSize={40}
+                    label={renderCustomLabel}
                   >
                     {revenueBuckets.map((row) => (
                       <Cell key={row.band} fill={row.color} />
@@ -180,16 +229,6 @@ const CustomerSegmentation: React.FC = () => {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-
-            <div className="cs-revenue-scale">
-              <span>20K</span>
-              <span>40K</span>
-              <span>60K</span>
-              <span>80K</span>
-              <span>100K</span>
-              <span>120K</span>
-              <span>140K</span>
             </div>
 
             <div className="cs-revenue-legend-row">
@@ -203,6 +242,36 @@ const CustomerSegmentation: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* CUSTOMERS BY LOCATION CARD – PURE HTML/CSS BARS */}
+        <div className="cs-card cs-card-location">
+          <div className="cs-card-top">
+            <span className="cs-card-title">Customers by Location</span>
+          </div>
+
+          <div className="cs-location-body">
+            {locationBuckets.map((loc) => {
+              const widthPct =
+                (loc.customers / maxLocationCustomers) * 100 || 0;
+              return (
+                <div key={loc.name} className="cs-location-row">
+                  <div className="cs-location-header">
+                    <span className="cs-location-name">{loc.name}</span>
+                    <span className="cs-location-value">
+                      {loc.customers.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="cs-location-track">
+                    <div
+                      className="cs-location-bar"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

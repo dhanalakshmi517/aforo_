@@ -53,8 +53,9 @@ line-height: var(--line-height-body-lg, 24px); /* 150% */
 
 .tcc-header-right {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .tcc-updated-text {
@@ -89,11 +90,43 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: #f9fbff;
   border-radius: 16px;
   max-height: 320px;
-  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  position: relative;
 }
 
-.tcc-card .tcc-table-wrapper:hover {
-  overflow-y: auto;
+/* Hide scrollbar for Chrome, Safari, Edge */
+.tcc-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* when showing all, remove max-height to show full content */
+.tcc-table-wrapper.tcc-show-all {
+  max-height: none;
+  overflow-y: hidden;
+}
+
+/* scrollbar container */
+.tcc-scrollbar-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-right: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tcc-table-wrapper:hover .tcc-scrollbar-container {
+  display: none;
+}
+
+/* hide scrollbar when showing all */
+.tcc-table-wrapper.tcc-show-all .tcc-scrollbar-container {
+  display: none;
 }
 
 /* table */
@@ -115,6 +148,14 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
+}
+
+.tcc-table tbody tr {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.tcc-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .tcc-table tr:last-child td:first-child {
@@ -168,6 +209,21 @@ font-weight: 500;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
+
+.tcc-table thead tr:first-child th:first-child {
+  border-top-left-radius:var(--border-radius-sm);
+}
+
+.tcc-table thead tr:first-child th:last-child {
+  border-top-right-radius: var(--border-radius-sm);
+}
+
+.tcc-table tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+.tcc-table tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-sm);
+}
 /* health bar */
 .tcc-health-wrapper {
   display: flex;
@@ -196,8 +252,16 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* numeric cols */
 .tcc-col-text {
-  color: #111827;
-}
+overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(---font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */}
 
 /* usage decline */
 .tcc-usage-cell {
@@ -216,15 +280,20 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .tcc-pill-very-high {
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
-  font-weight: 500;
-  background: #fee2e2;
-  color: #b91c1c;
+color:#C33235;
+
+/* body/sm/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+  background: #FFECEC;
 }
 
 .tcc-pill-very-high {
-  background: #fee2e2;
-  color: #7f1d1d;
+  background: #FFECEC;
+color:#C33235;
 }
 
 /* fade */

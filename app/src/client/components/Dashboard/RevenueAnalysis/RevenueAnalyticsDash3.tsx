@@ -6,6 +6,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 import "./RevenueAnalyticsDash3.css";
 
 type PlanSlice = {
@@ -55,22 +56,8 @@ const industries: IndustryRow[] = [
     customers: "8,789",
     icons: ["🦊", "🦁", "🐼"],
   },
-  {
-    id: 4,
-    name: "Education",
-    revenue: "$5,855",
-    mrr: "$2,855",
-    customers: "11,757",
-    icons: ["🦊", "🦁", "🐼"],
-  },
-  {
-    id: 5,
-    name: "Cinema",
-    revenue: "$5,855",
-    mrr: "$2,855",
-    customers: "11,757",
-    icons: ["🦊", "🦁", "🐼"],
-  },
+
+
 ];
 
 const RevenuAnalyticsDash3: React.FC = () => {
@@ -83,7 +70,7 @@ const RevenuAnalyticsDash3: React.FC = () => {
           <article className="rad3-card rad3-plan-card">
             <div className="rad3-card-header">
               <span className="rad3-card-title">Revenue by Plan</span>
-              <span className="rad3-updated">Updated 3 mins ago</span>
+              {/* <span className="rad3-updated">Updated 3 mins ago</span> */}
             </div>
 
             <div className="rad3-plan-body">
@@ -157,50 +144,55 @@ const RevenuAnalyticsDash3: React.FC = () => {
               <div className="rad3-trophy"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
   <path d="M8.75 13.41V15.036C8.74622 15.3786 8.65448 15.7145 8.48358 16.0115C8.31268 16.3085 8.06834 16.5566 7.774 16.732C7.14914 17.1948 6.64084 17.797 6.28948 18.4907C5.93813 19.1843 5.75341 19.9504 5.75 20.728M12.75 13.41V15.036C12.7538 15.3786 12.8455 15.7145 13.0164 16.0115C13.1873 16.3085 13.4317 16.5566 13.726 16.732C14.3509 17.1948 14.8592 17.797 15.2105 18.4907C15.5619 19.1843 15.7466 19.9504 15.75 20.728M16.75 7.75H18.25C18.913 7.75 19.5489 7.48661 20.0178 7.01777C20.4866 6.54893 20.75 5.91304 20.75 5.25C20.75 4.58696 20.4866 3.95107 20.0178 3.48223C19.5489 3.01339 18.913 2.75 18.25 2.75H16.75M16.75 7.75C16.75 9.3413 16.1179 10.8674 14.9926 11.9926C13.8674 13.1179 12.3413 13.75 10.75 13.75C9.1587 13.75 7.63258 13.1179 6.50736 11.9926C5.38214 10.8674 4.75 9.3413 4.75 7.75M16.75 7.75V1.75C16.75 1.48478 16.6446 1.23043 16.4571 1.04289C16.2696 0.855357 16.0152 0.75 15.75 0.75H5.75C5.48478 0.75 5.23043 0.855357 5.04289 1.04289C4.85536 1.23043 4.75 1.48478 4.75 1.75V7.75M2.75 20.75H18.75M4.75 7.75H3.25C2.58696 7.75 1.95107 7.48661 1.48223 7.01777C1.01339 6.54893 0.75 5.91304 0.75 5.25C0.75 4.58696 1.01339 3.95107 1.48223 3.48223C1.95107 3.01339 2.58696 2.75 3.25 2.75H4.75" stroke="#389315" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg></div>
-              <span className="rad3-card-title">Top 5 Industries by Revenue</span>
+              <span className="rad3-card-title">Top Industries by Revenue</span>
             </div>
             <div className="rad3-industries-right">
-              <span className="rad3-updated">Updated 3 mins ago</span>
+              {/* <span className="rad3-updated">Updated 3 mins ago</span> */}
               <button className="rad3-view-btn">
-                View All <span className="rad3-view-arrow">↗</span>
+                View All <span className="rad3-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
               </button>
             </div>
           </div>
 
-          <div className="rad3-table-wrapper">
-            <table className="rad3-table">
-              <thead>
-                <tr>
-                  <th>Industry Name</th>
-                  <th>Total Revenue</th>
-                  <th>MRR</th>
-                  <th>No.Of Customers</th>
-                </tr>
-              </thead>
-              <tbody>
-                {industries.map((row) => (
-                  <tr key={row.id}>
-                    <td className="rad3-bold">{row.name}</td>
-                    <td>{row.revenue}</td>
-                    <td>{row.mrr}</td>
-                    <td>
-                      <div className="rad3-customer-cell">
-                        <div className="rad3-avatar-stack">
-                          {row.icons.map((ic, idx) => (
-                            <span className="rad3-avatar" key={idx}>
-                              {ic}
-                            </span>
-                          ))}
-                        </div>
-                        <span className="rad3-customer-count">
-                          {row.customers}
-                        </span>
-                      </div>
-                    </td>
+          <div className="rad3-table-container">
+            <div className="rad3-scroll-area">
+              <table className="rad3-table">
+                <thead>
+                  <tr>
+                    <th>Industry Name</th>
+                    <th>Total Revenue</th>
+                    <th>MRR</th>
+                    <th>No.Of Customers</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {industries.map((row) => (
+                    <tr key={row.id}>
+                      <td className="rad3-bold">{row.name}</td>
+                      <td>{row.revenue}</td>
+                      <td>{row.mrr}</td>
+                      <td>
+                        <div className="rad3-customer-cell">
+                          <div className="rad3-avatar-stack">
+                            {row.icons.map((ic, idx) => (
+                              <span className="rad3-avatar" key={idx}>
+                                {ic}
+                              </span>
+                            ))}
+                          </div>
+                          <span className="rad3-customer-count">
+                            {row.customers}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <VerticalScrollbar className="rad3-vertical-scrollbar" height="100%" />
           </div>
         </article>
       </div>

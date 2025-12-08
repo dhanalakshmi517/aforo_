@@ -1,0 +1,83 @@
+@import "../Variables/Variables.css";
+
+.review-card {
+  width: 700px;
+  box-sizing: border-box;
+
+  /* card styling */
+  background: #f9fbff;
+  border-radius: 16px;
+
+  /* padding in pixels as in your design */
+  padding: 16px 24px 16px 24px;
+
+  /* optional subtle border / shadow */
+  border: 1px solid #eef2f7;
+}
+
+/* top title */
+.review-header {
+  margin-bottom: 10px;
+color: var(--color-neutral-1400);
+
+/* body/md/thin */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 300;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  
+  
+  text-transform: uppercase;
+}
+
+/* table-like wrapper */
+.review-table {
+  margin: 0;
+  padding: 0;
+}
+
+/* one row */
+.review-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+/* remove line after last row */
+.review-row:last-child {
+  border-bottom: none;
+}
+
+/* left text – label */
+.review-label {
+  margin: 0;
+
+ color: var(--color-neutral-1400);
+
+/* body/md/thin */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+/* right text – value */
+.review-value {
+  margin: 0;
+
+ color: var(--color-neutral-1400);
+
+/* body/md/thin */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  text-align: right;
+}

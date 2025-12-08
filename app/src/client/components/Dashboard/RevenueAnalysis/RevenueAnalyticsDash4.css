@@ -32,7 +32,7 @@
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: #e0f2fe;
+  background: #EEEFF7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,8 +50,9 @@
 
 .ra4-header-right {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .ra4-updated {
@@ -66,10 +67,16 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .ra4-view-all {
-  border: none;
+   border: none;
   background: transparent;
-  font-size: 12px;
-  color: #2563eb;
+ color: var(--color-neutral-800);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -86,11 +93,39 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: transparent;
   border-radius: 16px;
   max-height: 260px;
-  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  position: relative;
 }
 
-.ra4-table-wrapper:hover {
-  overflow-y: auto;
+/* Hide scrollbar for Chrome, Safari, Edge */
+.ra4-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* when showing all, remove max-height to show full content */
+.ra4-table-wrapper.ra4-show-all {
+  max-height: none;
+  overflow-y: hidden;
+}
+
+/* scrollbar container */
+.ra4-scrollbar-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-right: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* hide scrollbar when showing all */
+.ra4-table-wrapper.ra4-show-all .ra4-scrollbar-container {
+  display: none;
 }
 
 .ra4-table {
@@ -103,13 +138,35 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: var(--color-neutral-100);
 }
 
-.ra4-table th,
-.ra4-table td {
+.ra4-table th{
   padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
 }
 
+.ra4-table td {
+  padding: 18px 16px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.ra4-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ra4-table td {
+   overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
 .ra4-table th {
  color:  #44576F;
 
@@ -143,8 +200,14 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 .ra4-name-text {
-  font-size: 12px;
-  color: #0f172a;
+color:  #19222D;
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* over limit indicator */
@@ -179,19 +242,24 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* actions */
 .ra4-view-btn {
-  min-width: 56px;
-  height: 28px;
-  border-radius: 999px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  font-size: 11px;
-  color: #111827;
-  cursor: pointer;
+ min-width: 56px;
+  height: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--color-neutral-300);
+  padding: 4px 12px 6px 12px;
+
+  background-color: var(--color-neutral-white);
+  color:  #19222D;
+
+/* body/sm/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
-.ra4-view-btn:hover {
-  background: #f3f4f6;
-}
+
 
 /* responsive */
 @media (max-width: 900px) {

@@ -14,11 +14,14 @@
 
 .ch-header h2 {
   margin: 0;
-  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
-    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
+color: #000;
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
 }
 
 .ch-info-btn {
@@ -45,16 +48,17 @@
 .ch-card {
   flex: 1 1 0;
   min-width: 280px;
-  background: #ffffff;
+  background: var(--color-neutral-white);
   border-radius: 16px;
-  padding: 20px;
-box-shadow: 0 1.34px 17.869px 0  #EEF1F6, 0 0.399px 5.32px 0  #EEF1F6;
+  padding: 28px;
+box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
+
   box-sizing: border-box;
 }
 
 /* Left card */
 .ch-card-left {
-  max-width: 480px;
+  max-width: 515px;
 }
 
 .ch-card-top {
@@ -66,8 +70,7 @@ box-shadow: 0 1.34px 17.869px 0  #EEF1F6, 0 0.399px 5.32px 0  #EEF1F6;
 
 .ch-card-title {
   font-family: var(--font-family-primary);
-  color: #111827;
-  color: var(--black-100, #1C1C1C);
+  color:  #1C1C1C;
 
 /* body/lg/med */
 font-size: var(--font-size-lg);
@@ -107,16 +110,22 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 .ch-legend {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  margin-left: 45px;
 
 }
 
 .ch-legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: #475569;
+color: var(--color-neutral-800);
+
+/* body/sm/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
 .ch-legend-dot {
@@ -139,8 +148,14 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .ch-health-stat-title {
-  font-size: 11px;
-  font-weight: 600;
+ color:  #1C1C1C;
+
+/* body/lg/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
   margin-bottom: 2px;
 }
 

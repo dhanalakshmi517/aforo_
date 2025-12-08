@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./TopHealthyCustomers.css";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 
 type ChurnRiskLevel = "Low";
 
@@ -87,6 +88,7 @@ const healthyRows: HealthyCustomerRow[] = [
 
 const TopHealthyCustomers: React.FC = () => {
   const [showAll, setShowAll] = useState(false);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const visibleRows = showAll ? healthyRows : healthyRows.slice(0, 4);
 
@@ -101,24 +103,29 @@ const TopHealthyCustomers: React.FC = () => {
 </svg></span>
           </div>
           <div className="thc-header-text">
-            <div className="thc-header-title">Top 10 Healthy Customers</div>
+            <div className="thc-header-title">Top Healthy Customers</div>
           </div>
         </div>
 
         <div className="thc-header-right">
-          <span className="thc-updated-text">Updated 3 mins ago</span>
+          {/* <span className="thc-updated-text">View all › </span> */}
           <button
             className="thc-view-btn"
             type="button"
             onClick={() => setShowAll((prev) => !prev)}
           >
             {showAll ? "View Less" : "View All"}
-            <span className="thc-view-arrow">↗</span>
+            <span className="thc-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
           </button>
         </div>
       </div>
 
-      <div className="thc-table-wrapper">
+      <div className={`thc-table-wrapper ${showAll ? 'thc-show-all' : ''}`} ref={tableWrapperRef}>
+        <div className="thc-scrollbar-container">
+          <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+        </div>
         <table className="thc-table">
           <thead>
             <tr>

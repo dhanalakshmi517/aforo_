@@ -5,7 +5,7 @@
   display: flex;
   flex-wrap: nowrap;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 20px;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -22,19 +22,19 @@
   gap: 4px;
 
   border-radius: 16px;
-  background: #f6f8ff;
+  background: #EEF6F7;
 }
 
 /* very light variation between cards if you want */
 .co-metric-card:nth-child(2) {
-  background: #f5fbff;
+  background: #EEF3F7;
 }
 .co-metric-card:nth-child(3) {
-  background: #fff6f6;
+  background: #EEEFF7;
 }
 .co-metric-card:nth-child(4),
 .co-metric-card:nth-child(5) {
-  background: #f7f5ff;
+  background: #F0EEF7;
 }
 
 /* Header row: label + tiny square */
@@ -46,13 +46,13 @@
 }
 
 .co-metric-label {
- color: var(--color-neutral-600);
+ color: var(--color-neutral-700);
 
 /* body/sm/bold */
 font-family: var(--font-family-primary);
 font-size: var(--font-size-sm);
 font-style: normal;
-font-weight: 700;
+font-weight: 600;
 line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
@@ -104,8 +104,14 @@ line-height: var(--line-height-heading-h2, 36px); /* 128.571% */
 }
 
 .co-metric-subtitle {
-  color: #9ca3af;
-}
+color: var(--color-neutral-800);
+
+/* body/xs/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-xs);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-xs, 16px); /* 160% */}
 
 /* responsiveness */
 @media (max-width: 900px) {

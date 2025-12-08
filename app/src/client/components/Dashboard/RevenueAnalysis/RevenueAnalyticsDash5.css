@@ -32,7 +32,7 @@
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: #f4e9ff;
+  background:#F0EEF7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,8 +50,9 @@
 
 .ra5-header-right {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .ra5-updated {
@@ -68,8 +69,14 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 .ra5-view-all {
   border: none;
   background: transparent;
-  font-size: 12px;
-  color: #2563eb;
+ color: var(--color-neutral-800);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -85,11 +92,39 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: transparent;
   border-radius: 16px;
   max-height: 260px;
-  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  position: relative;
 }
 
-.ra5-table-wrapper:hover {
-  overflow-y: auto;
+/* Hide scrollbar for Chrome, Safari, Edge */
+.ra5-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* when showing all, remove max-height to show full content */
+.ra5-table-wrapper.ra5-show-all {
+  max-height: none;
+  overflow-y: hidden;
+}
+
+/* scrollbar container */
+.ra5-scrollbar-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-right: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* hide scrollbar when showing all */
+.ra5-table-wrapper.ra5-show-all .ra5-scrollbar-container {
+  display: none;
 }
 
 .ra5-table {
@@ -102,11 +137,21 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   background: var(--color-neutral-100);
 }
 
-.ra5-table th,
-.ra5-table td {
+.ra5-table th{
   padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
+}
+
+.ra5-table td {
+  padding: 18px 16px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.ra5-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .ra5-table th {
@@ -120,6 +165,18 @@ font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
+.ra5-table td{
+  overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
 
 
 /* customer cell */
@@ -143,20 +200,33 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 .ra5-name-text {
-  font-size: 12px;
-  color: #0f172a;
+color: var(--text-text-darkest, #19222D);
+
+/* body/md/med */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--fontsize-body-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* action button */
 .ra5-view-btn {
   min-width: 56px;
-  height: 28px;
-  border-radius: 999px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  font-size: 11px;
-  color: #111827;
-  cursor: pointer;
+  height: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--color-neutral-300);
+  padding: 4px 12px 6px 12px;
+
+  background-color: var(--color-neutral-white);
+  color:  #19222D;
+
+/* body/sm/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
 .ra5-view-btn:hover {

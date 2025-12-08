@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./TopAtRiskCustomers.css";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 
 type ChurnRiskLevel = "At Risk" | "High" | "Very High";
 
@@ -82,10 +83,56 @@ const rows: CustomerRow[] = [
     usageDecline: "-7.90%",
     churnRisk: "Very High",
   },
+
+   {
+    id: 7,
+    name: "Customer 7",
+    logoText: "AF",
+    healthScore: 30,
+    healthColor: "#EF4444",
+    lastActivity: "1 month ago",
+    avgMRR: "$5,010",
+    usageDecline: "-7.90%",
+    churnRisk: "Very High",
+  },
+   {
+    id: 8,
+    name: "Customer 8",
+    logoText: "AF",
+    healthScore: 30,
+    healthColor: "#EF4444",
+    lastActivity: "1 month ago",
+    avgMRR: "$5,010",
+    usageDecline: "-7.90%",
+    churnRisk: "Very High",
+  },
+   {
+    id: 9,
+    name: "Customer 9",
+    logoText: "AF",
+    healthScore: 30,
+    healthColor: "#EF4444",
+    lastActivity: "1 month ago",
+    avgMRR: "$5,010",
+    usageDecline: "-7.90%",
+    churnRisk: "Very High",
+  },
+   {
+    id: 10,
+    name: "Customer 10",
+    logoText: "AF",
+    healthScore: 30,
+    healthColor: "#EF4444",
+    lastActivity: "1 month ago",
+    avgMRR: "$5,010",
+    usageDecline: "-7.90%",
+    churnRisk: "Very High",
+  },
 ];
 
 const TopAtRiskCustomers: React.FC = () => {
   const [showAll, setShowAll] = useState(false);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const visibleRows = showAll ? rows : rows.slice(0, 4);
 
@@ -102,20 +149,25 @@ const TopAtRiskCustomers: React.FC = () => {
 </svg></span>
           </div>
           <div className="tar-header-text">
-            <div className="tar-header-title">Top 10 Customers At-Risk</div>
+            <div className="tar-header-title">Top Customers At-Risk</div>
           </div>
         </div>
 
         <div className="tar-header-right">
-          <span className="tar-updated-text">Updated 3 mins ago</span>
+          {/* <span className="tar-updated-text">Updated 3 mins ago</span> */}
           <button className="tar-view-btn" onClick={handleToggle}>
             {showAll ? "View Less" : "View All"}
-            <span className="tar-view-arrow">›</span>
+            <span className="tar-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
           </button>
         </div>
       </div>
 
-      <div className="tar-table-wrapper">
+      <div className={`tar-table-wrapper ${showAll ? 'tar-show-all' : ''}`} ref={tableWrapperRef}>
+        <div className="tar-scrollbar-container">
+          <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+        </div>
         <table className="tar-table">
           <thead>
             <tr>

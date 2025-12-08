@@ -14,20 +14,19 @@
 
 .revA-header h2 {
   margin: 0;
-  font-family: var(--type-font-family-primary, "IBM Plex Sans"), system-ui,
-    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
+ color: #000;
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
 }
 
 .revA-info-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #64748b;
+
+
   font-size: 11px;
   display: inline-flex;
   align-items: center;
@@ -43,7 +42,7 @@
 
 /* cards */
 .revA-card {
-  background: #ffffff;
+  background: transparent;
   border-radius: 24px;
   padding: 20px 20px 18px 20px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
@@ -69,18 +68,18 @@
 }
 
 .revA-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+color: #1C1C1C;
+
+/* 14 Semibold */
+font-family: var(--font-family-primary);
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: 20px; /* 142.857% */
 }
 
 .revA-info-inline {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #64748b;
+
   font-size: 11px;
   display: inline-flex;
   align-items: center;
@@ -127,8 +126,9 @@
 /* right card */
 .revA-right-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .revA-right-header-left {
@@ -150,8 +150,9 @@
 
 .revA-right-header-right {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 .revA-updated {
@@ -187,24 +188,52 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   font-size: 14px;
 }
 
+/* scrollbar container */
+.revA-scrollbar-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-right: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* hide scrollbar when showing all */
+.revA-table-wrapper.revA-show-all .revA-scrollbar-container {
+  display: none;
+}
+
 /* table */
 .revA-table-wrapper {
   margin-top: 12px;
-  background: white;
+  background: transparent;
   border-radius: 20px;
   max-height: 260px;
-  overflow: hidden;
-  box-shadow: 0 18px 30px 0 var(--shadow-shadow-1, #EEF1F6);
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  position: relative;
 }
 
-.revA-card-right .revA-table-wrapper:hover {
-  overflow-y: auto;
+/* Hide scrollbar for Chrome, Safari, Edge */
+.revA-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* when showing all, remove max-height to show full content */
+.revA-table-wrapper.revA-show-all {
+  max-height: none;
+  overflow-y: visible;
 }
 
 .revA-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
+  background-color: transparent;
 }
 
 .revA-table thead {
@@ -216,8 +245,25 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   padding: 6px 16px;
   text-align: left;
   white-space: nowrap;
+  border-bottom: 1px solid #E5E7EB;
 }
 
+.revA-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.revA-table td {
+    overflow: hidden;
+color: var(--color-neutral-1400);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
 .revA-table th {
   overflow: hidden;
 color: var(--color-neutral-1000);

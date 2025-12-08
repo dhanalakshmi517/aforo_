@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import {
   PieChart,
   Pie,
@@ -7,6 +7,7 @@ import {
   Tooltip,
 } from "recharts";
 import "./RevenuAnalyticsDash1.css";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
 
 type CustomerRow = {
   id: number;
@@ -37,6 +38,14 @@ const declineCustomers: CustomerRow[] = [
 ];
 
 const RevenuAnalyticsDash1: React.FC = () => {
+  const [showAllGrowth, setShowAllGrowth] = useState(false);
+  const [showAllDecline, setShowAllDecline] = useState(false);
+  const growthTableRef = useRef<HTMLDivElement>(null);
+  const declineTableRef = useRef<HTMLDivElement>(null);
+
+  const visibleGrowthCustomers = showAllGrowth ? growthCustomers : growthCustomers.slice(0, 4);
+  const visibleDeclineCustomers = showAllDecline ? declineCustomers : declineCustomers.slice(0, 4);
+
   return (
     <section className="rad1-section">
       <div className="rad1-grid">
@@ -56,7 +65,7 @@ const RevenuAnalyticsDash1: React.FC = () => {
           <article className="rad1-card rad1-concentration-card">
             <div className="rad1-card-header">
               <span className="rad1-card-title">Revenue Concentration</span>
-              <span className="rad1-updated">Updated 3 mins ago</span>
+              {/* <span className="rad1-updated">Updated 3 mins ago</span> */}
             </div>
 
             <div className="rad1-concentration-body">
@@ -93,24 +102,26 @@ const RevenuAnalyticsDash1: React.FC = () => {
                 </ResponsiveContainer>
               </div>
 
-              <div className="rad1-concentration-legend">
-                {revenueConcentrationData.map((slice) => (
-                  <div key={slice.name} className="rad1-legend-item">
-                    <span
-                      className="rad1-legend-dot"
-                      style={{ backgroundColor: slice.color }}
-                    />
-                    <span className="rad1-legend-label">{slice.name}</span>
-                  </div>
-                ))}
-              </div>
+              <div className="rad1-concentration-right">
+                <div className="rad1-concentration-legend">
+                  {revenueConcentrationData.map((slice) => (
+                    <div key={slice.name} className="rad1-legend-item">
+                      <span
+                        className="rad1-legend-dot"
+                        style={{ backgroundColor: slice.color }}
+                      />
+                      <span className="rad1-legend-label">{slice.name}</span>
+                    </div>
+                  ))}
+                </div>
 
-              <p className="rad1-concentration-note">
-                <span className="rad1-concentration-strong">
-                  Top 20% customers
-                </span>{" "}
-                are generating 68% of total revenue
-              </p>
+                <p className="rad1-concentration-note">
+                  <span className="rad1-concentration-strong">
+                    Top 20% customers
+                  </span>{" "}
+                  are generating 68% of total revenue
+                </p>
+              </div>
             </div>
           </article>
         </div>
@@ -128,14 +139,20 @@ const RevenuAnalyticsDash1: React.FC = () => {
               <span className="rad1-card-title">Revenue Growth Customers</span>
             </div>
             <div className="rad1-list-header-right">
-              <span className="rad1-updated">Updated 3 mins ago</span>
-              <button className="rad1-view-btn">
-                View All <span className="rad1-view-arrow">↗</span>
+              {/* <span className="rad1-updated">Updated 3 mins ago</span> */}
+              <button className="rad1-view-btn" onClick={() => setShowAllGrowth((prev) => !prev)}>
+                {showAllGrowth ? "View Less" : "View All"} <span className="rad1-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
               </button>
             </div>
           </div>
 
-          <div className="rad1-table-wrapper">
+          <div className="rad1-scrollbar-container">
+            <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+          </div>
+
+          <div className={`rad1-table-wrapper ${showAllGrowth ? 'rad1-show-all' : ''}`} ref={growthTableRef}>
             <table className="rad1-table">
               <thead>
                 <tr>
@@ -144,7 +161,7 @@ const RevenuAnalyticsDash1: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {growthCustomers.map((row) => (
+                {visibleGrowthCustomers.map((row) => (
                   <tr key={row.id}>
                     <td>
                       <div className="rad1-name-cell">
@@ -194,14 +211,20 @@ const RevenuAnalyticsDash1: React.FC = () => {
               <span className="rad1-card-title">Revenue Decline Customers</span>
             </div>
             <div className="rad1-list-header-right">
-              <span className="rad1-updated">Updated 3 mins ago</span>
-              <button className="rad1-view-btn">
-                View All <span className="rad1-view-arrow">↗</span>
+              {/* <span className="rad1-updated">Updated 3 mins ago</span> */}
+              <button className="rad1-view-btn" onClick={() => setShowAllDecline((prev) => !prev)}>
+                {showAllDecline ? "View Less" : "View All"} <span className="rad1-view-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="5" height="9" viewBox="0 0 5 9" fill="none">
+  <path d="M0.600098 7.6001L4.1001 4.1001L0.600098 0.600098" stroke="#2A455E" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
               </button>
             </div>
           </div>
 
-          <div className="rad1-table-wrapper">
+          <div className="rad1-scrollbar-container">
+            <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} />
+          </div>
+
+          <div className={`rad1-table-wrapper ${showAllDecline ? 'rad1-show-all' : ''}`} ref={declineTableRef}>
             <table className="rad1-table">
               <thead>
                 <tr>
@@ -210,7 +233,7 @@ const RevenuAnalyticsDash1: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {declineCustomers.map((row) => (
+                {visibleDeclineCustomers.map((row) => (
                   <tr key={row.id}>
                     <td>
                       <div className="rad1-name-cell">
