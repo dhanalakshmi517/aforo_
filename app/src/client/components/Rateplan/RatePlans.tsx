@@ -159,14 +159,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const loadRatePlans = async () => {
     try {
       setLoading(true);
-      
+
       // First check API health
       console.log('🏥 Checking API health before fetching rate plans...');
       const isHealthy = await checkApiHealth();
       if (!isHealthy) {
         console.warn('⚠️ API health check failed, but attempting to fetch rate plans anyway...');
       }
-      
+
       const data = await fetchRatePlans();
       console.log('RatePlans - All Rate Plans:', data);
       setRatePlansState(data);
@@ -210,7 +210,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
 
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -253,7 +253,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
         // Extract billable metric details
         let bmName = '';
         let uomShort = '';
-        
+
         // First try to get from the response directly
         bmName = firstNonEmpty(d, [
           'billableMetric.name',
@@ -263,7 +263,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
           'metric.name',
           'billableMetric.title'
         ], '');
-        
+
         uomShort = firstNonEmpty(d, [
           'billableMetric.uomShort',
           'billableMetric.uom.short',
@@ -319,7 +319,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
       // Get all products to find the one we need
       const products = await getProductsApi();
       const product = products.find(p => parseInt(p.productId) === productId);
-      
+
       if (!product) {
         console.log(`❌ Product with ID ${productId} not found`);
         setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
@@ -332,10 +332,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
       // ✅ PRIORITY 1: Check for structured productIcon field (saved during product creation)
       if (product.productIcon && product.productIcon !== 'null' && product.productIcon !== '') {
         try {
-          const parsed = typeof product.productIcon === 'string' 
-            ? JSON.parse(product.productIcon) 
+          const parsed = typeof product.productIcon === 'string'
+            ? JSON.parse(product.productIcon)
             : product.productIcon;
-          
+
           if (parsed?.id && parsed?.svgPath && parsed?.tileColor) {
             iconData = {
               id: parsed.id,
@@ -369,14 +369,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
             headers: authHeaders,
             timeout: 5000
           });
-          
+
           iconUrl = URL.createObjectURL(response.data);
 
           // Try to parse SVG content to extract icon data
           const svgText = await (response.data as Blob).text();
           const parser = new DOMParser();
           const doc = parser.parseFromString(svgText, 'image/svg+xml');
-          
+
           // Extract tile color from the background rect
           const rects = doc.querySelectorAll('rect');
           let tileColor = '#0F6DDA';
@@ -388,7 +388,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
               break;
             }
           }
-          
+
           // Extract icon path and viewBox
           const pathElement = doc.querySelector('path[fill="#FFFFFF"]');
           let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
@@ -414,7 +414,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
               }
             }
           }
-          
+
           iconData = {
             id: `product-${product.productId}`,
             label: product.productName || 'Product',
@@ -432,7 +432,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
       if (!iconData && !iconUrl) {
         const colors = ['#0F6DDA', '#23A36D', '#CC9434', '#E3ADEB', '#FF6B6B', '#4ECDC4', '#95E77E', '#FFD93D'];
         const colorIndex = productId % colors.length;
-        
+
         iconData = {
           id: `product-fallback-${productId}`,
           label: product.productName || 'Product',
@@ -441,7 +441,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
           viewBox: '0 0 24 24'
         };
       }
-      
+
       setProductIcons(prev => ({ ...prev, [productId]: { iconData, iconUrl } }));
     } catch (e) {
       console.error('Error loading product icon:', e);
@@ -542,7 +542,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
       return (
         <span className="pill pill--prepaid">
           <span className="pill-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><g clipPath="url(#clip0_prepaid)"><path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#1A2126" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></g><defs><clipPath id="clip0_prepaid"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><g clipPath="url(#clip0_prepaid)"><path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#1A2126" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></g><defs><clipPath id="clip0_prepaid"><rect width="16" height="16" fill="white" /></clipPath></defs></svg>
           </span>
           Pre-paid
         </span>
@@ -552,7 +552,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
       return (
         <span className="pill pill--postpaid">
           <span className="pill-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126Z" fill="#1A2126"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126Z" fill="#1A2126" /></svg>
           </span>
           Post-paid
         </span>
@@ -622,13 +622,13 @@ const RatePlans: React.FC<RatePlansProps> = ({
               'PR'
             )}
           </div>
-          
+
           {/* Front Thread */}
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="13" 
-            height="10" 
-            viewBox="0 0 13 10" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="10"
+            viewBox="0 0 13 10"
             fill="none"
             style={{
               position: 'absolute',
@@ -640,15 +640,15 @@ const RatePlans: React.FC<RatePlansProps> = ({
               zIndex: 2
             }}
           >
-            <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round"/>
+            <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round" />
           </svg>
-          
+
           {/* Purchase Tag */}
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="21" 
-            height="21" 
-            viewBox="0 0 21 21" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="21"
+            height="21"
+            viewBox="0 0 21 21"
             fill="none"
             style={{
               position: 'absolute',
@@ -662,22 +662,22 @@ const RatePlans: React.FC<RatePlansProps> = ({
           >
             <defs>
               <clipPath id="bgblur_purchase_tag_clip">
-                <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z"/>
+                <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" />
               </clipPath>
             </defs>
             <foreignObject x="3.03555" y="-0.172949" width="14.5764" height="18.7165">
-              <div style={{backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%'}}></div>
+              <div style={{ backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%' }}></div>
             </foreignObject>
-            <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round"/>
+            <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round" />
           </svg>
-          
+
           {/* Back Thread */}
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="7" 
-            height="4" 
-            viewBox="0 0 7 4" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="7"
+            height="4"
+            viewBox="0 0 7 4"
             fill="none"
             style={{
               position: 'absolute',
@@ -689,7 +689,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
               zIndex: 1
             }}
           >
-            <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6"/>
+            <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6" />
           </svg>
         </div>
       );
@@ -765,11 +765,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
         </div>
 
         {/* Front Thread */}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="13" 
-          height="10" 
-          viewBox="0 0 13 10" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13"
+          height="10"
+          viewBox="0 0 13 10"
           fill="none"
           style={{
             position: 'absolute',
@@ -781,15 +781,15 @@ const RatePlans: React.FC<RatePlansProps> = ({
             zIndex: 2
           }}
         >
-          <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round"/>
+          <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round" />
         </svg>
-        
+
         {/* Purchase Tag */}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="21" 
-          height="21" 
-          viewBox="0 0 21 21" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="21"
+          height="21"
+          viewBox="0 0 21 21"
           fill="none"
           style={{
             position: 'absolute',
@@ -803,22 +803,22 @@ const RatePlans: React.FC<RatePlansProps> = ({
         >
           <defs>
             <clipPath id="bgblur_purchase_tag_clip">
-              <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z"/>
+              <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" />
             </clipPath>
           </defs>
           <foreignObject x="3.03555" y="-0.172949" width="14.5764" height="18.7165">
-            <div style={{backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%'}}></div>
+            <div style={{ backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%' }}></div>
           </foreignObject>
-          <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round"/>
+          <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round" />
         </svg>
-        
+
         {/* Back Thread */}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="7" 
-          height="4" 
-          viewBox="0 0 7 4" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="7"
+          height="4"
+          viewBox="0 0 7 4"
           fill="none"
           style={{
             position: 'absolute',
@@ -830,7 +830,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             zIndex: 1
           }}
         >
-          <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6"/>
+          <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6" />
         </svg>
       </div>
     );
@@ -840,7 +840,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const renderNameChip = (p: RatePlan) => {
     const productName = p.productName ?? p.product?.productName ?? '—';
     const productIcon = productIcons[p.productId];
-    
+
     return (
       <div style={{
         display: 'flex',
@@ -851,11 +851,11 @@ const RatePlans: React.FC<RatePlansProps> = ({
         borderBottom: '0.4px solid var(--border-border-1, #E9E9EE)'
       }}>
         {/* Product Icon with purchase tag */}
-        <RatePlanIcon 
+        <RatePlanIcon
           iconData={productIcon?.iconData || null}
           iconUrl={productIcon?.iconUrl || null}
         />
-        
+
         {/* Rate plan name and product name */}
         <div className="rp-name-texts" style={{
           display: 'flex',
@@ -909,227 +909,227 @@ const RatePlans: React.FC<RatePlansProps> = ({
           <div className="notification-container"><Notification {...notification} /></div>
         )}
 
-      {showCreatePlan ? (
-        <div className="create-plan-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          <TopBar
-            title="Create New Rate Plan"
-            onBack={() => {
-              const ok = createPlanRef.current?.validateBeforeBack?.() ?? true;
-              if (ok) {
-                setShowSaveDraftModal(true);
-              } else {
-                createPlanRef.current?.back?.() || setShowCreatePlan(false);
-              }
-            }}
-            cancel={{ label: 'Discard', onClick: () => setShowConfirmDelete(true) }}
-            save={{
-              label: 'Save as Draft',
-              labelWhenSaved: 'Saved as Draft',
-              saved: draftSaved,
-              saving: draftSaving,
-              disabled: !saveDraftFn,
-              onClick: async () => {
-                if (!saveDraftFn) return;
-                setDraftSaved(false); // Reset saved state during save
-                setDraftSaving(true);
-                const ok = await saveDraftFn(); // boolean
-                setDraftSaving(false);
-                if (!ok) {
-                  // validation failed; keep wizard open
-                  return;
+        {showCreatePlan ? (
+          <div className="create-plan-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <TopBar
+              title="Create New Rate Plan"
+              onBack={() => {
+                const ok = createPlanRef.current?.validateBeforeBack?.() ?? true;
+                if (ok) {
+                  setShowSaveDraftModal(true);
+                } else {
+                  createPlanRef.current?.back?.() || setShowCreatePlan(false);
                 }
-                setDraftSaved(true); // Mark as saved
-                // Stay on the same page after saving
-                showToast?.({ message: 'Draft saved', kind: 'success' });
-              }
-            }}
-          />
-          <div className="create-plan-body" style={{ flex: 1 }}>
-            <CreatePricePlan
-              ref={createPlanRef}
-              registerSaveDraft={(fn) => setSaveDraftFn(() => fn)}
-              draftData={draftPlanData}
-              onFieldChange={() => {
-                if (draftSaved) setDraftSaved(false);
               }}
-              onClose={() => {
-                setDraftPlanData(null);
-                clearAllRatePlanData();
-                setShowCreatePlan(false);
-                loadRatePlans();
+              cancel={{ label: 'Discard', onClick: () => setShowConfirmDelete(true) }}
+              save={{
+                label: 'Save as Draft',
+                labelWhenSaved: 'Saved as Draft',
+                saved: draftSaved,
+                saving: draftSaving,
+                disabled: !saveDraftFn,
+                onClick: async () => {
+                  if (!saveDraftFn) return;
+                  setDraftSaved(false); // Reset saved state during save
+                  setDraftSaving(true);
+                  const ok = await saveDraftFn(); // boolean
+                  setDraftSaving(false);
+                  if (!ok) {
+                    // validation failed; keep wizard open
+                    return;
+                  }
+                  setDraftSaved(true); // Mark as saved
+                  // Stay on the same page after saving
+                  showToast?.({ message: 'Draft saved', kind: 'success' });
+                }
               }}
             />
-          </div>
+            <div className="create-plan-body" style={{ flex: 1 }}>
+              <CreatePricePlan
+                ref={createPlanRef}
+                registerSaveDraft={(fn) => setSaveDraftFn(() => fn)}
+                draftData={draftPlanData}
+                onFieldChange={() => {
+                  if (draftSaved) setDraftSaved(false);
+                }}
+                onClose={() => {
+                  setDraftPlanData(null);
+                  clearAllRatePlanData();
+                  setShowCreatePlan(false);
+                  loadRatePlans();
+                }}
+              />
+            </div>
 
-          <SaveDraft
-            isOpen={showSaveDraftModal}
-            onClose={() => setShowSaveDraftModal(false)}
-            onSave={async () => {
-              if (!saveDraftFn) return;
-              try {
-                setDraftSaving(true);
-                const ok = await saveDraftFn(); // now returns boolean
-                setDraftSaving(false);
+            <SaveDraft
+              isOpen={showSaveDraftModal}
+              onClose={() => setShowSaveDraftModal(false)}
+              onSave={async () => {
+                if (!saveDraftFn) return;
+                try {
+                  setDraftSaving(true);
+                  const ok = await saveDraftFn(); // now returns boolean
+                  setDraftSaving(false);
 
-                if (!ok) {
-                  // ❗ Validation failed. Close ONLY the modal so the inline errors are visible.
+                  if (!ok) {
+                    // ❗ Validation failed. Close ONLY the modal so the inline errors are visible.
+                    setShowSaveDraftModal(false);
+                    return;
+                  }
+
+                  // This modal is the flow for “Back” → save & exit.
                   setShowSaveDraftModal(false);
-                  return;
+                  setShowCreatePlan(false);
+                  await loadRatePlans();
+                } catch {
+                  setDraftSaving(false);
+                  // keep modal open on unexpected error
                 }
-
-                // This modal is the flow for “Back” → save & exit.
+              }}
+              onDelete={async () => {
                 setShowSaveDraftModal(false);
+                const currentId = createPlanRef.current?.getRatePlanId();
+                if (currentId) { try { await deleteRatePlan(currentId); } catch { } }
                 setShowCreatePlan(false);
                 await loadRatePlans();
-              } catch {
-                setDraftSaving(false);
-                // keep modal open on unexpected error
-              }
-            }}
-            onDelete={async () => {
-              setShowSaveDraftModal(false);
-              const currentId = createPlanRef.current?.getRatePlanId();
-              if (currentId) { try { await deleteRatePlan(currentId); } catch {} }
-              setShowCreatePlan(false);
-              await loadRatePlans();
-            }}
-          />
+              }}
+            />
 
-          <ConfirmDeleteModal
-            isOpen={showConfirmDelete}
-            productName={createPlanRef.current?.getRatePlanId() ? 'Rate Plan' : 'Draft Rate Plan'}
-            onConfirm={async () => {
-              setShowConfirmDelete(false);
-              const currentId = createPlanRef.current?.getRatePlanId();
-              if (currentId) {
-                try { await deleteRatePlan(currentId); setNotification({ type: 'success', ratePlanName: 'Rate Plan' }); setTimeout(() => setNotification(null), 3000); }
-                catch { setNotification({ type: 'error', ratePlanName: 'Rate Plan' }); setTimeout(() => setNotification(null), 3000); }
-              }
-              setShowCreatePlan(false);
-              await loadRatePlans();
-            }}
-            onCancel={() => setShowConfirmDelete(false)}
-          />
-        </div>
-      ) : (
-        <div className="rateplan-check-container">
-          <PageHeader
-            title="Rate Plans"
-            searchTerm={searchTerm}
-            onSearchTermChange={setSearchTerm}
-            primaryLabel="+ New Rate Plan"
-            onPrimaryClick={() => { 
-              clearAllRatePlanData(); 
-              setDraftSaved(false);
-              setShowCreatePlan(true); 
-              navigate('/get-started/rate-plans'); 
-            }}
-            onFilterClick={() => {}}
-            searchDisabled={!hasRows}
-            filterDisabled={!hasRows}
-            showPrimary={hasRows}
-showIntegrations={filteredPlans.length > 0}          />
+            <ConfirmDeleteModal
+              isOpen={showConfirmDelete}
+              productName={createPlanRef.current?.getRatePlanId() ? 'Rate Plan' : 'Draft Rate Plan'}
+              onConfirm={async () => {
+                setShowConfirmDelete(false);
+                const currentId = createPlanRef.current?.getRatePlanId();
+                if (currentId) {
+                  try { await deleteRatePlan(currentId); setNotification({ type: 'success', ratePlanName: 'Rate Plan' }); setTimeout(() => setNotification(null), 3000); }
+                  catch { setNotification({ type: 'error', ratePlanName: 'Rate Plan' }); setTimeout(() => setNotification(null), 3000); }
+                }
+                setShowCreatePlan(false);
+                await loadRatePlans();
+              }}
+              onCancel={() => setShowConfirmDelete(false)}
+            />
+          </div>
+        ) : (
+          <div className="rateplan-check-container">
+            <PageHeader
+              title="Rate Plans"
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              primaryLabel="+ New Rate Plan"
+              onPrimaryClick={() => {
+                clearAllRatePlanData();
+                setDraftSaved(false);
+                setShowCreatePlan(true);
+                navigate('/get-started/rate-plans');
+              }}
+              onFilterClick={() => { }}
+              searchDisabled={!hasRows}
+              filterDisabled={!hasRows}
+              showPrimary={hasRows}
+              showIntegrations={filteredPlans.length > 0} />
 
-          <div className="customers-table-wrapper">
-            <table className="customers-table">
-              <colgroup>
-                <col className="col-rateplan-name" />
-                <col className="col-product" />
-                <col className="col-payment" />
-                <col className="col-created" />
-                <col className="col-status" />
-                <col className="col-actions" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Rate Plan</th>
-                  <th>Pricing model</th>
-                  <th>Payment Type</th>
-                  <th>Created on</th>
-                  <th>Status</th>
-                  <th className="col-actions">Actions</th>
-                </tr>
-              </thead>
+            <div className="customers-table-wrapper">
+              <table className="customers-table">
+                <colgroup>
+                  <col className="col-rateplan-name" />
+                  <col className="col-product" />
+                  <col className="col-payment" />
+                  <col className="col-created" />
+                  <col className="col-status" />
+                  <col className="col-actions" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Rate Plan</th>
+                    <th>Pricing model</th>
+                    <th>Payment Type</th>
+                    <th>Created on</th>
+                    <th>Status</th>
+                    <th className="col-actions">Actions</th>
+                  </tr>
+                </thead>
 
-              {hasRows ? (
-                <tbody>
-                  {filteredPlans.map((plan) => (
-                    <tr key={plan.ratePlanId}>
-                      <td>{renderNameChip(plan)}</td>
-                      <td>{renderPricingModel(plan)}</td>
-                      <td>{renderPaymentType(plan)}</td>
-                      <td>{renderCreatedOn(plan)}</td>
-                      <td>
-                        <StatusBadge
-                          label={formatStatus(plan.status)}
-                          variant={String(plan.status || '').toLowerCase() as Variant}
-                          size="sm"
-                        />
-                      </td>
-                      <td>
-                        <div className="product-action-buttons">
-                          {plan.status?.toLowerCase() === 'draft' ? (
-                            <RetryIconButton
-                              onClick={() => handleDraft(plan.ratePlanId)}
-                              title="Continue editing draft"
-                            />
-                          ) : (
-                            <EditIconButton
-                              onClick={() => handleEdit(plan.ratePlanId)}
-                              title="Edit rate plan"
-                            />
-                          )}
-                          <DeleteIconButton
-                            onClick={() => handleDeleteClick(plan.ratePlanId)}
-                            title="Delete rate plan"
+                {hasRows ? (
+                  <tbody>
+                    {filteredPlans.map((plan) => (
+                      <tr key={plan.ratePlanId}>
+                        <td>{renderNameChip(plan)}</td>
+                        <td>{renderPricingModel(plan)}</td>
+                        <td>{renderPaymentType(plan)}</td>
+                        <td>{renderCreatedOn(plan)}</td>
+                        <td>
+                          <StatusBadge
+                            label={formatStatus(plan.status)}
+                            variant={String(plan.status || '').toLowerCase() as Variant}
+                            size="sm"
                           />
+                        </td>
+                        <td>
+                          <div className="product-action-buttons">
+                            {plan.status?.toLowerCase() === 'draft' ? (
+                              <RetryIconButton
+                                onClick={() => handleDraft(plan.ratePlanId)}
+                                title="Continue editing draft"
+                              />
+                            ) : (
+                              <EditIconButton
+                                onClick={() => handleEdit(plan.ratePlanId)}
+                                title="Edit rate plan"
+                              />
+                            )}
+                            <DeleteIconButton
+                              onClick={() => handleDeleteClick(plan.ratePlanId)}
+                              title="Delete rate plan"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                ) : (
+                  <tbody>
+                    <tr className="pp-empty-row">
+                      <td colSpan={6}>
+                        <div className="pp-empty-area in-table">
+                          <div className="rate-empty">
+                            <div className="rate-empty-illustration" aria-hidden="true">
+                              <img src={RatePlansEmptyImg} alt="No rate plans" style={{ width: '190px', height: '190px' }} />
+                            </div>
+                            <p className="customers-empty-state-text">
+                              No Rate Plan created yet. Click ‘New Rate Plan’<br /> to create your First Rate Plan.
+                            </p>
+                            <PrimaryButton
+                              onClick={() => {
+                                clearAllRatePlanData();
+                                setDraftPlanData(null);
+                                setShowCreatePlan(true);
+                                navigate('/get-started/rate-plans');
+                              }}
+                            >
+                              + New Rate Plan
+                            </PrimaryButton>
+                          </div>
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr className="pp-empty-row">
-                    <td colSpan={6}>
-                      <div className="pp-empty-area in-table">
-                        <div className="rate-empty">
-                          <div className="rate-empty-illustration" aria-hidden="true">
-                            <img src={RatePlansEmptyImg} alt="No rate plans" style={{ width: '190px', height: '190px' }} />
-                          </div>
-                          <p className="customers-empty-state-text">
-                            No Rate Plan created yet. Click ‘New Rate Plan’<br /> to create your First Rate Plan.
-                          </p>
-                          <PrimaryButton 
-                            onClick={() => { 
-                              clearAllRatePlanData(); 
-                              setDraftPlanData(null);
-                              setShowCreatePlan(true); 
-                              navigate('/get-started/rate-plans');
-                            }}
-                          >
-                             + New Rate Plan
-                          </PrimaryButton>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
-          </div>
+                  </tbody>
+                )}
+              </table>
+            </div>
 
-          {/* Table row delete modal */}
-          {showTableDeleteModal && (
-            <ConfirmDeleteModal
-              isOpen={showTableDeleteModal}
-              productName={deleteRatePlanName}
-              onCancel={handleTableDeleteCancel}
-              onConfirm={handleTableDeleteConfirm}
-            />
-          )}
-        </div>
-      )}
+            {/* Table row delete modal */}
+            {showTableDeleteModal && (
+              <ConfirmDeleteModal
+                isOpen={showTableDeleteModal}
+                productName={deleteRatePlanName}
+                onCancel={handleTableDeleteCancel}
+                onConfirm={handleTableDeleteConfirm}
+              />
+            )}
+          </div>
+        )}
       </div>
     </ToastProvider>
   );

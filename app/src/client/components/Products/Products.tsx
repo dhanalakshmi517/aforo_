@@ -87,7 +87,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   // Function to handle icon updates from EditProduct
   const handleIconUpdate = (productId: string, iconData: ProductIconData | null) => {
     console.log(`🎨 handleIconUpdate called for product ${productId}:`, iconData);
-    
+
     if (iconData) {
       const iconJson = JSON.stringify({ iconData });
       console.log(`💾 Storing updated icon in local state for ${productId}`);
@@ -107,10 +107,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       prevProducts.map(p =>
         p.productId === productId
           ? {
-              ...p,
-              productIcon: iconData ? JSON.stringify({ iconData }) : undefined,
-              iconData: iconData || undefined
-            }
+            ...p,
+            productIcon: iconData ? JSON.stringify({ iconData }) : undefined,
+            iconData: iconData || undefined
+          }
           : p
       )
     );
@@ -234,7 +234,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           }
         } else if (!iconData) {
           console.log(`🚫 Product ${product.productId} has no productIcon field, trying individual fetch...`);
-          
+
           // Fallback: Try fetching individual product data if productIcon is missing
           try {
             const individualProduct = await getProductById(product.productId);
@@ -436,7 +436,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleWindowFocus);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleWindowFocus);
@@ -476,7 +476,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       const g = parseInt(cleanHex.slice(3, 5), 16);
       const b = parseInt(cleanHex.slice(5, 7), 16);
       return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      };
+    };
 
     return (
       <div
@@ -494,7 +494,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             left: 6,
             top: 4,
             width: 34,
-            borderRadius:'9px',
+            borderRadius: '9px',
 
             height: 34,
             backgroundColor: tile,
@@ -502,25 +502,25 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           }}
         />
         {/* GLASS FOREGROUND TILE */}
-       <div
-  style={{
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%) translate(9px, 6px)',
-    width: 34,
-    height: 34,
-    display: 'flex',
-    justifyContent: 'center',
-    borderRadius:'9px',
-    alignItems: 'center',
-    border: '0.6px solid #FFF',
-    backgroundColor: hexToRgba(tile, 0.10),
-    background: hexToRgba(tile, 0.10),
-    backdropFilter: 'blur(3.875000238418579px)',
-    boxShadow: '0 2px 6px rgba(0,0,0,0.15)', // optional: adds soft depth
-  }}
->
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%) translate(9px, 6px)',
+            width: 34,
+            height: 34,
+            display: 'flex',
+            justifyContent: 'center',
+            borderRadius: '9px',
+            alignItems: 'center',
+            border: '0.6px solid #FFF',
+            backgroundColor: hexToRgba(tile, 0.10),
+            background: hexToRgba(tile, 0.10),
+            backdropFilter: 'blur(3.875000238418579px)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)', // optional: adds soft depth
+          }}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -580,7 +580,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             </defs>
           </svg>
         </span>
-        
+
         {showTooltip && (
           <div
             style={{
@@ -657,7 +657,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
     // Listen for storage changes (cross-tab communication)
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Also check when window gains focus
     window.addEventListener('focus', checkForUpdates);
 
@@ -690,16 +690,16 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             <Header
               title="Products"
               searchTerm=""
-              onSearchTermChange={() => {}}
+              onSearchTermChange={() => { }}
               searchDisabled={true}
               filterDisabled={true}
               showPrimary={true}
               showKongButton={false}
               primaryLabel="+ New Product"
               onPrimaryClick={() => navigate('/get-started/products/new')}
-              onFilterClick={() => {}}
-              onSettingsClick={() => {}}
-              onNotificationsClick={() => {}}
+              onFilterClick={() => { }}
+              onSettingsClick={() => { }}
+              onNotificationsClick={() => { }}
             />
             <div className="customers-table-wrapper">
               <table className="customers-table">
@@ -741,7 +741,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   return (
     <ToastProvider>
       <>
-<div style={{ width: 'calc(100% - 10px)' }}>
+        <div style={{ width: 'calc(100% - 10px)' }}>
           {showConfirmDeleteModal && (
             <ConfirmDeleteModal
               isOpen={showConfirmDeleteModal}
@@ -766,10 +766,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   setIsEditFormOpen(false);
                   setEditingProduct(null);
                   setRefreshKey(prev => prev + 1);
-                  
+
                   // Always refresh products list after edit to ensure latest data
                   console.log('🔄 EditProduct closed, refreshing products list...');
-                  
+
                   // Small delay to allow backend to process any pending updates
                   setTimeout(async () => {
                     try {
@@ -777,17 +777,17 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       if (editingProduct?.productId) {
                         console.log(`🔍 Fetching updated data for product ${editingProduct.productId}...`);
                         const updatedProduct = await getProductById(editingProduct.productId);
-                        
+
                         if (updatedProduct?.productIcon) {
                           console.log(`✅ Found updated productIcon for ${editingProduct.productId}, updating local state`);
                           setProducts(prev =>
                             prev.map(p =>
                               p.productId === editingProduct.productId!.toString()
-                                ? { 
-                                    ...p, 
-                                    productIcon: updatedProduct.productIcon,
-                                    icon: updatedProduct.icon // Also update icon URL if available
-                                  }
+                                ? {
+                                  ...p,
+                                  productIcon: updatedProduct.productIcon,
+                                  icon: updatedProduct.icon // Also update icon URL if available
+                                }
                                 : p
                             )
                           );
@@ -798,7 +798,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     } catch (error) {
                       console.error('Failed to fetch individual product after edit:', error);
                     }
-                    
+
                     // Always do a full refresh to ensure consistency
                     console.log('🔄 Doing full products list refresh...');
                     await fetchProducts();
@@ -821,9 +821,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 showKongButton={products.length > 0}
                 primaryLabel="+ Create Product"
                 onPrimaryClick={() => navigate('/get-started/products/new')}
-                onFilterClick={() => {}}
+                onFilterClick={() => { }}
                 onSettingsClick={() => setShowKongIntegration(true)}
-                onNotificationsClick={() => {}}
+                onNotificationsClick={() => { }}
 
               />
 
@@ -888,9 +888,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                     fontWeight: 600,
                                     backgroundColor:
                                       getRandomBackgroundColor(parseInt(product.productId) || 0),
-                                    border: `1px solid ${
-                                      getRandomBorderColor(parseInt(product.productId) || 0)
-                                    }`
+                                    border: `1px solid ${getRandomBorderColor(parseInt(product.productId) || 0)
+                                      }`
                                   }}
                                 >
                                   {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
@@ -908,9 +907,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
                         <td>
                           <span
-                            className={`product-type-badge--${
-                              product.productType?.toLowerCase() || 'default'
-                            }`}
+                            className={`product-type-badge--${product.productType?.toLowerCase() || 'default'
+                              }`}
                           >
                             {(() => {
                               const map = {
@@ -1070,16 +1068,16 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
-                            <img src={EmptyBox} alt="No products" style={{ width: '190px', height: '190px' }}/>
+                            <img src={EmptyBox} alt="No products" style={{ width: '190px', height: '190px' }} />
                             <p className="customers-empty-state-text">
-No products are available. Click ‘New Product’ to add your first <br/> product manually, or import products from Kong.                            </p>
+                              No products are available. Click ‘New Product’ to add your first <br /> product manually, or import products from Kong.                            </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product
                               </PrimaryButton>
                               <TertiaryButton onClick={() => navigate('/get-started/integrations')}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }}>
-                                  <path d="M5.83333 13.8333V3.83333C5.83333 3.65652 5.7631 3.48695 5.63807 3.36193C5.51305 3.2369 5.34348 3.16667 5.16667 3.16667H1.83333C1.47971 3.16667 1.14057 3.30714 0.890524 3.55719C0.640476 3.80724 0.5 4.14638 0.5 4.5V12.5C0.5 12.8536 0.640476 13.1928 0.890524 13.4428C1.14057 13.6929 1.47971 13.8333 1.83333 13.8333H9.83333C10.187 13.8333 10.5261 13.6929 10.7761 13.4428C11.0262 13.1928 11.1667 12.8536 11.1667 12.5V9.16667C11.1667 8.98986 11.0964 8.82029 10.9714 8.69526C10.8464 8.57024 10.6768 8.5 10.5 8.5H0.5M9.16667 0.5H13.1667C13.5349 0.5 13.8333 0.798477 13.8333 1.16667V5.16667C13.8333 5.53486 13.5349 5.83333 13.1667 5.83333H9.16667C8.79848 5.83333 8.5 5.53486 8.5 5.16667V1.16667C8.5 0.798477 8.79848 0.5 9.16667 0.5Z" stroke="#2A455E" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M5.83333 13.8333V3.83333C5.83333 3.65652 5.7631 3.48695 5.63807 3.36193C5.51305 3.2369 5.34348 3.16667 5.16667 3.16667H1.83333C1.47971 3.16667 1.14057 3.30714 0.890524 3.55719C0.640476 3.80724 0.5 4.14638 0.5 4.5V12.5C0.5 12.8536 0.640476 13.1928 0.890524 13.4428C1.14057 13.6929 1.47971 13.8333 1.83333 13.8333H9.83333C10.187 13.8333 10.5261 13.6929 10.7761 13.4428C11.0262 13.1928 11.1667 12.8536 11.1667 12.5V9.16667C11.1667 8.98986 11.0964 8.82029 10.9714 8.69526C10.8464 8.57024 10.6768 8.5 10.5 8.5H0.5M9.16667 0.5H13.1667C13.5349 0.5 13.8333 0.798477 13.8333 1.16667V5.16667C13.8333 5.53486 13.5349 5.83333 13.1667 5.83333H9.16667C8.79848 5.83333 8.5 5.53486 8.5 5.16667V1.16667C8.5 0.798477 8.79848 0.5 9.16667 0.5Z" stroke="#2A455E" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                                 Import Products
                               </TertiaryButton>

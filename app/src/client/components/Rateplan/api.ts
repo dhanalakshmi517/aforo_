@@ -22,7 +22,7 @@ export interface Product {
 /* =========================
  * Constants
  * ========================= */
-export const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3001/api' : 'http://3.208.93.68:8080/api';
+export const BASE_URL = 'http://3.208.93.68:8080/api';
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 const BM_BASE = 'http://34.238.49.158:8081/api/billable-metrics';
 
@@ -82,7 +82,7 @@ function extractNumericId(maybe: any, keys: string[] = []): number | undefined {
   if (!maybe || typeof maybe !== 'object') return undefined;
   const candidates = keys.length
     ? keys
-    : ['flatFeeId','usageBasedPricingId','tieredPricingId','stairStepPricingId','volumePricingId','id'];
+    : ['flatFeeId', 'usageBasedPricingId', 'tieredPricingId', 'stairStepPricingId', 'volumePricingId', 'id'];
   for (const k of candidates) {
     const v = (maybe as any)[k];
     const n = typeof v === 'string' ? Number(v) : v;
@@ -171,7 +171,7 @@ export const checkApiHealth = async (): Promise<boolean> => {
       console.warn('❌ Health check failed for:', endpoint, error.response?.status);
     }
   }
-  
+
   console.error('❌ All health check endpoints failed');
   return false;
 };
@@ -189,13 +189,13 @@ export const fetchRatePlans = async (): Promise<RatePlan[]> => {
       statusText: error.response?.statusText,
       data: error.response?.data
     });
-    
+
     // Temporary fallback: return empty array when Redis is down
     if (error.response?.status === 500 && error.response?.data?.details?.includes('Redis')) {
       console.warn('⚠️ Redis connection failed, returning empty rate plans array');
       return [];
     }
-    
+
     throw error;
   }
 };
@@ -206,7 +206,7 @@ export const fetchRatePlan = async (id: number): Promise<RatePlan & Record<strin
     return response.data;
   } catch (error: any) {
     console.error('❌ Fetch single rate plan error:', error.response?.data);
-    
+
     // Fallback for Redis issues
     if (error.response?.status === 500 && error.response?.data?.details?.includes('Redis')) {
       console.warn('⚠️ Redis connection failed, returning mock rate plan data');
@@ -220,7 +220,7 @@ export const fetchRatePlan = async (id: number): Promise<RatePlan & Record<strin
         status: 'DRAFT'
       };
     }
-    
+
     throw error;
   }
 };
@@ -249,13 +249,13 @@ export const deleteRatePlan = async (id: number): Promise<void> => {
     await axios.delete(`${BASE_URL}/rateplans/${id}`);
   } catch (error: any) {
     console.error('❌ Delete rate plan error:', error.response?.data);
-    
+
     // Fallback for Redis issues - just log and continue
     if (error.response?.status === 500 && error.response?.data?.details?.includes('Redis')) {
       console.warn('⚠️ Redis connection failed, simulating delete operation');
       return; // Pretend it worked
     }
-    
+
     throw error;
   }
 };
@@ -274,7 +274,7 @@ export const createRatePlan = async (payload: RatePlanRequest): Promise<RatePlan
       payload: payload,
       url: error.config?.url
     });
-    
+
     // Fallback for Redis issues - create a mock rate plan
     if (error.response?.status === 500 && error.response?.data?.details?.includes('Redis')) {
       console.warn('⚠️ Redis connection failed, creating mock rate plan');
@@ -290,7 +290,7 @@ export const createRatePlan = async (payload: RatePlanRequest): Promise<RatePlan
       };
       return mockRatePlan;
     }
-    
+
     throw error;
   }
 };
@@ -378,7 +378,7 @@ export const saveFlatFeePricing = async (ratePlanId: number, payload: FlatFeePay
       if (flatFeeId != null) {
         return axios.put(`${baseUrl}/${flatFeeId}`, clean);
       }
-    } catch {}
+    } catch { }
     throw postErr;
   }
 };
@@ -582,10 +582,10 @@ const PRICING_MODEL_LABELS: Record<string, string> = {
 
 export async function getPricingSnapshot(ratePlanId: number) {
   const endpoints = [
-    { key: 'USAGE',     url: `${BASE_URL}/rateplans/${ratePlanId}/usagebased` },
-    { key: 'FLAT_FEE',  url: `${BASE_URL}/rateplans/${ratePlanId}/flatfee` },
-    { key: 'VOLUME',    url: `${BASE_URL}/rateplans/${ratePlanId}/volume-pricing` },
-    { key: 'TIERED',    url: `${BASE_URL}/rateplans/${ratePlanId}/tiered` },
+    { key: 'USAGE', url: `${BASE_URL}/rateplans/${ratePlanId}/usagebased` },
+    { key: 'FLAT_FEE', url: `${BASE_URL}/rateplans/${ratePlanId}/flatfee` },
+    { key: 'VOLUME', url: `${BASE_URL}/rateplans/${ratePlanId}/volume-pricing` },
+    { key: 'TIERED', url: `${BASE_URL}/rateplans/${ratePlanId}/tiered` },
     { key: 'STAIRSTEP', url: `${BASE_URL}/rateplans/${ratePlanId}/stairstep` },
   ];
 
@@ -671,10 +671,10 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
       const data = pricing.data;
       switch (pricing.model) {
         case 'FLAT_FEE':
-          plan.flatFeeAmount    = data.flatFeeAmount;
+          plan.flatFeeAmount = data.flatFeeAmount;
           plan.numberOfApiCalls = data.numberOfApiCalls;
-          plan.overageUnitRate  = data.overageUnitRate;
-          plan.graceBuffer      = data.graceBuffer;
+          plan.overageUnitRate = data.overageUnitRate;
+          plan.graceBuffer = data.graceBuffer;
           break;
         case 'VOLUME':
           plan.volumePricing = data;
@@ -686,7 +686,7 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
           plan.stairStepPricing = data;
           break;
         case 'USAGE':
-          plan.perUnitAmount     = data.perUnitAmount;
+          plan.perUnitAmount = data.perUnitAmount;
           plan.usageBasedPricing = { ...data };
           break;
       }
@@ -702,10 +702,10 @@ export async function fetchRatePlanWithDetails(ratePlanId: number) {
 
     // --- extras ---
     const ex = extras || {};
-    if (ex.setupFee)           plan.setupFee = ex.setupFee;
-    if (ex.discount)           plan.discount = ex.discount;
-    if (ex.freemium)           plan.freemium = ex.freemium;
-    if (ex.minimumCommitment)  plan.minimumCommitment = ex.minimumCommitment;
+    if (ex.setupFee) plan.setupFee = ex.setupFee;
+    if (ex.discount) plan.discount = ex.discount;
+    if (ex.freemium) plan.freemium = ex.freemium;
+    if (ex.minimumCommitment) plan.minimumCommitment = ex.minimumCommitment;
 
     return plan;
   } catch (error) {
