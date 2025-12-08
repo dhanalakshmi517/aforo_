@@ -32,6 +32,7 @@ interface PricingProps {
   validationErrors?: Record<string, string>;
   draftData?: any;
   isFreshCreation?: boolean;
+  locked?: boolean;
 }
 
 type PricingErrors = {
@@ -45,7 +46,7 @@ type PricingErrors = {
 };
 
 const Pricing = forwardRef<PricingHandle, PricingProps>(
-  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false }, ref) => {
+  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false, locked = false }, ref) => {
     const [selected, setSelected] = useState('');
     const [errors, setErrors] = useState<PricingErrors>({});
 
@@ -78,13 +79,13 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
     const savePricing = async (): Promise<boolean> => {
       setErrors({});
       console.log('💾 Pricing: savePricing called with selected:', selected);
-      
+
       // Always persist the pricing model selection to session storage
       if (selected) {
         console.log('💾 Pricing: Ensuring pricing model is persisted:', selected);
         setRatePlanData('PRICING_MODEL', selected);
       }
-      
+
       if (!selected) {
         console.log('⚠️ Pricing: No pricing model selected, returning early');
         return true;
@@ -156,7 +157,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         console.log('🔍 Pricing: No draft data provided');
         return;
       }
-      
+
       console.log('🔍 Pricing: Processing draft data:', draftData);
       console.log('🔍 Pricing: Draft data keys:', Object.keys(draftData));
       console.log('🔍 Pricing: pricingModelName:', draftData.pricingModelName);
@@ -167,15 +168,15 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
       if (sessionPricingModel) {
         console.log('🎯 Pricing: Using session storage pricing model (user selection):', sessionPricingModel);
         setSelected(sessionPricingModel);
-        
+
         // Load appropriate data based on session selection, not backend detection
         if (sessionPricingModel === 'Usage-Based') {
           const usageObj = (Array.isArray(draftData.usageBasedPricing)
             ? draftData.usageBasedPricing[0]
             : draftData.usageBasedPricing) ||
-          (draftData.perUnitAmount != null
-            ? { perUnitAmount: draftData.perUnitAmount }
-            : null);
+            (draftData.perUnitAmount != null
+              ? { perUnitAmount: draftData.perUnitAmount }
+              : null);
           if (usageObj && usageObj.perUnitAmount != null) {
             const amt = Number(usageObj.perUnitAmount) || 0;
             setUsage({ perUnitAmount: amt });
@@ -311,8 +312,8 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
         ? draftData.stairStepPricing[draftData.stairStepPricing.length - 1]
         : draftData.stairStepPricing
         || (Array.isArray(draftData.stairStepPricings)
-            ? draftData.stairStepPricings[draftData.stairStepPricings.length - 1]
-            : draftData.stairStepPricings);
+          ? draftData.stairStepPricings[draftData.stairStepPricings.length - 1]
+          : draftData.stairStepPricings);
 
       if (stairRaw && Object.keys(stairRaw).length > 0) {
         setSelected('Stairstep');
@@ -517,21 +518,21 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
     const handleAddTier = () => {
       // When adding a new tier, uncheck unlimited since user wants more tiers
       setNoUpperLimit(false);
-      
+
       // Clear unlimited from current last tier if it was unlimited
       const updated = [...tiers];
       if (updated.length > 0 && updated[updated.length - 1].isUnlimited) {
         updated[updated.length - 1].isUnlimited = false;
       }
-      
+
       // Add new tier with unlimited = false
       updated.push({ from: null, to: null, price: null, isUnlimited: false });
       setTiers(updated);
-      
+
       // Update session storage
       const isTiered = selected === 'Tiered Pricing';
       const isVolume = selected === 'Volume-Based';
-      
+
       if (isTiered) setRatePlanData('TIERED_NO_UPPER_LIMIT', 'false');
       if (isVolume) setRatePlanData('VOLUME_NO_UPPER_LIMIT', 'false');
     };
@@ -612,6 +613,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             className={`custom-select ${errors.select ? 'has-error' : ''}`}
             value={selected}
             onChange={e => {
+              if (locked) return;
               const v = e.target.value;
               console.log('🎯 Pricing: User selected pricing model:', v);
               setSelected(v);
@@ -619,6 +621,8 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }
             }}
+            disabled={locked}
+            style={{ cursor: locked ? 'not-allowed' : 'pointer', opacity: locked ? 0.6 : 1 }}
           >
             <option value="">Select a pricing model</option>
             <option value="Flat Fee">Flat Fee</option>
@@ -704,7 +708,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   onDeleteTier={handleDeleteTier}
                   onChange={handleTierChange}
                   noUpperLimit={noUpperLimit}
-                  setNoUpperLimit={(flag:boolean)=>{
+                  setNoUpperLimit={(flag: boolean) => {
                     setNoUpperLimit(flag);
                     setRatePlanData('VOLUME_NO_UPPER_LIMIT', flag ? 'true' : 'false');
 
