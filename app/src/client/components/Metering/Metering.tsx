@@ -140,8 +140,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         let iconData = null;
         try {
           if ((m as any).iconData) {
-            iconData = typeof (m as any).iconData === 'string' 
-              ? JSON.parse((m as any).iconData) 
+            iconData = typeof (m as any).iconData === 'string'
+              ? JSON.parse((m as any).iconData)
               : (m as any).iconData;
           }
         } catch (e) {
@@ -182,6 +182,20 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
   };
+
+  // Define metric color palette
+  const metricColors = [
+    'rgba(234, 212, 174, 0.15)',
+    'rgba(226, 182, 190, 0.15)',
+    'rgba(226, 182, 204, 0.15)',
+    'rgba(220, 182, 226, 0.15)',
+    'rgba(204, 183, 225, 0.15)',
+    'rgba(196, 183, 225, 0.15)',
+    'rgba(174, 234, 214, 0.15)'
+  ];
+
+  // Helper function to get metric color by index
+  const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
 
   const filteredMetrics = metrics
     .filter((m) =>
