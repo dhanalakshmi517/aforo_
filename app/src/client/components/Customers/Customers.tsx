@@ -43,7 +43,7 @@ const Notification: React.FC<NotificationState> = ({ type, message }) => {
 
 const InfoIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <path d="M5.66602 8V6M5.66602 4H5.67102M10.666 6C10.666 8.76142 8.42744 11 5.66602 11C2.90459 11 0.666016 8.76142 0.666016 6C0.666016 3.23858 2.90459 1 5.66602 1C8.42744 1 10.666 3.23858 10.666 6Z" stroke="#98959A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5.66602 8V6M5.66602 4H5.67102M10.666 6C10.666 8.76142 8.42744 11 5.66602 11C2.90459 11 0.666016 8.76142 0.666016 6C0.666016 3.23858 2.90459 1 5.66602 1C8.42744 1 10.666 3.23858 10.666 6Z" stroke="#98959A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -107,14 +107,14 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
   const url = absolutizeUpload(uploadPath);
   console.log('Resolving logo URL:', url);
-  
+
   // First try: Direct URL without authentication (for public uploads)
   try {
     const directUrl = url;
     console.log('Trying direct URL:', directUrl);
-    const testRes = await fetch(directUrl, { 
+    const testRes = await fetch(directUrl, {
       method: "HEAD",
-      cache: "no-store" 
+      cache: "no-store"
     });
     if (testRes.ok) {
       console.log('Direct URL works, using it:', directUrl);
@@ -123,7 +123,7 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   } catch (error) {
     console.log('Direct URL failed, trying authenticated fetch:', error);
   }
-  
+
   // Second try: Authenticated fetch with blob conversion
   try {
     const res = await fetch(url, {
@@ -167,7 +167,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
-  
+
   const { showToast } = useToast();
 
   // NEW: resume draft payload
@@ -286,7 +286,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             onSearchTermChange={setSearchTerm}
             primaryLabel={customers.length > 0 ? " + New Customer" : ""}
             onPrimaryClick={handleNewCustomer}
-            onFilterClick={() => {}}
+            onFilterClick={() => { }}
             searchDisabled={searchDisabled}
             filterDisabled={customers.length === 0}
             showPrimary={customers.length > 0}
@@ -295,7 +295,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
           />
 
           <div className="customers-table-wrapper">
-        <table className="customers-table">
+            <table className="customers-table">
               <thead>
                 <tr>
                   <th>Company Name </th>
@@ -330,7 +330,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                 {filteredCustomers.map((customer) => {
                   const id = customer.customerId ?? customer.id;
                   const companyTitle = customer.companyName || "-";
-                  const personTitle  = customer.customerName || "-";
+                  const personTitle = customer.customerName || "-";
                   const initials = initialsFrom(companyTitle);
                   const imgSrc = customer.__resolvedLogoSrc ?? null;
                   const logoClass = `customer-logo${imgSrc ? " has-image" : " no-image"}`;

@@ -49,9 +49,9 @@ const PaymentPill: React.FC<{ value?: string }> = ({ value }) => {
         <span className="pill-icon" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
             <g clipPath="url(#clip0_prepaid)">
-              <path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#1A2126" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#1A2126" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </g>
-            <defs><clipPath id="clip0_prepaid"><rect width="16" height="16" fill="white"/></clipPath></defs>
+            <defs><clipPath id="clip0_prepaid"><rect width="16" height="16" fill="white" /></clipPath></defs>
           </svg>
         </span>
         Pre-paid
@@ -63,7 +63,7 @@ const PaymentPill: React.FC<{ value?: string }> = ({ value }) => {
       <span className="pill pill--postpaid">
         <span className="pill-icon" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126Z" fill="var(--icon-color-darkest, #1A2126)"/>
+            <path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126Z" fill="var(--icon-color-darkest, #1A2126)" />
           </svg>
         </span>
         Post-paid
@@ -305,15 +305,15 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         onSearchTermChange={setSearchQuery}
         primaryLabel="New Purchase"
         onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
-        onFilterClick={() => {}}
+        onFilterClick={() => { }}
         searchDisabled={searchDisabled}
         filterDisabled={isEmpty}
         showPrimary={!isEmpty}
-          showIntegrations={subscriptions.length > 0} // Add this line
+        showIntegrations={subscriptions.length > 0} // Add this line
 
       />
 
-       <div className="customers-table-wrapper">
+      <div className="customers-table-wrapper">
         <table className="customers-table">
           <thead>
             <tr>
@@ -330,12 +330,12 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
             {filtered.map(sub => {
               const cust = customerMap.get(sub.customerId);
               const rp = ratePlanMap.get(sub.ratePlanId);
-              
+
               // Backend already returns formatted date string, so use it directly
-              const purchased = (sub as any).createdOn || 
-                               formatIST((sub as any).createdAt) || 
-                               formatIST((sub as any).startDate) || 
-                               '—';
+              const purchased = (sub as any).createdOn ||
+                formatIST((sub as any).createdAt) ||
+                formatIST((sub as any).startDate) ||
+                '—';
               const logo = cust?.__resolvedLogoSrc || null;
 
               return (
@@ -388,7 +388,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
                           <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
-                                stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </button>
 
@@ -428,8 +428,8 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
               onClick={() => navigate('/get-started/subscriptions/new')}
               className="empty-new-purchase-btn"
             >
-              
-             + New Purchase
+
+              + New Purchase
             </PrimaryButton>
           </div>
         )}

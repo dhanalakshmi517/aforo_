@@ -193,7 +193,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         onSearchTermChange={setSearchQuery}
         primaryLabel={metrics.length > 0 ? " + New Billable Metric" : ""}
         onPrimaryClick={() => navigate('/get-started/metering/new')}
-        onFilterClick={() => {}}
+        onFilterClick={() => { }}
         searchDisabled={metrics.length === 0}
         filterDisabled={metrics.length === 0}
         showPrimary={metrics.length > 0}
@@ -201,69 +201,69 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       />
       <div className="customers-table-wrapper">
         <table className="customers-table">
-        <thead>
-          <tr>
-            <th>Usage Metric</th>
-            <th>Product Name</th>
-            <th>Unit Of Measure</th>
-            <th>Status</th>     
-            <th>Created On</th>
-            <th className="actions-cell">Actions</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-          {filteredMetrics.map((metric, idx) => (
-            <tr key={metric.id}>
-              <td className="metrics-cell"><div className="metrics-wrapper" style={{display:'flex',alignItems:'center',justifyContent:'flex-start'}}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom" title={metric.unit}>{display(metric.unit && metric.unit.length > 3 ? `${metric.unit.substring(0, 3)}...` : metric.unit)}</div><div className="metric-name" title={metric.usageMetric}>{display(metric.usageMetric && metric.usageMetric.length > 3 ? `${metric.usageMetric.substring(0, 3)}...` : metric.usageMetric)}</div></div></div><span style={{marginLeft:4}}>{display(metric.usageMetric)}</span></div></td>
-              <td>{display(metric.productName)}</td>
-              <td>{display(metric.unit)}</td>
-              <td>
-                <StatusBadge
-                  label={formatStatus(metric.status)}
-                  variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
-                  size="sm"
-                />
-              </td>
-              <td>{display(metric.createdOn)}</td>
-              
-              <td className="actions-cell"><div className="product-action-buttons">
-                {metric.status?.toLowerCase() === 'draft' ? (
-                  <RetryIconButton
-                    onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
-                    title="Continue editing draft"
-                  />
-                ) : (
-                  <EditIconButton
-                    onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}
-                    title="Edit metric"
-                  />
-                )}
-                <DeleteIconButton
-                  onClick={() => handleDeleteClick(metric)}
-                  title="Delete metric"
-                />
-              </div></td>
-            </tr>
-          ))}
-          {filteredMetrics.length === 0 && (
+          <thead>
             <tr>
-              <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                <div className="metrics-empty-state">
-                  <img src={UsageEmptyImg} alt="No metrics" style={{ width: 190, height: 190 }} />
-                  <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
-                  <div className="new-metric-button-wrapper">
-                    <PrimaryButton 
-                      onClick={() => navigate('/get-started/metering/new')}
-                    >
-                      + New Billable Metric
-                    </PrimaryButton>
-                  </div>
-                </div>
-              </td>
+              <th>Usage Metric</th>
+              <th>Product Name</th>
+              <th>Unit Of Measure</th>
+              <th>Status</th>
+              <th>Created On</th>
+              <th className="actions-cell">Actions</th>
+
             </tr>
-          )}
-        </tbody>
+          </thead>
+          <tbody>
+            {filteredMetrics.map((metric, idx) => (
+              <tr key={metric.id}>
+                <td className="metrics-cell"><div className="metrics-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom" title={metric.unit}>{display(metric.unit && metric.unit.length > 3 ? `${metric.unit.substring(0, 3)}...` : metric.unit)}</div><div className="metric-name" title={metric.usageMetric}>{display(metric.usageMetric && metric.usageMetric.length > 3 ? `${metric.usageMetric.substring(0, 3)}...` : metric.usageMetric)}</div></div></div><span style={{ marginLeft: 4 }}>{display(metric.usageMetric)}</span></div></td>
+                <td>{display(metric.productName)}</td>
+                <td>{display(metric.unit)}</td>
+                <td>
+                  <StatusBadge
+                    label={formatStatus(metric.status)}
+                    variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
+                    size="sm"
+                  />
+                </td>
+                <td>{display(metric.createdOn)}</td>
+
+                <td className="actions-cell"><div className="product-action-buttons">
+                  {metric.status?.toLowerCase() === 'draft' ? (
+                    <RetryIconButton
+                      onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
+                      title="Continue editing draft"
+                    />
+                  ) : (
+                    <EditIconButton
+                      onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}
+                      title="Edit metric"
+                    />
+                  )}
+                  <DeleteIconButton
+                    onClick={() => handleDeleteClick(metric)}
+                    title="Delete metric"
+                  />
+                </div></td>
+              </tr>
+            ))}
+            {filteredMetrics.length === 0 && (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                  <div className="metrics-empty-state">
+                    <img src={UsageEmptyImg} alt="No metrics" style={{ width: 190, height: 190 }} />
+                    <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
+                    <div className="new-metric-button-wrapper">
+                      <PrimaryButton
+                        onClick={() => navigate('/get-started/metering/new')}
+                      >
+                        + New Billable Metric
+                      </PrimaryButton>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
 

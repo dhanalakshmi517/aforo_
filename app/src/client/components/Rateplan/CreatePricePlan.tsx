@@ -191,21 +191,79 @@ const CreatePricePlan = React.forwardRef<
     }
   }, [draftData, isResuming, resumeDraftId]);
 
-  // Fetch current data when navigating to Pricing step (step 2) or Extras step (step 3)
+  // Fetch current data when navigating to Pricing step (step 2), Extras step (step 3), or Review step (step 4)
   useEffect(() => {
     const fetchCurrentDataForStep = async () => {
-      if ((currentStep === 2 || currentStep === 3) && ratePlanId && !persistentDraftData) {
+      if ((currentStep === 2 || currentStep === 3 || currentStep === 4) && ratePlanId && !persistentDraftData) {
         try {
           console.log('🔄 Fetching current plan data for step:', currentStep);
           const currentPlan = await fetchRatePlanWithDetails(ratePlanId);
           console.log('📊 Fetched plan data:', currentPlan);
           setCurrentStepData(currentPlan);
+
           // Update pricing and extras data to ensure components receive fresh data
           if (currentStep === 2) {
             setDraftPricingData(currentPlan);
           }
           if (currentStep === 3) {
             setDraftExtrasData(currentPlan);
+          }
+
+          // ✅ For Review step (step 4), ensure ALL pricing data is in session storage
+          if (currentStep === 4) {
+            const sessionPricingModel = getRatePlanData('PRICING_MODEL');
+
+            // Always populate pricing data from backend if we have it
+            if (currentPlan?.pricingModelName) {
+              console.log('📝 CreatePricePlan: Hydrating pricing data for Review:', currentPlan.pricingModelName);
+
+              // Set pricing model
+              if (!sessionPricingModel) {
+                setRatePlanData('PRICING_MODEL', currentPlan.pricingModelName);
+              }
+
+              // Hydrate pricing data based on model type
+              if (currentPlan.pricingModelName === 'Flat Fee' && currentPlan.flatFeePricing) {
+                setRatePlanData('FLAT_FEE_AMOUNT', String(currentPlan.flatFeePricing.flatFeeAmount || ''));
+                setRatePlanData('FLAT_FEE_API_CALLS', String(currentPlan.flatFeePricing.numberOfApiCalls || ''));
+                setRatePlanData('FLAT_FEE_OVERAGE', String(currentPlan.flatFeePricing.overageUnitRate || ''));
+                setRatePlanData('FLAT_FEE_GRACE', String(currentPlan.flatFeePricing.graceBuffer || ''));
+              } else if (currentPlan.pricingModelName === 'Usage-Based' && currentPlan.usageBasedPricing) {
+                setRatePlanData('USAGE_PER_UNIT_AMOUNT', String(currentPlan.usageBasedPricing.perUnitAmount || ''));
+              } else if (currentPlan.pricingModelName === 'Tiered Pricing' && currentPlan.tieredPricing) {
+                const tiers = (currentPlan.tieredPricing.tiers || []).map((t: any) => ({
+                  from: t.startRange,
+                  to: t.endRange,
+                  price: t.unitPrice,
+                  isUnlimited: !t.endRange
+                }));
+                setRatePlanData('TIERED_TIERS', JSON.stringify(tiers));
+                setRatePlanData('TIERED_OVERAGE', String(currentPlan.tieredPricing.overageUnitRate || ''));
+                setRatePlanData('TIERED_GRACE', String(currentPlan.tieredPricing.graceBuffer || ''));
+              } else if (currentPlan.pricingModelName === 'Volume-Based' && currentPlan.volumePricing) {
+                const tiers = (currentPlan.volumePricing.tiers || []).map((t: any) => ({
+                  from: t.usageStart,
+                  to: t.usageEnd,
+                  price: t.unitPrice,
+                  isUnlimited: !t.usageEnd
+                }));
+                setRatePlanData('VOLUME_TIERS', JSON.stringify(tiers));
+                setRatePlanData('VOLUME_OVERAGE', String(currentPlan.volumePricing.overageUnitRate || ''));
+                setRatePlanData('VOLUME_GRACE', String(currentPlan.volumePricing.graceBuffer || ''));
+              } else if (currentPlan.pricingModelName === 'Stairstep' && currentPlan.stairStepPricing) {
+                const tiers = (currentPlan.stairStepPricing.tiers || []).map((t: any) => ({
+                  from: t.usageStart,
+                  to: t.usageEnd,
+                  cost: t.flatCost,
+                  isUnlimited: !t.usageEnd
+                }));
+                setRatePlanData('STAIR_TIERS', JSON.stringify(tiers));
+                setRatePlanData('STAIR_OVERAGE', String(currentPlan.stairStepPricing.overageUnitRate || ''));
+                setRatePlanData('STAIR_GRACE', String(currentPlan.stairStepPricing.graceBuffer || ''));
+              }
+
+              console.log('✅ Pricing data hydrated for Review step');
+            }
           }
         } catch (error) {
           console.error('❌ Failed to fetch current plan data for step:', error);
@@ -245,12 +303,12 @@ const CreatePricePlan = React.forwardRef<
       // ✅ Only show popup if there are actual changes, not when fields are empty
       validateBeforeBack: () => {
         if (currentStep !== 0) return true;
-        
+
         // If no changes have been made (all fields empty), don't show popup
         if (!hasChanges()) {
           return false;
         }
-        
+
         return true;
       },
     }),
@@ -613,10 +671,10 @@ const CreatePricePlan = React.forwardRef<
 
           const mapUiToApi = (ui: string) =>
             ui === "FREE_TRIAL_DURATION" ? "FREE_TRIAL_DURATION"
-            : ui === "FREE_UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
-            : ui === "UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
-            : ui === "FREE_TRIAL" ? "FREE_TRIAL_DURATION"
-            : "FREE_UNITS";
+              : ui === "FREE_UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
+                : ui === "UNITS_PER_DURATION" ? "FREE_UNITS_PER_DURATION"
+                  : ui === "FREE_TRIAL" ? "FREE_TRIAL_DURATION"
+                    : "FREE_UNITS";
 
           const apiFreeType = mapUiToApi(uiFreeType);
           if (freeUnits > 0 || freeTrialDuration > 0 || fStart || fEnd) {
@@ -812,9 +870,9 @@ const CreatePricePlan = React.forwardRef<
                   productError
                     ? []
                     : products.map((p) => ({
-                        label: p.productName,
-                        value: p.productName,
-                      }))
+                      label: p.productName,
+                      value: p.productName,
+                    }))
                 }
                 error={errors.selectedProductName}
               />
@@ -959,7 +1017,7 @@ const CreatePricePlan = React.forwardRef<
                             Back
                           </SecondaryButton>
                         )}
-                       
+
                       </div>
 
                       <div className="rate-np-btn-group rate-np-btn-group--next">
@@ -973,8 +1031,8 @@ const CreatePricePlan = React.forwardRef<
                               ? "Submitting..."
                               : "Saving..."
                             : currentStep === steps.length - 1
-                            ? "Create Rate Plan"
-                            : "Save & Next"}
+                              ? "Create Rate Plan"
+                              : "Save & Next"}
                         </PrimaryButton>
                       </div>
                     </div>
