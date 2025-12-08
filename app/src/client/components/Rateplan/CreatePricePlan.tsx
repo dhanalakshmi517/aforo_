@@ -94,6 +94,51 @@ const CreatePricePlan = React.forwardRef<
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Lock logic - similar to CreateCustomer
+  const isStep0Filled = React.useMemo(() => {
+    return Boolean(
+      planName.trim() &&
+      billingFrequency &&
+      selectedProductName &&
+      paymentMethod
+    );
+  }, [planName, billingFrequency, selectedProductName, paymentMethod]);
+
+  const isStep1Filled = React.useMemo(() => {
+    return selectedMetricId !== null;
+  }, [selectedMetricId]);
+
+  const isStep2Filled = React.useMemo(() => {
+    const pricingModel = getRatePlanData('PRICING_MODEL');
+    return Boolean(pricingModel);
+  }, [currentStep]); // Re-evaluate when step changes
+
+  // Determine if each step is locked
+  const isStep1Locked = !isStep0Filled;
+  const isStep2Locked = !isStep0Filled || !isStep1Filled;
+  const isStep3Locked = !isStep0Filled || !isStep1Filled || !isStep2Filled;
+  const isStep4Locked = !isStep0Filled || !isStep1Filled || !isStep2Filled;
+
+  const LockBadge = () => (
+    <span
+      style={{
+        borderRadius: '8px',
+        background: '#E9E9EE',
+        display: 'flex',
+        padding: '6px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '5px',
+        marginLeft: '8px'
+      }}
+      aria-label="Locked"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+
   // helper: clear a single error key when value becomes valid
   const clearErrorIfValid = (key: string, isValid: boolean) => {
     setErrors((prev) => {
@@ -104,16 +149,6 @@ const CreatePricePlan = React.forwardRef<
       }
       return prev;
     });
-  };
-
-  // 👉 NEW: pure check that does NOT mutate state
-  const isStep0Filled = () => {
-    const ok =
-      !!planName.trim() &&
-      !!billingFrequency &&
-      !!selectedProductName &&
-      !!paymentMethod;
-    return ok;
   };
 
   // Check if any values have been changed from initial state
@@ -415,61 +450,40 @@ const CreatePricePlan = React.forwardRef<
     }
   };
 
+  // Allow navigation to any step (no blocking), but steps may be locked
   const canNavigateTo = async (targetIndex: number): Promise<boolean> => {
+    // Always allow backward navigation
     if (targetIndex <= currentStep) return true;
 
-    if (targetIndex >= 1 && !validateStep0()) {
-      setCurrentStep(0);
-      return false;
+    // For forward navigation, create rate plan if needed (step 2+)
+    if (targetIndex >= 2 && isStep0Filled && isStep1Filled) {
+      const ok = await ensureRatePlanCreated();
+      if (!ok) return false;
     }
 
-    if (targetIndex >= 2) {
-      if (selectedMetricId === null) {
-        setErrors({ billableMetric: "This is required field" });
-        setCurrentStep(1);
-        return false;
-      }
-      const ok = await ensureRatePlanCreated();
-      if (!ok) {
-        setCurrentStep(1);
-        return false;
-      }
-    }
     return true;
   };
 
-  // ===== NEW: persist the step we are LEAVING when navigating via sidebar =====
+  // Allow sidebar navigation without validation blocking
   const onStepClick = async (index: number) => {
     if (index === currentStep) return;
 
-    // First, ensure we are allowed to move forward (creates plan if needed)
+    // Allow navigation (creates plan if needed)
     const ok = await canNavigateTo(index);
     if (!ok) return;
 
-    // Now, persist the current step before switching away
+    // Try to persist current step data (best effort, don't block navigation)
     try {
-      if (currentStep === 2) { // leaving Pricing
-        const v = validatePricingStep();
-        if (!v.isValid) {
-          setErrors(v.errors);
-          setCurrentStep(2);
-          return;
-        }
-        if (pricingRef.current && ratePlanId) {
-          setSaving(true);
-          const success = await pricingRef.current.save();
-          setSaving(false);
-          if (!success) {
-            setCurrentStep(2);
-            return;
-          }
-        }
-      } else if (currentStep === 3) { // leaving Extras
-        if (extrasRef.current && ratePlanId) {
-          setSaving(true);
-          await extrasRef.current.saveAll(ratePlanId);
-          setSaving(false);
-        }
+      if (currentStep === 2 && pricingRef.current && ratePlanId) {
+        // Save pricing without validation blocking
+        setSaving(true);
+        await pricingRef.current.save();
+        setSaving(false);
+      } else if (currentStep === 3 && extrasRef.current && ratePlanId) {
+        // Save extras
+        setSaving(true);
+        await extrasRef.current.saveAll(ratePlanId);
+        setSaving(false);
       }
     } catch (e) {
       console.error("Sidebar navigation save failed:", e);
@@ -1002,39 +1016,67 @@ const CreatePricePlan = React.forwardRef<
                   <form className="rate-np-form" onSubmit={(e) => e.preventDefault()}>
                     <div className="rate-np-form-section">
                       <section>
-                        <div className="rate-np-section-header">
+                        <div className="rate-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
                           <h3 className="rate-np-section-title">{sectionHeading.toUpperCase()}</h3>
+                          {((currentStep === 1 && isStep1Locked) ||
+                            (currentStep === 2 && isStep2Locked) ||
+                            (currentStep === 3 && isStep3Locked) ||
+                            (currentStep === 4 && isStep4Locked)) && <LockBadge />}
                         </div>
                         {renderStepContent()}
                       </section>
                     </div>
 
                     {/* Footer actions */}
-                    <div className="rate-np-form-footer">
-                      <div className="rate-np-btn-group rate-np-btn-group--back">
-                        {currentStep > 0 && (
-                          <SecondaryButton type="button" onClick={handleBack}>
-                            Back
-                          </SecondaryButton>
-                        )}
-
-                      </div>
-
-                      <div className="rate-np-btn-group rate-np-btn-group--next">
-                        <PrimaryButton
-                          type="button"
-                          onClick={handleNext}
-                          disabled={saving}
+                    <div className="rate-np-form-footer" style={{ position: 'relative' }}>
+                      {((currentStep === 1 && isStep1Locked) ||
+                        (currentStep === 2 && isStep2Locked) ||
+                        (currentStep === 3 && isStep3Locked) ||
+                        (currentStep === 4 && isStep4Locked)) ? (
+                        // Show hint when step is locked
+                        <div
+                          className="rate-np-footer-hint"
+                          style={{
+                            position: 'absolute',
+                            left: '0',
+                            bottom: '12px',
+                            paddingLeft: '24px',
+                            color: '#8C8F96',
+                            fontSize: 14,
+                            pointerEvents: 'none',
+                            whiteSpace: 'nowrap'
+                          }}
                         >
-                          {saving
-                            ? currentStep === steps.length - 1
-                              ? "Submitting..."
-                              : "Saving..."
-                            : currentStep === steps.length - 1
-                              ? "Create Rate Plan"
-                              : "Save & Next"}
-                        </PrimaryButton>
-                      </div>
+                          Fill the previous steps to unlock this step
+                        </div>
+                      ) : (
+                        // Show normal buttons when unlocked
+                        <>
+                          <div className="rate-np-btn-group rate-np-btn-group--back">
+                            {currentStep > 0 && (
+                              <SecondaryButton type="button" onClick={handleBack}>
+                                Back
+                              </SecondaryButton>
+                            )}
+                          </div>
+
+                          <div className="rate-np-btn-group rate-np-btn-group--next">
+                            <PrimaryButton
+                              type="button"
+                              onClick={handleNext}
+                              disabled={saving}
+                            >
+                              {saving
+                                ? currentStep === steps.length - 1
+                                  ? "Submitting..."
+                                  : "Saving..."
+                                : currentStep === steps.length - 1
+                                  ? "Create Rate Plan"
+                                  : "Save & Next"}
+                            </PrimaryButton>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </form>
                 </div>
