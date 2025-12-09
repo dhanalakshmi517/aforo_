@@ -1,246 +1,264 @@
 @import "../../Variables/Variables.css";
 
 :root {
-  /* Outer gaps */
-  --np-gap-left: 100px;
-  --np-gap-right: 100px;
+  --editprod-np-gap-left: 120px;
+  --editprod-np-gap-right: 120px;
   --np-gap-top: 10px;
   --np-gap-bottom: 15px;
-
- 
 }
-/* Ensure full page height */
-html, body, #root{ 
+
+html, body, #root { 
   height: 100%; 
   margin: 0;
   padding: 0;
   overflow: visible; 
 }
+
 .create-product-page { 
   min-height: 100vh; 
-  background: var(--color-neutral-white);
-  /* padding-bottom: 40px;  */
+  background: #f7f8fb;
 }
 
-/* Viewport fills screen */
-.edit-np-viewport {
+/* Viewport */
+.editprod-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
-  padding: 0;
+  padding: var(--np-gap-top) var(--editprod-np-gap-right) 30px var(--editprod-np-gap-left);
   box-sizing: border-box;
-  height: calc(100vh - 40px);
+  height: calc(100vh - 20px);
   width: 100%;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
 }
 
-.edit-np-label{
-  color: var(--color-neutral-1700);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  line-height: var(--line-height-body-md);
-  user-select: none;
-
-}
 /* Card */
-.edit-np-card {
-  margin-bottom: 0;
-  padding-bottom: 0;
+.editprod-np-card {
+  margin-bottom: 40px;
+  padding-bottom: 32px;
   background: var(--color-neutral-white);
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 18px 54px rgba(0,0,0,0.10), 0 2.254px 43.336px rgba(0,0,0,0.02);
   width: 100%;
-  box-sizing: border-box;
-  position: relative;
+  height: calc(100vh - 20px);
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
 }
 
-
-
-
-
-/* Grid fills height */
-.edit-np-grid{
+/* Grid */
+.editprod-np-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
   flex: 1;
   min-height: 0;
 }
 
-/* ===== Rail with vertical connector line ===== */
-.edit-np-rail{
-  background: var(--color-neutral-white);
-  align-self: stretch;
+.editprod-np-grid > div:first-child {
+  margin-top: 20px;
+}
+
+/* Rail */
+.editprod-np-rail {
+  background: var(--color-neutral-100);
   padding: 16px;
-  box-sizing: border-box;
   border-right: 1px solid var(--color-neutral-300);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Steps container */
+.editprod-np-steps {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 18px;
+  padding: 8px 8px 8px 0;
+  background-color: #f8f9fb;
+}
+
+/* Step */
+.editprod-np-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 12px;
+  background: transparent;
+  border: 0;
+  border-left: 3px solid transparent;
+  width: 100%;
+  cursor: pointer;
+}
+
+.editprod-np-step__title {
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+  margin-bottom: 2px;
+}
+
+.editprod-np-step.active {
+  border-left-color: var(--color-primary-800);
+}
+
+.editprod-np-step.active .editprod-np-step__title {
+  color: var(--color-neutral-black);
+  font-weight: 500;
+}
+
+/* Main */
+.editprod-np-main { 
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 20px);
+  padding-bottom: var(--np-gap-bottom);
+  overflow-x: hidden;
+}
+
+.editprod-np-main__inner {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.editprod-np-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.editprod-np-form {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  padding-bottom: 20px;
+  gap: 2px;
 }
 
-/* Steps container */
-.edit-np-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 8px 8px 8px 0;
-  position: relative;
-}
+/* Scrollbars */
+.editprod-np-form::-webkit-scrollbar { width: 6px; }
+.editprod-np-form::-webkit-scrollbar-thumb { background-color:#C3C2D0; border-radius:2px; }
 
-/* Each step card */
-.edit-np-step {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px 4px;
-  background-color: var(--color-neutral-white);
-  border-left: 2px solid transparent;
-  cursor: pointer;
-  transition: background-color .2s ease;
-}
-
-.edit-np-step:hover {
-  background-color: var(--color-neutral-white);
-}
-
-.edit-np-step.active {
-  border-left-width: 3px;
-  border-left-color: var(--color-primary-800);
-  background-color: var(--color-neutral-white);
-}
-
-.edit-np-step__title {
-  color: var(--color-neutral-800);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-lg);
-  transition: color 0.2s ease;
-}
-
-.edit-np-step.active .edit-np-step__title {
-  color: var(--color-neutral-1700);
-  font-weight: 600;
-}
-
-
-
-.edit-np-form {
-  display: flex;
-  flex-direction: column;
-  /* Let the form size naturally so the whole page scrolls */
-  min-height: 0;
-  overflow: visible;
-  gap: 16px;
-  padding-bottom: 80px;
+/* Form section */
+.editprod-np-form-section {
   flex: 1;
-  width: 100%;
-  max-width: 100%;
-  margin-top: 30px;
-  margin-left: 0;
-  /* no extra top margin */
-
-  /* === Custom scrollbars (match NewProduct) === */
-}
-
-.edit-np-form::-webkit-scrollbar{width:6px;}
-.edit-np-form::-webkit-scrollbar-track{background:transparent;}
-.edit-np-form::-webkit-scrollbar-thumb{background-color:#C3C2D0;border-radius:2px;}
-.edit-np-form::-webkit-scrollbar-thumb:hover{background-color:#A9A8B5;}
-.edit-np-form::-webkit-scrollbar-thumb:active{background-color:#878694;}
-.edit-np-form{scrollbar-width:thin;scrollbar-color:var(--color-neutral-400) transparent;}
-
-/* dotted thumb for inner sections */
-.edit-np-form-section::-webkit-scrollbar{width:6px;}
-.edit-np-form-section::-webkit-scrollbar-track{background:transparent;}
-.edit-np-form-section::-webkit-scrollbar-thumb{background-color:transparent;border-radius:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-y;background-position:center;background-size:4px 49px;}
-.edit-np-form-section::-webkit-scrollbar-thumb:hover{background-color:transparent;}
-.edit-np-form-section::-webkit-scrollbar-thumb:active{background-color:transparent;}
-.edit-np-form-section{scrollbar-width:thin;scrollbar-color:transparent transparent;}
-.edit-np-form-section {
-  flex: 1;
-  min-height: 0;
-  overflow: visible;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
+  overflow-y: auto;
   padding-bottom: 15px;
 }
 
-
-/* Content column ensures footer pushes to bottom */
-.edit-np-content {
-  overflow-y: visible;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-neutral-400) transparent;
-
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+.editprod-np-section-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  margin: 4px -24px 18px -24px;
+  padding: 0 24px;
 }
 
-.edit-np-content::-webkit-scrollbar {
-  width: 6px;
-}
-.edit-np-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-.edit-np-content::-webkit-scrollbar-thumb {
-  background: transparent;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: repeat-y;
-  background-position: center;
-  border-radius: 3px;
+.editprod-np-section-title{
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-h6);
+  font-weight: 400;
+  line-height: var(--line-height-heading-h6);
+  text-transform: uppercase;
 }
 
-/* Footer actions on a full-bleed line */
-.edit-np-form-footer {
+/* Footer */
+.editprod-np-form-footer {
+  position: relative;
+  margin: 0 -24px;
+  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  margin-top: auto;
   border-top: 1px solid var(--color-neutral-300);
+  margin-top: auto;
 }
 
-.edit-np-btn-group { 
+.editprod-np-btn-group { 
   display: flex;
   gap: 12px;
 }
 
-/* Back button group - align to left */
-.edit-np-btn-group--back {
-  margin-right: 12px; /* reset so it sits next to content */
+.editprod-np-btn-group--back { margin-right: auto; }
+.editprod-np-btn-group--next { margin-left: auto; }
+
+/* Buttons */
+.editprod-np-btn {
+  user-select: none;
+  height: 40px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-
-
-/* responsive */
-@media (max-width: 1200px){
-  :root{ --np-gap-left:72px; --np-gap-right:72px; }
+.editprod-np-btn--primary { 
+  background-color: var(--color-primary-700);
+  color: white;
 }
-@media (max-width: 900px){
-  :root{ --np-gap-left:48px; --np-gap-right:48px; }
+
+.editprod-np-btn--ghost { 
+  background-color: var(--color-primary-000);
+  border: 1px solid var(--color-neutral-400);
+  color: var(--color-primary-800);
 }
+
+/* Product Icon styles */
+.editprod-np-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.np-icon-field-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-neutral-300);
+  width: 456px;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.np-icon-actions {
+  display: flex;
+  gap: 3px;
+  margin-left: 190px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  :root { 
+    --np-gap-left: 72px; 
+    --np-gap-right: 72px; 
+  }
+}
+
+@media (max-width: 900px) {
+  :root { 
+    --np-gap-left: 48px; 
+    --np-gap-right: 48px; 
+  }
+}
+
 @media (max-width: 640px){
   :root{
-    --np-gap-top:24px; --np-gap-bottom:15px;
-    --np-gap-left:16px; --np-gap-right:16px;
-    --np-rail-w:100%;
+    --np-gap-top:24px; 
+    --np-gap-bottom:15px;
+    --np-gap-left:16px; 
+    --np-gap-right:16px;
   }
-  .np-grid{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-  .np-form{ gap:12px; }
+  .editprod-np-grid { 
+    grid-template-columns: 1fr; 
+    grid-template-rows: auto 1fr; 
+  }
 }
-
-

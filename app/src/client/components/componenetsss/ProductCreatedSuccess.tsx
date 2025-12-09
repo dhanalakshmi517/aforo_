@@ -77,9 +77,9 @@ const ProductCreatedSuccess: React.FC<Props> = ({
           To start selling, please complete the next steps:
         </p>
         <ul className="pcs-steps">
-          <li>Add billable metrics to track usage.</li>
-          <li>Create rate plans for those metrics.</li>
-          <li>Market &amp; sell to move the product live.</li>
+          <li>● Add billable metrics to track usage.</li>
+          <li>● Create rate plans for those metrics.</li>
+          <li>● Market &amp; sell to move the product live.</li>
         </ul>
 
         <PrimaryButton

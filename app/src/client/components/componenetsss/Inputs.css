@@ -29,7 +29,7 @@
   flex-direction: column;
   gap: 4px; /* Gap between label and control */
   width: 456px;
-  margin-bottom: 15px !important  ; /* Increased bottom margin for better spacing between fields */
+  margin-bottom: 10px !important  ; /* Decreased bottom margin for tighter spacing between fields */
 }
 
 .if-label {
@@ -127,11 +127,32 @@
 }
 
 .if-help { 
-  font-size: 12px; 
-  color: var(--if-text-muted);
-  display: block;
+color: var(--color-neutral-1000);
+
+/* body/xs/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-xs, 16px); /* 160% */  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   margin: 0;
   padding: 0;
+}
+
+.if-help::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"%3E%3Cpath d="M5.59961 7.6001V5.6001M5.59961 3.6001H5.60461M10.5996 5.6001C10.5996 8.36152 8.36103 10.6001 5.59961 10.6001C2.83819 10.6001 0.599609 8.36152 0.599609 5.6001C0.599609 2.83867 2.83819 0.600098 5.59961 0.600098C8.36103 0.600098 10.5996 2.83867 10.5996 5.6001Z" stroke="%231D7AFC" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .if-error { 
@@ -207,6 +228,26 @@ select.if-select:focus-visible,
   color: var(--color-neutral-600);
   cursor: not-allowed;
   border-color: var(--color-neutral-200) !important;
+}
+
+/* Placeholder option styling */
+.if-select option:first-child,
+.if-select option[value=""] {
+overflow: hidden;
+color: var(--color-neutral-500);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+/* Styling for selected placeholder */
+.if-select:invalid {
+  color: var(--color-neutral-600);
 }
 
 /* ---------- Textarea ---------- */

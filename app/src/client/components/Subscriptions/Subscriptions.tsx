@@ -47,12 +47,9 @@ const PaymentPill: React.FC<{ value?: string }> = ({ value }) => {
     return (
       <span className="pill pill--prepaid">
         <span className="pill-icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <g clipPath="url(#clip0_prepaid)">
-              <path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#1A2126" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </g>
-            <defs><clipPath id="clip0_prepaid"><rect width="16" height="16" fill="white" /></clipPath></defs>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+  <path d="M11.3263 6.1801C11.9565 6.41505 12.5173 6.80512 12.9568 7.31423C13.3963 7.82334 13.7003 8.43506 13.8408 9.09281C13.9812 9.75056 13.9535 10.4331 13.7603 11.0773C13.5671 11.7216 13.2145 12.3066 12.7352 12.7785C12.2559 13.2504 11.6654 13.5938 11.0183 13.7769C10.3711 13.9601 9.68821 13.9771 9.03273 13.8264C8.37725 13.6757 7.77035 13.3622 7.26816 12.9148C6.76597 12.4674 6.3847 11.9006 6.15961 11.2668M3.93294 3.26676H4.59961V5.93343M10.4063 8.5201L10.8729 8.99343L8.99294 10.8734M8.59961 4.6001C8.59961 6.80924 6.80875 8.6001 4.59961 8.6001C2.39047 8.6001 0.599609 6.80924 0.599609 4.6001C0.599609 2.39096 2.39047 0.600098 4.59961 0.600098C6.80875 0.600098 8.59961 2.39096 8.59961 4.6001Z" stroke="#7B97AE" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
         </span>
         Pre-paid
       </span>
@@ -62,15 +59,15 @@ const PaymentPill: React.FC<{ value?: string }> = ({ value }) => {
     return (
       <span className="pill pill--postpaid">
         <span className="pill-icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M4.2126 13.8002C3.09153 13.8002 2.14253 13.4117 1.3656 12.6348C0.588662 11.8579 0.200195 10.9089 0.200195 9.7878C0.200195 9.31713 0.280462 8.85973 0.440995 8.4156C0.601529 7.97146 0.831529 7.56893 1.131 7.208L3.53833 4.31282C3.79189 4.00787 3.84128 3.58189 3.66422 3.22701L2.8757 1.64665C2.54398 0.981803 3.02749 0.200195 3.77051 0.200195H10.2299C10.9729 0.200195 11.4564 0.981804 11.1247 1.64666L10.3362 3.22701C10.1591 3.58189 10.2085 4.00787 10.4621 4.31282L12.8694 7.208C13.1689 7.56893 13.3989 7.97146 13.5594 8.4156C13.7199 8.85973 13.8002 9.31713 13.8002 9.7878C13.8002 10.9089 13.4097 11.8579 12.6286 12.6348C11.8477 13.4117 10.9007 13.8002 9.7878 13.8002H4.2126Z" fill="var(--icon-color-darkest, #1A2126)" />
-          </svg>
+         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+  <path d="M4.0124 13.6C2.89133 13.6 1.94233 13.2115 1.1654 12.4346C0.388467 11.6577 0 10.7087 0 9.5876C0 9.11693 0.0802666 8.65953 0.2408 8.2154C0.401333 7.77127 0.631333 7.36873 0.9308 7.0078L3.33813 4.11263C3.5917 3.80767 3.64109 3.38169 3.46402 3.02681L2.67551 1.44646C2.34378 0.781608 2.8273 0 3.57031 0H10.0297C10.7727 0 11.2562 0.781609 10.9245 1.44646L10.136 3.02681C9.95891 3.38169 10.0083 3.80767 10.2619 4.11263L12.6692 7.0078C12.9687 7.36873 13.1987 7.77127 13.3592 8.2154C13.5197 8.65953 13.6 9.11693 13.6 9.5876C13.6 10.7087 13.2095 11.6577 12.4284 12.4346C11.6475 13.2115 10.7005 13.6 9.5876 13.6H4.0124ZM6.8 9.7922C6.40107 9.7922 6.06033 9.65093 5.7778 9.3684C5.49513 9.08587 5.3538 8.74513 5.3538 8.3462C5.3538 7.94713 5.49513 7.60633 5.7778 7.3238C6.06033 7.04127 6.40107 6.9 6.8 6.9C7.19893 6.9 7.53967 7.04127 7.8222 7.3238C8.10487 7.60633 8.2462 7.94713 8.2462 8.3462C8.2462 8.74513 8.10487 9.08587 7.8222 9.3684C7.53967 9.65093 7.19893 9.7922 6.8 9.7922ZM4.57702 2.54864C4.74669 2.88664 5.09253 3.1 5.47073 3.1H8.13466C8.51401 3.1 8.86069 2.88535 9.0298 2.54578L9.556 1.48916C9.62221 1.35619 9.52551 1.2 9.37697 1.2H4.22419C4.07537 1.2 3.97868 1.35673 4.04544 1.48973L4.57702 2.54864ZM4.0124 12.4H9.5876C10.3733 12.4 11.0385 12.1264 11.583 11.5792C12.1277 11.032 12.4 10.3681 12.4 9.5876C12.4 9.25733 12.3433 8.93713 12.23 8.627C12.1167 8.31673 11.9549 8.03647 11.7446 7.7862L9.14287 4.66028C8.95287 4.43201 8.67125 4.3 8.37426 4.3H5.2434C4.94775 4.3 4.66726 4.43082 4.47726 4.65732L1.863 7.7738C1.65273 8.02407 1.48967 8.3064 1.3738 8.6208C1.25793 8.93507 1.2 9.25733 1.2 9.5876C1.2 10.3681 1.4736 11.032 2.0208 11.5792C2.568 12.1264 3.23187 12.4 4.0124 12.4Z" fill="#7B97AE"/>
+</svg>
         </span>
         Post-paid
       </span>
     );
   }
-  return <span className="pill pill--unknown">—</span>;
+  return <span className="pill--">—</span>;
 };
 
 // Small rate plan chip
@@ -89,7 +86,7 @@ const RatePlanChip: React.FC<{ name?: string }> = ({ name }) => (
 );
 
 /* ---------- NEW: logo resolution (same approach as Customers.tsx) ---------- */
-const FILE_HOST = 'http://43.206.110.213:8081';
+const FILE_HOST = 'http://44.201.19.187:8081/';
 const absolutizeUpload = (path: string) => {
   const clean = (path || '').replace(/\\/g, '/').trim();
   if (!clean) return '';
@@ -162,12 +159,17 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   const fetchLookups = async () => {
     try {
       const [custRaw, plans] = await Promise.all([Api.getCustomers?.(), Api.getRatePlans?.()]);
+      console.log('📦 Raw customers from API:', custRaw);
       const custWithLogos: CustomerLite[] = await Promise.all(
-        (Array.isArray(custRaw) ? custRaw : []).map(async (c: any) => ({
-          ...c,
-          __resolvedLogoSrc: await resolveLogoSrc(c.companyLogoUrl),
-        }))
+        (Array.isArray(custRaw) ? custRaw : []).map(async (c: any) => {
+          console.log('Processing customer:', c.customerName, 'companyLogoUrl:', c.companyLogoUrl);
+          return {
+            ...c,
+            __resolvedLogoSrc: await resolveLogoSrc(c.companyLogoUrl),
+          };
+        })
       );
+      console.log('✅ Customers with resolved logos:', custWithLogos);
       setCustomers(custWithLogos);
       setRatePlans(Array.isArray(plans) ? plans : []);
     } catch (e) {
@@ -303,7 +305,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         title="Purchases"
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
-        primaryLabel="New Purchase"
+        primaryLabel="+ New Purchase"
         onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
         onFilterClick={() => { }}
         searchDisabled={searchDisabled}
@@ -317,7 +319,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         <table className="customers-table">
           <thead>
             <tr>
-              <th>Customer</th>
+              <th>Customer Name</th>
               <th>Rate Plan</th>
               <th>Payment Type</th>
               <th>Purchased On</th>

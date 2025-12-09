@@ -7,7 +7,7 @@
     top: 0;
     width: 100%;
     height: 70px;
-    background: var(--color-neutral-white);
+    background: var(--color-neutral-50);
     border: 1px solid var(--color-neutral-200);
     display: flex;
     align-items: center;
@@ -35,7 +35,7 @@
    height: 28px;
     border-radius: var(--border-radius-sm);
     background: var(--color-neutral-white);
-    border: 1px solid var(--color-primary-800);
+    border: 1px solid var(--color-neutral-200);
     display: inline-flex; align-items: center; justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -44,7 +44,7 @@
   
   /* back tile hover state */
   .af-topbar__back:hover:not(:disabled){
-    border-color: var(--color-primary-800);
+    border-color: var(--color-neutral-800);
   }
   
   /* back tile active/clicked state */
@@ -68,9 +68,9 @@
     color: var(--color-neutral-1700);
 
 font-family: var(--font-family-primary);
-font-size: var(--font-size-h4);
+font-size:16px;
 font-style: normal;
-font-weight: 500;
+font-weight: 700;
 line-height: var(--line-height-heading-h4); }
   
   /* Spinner */
@@ -89,7 +89,39 @@ line-height: var(--line-height-heading-h4); }
 
   /* right side */
   .af-topbar__right{ display:flex; align-items:center; gap:8px; }
-  
+
+  /* Icon buttons */
+  .af-topbar__icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--border-radius-sm);
+    background: var(--color-neutral-white);
+box-shadow: 0 0 8px 10px var(--shadow-shadow-1, #EEF1F6);    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* Add margin to first icon button to create gap from action buttons */
+  .af-topbar__icon-btn:first-of-type {
+    margin-right: 16px;
+  }
+
+  .af-topbar__icon-btn:hover:not(:disabled) {
+  box-shadow: 0 0 14px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  .af-topbar__icon-btn:active:not(:disabled) {
+    border-color: var(--color-neutral-400);
+    background-color: var(--color-neutral-white);
+  }
+
+  .af-topbar__icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   /* pills */
   .af-topbar__btn{
     display: inline-flex;
