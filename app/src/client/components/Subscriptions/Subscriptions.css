@@ -94,10 +94,10 @@
 }
 
 .subscriptions-table td.actions-cell,
-.subscriptions-table th.actions-cell { text-align: center; width: 160px; }
+.subscriptions-table th.actions-cell { text-align: center; width: 160px; padding: 18px 8px; }
 
 /* --------- Customer cell (image + initials + info) ---------- */
-.sub-customer-cell .cell-flex { display: flex; align-items: center; gap: 12px; }
+.sub-customer-cell .cell-flex { display: flex; align-items: center; gap: 2px; }
 
 /* same structure as Customers.css */
 .customer-logo {
@@ -115,6 +115,28 @@
 .cust-block { display: flex; flex-direction: column; gap: 2px; }
 .cust-name { color: var(--color-neutral-1700); font-weight: 600; }
 .cust-email { color: var(--color-neutral-700); }
+
+/* --------- Date column (Purchased On) ---------- */
+.subscriptions-table td:nth-child(4) {
+  color: var(--color-neutral-1400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 240px;
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* --------- Status column ---------- */
+.subscriptions-table td:nth-child(5) {
+  padding: 18px 8px;
+}
+
+
 
 /* --------- Actions ---------- */
 .action-buttons { display: flex; gap: 8px; justify-content: center; align-items: center; }
@@ -142,18 +164,21 @@
 /* --------- Payment pills ---------- */
 .pill {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-family: var(--font-family-primary);
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--color-neutral-900);
+  height:24px;
+  padding: 4px 8px;
+  border-radius: 20px;
+color: var(--color-neutral-1000);
+
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm);
+font-weight: 400;
+line-height: var(--line-height-body-sm);
   background: var(--color-neutral-100);
+  border:0.4px solid var(--color-neutral-500)
 }
 .pill-icon { display: inline-flex; }
-.pill--prepaid  { background: #EEF2FF; }
-.pill--postpaid { background: #F3F4F6; }
-.pill--unknown  { background: #F1F5F9; }
+.pill--prepaid  { background: var(--color-neutral-white); }
+.pill--postpaid { background: var(--color-neutral-white); }
 
 /* --------- Status badge ---------- */
 .status-badge {

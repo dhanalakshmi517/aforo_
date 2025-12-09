@@ -1,5 +1,6 @@
 import React from 'react';
 import './EditReview.css';
+import ReviewComponent, { ReviewRow } from '../../componenetsss/ReviewComponent';
 
 interface EditReviewProps {
   customerName: string;
@@ -22,29 +23,19 @@ const EditReview: React.FC<EditReviewProps> = ({
   confirmLabel = 'Save Draft',
   confirmLoading = false,
 }) => {
+  const subscriptionRows: ReviewRow[] = [
+    { label: 'Customer', value: customerName },
+    { label: 'Product', value: productName },
+    { label: 'Rate Plan', value: ratePlanName },
+    { label: 'Payment Type', value: paymentType },
+  ];
+
   return (
     <div className="edit-review-container">
-      <h4 className="sub-review-title">SUBSCRIPTION DETAILS</h4>
-      <table className="sub-review-table">
-        <tbody>
-          <tr>
-            <td>Customer</td>
-            <td>{customerName}</td>
-          </tr>
-          <tr>
-            <td>Product</td>
-            <td>{productName}</td>
-          </tr>
-          <tr>
-            <td>Rate Plan</td>
-            <td>{ratePlanName}</td>
-          </tr>
-          <tr>
-            <td>Payment Type</td>
-            <td>{paymentType}</td>
-          </tr>
-        </tbody>
-      </table>
+      <ReviewComponent 
+        title="SUBSCRIPTION DETAILS"
+        rows={subscriptionRows}
+      />
       
       {/* <div className="edit-review-actions">
         <button 

@@ -371,6 +371,7 @@ html, body, #root{
 .customer-np-btn-group { 
   display: flex;
   gap: 12px;
+  margin-top: -10px;
 }
 
 /* Back button group - align to left */

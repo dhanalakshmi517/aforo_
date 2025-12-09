@@ -84,7 +84,8 @@
   padding: 0;
   background: transparent;
 }
-.rp-header-search.has-value .rp-search-input { width: auto; flex: 1 0 0; }
+.rp-header-search.has-value .rp-search-input { width: auto; flex: 1 0 0;   border: none;
+}
 .rp-search-input::placeholder { color: var(--text-placeholder, #C3C2D0); }
 .rp-header-search.is-disabled .rp-search-input,
 .rp-header-search.is-disabled .rp-search-input::placeholder { color: var(--color-neutral-400); }
@@ -130,6 +131,8 @@
 /* Adjust input padding when there's a value to prevent text overlap */
 .rp-header-search.has-value .rp-search-input {
   padding-right: 24px;
+    border: none;
+
 }
 
 /* ================= Filter button ================= */

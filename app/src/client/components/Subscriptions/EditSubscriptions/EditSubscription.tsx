@@ -1,15 +1,23 @@
 import * as React from 'react';
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import TopBar from '../../componenetsss/TopBar';
-import EditModal from '../../componenetsss/EditModal';
 import EditPopUp from '../../componenetsss/EditPopUp';
 import { SelectField, TextareaField } from '../../componenetsss/Inputs';
 import { useToast } from '../../componenetsss/ToastProvider';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditReview from './EditReview';
-import './EditSubscription.css';
-import { Api, Product, RatePlan, Customer, Subscription as SubscriptionType } from '../api';
+
+import './EditSubscription.css'; 
+import '../../componenetsss/SkeletonForm.css';
+
+import {
+  Api,
+  Product,
+  RatePlan,
+  Customer,
+  Subscription as SubscriptionType,
+} from '../api';
 
 type ActiveTab = 'details' | 'review';
 
@@ -21,21 +29,32 @@ interface EditSubscriptionProps {
 }
 
 const steps = [
-  { id: 1, title: 'Subscription Details' },
+  { id: 1, title: 'Purchase Details' },
   { id: 2, title: 'Review & Confirm' }
 ];
 
-const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, onRefresh }) => {
+const EditSubscription: React.FC<EditSubscriptionProps> = ({
+  onClose,
+  initial,
+  onRefresh,
+}) => {
   const { showToast } = useToast();
+
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
 
-  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(
+    null,
+  );
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null,
+  );
   const [selectedProductName, setSelectedProductName] = useState('');
-  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(
+    null,
+  );
   const [selectedRatePlanName, setSelectedRatePlanName] = useState('');
   const [planDescription, setPlanDescription] = useState('');
   const [paymentType, setPaymentType] = useState<string>('');
@@ -43,41 +62,41 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>('details');
 
-  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [submissionStatus, setSubmissionStatus] = useState<
+    'idle' | 'saving' | 'success' | 'error'
+  >('idle');
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Update hasChanges when any form field changes
+  // Detect changes
   useEffect(() => {
     if (initial) {
-      const formChanged = 
+      const formChanged =
         selectedCustomerId !== initial.customerId ||
         selectedProductId !== initial.productId ||
         selectedRatePlanId !== initial.ratePlanId ||
         paymentType !== initial.paymentType ||
         planDescription !== (initial.adminNotes || '');
-      
+
       setHasChanges(formChanged);
     } else {
-      // For new subscriptions, check if any field has a value
-      const anyFieldFilled = 
+      const anyFieldFilled =
         selectedCustomerId !== null ||
         selectedProductId !== null ||
         selectedRatePlanId !== null ||
         paymentType !== '' ||
         planDescription !== '';
-      
+
       setHasChanges(anyFieldFilled);
     }
   }, [
-    selectedCustomerId, 
-    selectedProductId, 
-    selectedRatePlanId, 
-    paymentType, 
-    planDescription, 
-    initial
+    selectedCustomerId,
+    selectedProductId,
+    selectedRatePlanId,
+    paymentType,
+    planDescription,
+    initial,
   ]);
 
   // Load dropdowns
@@ -130,21 +149,22 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
     }
   }, [selectedRatePlanId, ratePlans]);
 
-  // Helpers to mirror EditProduct structure
+  // Step nav
   const goToStep = (index: number) => {
     setCurrentStep(index);
     setActiveTab(index === 0 ? 'details' : 'review');
   };
 
-  const canSubmit = useMemo(() => {
-    // Minimal validation for details step
-    return Boolean(
-      (selectedCustomerId ?? null) &&
-      (selectedProductId ?? null) &&
-      (selectedRatePlanId ?? null) &&
-      paymentType
-    );
-  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType]);
+  const canSubmit = useMemo(
+    () =>
+      Boolean(
+        (selectedCustomerId ?? null) &&
+          (selectedProductId ?? null) &&
+          (selectedRatePlanId ?? null) &&
+          paymentType,
+      ),
+    [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType],
+  );
 
   const saveChanges = async (): Promise<boolean> => {
     if (!initial?.subscriptionId) return false;
@@ -155,10 +175,10 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
         ratePlanId: selectedRatePlanId ?? initial.ratePlanId,
         paymentType: paymentType || initial.paymentType,
         adminNotes: planDescription,
-        status: 'ACTIVE' as const
+        status: 'ACTIVE' as const,
       };
       await Api.updateSubscription(initial.subscriptionId, payload as any);
-      if (onRefresh) onRefresh();
+      onRefresh?.();
       return true;
     } catch (e) {
       console.error('Failed to save changes', e);
@@ -168,12 +188,10 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
 
   const handleNextStep = async () => {
     if (activeTab === 'details') {
-      // move to review if valid
       if (!canSubmit) return;
       goToStep(1);
       return;
     }
-    // review -> save changes
     const ok = await saveChanges();
     if (ok) onClose();
   };
@@ -189,35 +207,33 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
     if (savingDraft || !initial?.subscriptionId) return false;
     setSavingDraft(true);
     try {
-      // Save all form field changes without modifying the status
       const payload = {
         customerId: selectedCustomerId ?? initial.customerId,
         productId: selectedProductId ?? initial.productId,
         ratePlanId: selectedRatePlanId ?? initial.ratePlanId,
         paymentType: paymentType || initial.paymentType,
-        adminNotes: planDescription
-        // Don't include status to keep it unchanged
+        adminNotes: planDescription,
       };
       await Api.updateSubscriptionDraft(initial.subscriptionId, payload as any);
       setSubmissionStatus('success');
-      
+
       if (!skipToast) {
         showToast({
           kind: 'success',
           title: 'Draft Saved',
-          message: 'Your changes have been saved as a draft.'
+          message: 'Your changes have been saved as a draft.',
         });
       }
       return true;
     } catch (e) {
       console.error('Failed to save draft', e);
       setSubmissionStatus('error');
-      
+
       if (!skipToast) {
         showToast({
           kind: 'error',
           title: 'Save Failed',
-          message: 'Failed to save draft. Please try again.'
+          message: 'Failed to save draft. Please try again.',
         });
       }
       return false;
@@ -226,19 +242,21 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
     }
   };
 
-  // Handle back button click - show save draft modal
   const handleHeaderBack = useCallback(() => {
-    setShowExitModal(true);
-  }, []);
+    if (hasChanges) {
+      setShowExitModal(true);
+    } else {
+      onClose();
+    }
+  }, [hasChanges, onClose]);
 
-  // Save draft and close
   const handleSaveDraft = async (): Promise<boolean> => {
     const saved = await saveDraft({ skipToast: true });
     if (saved) {
       showToast({
         kind: 'success',
         title: 'Changes saved',
-        message: 'Your changes have been saved successfully.'
+        message: 'Your changes have been saved successfully.',
       });
       onClose();
       return true;
@@ -246,7 +264,6 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
     return false;
   };
 
-  // Handle exit without saving - used by the cancel button in the popup
   const handleExitWithoutSaving = useCallback(() => {
     setShowExitModal(false);
     onClose();
@@ -254,207 +271,242 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({ onClose, initial, o
 
   return (
     <>
-      {/* Header matches EditProduct pattern */}
-      <TopBar title={'Edit Subscription'} onBack={handleHeaderBack} />
+      {/* TopBar stays as-is */}
+      <TopBar title="Edit Subscription" onBack={handleHeaderBack} />
 
-      <div className="edit-np-viewport">
-        <div className="edit-np-card">
-          <div className="edit-np-grid">
-            {/* Sidebar / Steps */}
-            <aside className="edit-np-rail">
-              <div className="edit-np-steps">
-                {steps.map((step, index) => {
-                  const isActive = index === currentStep;
-                  const isCompleted = index < currentStep;
+      <div className="editsub-np-viewport">
+        <div className="editsub-np-card">
+          <div className="editsub-np-grid">
+            {/* LEFT rail – same skeleton pattern as NewProduct */}
+            <aside className="editsub-np-rail">
+              <nav className="editsub-np-steps">
+                {steps.map((step, i) => {
+                  const isActive = i === currentStep;
+                  const isCompleted = i < currentStep;
+                  const showConnector = i < steps.length - 1;
+
                   return (
-                    <div
+                    <button
                       key={step.id}
-                      className={`edit-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                      onClick={() => goToStep(index)}
+                      type="button"
+                      className={[
+                        'editsub-np-step',
+                        isActive ? 'active' : '',
+                        isCompleted ? 'completed' : '',
+                      ]
+                        .join(' ')
+                        .trim()}
+                      onClick={() => goToStep(i)}
                     >
-                      <div className="edit-np-step__title">{step.title}</div>
-                    </div>
+                      {/* Bullet + connector column */}
+                     
+
+                      {/* Text column */}
+                      <span className="edisub-np-step__text">
+                        <span className="editsub-np-step__title">{step.title}</span>
+                      </span>
+                    </button>
                   );
                 })}
-              </div>
+              </nav>
             </aside>
 
-            {/* Main Content */}
-            <div className="edit-np-content">
-              <div className="edit-np-form">
-                {/* ---------- DETAILS ---------- */}
-                {activeTab === 'details' && (
-                  <div className="edit-np-section">
-                    <div className="edit-np-form-row">
-                      <div className="edit-np-form-group">
-                        <SelectField
-                          label="Customer"
-                          value={selectedCustomerId?.toString() || ''}
-                          onChange={(value) => {
-                            const id = Number(value);
-                            setSelectedCustomerId(id);
-                            const cust = customers.find(c => c.customerId === id);
-                            setSelectedCustomerName(cust?.customerName || '');
-                          }}
-                          options={[
-                            { label: 'Select Customer', value: '' },
-                            ...customers.map(c => ({
-                              label: c.customerName,
-                              value: c.customerId.toString()
-                            }))
-                          ]}
-                        />
+            {/* MAIN area – shares skeleton structure with NewProduct */}
+            <main className="editsub-np-main">
+              <div className="af-skel-rule af-skel-rule--top" />
+              <div className="editsub-np-main__inner">
+                <div className="editsub-np-body">
+                  <form
+                    className="editsub-np-form"
+                    onSubmit={e => {
+                      e.preventDefault();
+                    }}
+                  >
+                    <div className="editsub-np-form-section">
+                      {/* -------- DETAILS -------- */}
+                      {activeTab === 'details' && (
+                        <section>
+                          <div className="editsub-np-section-header">
+                            <h3 className="editsub-np-section-title">PURCHASE DETAILS</h3>
+                          </div>
+
+                          <div className="editsub-np-grid">
+                            <div className="editsub-np-form-group">
+                              <SelectField
+                                label="Customer Name"
+                                value={selectedCustomerId?.toString() || ''}
+                                onChange={value => {
+                                  const id = Number(value);
+                                  setSelectedCustomerId(id || null);
+                                  const cust = customers.find(
+                                    c => c.customerId === id,
+                                  );
+                                  setSelectedCustomerName(
+                                    cust?.customerName || '',
+                                  );
+                                }}
+                                options={[
+                                  { label: 'e.g., Aditya Inc', value: '' },
+                                  ...customers.map(c => ({
+                                    label: c.customerName,
+                                    value: c.customerId.toString(),
+                                  })),
+                                ]}
+                              />
+                            </div>
+
+                            <div className="editsub-np-form-group">
+                              <SelectField
+                                label="Product"
+                                value={selectedProductId?.toString() || ''}
+                                onChange={value => {
+                                  const id = Number(value);
+                                  setSelectedProductId(id || null);
+                                  const prod = products.find(
+                                    p => p.productId === id,
+                                  );
+                                  setSelectedProductName(
+                                    prod?.productName || '',
+                                  );
+                                  setSelectedRatePlanId(null);
+                                  setSelectedRatePlanName('');
+                                }}
+                                options={[
+                                  { label: 'Select Product', value: '' },
+                                  ...products.map(p => ({
+                                    label: p.productName,
+                                    value: p.productId.toString(),
+                                  })),
+                                ]}
+                              />
+                            </div>
+
+                            <div className="editsub-np-form-group">
+                              <SelectField
+                                label="Rate Plan"
+                                value={selectedRatePlanId?.toString() || ''}
+                                onChange={value => {
+                                  const id = Number(value);
+                                  setSelectedRatePlanId(id || null);
+                                  const rp = ratePlans.find(
+                                    r => r.ratePlanId === id,
+                                  );
+                                  setSelectedRatePlanName(
+                                    rp?.ratePlanName || '',
+                                  );
+                                }}
+                                options={[
+                                  { label: 'Select Rate Plan', value: '' },
+                                  ...ratePlans
+                                    .filter(rp =>
+                                      selectedProductId
+                                        ? rp.productId === selectedProductId
+                                        : true,
+                                    )
+                                    .map(rp => ({
+                                      label: rp.ratePlanName,
+                                      value: rp.ratePlanId.toString(),
+                                    })),
+                                ]}
+                                disabled={!selectedProductId}
+                                helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
+                              />
+                            </div>
+
+                            <div className="editsub-np-form-group">
+                              <SelectField
+                                label="Payment Type"
+                                value={paymentType}
+                                onChange={setPaymentType}
+                                options={[
+                                  { label: 'Select Payment Type', value: '' },
+                                  { label: 'Prepaid', value: 'PREPAID' },
+                                  { label: 'Postpaid', value: 'POSTPAID' },
+                                ]}
+                              />
+                            </div>
+
+                            <div className="editsub-np-form-group">
+                              <TextareaField
+                                label="Admin Notes"
+                                placeholder="Type your note here..."
+                                value={planDescription}
+                                onChange={setPlanDescription}
+                                rows={4}
+                              />
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* -------- REVIEW -------- */}
+                      {activeTab === 'review' && (
+                        <section>
+                          <div className="editsub-np-section-header">
+                            <h3 className="editsub-np-section-title">REVIEW & CONFIRM</h3>
+                          </div>
+                          <div className="edit-np-review-container">
+                            <EditReview
+                              customerName={selectedCustomerName}
+                              productName={selectedProductName}
+                              ratePlanName={selectedRatePlanName}
+                              paymentType={paymentType}
+                              onBack={handlePreviousStep}
+                              onConfirm={handleNextStep}
+                              confirmLabel="Save Draft"
+                              confirmLoading={savingDraft}
+                            />
+                          </div>
+                        </section>
+                      )}
+                    </div>
+                                  <div className="af-skel-rule af-skel-rule--bottom" />
+
+
+                    {/* FOOTER actions – same alignment as NewProduct */}
+                    <div className="editsub-np-form-footer">
+                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
+                        {activeTab !== 'details' && (
+                          <SecondaryButton type="button" onClick={handlePreviousStep}>
+                            Back
+                          </SecondaryButton>
+                        )}
+                      </div>
+
+                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
+                        {activeTab === 'details' ? (
+                          <PrimaryButton
+                            type="button"
+                            onClick={handleNextStep}
+                            disabled={!canSubmit}
+                          >
+                            Save &amp; Next
+                          </PrimaryButton>
+                        ) : (
+                          <PrimaryButton type="button" onClick={handleSaveDraft}>
+                            Confirm changes
+                          </PrimaryButton>
+                        )}
                       </div>
                     </div>
-
-                    <div className="edit-np-form-row">
-                      <div className="edit-np-form-group">
-                        <SelectField
-                          label="Product"
-                          value={selectedProductId?.toString() || ''}
-                          onChange={(value) => {
-                            const id = Number(value);
-                            setSelectedProductId(id);
-                            const prod = products.find(p => p.productId === id);
-                            setSelectedProductName(prod?.productName || '');
-                            setSelectedRatePlanId(null);
-                            setSelectedRatePlanName('');
-                          }}
-                          options={[
-                            { label: 'Select Product', value: '' },
-                            ...products.map(p => ({
-                              label: p.productName,
-                              value: p.productId.toString()
-                            }))
-                          ]}
-                        />
-                      </div>
-
-                      <div className="edit-np-form-group">
-                        <SelectField
-                          label="Rate Plan"
-                          value={selectedRatePlanId?.toString() || ''}
-                          onChange={(value) => {
-                            const id = Number(value);
-                            setSelectedRatePlanId(id);
-                            const rp = ratePlans.find(r => r.ratePlanId === id);
-                            setSelectedRatePlanName(rp?.ratePlanName || '');
-                          }}
-                          options={[
-                            { label: 'Select Rate Plan', value: '' },
-                            ...ratePlans
-                              .filter(rp => (selectedProductId ? rp.productId === selectedProductId : true))
-                              .map(rp => ({
-                                label: rp.ratePlanName,
-                                value: rp.ratePlanId.toString()
-                              }))
-                          ]}
-                          disabled={!selectedProductId}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="edit-np-form-row">
-                      <div className="edit-np-form-group">
-                        <SelectField
-                          label="Payment Type"
-                          value={paymentType}
-                          onChange={setPaymentType}
-                          options={[
-                            { label: 'Select Payment Type', value: '' },
-                            { label: 'Prepaid', value: 'PREPAID' },
-                            { label: 'Postpaid', value: 'POSTPAID' }
-                          ]}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="edit-np-form-group">
-                      <TextareaField
-                        label="Admin Notes"
-                        placeholder="Enter admin notes"
-                        value={planDescription}
-                        onChange={setPlanDescription}
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* ---------- REVIEW ---------- */}
-                {activeTab === 'review' && (
-                  <div className="edit-np-section">
-                    <div className="edit-np-review-container">
-                      <EditReview
-                        customerName={selectedCustomerName}
-                        productName={selectedProductName}
-                        ratePlanName={selectedRatePlanName}
-                        paymentType={paymentType}
-                        onBack={handlePreviousStep}
-                        onConfirm={handleNextStep}
-                        confirmLabel="Save Draft"
-                        confirmLoading={savingDraft}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer Buttons (match EditProduct layout) */}
-              <div className="edit-np-form-footer">
-                <div className="edit-np-btn-group edit-np-btn-group--back">
-                  {activeTab !== 'details' && (
-                    <SecondaryButton
-                      type="button"
-                      onClick={handlePreviousStep}
-                    >
-                      Back
-                    </SecondaryButton>
-                  )}
+                  </form>
                 </div>
-
-                <div className="edit-np-btn-group edit-np-btn-group--next">
-                  {activeTab === 'details' ? (
-                    <PrimaryButton
-                      type="button"
-                      onClick={handleNextStep}
-                      disabled={!canSubmit}
-                    >
-                     save & Next
-                    </PrimaryButton>
-                  ) : (
-                    <PrimaryButton
-                      type="button"
-                      onClick={handleSaveDraft}
-                    >
-                      Confirm changes
-                    </PrimaryButton>
-                  )}
-                </div>
               </div>
-            </div>
+              <div className="af-skel-rule af-skel-rule--bottom" />
+            </main>
           </div>
-
-          <div className="af-skel-rule af-skel-rule--bottom" />
         </div>
       </div>
 
-      {/* Edit Popup for exit confirmation */}
+      {/* Exit confirmation popup */}
       <EditPopUp
         isOpen={showExitModal}
-        onClose={() => {
-          setShowExitModal(false);
-          onClose();
-        }}
-        onDismiss={() => {
-          // Only close the popup, not the form
-          setShowExitModal(false);
-        }}
+        onClose={handleExitWithoutSaving}
+        onDismiss={() => setShowExitModal(false)}
         onSave={async () => {
           const saved = await handleSaveDraft();
           if (saved) {
             setShowExitModal(false);
-            onClose();
           }
         }}
       />

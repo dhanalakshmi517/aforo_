@@ -878,8 +878,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                 <div
                                   className="product-avatar"
                                   style={{
-                                    width: 40,
-                                    height: 40,
+                                    width: 41,
+                                    height: 41,
                                     borderRadius: 8,
                                     display: 'flex',
                                     alignItems: 'center',

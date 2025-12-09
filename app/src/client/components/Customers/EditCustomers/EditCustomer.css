@@ -162,6 +162,8 @@ html, body, #root{
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+      margin-bottom: -270px;
+
 }
 
 .edit-np-btn-group { 

@@ -13,6 +13,7 @@ import RetryIconButton from '../componenetsss/RetryIconButton';
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
 import CustomersPlat from './customers-plat.svg';
 
 interface NotificationState { type: "success" | "error"; message: string; }
@@ -167,6 +168,8 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
   const { showToast } = useToast();
 
@@ -174,6 +177,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [resumeDraft, setResumeDraft] = useState<Customer | null>(null);
 
   const pendingName = useRef("");
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -245,6 +249,34 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     }
   };
 
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (tableWrapperRef.current) {
+        const isOverflowing = tableWrapperRef.current.scrollHeight > tableWrapperRef.current.clientHeight;
+        setHasOverflow(isOverflowing);
+      }
+    };
+
+    const handleScroll = () => {
+      if (tableWrapperRef.current) {
+        setScrollPosition(tableWrapperRef.current.scrollTop);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    tableWrapperRef.current?.addEventListener('scroll', handleScroll);
+    
+    // Also check after a small delay to ensure DOM is fully rendered
+    const timer = setTimeout(checkOverflow, 100);
+    
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      tableWrapperRef.current?.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
+  }, [customers]);
+
   useEffect(() => { fetchCustomersAndLogos(); }, []);
   useEffect(() => { if (!showNewCustomerForm) fetchCustomersAndLogos(); }, [showNewCustomerForm]);
 
@@ -294,7 +326,9 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
 
           />
 
-          <div className="customers-table-wrapper">
+          <div className="customers-table-wrapper" ref={tableWrapperRef}>
+            <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
             <table className="customers-table">
               <thead>
                 <tr>
@@ -411,6 +445,18 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                 })}
               </tbody>
             </table>
+              </div>
+              {hasOverflow && tableWrapperRef.current && (
+                <div 
+                  className="scrollbar-container-customers"
+                  style={{
+                    transform: `translateY(${(scrollPosition / (tableWrapperRef.current.scrollHeight - tableWrapperRef.current.clientHeight)) * (tableWrapperRef.current.clientHeight - 49)}px)`
+                  }}
+                >
+                  <VerticalScrollbar color="#C3C2D0" thickness={4} />
+                </div>
+              )}
+            </div>
           </div>
         </>
       ) : (

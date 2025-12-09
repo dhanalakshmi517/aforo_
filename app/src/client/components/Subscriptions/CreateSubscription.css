@@ -2,8 +2,8 @@
 
 :root {
   /* Outer gaps */
-  --np-gap-left: 100px;
-  --np-gap-right: 100px;
+  --sub-np-gap-left: 120px;
+  --sub-np-gap-right: 120px;
   --np-gap-top: 10px;
   --np-gap-bottom: 15px;
 
@@ -20,7 +20,7 @@ html, body, #root{
 /* Viewport fills screen */
 .pur-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
-  padding: var(--np-gap-top) var(--np-gap-right) 30px var(--np-gap-left);
+  padding: var(--np-gap-top) var(--sub-np-gap-right) 30px var(--sub-np-gap-left);
   box-sizing: border-box;
   height: calc(100vh - 20px);
   width: 100%;
@@ -144,11 +144,11 @@ html, body, #root{
 
 /* Different heights for each connector */
 .pur-np-step:nth-child(1) .pur-np-step__connector {
-  height: 88px; /* Height for first connector */
+  height: 89px; /* Height for first connector */
 }
 
 .pur-np-step:nth-child(2) .pur-np-step__connector {
-  height: 98px; /* Height for second connector */
+  height: 99px; /* Height for second connector */
 }
 
 
@@ -202,9 +202,9 @@ html, body, #root{
   height: 100%;
 }
 
-.pur-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
+.pur-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:3px; }
 .pur-np-step__title{
-   color: var(--color-neutral-1400);
+   color: var(--color-neutral-800);
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -215,18 +215,8 @@ line-height: var(--line-height-body-lg); /* 150% */
 text-align: left;
 margin-bottom: 2px;
 }
-.pur-np-step__title:hover{
-  color: var(--color-neutral-1700);
 
-  /* body/md/med */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-lg);
-    
-}
-.pur-np-step__desc{ color: var(--color-neutral-1400);
+.pur-np-step__desc{ color: var(--color-neutral-1000);
 
   /* body/md/reg */
   font-family: var(--font-family-primary);
@@ -305,9 +295,14 @@ margin-bottom: 2px;
   overflow-x: hidden;
   padding-bottom: 20px;
   gap: 2px; /* Reduced from 4px to 2px */
-  flex: 1;
   width: 100%;
   max-width: 100%;
+  padding-bottom: 15px;
+  scrollbar-width: none;
+  scrollbar-gutter: stable;
+  z-index:5;
+  margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
+  padding:0 24px;   
 }
 
 /* === Hide scrollbars for the form === */
@@ -335,21 +330,26 @@ margin-bottom: 2px;
   width: 100%;
   max-width: 100%;
   padding-bottom: 15px;
+  scrollbar-width: none;
+  scrollbar-gutter: stable;
 }
-/* custom scrollbar */
-.pur-np-form-section::-webkit-scrollbar      { width: 6px; }
-.pur-np-form-section::-webkit-scrollbar-track{ background: transparent; }
-.pur-np-form-section::-webkit-scrollbar-thumb{
-  background-color:transparent;
-  border-radius:2px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:repeat-y;
-  background-position:center;
-  background-size:4px 49px;
+
+/* Hide native scrollbar completely */
+.pur-np-form-section::-webkit-scrollbar { width: 0px; }
+.pur-np-form-section::-webkit-scrollbar-track { background: transparent; }
+.pur-np-form-section::-webkit-scrollbar-thumb { background: transparent; }
+
+/* Custom scrollbar container for form section */
+.scrollbar-container-form {
+  position: absolute;
+  right: 8px;
+  top: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform 0.05s ease-out;
 }
-.pur-np-form-section::-webkit-scrollbar-thumb:hover{ background-color:transparent; }
-.pur-np-form-section::-webkit-scrollbar-thumb:active{ background-color:transparent; }
-.pur-np-form-section{ scrollbar-width: thin; scrollbar-color:transparent transparent; }
 
 /* Section title above a full-bleed faint line */
 .pur-np-section-header{
@@ -359,7 +359,6 @@ margin-bottom: 2px;
   z-index:5;
   margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
   padding:0 24px;   
- 
 }
 .pur-np-section-title{
   color: var(--color-neutral-800);
@@ -406,7 +405,7 @@ text-transform: uppercase;
 .pur-np-form-footer {
   position: relative;
   margin: 0 -24px;
-  padding: 16px 24px;
+  padding: 16px;
   display: flex;
   justify-content: space-between; /* Space between back and next buttons */
   align-items: center;
@@ -422,11 +421,13 @@ text-transform: uppercase;
 /* Back button group - align to left */
 .pur-np-btn-group--back {
   margin-right: auto;
+  
 }
 
 /* Next button group - align to right */
 .pur-np-btn-group--next {
   margin-left: auto;
+  margin-right: 40px;
 }
 
 /* Ensure the next button is on the right */

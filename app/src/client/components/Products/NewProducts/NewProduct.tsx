@@ -856,7 +856,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               placeholder="eg. Google Maps API"
                             />
                             <InputField
-                              label="Version • Optional"
+                              label="Version (Optional)"
                               value={formData.version}
                               onChange={handleFieldChange('version')}
                               placeholder="eg., 2.3-VOS"
@@ -865,7 +865,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             {/* Product Icon Field - Add */}
                             {!selectedIcon && (
                               <div className="np-form-group">
-                                <label className="if-label">Product Icon</label>
+                                <label className="if-label">Product Icon (optional)</label>
                                 <div className="np-icon-field-wrapper">
                                   <div className="np-icon-placeholder">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
@@ -998,7 +998,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               error={errors.skuCode}
                             />
                             <TextareaField
-                              label="Description"
+                              label="Description (Optional)"
                               value={formData.description}
                               onChange={handleFieldChange('description')}
                               placeholder="eg. Mapping service API for location-based apps..."

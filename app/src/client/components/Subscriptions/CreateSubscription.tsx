@@ -6,7 +6,8 @@ import TopBar from "../componenetsss/TopBar";
 import { useToast } from "../componenetsss/ToastProvider";
 import SaveDraft from "../componenetsss/SaveDraft";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
-import SubReview from "./SubReview";
+import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
+import VerticalScrollbar from "../componenetsss/VerticalScrollbar";
 import "../Products/NewProducts/NewProduct.css";
 import "../componenetsss/SkeletonForm.css";
 
@@ -29,13 +30,13 @@ type PaymentKind = "PREPAID" | "POSTPAID";
 const steps: Array<{ id: StepId; title: string; desc: string }> = [
   {
     id: 1,
-    title: "Subscription Details",
-    desc: "Set up the core information like plan type, and pricing model for this subscription.",
+    title: "Purchase Details",
+    desc: "provide purchase related details",
   },
   {
     id: 2,
     title: "Review & Confirm",
-    desc: "Review the final pricing and details based on the information you've entered.",
+    desc: "Check and Finalize details.",
   },
 ];
 
@@ -55,6 +56,27 @@ export default function CreateSubscription({
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const formSectionRef = React.useRef<HTMLDivElement>(null);
+
+  // data sources
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
+
+  // form fields
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedCustomerName, setSelectedCustomerName] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedProductName, setSelectedProductName] = useState("");
+  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+  const [selectedRatePlanName, setSelectedRatePlanName] = useState("");
+  const [paymentType, setPaymentType] = useState<PaymentKind | ''>('');
+  const [planDescription, setPlanDescription] = useState("");
+
+  // flow state
+  const [currentStep, setCurrentStep] = useState(0); // 0-based like NewProduct
 
   // Handle browser back button and add page class
   useEffect(() => {
@@ -75,23 +97,34 @@ export default function CreateSubscription({
     };
   }, [navigate]);
 
-  // data sources
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
+  // Track scroll position for custom scrollbar
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (formSectionRef.current) {
+        const isOverflowing = formSectionRef.current.scrollHeight > formSectionRef.current.clientHeight;
+        setHasOverflow(isOverflowing);
+      }
+    };
 
-  // form fields
-  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
-  const [selectedCustomerName, setSelectedCustomerName] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedProductName, setSelectedProductName] = useState("");
-  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
-  const [selectedRatePlanName, setSelectedRatePlanName] = useState("");
-  const [paymentType, setPaymentType] = useState<PaymentKind | ''>('');
-  const [planDescription, setPlanDescription] = useState("");
+    const handleScroll = () => {
+      if (formSectionRef.current) {
+        setScrollPosition(formSectionRef.current.scrollTop);
+      }
+    };
 
-  // flow state
-  const [currentStep, setCurrentStep] = useState(0); // 0-based like NewProduct
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    formSectionRef.current?.addEventListener('scroll', handleScroll);
+    
+    // Also check after a small delay to ensure DOM is fully rendered
+    const timer = setTimeout(checkOverflow, 100);
+    
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      formSectionRef.current?.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
+  }, [currentStep]);
 
   // Handle draft data when component mounts or draftData changes
   useEffect(() => {
@@ -420,6 +453,7 @@ export default function CreateSubscription({
           setSelectedCustomerName(cust?.customerName || "");
         }}
         error={errors.customerId}
+        placeholderOption="e.g., Aditya Inc"
         options={customers.map((c) => ({ label: c.customerName, value: c.customerId.toString() }))}
       />
 
@@ -437,6 +471,7 @@ export default function CreateSubscription({
           setSelectedRatePlanName("");
         }}
         error={errors.productId}
+        placeholderOption="Select Product"
         options={products.map((p) => ({ label: p.productName, value: p.productId.toString() }))}
       />
 
@@ -461,7 +496,9 @@ export default function CreateSubscription({
           setSelectedRatePlanName(rp?.ratePlanName || "");
         }}
         error={errors.ratePlanId}
+        placeholderOption="Select Rate Plan"
         options={ratePlans.map((rp) => ({ label: rp.ratePlanName, value: rp.ratePlanId.toString() }))}
+        helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
       />
 
       <div className="pur-np-inline-note">
@@ -484,8 +521,8 @@ export default function CreateSubscription({
           }
         }}
         error={errors.paymentType}
+        placeholderOption="Select Payment Type"
         options={[
-          { label: "Select Payment Type", value: "" },
           { label: "Post-Paid", value: "POSTPAID" },
           { label: "Pre-Paid", value: "PREPAID" },
         ]}
@@ -500,23 +537,29 @@ export default function CreateSubscription({
     </div>
   );
 
-  const renderStep1 = () => (
-    <div className="review-container">
-      <SubReview
-        customerName={selectedCustomerName || ''}
-        productName={selectedProductName || ''}
-        ratePlan={selectedRatePlanName || ''}
-        paymentMethod={paymentType === 'PREPAID' ? 'Pre-Paid' : paymentType === 'POSTPAID' ? 'Post-Paid' : 'Not specified'}
-        adminNotes={planDescription}
-        subscriptionId={subscriptionId}
-      />
-    </div>
-  );
+  const renderStep1 = () => {
+    const reviewRows: ReviewRow[] = [
+      { label: "Customer Name", value: selectedCustomerName || '—' },
+      { label: "Product", value: selectedProductName || '—' },
+      { label: "Rate Plan", value: selectedRatePlanName || '—' },
+      { label: "Payment Type", value: paymentType === 'PREPAID' ? 'Pre-Paid' : paymentType === 'POSTPAID' ? 'Post-Paid' : '—' },
+      { label: "Admin Notes", value: planDescription || '—' },
+    ];
+
+    return (
+      <div>
+        <ReviewComponent
+          title="PURCHASE DETAILS"
+          rows={reviewRows}
+        />
+      </div>
+    );
+  };
 
   return (
     <>
       <TopBar
-        title="Create New Subscription"
+        title="Create New Purchase"
         onBack={currentStep === 0 ? handleBackTop : () => gotoStep(0)}
         cancel={{ onClick: handleCancelTop }}
         save={currentStep === 0 ? {
@@ -587,11 +630,11 @@ export default function CreateSubscription({
               <div className="pur-np-main__inner">
                 <div className="pur-np-body">
                   <form className="pur-np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="pur-np-form-section">
+                    <div className="pur-np-form-section" ref={formSectionRef} style={{ position: 'relative' }}>
                       <section>
                         <div className="pur-np-section-header">
                           <h3 className="pur-np-section-title">
-                            {currentStepMeta.id === 1 ? "SUBSCRIPTION DETAILS" : "REVIEW & CONFIRM"}
+                            {currentStepMeta.id === 1 ? "PURCHASE DETAILS" : "REVIEW & CONFIRM"}
                           </h3>
                         </div>
 
@@ -630,7 +673,7 @@ export default function CreateSubscription({
                               type="button"
                               onClick={handleFinalSubmit}
                             >
-                              Create Subscription
+                              Create Purchase
                             </PrimaryButton>
                           </div>
                         </>
