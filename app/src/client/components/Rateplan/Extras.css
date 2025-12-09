@@ -1,7 +1,7 @@
 @import "../Variables/Variables.css";
 
 /* Design tokens / fallbacks */
-:root{
+:root {
   --surface-success: var(--color-success-050, #E7F9F2);
   --text-success: var(--color-success-900, #1B5E20);
   --surface-secondary-btn-active-2: #EBF6FB;
@@ -25,7 +25,8 @@
   background-color: var(--color-neutral-white);
 
   /* ⬆️ Move the whole row (icon + label) further right */
-  padding: 16px 16px 16px 40px; /* was 16px 16px 16px 24px */
+  padding: 16px 16px 16px 40px;
+  /* was 16px 16px 16px 24px */
   color: var(--color-neutral-1700);
   font-weight: 600;
 }
@@ -35,12 +36,15 @@
   align-items: center;
   gap: 8px;
   margin-top: 0;
-  padding: 12px 16px;      /* header’s own padding */
+  padding: 12px 16px;
+  /* header’s own padding */
   background-color: var(--color-neutral-white);
   cursor: pointer;
 }
 
-.header-label { white-space: nowrap; }
+.header-label {
+  white-space: nowrap;
+}
 
 .dropdown-icon {
   margin-left: auto;
@@ -50,6 +54,7 @@
   width: 24px;
   height: 24px;
 }
+
 .section-header .dropdown-icon svg {
   width: 20px;
   height: 20px;
@@ -59,7 +64,7 @@
 }
 
 /* Icon chip */
-.extras-icon-btn{
+.extras-icon-btn {
   width: 48px;
   height: 48px;
   display: flex;
@@ -71,22 +76,34 @@
   color: var(--color-secondary-700);
   margin-right: 8px;
 }
-.extras-icon-btn svg{ width:24px; height:24px; }
+
+.extras-icon-btn svg {
+  width: 24px;
+  height: 24px;
+}
 
 /* Description row */
-.description-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
+.description-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
   /* ⬆️ Indent to align text under the label (icon 48 + gap 8 + header PL 12 = 68) */
   padding-left: 68px;
 }
-.icon-btn{
-  width:60px; height:48px; border:none; background:transparent;
-  display:flex; align-items:center; justify-content:center; cursor:pointer;
+
+.icon-btn {
+  width: 60px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
-.description{
+
+.description {
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
@@ -105,15 +122,17 @@
   flex-direction: column;
   gap: 10px;
 }
-.section-content label{
+
+.section-content label {
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: 400;
   line-height: var(--line-height-body-md);
 }
+
 .section-content input,
-.section-content textarea{
+.section-content textarea {
   padding: 8px;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
@@ -121,15 +140,19 @@
   width: 80%;
   background-color: var(--color-neutral-white);
 }
-.section-content textarea{ resize: vertical; }
-.section-content select{
+
+.section-content textarea {
+  resize: vertical;
+}
+
+.section-content select {
   width: 80%;
   padding: 6px 10px;
   height: 36px;
   background-color: var(--color-neutral-100);
 }
 
-.optional{
+.optional {
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
@@ -138,21 +161,30 @@
 }
 
 /* Date range */
-.date-range{ display:flex; gap:20px; align-items:flex-end; }
-.date-input{
-  display:flex; flex-direction:column;
+.date-range {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.date-input {
+  display: flex;
+  flex-direction: column;
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: 400;
   line-height: var(--line-height-body-md);
 }
-.date-input input[type="date"]{
-  width:300px; padding:8px 10px; font-size:14px;
+
+.date-input input[type="date"] {
+  width: 300px;
+  padding: 8px 10px;
+  font-size: 14px;
 }
 
 /* Save button */
-.extras-save-btn{
+.extras-save-btn {
   width: 140px;
   height: 40px;
   padding: 8px 20px;
@@ -171,11 +203,22 @@
   line-height: var(--line-height-body-md);
   transition: background-color .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease;
 }
-.extras-save-btn:hover{ filter: brightness(0.95); }
-.extras-save-btn.is-saving{ opacity: .7; pointer-events: none; }
-.extras-save-btn.is-saved{
+
+.extras-save-btn:hover {
+  filter: brightness(0.95);
+}
+
+.extras-save-btn.is-saving {
+  opacity: .7;
+  pointer-events: none;
+}
+
+.extras-save-btn.is-saved {
   background-color: var(--surface-success);
   color: var(--text-success);
   border-color: transparent;
 }
-.saved-check{ display:inline-block; }
+
+.saved-check {
+  display: inline-block;
+}

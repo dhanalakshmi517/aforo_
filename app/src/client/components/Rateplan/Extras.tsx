@@ -19,6 +19,7 @@ interface ExtrasProps {
   ratePlanId: number | null;
   noUpperLimit: boolean;
   draftData?: any; // Draft data from backend
+  locked?: boolean;
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -43,10 +44,10 @@ const uiToApiFreemium = (raw: string | undefined | null): APIFreemiumType => {
   return 'FREE_UNITS';
 };
 
-const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData }, ref) => {
+const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, locked = false }, ref) => {
   // ✅ Optional guarded clear: only when switching between two *different* valid plans
   const prevRatePlanIdRef = useRef<number | null>(null);
-  
+
   // Track whether user has made selections to prevent backend data from overriding
   const userHasSelectedFreemiumRef = useRef<boolean>(false);
   const userHasSelectedDiscountsRef = useRef<boolean>(false);
@@ -74,7 +75,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   React.useEffect(() => {
     // Always check session storage for user selections, but don't override if already set
     console.log('🔍 Checking session storage for user selections...');
-    
+
     // Skip if we already have data loaded and this is just a re-render
     if (draftData !== null && draftData !== undefined && activeSections.length > 0) {
       console.log('⏭️ Skipping session storage hydration - data already loaded');
@@ -100,11 +101,11 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
 
     // Discounts
     const percentStr = getRatePlanData('DISCOUNT_PERCENT');
-    const flatStr    = getRatePlanData('DISCOUNT_FLAT');
-    const typeStr    = getRatePlanData('DISCOUNT_TYPE');
-    const eligStr    = getRatePlanData('ELIGIBILITY');
-    const dStart     = getRatePlanData('DISCOUNT_START');
-    const dEnd       = getRatePlanData('DISCOUNT_END');
+    const flatStr = getRatePlanData('DISCOUNT_FLAT');
+    const typeStr = getRatePlanData('DISCOUNT_TYPE');
+    const eligStr = getRatePlanData('ELIGIBILITY');
+    const dStart = getRatePlanData('DISCOUNT_START');
+    const dEnd = getRatePlanData('DISCOUNT_END');
 
     const hasDiscountData = (
       (percentStr && Number(percentStr) > 0) ||
@@ -117,7 +118,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     if (hasDiscountData) {
       setDiscountForm(prev => ({
         ...prev,
-        discountType: (typeStr as 'PERCENTAGE'|'FLAT') || (percentStr ? 'PERCENTAGE' : 'FLAT'),
+        discountType: (typeStr as 'PERCENTAGE' | 'FLAT') || (percentStr ? 'PERCENTAGE' : 'FLAT'),
         percentageDiscountStr: percentStr || '',
         flatDiscountAmountStr: flatStr || '',
         eligibility: eligStr || '',
@@ -128,11 +129,11 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     }
 
     // Freemium (session storage is in UI terms; convert for payload)
-    const freeTypeStr   = getRatePlanData('FREEMIUM_TYPE') as UIFreemiumType | '' | null;
-    const freeUnitsStr  = getRatePlanData('FREEMIUM_UNITS');
-    const trialDurStr   = getRatePlanData('FREE_TRIAL_DURATION');
-    const freeStartStr  = getRatePlanData('FREEMIUM_START');
-    const freeEndStr    = getRatePlanData('FREEMIUM_END');
+    const freeTypeStr = getRatePlanData('FREEMIUM_TYPE') as UIFreemiumType | '' | null;
+    const freeUnitsStr = getRatePlanData('FREEMIUM_UNITS');
+    const trialDurStr = getRatePlanData('FREE_TRIAL_DURATION');
+    const freeStartStr = getRatePlanData('FREEMIUM_START');
+    const freeEndStr = getRatePlanData('FREEMIUM_END');
 
     const hasFreemiumData = (
       (freeTypeStr && typeof freeTypeStr === 'string' && freeTypeStr.trim()) ||
@@ -190,30 +191,30 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       userHasSelectedFreemium: userHasSelectedFreemiumRef.current,
       userHasSelectedDiscounts: userHasSelectedDiscountsRef.current
     });
-    
+
     // DON'T reset user selection flags here - they should persist during navigation
     // Only reset when switching to a different plan (handled in ratePlanId useEffect)
-    
+
     // Check if we have user selections in session storage that should take priority
     const sessionFreemiumType = getRatePlanData('FREEMIUM_TYPE');
     const sessionFreemiumUnits = getRatePlanData('FREEMIUM_UNITS');
     const sessionFreemiumTrialDuration = getRatePlanData('FREE_TRIAL_DURATION');
     const hasSessionFreemiumData = sessionFreemiumType && sessionFreemiumType.trim() && sessionFreemiumType !== '';
-    
+
     const sessionDiscountType = getRatePlanData('DISCOUNT_TYPE');
     const sessionDiscountPercent = getRatePlanData('DISCOUNT_PERCENT');
     const sessionDiscountFlat = getRatePlanData('DISCOUNT_FLAT');
-    const hasSessionDiscountData = sessionDiscountType || 
-                                  (sessionDiscountPercent !== null && sessionDiscountPercent !== '') || 
-                                  (sessionDiscountFlat !== null && sessionDiscountFlat !== '');
-    
+    const hasSessionDiscountData = sessionDiscountType ||
+      (sessionDiscountPercent !== null && sessionDiscountPercent !== '') ||
+      (sessionDiscountFlat !== null && sessionDiscountFlat !== '');
+
     const sessionSetupFee = getRatePlanData('SETUP_FEE');
     const hasSessionSetupFeeData = sessionSetupFee && Number(sessionSetupFee) > 0;
-    
+
     const sessionMinUsage = getRatePlanData('MINIMUM_USAGE');
     const sessionMinCharge = getRatePlanData('MINIMUM_CHARGE');
     const hasSessionMinCommitmentData = sessionMinUsage || sessionMinCharge;
-    
+
     console.log('🔍 Checking session storage for user selections:', {
       sessionFreemiumType,
       hasSessionFreemiumData,
@@ -230,7 +231,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       console.log('🎯 Using session storage setup fee data (user selection)');
       const sessionTiming = getRatePlanData('SETUP_APPLICATION_TIMING');
       const sessionDesc = getRatePlanData('SETUP_INVOICE_DESC');
-      
+
       setSetupFeePayload({
         setupFee: Number(sessionSetupFee) || 0,
         applicationTiming: Number(sessionTiming) || 0,
@@ -251,29 +252,29 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     if (hasSessionDiscountData) {
       console.log('🎯 Found session storage discount data');
       console.log('🔍 User has made manual discount selection:', userHasSelectedDiscountsRef.current);
-      
+
       // Only update if user hasn't made a manual selection or if we need to restore from session
-      const shouldUpdate = !userHasSelectedDiscountsRef.current || 
-                          (discountForm.discountType !== sessionDiscountType);
-      
+      const shouldUpdate = !userHasSelectedDiscountsRef.current ||
+        (discountForm.discountType !== sessionDiscountType);
+
       if (shouldUpdate) {
         console.log('🔄 Updating discount state to match session storage');
         userHasSelectedDiscountsRef.current = true; // Mark that we have user data
-        
+
         // Load from session storage (user's selection takes priority)
         const sessionEligibility = getRatePlanData('ELIGIBILITY');
         const sessionStartDate = getRatePlanData('DISCOUNT_START');
         const sessionEndDate = getRatePlanData('DISCOUNT_END');
-        
+
         const newDiscountForm = {
-          discountType: (sessionDiscountType as 'PERCENTAGE'|'FLAT') || 'PERCENTAGE',
+          discountType: (sessionDiscountType as 'PERCENTAGE' | 'FLAT') || 'PERCENTAGE',
           percentageDiscountStr: sessionDiscountPercent || '',
           flatDiscountAmountStr: sessionDiscountFlat || '',
           eligibility: sessionEligibility || '',
           startDate: sessionStartDate || '',
           endDate: sessionEndDate || '',
         };
-        
+
         console.log('🔧 DISCOUNT FORM - Setting form values from session storage:', {
           sessionValues: {
             sessionDiscountType,
@@ -285,7 +286,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           },
           formValues: newDiscountForm
         });
-        
+
         setDiscountForm(newDiscountForm);
       } else {
         console.log('✅ Preserving current discount state (user has made selections)');
@@ -301,7 +302,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         startDate: draftData.discount.startDate,
         endDate: draftData.discount.endDate
       });
-      
+
       // Fallback to backend data if no session storage and user hasn't made selections
       setDiscountForm({
         discountType: draftData.discount.discountType || 'PERCENTAGE',
@@ -311,7 +312,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         startDate: draftData.discount.startDate || '',
         endDate: draftData.discount.endDate || '',
       });
-      
+
       // Expand section if we have any discount data (including zero values)
       if (draftData.discount.discountType) {
         console.log('✅ Expanding discounts section - has discount type:', draftData.discount.discountType);
@@ -325,24 +326,24 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     if (hasSessionFreemiumData) {
       console.log('🎯 Found session storage freemium data:', sessionFreemiumType);
       console.log('🔍 User has made manual selection:', userHasSelectedFreemiumRef.current);
-      
+
       // Only update if user hasn't made a manual selection or if current state doesn't match session
       const currentStateMatchesSession = freemiumType === sessionFreemiumType;
       const shouldUpdate = !userHasSelectedFreemiumRef.current || !currentStateMatchesSession;
-      
+
       if (shouldUpdate) {
         console.log('🔄 Updating freemium state to match session storage');
         userHasSelectedFreemiumRef.current = true; // Mark that we have user data
-        
+
         // Load from session storage (user's selection takes priority)
         const freeUnitsStr = getRatePlanData('FREEMIUM_UNITS');
         const trialDurStr = getRatePlanData('FREE_TRIAL_DURATION');
         const freeStartStr = getRatePlanData('FREEMIUM_START');
         const freeEndStr = getRatePlanData('FREEMIUM_END');
-        
+
         const uiType = sessionFreemiumType as UIFreemiumType;
         const apiType = uiToApiFreemium(uiType);
-        
+
         const newFreemiumPayload = {
           freemiumType: apiType,
           freeUnits: freeUnitsStr ? Number(freeUnitsStr) : 0,
@@ -350,7 +351,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           startDate: freeStartStr || '',
           endDate: freeEndStr || '',
         };
-        
+
         console.log('🔧 FREEMIUM FORM - Setting form values from session storage:', {
           sessionValues: {
             sessionFreemiumType,
@@ -363,7 +364,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           apiType,
           formValues: newFreemiumPayload
         });
-        
+
         setFreemiumType(uiType);
         setFreemiumPayload(newFreemiumPayload);
       } else {
@@ -389,7 +390,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           endDate: freemiumData.endDate,
           hasFreemiumType: !!freemiumData.freemiumType
         });
-        
+
         // UPDATED: tolerate UI or API token from backend
         const uiType = apiToUiFreemium(freemiumData.freemiumType);
         const apiType = uiToApiFreemium(freemiumData.freemiumType);
@@ -402,7 +403,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           startDate: freemiumData.startDate || '',
           endDate: freemiumData.endDate || '',
         });
-        
+
         console.log('✅ Expanding freemium section - has freemium type:', freemiumData.freemiumType);
         sectionsToExpand.push('freemium');
       } else {
@@ -432,7 +433,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       totalSections: sectionsToExpand.length,
       draftDataKeys: draftData ? Object.keys(draftData) : 'no draftData'
     });
-    
+
     setActiveSections(sectionsToExpand);
   }, [draftData]);
 
@@ -497,15 +498,15 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
 
   React.useEffect(() => {
     // Discounts – persist all relevant fields
-    const pct  = discountForm.discountType === 'PERCENTAGE' ? discountForm.percentageDiscountStr : '';
-    const flat = discountForm.discountType === 'FLAT'       ? discountForm.flatDiscountAmountStr : '';
+    const pct = discountForm.discountType === 'PERCENTAGE' ? discountForm.percentageDiscountStr : '';
+    const flat = discountForm.discountType === 'FLAT' ? discountForm.flatDiscountAmountStr : '';
 
-    setRatePlanData('DISCOUNT_TYPE',  discountForm.discountType || '');
+    setRatePlanData('DISCOUNT_TYPE', discountForm.discountType || '');
     setRatePlanData('DISCOUNT_PERCENT', pct);
-    setRatePlanData('DISCOUNT_FLAT',    flat);
-    setRatePlanData('ELIGIBILITY',      discountForm.eligibility);
-    setRatePlanData('DISCOUNT_START',   discountForm.startDate);
-    setRatePlanData('DISCOUNT_END',     discountForm.endDate);
+    setRatePlanData('DISCOUNT_FLAT', flat);
+    setRatePlanData('ELIGIBILITY', discountForm.eligibility);
+    setRatePlanData('DISCOUNT_START', discountForm.startDate);
+    setRatePlanData('DISCOUNT_END', discountForm.endDate);
   }, [discountForm]);
 
   React.useEffect(() => {
@@ -514,7 +515,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
     setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits > 0 ? String(freemiumPayload.freeUnits) : '');
     setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration > 0 ? String(freemiumPayload.freeTrialDuration) : '');
     setRatePlanData('FREEMIUM_START', freemiumPayload.startDate);
-    setRatePlanData('FREEMIUM_END',   freemiumPayload.endDate);
+    setRatePlanData('FREEMIUM_END', freemiumPayload.endDate);
   }, [freemiumType, freemiumPayload]);
 
   React.useEffect(() => {
@@ -534,29 +535,29 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   const iconMap: Record<string, JSX.Element> = {
     setupFee: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M14.6994 6.30022C14.5161 6.48715 14.4135 6.73847 14.4135 7.00022C14.4135 7.26198 14.5161 7.51329 14.6994 7.70022L16.2994 9.30022C16.4863 9.48345 16.7376 9.58608 16.9994 9.58608C17.2611 9.58608 17.5124 9.48345 17.6994 9.30022L21.4694 5.53022C21.9722 6.64141 22.1244 7.87946 21.9058 9.07937C21.6872 10.2793 21.1081 11.3841 20.2456 12.2465C19.3832 13.1089 18.2784 13.6881 17.0785 13.9067C15.8786 14.1253 14.6406 13.9731 13.5294 13.4702L6.61937 20.3802C6.22154 20.778 5.68198 21.0015 5.11937 21.0015C4.55676 21.0015 4.01719 20.778 3.61937 20.3802C3.22154 19.9824 2.99805 19.4428 2.99805 18.8802C2.99805 18.3176 3.22154 17.778 3.61937 17.3802L10.5294 10.4702C10.0265 9.35904 9.87428 8.12099 10.0929 6.92108C10.3115 5.72117 10.8907 4.61638 11.7531 3.75395C12.6155 2.89151 13.7203 2.31239 14.9202 2.09377C16.1201 1.87514 17.3582 2.02739 18.4694 2.53022L14.6994 6.30022Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M14.6994 6.30022C14.5161 6.48715 14.4135 6.73847 14.4135 7.00022C14.4135 7.26198 14.5161 7.51329 14.6994 7.70022L16.2994 9.30022C16.4863 9.48345 16.7376 9.58608 16.9994 9.58608C17.2611 9.58608 17.5124 9.48345 17.6994 9.30022L21.4694 5.53022C21.9722 6.64141 22.1244 7.87946 21.9058 9.07937C21.6872 10.2793 21.1081 11.3841 20.2456 12.2465C19.3832 13.1089 18.2784 13.6881 17.0785 13.9067C15.8786 14.1253 14.6406 13.9731 13.5294 13.4702L6.61937 20.3802C6.22154 20.778 5.68198 21.0015 5.11937 21.0015C4.55676 21.0015 4.01719 20.778 3.61937 20.3802C3.22154 19.9824 2.99805 19.4428 2.99805 18.8802C2.99805 18.3176 3.22154 17.778 3.61937 17.3802L10.5294 10.4702C10.0265 9.35904 9.87428 8.12099 10.0929 6.92108C10.3115 5.72117 10.8907 4.61638 11.7531 3.75395C12.6155 2.89151 13.7203 2.31239 14.9202 2.09377C16.1201 1.87514 17.3582 2.02739 18.4694 2.53022L14.6994 6.30022Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     discounts: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M15 9L9 15M9 9H9.01M15 15H15.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M15 9L9 15M9 9H9.01M15 15H15.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     freemium: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 7.99995V20.9999M12 7.99995C11.6383 6.50935 11.0154 5.23501 10.2127 4.34311C9.41003 3.45121 8.46469 2.98314 7.5 2.99995C6.83696 2.99995 6.20107 3.26334 5.73223 3.73218C5.26339 4.20102 5 4.83691 5 5.49995C5 6.16299 5.26339 6.79887 5.73223 7.26772C6.20107 7.73656 6.83696 7.99995 7.5 7.99995M12 7.99995C12.3617 6.50935 12.9846 5.23501 13.7873 4.34311C14.59 3.45121 15.5353 2.98314 16.5 2.99995C17.163 2.99995 17.7989 3.26334 18.2678 3.73218C18.7366 4.20102 19 4.83691 19 5.49995C19 6.16299 18.7366 6.79887 18.2678 7.26772C17.7989 7.73656 17.163 7.99995 16.5 7.99995M19 11.9999V18.9999C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7892 17.5304 20.9999 17 20.9999H7C6.46957 20.9999 5.96086 20.7892 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 18.9999V11.9999M4 7.99995H20C20.5523 7.99995 21 8.44766 21 8.99995V10.9999C21 11.5522 20.5523 11.9999 20 11.9999H4C3.44772 11.9999 3 11.5522 3 10.9999V8.99995C3 8.44766 3.44772 7.99995 4 7.99995Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 7.99995V20.9999M12 7.99995C11.6383 6.50935 11.0154 5.23501 10.2127 4.34311C9.41003 3.45121 8.46469 2.98314 7.5 2.99995C6.83696 2.99995 6.20107 3.26334 5.73223 3.73218C5.26339 4.20102 5 4.83691 5 5.49995C5 6.16299 5.26339 6.79887 5.73223 7.26772C6.20107 7.73656 6.83696 7.99995 7.5 7.99995M12 7.99995C12.3617 6.50935 12.9846 5.23501 13.7873 4.34311C14.59 3.45121 15.5353 2.98314 16.5 2.99995C17.163 2.99995 17.7989 3.26334 18.2678 3.73218C18.7366 4.20102 19 4.83691 19 5.49995C19 6.16299 18.7366 6.79887 18.2678 7.26772C17.7989 7.73656 17.163 7.99995 16.5 7.99995M19 11.9999V18.9999C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7892 17.5304 20.9999 17 20.9999H7C6.46957 20.9999 5.96086 20.7892 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 18.9999V11.9999M4 7.99995H20C20.5523 7.99995 21 8.44766 21 8.99995V10.9999C21 11.5522 20.5523 11.9999 20 11.9999H4C3.44772 11.9999 3 11.5522 3 10.9999V8.99995C3 8.44766 3.44772 7.99995 4 7.99995Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     commitment: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M9 12H15M20 13C20 18 16.5 20.5 12.34 21.95C12.1222 22.0238 11.8855 22.0202 11.67 21.94C7.5 20.5 4 18 4 13V5.99996C4 5.73474 4.10536 5.48039 4.29289 5.29285C4.48043 5.10532 4.73478 4.99996 5 4.99996C7 4.99996 9.5 3.79996 11.24 2.27996C11.4519 2.09896 11.7214 1.99951 12 1.99951C12.2786 1.99951 12.5481 2.09896 12.76 2.27996C14.51 3.80996 17 4.99996 19 4.99996C19.2652 4.99996 19.5196 5.10532 19.7071 5.29285C19.8946 5.48039 20 5.73474 20 5.99996V13Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M9 12H15M20 13C20 18 16.5 20.5 12.34 21.95C12.1222 22.0238 11.8855 22.0202 11.67 21.94C7.5 20.5 4 18 4 13V5.99996C4 5.73474 4.10536 5.48039 4.29289 5.29285C4.48043 5.10532 4.73478 4.99996 5 4.99996C7 4.99996 9.5 3.79996 11.24 2.27996C11.4519 2.09896 11.7214 1.99951 12 1.99951C12.2786 1.99951 12.5481 2.09896 12.76 2.27996C14.51 3.80996 17 4.99996 19 4.99996C19.2652 4.99996 19.5196 5.10532 19.7071 5.29285C19.8946 5.48039 20 5.73474 20 5.99996V13Z" stroke="#D59026" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   };
 
   const SavedCheck = () => (
     <svg className="saved-check" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M5 10.5L8.5 14L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 10.5L8.5 14L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
   const btnClass = (state: SaveState) =>
@@ -585,7 +586,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
   useImperativeHandle(ref, () => ({
     saveAll: async (ratePlanId: number) => {
       const savePromises: Promise<any>[] = [];
-      
+
       if (setupFeePayload.setupFee > 0) {
         setRatePlanData('SETUP_FEE', setupFeePayload.setupFee.toString());
         savePromises.push(
@@ -601,11 +602,11 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
       } else {
         setRatePlanData('SETUP_FEE', '');
       }
-      
+
       if (discountForm.discountType && (discountForm.percentageDiscountStr || discountForm.flatDiscountAmountStr)) {
         const percentVal = Number(discountForm.percentageDiscountStr || 0);
         const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
-        
+
         if (discountForm.discountType === 'PERCENTAGE') {
           if (percentVal > 0) setRatePlanData('DISCOUNT_PERCENT', String(percentVal));
           setRatePlanData('DISCOUNT_FLAT', '');
@@ -613,19 +614,19 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
           if (flatVal > 0) setRatePlanData('DISCOUNT_FLAT', String(flatVal));
           setRatePlanData('DISCOUNT_PERCENT', '');
         }
-        
+
         const bulkDiscountPayload = {
           ...discountForm,
           percentageDiscount: percentVal,
           flatDiscountAmount: flatVal,
         };
-        
+
         console.log('💾 DISCOUNTS - Bulk save (Save & Next) with payload:', {
           ratePlanId,
           payload: bulkDiscountPayload,
           timestamp: new Date().toISOString()
         });
-        
+
         savePromises.push(
           saveDiscounts(ratePlanId, bulkDiscountPayload).then(() => {
             console.log('✅ DISCOUNTS - Bulk save successful:', {
@@ -651,7 +652,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         setRatePlanData('DISCOUNT_PERCENT', '');
         setRatePlanData('DISCOUNT_FLAT', '');
       }
-      
+
       const buildFreemiumPayload = (): FreemiumPayload => {
         // ensure we normalize to API token even if UI token sneaks in
         const apiType = uiToApiFreemium(freemiumPayload.freemiumType);
@@ -670,16 +671,16 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         setRatePlanData('FREEMIUM_TYPE', apiToUiFreemium(freemiumPayload.freemiumType));
         setRatePlanData('FREEMIUM_UNITS', freemiumPayload.freeUnits ? String(freemiumPayload.freeUnits) : '');
         setRatePlanData('FREE_TRIAL_DURATION', freemiumPayload.freeTrialDuration ? String(freemiumPayload.freeTrialDuration) : '');
-        
+
         const cleanFreemium = buildFreemiumPayload();
-        
+
         console.log('💾 FREEMIUM - Bulk save (Save & Next) with payload:', {
           ratePlanId,
           payload: cleanFreemium,
           originalPayload: freemiumPayload,
           timestamp: new Date().toISOString()
         });
-        
+
         savePromises.push(
           saveFreemiums(ratePlanId, cleanFreemium).then(() => {
             console.log('✅ FREEMIUM - Bulk save successful:', {
@@ -706,20 +707,20 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         setRatePlanData('FREEMIUM_UNITS', '');
         setRatePlanData('FREE_TRIAL_DURATION', '');
       }
-      
+
       if (minimumUsage || minimumCharge) {
         const payload = {
           minimumUsage: minimumUsage ? +minimumUsage : 0,
           minimumCharge: minimumCharge ? +minimumCharge : 0,
         };
-        
+
         setRatePlanData('MINIMUM_USAGE', String(payload.minimumUsage));
         if (payload.minimumCharge > 0) {
           setRatePlanData('MINIMUM_CHARGE', String(payload.minimumCharge));
         } else {
           setRatePlanData('MINIMUM_CHARGE', '');
         }
-        
+
         savePromises.push(
           saveMinimumCommitment(ratePlanId, payload).catch((err: any) => {
             console.error('Minimum commitment save failed:', err);
@@ -734,7 +735,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
         setRatePlanData('MINIMUM_USAGE', '');
         setRatePlanData('MINIMUM_CHARGE', '');
       }
-      
+
       await Promise.all(savePromises);
     },
   }));
@@ -764,6 +765,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 });
               }}
               placeholder="$0"
+              disabled={locked}
             />
 
             <label>Application Timing</label>
@@ -778,6 +780,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 });
               }}
               placeholder="0"
+              disabled={locked}
             />
 
             <label>Invoice Description</label>
@@ -785,12 +788,13 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               value={setupFeePayload.invoiceDescription}
               onChange={(val) => setSetupFeePayload({ ...setupFeePayload, invoiceDescription: val })}
               placeholder="Invoice Description"
+              disabled={locked}
             />
 
             <button
               type="button"
               className={btnClass(saveState.setupFee)}
-              disabled={!ratePlanId || saveState.setupFee === 'saving'}
+              disabled={locked || !ratePlanId || saveState.setupFee === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, setupFee: 'saving' }));
@@ -847,6 +851,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 { label: 'PERCENTAGE', value: 'PERCENTAGE' },
                 { label: 'FLAT', value: 'FLAT' },
               ]}
+              disabled={locked}
             />
 
             {/* Show only the relevant input */}
@@ -856,8 +861,9 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="number"
                   value={discountForm.percentageDiscountStr}
-                  onChange={(val)=> setDiscountForm({ ...discountForm, percentageDiscountStr: val })}
+                  onChange={(val) => setDiscountForm({ ...discountForm, percentageDiscountStr: val })}
                   placeholder="e.g., 10"
+                  disabled={locked}
                 />
               </>
             )}
@@ -868,8 +874,9 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="number"
                   value={discountForm.flatDiscountAmountStr}
-                  onChange={(val)=> setDiscountForm({ ...discountForm, flatDiscountAmountStr: val })}
+                  onChange={(val) => setDiscountForm({ ...discountForm, flatDiscountAmountStr: val })}
                   placeholder="e.g., 50"
+                  disabled={locked}
                 />
               </>
             )}
@@ -878,8 +885,9 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
             <InputField
               type="text"
               value={discountForm.eligibility}
-              onChange={(val)=> setDiscountForm({ ...discountForm, eligibility: val })}
+              onChange={(val) => setDiscountForm({ ...discountForm, eligibility: val })}
               placeholder="e.g. new users"
+              disabled={locked}
             />
 
             <label>Validity Period</label>
@@ -889,7 +897,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="date"
                   value={discountForm.startDate}
-                  onChange={(val)=> setDiscountForm({ ...discountForm, startDate: val })}
+                  onChange={(val) => setDiscountForm({ ...discountForm, startDate: val })}
+                  disabled={locked}
                 />
               </div>
               <div className="date-input">
@@ -897,7 +906,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="date"
                   value={discountForm.endDate}
-                  onChange={(val)=> setDiscountForm({ ...discountForm, endDate: val })}
+                  onChange={(val) => setDiscountForm({ ...discountForm, endDate: val })}
+                  disabled={locked}
                 />
               </div>
             </div>
@@ -905,20 +915,20 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
             <button
               type="button"
               className={btnClass(saveState.discounts)}
-              disabled={!ratePlanId || saveState.discounts === 'saving'}
+              disabled={locked || !ratePlanId || saveState.discounts === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, discounts: 'saving' }));
-                
+
                 const percentVal = Number(discountForm.percentageDiscountStr || 0);
                 const flatVal = Number(discountForm.flatDiscountAmountStr || 0);
-                
+
                 const discountPayload = {
                   ...discountForm,
                   percentageDiscount: percentVal,
                   flatDiscountAmount: flatVal,
                 };
-                
+
                 try {
                   if (discountForm.discountType === 'PERCENTAGE') {
                     if (percentVal > 0) setRatePlanData('DISCOUNT_PERCENT', String(percentVal));
@@ -927,15 +937,15 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                     if (flatVal > 0) setRatePlanData('DISCOUNT_FLAT', String(flatVal));
                     setRatePlanData('DISCOUNT_PERCENT', '');
                   }
-                  
+
                   console.log('💾 DISCOUNTS - Saving individual discount with payload:', {
                     ratePlanId,
                     payload: discountPayload,
                     timestamp: new Date().toISOString()
                   });
-                  
+
                   await saveDiscounts(ratePlanId, discountPayload);
-                  
+
                   console.log('✅ DISCOUNTS - Individual save successful:', {
                     ratePlanId,
                     payload: discountPayload,
@@ -993,6 +1003,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 { label: 'Free Trial Duration', value: 'FREE_TRIAL_DURATION' },
                 { label: 'Free Units for Duration', value: 'FREE_UNITS_PER_DURATION' },
               ]}
+              disabled={locked}
             />
 
             {(freemiumType === 'FREE_UNITS' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
@@ -1001,13 +1012,14 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="number"
                   value={freemiumPayload.freeUnits === 0 ? '' : String(freemiumPayload.freeUnits)}
-                  onChange={(val)=>{
+                  onChange={(val) => {
                     setFreemiumPayload({
                       ...freemiumPayload,
                       freeUnits: val.trim() === '' ? 0 : Number(val),
                     });
                   }}
                   placeholder="Enter Free Units"
+                  disabled={locked}
                 />
               </>
             )}
@@ -1018,13 +1030,14 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="number"
                   value={freemiumPayload.freeTrialDuration === 0 ? '' : String(freemiumPayload.freeTrialDuration)}
-                  onChange={(val)=>{
+                  onChange={(val) => {
                     setFreemiumPayload({
                       ...freemiumPayload,
                       freeTrialDuration: val.trim() === '' ? 0 : Number(val),
                     });
                   }}
                   placeholder="Enter Trial Duration"
+                  disabled={locked}
                 />
               </>
             )}
@@ -1035,7 +1048,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="date"
                   value={freemiumPayload.startDate}
-                  onChange={(val)=> setFreemiumPayload({ ...freemiumPayload, startDate: val })}
+                  onChange={(val) => setFreemiumPayload({ ...freemiumPayload, startDate: val })}
+                  disabled={locked}
                 />
               </div>
               <div className="date-input">
@@ -1043,7 +1057,8 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                 <InputField
                   type="date"
                   value={freemiumPayload.endDate}
-                  onChange={(val)=> setFreemiumPayload({ ...freemiumPayload, endDate: val })}
+                  onChange={(val) => setFreemiumPayload({ ...freemiumPayload, endDate: val })}
+                  disabled={locked}
                 />
               </div>
             </div>
@@ -1051,17 +1066,17 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
             <button
               type="button"
               className={btnClass(saveState.freemium)}
-              disabled={!ratePlanId || saveState.freemium === 'saving'}
+              disabled={locked || !ratePlanId || saveState.freemium === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, freemium: 'saving' }));
-                
+
                 // UPDATED: always send canonical API token
                 const clean = {
                   ...freemiumPayload,
                   freemiumType: uiToApiFreemium(freemiumPayload.freemiumType),
                 } as FreemiumPayload;
-                
+
                 try {
                   // Persist UI type and numbers for back/forward navigation
                   setRatePlanData('FREEMIUM_TYPE', freemiumType);
@@ -1078,7 +1093,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
                   });
 
                   await saveFreemiums(ratePlanId, clean);
-                  
+
                   console.log('✅ FREEMIUM - Individual save successful:', {
                     ratePlanId,
                     payload: clean,
@@ -1122,11 +1137,11 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               type="number"
               placeholder="Enter usage"
               value={minimumUsage.replace(/^0+(?=\d)/, '')}
-              onChange={(val)=>{
+              onChange={(val) => {
                 setMinimumUsage(val.replace(/^0+(?=\d)/, ''));
                 if (val) setMinimumCharge('');
               }}
-              disabled={!!minimumCharge}
+              disabled={locked || !!minimumCharge}
             />
 
             <label>Minimum Charge</label>
@@ -1134,17 +1149,17 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData },
               type="number"
               placeholder="Enter charge"
               value={minimumCharge.replace(/^0+(?=\d)/, '')}
-              onChange={(val)=>{
+              onChange={(val) => {
                 setMinimumCharge(val.replace(/^0+(?=\d)/, ''));
                 if (val) setMinimumUsage('');
               }}
-              disabled={!!minimumUsage}
+              disabled={locked || !!minimumUsage}
             />
 
             <button
               type="button"
               className={btnClass(saveState.commitment)}
-              disabled={!ratePlanId || saveState.commitment === 'saving'}
+              disabled={locked || !ratePlanId || saveState.commitment === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, commitment: 'saving' }));

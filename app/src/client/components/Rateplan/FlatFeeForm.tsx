@@ -16,12 +16,13 @@ interface FlatFeeFormProps {
   data: FlatFeePayload;
   onChange: (payload: FlatFeePayload) => void;
   validationErrors?: Record<string, string>;
+  locked?: boolean;
 }
 
 const toNumber = (s: string): number => (s.trim() === '' ? NaN : Number(s));
 const numToStr = (n: number | undefined): string => (n && n !== 0 ? n.toString() : '');
 
-const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChange, validationErrors = {} }, ref) => {
+const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChange, validationErrors = {}, locked = false }, ref) => {
   const [flatFee, setFlatFee] = useState<string>(numToStr(data.flatFeeAmount));
   const [apiCalls, setApiCalls] = useState<string>(numToStr(data.numberOfApiCalls));
   const [overageRate, setOverageRate] = useState<string>(numToStr(data.overageUnitRate));
@@ -72,32 +73,32 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
 
   const handleChange =
     (setter: React.Dispatch<React.SetStateAction<string>>, key: 'flatFee' | 'api' | 'overage' | 'grace') =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value;
-      setter(val);
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setter(val);
 
-      // Write to sessionStorage live (kept from your original logic)
-      if (key === 'flatFee') setRatePlanData('FLAT_FEE_AMOUNT', val);
-      else if (key === 'api') setRatePlanData('FLAT_FEE_API_CALLS', val);
-      else if (key === 'overage') setRatePlanData('FLAT_FEE_OVERAGE', val);
-      else if (key === 'grace') setRatePlanData('FLAT_FEE_GRACE', val);
+        // Write to sessionStorage live (kept from your original logic)
+        if (key === 'flatFee') setRatePlanData('FLAT_FEE_AMOUNT', val);
+        else if (key === 'api') setRatePlanData('FLAT_FEE_API_CALLS', val);
+        else if (key === 'overage') setRatePlanData('FLAT_FEE_OVERAGE', val);
+        else if (key === 'grace') setRatePlanData('FLAT_FEE_GRACE', val);
 
-      // Validate on change
-      const error = validateField(val, key);
-      setErrors(prev => {
-        const next = { ...prev };
-        if (error) next[key] = error;
-        else delete next[key];
-        return next;
-      });
+        // Validate on change
+        const error = validateField(val, key);
+        setErrors(prev => {
+          const next = { ...prev };
+          if (error) next[key] = error;
+          else delete next[key];
+          return next;
+        });
 
-      propagate(
-        key === 'flatFee' ? val : flatFee,
-        key === 'api' ? val : apiCalls,
-        key === 'overage' ? val : overageRate,
-        key === 'grace' ? val : graceBuffer
-      );
-    };
+        propagate(
+          key === 'flatFee' ? val : flatFee,
+          key === 'api' ? val : apiCalls,
+          key === 'overage' ? val : overageRate,
+          key === 'grace' ? val : graceBuffer
+        );
+      };
 
   const markTouched = (key: 'flatFee' | 'api' | 'overage' | 'grace') =>
     setTouched(t => ({ ...t, [key]: true }));
@@ -126,12 +127,13 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             onChange={handleChange(setFlatFee, 'flatFee')}
             onBlur={() => markTouched('flatFee')}
             className={touched.flatFee && errors.flatFee ? 'error-input' : undefined}
+            disabled={locked}
           />
           {touched.flatFee && errors.flatFee && <span className="error-text">{errors.flatFee}</span>}
           {validationErrors.flatFeeAmount && (
             <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
-                <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {validationErrors.flatFeeAmount}
             </div>
@@ -147,12 +149,13 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             onChange={handleChange(setApiCalls, 'api')}
             onBlur={() => markTouched('api')}
             className={touched.api && errors.api ? 'error-input' : undefined}
+            disabled={locked}
           />
           {touched.api && errors.api && <span className="error-text">{errors.api}</span>}
           {validationErrors.apiCalls && (
             <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
-                <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {validationErrors.apiCalls}
             </div>
@@ -168,12 +171,13 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             onChange={handleChange(setOverageRate, 'overage')}
             onBlur={() => markTouched('overage')}
             className={touched.overage && errors.overage ? 'error-input' : undefined}
+            disabled={locked}
           />
           {touched.overage && errors.overage && <span className="error-text">{errors.overage}</span>}
           {validationErrors.overageRate && (
             <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
-                <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {validationErrors.overageRate}
             </div>
@@ -188,6 +192,7 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             value={graceBuffer}
             onChange={handleChange(setGraceBuffer, 'grace')}
             onBlur={() => markTouched('grace')}
+            disabled={locked}
           />
         </label>
       </div>

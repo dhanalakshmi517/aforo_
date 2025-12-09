@@ -28,6 +28,7 @@ interface VolumeProps {
   graceBuffer: number;
   setGraceBuffer: (val: number) => void;
   validationErrors?: Record<string, string>;
+  locked?: boolean;
 }
 
 const Volume = forwardRef<VolumeHandle, VolumeProps>(({
@@ -42,6 +43,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
   graceBuffer,
   setGraceBuffer,
   validationErrors = {},
+  locked = false,
 }, ref) => {
   const [tierErrors, setTierErrors] = useState<TierError[]>([]);
   const [tierTouched, setTierTouched] = useState<TierTouched[]>([]);
@@ -198,6 +200,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   onChange={(e) => onChange(index, 'from', e.target.value)}
                   onBlur={() => markTouched(index, 'from')}
                   placeholder="From"
+                  disabled={locked}
                 />
                 {touched.from && error.from && <span className="error-text">{error.from}</span>}
               </div>
@@ -209,7 +212,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   className={`tiered-input-small ${touched.to && error.to ? 'error-input' : ''}`}
                   value={unlimitedForRow ? 'Unlimited' : (Number.isNaN(tier.to) ? '' : tier.to)}
                   placeholder="To"
-                  disabled={unlimitedForRow}
+                  disabled={unlimitedForRow || locked}
                   onChange={(e) => onChange(index, 'to', e.target.value)}
                   onBlur={() => markTouched(index, 'to')}
                 />
@@ -224,6 +227,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   onChange={(e) => onChange(index, 'price', e.target.value)}
                   onBlur={() => markTouched(index, 'price')}
                   placeholder="Price"
+                  disabled={locked}
                 />
                 {touched.price && error.price && <span className="error-text">{error.price}</span>}
               </div>
@@ -233,11 +237,12 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   className="tiered-delete-btn"
                   onClick={() => onDeleteTier(index)}
                   title="Delete tier"
+                  disabled={locked}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                       viewBox="0 0 16 16" fill="none">
+                    viewBox="0 0 16 16" fill="none">
                     <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335"
-                          stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               )}
@@ -266,13 +271,14 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 setOverageError(null);
               }
             }}
+            disabled={locked}
           />
           <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-               viewBox="0 0 24 24" fill="none">
+            viewBox="0 0 24 24" fill="none">
             <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z"
-                  stroke="#E6E5E6" strokeWidth="1.2" />
+              stroke="#E6E5E6" strokeWidth="1.2" />
             <path className="tick" d="M8 12.5L10.5 15L16 9.5" stroke="#4C7EFF"
-                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span>No upper limit for last tier</span>
         </label>
@@ -289,13 +295,14 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 value={overageUnitRate}
                 onChange={(e) => setOverageUnitRate(parseFloat(e.target.value) || 0)}
                 onBlur={() => setOverageTouched(true)}
+                disabled={locked}
               />
               {/* Only show overage errors when NOT unlimited */}
               {!noUpperLimit && overageTouched && overageError && <span className="error-text">{overageError}</span>}
               {!noUpperLimit && validationErrors.volumeOverage && (
                 <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
-                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {validationErrors.volumeOverage}
                 </div>
@@ -309,19 +316,20 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 placeholder="Enter grace buffer"
                 value={graceBuffer}
                 onChange={(e) => setGraceBuffer(parseFloat(e.target.value) || 0)}
+                disabled={locked}
               />
             </label>
           </div>
         )}
 
-        <button className="tiered-add-btn" onClick={onAddTier}>
+        <button className="tiered-add-btn" onClick={onAddTier} disabled={locked}>
           + Add Volume Tier
         </button>
 
         {validationErrors.volumeTiers && (
           <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
-              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {validationErrors.volumeTiers}
           </div>

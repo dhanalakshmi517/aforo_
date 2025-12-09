@@ -17,7 +17,8 @@
 
 .usage-left {
   flex: 1 1 auto;
-  flex: 1 1 60%; /* flexible, shrinks on small screens */
+  flex: 1 1 60%;
+  /* flexible, shrinks on small screens */
   min-width: 200px;
   display: flex;
   flex-direction: column;
@@ -47,7 +48,8 @@
   border-radius: var(--border-radius-lg);
   padding: 16px;
   border: 1px solid var(--color-neutral-200);
-  flex: 1 1 40%; /* flexible share */
+  flex: 1 1 40%;
+  /* flexible share */
   min-width: 260px;
 }
 
@@ -88,4 +90,10 @@
   line-height: 16px;
   margin-top: 4px;
   display: block;
+}
+
+/* Disabled input styling */
+.usage-container input:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
 }

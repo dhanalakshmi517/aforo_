@@ -11,11 +11,12 @@ interface UsageBasedProps {
   data: UsagePayload;
   onChange: (payload: UsagePayload) => void;
   validationErrors?: Record<string, string>;
+  locked?: boolean;
 }
 
 const numToStr = (n: number | undefined): string => (n && n !== 0 ? n.toString() : '');
 
-const UsageBased = forwardRef<UsageBasedHandle, UsageBasedProps>(({ data, onChange, validationErrors = {} }, ref) => {
+const UsageBased = forwardRef<UsageBasedHandle, UsageBasedProps>(({ data, onChange, validationErrors = {}, locked = false }, ref) => {
   const [unitAmount, setUnitAmount] = useState<string>(numToStr(data.perUnitAmount));
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState<boolean>(false);
@@ -65,6 +66,7 @@ const UsageBased = forwardRef<UsageBasedHandle, UsageBasedProps>(({ data, onChan
           onChange={handleChange}
           onBlur={() => setTouched(true)}
           placeholder="0.10"
+          disabled={locked}
         />
         {touched && error && <span className="error-text">{error}</span>}
         {validationErrors.perUnitAmount && (

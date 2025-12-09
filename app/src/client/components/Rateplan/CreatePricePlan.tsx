@@ -930,6 +930,7 @@ const CreatePricePlan = React.forwardRef<
                 clearErrorIfValid("billableMetric", id !== null);
                 onFieldChange?.();
               }}
+              locked={isStep1Locked}
             />
             {errors.billableMetric && (
               <div className="rate-np-error-message" style={{ marginTop: 10 }}>
@@ -947,11 +948,12 @@ const CreatePricePlan = React.forwardRef<
             validationErrors={errors}
             draftData={draftPricingData}
             isFreshCreation={isFreshCreation}
+            locked={isStep2Locked}
           />
         );
       case 3: {
         const extrasData = persistentDraftData || draftExtrasData || currentStepData;
-        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={extrasData} />;
+        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={extrasData} locked={isStep3Locked} />;
       }
       case 4: {
         const planDetails = {

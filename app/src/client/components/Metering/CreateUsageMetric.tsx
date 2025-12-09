@@ -33,8 +33,8 @@ type ActiveTab = 'metric' | 'conditions' | 'review';
 
 const steps = [
   { id: 1, title: 'Define Metric & Aggregation', desc: 'Give your metric a name, set its unit, and connect it to the product or event source it will measure.' },
-  { id: 2, title: 'Usage Conditions',            desc: 'Define how usage is calculated — set thresholds, group data, and apply any rules needed for billing.' },
-  { id: 3, title: 'Review & Confirm',            desc: 'Review your setup to make sure everything is correct before saving the metric.' }
+  { id: 2, title: 'Usage Conditions', desc: 'Define how usage is calculated — set thresholds, group data, and apply any rules needed for billing.' },
+  { id: 3, title: 'Review & Confirm', desc: 'Review your setup to make sure everything is correct before saving the metric.' }
 ];
 
 interface CreateUsageMetricProps { onClose: () => void; draftMetricId?: number; }
@@ -55,13 +55,13 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       onClose();
       return;
     }
-    
+
     if (!metricId) {
       // This is a new metric that was never saved - just navigate back
       onClose();
       return;
     }
-    
+
     // This is a finalized metric - delete it from database
     try {
       await deleteUsageMetric(metricId);
@@ -130,7 +130,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         console.log('Fetching metric with ID:', activeMetricId);
         const data = await getUsageMetric(activeMetricId);
         console.log('API Response:', JSON.stringify(data, null, 2));
-        
+
         if (data) {
           console.log('Setting form state with data:', {
             metricId: (data as any).metricId ?? (data as any).billableMetricId ?? null,
@@ -246,8 +246,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     if (step === 1) {
       const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
       if (!first.dimension) step1CondErrors['0.dimension'] = 'Dimension is required';
-      if (!first.operator)  step1CondErrors['0.operator']  = 'Operator is required';
-      if (!first.value)     step1CondErrors['0.value']     = 'Value is required';
+      if (!first.operator) step1CondErrors['0.operator'] = 'Operator is required';
+      if (!first.value) step1CondErrors['0.value'] = 'Value is required';
 
       const nextErrors = { ...errors };
       if (!billingCriteria) nextErrors.billingCriteria = 'Billing criteria is required';
@@ -271,13 +271,13 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     return true;
   };
 
-  const clean = (obj:any)=>{
-    const out:any={};
-    Object.entries(obj).forEach(([k,v])=>{
+  const clean = (obj: any) => {
+    const out: any = {};
+    Object.entries(obj).forEach(([k, v]) => {
       if (v === undefined || v === null) return;
       if (typeof v === 'string' && v.trim() === '') return;
       if (Array.isArray(v) && v.length === 0) return;
-      out[k]=v;
+      out[k] = v;
     });
     return out;
   };
@@ -285,7 +285,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const buildPayload = (isDraft: boolean) => {
     // When billing excludes usage conditions, don't send any usage conditions
     const shouldIncludeUsageConditions = billingCriteria !== 'BILL_EXCLUDING_USAGE_CONDITIONS';
-    
+
     if (metricId) {
       const payload: any = {
         metricId,
@@ -306,27 +306,27 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       const payload: any = {
         usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
       };
-      if (metricName.trim())         payload.metricName = metricName.trim();
-      if (selectedProductId)         payload.productId = Number(selectedProductId);
-      if (version.trim())            payload.version = version.trim();
-      if (unitOfMeasure.trim())      payload.unitOfMeasure = unitOfMeasure.trim();
-      if (description.trim())        payload.description = description.trim();
-      if (aggregationFunction)       payload.aggregationFunction = aggregationFunction;
-      if (aggregationWindow)         payload.aggregationWindow = aggregationWindow;
-      if (billingCriteria)           payload.billingCriteria = billingCriteria;
+      if (metricName.trim()) payload.metricName = metricName.trim();
+      if (selectedProductId) payload.productId = Number(selectedProductId);
+      if (version.trim()) payload.version = version.trim();
+      if (unitOfMeasure.trim()) payload.unitOfMeasure = unitOfMeasure.trim();
+      if (description.trim()) payload.description = description.trim();
+      if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
+      if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
+      if (billingCriteria) payload.billingCriteria = billingCriteria;
       return clean(payload);
     }
 
     return {
-      metricName:          metricName.trim(),
-      productId:           Number(selectedProductId),
-      version:             version.trim(),
-      unitOfMeasure:       unitOfMeasure.trim(),
-      description:         description.trim(),
+      metricName: metricName.trim(),
+      productId: Number(selectedProductId),
+      version: version.trim(),
+      unitOfMeasure: unitOfMeasure.trim(),
+      description: description.trim(),
       aggregationFunction,
       aggregationWindow,
-      billingCriteria:     billingCriteria || undefined,
-      usageConditions:     shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
+      billingCriteria: billingCriteria || undefined,
+      usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
     };
   };
 
@@ -416,11 +416,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     try {
       setIsDraftSaving(true);
       setIsDraftSaved(false);
-      
+
       console.log('Saving draft, current metricId:', metricId);
       const payload = buildPayload(true);
       console.log('Draft payload:', JSON.stringify(payload, null, 2));
-      
+
       let ok;
       if (metricId) {
         console.log('Updating existing draft with ID:', metricId);
@@ -433,7 +433,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           setMetricId(response.id);
         }
       }
-      
+
       if (ok) {
         setIsDraftSaved(true);
         return true;
@@ -470,10 +470,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       aria-label="Locked"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
   );
+
 
   return (
     <>
@@ -544,7 +545,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                           <div className="met-np-grid-2">
                             {/* fields ... (unchanged) */}
-                            <InputField label="Metric Name" value={metricName} onChange={setMetricName} placeholder="eg. API Calls" error={errors.metricName}/>
+                            <InputField label="Metric Name" value={metricName} onChange={setMetricName} placeholder="eg. API Calls" error={errors.metricName} />
                             <div className="form-group">
                               <SelectField
                                 label="Product"
@@ -565,8 +566,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 className="select-product"
                               />
                             </div>
-                            <InputField label="Version (optional)" value={version} onChange={setVersion} placeholder="eg. v2.0"/>
-                            <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month"/>
+                            <InputField label="Version (optional)" value={version} onChange={setVersion} placeholder="eg. v2.0" />
+                            <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" />
 
                             <div className="met-np-field">
                               {(() => {
@@ -635,11 +636,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                             <div className="met-np-field">
                               <AggregationWindowSelect
-                                label="Aggregation Window"  
+                                label="Aggregation Window"
                                 productType={selectedProductType}
                                 unitOfMeasure={unitOfMeasure}
                                 value={aggregationWindow}
-                                onChange={(v:string)=>{
+                                onChange={(v: string) => {
                                   setAggregationWindow(v);
                                   if (errors.aggregationWindow) {
                                     const { aggregationWindow, ...rest } = errors;
@@ -656,7 +657,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                       {/* STEP 2: CONDITIONS */}
                       {activeTab === 'conditions' && (
                         <section>
-                          <div className="met-np-section-header" style={{display:'flex',alignItems:'center'}}>
+                          <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
                             <h3 className="met-np-section-title">USAGE CONDITIONS</h3>
                             {isConditionsLocked && <LockBadge />}
                           </div>
@@ -698,7 +699,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                     </div>
 
                     {/* FOOTER */}
-                    <div className="met-np-form-footer" style={{position:'relative'}}>
+                    <div className="met-np-form-footer" style={{ position: 'relative' }}>
                       {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
 
                       {activeTab === 'metric' && (
