@@ -222,3 +222,11 @@
 .saved-check {
   display: inline-block;
 }
+/* Disabled styling for inputs, buttons, and selects */
+.extras-container input:disabled,
+.extras-container textarea:disabled,
+.extras-container select:disabled,
+.extras-container button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}

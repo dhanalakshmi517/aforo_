@@ -494,8 +494,45 @@ const CreatePricePlan = React.forwardRef<
     setCurrentStep(index);
   };
 
+  // ===== Validation: Check if any meaningful data has been entered =====
+  const hasAnyMeaningfulData = useCallback((): boolean => {
+    // Check basic fields
+    if (planName.trim()) return true;
+    if (planDescription.trim()) return true;
+    if (selectedProductName && products.find(p => p.productName === selectedProductName)) return true;
+    if (billingFrequency) return true;
+    if (paymentMethod) return true;
+    if (selectedMetricId !== null) return true;
+
+    // Check session storage for pricing data
+    const pricingModel = getRatePlanData('PRICING_MODEL');
+    if (pricingModel) return true;
+
+    // Check session storage for extras data
+    const setupFee = getRatePlanData('SETUP_FEE');
+    if (setupFee && Number(setupFee) > 0) return true;
+
+    const discountType = getRatePlanData('DISCOUNT_TYPE');
+    if (discountType) return true;
+
+    const freemiumType = getRatePlanData('FREEMIUM_TYPE');
+    if (freemiumType) return true;
+
+    const minUsage = getRatePlanData('MINIMUM_USAGE');
+    const minCharge = getRatePlanData('MINIMUM_CHARGE');
+    if (minUsage || minCharge) return true;
+
+    return false;
+  }, [planName, planDescription, selectedProductName, products, billingFrequency, paymentMethod, selectedMetricId]);
+
   // ===== Save-as-Draft: always try to persist pricing (best-effort) =====
   const saveDraft = useCallback(async (): Promise<boolean> => {
+    // ✅ Validate: don't create empty drafts
+    if (!hasAnyMeaningfulData()) {
+      console.warn('⚠️ Cannot save empty draft - no data entered');
+      return false; // Indicate save was blocked
+    }
+
     setHasSavedAsDraft(true);
     setRatePlanData("CURRENT_STEP", currentStep.toString());
 
@@ -730,6 +767,7 @@ const CreatePricePlan = React.forwardRef<
     selectedMetricId,
     ratePlanId,
     products,
+    hasAnyMeaningfulData,
   ]);
 
   useEffect(() => {
