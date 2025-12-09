@@ -149,7 +149,7 @@
 
 
 .tiered-add-btn {
-  width: 186px ;
+  width: 186px;
   height: 40px;
   padding: 8px 20px;
   background-color: var(--color-primary-000);
@@ -239,3 +239,10 @@
   margin-top: 4px;
 }
 
+/* Disabled input/button cursor styling */
+.tiered-container input:disabled,
+.tiered-container button:disabled,
+.tiered-container input[type='checkbox']:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}

@@ -28,6 +28,7 @@ interface VolumeProps {
   graceBuffer: number;
   setGraceBuffer: (val: number) => void;
   validationErrors?: Record<string, string>;
+  locked?: boolean;
 }
 
 const Volume = forwardRef<VolumeHandle, VolumeProps>(({
@@ -42,6 +43,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
   graceBuffer,
   setGraceBuffer,
   validationErrors = {},
+  locked = false,
 }, ref) => {
   const [tierErrors, setTierErrors] = useState<TierError[]>([]);
   const [tierTouched, setTierTouched] = useState<TierTouched[]>([]);
@@ -198,6 +200,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   onChange={(e) => onChange(index, 'from', e.target.value)}
                   onBlur={() => markTouched(index, 'from')}
                   placeholder="From"
+                  disabled={locked}
                 />
                 {touched.from && error.from && <span className="error-text">{error.from}</span>}
               </div>
@@ -209,7 +212,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   className={`tiered-input-small ${touched.to && error.to ? 'error-input' : ''}`}
                   value={unlimitedForRow ? 'Unlimited' : (Number.isNaN(tier.to) ? '' : tier.to)}
                   placeholder="To"
-                  disabled={unlimitedForRow}
+                  disabled={unlimitedForRow || locked}
                   onChange={(e) => onChange(index, 'to', e.target.value)}
                   onBlur={() => markTouched(index, 'to')}
                 />
@@ -224,6 +227,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   onChange={(e) => onChange(index, 'price', e.target.value)}
                   onBlur={() => markTouched(index, 'price')}
                   placeholder="Price"
+                  disabled={locked}
                 />
                 {touched.price && error.price && <span className="error-text">{error.price}</span>}
               </div>
@@ -233,6 +237,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                   className="tiered-delete-btn"
                   onClick={() => onDeleteTier(index)}
                   title="Delete tier"
+                  disabled={locked}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                     viewBox="0 0 16 16" fill="none">
@@ -266,6 +271,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 setOverageError(null);
               }
             }}
+            disabled={locked}
           />
           <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
             viewBox="0 0 24 24" fill="none">
@@ -289,6 +295,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 value={overageUnitRate}
                 onChange={(e) => setOverageUnitRate(parseFloat(e.target.value) || 0)}
                 onBlur={() => setOverageTouched(true)}
+                disabled={locked}
               />
               {/* Only show overage errors when NOT unlimited */}
               {!noUpperLimit && overageTouched && overageError && <span className="error-text">{overageError}</span>}
@@ -309,12 +316,13 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 placeholder="Enter grace buffer"
                 value={graceBuffer}
                 onChange={(e) => setGraceBuffer(parseFloat(e.target.value) || 0)}
+                disabled={locked}
               />
             </label>
           </div>
         )}
 
-        <button className="tiered-add-btn" onClick={onAddTier}>
+        <button className="tiered-add-btn" onClick={onAddTier} disabled={locked}>
           + Add Volume Tier
         </button>
 

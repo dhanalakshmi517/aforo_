@@ -25,6 +25,7 @@ interface TieredProps {
   validationErrors?: Record<string, string>;
   overageCharge?: string | number;
   graceBuffer?: string | number;
+  locked?: boolean;
 }
 
 const Tiered = forwardRef<TieredHandle, TieredProps>(({
@@ -37,6 +38,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   validationErrors = {},
   overageCharge: overageFromParent,
   graceBuffer: graceFromParent,
+  locked = false,
 }, ref) => {
   const [tiers, setTiers] = useState<Tier[]>(externalTiers ?? [{ from: '', to: '', price: '' }]);
   const [unlimited, setUnlimited] = useState(externalUnlimited ?? false);
@@ -260,6 +262,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                   onChange={(e) => handleChange(index, 'from', e.target.value)}
                   onBlur={() => markTouched(index, 'from')}
                   placeholder="From"
+                  disabled={locked}
                 />
                 {touched.from && error.from && <span className="error-text">{error.from}</span>}
               </div>
@@ -271,7 +274,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                   className={`tiered-input-small ${(!tier.isUnlimited && touched.to && error.to) ? 'error-input' : ''}`}
                   value={tier.isUnlimited ? 'Unlimited' : tier.to}
                   placeholder="To"
-                  disabled={!!tier.isUnlimited}
+                  disabled={!!tier.isUnlimited || locked}
                   onChange={(e) => handleChange(index, 'to', e.target.value)}
                   onBlur={() => markTouched(index, 'to')}
                 />
@@ -285,11 +288,12 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                   onChange={(e) => handleChange(index, 'price', e.target.value)}
                   onBlur={() => markTouched(index, 'price')}
                   placeholder="Price"
+                  disabled={locked}
                 />
                 {touched.price && error.price && <span className="error-text">{error.price}</span>}
               </div>
 
-              <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)} aria-label="Delete tier">
+              <button className="tiered-delete-btn" onClick={() => handleDeleteTier(index)} aria-label="Delete tier" disabled={locked}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -303,6 +307,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
             type="checkbox"
             checked={unlimited}
             onChange={(e) => handleUnlimitedToggle(e.target.checked)}
+            disabled={locked}
           />
           <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
@@ -322,6 +327,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 onChange={(e) => setOverageCharge(e.target.value)}
                 onBlur={() => setOverageTouched(true)}
                 placeholder="Enter overage charge"
+                disabled={locked}
               />
               {overageTouched && overageError && <span className="error-text">{overageError}</span>}
               {validationErrors.tieredOverage && (
@@ -341,12 +347,13 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 value={graceBuffer}
                 onChange={(e) => setGraceBuffer(e.target.value)}
                 placeholder="Enter grace buffer"
+                disabled={locked}
               />
             </label>
           </div>
         )}
 
-        <button className="tiered-add-btn" onClick={handleAddTier}>+ Add Volume Tier</button>
+        <button className="tiered-add-btn" onClick={handleAddTier} disabled={locked}>+ Add Volume Tier</button>
 
         {validationErrors.tieredTiers && (
           <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>

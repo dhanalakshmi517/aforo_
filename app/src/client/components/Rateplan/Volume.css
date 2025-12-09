@@ -5,19 +5,23 @@
   .volume-container {
     padding: 16px 12px;
   }
+
   .volume-input-small {
     width: 60px;
   }
+
   .volume-input-large {
     width: 120px;
   }
+
   .volume-example-section {
     margin-top: 16px;
   }
 }
 
 .volume-container {
-  flex-wrap: wrap; /* allow stacking on narrow screens */
+  flex-wrap: wrap;
+  /* allow stacking on narrow screens */
   display: flex;
   justify-content: space-between;
   background: var(--color-neutral-white);
@@ -147,7 +151,7 @@
 
 
 .volume-add-stair-btn {
-  width: 186px ;
+  width: 186px;
   height: 40px;
   padding: 8px 20px;
   background-color: var(--color-primary-000);
@@ -166,14 +170,17 @@
 }
 
 .volume-example-section {
-  flex: 1 1 300px; /* grow but minimum 300px */
+  flex: 1 1 300px;
+  /* grow but minimum 300px */
   flex: 1;
   background: var(--color-info-100);
   border-radius: var(--border-radius-lg);
   padding: 16px;
   border: 1px solid var(--color-neutral-200);
-  max-width: 435px; width: 100%;
-  min-height: 300px; height: auto;
+  max-width: 435px;
+  width: 100%;
+  min-height: 300px;
+  height: auto;
 }
 
 .volume-example-section h4 {
@@ -248,3 +255,11 @@
   flex-direction: column;
   position: relative;
 }
+
+/* Disabled input/button cursor styling */
+.volume-container input:disabled,
+.volume-container button:disabled,
+.volume-container input[type='checkbox']:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}/* Note: Volume.css disabled styling uses .tiered-container because Volume.tsx uses className='tiered-container' */ 

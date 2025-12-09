@@ -16,12 +16,13 @@ interface FlatFeeFormProps {
   data: FlatFeePayload;
   onChange: (payload: FlatFeePayload) => void;
   validationErrors?: Record<string, string>;
+  locked?: boolean;
 }
 
 const toNumber = (s: string): number => (s.trim() === '' ? NaN : Number(s));
 const numToStr = (n: number | undefined): string => (n && n !== 0 ? n.toString() : '');
 
-const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChange, validationErrors = {} }, ref) => {
+const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChange, validationErrors = {}, locked = false }, ref) => {
   const [flatFee, setFlatFee] = useState<string>(numToStr(data.flatFeeAmount));
   const [apiCalls, setApiCalls] = useState<string>(numToStr(data.numberOfApiCalls));
   const [overageRate, setOverageRate] = useState<string>(numToStr(data.overageUnitRate));
@@ -126,6 +127,7 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             onChange={handleChange(setFlatFee, 'flatFee')}
             onBlur={() => markTouched('flatFee')}
             className={touched.flatFee && errors.flatFee ? 'error-input' : undefined}
+            disabled={locked}
           />
           {touched.flatFee && errors.flatFee && <span className="error-text">{errors.flatFee}</span>}
           {validationErrors.flatFeeAmount && (
@@ -147,6 +149,7 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             onChange={handleChange(setApiCalls, 'api')}
             onBlur={() => markTouched('api')}
             className={touched.api && errors.api ? 'error-input' : undefined}
+            disabled={locked}
           />
           {touched.api && errors.api && <span className="error-text">{errors.api}</span>}
           {validationErrors.apiCalls && (
@@ -168,6 +171,7 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             onChange={handleChange(setOverageRate, 'overage')}
             onBlur={() => markTouched('overage')}
             className={touched.overage && errors.overage ? 'error-input' : undefined}
+            disabled={locked}
           />
           {touched.overage && errors.overage && <span className="error-text">{errors.overage}</span>}
           {validationErrors.overageRate && (
@@ -188,6 +192,7 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             value={graceBuffer}
             onChange={handleChange(setGraceBuffer, 'grace')}
             onBlur={() => markTouched('grace')}
+            disabled={locked}
           />
         </label>
       </div>

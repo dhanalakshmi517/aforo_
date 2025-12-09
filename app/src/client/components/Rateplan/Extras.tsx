@@ -1159,7 +1159,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <button
               type="button"
               className={btnClass(saveState.commitment)}
-              disabled={!ratePlanId || saveState.commitment === 'saving'}
+              disabled={locked || !ratePlanId || saveState.commitment === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, commitment: 'saving' }));

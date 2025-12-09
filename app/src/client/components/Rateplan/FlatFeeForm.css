@@ -1,7 +1,7 @@
 @import "../Variables/Variables.css";
 
 /* ===== Container (aligned with UsageBased) ===== */
-.flat-fee-container{
+.flat-fee-container {
   display: flex;
   flex-wrap: nowrap;
   justify-content: flex-start;
@@ -18,7 +18,7 @@
 }
 
 /* Left side (fields) */
-.form-sections{
+.form-sections {
   flex: 1 1 60%;
   min-width: 200px;
   display: flex;
@@ -27,9 +27,9 @@
 }
 
 /* One field group */
-.form-section{ 
-  display: flex; 
-  flex-direction: column; 
+.form-section {
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   align-self: stretch;
@@ -37,7 +37,7 @@
 
 /* Label = body/bold/md */
 .form-section label,
-.ff-label span{
+.ff-label span {
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
@@ -53,7 +53,7 @@
 
 /* Inputs (match UsageBased styles) */
 .form-section input,
-.ff-label input{
+.ff-label input {
   width: 100%;
   height: 40px;
   padding: 8px 12px;
@@ -73,15 +73,16 @@
   font-weight: 400;
   line-height: var(--line-height-body-md);
 }
+
 .form-section input:focus,
-.ff-label input:focus{
+.ff-label input:focus {
   outline: none;
   border: 2px solid var(--primary-primary-6, #7C3AED);
 }
 
 /* Placeholder look */
 .form-section input::placeholder,
-.ff-label input::placeholder{
+.ff-label input::placeholder {
   color: var(--color-text-placeholder, #B3B9BF);
   font-family: var(--font-family-primary);
   font-size: 16px;
@@ -91,10 +92,11 @@
 }
 
 /* Validation feedback (red) */
-.error-input{
+.error-input {
   border-color: var(--color-danger-700, #E34935) !important;
 }
-.error-text{
+
+.error-text {
   color: var(--color-danger-700, #E34935);
   font-size: 12px;
   margin-top: 4px;
@@ -102,7 +104,7 @@
 }
 
 /* Right-side example card */
-.example-section{
+.example-section {
   flex: 1 1 40%;
   min-width: 260px;
   background: var(--color-info-100);
@@ -112,7 +114,8 @@
   width: 410px;
   height: 200px;
 }
-.example-section h4{
+
+.example-section h4 {
   margin: 0;
   color: var(--color-neutral-700);
   font-family: var(--font-family-primary);
@@ -122,7 +125,7 @@
   line-height: var(--line-height-body-lg);
 }
 
-.linklike{
+.linklike {
   background: none;
   border: none;
   color: var(--color-primary-900);
@@ -134,7 +137,7 @@
   text-decoration: underline;
 }
 
-.consumer-note{
+.consumer-note {
   margin-top: 1px;
   margin-bottom: 20px;
   color: var(--color-neutral-800);
@@ -151,8 +154,26 @@
 }
 
 /* Responsive parity with UsageBased */
-@media (max-width: 1024px){
-  .flat-fee-container{ flex-wrap: wrap; }
-  .form-sections{ flex-basis: 100%; order: 1; }
-  .example-section{ flex-basis: 100%; order: 2; width: 100%; height: auto; }
+@media (max-width: 1024px) {
+  .flat-fee-container {
+    flex-wrap: wrap;
+  }
+
+  .form-sections {
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .example-section {
+    flex-basis: 100%;
+    order: 2;
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* Disabled input styling */
+.flat-fee-container input:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
 }

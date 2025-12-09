@@ -21,10 +21,11 @@ interface StairStepProps {
   onStairsChange?: (stairs: Stair[]) => void;
   onOverageChange?: (val: string) => void;
   onGraceBufferChange?: (val: string) => void;
+  locked?: boolean;
 }
 
 const StairStep = forwardRef<StairStepHandle, StairStepProps>(
-  ({ validationErrors = {}, stairs: externalStairs, overageCharge: overageFromParent, graceBuffer: graceFromParent, onStairsChange, onOverageChange, onGraceBufferChange }, ref) => {
+  ({ validationErrors = {}, stairs: externalStairs, overageCharge: overageFromParent, graceBuffer: graceFromParent, onStairsChange, onOverageChange, onGraceBufferChange, locked = false }, ref) => {
     // hydrate from parent only once to prevent clobbering user edits on re-renders
     const hydrated = useRef(false);
 
@@ -248,6 +249,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                     onChange={(ev) => change(i, 'from', ev.target.value)}
                     onBlur={() => markTouched(i, 'from')}
                     placeholder="From"
+                    disabled={locked}
                   />
                   {t.from && e.from && <span className="error-text">{e.from}</span>}
                 </div>
@@ -259,7 +261,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                     className={`input-small ${t.to && e.to ? 'error-input' : ''}`}
                     value={row.isUnlimited ? 'Unlimited' : row.to}
                     placeholder="To"
-                    disabled={row.isUnlimited}
+                    disabled={row.isUnlimited || locked}
                     onChange={(ev) => change(i, 'to', ev.target.value)}
                     onBlur={() => markTouched(i, 'to')}
                   />
@@ -273,11 +275,12 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                     onChange={(ev) => change(i, 'cost', ev.target.value)}
                     onBlur={() => markTouched(i, 'cost')}
                     placeholder="Cost"
+                    disabled={locked}
                   />
                   {t.cost && e.cost && <span className="error-text">{e.cost}</span>}
                 </div>
 
-                <button className="delete-btn" onClick={() => deleteStair(i)} aria-label="Delete stair">
+                <button className="delete-btn" onClick={() => deleteStair(i)} aria-label="Delete stair" disabled={locked}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -291,6 +294,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
               type="checkbox"
               checked={unlimited}
               onChange={(e) => toggleUnlimited(e.target.checked, last)}
+              disabled={locked}
             />
             <svg className="checkbox-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
@@ -310,6 +314,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                   onChange={(e) => { setOverageCharge(e.target.value); pushOverageUp(e.target.value); }}
                   onBlur={() => setOverageTouched(true)}
                   placeholder="Enter overage charge"
+                  disabled={locked}
                 />
                 {overageTouched && overageError && <span className="error-text">{overageError}</span>}
                 {validationErrors.stairOverage && (
@@ -330,12 +335,13 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                   value={graceBuffer}
                   onChange={(e) => { setGraceBuffer(e.target.value); pushGraceUp(e.target.value); }}
                   placeholder="Enter grace buffer"
+                  disabled={locked}
                 />
               </label>
             </div>
           )}
 
-          <button className="add-stair-btn" onClick={addStair}>+ Add Stair</button>
+          <button className="add-stair-btn" onClick={addStair} disabled={locked}>+ Add Stair</button>
 
           {validationErrors.stairTiers && (
             <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>

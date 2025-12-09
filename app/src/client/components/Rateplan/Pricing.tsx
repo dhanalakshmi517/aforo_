@@ -503,7 +503,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
           }
         }
       }
-    }, [isFreshCreation, draftData, selected]);
+    }, [isFreshCreation, draftData]);
 
     useEffect(() => {
       console.log('💾 Pricing: Persisting selected model to session storage:', selected);
@@ -613,7 +613,6 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             className={`custom-select ${errors.select ? 'has-error' : ''}`}
             value={selected}
             onChange={e => {
-              if (locked) return;
               const v = e.target.value;
               console.log('🎯 Pricing: User selected pricing model:', v);
               setSelected(v);
@@ -621,8 +620,6 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }
             }}
-            disabled={locked}
-            style={{ cursor: locked ? 'not-allowed' : 'pointer', opacity: locked ? 0.6 : 1 }}
           >
             <option value="">Select a pricing model</option>
             <option value="Flat Fee">Flat Fee</option>
@@ -648,6 +645,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   data={flatFee}
                   onChange={setFlatFee}
                   validationErrors={validationErrors}
+                  locked={locked}
                 />
               </div>
               {errors.flatFee && <div className="inline-error">{errors.flatFee}</div>}
@@ -689,6 +687,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   validationErrors={validationErrors}
                   overageCharge={String(overageUnitRate || '')}
                   graceBuffer={String(graceBuffer || '')}
+                  locked={locked}
                 />
               </div>
               {errors.tiered && <div className="inline-error">{errors.tiered}</div>}
@@ -743,6 +742,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   setGraceBuffer={setGraceBuffer}
                   // ❌ don’t surface “volumeOverage” when unlimited
                   validationErrors={volumeValidationErrors}
+                  locked={locked}
                 />
               </div>
               {errors.volume && <div className="inline-error">{errors.volume}</div>}
@@ -782,6 +782,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                     setGraceBuffer(n === '' ? 0 : Number(n));
                     setRatePlanData('STAIR_GRACE', n);
                   }}
+                  locked={locked}
                 />
               </div>
               {errors.stair && <div className="inline-error">{errors.stair}</div>}
@@ -796,6 +797,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   data={usage}
                   onChange={setUsage}
                   validationErrors={validationErrors}
+                  locked={locked}
                 />
               </div>
               {errors.usage && <div className="inline-error">{errors.usage}</div>}
