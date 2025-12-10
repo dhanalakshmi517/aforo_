@@ -486,16 +486,27 @@ const DataIngestionPage: React.FC = () => {
             )}
 
             {activeTab === 'history' && (
-              <IngestionHistory rows={rows
-                .filter(row => row.status !== 'Staged') // Only include uploaded or failed files
-                .map((row, idx) => ({
-                  id: row.id,
-                  name: row.name,
-                  ingestionType: mode === "left" ? "Manual" : "API",
-                  ingestedOn: row.uploadedAt,
-                  status: row.status === "Uploaded" ? "Success" : "Failed",
-                  note: row.note,
-                }))} />
+              <IngestionHistory 
+                rows={rows
+                  .filter(row => row.status !== 'Staged') // Only include uploaded or failed files
+                  .map((row, idx) => ({
+                    id: row.id,
+                    name: row.name,
+                    ingestionType: mode === "left" ? "Manual" : "API",
+                    ingestedOn: row.uploadedAt,
+                    status: row.status === "Uploaded" ? "Success" : "Failed",
+                    note: row.note,
+                  }))}
+                showSmartDetection={showSmartDetection}
+                onSmartDetectionClose={() => setShowSmartDetection(false)}
+                onCheckboxChange={(checked: boolean) => {
+                  setDontShowAgain(checked);
+                  if (checked) {
+                    localStorage.setItem('hideSmartDetection', 'true');
+                  }
+                }}
+                dontShowAgain={dontShowAgain}
+              />
             )}
 
           </div>

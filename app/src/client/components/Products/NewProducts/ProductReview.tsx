@@ -45,7 +45,6 @@ const ProductReview: React.FC<ProductReviewProps> = ({
           key={section.title}
           title={section.title}
           rows={section.rows}
-          className="product-review-card"
         />
       ))}
     </div>

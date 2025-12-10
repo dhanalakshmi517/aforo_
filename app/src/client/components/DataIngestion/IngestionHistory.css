@@ -264,3 +264,17 @@
     font-size: var(--font-size-md);
     margin: 0;
   }
+
+  /* Data card wrapper for positioning context */
+  .data-card {
+    position: relative;
+  }
+
+  /* Smart Duplicate Detection in History */
+  .smart-detection-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+  }

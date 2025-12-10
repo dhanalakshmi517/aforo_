@@ -141,6 +141,13 @@ const TopBar: React.FC<TopBarProps> = ({
             )}
             </button>
           )}
+          
+          {save && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="1" height="34" viewBox="0 0 1 34" fill="none" className="af-topbar__separator" aria-hidden="true">
+              <path d="M0.5 0.5V33.5" stroke="#EEF1F6" strokeLinecap="round"/>
+            </svg>
+          )}
+          
            <button
           type="button"
           className="af-topbar__icon-btn"
