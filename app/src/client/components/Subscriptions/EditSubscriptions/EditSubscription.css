@@ -230,6 +230,9 @@ html, body, #root{
 
 .editsub-np-step.active {
   border-left-color: var(--color-primary-800);
+  border-left-width: 3px;
+  height: 35px;
+  margin-top: 8px;
 }
 
 /* Override active state when disabled */

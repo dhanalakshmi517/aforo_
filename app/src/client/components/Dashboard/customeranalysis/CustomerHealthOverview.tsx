@@ -106,8 +106,8 @@ const CustomerHealthOverview: React.FC = () => {
         nameKey="name"          // <-- add this
         startAngle={90}
         endAngle={-270}
-        innerRadius="55%"
-        outerRadius="80%"
+        innerRadius="45%"
+        outerRadius="85%"
         paddingAngle={2}
         cornerRadius={6}
       >
@@ -192,7 +192,7 @@ const CustomerHealthOverview: React.FC = () => {
           </div>
 
           <div className="ch-chart-wrapper">
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={healthTrendData}
                 margin={{ top: 10, right: 30, left: -15, bottom: 0 }}
@@ -228,7 +228,7 @@ const CustomerHealthOverview: React.FC = () => {
                 <Line
                   type="monotone"
                   dataKey="score"
-                  stroke="#5271FF"
+                  stroke="#6685CC"
                   strokeWidth={3}
                   dot={false}
                   activeDot={{

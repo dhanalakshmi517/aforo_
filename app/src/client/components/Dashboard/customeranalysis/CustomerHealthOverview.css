@@ -58,7 +58,7 @@ box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32p
 
 /* Left card */
 .ch-card-left {
-  max-width: 515px;
+  max-width: 530px;
 }
 
 .ch-card-top {
@@ -173,13 +173,8 @@ line-height: var(--line-height-body-lg, 24px); /* 150% */
 /* Right card */
 .ch-card-right {
   flex: 1 1 0;
-}
-
-.ch-right-top {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  flex-direction: column;
 }
 
 .ch-card-title-row {
@@ -229,10 +224,13 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */  cursor: pointer;
 
 .ch-chart-wrapper {
   margin-top: 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .ch-chart-footnote {
-  margin-top: 8px;
+  margin-top: 0;
   font-size: 11px;
   color: #6b7280;
 }

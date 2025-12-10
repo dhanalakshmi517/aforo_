@@ -1,3 +1,4 @@
+// CreateCustomer.tsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import TopBar from "../componenetsss/TopBar";
 import SaveDraft from "../componenetsss/SaveDraft";
@@ -196,10 +197,6 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
   }, [accountDetails]); // eslint-disable-line
 
   const gotoStep = (index: number) => setCurrentStep(index);
-  const handleBack = () => {
-    if (currentStep > 0) setCurrentStep(s => s - 1);
-    else setShowSaveDraftModal(true);
-  };
 
   const validateStep = async (s: number): Promise<boolean> => {
     if (s === 0) {
@@ -382,33 +379,38 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
     }
   };
 
+  const topActionsDisabled = !hasAnyRequiredInput && !customerId;
+
   return (
     <>
       <TopBar
         title="Create New Customer"
         onBack={() => {
-          if (hasAnyRequiredInput) {
+          if (hasAnyRequiredInput || customerId) {
             setShowSaveDraftModal(true);
           } else {
             onClose();
           }
         }}
-        cancel={{ onClick: () => setShowDeleteModal(true) }}
+        cancel={{
+          onClick: () => setShowDeleteModal(true),
+          disabled: topActionsDisabled,
+        }}
         save={{
           label: draftSaved ? "Saved!" : "Save as Draft",
           saving: isSavingDraft,
           saved: draftSaved,
-          disabled: isSubmitting,
+          disabled: isSubmitting || topActionsDisabled,
           onClick: handleSaveDraft,
         }}
       />
 
-      <div className="customer-np-viewport">
-        <div className="customer-np-card">
-          <div className="customer-np-grid">
+      <div className="cust-np-viewport">
+        <div className="cust-np-card">
+          <div className="cust-np-grid">
             {/* LEFT rail */}
-            <aside className="customer-np-rail">
-              <nav className="customer-np-steps">
+            <aside className="cust-np-rail">
+              <nav className="cust-np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
@@ -419,14 +421,14 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                       key={step.id}
                       type="button"
                       className={[
-                        "customer-np-step",
+                        "cust-np-step",
                         isActive ? "active" : "",
                         isCompleted ? "completed" : "",
                       ].join(" ").trim()}
                       onClick={() => gotoStep(i)}
                     >
-                      <span className="customer-np-step__bullet" aria-hidden="true">
-                        <span className="customer-np-step__icon">
+                      <span className="cust-np-step__bullet" aria-hidden="true">
+                        <span className="cust-np-step__icon">
                           {isCompleted ? (
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                               <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
@@ -439,12 +441,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                             </svg>
                           )}
                         </span>
-                        {showConnector && <span className="customer-np-step__connector" />}
+                        {showConnector && <span className="cust-np-step__connector" />}
                       </span>
 
-                      <span className="customer-np-step__text">
-                        <span className="customer-np-step__title">{step.title}</span>
-                        <span className="customer-np-step__desc">{step.desc}</span>
+                      <span className="cust-np-step__text">
+                        <span className="cust-np-step__title">{step.title}</span>
+                        <span className="cust-np-step__desc">{step.desc}</span>
                       </span>
                     </button>
                   );
@@ -453,19 +455,20 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
             </aside>
 
             {/* MAIN */}
-            <main className="customer-np-main">
-              <div className="customer-np-main__inner">
-                <div className="customer-np-body">
-                  <form className="customer-np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="customer-np-form-section">
+            <main className="cust-np-main">
+              <div className="af-skel-rule af-skel-rule--top" />
+              <div className="cust-np-main__inner">
+                <div className="cust-np-body">
+                  <form className="cust-np-form" onSubmit={(e) => e.preventDefault()}>
+                    <div className="cust-np-form-section">
                       {/* STEP 1: GENERAL */}
                       {activeTab === "general" && (
                         <section>
-                          <div className="customer-np-section-header">
-                            <h3 className="customer-np-section-title">CUSTOMER DETAILS</h3>
+                          <div className="cust-np-section-header">
+                            <h3 className="cust-np-section-title">CUSTOMER DETAILS</h3>
                           </div>
 
-                          <div className="customer-np-grid">
+                          <div className="cust-np-grid-2">
                             <InputField
                               label="Company Name"
                               value={companyName}
@@ -474,7 +477,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                               error={errors.companyName}
                             />
 
-                            <div className="customer-np-grid__full">
+                            <div className="cust-np-field">
                               <label className="customer-visually-hidden">Company Logo</label>
                               <LogoUploader
                                 logo={companyLogo}
@@ -512,8 +515,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                       {/* STEP 2: BILLING */}
                       {activeTab === "billing" && (
                         <section>
-                          <div className="customer-np-section-header" style={{display:'flex',alignItems:'center'}}>
-                            <h3 className="customer-np-section-title">Account Details</h3>
+                          <div className="cust-np-section-header" style={{display:'flex',alignItems:'center'}}>
+                            <h3 className="cust-np-section-title">ACCOUNT DETAILS</h3>
                             {isBillingLocked && <LockBadge />}
                           </div>
                           <AccountDetailsForm
@@ -532,8 +535,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                       {/* STEP 3: REVIEW */}
                       {activeTab === "review" && (
                         <section>
-                          <div className="customer-np-section-header">
-                            <h3 className="customer-np-section-title">REVIEW & CONFIRM</h3>
+                          <div className="cust-np-section-header">
+                            <h3 className="cust-np-section-title">REVIEW & CONFIRM</h3>
                           </div>
                           <CustomerReview
                             customerName={customerName}
@@ -546,11 +549,10 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                     </div>
 
                     {/* Footer actions */}
-                    <div className="customer-np-form-footer" style={{position:'relative'}}>
+                    <div className="cust-np-form-footer" style={{position:'relative'}}>
                       {activeTab === "billing" && isBillingLocked ? (
-                        // ONLY the hint when billing step is locked (no buttons)
                         <div
-                          className="customer-np-footer-hint"
+                          className="cust-np-footer-hint"
                           style={{
                             position: 'absolute',
                             left: '50%',
@@ -565,17 +567,21 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                           Fill the previous steps to unlock this step
                         </div>
                       ) : (
-                        // normal buttons when unlocked or not billing step
                         <>
                           {activeTab !== "general" && (
-                            <div className="customer-np-btn-group customer-np-btn-group--back">
-                              <SecondaryButton type="button" onClick={handleBack}>
+                            <div className="cus-np-btn-group cust-np-btn-group--back">
+                              <SecondaryButton
+                                type="button"
+                                onClick={() => {
+                                  if (currentStep > 0) setCurrentStep(s => s - 1);
+                                }}
+                              >
                                 Back
                               </SecondaryButton>
                             </div>
                           )}
 
-                          <div className="customer-np-btn-group customer-np-btn-group--next">
+                          <div className="cust-np-btn-group cust-np-btn-group--next">
                             <PrimaryButton
                               type="button"
                               onClick={handleNext}
@@ -590,6 +596,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                   </form>
                 </div>
               </div>
+
+              <div className="af-skel-rule af-skel-rule--bottom" />
             </main>
           </div>
         </div>

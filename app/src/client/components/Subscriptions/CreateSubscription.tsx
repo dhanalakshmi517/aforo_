@@ -1,5 +1,6 @@
+// CreateSubscription.tsx
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../componenetsss/TopBar";
@@ -7,11 +8,9 @@ import { useToast } from "../componenetsss/ToastProvider";
 import SaveDraft from "../componenetsss/SaveDraft";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
-import VerticalScrollbar from "../componenetsss/VerticalScrollbar";
-import "../Products/NewProducts/NewProduct.css";
-import "../componenetsss/SkeletonForm.css";
 
-import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs"; // align with NewProduct pattern
+import "../componenetsss/SkeletonForm.css";
+import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
 import {
@@ -21,22 +20,24 @@ import {
   Customer,
   Subscription as SubscriptionType,
 } from "./api";
+import '../componenetsss/SkeletonForm.css';
 
-import "./CreateSubscription.css"; // keep your CSS; class names now match np-* layout too
+import "./CreateSubscription.css"; // you can copy met-np-* styles here (or reuse Usagemetric.css)
 
 type StepId = 1 | 2;
 type PaymentKind = "PREPAID" | "POSTPAID";
+type ActiveTab = "details" | "review";
 
 const steps: Array<{ id: StepId; title: string; desc: string }> = [
   {
     id: 1,
     title: "Purchase Details",
-    desc: "provide purchase related details",
+    desc: "Provide purchase-related details.",
   },
   {
     id: 2,
     title: "Review & Confirm",
-    desc: "Check and Finalize details.",
+    desc: "Check and finalize details.",
   },
 ];
 
@@ -56,9 +57,6 @@ export default function CreateSubscription({
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [hasOverflow, setHasOverflow] = useState(false);
-  const formSectionRef = React.useRef<HTMLDivElement>(null);
 
   // data sources
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -72,129 +70,18 @@ export default function CreateSubscription({
   const [selectedProductName, setSelectedProductName] = useState("");
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
   const [selectedRatePlanName, setSelectedRatePlanName] = useState("");
-  const [paymentType, setPaymentType] = useState<PaymentKind | ''>('');
+  const [paymentType, setPaymentType] = useState<PaymentKind | "">("");
   const [planDescription, setPlanDescription] = useState("");
 
-  // flow state
-  const [currentStep, setCurrentStep] = useState(0); // 0-based like NewProduct
-
-  // Handle browser back button and add page class
-  useEffect(() => {
-    document.body.classList.add("create-product-page");
-
-    // Handle browser back button
-    const handleBackButton = (event: PopStateEvent) => {
-      event.preventDefault();
-      navigate('/get-started/subscriptions');
-    };
-
-    window.addEventListener('popstate', handleBackButton);
-    window.history.pushState(null, '', window.location.pathname);
-
-    return () => {
-      document.body.classList.remove("create-product-page");
-      window.removeEventListener('popstate', handleBackButton);
-    };
-  }, [navigate]);
-
-  // Track scroll position for custom scrollbar
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (formSectionRef.current) {
-        const isOverflowing = formSectionRef.current.scrollHeight > formSectionRef.current.clientHeight;
-        setHasOverflow(isOverflowing);
-      }
-    };
-
-    const handleScroll = () => {
-      if (formSectionRef.current) {
-        setScrollPosition(formSectionRef.current.scrollTop);
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    formSectionRef.current?.addEventListener('scroll', handleScroll);
-
-    // Also check after a small delay to ensure DOM is fully rendered
-    const timer = setTimeout(checkOverflow, 100);
-
-    return () => {
-      window.removeEventListener('resize', checkOverflow);
-      formSectionRef.current?.removeEventListener('scroll', handleScroll);
-      clearTimeout(timer);
-    };
-  }, [currentStep]);
-
-  // Handle draft data when component mounts or draftData changes
-  useEffect(() => {
-    if (draftData) {
-      // Set form fields from draft data
-      if (draftData.customerId) {
-        setSelectedCustomerId(draftData.customerId);
-        // Find and set customer name if available
-        const customer = customers.find(c => c.customerId === draftData.customerId);
-        if (customer) {
-          setSelectedCustomerName(customer.customerName || '');
-        }
-      }
-
-      if (draftData.productId) {
-        setSelectedProductId(draftData.productId);
-        // Find and set product name if available
-        const product = products.find(p => p.productId === draftData.productId);
-        if (product) {
-          setSelectedProductName(product.productName || '');
-        }
-      }
-
-      if (draftData.ratePlanId) {
-        setSelectedRatePlanId(draftData.ratePlanId);
-        // Find and set rate plan name if available
-        const ratePlan = ratePlans.find(rp => rp.ratePlanId === draftData.ratePlanId);
-        if (ratePlan) {
-          setSelectedRatePlanName(ratePlan.ratePlanName || '');
-        }
-      }
-
-      if (draftData.paymentType) {
-        const paymentType = draftData.paymentType === 'PREPAID' || draftData.paymentType === 'POSTPAID'
-          ? draftData.paymentType as PaymentKind
-          : undefined;
-        if (paymentType) {
-          setPaymentType(paymentType);
-        }
-      }
-
-      if (draftData.adminNotes) {
-        setPlanDescription(draftData.adminNotes);
-      }
-
-      // Set subscription ID if it exists
-      if (draftData.subscriptionId) {
-        setSubscriptionId(draftData.subscriptionId);
-      }
-    }
-  }, [draftData, customers, products, ratePlans]);
-
-  // Check if any required input has been entered (similar to CreateCustomer)
-  const hasAnyRequiredInput = React.useMemo(() => {
-    return Boolean(
-      selectedCustomerId ||
-      selectedProductId ||
-      selectedRatePlanId ||
-      paymentType ||
-      planDescription.trim()
-    );
-  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, planDescription]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("details");
 
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // draft/save states
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
-  const [savingDraft, setSavingDraft] = useState(false); // inner guard for draft API method
+  const [savingDraft, setSavingDraft] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "success" | "error">("idle");
   const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
 
@@ -202,7 +89,25 @@ export default function CreateSubscription({
 
   const currentStepMeta = steps[currentStep];
 
-  // hydrate selectable lists
+  // ---------- page + back-button handling ----------
+  useEffect(() => {
+    document.body.classList.add("create-product-page");
+
+    const handleBackButton = (event: PopStateEvent) => {
+      event.preventDefault();
+      navigate("/get-started/subscriptions");
+    };
+
+    window.addEventListener("popstate", handleBackButton);
+    window.history.pushState(null, "", window.location.pathname);
+
+    return () => {
+      document.body.classList.remove("create-product-page");
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [navigate]);
+
+  // ---------- hydrate selectable lists ----------
   useEffect(() => {
     (async () => {
       try {
@@ -217,14 +122,64 @@ export default function CreateSubscription({
       } catch (e) {
         console.error("Failed to load subscription dependencies.", e);
         showToast({
-          kind: 'error',
-          title: 'Loading Failed',
-          message: 'Failed to load required data. Please refresh the page to try again.'
+          kind: "error",
+          title: "Loading Failed",
+          message: "Failed to load required data. Please refresh the page to try again.",
         });
       }
     })();
   }, [showToast]);
 
+  // ---------- apply draftData on mount ----------
+  useEffect(() => {
+    if (draftData) {
+      if (draftData.customerId) {
+        setSelectedCustomerId(draftData.customerId);
+        const customer = customers.find((c) => c.customerId === draftData.customerId);
+        if (customer) setSelectedCustomerName(customer.customerName || "");
+      }
+
+      if (draftData.productId) {
+        setSelectedProductId(draftData.productId);
+        const product = products.find((p) => p.productId === draftData.productId);
+        if (product) setSelectedProductName(product.productName || "");
+      }
+
+      if (draftData.ratePlanId) {
+        setSelectedRatePlanId(draftData.ratePlanId);
+        const ratePlan = ratePlans.find((rp) => rp.ratePlanId === draftData.ratePlanId);
+        if (ratePlan) setSelectedRatePlanName(ratePlan.ratePlanName || "");
+      }
+
+      if (draftData.paymentType) {
+        const pt =
+          draftData.paymentType === "PREPAID" || draftData.paymentType === "POSTPAID"
+            ? (draftData.paymentType as PaymentKind)
+            : undefined;
+        if (pt) setPaymentType(pt);
+      }
+
+      if (draftData.adminNotes) setPlanDescription(draftData.adminNotes);
+      if (draftData.subscriptionId) setSubscriptionId(draftData.subscriptionId);
+    }
+  }, [draftData, customers, products, ratePlans]);
+
+  // ---------- hasAnyRequiredInput (for Save/Cancel lock like metric form) ----------
+  const hasAnyRequiredInput = useMemo(
+    () =>
+      Boolean(
+        selectedCustomerId ||
+          selectedProductId ||
+          selectedRatePlanId ||
+          paymentType ||
+          planDescription.trim()
+      ),
+    [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, planDescription]
+  );
+
+  const topActionsDisabled = !hasAnyRequiredInput && !subscriptionId;
+
+  // ---------- errors ----------
   const clearError = (field: string) => {
     setErrors((prev) => {
       const { [field]: _gone, ...rest } = prev;
@@ -237,169 +192,117 @@ export default function CreateSubscription({
     if (!selectedCustomerId) e.customerId = "This field is required";
     if (!selectedProductId) e.productId = "This field is required";
     if (!selectedRatePlanId) e.ratePlanId = "This field is required";
-    if (!paymentType || (paymentType !== 'PREPAID' && paymentType !== 'POSTPAID')) {
+    if (!paymentType || (paymentType !== "PREPAID" && paymentType !== "POSTPAID")) {
       e.paymentType = "This field is required";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  // ----- Draft save -----
+  // ---------- draft save ----------
   const saveDraft = async (): Promise<SubscriptionType | undefined> => {
     if (savingDraft) return;
     setSavingDraft(true);
 
     try {
-      // No validations for draft - save whatever fields are available
-      const payload: any = {
-        status: "DRAFT"
-      };
+      const payload: any = { status: "DRAFT" };
 
-      // Only include fields that have values
       if (selectedCustomerId) payload.customerId = selectedCustomerId;
       if (selectedProductId) payload.productId = selectedProductId;
       if (selectedRatePlanId) payload.ratePlanId = selectedRatePlanId;
-      if (paymentType === 'PREPAID' || paymentType === 'POSTPAID') {
+      if (paymentType === "PREPAID" || paymentType === "POSTPAID") {
         payload.paymentType = paymentType;
       }
       if (planDescription) payload.adminNotes = planDescription;
 
       let resp: SubscriptionType;
 
-      try {
-        // Simple logic: If we have an ID, use PATCH. Otherwise, use POST.
-        if (subscriptionId) {
-          resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
-        } else {
-          resp = await Api.createSubscriptionDraft(payload);
-          setSubscriptionId(resp.subscriptionId);
-        }
-
-        setSubmissionStatus("success");
-        setIsDraftSaved(true);
-
-        // Reset the saved state after 2.5 seconds
-        setTimeout(() => {
-          console.log('Resetting draft saved state');
-          setIsDraftSaved(false);
-        }, 2500);
-
-        return resp;
-      } catch (error) {
-        console.error('Error in saveDraft API call:', error);
-        throw error;
+      if (subscriptionId) {
+        resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
+      } else {
+        resp = await Api.createSubscriptionDraft(payload);
+        setSubscriptionId(resp.subscriptionId);
       }
-    } catch (e) {
-      const error = e as Error;
-      console.error("Failed to save draft:", error);
 
-      // Show error to user
+      setSubmissionStatus("success");
+      setIsDraftSaved(true);
+      setTimeout(() => setIsDraftSaved(false), 2500);
+
+      return resp;
+    } catch (e) {
+      const err = e as Error;
+      console.error("Failed to save draft:", err);
       showToast({
         kind: "error",
         title: "Save Failed",
-        message: error.message || "Failed to save draft. Please try again.",
+        message: err.message || "Failed to save draft. Please try again.",
       });
-
       setSubmissionStatus("error");
-      throw error; // Re-throw to allow error handling in the calling function
+      throw err;
     } finally {
-      console.log('Save operation completed');
       setSavingDraft(false);
     }
   };
 
-  // ----- Flow actions (match NewProduct patterns) -----
-  const gotoStep = (index: number) => setCurrentStep(index);
+  // ---------- flow actions ----------
+  const gotoStep = (index: number) => {
+    setCurrentStep(index);
+    const map: ActiveTab[] = ["details", "review"];
+    setActiveTab(map[index] || "details");
+  };
 
-  const handleBackTop = () => {
-    // Only show save prompt if user has filled any fields
-    if (hasAnyRequiredInput) {
+  const handleTopbarBack = () => {
+    if (hasAnyRequiredInput || subscriptionId) {
       setShowSavePrompt(true);
     } else {
-      onClose();
-    }
-  };
-
-  const handleSaveDraftAndClose = async () => {
-    try {
-      setIsDraftSaving(true);
-      const result = await saveDraft();
-      if (result) {
-        // Close the form after successful save
-        onClose();
-      }
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      showToast({
-        kind: 'error',
-        title: 'Save Failed',
-        message: 'Failed to save draft. Please try again.'
-      });
-    } finally {
-      setIsDraftSaving(false);
-    }
-  };
-
-  const handleDeleteDraft = async () => {
-    if (!subscriptionId) {
-      onClose(); // Just close if no subscription ID exists
-      return;
-    }
-
-    try {
-      setShowDeleteConfirm(false);
-      await Api.deleteSubscription(subscriptionId);
-      showToast({
-        kind: 'success',
-        title: 'Subscription deleted',
-        message: 'The subscription has been successfully deleted.'
-      });
-      onClose();
-    } catch (error) {
-      console.error('Error deleting draft:', error);
-      showToast({
-        kind: 'error',
-        title: 'Error',
-        message: 'Failed to delete draft. Please try again.'
-      });
+      navigate("/get-started/subscriptions");
     }
   };
 
   const handleSaveDraftTop = async () => {
+    if (isDraftSaving) return false;
     try {
       setIsDraftSaving(true);
       const result = await saveDraft();
-      // Don't show toast here - it will be shown by the SaveDraft component when saving from back button
       return !!result;
-    } catch (error) {
-      console.error('Error in handleSaveDraftTop:', error);
-      // Error is already handled in saveDraft
+    } catch {
       return false;
     } finally {
       setIsDraftSaving(false);
     }
   };
 
-  const handleCancelTop = () => {
-    // Always show the delete confirmation modal
-    setShowDeleteConfirm(true);
-  };
+  const deleteAndClose = async () => {
+    if (!subscriptionId) {
+      onClose();
+      return;
+    }
 
-  const canSaveNext =
-    !!selectedCustomerId &&
-    !!selectedProductId &&
-    !!selectedRatePlanId &&
-    (paymentType === 'PREPAID' || paymentType === 'POSTPAID');
+    try {
+      await Api.deleteSubscription(subscriptionId);
+      showToast({
+        kind: "success",
+        title: "Subscription deleted",
+        message: "The subscription has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error("Error deleting draft:", error);
+      showToast({
+        kind: "error",
+        title: "Error",
+        message: "Failed to delete draft. Please try again.",
+      });
+    } finally {
+      onClose();
+    }
+  };
 
   const handleSaveAndNext = async () => {
     if (!validateStep0()) return;
 
     try {
-      // Save the draft (will use POST or PATCH automatically based on subscriptionId)
       const draftSubscription = await saveDraft();
-
       if (draftSubscription) {
-        // Navigate to review step after successful save
         gotoStep(1);
       }
     } catch (e) {
@@ -424,9 +327,14 @@ export default function CreateSubscription({
     }
 
     try {
-      // Call confirm API with the saved subscription ID
-      const resp = await Api.confirmSubscription(subscriptionId);
+      showToast({
+        kind: "info",
+        title: "Processing",
+        message: "Confirming your subscription...",
+        autoDismiss: false,
+      });
 
+      const resp = await Api.confirmSubscription(subscriptionId);
       setSubmissionStatus("success");
       showToast({
         kind: "success",
@@ -438,7 +346,7 @@ export default function CreateSubscription({
       onRefresh?.();
       onClose();
     } catch (e) {
-      console.error("Failed to create subscription", e);
+      console.error("Failed to confirm subscription", e);
       setSubmissionStatus("error");
       showToast({
         kind: "error",
@@ -448,9 +356,9 @@ export default function CreateSubscription({
     }
   };
 
-  // ---------- Renderers ----------
+  // ---------- renderers ----------
   const renderStep0 = () => (
-    <div className="pur-np-grid">
+    <div className="pur-np-grid-2">
       <SelectField
         label="Customer"
         value={selectedCustomerId?.toString() || ""}
@@ -463,7 +371,10 @@ export default function CreateSubscription({
         }}
         error={errors.customerId}
         placeholderOption="e.g., Aditya Inc"
-        options={customers.map((c) => ({ label: c.customerName, value: c.customerId.toString() }))}
+        options={customers.map((c) => ({
+          label: c.customerName,
+          value: c.customerId.toString(),
+        }))}
       />
 
       <SelectField
@@ -475,24 +386,16 @@ export default function CreateSubscription({
           clearError("productId");
           const prod = products.find((p) => p.productId === id);
           setSelectedProductName(prod?.productName || "");
-          // reset rate plan when product changes
           setSelectedRatePlanId(null);
           setSelectedRatePlanName("");
         }}
         error={errors.productId}
         placeholderOption="Select Product"
-        options={products.map((p) => ({ label: p.productName, value: p.productId.toString() }))}
+        options={products.map((p) => ({
+          label: p.productName,
+          value: p.productId.toString(),
+        }))}
       />
-
-      <div className="pur-np-inline-note">
-        {/* <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <g clipPath="url(#clip0_cust_info)">
-            <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </g>
-          <defs><clipPath id="clip0_cust_info"><rect width="12" height="12" fill="white"/></clipPath></defs>
-        </svg> */}
-        {/* <span>Select a product to view its associated rate plans.</span> */}
-      </div>
 
       <SelectField
         label="Rate Plan"
@@ -506,25 +409,18 @@ export default function CreateSubscription({
         }}
         error={errors.ratePlanId}
         placeholderOption="Select Rate Plan"
-        options={ratePlans.map((rp) => ({ label: rp.ratePlanName, value: rp.ratePlanId.toString() }))}
+        options={ratePlans.map((rp) => ({
+          label: rp.ratePlanName,
+          value: rp.ratePlanId.toString(),
+        }))}
         helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
       />
-
-      <div className="pur-np-inline-note">
-        {/* <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <g clipPath="url(#clip0_rate_info)">
-            <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </g>
-          <defs><clipPath id="clip0_rate_info"><rect width="12" height="12" fill="white"/></clipPath></defs>
-        </svg> */}
-        {/* <span>Pick a rate plan for the selected product. Changing the product resets this selection.</span> */}
-      </div>
 
       <SelectField
         label="Payment Type"
         value={paymentType}
         onChange={(val) => {
-          if (val === 'PREPAID' || val === 'POSTPAID' || val === '') {
+          if (val === "PREPAID" || val === "POSTPAID" || val === "") {
             setPaymentType(val);
             clearError("paymentType");
           }
@@ -537,54 +433,62 @@ export default function CreateSubscription({
         ]}
       />
 
-      <TextareaField
-        label="Admin Notes"
-        placeholder="Enter admin notes"
-        value={planDescription}
-        onChange={setPlanDescription}
-      />
+      <div className="pur-np-field">
+        <TextareaField
+          label="Admin Notes"
+          placeholder="Enter admin notes"
+          value={planDescription}
+          onChange={setPlanDescription}
+        />
+      </div>
     </div>
   );
 
   const renderStep1 = () => {
     const reviewRows: ReviewRow[] = [
-      { label: "Customer Name", value: selectedCustomerName || '—' },
-      { label: "Product", value: selectedProductName || '—' },
-      { label: "Rate Plan", value: selectedRatePlanName || '—' },
-      { label: "Payment Type", value: paymentType === 'PREPAID' ? 'Pre-Paid' : paymentType === 'POSTPAID' ? 'Post-Paid' : '—' },
-      { label: "Admin Notes", value: planDescription || '—' },
+      { label: "Customer Name", value: selectedCustomerName || "—" },
+      { label: "Product", value: selectedProductName || "—" },
+      { label: "Rate Plan", value: selectedRatePlanName || "—" },
+      {
+        label: "Payment Type",
+        value:
+          paymentType === "PREPAID"
+            ? "Pre-Paid"
+            : paymentType === "POSTPAID"
+            ? "Post-Paid"
+            : "—",
+      },
+      { label: "Admin Notes", value: planDescription || "—" },
     ];
 
     return (
-      <div>
-        <ReviewComponent
-          title="PURCHASE DETAILS"
-          rows={reviewRows}
-        />
-      </div>
+      <section>
+        <div className="pur-np-section-header">
+          <h3 className="pur-np-section-title">REVIEW & CONFIRM</h3>
+        </div>
+        <ReviewComponent title="PURCHASE DETAILS" rows={reviewRows} />
+      </section>
     );
   };
+
+  const LockBadge = () => null; // not needed here, but kept for parity if you ever add locked steps
 
   return (
     <>
       <TopBar
         title="Create New Purchase"
-        onBack={currentStep === 0 ? handleBackTop : () => gotoStep(0)}
+        onBack={handleTopbarBack}
         cancel={{
-          onClick: handleCancelTop,
-          disabled: !hasAnyRequiredInput
+          onClick: () => setShowDeleteConfirm(true),
+          disabled: topActionsDisabled,
         }}
-        save={currentStep === 0 ? {
+        save={{
           onClick: handleSaveDraftTop,
           label: isDraftSaved ? "Saved!" : "Save as Draft",
           saved: isDraftSaved,
           saving: isDraftSaving,
           labelWhenSaved: "Saved as Draft",
-          disabled: !hasAnyRequiredInput
-        } : {
-          // onClick: handleFinalSubmit,
-          // saved: submissionStatus === 'success',
-          // labelWhenSaved: 'Confirmed!'
+          disabled: topActionsDisabled,
         }}
       />
 
@@ -598,33 +502,59 @@ export default function CreateSubscription({
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
                   const showConnector = i < steps.length - 1;
-                  // Disable step navigation - users must use Save & Next and Back buttons
-                  const isDisabled = true;
-
                   return (
                     <button
                       key={step.id}
                       type="button"
                       className={[
                         "pur-np-step",
-                        isActive ? "pur-active" : "",
-                        isCompleted ? "pur-completed" : "",
-                        isDisabled ? "disabled" : ""
-                      ].join(" ").trim()}
-                      onClick={() => !isDisabled && gotoStep(i)}
-                      disabled={isDisabled}
-                      title={isDisabled ? "Use the Save & Next or Back buttons to navigate" : ""}
+                        isActive ? "active" : "",
+                        isCompleted ? "completed" : "",
+                      ]
+                        .join(" ")
+                        .trim()}
+                      onClick={() => gotoStep(i)}
                     >
                       <span className="pur-np-step__bullet" aria-hidden="true">
                         <span className="pur-np-step__icon">
                           {isCompleted ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                              <path d="M7 12l3 3 6-6" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="11.5"
+                                fill="var(--color-primary-800)"
+                                stroke="var(--color-primary-800)"
+                              />
+                              <path
+                                d="M7 12l3 3 6-6"
+                                stroke="#FFFFFF"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                           ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="11"
+                                stroke="#C3C2D0"
+                                strokeWidth="2"
+                              />
                               <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
                             </svg>
                           )}
@@ -644,40 +574,45 @@ export default function CreateSubscription({
 
             {/* MAIN area */}
             <main className="pur-np-main">
-              {/* faint separators behind content */}
               <div className="af-skel-rule af-skel-rule--top" />
               <div className="pur-np-main__inner">
                 <div className="pur-np-body">
-                  <form className="pur-np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="pur-np-form-section" ref={formSectionRef} style={{ position: 'relative' }}>
-                      <section>
-                        <div className="pur-np-section-header">
-                          <h3 className="pur-np-section-title">
-                            {currentStepMeta.id === 1 ? "PURCHASE DETAILS" : "REVIEW & CONFIRM"}
-                          </h3>
-                        </div>
-
-                        {currentStepMeta.id === 1 ? renderStep0() : renderStep1()}
-                      </section>
-                    </div>
-
-                    {/* Footer actions (match NewProduct layout) */}
-                    <div className="pur-np-form-footer">
-                      {currentStepMeta.id === 1 && (
-                        <>
-                          {errors.form && <div className="pur-np-error-message">{errors.form}</div>}
-                          <div className="pur-np-btn-group pur-np-btn-group--next">
-                            <PrimaryButton
-                              type="button"
-                              onClick={handleSaveAndNext}
-                            >
-                              Save & Next
-                            </PrimaryButton>
+                  <form
+                    className="pur-np-form"
+                    onSubmit={(e) => e.preventDefault()}
+                  >
+                    <div className="pur-np-form-section">
+                      {activeTab === "details" && (
+                        <section>
+                          <div className="pur-np-section-header">
+                            <h3 className="pur-np-section-title">
+                              PURCHASE DETAILS
+                            </h3>
                           </div>
-                        </>
+                          {renderStep0()}
+                        </section>
                       )}
 
-                      {currentStepMeta.id === 2 && (
+                      {activeTab === "review" && renderStep1()}
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="pur-np-form-footer" style={{ position: "relative" }}>
+                      {errors.form && (
+                        <div className="pur-pur-np-error-message">
+                          {errors.form}
+                        </div>
+                      )}
+
+                      {activeTab === "details" && (
+                        <div className="pur-np-btn-group pur-np-btn-group--next">
+                          <PrimaryButton type="button" onClick={handleSaveAndNext}>
+                            Save & Next
+                          </PrimaryButton>
+                        </div>
+                      )}
+
+                      {activeTab === "review" && (
                         <>
                           <div className="pur-np-btn-group pur-np-btn-group--back">
                             <SecondaryButton
@@ -703,44 +638,40 @@ export default function CreateSubscription({
               </div>
             </main>
           </div>
+
+          <div className="af-skel-rule af-skel-rule--bottom" />
+
+          {/* Save Draft modal – same pattern as metric screen */}
+          <SaveDraft
+            isOpen={showSavePrompt}
+            onClose={async () => {
+              setShowSavePrompt(false);
+              await deleteAndClose();
+            }}
+            onSave={async () => {
+              try {
+                const result = await saveDraft();
+                if (result) {
+                  showToast({
+                    kind: "success",
+                    title: "Draft Saved",
+                    message: "Your changes have been saved as a draft.",
+                  });
+                  onClose();
+                }
+              } catch (error) {
+                console.error("Error saving draft from back button:", error);
+              }
+            }}
+          />
         </div>
-
-        <div className="af-skel-rule af-skel-rule--bottom" />
       </div>
-
-      {/* Save Draft confirmation modal (same UX as product page) */}
-      <SaveDraft
-        isOpen={showSavePrompt}
-        disabled={!hasAnyRequiredInput}
-        onClose={async () => {
-          setShowSavePrompt(false);
-          // on Close without saving draft
-          onClose();
-        }}
-        onSave={async () => {
-          try {
-            const result = await saveDraft();
-            if (result) {
-              showToast({
-                kind: "success",
-                title: "Draft Saved",
-                message: "Your changes have been saved as a draft.",
-              });
-              onClose();
-            }
-          } catch (error) {
-            console.error('Error saving draft from back button:', error);
-            // Error is already handled in saveDraft
-          }
-        }}
-        onDismiss={() => setShowSavePrompt(false)}
-      />
 
       {/* Delete / Cancel confirmation */}
       <ConfirmDeleteModal
         isOpen={showDeleteConfirm}
         productName="subscription draft"
-        onConfirm={handleDeleteDraft}
+        onConfirm={deleteAndClose}
         onCancel={() => setShowDeleteConfirm(false)}
       />
     </>

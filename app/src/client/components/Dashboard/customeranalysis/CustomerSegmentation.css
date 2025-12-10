@@ -12,6 +12,16 @@
   margin-bottom: 16px;
 }
 
+.cs-legend-label{
+  color: var(--color-neutral-800);
+
+/* body/sm/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
 .cs-header h2 {
   margin: 0;
   color: #000;

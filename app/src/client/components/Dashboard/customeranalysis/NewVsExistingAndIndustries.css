@@ -4,7 +4,7 @@
   gap: 28px;
   width: 100%;
   box-sizing: border-box;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 /* Shared card styles */
@@ -272,9 +272,9 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 /* Table */
-.nei-table {
+/* .nei-table {
   margin-top: 4px;
-}
+} */
 
 .nei-table-header,
 .nei-table-row {

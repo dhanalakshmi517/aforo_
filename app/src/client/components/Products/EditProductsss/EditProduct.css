@@ -102,6 +102,9 @@ html, body, #root {
 
 .editprod-np-step.active {
   border-left-color: var(--color-primary-800);
+    border-left-width: 3px;
+  height: 35px;
+  margin-top: 5px;
 }
 
 .editprod-np-step.active .editprod-np-step__title {

@@ -76,11 +76,12 @@ const RevenuAnalyticsDash1: React.FC = () => {
                       data={revenueConcentrationData}
                       dataKey="value"
                       nameKey="name"
-                      innerRadius="45%"
-                      outerRadius="80%"
+                      innerRadius="40%"
+                      outerRadius="85%"
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={3}
+                      cornerRadius={6}
                     >
                       {revenueConcentrationData.map((slice) => (
                         <Cell key={slice.name} fill={slice.color} />

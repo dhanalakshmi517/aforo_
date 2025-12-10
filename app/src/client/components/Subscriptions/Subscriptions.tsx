@@ -100,7 +100,6 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
     const res = await fetch(url, {
       method: 'GET',
       headers: { ...getAuthHeaders(), Accept: 'image/*' },
-      credentials: 'include',
       cache: 'no-store',
     });
     if (!res.ok) return null;

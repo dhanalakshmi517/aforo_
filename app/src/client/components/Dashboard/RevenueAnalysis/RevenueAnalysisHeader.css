@@ -8,7 +8,7 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
-  background: var(--surface-layer-4, #ffffff);
+  background: var(--color-neutral-50);
   padding: var(--scale-400, 16px) var(--scale-500, 20px)
     var(--scale-400, 16px) var(--scale-700, 28px);
   border-bottom: 1px solid var(--border-subtle, #e4e7ec);
@@ -97,13 +97,15 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */}
   width: 32px;
   height: 32px;
   border-radius: var(--border-radius-sm);
-  border: 1px solid #e2e8f0;
+  border: none;
   background: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+
 }
 
 .co-icon-btn:hover {
@@ -256,6 +258,22 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .co-filter-chevron {
   font-size: 11px;
   color: #9ca3af;
+}
+
+.co-refresh-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #389315;
+}
+
+.co-refresh-spinner svg {
+  display: block;
+  animation: co-spin 1s linear infinite;
+}
+
+@keyframes co-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Responsive behaviour */

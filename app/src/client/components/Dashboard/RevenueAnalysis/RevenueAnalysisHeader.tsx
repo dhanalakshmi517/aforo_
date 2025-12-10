@@ -9,6 +9,7 @@ const RevenueAnalysisHeader: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isLive, setIsLive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [lastRefreshTs, setLastRefreshTs] = useState<number>(
     Date.now() - 3 * 60 * 1000
   );
@@ -30,7 +31,11 @@ const RevenueAnalysisHeader: React.FC = () => {
       setIsLive(false);
       setLastRefreshTs(Date.now());
     } else {
-      setIsLive(true);
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLive(true);
+        setIsLoading(false);
+      }, 2000);
     }
   };
 
@@ -133,14 +138,24 @@ const RevenueAnalysisHeader: React.FC = () => {
           <div className="co-filter-group">
             <button
               type="button"
-              className={`co-refresh-pill ${isLive ? "is-live" : ""}`}
+              className={`co-refresh-pill ${isLive ? "is-live" : ""} ${isLoading ? "is-loading" : ""}`}
               onClick={onClickRefreshPill}
               aria-pressed={isLive}
+              disabled={isLoading}
             >
               {isLive ? (
                 <>
                   <span className="co-refresh-dot" />
                   <span>Live</span>
+                </>
+              ) : isLoading ? (
+                <>
+                  <span className="co-refresh-spinner" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <circle cx="7" cy="7" r="6" stroke="#2A455E" strokeWidth="1.5" fill="none" strokeDasharray="6 20" />
+                    </svg>
+                  </span>
+                  <span>Loading...</span>
                 </>
               ) : (
                 <>

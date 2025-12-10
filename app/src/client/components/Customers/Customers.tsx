@@ -484,4 +484,3 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   );
 };
 export default Customers;
-

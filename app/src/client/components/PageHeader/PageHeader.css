@@ -9,7 +9,7 @@
   min-height: 70px;
   padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 20px);
   box-sizing: border-box;
-  background:var(--color-neutral-50);
+  background:var(--color-neutral-white);
 }
 
 .rate-plan-header h2 {

@@ -5,7 +5,7 @@ import {
   updateCustomer,
   confirmCustomer,
   updateCustomerLogo,
-  deleteCustomerLogo
+  deleteCustomerLogo,
 } from '../api';
 import type { Customer } from '../Customers';
 import EditReview from './EditReview';
@@ -17,15 +17,15 @@ import LogoUploader from '../LogoUploader';
 import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
 
+import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
+
 /* ---------- helpers copied from Customers list ---------- */
-const FILE_HOST = 'http://44.201.19.187:8081';
+const FILE_HOST = 'http://44.201.19.187:8081/';
 
 const absolutizeUpload = (path: string) => {
   const clean = path.replace(/\\/g, '/').trim();
   if (/^https?:\/\//i.test(clean)) return clean;
-  // Ensure single slash between host and path
-  const separator = clean.startsWith('/') ? '' : '/';
-  return `${FILE_HOST}${separator}${clean}`;
+  return `${FILE_HOST}${clean.startsWith('/') ? '' : '/'}${clean}`;
 };
 
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
@@ -33,13 +33,13 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   const url = absolutizeUpload(uploadPath);
   console.log('EditCustomer - Resolving logo URL:', url);
 
-  // First try: Direct URL without authentication (for public uploads)
+  // First try: Direct URL
   try {
     const directUrl = url;
     console.log('EditCustomer - Trying direct URL:', directUrl);
     const testRes = await fetch(directUrl, {
-      method: "HEAD",
-      cache: "no-store"
+      method: 'HEAD',
+      cache: 'no-store',
     });
     if (testRes.ok) {
       console.log('EditCustomer - Direct URL works, using it:', directUrl);
@@ -49,12 +49,12 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
     console.log('EditCustomer - Direct URL failed, trying authenticated fetch:', error);
   }
 
-  // Second try: Authenticated fetch with blob conversion
+  // Second try: authenticated fetch
   try {
     const res = await fetch(url, {
-      method: "GET",
-      headers: { ...getAuthHeaders(), Accept: "image/*" },
-      cache: "no-store",
+      method: 'GET',
+      headers: { ...getAuthHeaders(), Accept: 'image/*' },
+      cache: 'no-store',
     });
     console.log('EditCustomer - Authenticated fetch response:', res.status, res.statusText);
     if (!res.ok) {
@@ -162,12 +162,11 @@ const EditCustomer: React.FC = () => {
         };
         setAccountDetails(account);
 
-        // Store original data for change detection
         setOriginalData({
           customerName: data.customerName ?? '',
           companyName: data.companyName ?? '',
           companyType: data.companyType ?? '',
-          accountDetails: account
+          accountDetails: account,
         });
       })
       .catch((err: unknown) => console.error('Failed to fetch customer', err))
@@ -222,15 +221,15 @@ const EditCustomer: React.FC = () => {
   }, [accountDetails]);
   /* ---------------------------------------- */
 
-  // ------- step helpers (match EditProduct UX) -------
+  // ------- step helpers (match EditProduct / EditSubscription UX) -------
   const goToStep = (index: number) => {
     setCurrentStep(index);
     const first = steps[index].title.split(' ')[0].toLowerCase();
     const tab = (first === 'customer'
       ? 'details'
       : first === 'billing'
-        ? 'account'
-        : 'review') as ActiveTab;
+      ? 'account'
+      : 'review') as ActiveTab;
     setActiveTab(tab);
   };
 
@@ -262,14 +261,24 @@ const EditCustomer: React.FC = () => {
     }
 
     [
-      'billingAddressLine1', 'billingAddressLine2', 'billingCity', 'billingState', 'billingPostalCode', 'billingCountry',
-      'customerAddressLine1', 'customerAddressLine2', 'customerCity', 'customerState', 'customerPostalCode', 'customerCountry'
-    ].forEach((k) => {
+      'billingAddressLine1',
+      'billingAddressLine2',
+      'billingCity',
+      'billingState',
+      'billingPostalCode',
+      'billingCountry',
+      'customerAddressLine1',
+      'customerAddressLine2',
+      'customerCity',
+      'customerState',
+      'customerPostalCode',
+      'customerCountry',
+    ].forEach(k => {
       // @ts-ignore
       if (!a[k]?.trim()) newAccErrs[k] = `${k.replace(/([A-Z])/g, ' $1')} is required`;
     });
 
-    setAccountErrors((prev) => ({ ...prev, ...newAccErrs }));
+    setAccountErrors(prev => ({ ...prev, ...newAccErrs }));
     return Object.keys(newAccErrs).length === 0;
   };
 
@@ -278,8 +287,6 @@ const EditCustomer: React.FC = () => {
 
     console.log('savePatch: companyLogo state:', companyLogo);
 
-    // First, update customer details (without logo)
-    console.log('Updating customer details');
     const payload: Record<string, any> = {
       companyName,
       customerName,
@@ -290,7 +297,6 @@ const EditCustomer: React.FC = () => {
     try {
       await updateCustomer(id, payload);
 
-      // If there's a new logo file, upload it separately
       if (companyLogo) {
         console.log('Uploading logo via separate endpoint');
         try {
@@ -298,7 +304,6 @@ const EditCustomer: React.FC = () => {
           console.log('Logo uploaded successfully');
         } catch (logoErr) {
           console.error('Failed to upload logo:', logoErr);
-          // Don't fail the whole save if logo upload fails
         }
       }
 
@@ -317,14 +322,12 @@ const EditCustomer: React.FC = () => {
     }
     if (activeTab === 'account') {
       if (!validateStep1()) return;
-      // persist patch so review is fresh
       const ok = await savePatch();
       if (!ok) return;
       goToStep(2);
       return;
     }
     if (activeTab === 'review') {
-      // final save + confirm
       const ok = await savePatch();
       if (!ok || !id) return;
       try {
@@ -340,14 +343,14 @@ const EditCustomer: React.FC = () => {
   const hasChanges = () => {
     if (!originalData) return false;
 
-    // Check basic fields
-    if (originalData.customerName !== customerName ||
+    if (
+      originalData.customerName !== customerName ||
       originalData.companyName !== companyName ||
-      originalData.companyType !== companyType) {
+      originalData.companyType !== companyType
+    ) {
       return true;
     }
 
-    // Check account details
     if (JSON.stringify(originalData.accountDetails) !== JSON.stringify(accountDetails)) {
       return true;
     }
@@ -424,21 +427,29 @@ const EditCustomer: React.FC = () => {
                   label=""
                   value={companyName}
                   placeholder="Enter company name"
-                  onChange={(val) => {
+                  onChange={val => {
                     setCompanyName(val);
-                    if (!val.trim()) setErrors((p) => ({ ...p, companyName: 'Company Name is required' }));
-                    else if (errors.companyName) setErrors((p) => ({
-                      ...Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'companyName'))
-                    }));
+                    if (!val.trim())
+                      setErrors(p => ({ ...p, companyName: 'Company Name is required' }));
+                    else if (errors.companyName)
+                      setErrors(p => ({
+                        ...Object.fromEntries(
+                          Object.entries(p).filter(([k]) => k !== 'companyName',
+                          ),
+                        ),
+                      }));
                   }}
                   onBlur={() => {
-                    if (!companyName.trim()) setErrors((p) => ({ ...p, companyName: 'Company Name is required' }));
+                    if (!companyName.trim())
+                      setErrors(p => ({ ...p, companyName: 'Company Name is required' }));
                   }}
                   error={errors.companyName}
                   required
                 />
               </div>
-              {/* <div className="edit-np-form-group">
+
+            
+              <div className="edit-np-form-group">
                 <label className="edit-np-label">Company Logo</label>
                 <LogoUploader
                   logo={companyLogo}
@@ -446,22 +457,27 @@ const EditCustomer: React.FC = () => {
                   onChange={handleLogoChange}
                   onRemove={handleLogoRemove}
                 />
-              </div> */}
+              </div>
               <div className="edit-np-form-group">
                 <label className="edit-np-label">Customer Name</label>
                 <InputField
                   label=""
                   value={customerName}
                   placeholder="Enter customer name"
-                  onChange={(val) => {
+                  onChange={val => {
                     setCustomerName(val);
-                    if (!val.trim()) setErrors((p) => ({ ...p, customerName: 'Customer Name is required' }));
-                    else if (errors.customerName) setErrors((p) => ({
-                      ...Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'customerName'))
-                    }));
+                    if (!val.trim())
+                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
+                    else if (errors.customerName)
+                      setErrors(p => ({
+                        ...Object.fromEntries(
+                          Object.entries(p).filter(([k]) => k !== 'customerName'),
+                        ),
+                      }));
                   }}
                   onBlur={() => {
-                    if (!customerName.trim()) setErrors((p) => ({ ...p, customerName: 'Customer Name is required' }));
+                    if (!customerName.trim())
+                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
                   }}
                   error={errors.customerName}
                   required
@@ -475,15 +491,20 @@ const EditCustomer: React.FC = () => {
                 <SelectField
                   label=""
                   value={companyType}
-                  onChange={(val) => {
+                  onChange={val => {
                     setCompanyType(val);
-                    if (!val.trim()) setErrors((p) => ({ ...p, companyType: 'Company Type is required' }));
-                    else if (errors.companyType) setErrors((p) => ({
-                      ...Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'companyType'))
-                    }));
+                    if (!val.trim())
+                      setErrors(p => ({ ...p, companyType: 'Company Type is required' }));
+                    else if (errors.companyType)
+                      setErrors(p => ({
+                        ...Object.fromEntries(
+                          Object.entries(p).filter(([k]) => k !== 'companyType'),
+                        ),
+                      }));
                   }}
                   onBlur={() => {
-                    if (!companyType.trim()) setErrors((p) => ({ ...p, companyType: 'Company Type is required' }));
+                    if (!companyType.trim())
+                      setErrors(p => ({ ...p, companyType: 'Company Type is required' }));
                   }}
                   options={[
                     { label: 'Select company type', value: '' },
@@ -494,8 +515,6 @@ const EditCustomer: React.FC = () => {
                   required
                 />
               </div>
-
-
             </div>
           </div>
         );
@@ -532,72 +551,91 @@ const EditCustomer: React.FC = () => {
 
   return (
     <>
-      <TopBar
-        title="Edit Customer"
-        onBack={openLeavePopup}
-      />
+      <TopBar title="Edit Customer" onBack={openLeavePopup} />
 
-      <div className="edit-np-viewport">
-        <div className="edit-np-card">
-          <div className="edit-np-grid">
-            {/* Sidebar */}
-            <aside className="edit-np-rail">
-              <div className="edit-np-steps">
+      {/* same shell as EditSubscription – viewport → card → grid → rail + main */}
+      <div className="editsub-np-viewport">
+        <div className="editsub-np-card">
+          <div className="editsub-np-grid">
+            {/* LEFT rail – stepper */}
+            <aside className="editsub-np-rail">
+              <nav className="editsub-np-steps">
                 {steps.map((step, index) => {
                   const isActive = index === currentStep;
                   const isCompleted = index < currentStep;
+
                   return (
-                    <div
+                    <button
                       key={step.id}
-                      className={`edit-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                      type="button"
+                      className={[
+                        'editsub-np-step',
+                        isActive ? 'active' : '',
+                        isCompleted ? 'completed' : '',
+                      ]
+                        .join(' ')
+                        .trim()}
                       onClick={() => goToStep(index)}
                     >
-                      <div className="edit-np-step__title">{step.title}</div>
-                    </div>
+                      <span className="edisub-np-step__text">
+                        <span className="editsub-np-step__title">{step.title}</span>
+                      </span>
+                    </button>
                   );
                 })}
-              </div>
+              </nav>
             </aside>
 
-            {/* Main Content */}
-            <div className="edit-np-content">
-              <div className="edit-np-form">
-                {renderStepContent()}
-                <div className="edit-np-form-footer">
-                  <div className="edit-np-btn-group edit-np-btn-group--back">
-                    {activeTab !== 'details' && (
-                      <button
-                        type="button"
-                        className="np-btn np-btn--ghost"
-                        onClick={handlePreviousStep}
-                      >
-                        Back
-                      </button>
-                    )}
-                  </div>
+            {/* MAIN area – matches EditSubscription structure */}
+            <main className="editsub-np-main">
+              <div className="editsub-np-main__inner">
+                <div className="editsub-np-body">
+                  <form
+                    className="editsub-np-form"
+                    onSubmit={e => {
+                      e.preventDefault();
+                    }}
+                  >
+                    <div className="editsub-np-form-section">
+                      {renderStepContent()}
+                    </div>
 
-                  <div className="edit-np-btn-group edit-np-btn-group--next">
-                    <button
-                      type="button"
-                      className="np-btn np-btn--primary"
-                      onClick={handleNextStep}
-                    >
-                      {activeTab === 'review' ? 'Save Changes' : 'Save &Next'}
-                    </button>
-                  </div>
+                    <div className="af-skel-rule af-skel-rule--bottom" />
+
+                    {/* FOOTER actions – Back / Save & Next / Save Changes */}
+                    <div className="editsub-np-form-footer">
+                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
+                        {activeTab !== 'details' && (
+                          <button
+                            type="button"
+                            className="np-btn np-btn--ghost"
+                            onClick={handlePreviousStep}
+                          >
+                            Back
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
+                        <button
+                          type="button"
+                          className="np-btn np-btn--primary"
+                          onClick={handleNextStep}
+                        >
+                          {activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               </div>
-
-              {/* Footer Buttons */}
-
-            </div>
+              <div className="af-skel-rule af-skel-rule--bottom" />
+            </main>
           </div>
-
-          <div className="af-skel-rule af-skel-rule--bottom" />
         </div>
       </div>
 
-      {/* Leave / Save popup (matches EditProduct API) */}
+      {/* Leave / Save popup */}
       <EditPopup
         isOpen={showLeavePopup}
         onClose={() => {

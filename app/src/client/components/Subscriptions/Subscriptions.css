@@ -253,6 +253,12 @@
 
 .pill-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pill-icon svg {
+  display: block;
 }
 
 .pill--prepaid {

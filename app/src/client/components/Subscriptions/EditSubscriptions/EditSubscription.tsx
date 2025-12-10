@@ -313,7 +313,6 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
 
             {/* MAIN area – shares skeleton structure with NewProduct */}
             <main className="editsub-np-main">
-              <div className="af-skel-rule af-skel-rule--top" />
               <div className="editsub-np-main__inner">
                 <div className="editsub-np-body">
                   <form
@@ -326,9 +325,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       {/* -------- DETAILS -------- */}
                       {activeTab === 'details' && (
                         <section>
-                          <div className="editsub-np-section-header">
-                            <h3 className="editsub-np-section-title">PURCHASE DETAILS</h3>
-                          </div>
+                       
 
                           <div className="editsub-np-grid">
                             <div className="editsub-np-form-group">
@@ -442,9 +439,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       {/* -------- REVIEW -------- */}
                       {activeTab === 'review' && (
                         <section>
-                          <div className="editsub-np-section-header">
-                            <h3 className="editsub-np-section-title">REVIEW & CONFIRM</h3>
-                          </div>
+                    
                           <div className="edit-np-review-container">
                             <EditReview
                               customerName={selectedCustomerName}

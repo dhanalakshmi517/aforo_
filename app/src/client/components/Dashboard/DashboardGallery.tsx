@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DashboardGallery.css";
 import PageHeader from "../PageHeader/PageHeader";
@@ -71,6 +71,11 @@ const defaultCards: DashboardCard[] = [
 
 const DashboardGallery: React.FC<Props> = ({ cards = defaultCards, onCardClick }) => {
   const navigate = useNavigate();
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+
+  const handleImageLoad = (cardId: string) => {
+    setLoadedImages((prev) => new Set(prev).add(cardId));
+  };
 
   const handleCardClick = (card: DashboardCard) => {
     onCardClick?.(card);
@@ -114,7 +119,13 @@ const DashboardGallery: React.FC<Props> = ({ cards = defaultCards, onCardClick }
             }}
           >
             <div className="dg-media">
-              <img className="dg-img" src={c.imageSrc} alt="" />
+              {!loadedImages.has(c.id) && <div className="dg-skeleton" />}
+              <img 
+                className={`dg-img ${loadedImages.has(c.id) ? "dg-img--loaded" : ""}`}
+                src={c.imageSrc} 
+                alt="" 
+                onLoad={() => handleImageLoad(c.id)}
+              />
             </div>
 
             <div className="dg-meta">
