@@ -213,8 +213,13 @@ export default function App() {
   // Prefetch heavy modules (also edit screen)
   useEffect(() => {
     customersLoader();
+    productsLoader();
+    newProductLoader();
+    editProductLoader();
     meteringLoader();
+    createUsageMetricLoader();
     subscriptionsLoader();
+    createSubscriptionLoader();
     ratePlansLoader();
     editPlanLoader();
     editCustomerLoader();
