@@ -13,6 +13,7 @@ export type CommonProps = {
   helperText?: string;
   error?: string;
   className?: string;
+  optional?: boolean;
 };
 
 export type InputFieldProps = CommonProps & {
@@ -71,6 +72,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       step,
       inputMode,
       autoComplete,
+      optional,
     },
     ref
   ) => {
@@ -81,7 +83,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label} {required ? "*" : null}
+            {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
           </label>
         )}
         <input
@@ -162,6 +164,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
     options,
     onBlur,
     className,
+    optional,
   },
     ref
   ) => {
@@ -188,7 +191,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label} {required ? "*" : null}
+            {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
           </label>
         )}
 
@@ -233,17 +236,17 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
             aria-describedby={
               error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
             }
-        >
-          {!value && (
-            <option value="" disabled hidden>
-              {placeholderOption}
-            </option>
-          )}
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-              {opt.label}
-            </option>
-          ))}
+          >
+            {!value && (
+              <option value="" disabled hidden>
+                {placeholderOption}
+              </option>
+            )}
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+                {opt.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -291,6 +294,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   onChange,
   options,
   className,
+  optional,
 }) => {
   const controlId = id || React.useId();
   const listboxId = `${controlId}-listbox`;
@@ -364,7 +368,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
     <div className={`if-field ${className ?? ""} dd-wrap`} ref={wrapperRef}>
       {label && (
         <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-          {label} {required ? "*" : null}
+          {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
         </label>
       )}
 
@@ -474,6 +478,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
       onBlur,
       onFocus,
       className,
+      optional,
     },
     ref
   ) => {
@@ -484,7 +489,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label} {required ? "*" : null}
+            {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
           </label>
         )}
         <textarea

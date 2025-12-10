@@ -8,33 +8,36 @@ interface AggregationWindowSelectProps {
   value: string;
   onChange: (val: string) => void;
   error?: string;
+  optional?: boolean;
 }
 
 /**
  * Displays appropriate aggregation-window options based on product type + unit-of-measure.
  * Currently only API product rules are defined as per requirements.
  */
-const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({ 
+const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
   label,
-  productType, 
-  unitOfMeasure, 
-  value, 
-  onChange, 
-  error 
+  productType,
+  unitOfMeasure,
+  value,
+  onChange,
+  error,
+  optional
 }) => {
   // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
     return (
-      <SelectField 
+      <SelectField
         label={label}
-        value="" 
-        onChange={() => {}} 
-        options={[{label:'-- select product/unit first --',value:'',disabled:true}]} 
-        disabled 
+        value=""
+        onChange={() => { }}
+        options={[{ label: '-- select product/unit first --', value: '', disabled: true }]}
+        disabled
+        optional={optional}
       />
     );
   }
-  
+
   const type = productType.toUpperCase();
   const uom = unitOfMeasure.toUpperCase();
 
@@ -126,6 +129,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
         onChange={onChange}
         options={options.map(opt => ({ label: opt, value: opt }))}
         error={error}
+        optional={optional}
       />
     );
   }
@@ -137,6 +141,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
       onChange={onChange}
       placeholder="Aggregation Window"
       error={error}
+      optional={optional}
     />
   );
 };
