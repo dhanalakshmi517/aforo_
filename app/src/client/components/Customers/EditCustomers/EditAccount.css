@@ -7,12 +7,18 @@
 .acc-form-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .acc-form-group label {
-  font-weight: 400;
-  color: #555;
+color: var(--color-neutral-1700);
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* Style all form controls consistently */

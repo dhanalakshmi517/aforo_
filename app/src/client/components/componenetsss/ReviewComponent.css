@@ -1,7 +1,8 @@
 @import "../Variables/Variables.css";
 
 .review-card {
-  width: 650px;
+  width: 100%;
+  max-width: 550px;
   box-sizing: border-box;
 
   /* card styling */
@@ -24,13 +25,13 @@ color: var(--color-neutral-1400);
 font-family: var(--font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-h6);
 font-style: normal;
-font-weight: 300;
+font-weight: 250;
 line-height: var(--line-height-heading-h6, 20px); /* 142.857% */
   
   
   text-transform: uppercase;
   border-bottom: 1px solid var(--color-neutral-300);
-  margin-left:6px;
+  margin-left:16px;
 }
 
 /* table-like wrapper */
@@ -67,7 +68,7 @@ font-family: var(--type-font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-md, 14px);
 font-style: normal;
 font-weight: 400;
-    margin-left:10px;
+    margin-left:16px;
 
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }

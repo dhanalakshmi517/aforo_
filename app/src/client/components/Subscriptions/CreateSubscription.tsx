@@ -327,12 +327,7 @@ export default function CreateSubscription({
     }
 
     try {
-      showToast({
-        kind: "info",
-        title: "Processing",
-        message: "Confirming your subscription...",
-        autoDismiss: false,
-      });
+      ;
 
       const resp = await Api.confirmSubscription(subscriptionId);
       setSubmissionStatus("success");
@@ -435,7 +430,7 @@ export default function CreateSubscription({
 
       <div className="pur-np-field">
         <TextareaField
-          label="Admin Notes"
+          label="Admin Notes (Optional)"
           placeholder="Enter admin notes"
           value={planDescription}
           onChange={setPlanDescription}

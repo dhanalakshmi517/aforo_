@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import SmartDuplicateDetection from "../componenetsss/SmartDuplicateDetection";
 import "./IngestionHistory.css";
 
 export type HistoryRow = {
@@ -12,9 +13,19 @@ export type HistoryRow = {
 
 interface Props {
   rows: HistoryRow[];
+  showSmartDetection?: boolean;
+  onSmartDetectionClose?: () => void;
+  onCheckboxChange?: (checked: boolean) => void;
+  dontShowAgain?: boolean;
 }
 
-const IngestionHistory: React.FC<Props> = ({ rows }) => {
+const IngestionHistory: React.FC<Props> = ({ 
+  rows, 
+  showSmartDetection = false,
+  onSmartDetectionClose,
+  onCheckboxChange,
+  dontShowAgain = false
+}) => {
   const [query, setQuery] = useState("");
   const [showFilter, setShowFilter] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Success" | "Failed">("All");
@@ -54,7 +65,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
   };
 
   return (
-    <>
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div className="data-toolbar">
     <div className="data-search">
       <svg
@@ -218,7 +229,19 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
         </table>
       </div>
     </section>
-    </>
+
+      {showSmartDetection && (
+        <div className="smart-detection-wrapper">
+          <SmartDuplicateDetection
+            onClose={onSmartDetectionClose}
+            onCheckboxChange={(checked) => {
+              onCheckboxChange?.(checked);
+            }}
+            checked={dontShowAgain}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

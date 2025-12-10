@@ -195,10 +195,8 @@
 
 /* --------- Status column ---------- */
 .subscriptions-table td:nth-child(5) {
-  padding: 18px 8px;
+  padding: 18px 8px 18px 24px;
 }
-
-
 
 /* --------- Actions ---------- */
 .action-buttons {
