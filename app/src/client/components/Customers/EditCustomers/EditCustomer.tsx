@@ -18,26 +18,28 @@ import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
 
 /* ---------- helpers copied from Customers list ---------- */
-const FILE_HOST = 'http://44.201.19.187:8081/';
+const FILE_HOST = 'http://44.201.19.187:8081';
 
 const absolutizeUpload = (path: string) => {
   const clean = path.replace(/\\/g, '/').trim();
   if (/^https?:\/\//i.test(clean)) return clean;
-  return `${FILE_HOST}${clean.startsWith('/') ? '' : '/'}${clean}`;
+  // Ensure single slash between host and path
+  const separator = clean.startsWith('/') ? '' : '/';
+  return `${FILE_HOST}${separator}${clean}`;
 };
 
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
   const url = absolutizeUpload(uploadPath);
   console.log('EditCustomer - Resolving logo URL:', url);
-  
+
   // First try: Direct URL without authentication (for public uploads)
   try {
     const directUrl = url;
     console.log('EditCustomer - Trying direct URL:', directUrl);
-    const testRes = await fetch(directUrl, { 
+    const testRes = await fetch(directUrl, {
       method: "HEAD",
-      cache: "no-store" 
+      cache: "no-store"
     });
     if (testRes.ok) {
       console.log('EditCustomer - Direct URL works, using it:', directUrl);
@@ -46,7 +48,7 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   } catch (error) {
     console.log('EditCustomer - Direct URL failed, trying authenticated fetch:', error);
   }
-  
+
   // Second try: Authenticated fetch with blob conversion
   try {
     const res = await fetch(url, {
@@ -159,7 +161,7 @@ const EditCustomer: React.FC = () => {
           billingCountry: (data as any).billingCountry ?? '',
         };
         setAccountDetails(account);
-        
+
         // Store original data for change detection
         setOriginalData({
           customerName: data.customerName ?? '',
@@ -227,8 +229,8 @@ const EditCustomer: React.FC = () => {
     const tab = (first === 'customer'
       ? 'details'
       : first === 'billing'
-      ? 'account'
-      : 'review') as ActiveTab;
+        ? 'account'
+        : 'review') as ActiveTab;
     setActiveTab(tab);
   };
 
@@ -260,8 +262,8 @@ const EditCustomer: React.FC = () => {
     }
 
     [
-      'billingAddressLine1','billingAddressLine2','billingCity','billingState','billingPostalCode','billingCountry',
-      'customerAddressLine1','customerAddressLine2','customerCity','customerState','customerPostalCode','customerCountry'
+      'billingAddressLine1', 'billingAddressLine2', 'billingCity', 'billingState', 'billingPostalCode', 'billingCountry',
+      'customerAddressLine1', 'customerAddressLine2', 'customerCity', 'customerState', 'customerPostalCode', 'customerCountry'
     ].forEach((k) => {
       // @ts-ignore
       if (!a[k]?.trim()) newAccErrs[k] = `${k.replace(/([A-Z])/g, ' $1')} is required`;
@@ -273,9 +275,9 @@ const EditCustomer: React.FC = () => {
 
   const savePatch = async () => {
     if (!id) return false;
-    
+
     console.log('savePatch: companyLogo state:', companyLogo);
-    
+
     // First, update customer details (without logo)
     console.log('Updating customer details');
     const payload: Record<string, any> = {
@@ -287,7 +289,7 @@ const EditCustomer: React.FC = () => {
     console.log('JSON payload:', payload);
     try {
       await updateCustomer(id, payload);
-      
+
       // If there's a new logo file, upload it separately
       if (companyLogo) {
         console.log('Uploading logo via separate endpoint');
@@ -299,7 +301,7 @@ const EditCustomer: React.FC = () => {
           // Don't fail the whole save if logo upload fails
         }
       }
-      
+
       return true;
     } catch (err) {
       console.error('Failed to save draft/update with JSON', err);
@@ -337,19 +339,19 @@ const EditCustomer: React.FC = () => {
   // ------- leave popup actions -------
   const hasChanges = () => {
     if (!originalData) return false;
-    
+
     // Check basic fields
     if (originalData.customerName !== customerName ||
-        originalData.companyName !== companyName ||
-        originalData.companyType !== companyType) {
+      originalData.companyName !== companyName ||
+      originalData.companyType !== companyType) {
       return true;
     }
-    
+
     // Check account details
     if (JSON.stringify(originalData.accountDetails) !== JSON.stringify(accountDetails)) {
       return true;
     }
-    
+
     return false;
   };
 
@@ -436,7 +438,7 @@ const EditCustomer: React.FC = () => {
                   required
                 />
               </div>
-               {/* <div className="edit-np-form-group">
+              {/* <div className="edit-np-form-group">
                 <label className="edit-np-label">Company Logo</label>
                 <LogoUploader
                   logo={companyLogo}
@@ -493,7 +495,7 @@ const EditCustomer: React.FC = () => {
                 />
               </div>
 
-             
+
             </div>
           </div>
         );
@@ -561,33 +563,33 @@ const EditCustomer: React.FC = () => {
             <div className="edit-np-content">
               <div className="edit-np-form">
                 {renderStepContent()}
-                 <div className="edit-np-form-footer">
-                <div className="edit-np-btn-group edit-np-btn-group--back">
-                  {activeTab !== 'details' && (
+                <div className="edit-np-form-footer">
+                  <div className="edit-np-btn-group edit-np-btn-group--back">
+                    {activeTab !== 'details' && (
+                      <button
+                        type="button"
+                        className="np-btn np-btn--ghost"
+                        onClick={handlePreviousStep}
+                      >
+                        Back
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="edit-np-btn-group edit-np-btn-group--next">
                     <button
                       type="button"
-                      className="np-btn np-btn--ghost"
-                      onClick={handlePreviousStep}
+                      className="np-btn np-btn--primary"
+                      onClick={handleNextStep}
                     >
-                      Back
+                      {activeTab === 'review' ? 'Save Changes' : 'Save &Next'}
                     </button>
-                  )}
+                  </div>
                 </div>
-
-                <div className="edit-np-btn-group edit-np-btn-group--next">
-                  <button
-                    type="button"
-                    className="np-btn np-btn--primary"
-                    onClick={handleNextStep}
-                  >
-                    {activeTab === 'review' ? 'Save Changes' : 'Save &Next'}
-                  </button>
-                </div>
-              </div>
               </div>
 
               {/* Footer Buttons */}
-             
+
             </div>
           </div>
 

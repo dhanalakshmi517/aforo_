@@ -81,16 +81,16 @@ export default function CreateSubscription({
   // Handle browser back button and add page class
   useEffect(() => {
     document.body.classList.add("create-product-page");
-    
+
     // Handle browser back button
     const handleBackButton = (event: PopStateEvent) => {
       event.preventDefault();
       navigate('/get-started/subscriptions');
     };
-    
+
     window.addEventListener('popstate', handleBackButton);
     window.history.pushState(null, '', window.location.pathname);
-    
+
     return () => {
       document.body.classList.remove("create-product-page");
       window.removeEventListener('popstate', handleBackButton);
@@ -115,10 +115,10 @@ export default function CreateSubscription({
     checkOverflow();
     window.addEventListener('resize', checkOverflow);
     formSectionRef.current?.addEventListener('scroll', handleScroll);
-    
+
     // Also check after a small delay to ensure DOM is fully rendered
     const timer = setTimeout(checkOverflow, 100);
-    
+
     return () => {
       window.removeEventListener('resize', checkOverflow);
       formSectionRef.current?.removeEventListener('scroll', handleScroll);
@@ -138,7 +138,7 @@ export default function CreateSubscription({
           setSelectedCustomerName(customer.customerName || '');
         }
       }
-      
+
       if (draftData.productId) {
         setSelectedProductId(draftData.productId);
         // Find and set product name if available
@@ -147,7 +147,7 @@ export default function CreateSubscription({
           setSelectedProductName(product.productName || '');
         }
       }
-      
+
       if (draftData.ratePlanId) {
         setSelectedRatePlanId(draftData.ratePlanId);
         // Find and set rate plan name if available
@@ -156,7 +156,7 @@ export default function CreateSubscription({
           setSelectedRatePlanName(ratePlan.ratePlanName || '');
         }
       }
-      
+
       if (draftData.paymentType) {
         const paymentType = draftData.paymentType === 'PREPAID' || draftData.paymentType === 'POSTPAID'
           ? draftData.paymentType as PaymentKind
@@ -165,17 +165,29 @@ export default function CreateSubscription({
           setPaymentType(paymentType);
         }
       }
-      
+
       if (draftData.adminNotes) {
         setPlanDescription(draftData.adminNotes);
       }
-      
+
       // Set subscription ID if it exists
       if (draftData.subscriptionId) {
         setSubscriptionId(draftData.subscriptionId);
       }
     }
   }, [draftData, customers, products, ratePlans]);
+
+  // Check if any required input has been entered (similar to CreateCustomer)
+  const hasAnyRequiredInput = React.useMemo(() => {
+    return Boolean(
+      selectedCustomerId ||
+      selectedProductId ||
+      selectedRatePlanId ||
+      paymentType ||
+      planDescription.trim()
+    );
+  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, planDescription]);
+
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -236,13 +248,13 @@ export default function CreateSubscription({
   const saveDraft = async (): Promise<SubscriptionType | undefined> => {
     if (savingDraft) return;
     setSavingDraft(true);
-    
+
     try {
       // No validations for draft - save whatever fields are available
       const payload: any = {
         status: "DRAFT"
       };
-      
+
       // Only include fields that have values
       if (selectedCustomerId) payload.customerId = selectedCustomerId;
       if (selectedProductId) payload.productId = selectedProductId;
@@ -251,9 +263,9 @@ export default function CreateSubscription({
         payload.paymentType = paymentType;
       }
       if (planDescription) payload.adminNotes = planDescription;
-      
+
       let resp: SubscriptionType;
-      
+
       try {
         // Simple logic: If we have an ID, use PATCH. Otherwise, use POST.
         if (subscriptionId) {
@@ -262,16 +274,16 @@ export default function CreateSubscription({
           resp = await Api.createSubscriptionDraft(payload);
           setSubscriptionId(resp.subscriptionId);
         }
-        
+
         setSubmissionStatus("success");
         setIsDraftSaved(true);
-        
+
         // Reset the saved state after 2.5 seconds
         setTimeout(() => {
           console.log('Resetting draft saved state');
           setIsDraftSaved(false);
         }, 2500);
-        
+
         return resp;
       } catch (error) {
         console.error('Error in saveDraft API call:', error);
@@ -280,14 +292,14 @@ export default function CreateSubscription({
     } catch (e) {
       const error = e as Error;
       console.error("Failed to save draft:", error);
-      
+
       // Show error to user
       showToast({
         kind: "error",
         title: "Save Failed",
         message: error.message || "Failed to save draft. Please try again.",
       });
-      
+
       setSubmissionStatus("error");
       throw error; // Re-throw to allow error handling in the calling function
     } finally {
@@ -300,7 +312,12 @@ export default function CreateSubscription({
   const gotoStep = (index: number) => setCurrentStep(index);
 
   const handleBackTop = () => {
-    setShowSavePrompt(true);
+    // Only show save prompt if user has filled any fields
+    if (hasAnyRequiredInput) {
+      setShowSavePrompt(true);
+    } else {
+      onClose();
+    }
   };
 
   const handleSaveDraftAndClose = async () => {
@@ -376,11 +393,11 @@ export default function CreateSubscription({
 
   const handleSaveAndNext = async () => {
     if (!validateStep0()) return;
-    
+
     try {
       // Save the draft (will use POST or PATCH automatically based on subscriptionId)
       const draftSubscription = await saveDraft();
-      
+
       if (draftSubscription) {
         // Navigate to review step after successful save
         gotoStep(1);
@@ -407,24 +424,16 @@ export default function CreateSubscription({
     }
 
     try {
-      // Show loading state
-      showToast({
-        kind: "info",
-        title: "Processing",
-        message: "Confirming your subscription...",
-        autoDismiss: false
-      });
-      
       // Call confirm API with the saved subscription ID
       const resp = await Api.confirmSubscription(subscriptionId);
-      
+
       setSubmissionStatus("success");
       showToast({
         kind: "success",
         title: "Subscription Confirmed",
         message: "Subscription has been confirmed successfully.",
       });
-      
+
       onCreateSuccess(resp);
       onRefresh?.();
       onClose();
@@ -561,13 +570,17 @@ export default function CreateSubscription({
       <TopBar
         title="Create New Purchase"
         onBack={currentStep === 0 ? handleBackTop : () => gotoStep(0)}
-        cancel={{ onClick: handleCancelTop }}
+        cancel={{
+          onClick: handleCancelTop,
+          disabled: !hasAnyRequiredInput
+        }}
         save={currentStep === 0 ? {
           onClick: handleSaveDraftTop,
           label: isDraftSaved ? "Saved!" : "Save as Draft",
           saved: isDraftSaved,
           saving: isDraftSaving,
           labelWhenSaved: "Saved as Draft",
+          disabled: !hasAnyRequiredInput
         } : {
           // onClick: handleFinalSubmit,
           // saved: submissionStatus === 'success',
@@ -585,6 +598,9 @@ export default function CreateSubscription({
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
                   const showConnector = i < steps.length - 1;
+                  // Disable step navigation - users must use Save & Next and Back buttons
+                  const isDisabled = true;
+
                   return (
                     <button
                       key={step.id}
@@ -593,8 +609,11 @@ export default function CreateSubscription({
                         "pur-np-step",
                         isActive ? "pur-active" : "",
                         isCompleted ? "pur-completed" : "",
+                        isDisabled ? "disabled" : ""
                       ].join(" ").trim()}
-                      onClick={() => gotoStep(i)}
+                      onClick={() => !isDisabled && gotoStep(i)}
+                      disabled={isDisabled}
+                      title={isDisabled ? "Use the Save & Next or Back buttons to navigate" : ""}
                     >
                       <span className="pur-np-step__bullet" aria-hidden="true">
                         <span className="pur-np-step__icon">
@@ -692,6 +711,7 @@ export default function CreateSubscription({
       {/* Save Draft confirmation modal (same UX as product page) */}
       <SaveDraft
         isOpen={showSavePrompt}
+        disabled={!hasAnyRequiredInput}
         onClose={async () => {
           setShowSavePrompt(false);
           // on Close without saving draft
