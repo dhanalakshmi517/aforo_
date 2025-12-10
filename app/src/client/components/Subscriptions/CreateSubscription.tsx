@@ -1,598 +1,708 @@
-@import "../Variables/Variables.css";
-
-
-
-/* Inline error message style for form fields */
-.pur-np-error-message {
-  color: var(--color-error-400, #D32F2F);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-body-sm);
-  margin-top: 4px;
-  --np-gap-right: 100px;
-  --np-gap-top: 10px;
-  --np-gap-bottom: 15px;
-
- 
-}
-/* Ensure full page height */
-
-/* Spacing between custom met-np-field groups */
-.pur-np-grid-2 .if-field{margin-bottom:8px;}
-.pur-np-grid-2 .if-field:last-child{margin-bottom:0;}
-
-/* Form group styling */
-.pur-np-grid-2 .form-group {
-  margin-bottom: 8px;
-  position: relative;
-  width: 100%;
-}
-
-/* Select field styling */
-.select-product {
-  width: 100%;
-}
-
-/* Select dropdown menu */
-.select-product .if-select__menu {
-  margin-top: 4px;
-  border-radius: 4px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-/* Select control */
-.select-product .if-select__control {
-  min-height: 40px;
-  border-radius: 4px;
-  border-color: var(--color-neutral-400);
-}
-
-/* Select control when focused */
-.select-product .if-select__control--is-focused {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 1px var(--color-primary-500);
-}
-
-/* Select placeholder */
-.select-product .if-select__placeholder {
-  color: var(--color-neutral-600);
-}
-
-/* Select option */
-.select-product .if-select__option {
-  padding: 8px 12px;
-  color: var(--color-neutral-900);
-}
-
-/* Selected option */
-.select-product .if-select__option--is-selected {
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
-}
-
-/* Hovered option */
-.select-product .if-select__option--is-focused {
-  background-color: var(--color-neutral-100);
-}
-
-/* Disabled option */
-.select-product .if-select__option--is-disabled {
-  color: var(--color-neutral-400);
-  cursor: not-allowed;
-}
-
-.pur-np-grid-2 .if-field {
-  margin-bottom: 8px;
-}
-
-.pur-np-grid-2 .if-field:last-child {
-  margin-bottom: 0;
-}
-
-/* Spacing between custom met-np-field groups */
-.pur-np-field{margin-bottom:8px;display:flex;flex-direction:column;}
-.pur-np-field:last-child{margin-bottom:0;}
-html, body, #root{
- 
-  height: 100%; 
-  margin: 0;
-  padding: 0;
-  overflow: visible; 
-}
-.create-product-page { 
-  min-height: 100vh; 
-  background: #f7f8fb;
-  /* padding-bottom: 40px;  */
-}
-
-/* Viewport fills screen */
-.pur-np-viewport {
-  border-bottom: 1px solid var(--color-neutral-300);
-  padding: var(--np-gap-top) 110px 30px 110px;
-  box-sizing: border-box;
-  height: calc(100vh - 20px);
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-}
-
-/* Card */
-.pur-np-card {
-  margin-bottom: 40px;          /* gap beneath card */
-  padding-bottom: 32px; /* space below footer */
-  background: var(--color-neutral-white);
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
-  width: 100%;
-  position: relative;
-  border-radius: var(--border-radius-lg);
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 40px);
-  overflow: hidden;
-}
-
-/* Grid fills height */
-.pur-np-grid{
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  flex: 1;
-  min-height: 0;
-}
-
-/* ===== Rail with vertical connector line ===== */
-.pur-np-rail{
-  background: var(--color-neutral-100);
-  height: auto;
-  align-self: stretch;
-  padding: 16px;
-  box-sizing: border-box;
-  border-right: 1px solid var(--color-neutral-300);
-  display: flex;
-  flex-direction: column;
-  height:100vh;
-}
-
-/* Steps container */
-.pur-np-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 8px 8px 8px 0;
-  background-color: transparent;
-}
-
-/* Steps container */
-.pur-np-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* Remove gap between steps */
-  padding: 8px 8px 8px 0;
-  background-color: transparent;
-  position: relative;
-}
-
-/* Each step card */
-.pur-np-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 8px;
-  background: transparent;
-  border: 0;
-  width: 100%;
-  text-align: left;
-  position: relative;
-  min-height: 70px; /* Reduced height for better alignment */
-}
-
-/* Bullet container */
-.pur-np-step__bullet {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 24px;
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 2;
-  gap: 0;
-  padding: 0;
-  margin: 0;
-}
-
-/* Icon container */
-.pur-np-step__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  position: relative;
-  z-index: 2;
-  background: #f8f9fb; /* Match the rail background */
-}
-
-/* Connector line container */
-.pur-np-step__connector {
-  position: absolute;
-  top: 22px; /* Start from the bottom of the circle, overlapping by 2px */
-  left: 11px;
-  z-index: 1;
-  width: 2px;
-  background-color: #C3C2D0; /* Match the circle stroke color */
-  content: '';
-  display: block;
-  margin-top: 0; /* Remove any gap */
-}
-
-/* Different heights for each connector */
-.pur-np-step:nth-child(1) .pur-np-step__connector {
-  height: 130px; /* Height for first connector */
-}
-
-.pur-np-step:nth-child(2) .pur-np-step__connector {
-  height: 109px; /* Height for second connector */
-}
-
-
-/* Vertical tweaks for steps after the first */
-.pur-np-step:not(:first-child) .pur-np-step__bullet { margin-top: -20px; }
-.pur-np-step:not(:first-child) .pur-np-step__text { margin-top: -20px; }
-
-/* Step container */
-.pur-np-step {
-  position: relative;
-  padding: 0 0 12px 0;
-  min-height: 100px; /* Increased to accommodate the tallest connector */
-  display: flex;
-  align-items: flex-start;
-}
-
-/* Remove connector from last step */
-.pur-np-step:last-child .pur-np-step__connector {
-  display: none;
-}
-
-/* Remove bottom padding from last step */
-.pur-np-step:last-child {
-  padding-bottom: 0;
-}
-
-/* Text content */
-.pur-np-step__text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-left: 4px;
-  padding-top: 2px; /* Align text with circle */
-}
-
-.pur-np-step__connector svg {
-  display: block;
-  height: 100%;
-}
-
-.pur-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
-.pur-np-step__title{
-   color: var(--color-neutral-800);
-
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg); /* 150% */
-text-align: left;
-margin-bottom: 2px;
-margin-top: -2px;
-}
-.pur-np-step__desc{ color: var(--color-neutral-1400);
-
-  /* body/md/reg */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md); /* 142.857% */
-}
-
-/* States */
-/* .np-step.active{
-   border:1px solid var(--color-neutral-300); 
-   border-radius: var(--border-radius-sm);
-    } */
-.pur-np-step.completed .pur-np-step__connector{ background-color: var(--color-primary-800); }
-
-.pur-np-step.completed .pur-np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
-.pur-np-step.completed .pur-np-step__icon svg{ visibility:hidden; }
-.pur-np-step.active .pur-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
-.pur-np-step.active .pur-np-step__connector{  }
-.pur-np-step.active .pur-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
-
-.pur-np-step.active .pur-np-step__title{ color: var(--color-neutral-1700);
-
-  /* body/md/med */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-lg); /* 150% */
-}
-
-
-/* ===== Main area ===== */
-.pur-np-main { 
-  border-radius: var(--border-radius-sm); 
-  position: relative; 
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  height: calc(100% - 24px);
-  min-height: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  padding-bottom: var(--np-gap-bottom);
-}
-
-/* Make inner area a column so footer can stick to bottom */
-.pur-np-main__inner {
-  position: relative;
-  z-index: 1;
-  padding: 24px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-.pur-np-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-.pur-np-form {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden; /* allow focus ring on left/right */
-  padding-bottom: 10px;
-  gap: 16px;
-  flex: 1;
-  width: 100%;
-  max-width: 100%;
-}
-.pur-np-form-section {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden; /* do not clip blue border shadow horizontally */
-  width: 100%;
-  max-width: 100%;
-  padding-bottom: 10px;
-  margin-top: 10px;
-}
-
-/* Section title above a full-bleed faint line */
-.pur-np-section-header{
-  position:sticky;
-  top:0;
-  background:#fff;
-  z-index:5;
-  margin:4px -24px 18px -24px; /* match NewProduct spacing */
-  padding:0 24px;   
- 
-}
-.pur-np-section-title{
-  color: var(--color-neutral-800);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h6);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-heading-h6);
-text-transform: uppercase;
-margin-top: -10px;
-}
-.pur-np-section-header::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-5px;
-  height:1px;
-}
-
-/* Footer actions on a full-bleed line */
-.pur-np-form-footer {
-  margin: 0 -24px;
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between; /* Space between back and next buttons */
-  align-items: center;
-  margin-top: auto;
-  margin-bottom: 24px;
-}
-
-.pur-np-btn-group { 
-  display: flex;
-  gap: 12px;
-}
-
-/* Back button group - align to left */
-.pur-np-btn-group--back {
-  margin-right: auto;
-}
-
-/* Next button group - align to right */
-.pur-np-btn-group--next {
-  margin-left: auto;
-}
-
-/* Ensure the next button is on the right */
-.pur-np-form-footer > .pur-np-btn-group:last-child {
-  margin-left: auto;
-}
-/* Base Button Styles */
-/* Base button styles with no flash */
-.pur-np-btn {
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  outline: none;
-  height: 40px;
-  padding: 8px 20px;
-  font-family: var(--type-font-family-primary);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  line-height: var(--line-height-body-md);
-  border-radius: var(--border-radius-sm);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 144px;
-  text-align: center;
-}
-
-
-
-/* Active state with no transform */
-.pur-np-btn:active {
-  transform: none !important;
-  transition: none !important;
-}
-
-.pur-np-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Primary Button */
-.pur-np-btn--primary { 
-  background-color: var(--color-primary-700);
-  color: white;
-}
-
-.pur-np-btn--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-800);
-}
-
-.pur-np-btn--primary:active:not(:disabled) {
-  background-color: var(--color-primary-900);
-}
-
-.pur-np-btn--primary:disabled {
-  background-color: var(--color-neutral-300);
-  color: var(--color-neutral-600);
-}
-
-/* Ghost Button */
-.pur-np-btn--ghost { 
-  width: 144px;
-  background-color: var(--color-primary-000);
-  border: 1px solid var(--color-neutral-400);
-  color: var(--color-primary-800);
-}
-
-.pur-np-btn--ghost:hover:not(:disabled) {
-  background-color: var(--color-neutral-100);
-  border-color: var(--color-neutral-500);
-}
-
-.pur-np-btn--ghost:active:not(:disabled) {
-  background-color: var(--color-neutral-200);
-}
-
-.pur-np-btn--ghost:disabled {
-  background-color: transparent;
-  border-color: var(--color-neutral-300);
-  color: var(--color-neutral-400);
-}
-
-/* responsive */
-@media (max-width: 1200px){
-  :root{ --np-gap-left:72px; --np-gap-right:72px; }
-}
-@media (max-width: 900px){
-  :root{ --np-gap-left:48px; --np-gap-right:48px; }
-}
-@media (max-width: 640px){
-  :root{
-    --np-gap-top:24px; --np-gap-bottom:15px;
-    --np-gap-left:16px; --np-gap-right:16px;
-    --np-rail-w:100%;
-  }
-  .pur-np-grid{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-  .pur-np-form{ gap: 8px; }
-}
-
-
-/* --- tuneable sizes so math stays correct --- */
-:root{
-  --np-step-icon: 24px;      /* circle size */
-  --np-steps-pl: 16px;       /* left padding on .np-steps */
-  --np-conn-w: 2px;          /* SVG line width */
-}
-
-/* Steps container (keep your existing look) */
-.pur-np-steps{
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding-left: var(--np-steps-pl);
-  background-color: #f8f9fb;
+// CreateSubscription.tsx
+import * as React from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import TopBar from "../componenetsss/TopBar";
+import { useToast } from "../componenetsss/ToastProvider";
+import SaveDraft from "../componenetsss/SaveDraft";
+import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
+import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
+
+import "../componenetsss/SkeletonForm.css";
+import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
+import PrimaryButton from "../componenetsss/PrimaryButton";
+import SecondaryButton from "../componenetsss/SecondaryButton";
+import {
+  Api,
+  Product,
+  RatePlan,
+  Customer,
+  Subscription as SubscriptionType,
+} from "./api";
+import '../componenetsss/SkeletonForm.css';
+
+import "./CreateSubscription.css"; // you can copy met-np-* styles here (or reuse Usagemetric.css)
+
+type StepId = 1 | 2;
+type PaymentKind = "PREPAID" | "POSTPAID";
+type ActiveTab = "details" | "review";
+
+const steps: Array<{ id: StepId; title: string; desc: string }> = [
+  {
+    id: 1,
+    title: "Purchase Details",
+    desc: "Provide purchase-related details.",
+  },
+  {
+    id: 2,
+    title: "Review & Confirm",
+    desc: "Check and finalize details.",
+  },
+];
+
+interface CreateSubscriptionProps {
+  onClose: () => void;
+  onCreateSuccess: (sub: SubscriptionType) => void;
+  onRefresh?: () => void;
+  draftData?: SubscriptionType;
+}
+
+export default function CreateSubscription({
+  onClose,
+  onCreateSuccess,
+  onRefresh,
+  draftData,
+}: CreateSubscriptionProps): JSX.Element {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { showToast, dismissToast } = useToast();
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const formSectionRef = React.useRef<HTMLDivElement>(null);
+
+  // data sources
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
+
+  // form fields
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedCustomerName, setSelectedCustomerName] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedProductName, setSelectedProductName] = useState("");
+  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+  const [selectedRatePlanName, setSelectedRatePlanName] = useState("");
+  const [paymentType, setPaymentType] = useState<PaymentKind | "">("");
+  const [planDescription, setPlanDescription] = useState("");
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("details");
+
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "success" | "error">("idle");
+  const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const currentStepMeta = steps[currentStep];
+
+  // ---------- page + back-button handling ----------
+  useEffect(() => {
+    document.body.classList.add("create-product-page");
+
+    const handleBackButton = (event: PopStateEvent) => {
+      event.preventDefault();
+      navigate("/get-started/subscriptions");
+    };
+
+    window.addEventListener("popstate", handleBackButton);
+    window.history.pushState(null, "", window.location.pathname);
+
+    return () => {
+      document.body.classList.remove("create-product-page");
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [navigate]);
+
+  // ---------- hydrate selectable lists ----------
+  useEffect(() => {
+    (async () => {
+      try {
+        const [productsData, ratePlansData, customersData] = await Promise.all([
+          Api.getProducts(),
+          Api.getRatePlans(),
+          Api.getCustomers(),
+        ]);
+        setProducts(productsData ?? []);
+        setRatePlans(ratePlansData ?? []);
+        setCustomers(customersData ?? []);
+      } catch (e) {
+        console.error("Failed to load subscription dependencies.", e);
+        showToast({
+          kind: "error",
+          title: "Loading Failed",
+          message: "Failed to load required data. Please refresh the page to try again.",
+        });
+      }
+    })();
+  }, [showToast]);
+
+  // ---------- apply draftData on mount ----------
+  useEffect(() => {
+    if (draftData) {
+      if (draftData.customerId) {
+        setSelectedCustomerId(draftData.customerId);
+        const customer = customers.find((c) => c.customerId === draftData.customerId);
+        if (customer) setSelectedCustomerName(customer.customerName || "");
+      }
+
+      if (draftData.productId) {
+        setSelectedProductId(draftData.productId);
+        const product = products.find((p) => p.productId === draftData.productId);
+        if (product) setSelectedProductName(product.productName || "");
+      }
+
+      if (draftData.ratePlanId) {
+        setSelectedRatePlanId(draftData.ratePlanId);
+        const ratePlan = ratePlans.find((rp) => rp.ratePlanId === draftData.ratePlanId);
+        if (ratePlan) setSelectedRatePlanName(ratePlan.ratePlanName || "");
+      }
+
+      if (draftData.paymentType) {
+        const pt =
+          draftData.paymentType === "PREPAID" || draftData.paymentType === "POSTPAID"
+            ? (draftData.paymentType as PaymentKind)
+            : undefined;
+        if (pt) setPaymentType(pt);
+      }
+
+      if (draftData.adminNotes) setPlanDescription(draftData.adminNotes);
+      if (draftData.subscriptionId) setSubscriptionId(draftData.subscriptionId);
+    }
+  }, [draftData, customers, products, ratePlans]);
+
+  // ---------- hasAnyRequiredInput (for Save/Cancel lock like metric form) ----------
+  const hasAnyRequiredInput = useMemo(
+    () =>
+      Boolean(
+        selectedCustomerId ||
+        selectedProductId ||
+        selectedRatePlanId ||
+        paymentType ||
+        planDescription.trim()
+      ),
+    [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, planDescription]
+  );
+
+  const topActionsDisabled = !hasAnyRequiredInput && !subscriptionId;
+
+  // Validation for step navigation and Save & Next button
+  const canSaveNext =
+    !!selectedCustomerId &&
+    !!selectedProductId &&
+    !!selectedRatePlanId &&
+    (paymentType === "PREPAID" || paymentType === "POSTPAID");
+
+  // ---------- errors ----------
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const { [field]: _gone, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const validateStep0 = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!selectedCustomerId) e.customerId = "This field is required";
+    if (!selectedProductId) e.productId = "This field is required";
+    if (!selectedRatePlanId) e.ratePlanId = "This field is required";
+    if (!paymentType || (paymentType !== "PREPAID" && paymentType !== "POSTPAID")) {
+      e.paymentType = "This field is required";
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  // ---------- draft save ----------
+  const saveDraft = async (): Promise<SubscriptionType | undefined> => {
+    if (savingDraft) return;
+    setSavingDraft(true);
+
+    try {
+      const payload: any = { status: "DRAFT" };
+
+      if (selectedCustomerId) payload.customerId = selectedCustomerId;
+      if (selectedProductId) payload.productId = selectedProductId;
+      if (selectedRatePlanId) payload.ratePlanId = selectedRatePlanId;
+      if (paymentType === "PREPAID" || paymentType === "POSTPAID") {
+        payload.paymentType = paymentType;
+      }
+      if (planDescription) payload.adminNotes = planDescription;
+
+      let resp: SubscriptionType;
+
+      if (subscriptionId) {
+        resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
+      } else {
+        resp = await Api.createSubscriptionDraft(payload);
+        setSubscriptionId(resp.subscriptionId);
+      }
+
+      setSubmissionStatus("success");
+      setIsDraftSaved(true);
+      setTimeout(() => setIsDraftSaved(false), 2500);
+
+      return resp;
+    } catch (e) {
+      const err = e as Error;
+      console.error("Failed to save draft:", err);
+      showToast({
+        kind: "error",
+        title: "Save Failed",
+        message: err.message || "Failed to save draft. Please try again.",
+      });
+      setSubmissionStatus("error");
+      throw err;
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  // ---------- flow actions ----------
+  const gotoStep = (index: number) => {
+    setCurrentStep(index);
+    const map: ActiveTab[] = ["details", "review"];
+    setActiveTab(map[index] || "details");
+  };
+
+  const handleTopbarBack = () => {
+    if (hasAnyRequiredInput || subscriptionId) {
+      setShowSavePrompt(true);
+    } else {
+      navigate("/get-started/subscriptions");
+    }
+  };
+
+  const handleSaveDraftTop = async () => {
+    if (isDraftSaving) return false;
+    try {
+      setIsDraftSaving(true);
+      const result = await saveDraft();
+      return !!result;
+    } catch {
+      return false;
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  const deleteAndClose = async () => {
+    if (!subscriptionId) {
+      onClose();
+      return;
+    }
+
+    try {
+      await Api.deleteSubscription(subscriptionId);
+      showToast({
+        kind: "success",
+        title: "Subscription deleted",
+        message: "The subscription has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error("Error deleting draft:", error);
+      showToast({
+        kind: "error",
+        title: "Error",
+        message: "Failed to delete draft. Please try again.",
+      });
+    } finally {
+      onClose();
+    }
+  };
+
+  const handleSaveAndNext = async () => {
+    if (!validateStep0()) return;
+
+    try {
+      const draftSubscription = await saveDraft();
+      if (draftSubscription) {
+        gotoStep(1);
+      }
+    } catch (e) {
+      console.error("Failed to save draft", e);
+      setSubmissionStatus("error");
+      showToast({
+        kind: "error",
+        title: "Error",
+        message: "Failed to save subscription draft. Please try again.",
+      });
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!subscriptionId) {
+      showToast({
+        kind: "error",
+        title: "Error",
+        message: "No subscription ID found. Please go back and try again.",
+      });
+      return;
+    }
+
+    // Show processing toast
+    const processingToastId = showToast({
+      kind: "info",
+      title: "Processing",
+      message: "Creating purchase...",
+      autoDismiss: false, // Don't auto-dismiss, we'll dismiss it manually
+    });
+
+    try {
+      // Call confirm API with the saved subscription ID
+      const resp = await Api.confirmSubscription(subscriptionId);
+
+      // Dismiss processing toast
+      dismissToast(processingToastId);
+
+      // Wait a tiny bit for smooth transition
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      setSubmissionStatus("success");
+      showToast({
+        kind: "success",
+        title: "Purchase Created",
+        message: "Purchase has been created successfully.",
+      });
+
+      onCreateSuccess(resp);
+      onRefresh?.();
+      onClose();
+    } catch (e) {
+      console.error("Failed to create subscription", e);
+
+      // Dismiss processing toast
+      dismissToast(processingToastId);
+
+      setSubmissionStatus("error");
+      showToast({
+        kind: "error",
+        title: "Creation Failed",
+        message: "Failed to create purchase. Please try again.",
+      });
+    }
+  };
+
+  // ---------- renderers ----------
+  const renderStep0 = () => (
+    <div className="pur-np-grid-2">
+      <SelectField
+        label="Customer"
+        value={selectedCustomerId?.toString() || ""}
+        onChange={(val) => {
+          const id = Number(val);
+          setSelectedCustomerId(id);
+          clearError("customerId");
+          const cust = customers.find((c) => c.customerId === id);
+          setSelectedCustomerName(cust?.customerName || "");
+        }}
+        error={errors.customerId}
+        placeholderOption="e.g., Aditya Inc"
+        options={customers.map((c) => ({
+          label: c.customerName,
+          value: c.customerId.toString(),
+        }))}
+      />
+
+      <SelectField
+        label="Product"
+        value={selectedProductId?.toString() || ""}
+        onChange={(val) => {
+          const id = Number(val);
+          setSelectedProductId(id);
+          clearError("productId");
+          const prod = products.find((p) => p.productId === id);
+          setSelectedProductName(prod?.productName || "");
+          setSelectedRatePlanId(null);
+          setSelectedRatePlanName("");
+        }}
+        error={errors.productId}
+        placeholderOption="Select Product"
+        options={products.map((p) => ({
+          label: p.productName,
+          value: p.productId.toString(),
+        }))}
+      />
+
+      <SelectField
+        label="Rate Plan"
+        value={selectedRatePlanId?.toString() || ""}
+        onChange={(val) => {
+          const id = Number(val);
+          setSelectedRatePlanId(id);
+          clearError("ratePlanId");
+          const rp = ratePlans.find((r) => r.ratePlanId === id);
+          setSelectedRatePlanName(rp?.ratePlanName || "");
+        }}
+        error={errors.ratePlanId}
+        placeholderOption="Select Rate Plan"
+        options={ratePlans.map((rp) => ({
+          label: rp.ratePlanName,
+          value: rp.ratePlanId.toString(),
+        }))}
+        helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
+      />
+
+      <SelectField
+        label="Payment Type"
+        value={paymentType}
+        onChange={(val) => {
+          if (val === "PREPAID" || val === "POSTPAID" || val === "") {
+            setPaymentType(val);
+            clearError("paymentType");
+          }
+        }}
+        error={errors.paymentType}
+        placeholderOption="Select Payment Type"
+        options={[
+          { label: "Post-Paid", value: "POSTPAID" },
+          { label: "Pre-Paid", value: "PREPAID" },
+        ]}
+      />
+
+      <div className="pur-np-field">
+        <TextareaField
+          label="Admin Notes"
+          placeholder="Enter admin notes"
+          value={planDescription}
+          onChange={setPlanDescription}
+        />
+      </div>
+    </div>
+  );
+
+  const renderStep1 = () => {
+    const reviewRows: ReviewRow[] = [
+      { label: "Customer Name", value: selectedCustomerName || "—" },
+      { label: "Product", value: selectedProductName || "—" },
+      { label: "Rate Plan", value: selectedRatePlanName || "—" },
+      {
+        label: "Payment Type",
+        value:
+          paymentType === "PREPAID"
+            ? "Pre-Paid"
+            : paymentType === "POSTPAID"
+              ? "Post-Paid"
+              : "—",
+      },
+      { label: "Admin Notes", value: planDescription || "—" },
+    ];
+
+    return (
+      <section>
+        <div className="pur-np-section-header">
+          <h3 className="pur-np-section-title">REVIEW & CONFIRM</h3>
+        </div>
+        <ReviewComponent title="PURCHASE DETAILS" rows={reviewRows} />
+      </section>
+    );
+  };
+
+  const LockBadge = () => null; // not needed here, but kept for parity if you ever add locked steps
+
+  return (
+    <>
+      <TopBar
+        title="Create New Purchase"
+        onBack={handleTopbarBack}
+        cancel={{
+          onClick: () => setShowDeleteConfirm(true),
+          disabled: topActionsDisabled,
+        }}
+        save={{
+          onClick: handleSaveDraftTop,
+          label: isDraftSaved ? "Saved!" : "Save as Draft",
+          saved: isDraftSaved,
+          saving: isDraftSaving,
+          labelWhenSaved: "Saved as Draft",
+          disabled: topActionsDisabled,
+        }}
+      />
+
+      <div className="pur-np-viewport">
+        <div className="pur-np-card">
+          <div className="pur-np-grid">
+            {/* LEFT rail (steps) */}
+            <aside className="pur-np-rail">
+              <nav className="pur-np-steps">
+                {steps.map((step, i) => {
+                  const isActive = i === currentStep;
+                  const isCompleted = i < currentStep;
+                  const showConnector = i < steps.length - 1;
+
+                  // Step 1 (index 0): Always enabled
+                  // Step 2 (index 1): Only enabled if all required fields are filled
+                  const isDisabled = i === 1 && !canSaveNext;
+
+                  return (
+                    <button
+                      key={step.id}
+                      type="button"
+                      className={[
+                        "pur-np-step",
+                        isActive ? "active" : "",
+                        isCompleted ? "completed" : "",
+                        isDisabled ? "disabled" : ""
+                      ].join(" ").trim()}
+                      onClick={() => !isDisabled && gotoStep(i)}
+                      disabled={isDisabled}
+                      title={isDisabled ? "Please fill all required fields in Purchase Details first" : ""}
+                    >
+                      <span className="pur-np-step__bullet" aria-hidden="true">
+                        <span className="pur-np-step__icon">
+                          {isCompleted ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="11.5"
+                                fill="var(--color-primary-800)"
+                                stroke="var(--color-primary-800)"
+                              />
+                              <path
+                                d="M7 12l3 3 6-6"
+                                stroke="#FFFFFF"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="11"
+                                stroke="#C3C2D0"
+                                strokeWidth="2"
+                              />
+                              <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                            </svg>
+                          )}
+                        </span>
+                        {showConnector && <span className="pur-np-step__connector" />}
+                      </span>
+
+                      <span className="pur-np-step__text">
+                        <span className="pur-np-step__title">{step.title}</span>
+                        <span className="pur-np-step__desc">{step.desc}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </aside>
+
+            {/* MAIN area */}
+            <main className="pur-np-main">
+              <div className="af-skel-rule af-skel-rule--top" />
+              <div className="pur-np-main__inner">
+                <div className="pur-np-body">
+                  <form
+                    className="pur-np-form"
+                    onSubmit={(e) => e.preventDefault()}
+                  >
+                    <div className="pur-np-form-section">
+                      {activeTab === "details" && (
+                        <section>
+                          <div className="pur-np-section-header">
+                            <h3 className="pur-np-section-title">
+                              PURCHASE DETAILS
+                            </h3>
+                          </div>
+                          {renderStep0()}
+                        </section>
+                      )}
+
+                      {activeTab === "review" && renderStep1()}
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="pur-np-form-footer" style={{ position: "relative" }}>
+                      {errors.form && (
+                        <div className="pur-pur-np-error-message">
+                          {errors.form}
+                        </div>
+                      )}
+
+                      {activeTab === "details" && (
+                        <div className="pur-np-btn-group pur-np-btn-group--next">
+                          <PrimaryButton type="button" onClick={handleSaveAndNext}>
+                            Save & Next
+                          </PrimaryButton>
+                        </div>
+                      )}
+
+                      {activeTab === "review" && (
+                        <>
+                          <div className="pur-np-btn-group pur-np-btn-group--back">
+                            <SecondaryButton
+                              type="button"
+                              onClick={() => gotoStep(0)}
+                            >
+                              Back
+                            </SecondaryButton>
+                          </div>
+                          <div className="pur-np-btn-group pur-np-btn-group--next">
+                            <PrimaryButton
+                              type="button"
+                              onClick={handleFinalSubmit}
+                            >
+                              Create Purchase
+                            </PrimaryButton>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </main>
+          </div>
+
+          <div className="af-skel-rule af-skel-rule--bottom" />
+
+          {/* Save Draft modal – same pattern as metric screen */}
+          <SaveDraft
+            isOpen={showSavePrompt}
+            onClose={async () => {
+              setShowSavePrompt(false);
+              await deleteAndClose();
+            }}
+            onSave={async () => {
+              try {
+                const result = await saveDraft();
+                if (result) {
+                  showToast({
+                    kind: "success",
+                    title: "Draft Saved",
+                    message: "Your changes have been saved as a draft.",
+                  });
+                  onClose();
+                }
+              } catch (error) {
+                console.error("Error saving draft from back button:", error);
+              }
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Delete / Cancel confirmation */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        productName="subscription draft"
+        onConfirm={deleteAndClose}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    </>
+  );
 }
-
-/* Remove any old line rules if present */
-.pur-np-steps::before,
-.pur-np-step:not(:last-child)::after { background: none; }
-
-/* Vertical line is now handled by individual step connectors in JSX */
-
-/* Step row (keep your existing styles—just ensure the icon uses the same size) */
-.pur-np-step{
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px 10px 0;
-  background-color: #f8f9fb;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all .2s ease;
-  z-index: 1;
-}
-
-.pur-np-step__icon{
-  width: var(--np-step-icon);
-  height: var(--np-step-icon);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* --- Custom scrollbars for CreateUsageMetric (match NewProduct) --- */
-.pur-np-form::-webkit-scrollbar{width:6px;}
-.pur-np-form::-webkit-scrollbar-track{background:transparent;}
-.pur-np-form::-webkit-scrollbar-thumb{background-color:#C3C2D0;border-radius:2px;}
-.pur-np-form::-webkit-scrollbar-thumb:hover{background-color:#A9A8B5;}
-.pur-np-form::-webkit-scrollbar-thumb:active{background-color:#878694;}
-.pur-np-form{scrollbar-width:thin;scrollbar-color:var(--color-neutral-400) transparent;}
-
-/* dotted thumb for inner sections */
-.pur-np-form-section::-webkit-scrollbar{width:6px;}
-.pur-np-form-section::-webkit-scrollbar-track{background:transparent;}
-.pur-np-form-section::-webkit-scrollbar-thumb{background-color:transparent;border-radius:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-y;background-position:center;background-size:4px 49px;}
-.pur-np-form-section::-webkit-scrollbar-thumb:hover{background-color:transparent;}
-.pur-np-form-section::-webkit-scrollbar-thumb:active{background-color:transparent;}
-.pur-np-form-section{scrollbar-width:thin;scrollbar-color:transparent transparent;}
-
-/* Adjust skeleton faint rules just for Create Usage Metric main area */
-.pur-np-main .af-skel-rule--top { top: 60px; }
-.pur-np-card .af-skel-rule--bottom { bottom: 70px; left: 300px; }
