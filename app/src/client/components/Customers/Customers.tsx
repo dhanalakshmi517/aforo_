@@ -101,7 +101,9 @@ const FILE_HOST = "http://44.201.19.187:8081";
 const absolutizeUpload = (path: string) => {
   const clean = path.replace(/\\/g, "/").trim();
   if (/^https?:\/\//i.test(clean)) return clean;
-  return `${FILE_HOST}${clean.startsWith("/") ? "" : "/"}${clean}`;
+  // Ensure single slash between host and path
+  const separator = clean.startsWith("/") ? "" : "/";
+  return `${FILE_HOST}${separator}${clean}`;
 };
 
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
@@ -266,10 +268,10 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     checkOverflow();
     window.addEventListener('resize', checkOverflow);
     tableWrapperRef.current?.addEventListener('scroll', handleScroll);
-    
+
     // Also check after a small delay to ensure DOM is fully rendered
     const timer = setTimeout(checkOverflow, 100);
-    
+
     return () => {
       window.removeEventListener('resize', checkOverflow);
       tableWrapperRef.current?.removeEventListener('scroll', handleScroll);
@@ -329,125 +331,125 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
           <div className="customers-table-wrapper" ref={tableWrapperRef}>
             <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
               <div style={{ flex: 1, overflow: 'hidden' }}>
-            <table className="customers-table">
-              <thead>
-                <tr>
-                  <th>Company Name </th>
-                  <th>Customer </th>
-                  <th>Status </th>
-                  <th>Created On </th>
-                  <th className="actions-cell">Actions </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading && <tr><td colSpan={5}>Loading...</td></tr>}
-                {errorMsg && <tr><td colSpan={5}>{errorMsg}</td></tr>}
-                {customers.length === 0 && !loading && !errorMsg && (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                      <div className="customers-empty-state">
-                        <img src={CustomersPlat} alt="No customers" style={{ width: '190px', height: '190px' }} />
-                        <p className="customers-empty-state-text" >
-                          No Customer created yet. Click "New Customer"<br /> to create your first Customer.
-                        </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                          <PrimaryButton onClick={() => setShowNewCustomerForm(true)}>
-                            + New Customer
-                          </PrimaryButton>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-
-                {filteredCustomers.map((customer) => {
-                  const id = customer.customerId ?? customer.id;
-                  const companyTitle = customer.companyName || "-";
-                  const personTitle = customer.customerName || "-";
-                  const initials = initialsFrom(companyTitle);
-                  const imgSrc = customer.__resolvedLogoSrc ?? null;
-                  const logoClass = `customer-logo${imgSrc ? " has-image" : " no-image"}`;
-                  console.log('🔍 RENDER - Customer:', companyTitle);
-                  console.log('  - __resolvedLogoSrc:', customer.__resolvedLogoSrc);
-                  console.log('  - imgSrc:', imgSrc);
-                  console.log('  - imgSrc truthy?:', !!imgSrc);
-                  console.log('  - companyLogoUrl:', customer.companyLogoUrl);
-                  console.log('  - logoClass:', logoClass);
-
-                  return (
-                    <tr key={id}>
-                      {/* 1) Company Name */}
-                      <td className="name-cell">
-                        <div className="cell-flex">
-                          <div
-                            className={logoClass}
-                            aria-label={`${companyTitle} logo`}
-                            role="img"
-                            style={imgSrc ? {
-                              backgroundImage: `url(${imgSrc})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                              backgroundRepeat: 'no-repeat'
-                            } : undefined}
-                          >
-                            {!imgSrc && <span className="avatar-initials">{initials}</span>}
-                          </div>
-                          <div className="company-block">
-                            <div className="company-name">{companyTitle}</div>
-                            <div className="company-type">{prettyType(customer.companyType)}</div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* 2) Customer */}
-                      <td className="customer-cell">
-                        <div className="cell-stack">
-                          <div className="person-name">{personTitle}</div>
-                          <div className="person-email">{customer.primaryEmail ?? "-"}</div>
-                        </div>
-                      </td>
-
-                      {/* 3) Status */}
-                      <td>
-                        <StatusBadge
-                          label={customer.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1).toLowerCase() : "N/A"}
-                          variant={customer.status?.toLowerCase().includes("active") ? "active" : customer.status?.toLowerCase().includes("draft") ? "draft" : "archived" as Variant}
-                          size="sm"
-                        />
-                      </td>
-
-                      {/* 4) Created On */}
-                      <td>{formatDateStr(customer.createdOn)}</td>
-
-                      {/* 5) Actions */}
-                      <td className="actions-cell">
-                        <div className="product-action-buttons">
-                          {customer.status?.toLowerCase() === "draft" ? (
-                            <RetryIconButton
-                              onClick={() => handleResumeDraft(customer)}
-                              title="Continue editing draft"
-                            />
-                          ) : (
-                            <EditIconButton
-                              onClick={() => navigate(`/get-started/customers/${id}/edit`)}
-                              title="Edit customer"
-                            />
-                          )}
-                          <DeleteIconButton
-                            onClick={() => handleDeleteClick(id!, companyTitle)}
-                            title="Delete customer"
-                          />
-                        </div>
-                      </td>
+                <table className="customers-table">
+                  <thead>
+                    <tr>
+                      <th>Company Name </th>
+                      <th>Customer </th>
+                      <th>Status </th>
+                      <th>Created On </th>
+                      <th className="actions-cell">Actions </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+
+                  <tbody>
+                    {loading && <tr><td colSpan={5}>Loading...</td></tr>}
+                    {errorMsg && <tr><td colSpan={5}>{errorMsg}</td></tr>}
+                    {customers.length === 0 && !loading && !errorMsg && (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="customers-empty-state">
+                            <img src={CustomersPlat} alt="No customers" style={{ width: '190px', height: '190px' }} />
+                            <p className="customers-empty-state-text" >
+                              No Customer created yet. Click "New Customer"<br /> to create your first Customer.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                              <PrimaryButton onClick={() => setShowNewCustomerForm(true)}>
+                                + New Customer
+                              </PrimaryButton>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {filteredCustomers.map((customer) => {
+                      const id = customer.customerId ?? customer.id;
+                      const companyTitle = customer.companyName || "-";
+                      const personTitle = customer.customerName || "-";
+                      const initials = initialsFrom(companyTitle);
+                      const imgSrc = customer.__resolvedLogoSrc ?? null;
+                      const logoClass = `customer-logo${imgSrc ? " has-image" : " no-image"}`;
+                      console.log('🔍 RENDER - Customer:', companyTitle);
+                      console.log('  - __resolvedLogoSrc:', customer.__resolvedLogoSrc);
+                      console.log('  - imgSrc:', imgSrc);
+                      console.log('  - imgSrc truthy?:', !!imgSrc);
+                      console.log('  - companyLogoUrl:', customer.companyLogoUrl);
+                      console.log('  - logoClass:', logoClass);
+
+                      return (
+                        <tr key={id}>
+                          {/* 1) Company Name */}
+                          <td className="name-cell">
+                            <div className="cell-flex">
+                              <div
+                                className={logoClass}
+                                aria-label={`${companyTitle} logo`}
+                                role="img"
+                                style={imgSrc ? {
+                                  backgroundImage: `url(${imgSrc})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  backgroundRepeat: 'no-repeat'
+                                } : undefined}
+                              >
+                                {!imgSrc && <span className="avatar-initials">{initials}</span>}
+                              </div>
+                              <div className="company-block">
+                                <div className="company-name">{companyTitle}</div>
+                                <div className="company-type">{prettyType(customer.companyType)}</div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* 2) Customer */}
+                          <td className="customer-cell">
+                            <div className="cell-stack">
+                              <div className="person-name">{personTitle}</div>
+                              <div className="person-email">{customer.primaryEmail ?? "-"}</div>
+                            </div>
+                          </td>
+
+                          {/* 3) Status */}
+                          <td>
+                            <StatusBadge
+                              label={customer.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1).toLowerCase() : "N/A"}
+                              variant={customer.status?.toLowerCase().includes("active") ? "active" : customer.status?.toLowerCase().includes("draft") ? "draft" : "archived" as Variant}
+                              size="sm"
+                            />
+                          </td>
+
+                          {/* 4) Created On */}
+                          <td>{formatDateStr(customer.createdOn)}</td>
+
+                          {/* 5) Actions */}
+                          <td className="actions-cell">
+                            <div className="product-action-buttons">
+                              {customer.status?.toLowerCase() === "draft" ? (
+                                <RetryIconButton
+                                  onClick={() => handleResumeDraft(customer)}
+                                  title="Continue editing draft"
+                                />
+                              ) : (
+                                <EditIconButton
+                                  onClick={() => navigate(`/get-started/customers/${id}/edit`)}
+                                  title="Edit customer"
+                                />
+                              )}
+                              <DeleteIconButton
+                                onClick={() => handleDeleteClick(id!, companyTitle)}
+                                title="Delete customer"
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
               {hasOverflow && tableWrapperRef.current && (
-                <div 
+                <div
                   className="scrollbar-container-customers"
                   style={{
                     transform: `translateY(${(scrollPosition / (tableWrapperRef.current.scrollHeight - tableWrapperRef.current.clientHeight)) * (tableWrapperRef.current.clientHeight - 49)}px)`

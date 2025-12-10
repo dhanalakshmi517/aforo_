@@ -14,8 +14,8 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Allow all origins for development - you should restrict this in production
-        config.addAllowedOrigin("*");
+        // Allow specific origins for development
+        config.addAllowedOriginPattern("*");
         
         // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
         config.addAllowedMethod("*");
@@ -23,7 +23,11 @@ public class CorsConfig {
         // Allow all headers
         config.addAllowedHeader("*");
         
-        source.registerCorsConfiguration("/api/**", config);
+        // Allow credentials (cookies, authorization headers)
+        config.setAllowCredentials(true);
+        
+        // Register CORS for all paths including /uploads/**
+        source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
 }

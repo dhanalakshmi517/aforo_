@@ -7,9 +7,10 @@ interface SaveDraftProps {
   onSave: () => void;
   onDelete?: () => void; // Optional explicit delete handler
   onDismiss?: () => void; // Just close popup without any action
+  disabled?: boolean; // Disable buttons when no fields are filled
 }
 
-const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDelete, onDismiss }) => {
+const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDelete, onDismiss, disabled = false }) => {
   if (!isOpen) return null;
 
   return (
@@ -17,7 +18,7 @@ const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDelete
       <div className="save-modal">
         <button className="save-modal-close" onClick={onDismiss || onClose}>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M11 1L1 11M1 1L11 11" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M11 1L1 11M1 1L11 11" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         <p className="save-modal-title">Do you want to save this plan as a draft?</p>
@@ -26,10 +27,18 @@ const SaveDraft: React.FC<SaveDraftProps> = ({ isOpen, onClose, onSave, onDelete
           continue later.
         </p>
         <div className="save-modal-buttons">
-          <button className="save-modal-btn save-modal-btn-cancel" onClick={onDelete || onClose}>
+          <button
+            className="save-modal-btn save-modal-btn-cancel"
+            onClick={onDelete || onClose}
+            disabled={disabled}
+          >
             Delete
           </button>
-          <button className="save-modal-btn save-modal-btn-save" onClick={onSave}>
+          <button
+            className="save-modal-btn save-modal-btn-save"
+            onClick={onSave}
+            disabled={disabled}
+          >
             Save as Draft
           </button>
         </div>

@@ -43,12 +43,16 @@ module.exports = {
   transform: {},
 
   // Test results processor
-  reporters: [
-    'default',
-    ['jest-html-reporters', {
-      publicPath: './selenium-tests/reports',
-      filename: 'selenium-test-report.html',
-      expand: true
-    }]
-  ]
+  reporters: ['default']
+
+  // To add HTML reports, install: npm install --save-dev jest-html-reporters
+  // Then uncomment below:
+  // reporters: [
+  //   'default',
+  //   ['jest-html-reporters', {
+  //     publicPath: './reports',
+  //     filename: 'selenium-test-report.html',
+  //     expand: true
+  //   }]
+  // ]
 };
