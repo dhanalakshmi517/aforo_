@@ -280,6 +280,19 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       String(sub.ratePlanId).toLowerCase().includes(q) ||
       String(sub.paymentType || '').toLowerCase().includes(q)
     );
+  }).sort((a, b) => {
+    // Priority 1: Draft status subscriptions appear first
+    const aIsDraft = a.status?.toLowerCase() === 'draft';
+    const bIsDraft = b.status?.toLowerCase() === 'draft';
+
+    if (aIsDraft && !bIsDraft) return -1;
+    if (!aIsDraft && bIsDraft) return 1;
+
+    // Priority 2: Within same status group, sort by creation time (newest first)
+    const aTime = new Date((a as any).createdOn || (a as any).createdAt || 0).getTime();
+    const bTime = new Date((b as any).createdOn || (b as any).createdAt || 0).getTime();
+
+    return bTime - aTime; // Descending order (newest first)
   });
 
   const isEmpty = subscriptions.length === 0;

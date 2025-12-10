@@ -182,6 +182,23 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
   }, [products, selectedProductId]);
 
+  // Reset draft saved state when any form field is modified
+  useEffect(() => {
+    if (isDraftSaved) {
+      setIsDraftSaved(false);
+    }
+  }, [
+    metricName,
+    selectedProductId,
+    version,
+    unitOfMeasure,
+    description,
+    aggregationFunction,
+    aggregationWindow,
+    billingCriteria,
+    usageConditions
+  ]);
+
   // anything typed (or condition row started)?
   const hasAnyRequiredInput = useMemo(() => {
     const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
@@ -237,8 +254,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       if (!metricName.trim()) step0Errors.metricName = 'Metric name is required';
       if (!selectedProductId) step0Errors.product = 'Product is required';
       if (!unitOfMeasure) step0Errors.unitOfMeasure = 'Unit of Measure is required';
-      if (!aggregationFunction) step0Errors.aggregationFunction = 'Aggregation Function is required';
-      if (!aggregationWindow) step0Errors.aggregationWindow = 'Aggregation Window is required';
+      // Description, Aggregation Function, and Aggregation Window are now optional
       setErrors(step0Errors);
       return Object.keys(step0Errors).length === 0;
     }
@@ -260,7 +276,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
 
     if (step === 2) {
-      if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !aggregationFunction) {
+      if (!metricName.trim() || !selectedProductId || !unitOfMeasure) {
         setErrors({ form: 'Please fill all required fields' });
         return false;
       }
@@ -286,6 +302,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     // When billing excludes usage conditions, don't send any usage conditions
     const shouldIncludeUsageConditions = billingCriteria !== 'BILL_EXCLUDING_USAGE_CONDITIONS';
 
+    // Filter out incomplete conditions (empty dimension, operator, or value)
+    const validConditions = usageConditions.filter(c =>
+      c.dimension?.trim() && c.operator?.trim() && c.value?.trim()
+    );
+
     if (metricId) {
       const payload: any = {
         metricId,
@@ -297,14 +318,14 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         billingCriteria: billingCriteria || undefined,
         version: version?.trim() ? version.trim() : undefined,
         description: description?.trim() ? description.trim() : undefined,
-        usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : [],
+        usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : [],
       };
       return clean(payload);
     }
 
     if (isDraft) {
       const payload: any = {
-        usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
+        usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : []
       };
       if (metricName.trim()) payload.metricName = metricName.trim();
       if (selectedProductId) payload.productId = Number(selectedProductId);
@@ -326,7 +347,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       aggregationFunction,
       aggregationWindow,
       billingCriteria: billingCriteria || undefined,
-      usageConditions: shouldIncludeUsageConditions && usageConditions?.length ? usageConditions : []
+      usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : []
     };
   };
 
@@ -566,8 +587,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 className="select-product"
                               />
                             </div>
-                            <InputField label="Version (optional)" value={version} onChange={setVersion} placeholder="eg. v2.0" />
-                            <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" />
+                            <InputField label="Version" value={version} onChange={setVersion} placeholder="eg. v2.0" optional={true} />
+                            <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" optional={true} />
 
                             <div className="met-np-field">
                               {(() => {
@@ -631,6 +652,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                   }
                                 }}
                                 error={errors.aggregationFunction}
+                                optional={true}
                               />
                             </div>
 
@@ -648,6 +670,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                   }
                                 }}
                                 error={errors.aggregationWindow}
+                                optional={true}
                               />
                             </div>
                           </div>
@@ -795,6 +818,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
               });
               onClose();
             }}
+            onDismiss={() => setShowSavePrompt(false)}
           />
         </div>
       </div>
