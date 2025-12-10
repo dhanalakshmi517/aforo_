@@ -33,11 +33,16 @@ const formatIST = (iso?: string) => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
   const fmt = new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-    timeZone: 'Asia/Kolkata'
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Kolkata',
   }).format(d);
-  return `${fmt} IST`;
+  // Use a non-breaking space before IST so the timezone label never wraps
+  return `${fmt} \u00A0IST`;
 };
 
 // Payment pill (same visuals as RatePlans.tsx)

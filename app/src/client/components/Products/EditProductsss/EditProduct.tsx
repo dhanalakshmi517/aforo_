@@ -22,6 +22,8 @@ import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration } from './EditProductApi';
 import { finalizeProduct, deleteProduct, updateProductIcon } from '../api';
 import { listAllProducts, getProducts } from '../api';
+import "../../componenetsss/SkeletonForm.css";
+
 
 interface Product { productId: string; }
 
@@ -670,7 +672,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
             {/* Main content area */}
             <main className="editprod-np-main">
-              <div className="af-skel-rule af-skel-rule--top" />
               <div className="editprod-np-main__inner">
                 <div className="editprod-np-body">
                   <form

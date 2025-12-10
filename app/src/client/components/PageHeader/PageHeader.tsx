@@ -137,7 +137,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             {primaryLabel}
           </PrimaryButton>
         )}
-        {showIntegrations && (
+        {/* {showIntegrations && (
           <button className="rp-integrations-btn" aria-label="Integrations" onClick={onSettingsClick}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
               <g clipPath="url(#clip0_13285_2368)">
@@ -150,7 +150,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
               </defs>
             </svg>
           </button>
-        )}
+        )} */}
         {/* Divider AFTER the New button (right side) */}
         {showDivider && (
           <div className="header-divider" aria-hidden="true">

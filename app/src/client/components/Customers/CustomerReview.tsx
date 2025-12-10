@@ -1,11 +1,6 @@
 import React from 'react';
 import { AccountDetailsData } from './AccountDetailsForm';
-import './CustomerReview.css';
-
-interface Section {
-  title: string;
-  fields: { label: string; value: string }[];
-}
+import ReviewComponent, { ReviewRow } from '../componenetsss/ReviewComponent';
 
 interface CustomerReviewProps {
   customerName: string;
@@ -14,14 +9,14 @@ interface CustomerReviewProps {
   accountDetails: AccountDetailsData | null;
 }
 
-const getSections = (props: CustomerReviewProps): Section[] => {
-  const customerFields: Section['fields'] = [
+const getSections = (props: CustomerReviewProps): { title: string; rows: ReviewRow[] }[] => {
+  const customerRows: ReviewRow[] = [
     { label: 'Customer Name', value: props.customerName || '—' },
     { label: 'Company Name', value: props.companyName || '—' },
     { label: 'Company Type', value: props.companyType || '—' },
   ];
 
-  const accountFields: Section['fields'] = [
+  const accountRows: ReviewRow[] = [
     // Contact Details
     { label: 'Phone Number', value: props.accountDetails?.phoneNumber || '—' },
     { label: 'Primary Email', value: props.accountDetails?.primaryEmail || '—' },
@@ -44,8 +39,8 @@ const getSections = (props: CustomerReviewProps): Section[] => {
   ];
 
   return [
-    { title: 'Customer Details', fields: customerFields },
-    { title: 'Account Details', fields: accountFields },
+    { title: 'Customer Details', rows: customerRows },
+    { title: 'Account Details', rows: accountRows },
   ];
 };
 
@@ -54,17 +49,7 @@ const CustomerReview: React.FC<CustomerReviewProps> = (props) => {
   return (
     <div className="review-wrapper">
       {sections.map((section, idx) => (
-        <div className="review-section" key={idx}>
-          <h4 className="section-title">{section.title}</h4>
-          <div className="review-grid">
-            {section.fields.map((field, i) => (
-              <React.Fragment key={i}>
-                <div className="review-label">{field.label}</div>
-                <div className="review-value">{field.value}</div>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+        <ReviewComponent key={idx} title={section.title} rows={section.rows} />
       ))}
     </div>
   );

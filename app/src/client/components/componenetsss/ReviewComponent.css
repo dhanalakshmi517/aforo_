@@ -22,10 +22,10 @@ color: var(--color-neutral-1400);
 
 /* body/md/thin */
 font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
+font-size: var(--font-size-h6);
 font-style: normal;
 font-weight: 300;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+line-height: var(--line-height-heading-h6, 20px); /* 142.857% */
   
   
   text-transform: uppercase;
@@ -82,7 +82,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 font-family: var(--type-font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-md, 14px);
 font-style: normal;
-font-weight: 500;
+font-weight: 600;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
   text-align: right;
   margin-right: 30px;

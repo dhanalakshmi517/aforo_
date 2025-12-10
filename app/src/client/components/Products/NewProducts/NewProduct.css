@@ -196,9 +196,11 @@ html, body, #root{
   height: 100%;
 }
 
-.np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
+.np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:8px;
+
+ }
 .np-step__title{
-   color: var(--color-neutral-1400);
+   color: var(--color-neutral-800);
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -208,19 +210,11 @@ font-weight: 400;
 line-height: var(--line-height-body-lg); /* 150% */
 text-align: left;
 margin-bottom: 2px;
+margin-left: 10px;
+margin-top: 10px;
 }
-.np-step__title:hover{
-  color: var(--color-neutral-1700);
 
-  /* body/md/med */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-lg);
-    
-}
-.np-step__desc{ color: var(--color-neutral-1400);
+.np-step__desc{ color: var(--color-neutral-900);
 
   /* body/md/reg */
   font-family: var(--font-family-primary);
@@ -244,7 +238,7 @@ margin-bottom: 2px;
 
 .np-rail .np-step.active .np-step__connector{ background-color: #C3C2D0; }
 
-.np-rail .np-step.active .np-step__title{ color: var(--color-neutral-1700);
+.np-rail .np-step.active .np-step__title{ color: var(--color-neutral-black);
 
   /* body/md/med */
   font-family: var(--font-family-primary);
@@ -258,10 +252,9 @@ margin-bottom: 2px;
 .np-step.disabled .np-step__icon svg circle:nth-of-type(2){ fill:#C3C2D0 !important; }
 .np-step.disabled .np-step__icon svg circle:nth-of-type(1){ stroke:#C3C2D0 !important; }
 .np-step.disabled .np-step__title{ color: var(--color-neutral-1400) !important; font-weight: 400 !important; }
-.np-step.disabled.active .np-step__icon svg circle:nth-of-type(2){ fill:#C3C2D0 !important; }
-.np-step.disabled.active .np-step__icon svg circle:nth-of-type(1){ stroke:#C3C2D0 !important; }
+.np-step.disabled.active .np-step__icon svg circle:nth-of-type(2){ fill:transparent !important; }
+.np-step.disabled.active .np-step__icon svg circle:nth-of-type(1){ stroke:transparent !important; }
 .np-step.disabled.active .np-step__title{ color: var(--color-neutral-1400) !important; font-weight: 400 !important; }
-.np-step.disabled:hover .np-step__title{ color: var(--color-neutral-1400) !important; }
 
 /* Force step circles to gray when modal is open */
 .np-rail[data-modal-open="true"] .np-step .np-step__icon svg circle:nth-of-type(1) { stroke: #C3C2D0 !important; }

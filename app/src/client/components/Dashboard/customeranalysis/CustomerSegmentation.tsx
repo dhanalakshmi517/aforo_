@@ -132,8 +132,8 @@ const CustomerSegmentation: React.FC = () => {
                     nameKey="name"
                     startAngle={90}
                     endAngle={-270}
-                    innerRadius="55%"
-                    outerRadius="80%"
+                    innerRadius="40%"
+                    outerRadius="85%"
                     paddingAngle={2}
                     cornerRadius={6}
                   >

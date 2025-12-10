@@ -4,17 +4,7 @@
 
 import * as React from "react";
 import "./ProductReview.css";
-
-// Types
-interface ReviewRow {
-  label: string;
-  value: string;
-}
-
-interface ReviewSection {
-  title: string;
-  rows: ReviewRow[];
-}
+import ReviewComponent, { ReviewRow } from "../../componenetsss/ReviewComponent";
 
 // Utility to prettify camelCase or snake_case keys into labels
 const prettify = (key: string): string => {
@@ -28,28 +18,6 @@ interface ProductReviewProps {
   generalDetails: Record<string, string>;
   configuration: Record<string, string>;
 }
-
-const CardSection: React.FC<ReviewSection> = ({ title, rows }: ReviewSection) => {
-  return (
-    <section className="product-review-card" aria-label={title}>
-      <header className="pr-card__header">
-        <h3 className="pr-card__title">{title}</h3>
-      </header>
-      <div className="pr-card__body">
-        {rows.map((r, i) => (
-          <div className="pr-row" key={`${r.label}-${i}`}>
-            <div className="pr-row__label" title={r.label}>
-              {r.label}
-            </div>
-            <div className="pr-row__value" title={r.value}>
-              {r.value}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
 
 const ProductReview: React.FC<ProductReviewProps> = ({
   generalDetails,
@@ -65,7 +33,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({
     value: v || '-'
   }));
 
-  const sections: ReviewSection[] = [
+  const sections = [
     { title: 'GENERAL DETAILS', rows: generalRows },
     { title: 'PRODUCT CONFIGURATION', rows: configRows }
   ];
@@ -73,7 +41,12 @@ const ProductReview: React.FC<ProductReviewProps> = ({
   return (
     <div className="product-review-grid">
       {sections.map((section) => (
-        <CardSection key={section.title} {...section} />
+        <ReviewComponent
+          key={section.title}
+          title={section.title}
+          rows={section.rows}
+          className="product-review-card"
+        />
       ))}
     </div>
   );

@@ -7,7 +7,7 @@
     top: 0;
     width: 100%;
     height: 70px;
-    background: var(--color-neutral-50);
+    background: var(--color-neutral-white);
     border: 1px solid var(--color-neutral-200);
     display: flex;
     align-items: center;
@@ -98,11 +98,12 @@ line-height: var(--line-height-heading-h4);}
     height: 36px;
     border-radius: var(--border-radius-sm);
     background: var(--color-neutral-white);
-box-shadow: 0 0 8px 10px var(--shadow-shadow-1, #EEF1F6);    display: inline-flex;
     align-items: center;
     justify-content: center;
+        border:1px solid var(--color-neutral-300);
+
     cursor: pointer;
-    padding: 0;
+    padding: 10px;
   }
 
   /* Add margin to first icon button to create gap from action buttons */

@@ -172,25 +172,19 @@ color: var(--color-neutral-1000);
 font-family: var(--font-family-primary);
 font-size: var(--font-size-sm);
 font-weight: 400;
-line-height: var(--line-height-body-sm);
+  line-height: var(--line-height-body-sm);
   background: var(--color-neutral-100);
   border:0.4px solid var(--color-neutral-500)
 }
-.pill-icon { display: inline-flex; }
-.pill--prepaid  { background: var(--color-neutral-white); }
-.pill--postpaid { background: var(--color-neutral-white); }
-
-/* --------- Status badge ---------- */
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px 6px 12px;
-  border-radius: 20px;
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  background: #EDEFF2;
-  color: #0F172A;
+.pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+.pill-icon svg {
+  display: block; /* remove baseline offset so it centers with text */
+}
+
 .status-badge--active { background: #E6F7EA; color: #107A3E; }
 .status-badge--draft  { background: #EEEAF7; color: #5D41A3; }
 

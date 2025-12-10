@@ -9,6 +9,7 @@
   padding: 8px 12px;        /* roomy like the spec */
   cursor: pointer;
   box-sizing: border-box;
+  width: 456px;             /* match form field width */
 }
 
 /* ADD state visuals (upload prompt) */

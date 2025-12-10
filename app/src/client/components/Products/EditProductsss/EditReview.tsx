@@ -4,17 +4,7 @@
 
 import React, { useEffect } from 'react';
 import './EditReview.css';
-
-// Types
-interface ReviewRow {
-  label: string;
-  value: string;
-}
-
-interface ReviewSection {
-  title: string;
-  rows: ReviewRow[];
-}
+import ReviewComponent, { ReviewRow } from '../../componenetsss/ReviewComponent';
 
 interface EditReviewProps {
   generalDetails: Record<string, string>;
@@ -71,29 +61,6 @@ const orderGeneral = (obj: Record<string, string>): [string, string][] => {
   const remaining = entries.filter(([k]) => !seen.has(k));
   return [...preferredEntries, ...remaining];
 };
-
-const CardSection: React.FC<ReviewSection> = React.memo(({ title, rows }) => {
-  return (
-    <section className="edit-pr-card" aria-label={title}>
-      <header className="edit-pr-card__header">
-        <h3 className="edit-pr-card__title">{title}</h3>
-      </header>
-      <div className="edit-pr-card__body">
-        {rows.map((r, i) => (
-          <div className="edit-pr-row" key={r.label + i}>
-            <div className="edit-pr-row__label" title={r.label}>
-              {r.label}
-            </div>
-            <div className="edit-pr-row__value" title={r.value}>
-              {r.value}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-});
-CardSection.displayName = 'CardSection';
 
 // Utility function to clear localStorage for edit review
 export const clearEditReviewStorage = () => {
@@ -156,7 +123,7 @@ const EditReview: React.FC<EditReviewProps> = ({
     value: (v ?? '').toString() || '—',
   }));
 
-  const sections: ReviewSection[] = [
+  const sections = [
     { title: 'GENERAL DETAILS', rows: generalRows },
     { title: 'PRODUCT CONFIGURATION', rows: configRows },
   ];
@@ -165,7 +132,12 @@ const EditReview: React.FC<EditReviewProps> = ({
     <div className="edit-pr-wrapper">
       <div className="edit-pr-grid">
         {sections.map((s) => (
-          <CardSection key={s.title} {...s} />
+          <ReviewComponent
+            key={s.title}
+            title={s.title}
+            rows={s.rows}
+            className="edit-pr-card"
+          />
         ))}
       </div>
     </div>
