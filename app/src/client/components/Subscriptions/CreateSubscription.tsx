@@ -56,7 +56,10 @@ export default function CreateSubscription({
 }: CreateSubscriptionProps): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
-  const { showToast } = useToast();
+  const { showToast, dismissToast } = useToast();
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const formSectionRef = React.useRef<HTMLDivElement>(null);
 
   // data sources
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -169,15 +172,22 @@ export default function CreateSubscription({
     () =>
       Boolean(
         selectedCustomerId ||
-          selectedProductId ||
-          selectedRatePlanId ||
-          paymentType ||
-          planDescription.trim()
+        selectedProductId ||
+        selectedRatePlanId ||
+        paymentType ||
+        planDescription.trim()
       ),
     [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, planDescription]
   );
 
   const topActionsDisabled = !hasAnyRequiredInput && !subscriptionId;
+
+  // Validation for step navigation and Save & Next button
+  const canSaveNext =
+    !!selectedCustomerId &&
+    !!selectedProductId &&
+    !!selectedRatePlanId &&
+    (paymentType === "PREPAID" || paymentType === "POSTPAID");
 
   // ---------- errors ----------
   const clearError = (field: string) => {
@@ -326,32 +336,45 @@ export default function CreateSubscription({
       return;
     }
 
-    try {
-      showToast({
-        kind: "info",
-        title: "Processing",
-        message: "Confirming your subscription...",
-        autoDismiss: false,
-      });
+    // Show processing toast
+    const processingToastId = showToast({
+      kind: "info",
+      title: "Processing",
+      message: "Creating purchase...",
+      autoDismiss: false, // Don't auto-dismiss, we'll dismiss it manually
+    });
 
+    try {
+      // Call confirm API with the saved subscription ID
       const resp = await Api.confirmSubscription(subscriptionId);
+
+      // Dismiss processing toast
+      dismissToast(processingToastId);
+
+      // Wait a tiny bit for smooth transition
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       setSubmissionStatus("success");
       showToast({
         kind: "success",
-        title: "Subscription Confirmed",
-        message: "Subscription has been confirmed successfully.",
+        title: "Purchase Created",
+        message: "Purchase has been created successfully.",
       });
 
       onCreateSuccess(resp);
       onRefresh?.();
       onClose();
     } catch (e) {
-      console.error("Failed to confirm subscription", e);
+      console.error("Failed to create subscription", e);
+
+      // Dismiss processing toast
+      dismissToast(processingToastId);
+
       setSubmissionStatus("error");
       showToast({
         kind: "error",
-        title: "Confirmation Failed",
-        message: "Failed to confirm subscription. Please try again.",
+        title: "Creation Failed",
+        message: "Failed to create purchase. Please try again.",
       });
     }
   };
@@ -455,8 +478,8 @@ export default function CreateSubscription({
           paymentType === "PREPAID"
             ? "Pre-Paid"
             : paymentType === "POSTPAID"
-            ? "Post-Paid"
-            : "—",
+              ? "Post-Paid"
+              : "—",
       },
       { label: "Admin Notes", value: planDescription || "—" },
     ];
@@ -502,18 +525,24 @@ export default function CreateSubscription({
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
                   const showConnector = i < steps.length - 1;
+
+                  // Step 1 (index 0): Always enabled
+                  // Step 2 (index 1): Only enabled if all required fields are filled
+                  const isDisabled = i === 1 && !canSaveNext;
+
                   return (
                     <button
                       key={step.id}
                       type="button"
                       className={[
                         "pur-np-step",
-                        isActive ? "active" : "",
-                        isCompleted ? "completed" : "",
-                      ]
-                        .join(" ")
-                        .trim()}
-                      onClick={() => gotoStep(i)}
+                        isActive ? "pur-active" : "",
+                        isCompleted ? "pur-completed" : "",
+                        isDisabled ? "disabled" : ""
+                      ].join(" ").trim()}
+                      onClick={() => !isDisabled && gotoStep(i)}
+                      disabled={isDisabled}
+                      title={isDisabled ? "Please fill all required fields in Purchase Details first" : ""}
                     >
                       <span className="pur-np-step__bullet" aria-hidden="true">
                         <span className="pur-np-step__icon">
