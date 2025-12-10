@@ -210,7 +210,7 @@ export default function CreateSubscription({
   };
 
   // ---------- draft save ----------
-  const saveDraft = async (): Promise<SubscriptionType | undefined> => {
+  const saveDraft = async (showSavedState = false): Promise<SubscriptionType | undefined> => {
     if (savingDraft) return;
     setSavingDraft(true);
 
@@ -235,8 +235,12 @@ export default function CreateSubscription({
       }
 
       setSubmissionStatus("success");
-      setIsDraftSaved(true);
-      setTimeout(() => setIsDraftSaved(false), 2500);
+
+      // Only show "Saved!" state when explicitly requested (from TopBar button)
+      if (showSavedState) {
+        setIsDraftSaved(true);
+        setTimeout(() => setIsDraftSaved(false), 2500);
+      }
 
       return resp;
     } catch (e) {
@@ -273,7 +277,7 @@ export default function CreateSubscription({
     if (isDraftSaving) return false;
     try {
       setIsDraftSaving(true);
-      const result = await saveDraft();
+      const result = await saveDraft(true); // Show "Saved!" state
       return !!result;
     } catch {
       return false;
@@ -692,6 +696,7 @@ export default function CreateSubscription({
                 console.error("Error saving draft from back button:", error);
               }
             }}
+            onDismiss={() => setShowSavePrompt(false)}
           />
         </div>
       </div>
