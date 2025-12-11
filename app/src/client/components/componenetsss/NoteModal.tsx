@@ -37,6 +37,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
 }) => {
   const [value, setValue] = useState(initialValue);
   const [appliedToAll, setAppliedToAll] = useState(false);
+  const [isApplyingAll, setIsApplyingAll] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   const hasMultipleFiles = totalFiles > 1;
@@ -44,6 +45,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
   useEffect(() => {
     setValue(initialValue);
     setAppliedToAll(false);
+    setIsApplyingAll(false);
   }, [initialValue, open]);
 
   // ESC to close
@@ -103,13 +105,64 @@ const NoteModal: React.FC<NoteModalProps> = ({
   <div className="di-notes-footer-row">
     <SecondaryButton
       onClick={() => {
-        if (!hasMultipleFiles) return;
+        if (!hasMultipleFiles || appliedToAll || isApplyingAll) return;
+        // start loading state immediately
+        setIsApplyingAll(true);
         onSaveAll(value);
-        setAppliedToAll(true);
+
+        // after a short delay, show success tick + text
+        setTimeout(() => {
+          setIsApplyingAll(false);
+          setAppliedToAll(true);
+        }, 1500);
+
+        // Auto-close the modal a few seconds after apply-all click
+        setTimeout(() => {
+          onClose();
+        }, 5000);
       }}
-      disabled={!hasMultipleFiles}
+      disabled={!hasMultipleFiles || appliedToAll || isApplyingAll}
+      className={(isApplyingAll || appliedToAll) ? "di-notes-applyall-success" : ""}
     >
-      Add same note to all files
+      {isApplyingAll ? (
+        <>
+          <span className="di-notes-success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle
+                cx="7"
+                cy="7"
+                r="5"
+                fill="none"
+                stroke="#389315"
+                strokeWidth="1.5"
+                strokeOpacity="0.25"
+              />
+              <path
+                d="M12 7A5 5 0 0 0 7 2"
+                fill="none"
+                stroke="#389315"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+          <span className="di-notes-success-text">pplying note to all files…</span>
+        </>
+      ) : appliedToAll ? (
+        <>
+          <span className="di-notes-success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="10" viewBox="0 0 13 10" fill="none">
+              <path d="M11.6667 1L4.33333 8.33333L1 5" stroke="#389315" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+          <span className="di-notes-success-text">Added note to all files</span>
+        </>
+      ) : (
+        <>
+          <PlusIcon />
+          <span>Add same note to all files</span>
+        </>
+      )}
     </SecondaryButton>
     <label className="di-notes-checkbox">
       <input
@@ -122,16 +175,6 @@ const NoteModal: React.FC<NoteModalProps> = ({
       />
     </label>
   </div>
-  {appliedToAll && hasMultipleFiles && (
-    <div className="di-notes-success">
-      <span className="di-notes-success-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="10" viewBox="0 0 13 10" fill="none">
-          <path d="M11.6667 1L4.33333 8.33333L1 5" stroke="#389315" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </span>
-      <span className="di-notes-success-text">added note to all files</span>
-    </div>
-  )}
 </div>
 
       </div>

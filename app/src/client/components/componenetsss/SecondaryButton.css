@@ -1,4 +1,3 @@
-
 @import "../Variables/Variables.css";
 
   
@@ -31,12 +30,11 @@
     white-space: nowrap;
     transition: background-color .15s ease, box-shadow .15s ease, transform .02s ease;
   }
-  
-  .af-secondary-color-btn.is-full { width: 100%; }
-  
-  .af-secondary-color-btn:hover:not(:disabled) { background: var(--color-primary-100); 
-    color: var(--color-primary-800);
-    border: 1px solid transparent;
+
+  .af-secondary-color-btn .af-btn-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   
     /* body/md/med */
     font-family: var(--font-family-primary);

@@ -350,9 +350,8 @@ const DataIngestionPage: React.FC = () => {
   };
 
   const handleSaveNoteToAll = (note: string) => {
+    // Apply note to all rows; let NoteModal decide when to close itself
     setRows(rows.map(row => ({ ...row, note })));
-    setShowNoteModal(false);
-    setCurrentNoteFile(null);
   };
 
   const formatUploaded = (d: Date) =>
