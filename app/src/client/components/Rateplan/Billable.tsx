@@ -58,7 +58,7 @@ const Billable: React.FC<BillableProps> = ({ productName, selectedMetricId, onSe
         const mapped: Metric[] = data.map((m, idx) => ({
 
           // build a unique id even if backend metricId is missing/duplicated
-          id: (m as any).metricId ?? (m as any).billableMetricId,
+          id: Number((m as any).metricId ?? (m as any).billableMetricId),
 
           title: m.metricName, // display name from backend
           subtitle: '',
