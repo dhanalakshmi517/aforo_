@@ -22,6 +22,8 @@ import {
   RatePlanRequest,
 } from '../api';
 
+import { setRatePlanData } from '../utils/sessionStorage';
+
 import './EditRatePlan.css';
 import '../../Products/EditProductsss/EditProduct.css';
 
@@ -82,12 +84,12 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     currentStep === 0
       ? 'details'
       : currentStep === 1
-      ? 'billable'
-      : currentStep === 2
-      ? 'pricing'
-      : currentStep === 3
-      ? 'extras'
-      : 'review';
+        ? 'billable'
+        : currentStep === 2
+          ? 'pricing'
+          : currentStep === 3
+            ? 'extras'
+            : 'review';
 
   const [loading, setLoading] = useState(false);
 
@@ -178,6 +180,14 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           productName: plan.productName || plan.product?.productName || '',
           paymentType: plan.paymentType || '',
         };
+
+        // Store plan details in session storage for EditReview
+        if (plan.ratePlanName) setRatePlanData('PLAN_NAME', plan.ratePlanName);
+        if (plan.description) setRatePlanData('PLAN_DESCRIPTION', plan.description);
+        if (plan.billingFrequency) setRatePlanData('BILLING_FREQUENCY', plan.billingFrequency);
+        if (plan.productName || plan.product?.productName) {
+          setRatePlanData('PRODUCT_NAME', plan.productName || plan.product?.productName || '');
+        }
 
         // PRICING MODEL HINTS IN LOCALSTORAGE
         if (plan.flatFeeAmount)
@@ -621,9 +631,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                     productError
                       ? []
                       : products.map(p => ({
-                          label: p.productName,
-                          value: p.productName,
-                        }))
+                        label: p.productName,
+                        value: p.productName,
+                      }))
                   }
                   error={errors.selectedProductName}
                 />
@@ -791,8 +801,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                           {loading
                             ? 'Saving...'
                             : activeTab === 'review'
-                            ? 'Save Changes'
-                            : 'Save & Next'}
+                              ? 'Save Changes'
+                              : 'Save & Next'}
                         </PrimaryButton>
                       </div>
                     </div>

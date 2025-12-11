@@ -436,10 +436,17 @@ export default function CreateSubscription({
         }}
         error={errors.ratePlanId}
         placeholderOption="Select Rate Plan"
-        options={ratePlans.map((rp) => ({
-          label: rp.ratePlanName,
-          value: rp.ratePlanId.toString(),
-        }))}
+        options={ratePlans
+          .filter((rp) =>
+            selectedProductId
+              ? rp.productId === selectedProductId
+              : true
+          )
+          .map((rp) => ({
+            label: rp.ratePlanName,
+            value: rp.ratePlanId.toString(),
+          }))}
+        disabled={!selectedProductId}
         helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
       />
 

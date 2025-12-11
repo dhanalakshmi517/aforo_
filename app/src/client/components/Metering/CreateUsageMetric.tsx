@@ -340,17 +340,22 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       return clean(payload);
     }
 
-    return {
+    // For new metric creation (non-draft), only include fields that have values
+    const payload: any = {
       metricName: metricName.trim(),
       productId: Number(selectedProductId),
-      version: version.trim(),
       unitOfMeasure: unitOfMeasure.trim(),
-      description: description.trim(),
-      aggregationFunction,
-      aggregationWindow,
-      billingCriteria: billingCriteria || undefined,
       usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : []
     };
+
+    // Only include optional fields if they have values
+    if (version?.trim()) payload.version = version.trim();
+    if (description?.trim()) payload.description = description.trim();
+    if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
+    if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
+    if (billingCriteria) payload.billingCriteria = billingCriteria;
+
+    return clean(payload);
   };
 
   const saveOrUpdateMetric = async (isDraft = false, skipFinalize = false) => {
@@ -434,7 +439,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       if (finalized) {
         setShowSuccess(true);
       } else {
-        alert('Finalize failed');
+        showToast({
+          kind: 'error',
+          title: 'Failed to Finalize',
+          message: 'Unable to finalize the metric. Please try again.'
+        });
       }
     }
   };
@@ -523,347 +532,351 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         />
       ) : (
         <>
-      <TopBar
-        title="Create New Usage Metric"
-        onBack={handleTopbarBack}
-        cancel={{
-          onClick: () => setShowDeleteConfirm(true),
-          disabled: topActionsDisabled,
-        }}
-        save={{
-          onClick: handleSaveDraft,
-          label: isDraftSaved ? 'Saved!' : 'Save as Draft',
-          saved: isDraftSaved,
-          saving: isDraftSaving,
-          labelWhenSaved: 'Saved as Draft',
-          disabled: topActionsDisabled
-        }}
-      />
+          <TopBar
+            title="Create New Usage Metric"
+            onBack={handleTopbarBack}
+            cancel={{
+              onClick: () => setShowDeleteConfirm(true),
+              disabled: topActionsDisabled,
+            }}
+            save={{
+              onClick: handleSaveDraft,
+              label: isDraftSaved ? 'Saved!' : 'Save as Draft',
+              saved: isDraftSaved,
+              saving: isDraftSaving,
+              labelWhenSaved: 'Saved as Draft',
+              disabled: topActionsDisabled
+            }}
+          />
 
-      <div className="met-np-viewport">
-        <div className="met-np-card">
-          <div className="met-np-grid">
-            <aside className="met-np-rail">
-              <nav className="met-np-steps">
-                {steps.map((step, i) => {
-                  const isActive = i === currentStep;
-                  const isCompleted = i < currentStep;
-                  const showConnector = i < steps.length - 1;
-                  return (
-                    <button
-                      key={step.id}
-                      type="button"
-                      className={['met-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : ''].join(' ').trim()}
-                      onClick={() => gotoStep(i)}
-                    >
-                      <span className="met-np-step__bullet" aria-hidden="true">
-                        <span className="met-np-step__icon">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
-                            <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
-                          </svg>
-                        </span>
-                        {showConnector && <span className="met-np-step__connector" />}
-                      </span>
-                      <span className="met-np-step__text">
-                        <span className="met-np-step__title">{step.title}</span>
-                        <span className="met-np-step__desc">{step.desc}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </aside>
+          <div className="met-np-viewport">
+            <div className="met-np-card">
+              <div className="met-np-grid">
+                <aside className="met-np-rail">
+                  <nav className="met-np-steps">
+                    {steps.map((step, i) => {
+                      const isActive = i === currentStep;
+                      const isCompleted = i < currentStep;
+                      const showConnector = i < steps.length - 1;
+                      return (
+                        <button
+                          key={step.id}
+                          type="button"
+                          className={['met-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : ''].join(' ').trim()}
+                          onClick={() => gotoStep(i)}
+                        >
+                          <span className="met-np-step__bullet" aria-hidden="true">
+                            <span className="met-np-step__icon">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                                <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                              </svg>
+                            </span>
+                            {showConnector && <span className="met-np-step__connector" />}
+                          </span>
+                          <span className="met-np-step__text">
+                            <span className="met-np-step__title">{step.title}</span>
+                            <span className="met-np-step__desc">{step.desc}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </aside>
 
-            <main className="met-np-main">
-              <div className="af-skel-rule af-skel-rule--top" />
-              <div className="met-np-main__inner">
-                <div className="met-np-body">
-                  <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="met-np-form-section">
-                      {/* STEP 1 */}
-                      {activeTab === 'metric' && (
-                        <section>
-                          <div className="met-np-section-header">
-                            <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
-                          </div>
+                <main className="met-np-main">
+                  <div className="af-skel-rule af-skel-rule--top" />
+                  <div className="met-np-main__inner">
+                    <div className="met-np-body">
+                      <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
+                        <div className="met-np-form-section">
+                          {/* STEP 1 */}
+                          {activeTab === 'metric' && (
+                            <section>
+                              <div className="met-np-section-header">
+                                <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
+                              </div>
 
-                          <div className="met-np-grid-2">
-                            {/* fields ... (unchanged) */}
-                            <InputField label="Metric Name" value={metricName} onChange={setMetricName} placeholder="eg. API Calls" error={errors.metricName} />
-                            <div className="form-group">
-                              <SelectField
-                                label="Product"
-                                value={selectedProductId}
-                                onChange={(v: string) => {
-                                  setSelectedProductId(v);
-                                  const prod = products.find(p => String(p.productId) === v);
-                                  setSelectedProductName(prod ? prod.productName : '');
-                                  setSelectedProductType(prod ? prod.productType : '');
-                                  setUnitOfMeasure('');
-                                  if (errors.product) {
-                                    const { product, ...rest } = errors;
-                                    setErrors(rest);
-                                  }
-                                }}
-                                options={productOptions}
-                                error={errors.product}
-                                className="select-product"
-                              />
-                            </div>
-                            <InputField label="Version" value={version} onChange={setVersion} placeholder="eg. v2.0" optional={true} />
-                            <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" optional={true} />
-
-                            <div className="met-np-field">
-                              {(() => {
-                                const map: Record<string, string[]> = {
-                                  API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
-                                  FLATFILE: ['FILE', 'ROW', 'RECORD', 'DELIVERY', 'MB'],
-                                  SQLRESULT: ['CELL', 'MB', 'ROW', 'QUERY_EXECUTION'],
-                                  LLMTOKEN: ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN']
-                                };
-                                const key = selectedProductType?.toUpperCase();
-                                const opts = map[key] || null;
-
-                                if (opts) {
-                                  return (
-                                    <SelectField
-                                      label="Unit of Measure"
-                                      placeholder="Select unit (eg. calls, GB, hours)"
-                                      value={unitOfMeasure}
-                                      onChange={(v: string) => {
-                                        setUnitOfMeasure(v);
-                                        if (errors.unitOfMeasure) {
-                                          const { unitOfMeasure, ...rest } = errors;
-                                          setErrors(rest);
-                                        }
-                                      }}
-                                      options={opts.map(o => ({ label: o, value: o }))}
-                                      error={errors.unitOfMeasure}
-                                    />
-                                  );
-                                }
-
-                                return (
-                                  <InputField
-                                    label="Unit of Measure"
-                                    placeholder="Unit"
-                                    value={unitOfMeasure}
+                              <div className="met-np-grid-2">
+                                {/* fields ... (unchanged) */}
+                                <InputField label="Metric Name" value={metricName} onChange={setMetricName} placeholder="eg. API Calls" error={errors.metricName} />
+                                <div className="form-group">
+                                  <SelectField
+                                    label="Product"
+                                    value={selectedProductId}
                                     onChange={(v: string) => {
-                                      setUnitOfMeasure(v);
-                                      if (errors.unitOfMeasure) {
-                                        const { unitOfMeasure, ...rest } = errors;
+                                      setSelectedProductId(v);
+                                      const prod = products.find(p => String(p.productId) === v);
+                                      setSelectedProductName(prod ? prod.productName : '');
+                                      setSelectedProductType(prod ? prod.productType : '');
+                                      setUnitOfMeasure('');
+                                      if (errors.product) {
+                                        const { product, ...rest } = errors;
                                         setErrors(rest);
                                       }
                                     }}
-                                    error={errors.unitOfMeasure}
+                                    options={productOptions}
+                                    error={errors.product}
+                                    className="select-product"
                                   />
-                                );
-                              })()}
-                            </div>
+                                </div>
+                                <InputField label="Version" value={version} onChange={setVersion} placeholder="eg. v2.0" optional={true} />
+                                <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" optional={true} />
 
-                            <div className="met-np-field">
-                              <AggregationFunctionSelect
-                                label="Aggregation Function"
+                                <div className="met-np-field">
+                                  {(() => {
+                                    const map: Record<string, string[]> = {
+                                      API: ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'],
+                                      FLATFILE: ['FILE', 'ROW', 'RECORD', 'DELIVERY', 'MB'],
+                                      SQLRESULT: ['CELL', 'MB', 'ROW', 'QUERY_EXECUTION'],
+                                      LLMTOKEN: ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN']
+                                    };
+                                    const key = selectedProductType?.toUpperCase();
+                                    const opts = map[key] || null;
+
+                                    if (opts) {
+                                      return (
+                                        <SelectField
+                                          label="Unit of Measure"
+                                          placeholder="Select unit (eg. calls, GB, hours)"
+                                          value={unitOfMeasure}
+                                          onChange={(v: string) => {
+                                            setUnitOfMeasure(v);
+                                            if (errors.unitOfMeasure) {
+                                              const { unitOfMeasure, ...rest } = errors;
+                                              setErrors(rest);
+                                            }
+                                          }}
+                                          options={opts.map(o => ({ label: o, value: o }))}
+                                          error={errors.unitOfMeasure}
+                                        />
+                                      );
+                                    }
+
+                                    return (
+                                      <InputField
+                                        label="Unit of Measure"
+                                        placeholder="Unit"
+                                        value={unitOfMeasure}
+                                        onChange={(v: string) => {
+                                          setUnitOfMeasure(v);
+                                          if (errors.unitOfMeasure) {
+                                            const { unitOfMeasure, ...rest } = errors;
+                                            setErrors(rest);
+                                          }
+                                        }}
+                                        error={errors.unitOfMeasure}
+                                      />
+                                    );
+                                  })()}
+                                </div>
+
+                                <div className="met-np-field">
+                                  <AggregationFunctionSelect
+                                    label="Aggregation Function"
+                                    productType={selectedProductType}
+                                    unitOfMeasure={unitOfMeasure}
+                                    value={aggregationFunction}
+                                    onChange={(v: string) => {
+                                      setAggregationFunction(v);
+                                      if (errors.aggregationFunction) {
+                                        const { aggregationFunction, ...rest } = errors;
+                                        setErrors(rest);
+                                      }
+                                    }}
+                                    error={errors.aggregationFunction}
+                                    optional={true}
+                                  />
+                                </div>
+
+                                <div className="met-np-field">
+                                  <AggregationWindowSelect
+                                    label="Aggregation Window"
+                                    productType={selectedProductType}
+                                    unitOfMeasure={unitOfMeasure}
+                                    value={aggregationWindow}
+                                    onChange={(v: string) => {
+                                      setAggregationWindow(v);
+                                      if (errors.aggregationWindow) {
+                                        const { aggregationWindow, ...rest } = errors;
+                                        setErrors(rest);
+                                      }
+                                    }}
+                                    error={errors.aggregationWindow}
+                                    optional={true}
+                                  />
+                                </div>
+                              </div>
+                            </section>
+                          )}
+
+                          {/* STEP 2: CONDITIONS */}
+                          {activeTab === 'conditions' && (
+                            <section>
+                              <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
+                                <h3 className="met-np-section-title">USAGE CONDITIONS</h3>
+                                {isConditionsLocked && <LockBadge />}
+                              </div>
+
+                              <UsageConditionForm
+                                locked={isConditionsLocked}
                                 productType={selectedProductType}
                                 unitOfMeasure={unitOfMeasure}
-                                value={aggregationFunction}
-                                onChange={(v: string) => {
-                                  setAggregationFunction(v);
-                                  if (errors.aggregationFunction) {
-                                    const { aggregationFunction, ...rest } = errors;
-                                    setErrors(rest);
-                                  }
-                                }}
-                                error={errors.aggregationFunction}
-                                optional={true}
+                                conditions={usageConditions}
+                                setConditions={setUsageConditions}
+                                billingCriteria={billingCriteria}
+                                onBillingCriteriaChange={setBillingCriteria}
+                                errors={conditionErrors}
+                                onFieldEdited={clearConditionError}
+                                billingError={errors.billingCriteria}
                               />
-                            </div>
+                            </section>
+                          )}
 
-                            <div className="met-np-field">
-                              <AggregationWindowSelect
-                                label="Aggregation Window"
-                                productType={selectedProductType}
+                          {/* STEP 3: REVIEW */}
+                          {activeTab === 'review' && (
+                            <section>
+                              <div className="met-np-section-header">
+                                <h3 className="met-np-section-title">REVIEW & CONFIRM</h3>
+                              </div>
+                              <Review
+                                metricName={metricName}
+                                productName={selectedProductName}
+                                description={description}
+                                version={version}
                                 unitOfMeasure={unitOfMeasure}
-                                value={aggregationWindow}
-                                onChange={(v: string) => {
-                                  setAggregationWindow(v);
-                                  if (errors.aggregationWindow) {
-                                    const { aggregationWindow, ...rest } = errors;
-                                    setErrors(rest);
-                                  }
-                                }}
-                                error={errors.aggregationWindow}
-                                optional={true}
+                                aggregationFunction={aggregationFunction}
+                                aggregationWindow={aggregationWindow}
+                                usageConditions={usageConditions}
+                                billingCriteria={billingCriteria}
                               />
-                            </div>
-                          </div>
-                        </section>
-                      )}
-
-                      {/* STEP 2: CONDITIONS */}
-                      {activeTab === 'conditions' && (
-                        <section>
-                          <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
-                            <h3 className="met-np-section-title">USAGE CONDITIONS</h3>
-                            {isConditionsLocked && <LockBadge />}
-                          </div>
-
-                          <UsageConditionForm
-                            locked={isConditionsLocked}
-                            productType={selectedProductType}
-                            unitOfMeasure={unitOfMeasure}
-                            conditions={usageConditions}
-                            setConditions={setUsageConditions}
-                            billingCriteria={billingCriteria}
-                            onBillingCriteriaChange={setBillingCriteria}
-                            errors={conditionErrors}
-                            onFieldEdited={clearConditionError}
-                            billingError={errors.billingCriteria}
-                          />
-                        </section>
-                      )}
-
-                      {/* STEP 3: REVIEW */}
-                      {activeTab === 'review' && (
-                        <section>
-                          <div className="met-np-section-header">
-                            <h3 className="met-np-section-title">REVIEW & CONFIRM</h3>
-                          </div>
-                          <Review
-                            metricName={metricName}
-                            productName={selectedProductName}
-                            description={description}
-                            version={version}
-                            unitOfMeasure={unitOfMeasure}
-                            aggregationFunction={aggregationFunction}
-                            aggregationWindow={aggregationWindow}
-                            usageConditions={usageConditions}
-                            billingCriteria={billingCriteria}
-                          />
-                        </section>
-                      )}
-                    </div>
-
-                    {/* FOOTER */}
-                    <div className="met-np-form-footer" style={{ position: 'relative' }}>
-                      {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
-
-                      {activeTab === 'metric' && (
-                        <div className="met-np-btn-group met-np-btn-group--next">
-                          <PrimaryButton onClick={handleSaveAndNext}>
-                            Save & Next
-                          </PrimaryButton>
+                            </section>
+                          )}
                         </div>
-                      )}
 
-                      {activeTab === 'conditions' && (
-                        <>
-                          {isConditionsLocked ? (
-                            // ONLY the hint when locked (no buttons)
-                            <div
-                              className="met-np-footer-hint"
-                              style={{
-                                position: 'absolute',
-                                left: '50%',
-                                bottom: '20px',
-                                transform: 'translateX(-50%)',
-                                color: '#8C8F96',
-                                fontSize: 14,
-                                pointerEvents: 'none',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              Fill the previous steps to unlock this step
+                        {/* FOOTER */}
+                        <div className="met-np-form-footer" style={{ position: 'relative' }}>
+                          {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
+
+                          {activeTab === 'metric' && (
+                            <div className="met-np-btn-group met-np-btn-group--next">
+                              <PrimaryButton onClick={handleSaveAndNext}>
+                                Save & Next
+                              </PrimaryButton>
                             </div>
-                          ) : (
-                            // normal buttons when unlocked
+                          )}
+
+                          {activeTab === 'conditions' && (
+                            <>
+                              {isConditionsLocked ? (
+                                // ONLY the hint when locked (no buttons)
+                                <div
+                                  className="met-np-footer-hint"
+                                  style={{
+                                    position: 'absolute',
+                                    left: '50%',
+                                    bottom: '20px',
+                                    transform: 'translateX(-50%)',
+                                    color: '#8C8F96',
+                                    fontSize: 14,
+                                    pointerEvents: 'none',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  Fill the previous steps to unlock this step
+                                </div>
+                              ) : (
+                                // normal buttons when unlocked
+                                <>
+                                  <div className="met-np-btn-group met-np-btn-group--back">
+                                    <SecondaryButton onClick={() => gotoStep(0)}>
+                                      Back
+                                    </SecondaryButton>
+                                  </div>
+                                  <div className="met-np-btn-group met-np-btn-group--next">
+                                    <PrimaryButton onClick={handleSaveAndNext}>
+                                      Save & Next
+                                    </PrimaryButton>
+                                  </div>
+                                </>
+                              )}
+                            </>
+                          )}
+
+                          {activeTab === 'review' && (
                             <>
                               <div className="met-np-btn-group met-np-btn-group--back">
-                                <SecondaryButton onClick={() => gotoStep(0)}>
+                                <SecondaryButton onClick={() => gotoStep(1)}>
                                   Back
                                 </SecondaryButton>
                               </div>
                               <div className="met-np-btn-group met-np-btn-group--next">
-                                <PrimaryButton onClick={handleSaveAndNext}>
-                                  Save & Next
+                                <PrimaryButton
+                                  onClick={async () => {
+                                    if (!metricId) return;
+                                    setSaving(true);
+                                    const finalized = await finalizeBillableMetric(metricId);
+                                    setSaving(false);
+                                    if (finalized) {
+                                      setShowSuccess(true);
+                                      showToast({
+                                        kind: 'success',
+                                        title: 'Usage Metric Created Successfully',
+                                        message: 'Your usage metric has been created successfully.',
+                                      });
+                                    } else {
+                                      showToast({
+                                        kind: 'error',
+                                        title: 'Failed to Create Metric',
+                                        message: 'Unable to finalize the metric. Please try again.'
+                                      });
+                                    }
+                                  }}
+                                  disabled={saving}
+                                >
+                                  {saving ? 'Submitting...' : 'Create Metric'}
                                 </PrimaryButton>
                               </div>
                             </>
                           )}
-                        </>
-                      )}
-
-                      {activeTab === 'review' && (
-                        <>
-                          <div className="met-np-btn-group met-np-btn-group--back">
-                            <SecondaryButton onClick={() => gotoStep(1)}>
-                              Back
-                            </SecondaryButton>
-                          </div>
-                          <div className="met-np-btn-group met-np-btn-group--next">
-                            <PrimaryButton
-                              onClick={async () => {
-                                if (!metricId) return;
-                                setSaving(true);
-                                const finalized = await finalizeBillableMetric(metricId);
-                                setSaving(false);
-                                if (finalized) {
-                                  setShowSuccess(true);
-                                  showToast({
-                                    kind: 'success',
-                                    title: 'Usage Metric Created Successfully',
-                                    message: 'Your usage metric has been created successfully.',
-                                  });
-                                } else {
-                                  alert('Finalize failed');
-                                }
-                              }}
-                              disabled={saving}
-                            >
-                              {saving ? 'Submitting...' : 'Create Metric'}
-                            </PrimaryButton>
-                          </div>
-                        </>
-                      )}
+                        </div>
+                      </form>
                     </div>
-                  </form>
-                </div>
+                  </div>
+                </main>
               </div>
-            </main>
+
+              <div className="af-skel-rule af-skel-rule--bottom" />
+
+              <SaveDraft
+                isOpen={showSavePrompt}
+                onClose={async () => {
+                  setShowSavePrompt(false);
+                  await deleteAndClose();
+                }}
+                onSave={async () => {
+                  const ok = await handleSaveDraft();
+                  showToast({
+                    kind: ok ? 'success' : 'error',
+                    title: ok ? 'Draft Saved' : 'Failed to Save Draft',
+                    message: ok ? 'Usage metric draft saved successfully.' : 'Unable to save draft. Please try again.'
+                  });
+                  onClose();
+                }}
+                onDismiss={() => setShowSavePrompt(false)}
+              />
+            </div>
           </div>
 
-          <div className="af-skel-rule af-skel-rule--bottom" />
-
-          <SaveDraft
-            isOpen={showSavePrompt}
-            onClose={async () => {
-              setShowSavePrompt(false);
+          <ConfirmDeleteModal
+            isOpen={showDeleteConfirm}
+            productName={metricName || 'this metric'}
+            onConfirm={async () => {
+              setShowDeleteConfirm(false);
               await deleteAndClose();
             }}
-            onSave={async () => {
-              const ok = await handleSaveDraft();
-              showToast({
-                kind: ok ? 'success' : 'error',
-                title: ok ? 'Draft Saved' : 'Failed to Save Draft',
-                message: ok ? 'Usage metric draft saved successfully.' : 'Unable to save draft. Please try again.'
-              });
-              onClose();
-            }}
-            onDismiss={() => setShowSavePrompt(false)}
+            onCancel={() => setShowDeleteConfirm(false)}
           />
-        </div>
-      </div>
-
-      <ConfirmDeleteModal
-        isOpen={showDeleteConfirm}
-        productName={metricName || 'this metric'}
-        onConfirm={async () => {
-          setShowDeleteConfirm(false);
-          await deleteAndClose();
-        }}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
         </>
       )}
     </>
