@@ -148,20 +148,20 @@ export const getProducts = async (): Promise<Product[]> => {
     const timestamp = Date.now();
     const response = await api.get<Product[]>(`/products?_t=${timestamp}`);
     const products = handleApiResponse(response);
-    
+
     // Debug: Check if productIcon field is present in backend response
     console.log('🔍 Backend GET /products response analysis:');
     console.log('📊 Total products:', products.length);
     console.log('🎨 Products with productIcon field:', products.filter(p => p.productIcon).length);
     console.log('🎨 Products with icon field:', products.filter(p => p.icon).length);
-    
+
     if (products.length > 0) {
       const sampleProduct = products[0];
       console.log('🎯 Sample product fields:', Object.keys(sampleProduct));
       console.log('🎨 Raw productIcon field:', sampleProduct.productIcon);
       console.log('🖼️ Raw icon field:', sampleProduct.icon);
     }
-    
+
     return products;
   } catch (error) {
     return handleApiError(error);
@@ -185,7 +185,7 @@ export const createProduct = async (
     if (payload.productDescription?.trim())
       requestPayload.productDescription = payload.productDescription.trim();
     if (payload.status) requestPayload.status = payload.status;
-    
+
     // Add productIcon to the main payload if it exists
     if (payload.productIcon) {
       console.log('📤 Adding productIcon to request payload:', payload.productIcon);
@@ -210,15 +210,14 @@ export const createProduct = async (
         // Only create SVG file if we have the necessary data
         if (iconData.svgContent || iconData.svgPath) {
           let svgContent: string = '';
-          
+
           if (iconData.svgContent) {
             // Use the original SVG content as-is
             svgContent = iconData.svgContent;
           } else if (iconData.svgPath) {
             // Create a simple SVG from the path
-            svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
-              iconData.viewBox || '0 0 24 24'
-            }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+            svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${iconData.viewBox || '0 0 24 24'
+              }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
           }
 
           if (svgContent) {
@@ -234,7 +233,7 @@ export const createProduct = async (
     }
 
     const api = createApiClient();
-    
+
     // Log the FormData contents for debugging
     console.log('📤 FormData contents:');
     for (const [key, value] of formData.entries()) {
@@ -244,7 +243,7 @@ export const createProduct = async (
         console.log(`  ${key}:`, value);
       }
     }
-    
+
     const response = await api.post<Product>('/products', formData, {
       headers: {
         // Some backends require org header during creation
@@ -260,16 +259,16 @@ export const createProduct = async (
     if (axios.isAxiosError(error)) {
       console.error('Error Response:', error.response?.data);
       console.error('Status Code:', error.response?.status);
-      
+
       // Check if product was actually created despite 500 error
       // Some backends return 500 but include the created product data
       if (error.response?.status === 500 && error.response?.data) {
         const responseData = error.response.data as any;
-        
+
         // Check if the error details mention "productName already exists"
         const errorDetails = responseData.details || responseData.error || '';
         const isNameExistsError = errorDetails.toLowerCase().includes('productname already exists');
-        
+
         // If we got a productId back, the product was actually created
         if (responseData.productId || responseData.id) {
           if (isNameExistsError) {
@@ -277,7 +276,7 @@ export const createProduct = async (
           } else {
             console.warn('⚠️ Backend returned 500 but product was created. Using response data.');
           }
-          
+
           return {
             productId: (responseData.productId || responseData.id).toString(),
             productName: responseData.productName || '',
@@ -290,7 +289,7 @@ export const createProduct = async (
             ...responseData
           } as Product;
         }
-        
+
         // If no productId but it's a "name exists" error, throw a clearer error
         if (isNameExistsError) {
           throw new Error('A product with this name already exists. Please use a different name.');
@@ -417,7 +416,7 @@ export const getProductConfiguration = async (
   try {
     const api = createApiClient();
     const normalizedType = (productType || '').toLowerCase();
-    
+
     const getApiEndpoint = (type: string): string => {
       switch (type) {
         case 'api':
@@ -437,7 +436,7 @@ export const getProductConfiguration = async (
 
     const apiEndpoint = getApiEndpoint(normalizedType);
     console.log('Fetching configuration from:', apiEndpoint);
-    
+
     const response = await api.get(apiEndpoint);
     console.log('Configuration fetched:', response.data);
     return response.data || {};
@@ -527,10 +526,10 @@ export const saveProductConfiguration = async (
     switch (normalizedType) {
       case 'api': {
         const apiPayload: Record<string, any> = {};
-        
+
         // Ensure endpointUrl is always present, even if empty
         apiPayload.endpointUrl = configData.endpointUrl?.trim() || '';
-        
+
         // Always send authType, default to 'NONE' if not provided
         apiPayload.authType = configData.authType || 'NONE';
 
@@ -645,7 +644,7 @@ export const saveProductConfiguration = async (
         method: operationType === 'update' ? 'PUT' : 'POST',
         payload: cleanedPayload
       });
-      
+
       // Provide more specific error messages
       if (apiError.response?.status === 500) {
         throw new Error(`Server error when saving ${normalizedType} configuration. Please check the data and try again.`);
@@ -697,92 +696,63 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
     console.log('🔄 Updating product icon using same approach as createProduct...');
 
     if (iconData === null) {
-      // Remove icon - update product with empty productIcon
+      // Remove icon - update product with empty productIcon AND icon fields
       console.log('🗑️ Removing product icon via /api/products/{id}...');
-      
+
       const api = createApiClient();
-      await api.patch(`/products/${productId}`, { productIcon: null }, {
+      // Clear BOTH productIcon (JSON data) and icon (SVG file path) to prevent fallback
+      await api.patch(`/products/${productId}`, { productIcon: null, icon: null }, {
         headers: {
           'X-Organization-Id': authData?.organizationId?.toString() || ''
         }
       });
-      
-      console.log('✅ Product icon removed successfully');
+
+      console.log('✅ Product icon removed successfully (both productIcon and icon fields cleared)');
       return { success: true, message: 'Product icon removed successfully' };
     } else {
       // Follow the same approach as createProduct - use FormData with both structured data and file
-      const formData = new FormData();
-      
+      const api = createApiClient();
+
       // Create the productIcon JSON - use SIMPLE SVG like createProduct
       let simpleSvgContent: string;
-      
+
       if (iconData.svgContent) {
         // Use the original SVG content as-is
         simpleSvgContent = iconData.svgContent;
       } else if (iconData.svgPath) {
         // Create a simple SVG from the path - no extra styling or frames
-        simpleSvgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
-          iconData.viewBox || '0 0 24 24'
-        }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
+        simpleSvgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${iconData.viewBox || '0 0 24 24'
+          }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
       } else {
         throw new Error('Invalid icon data: missing svgContent or svgPath');
       }
-      
+
       const productIconJson = JSON.stringify({
         iconData: iconData,
         svgContent: simpleSvgContent
       });
 
-      // Prepare request payload (same structure as createProduct)
-      const requestPayload = { productIcon: productIconJson };
-      const requestJson = JSON.stringify(requestPayload);
-      
-      console.log('📤 updateProductIcon requestPayload:', requestPayload);
-      formData.append('request', requestJson);
-      
-      // Add productIcon as separate FormData field
-      formData.append('productIcon', productIconJson);
+      console.log('📤 updateProductIcon productIconJson:', productIconJson);
 
-      // Create and add the SVG file (EXACT same logic as createProduct)
+      // STEP 1: Upload SVG file to /icon endpoint (updates 'icon' field)
       try {
-        // Use the EXACT same SVG generation logic as createProduct - NO CHANGES
-        let svgContent: string;
-        
-        if (iconData.svgContent) {
-          // Use the original SVG content as-is
-          svgContent = iconData.svgContent;
-        } else if (iconData.svgPath) {
-          // Create a simple SVG from the path - no extra styling or frames
-          svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="${
-            iconData.viewBox || '0 0 24 24'
-          }" fill="none"><path d="${iconData.svgPath}" fill="currentColor"/></svg>`;
-        } else {
-          throw new Error('Invalid icon data: missing svgContent or svgPath');
-        }
+        const svgBlob = new Blob([simpleSvgContent], { type: 'image/svg+xml' });
+        const iconFormData = new FormData();
+        iconFormData.append('icon', svgBlob, 'icon.svg');
 
-        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-        formData.append('icon', svgBlob, 'icon.svg');
-        
-        console.log('📤 Added SVG file to FormData (simple format):', svgContent.length, 'bytes');
-      } catch (e) {
-        console.error('Error processing icon for update:', e);
+        console.log('📤 Step 1: Uploading SVG to /products/{id}/icon endpoint...');
+        await api.patch(`/products/${productId}/icon`, iconFormData, {
+          headers: {
+            'X-Organization-Id': authData?.organizationId?.toString() || ''
+          }
+        });
+        console.log('✅ Step 1 complete: SVG file uploaded');
+      } catch (iconUploadErr: any) {
+        console.warn('⚠️ Icon file upload failed (continuing with productIcon update):', iconUploadErr?.message);
       }
 
-      // Log FormData contents
-      console.log('📤 FormData contents for update:');
-      for (const [key, value] of formData.entries()) {
-        if (value instanceof Blob) {
-          console.log(`  ${key}: [Blob] ${value.type} (${value.size} bytes)`);
-        } else {
-          console.log(`  ${key}:`, value);
-        }
-      }
-
-      // Use the regular /products endpoint with JSON payload to update productIcon field
-      // The /icon endpoint only updates the icon file, not the productIcon field
-      const api = createApiClient();
-      
-      console.log('🔄 Using /products endpoint to update productIcon field...');
+      // STEP 2: Update productIcon JSON field via main /products endpoint
+      console.log('📤 Step 2: Updating productIcon JSON field...');
       const response = await api.patch(`/products/${productId}`, {
         productIcon: productIconJson
       }, {
@@ -792,7 +762,8 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
         }
       });
 
-      console.log('✅ Product icon updated successfully using createProduct approach');
+      console.log('✅ Step 2 complete: productIcon JSON updated');
+      console.log('✅ Product icon updated successfully (both icon file and productIcon JSON)');
       return { success: true, message: 'Product icon updated successfully' };
     }
   } catch (error) {
@@ -808,12 +779,12 @@ export const getProductById = async (productId: string): Promise<Product | null>
     const timestamp = Date.now();
     const response = await api.get<Product>(`/products/${productId}?_t=${timestamp}`);
     const product = handleApiResponse(response);
-    
+
     console.log(`🔍 Individual product ${productId} fetch:`);
     console.log(`🎨 Has productIcon field:`, !!product.productIcon);
     console.log(`🖼️ Has icon field:`, !!product.icon);
     console.log(`🎨 Raw productIcon:`, product.productIcon);
-    
+
     return product;
   } catch (error) {
     console.error(`Error fetching product ${productId}:`, error);

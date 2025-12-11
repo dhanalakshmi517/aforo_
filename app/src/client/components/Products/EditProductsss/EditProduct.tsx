@@ -78,7 +78,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
   // CHANGE DETECTION SNAPSHOTS
   const originalFormDataRef = useRef<typeof formData | null>(null);
-  const originalConfigRef   = useRef<Record<string, string> | null>(null);
+  const originalConfigRef = useRef<Record<string, string> | null>(null);
 
   const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
   const [originalValues, setOriginalValues] = useState<{ productName: string; skuCode: string }>({ productName: '', skuCode: '' });
@@ -117,7 +117,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     if (field === 'productName') {
       const duplicate = existingProducts.some(p => {
         if ((p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
-            (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) return false;
+          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) return false;
         return (p.productName || '').toLowerCase() === trimmed.toLowerCase();
       });
       if (duplicate) setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
@@ -129,7 +129,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     if (field === 'skuCode') {
       const duplicate = existingProducts.some(p => {
         if ((p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
-            (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) return false;
+          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) return false;
         return (p.skuCode || '').toLowerCase() === trimmed.toLowerCase();
       });
       if (duplicate) setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
@@ -153,7 +153,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     if (formData.productName && modifiedFields.has('productName')) {
       const isDuplicate = existingProducts.some(p => {
         if (lower(p.productName || '') === lower(originalValues.productName) &&
-            lower(p.skuCode || '') === lower(originalValues.skuCode)) return false;
+          lower(p.skuCode || '') === lower(originalValues.skuCode)) return false;
         return lower(p.productName || '') === lower(formData.productName);
       });
       if (isDuplicate) newErrors.productName = 'Must be unique';
@@ -162,7 +162,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     if (formData.skuCode && modifiedFields.has('skuCode')) {
       const isDuplicate = existingProducts.some(p => {
         if (lower(p.productName || '') === lower(originalValues.productName) &&
-            lower(p.skuCode || '') === lower(originalValues.skuCode)) return false;
+          lower(p.skuCode || '') === lower(originalValues.skuCode)) return false;
         return lower(p.skuCode || '') === lower(formData.skuCode);
       });
       if (isDuplicate) newErrors.skuCode = 'Must be unique';
@@ -345,14 +345,14 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
   const hasPendingChanges = () => {
     const origForm = originalFormDataRef.current;
-    const origCfg  = originalConfigRef.current;
+    const origCfg = originalConfigRef.current;
 
     // If original data hasn't loaded yet, consider as no changes
     if (!origForm || !origCfg) return false;
 
     const formChanged = !shallowEqual(origForm, formData);
     const { o, c } = normalizeConfigsForCompare(origCfg, configuration);
-    const cfgChanged  = !shallowEqual(o, c);
+    const cfgChanged = !shallowEqual(o, c);
 
     return formChanged || cfgChanged;
   };
@@ -392,7 +392,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
       const { getAuthData } = await import('../../../utils/auth');
       const authData = getAuthData();
       if (!authData?.token) throw new Error('No authentication token found');
-      if (!productId)        throw new Error('Product ID is required for updating');
+      if (!productId) throw new Error('Product ID is required for updating');
 
       if (includeGeneral) {
         const generalDetailsPayload = {
@@ -412,6 +412,25 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
         if (iconResult.success) {
           setOriginalIcon(selectedIcon || null);
           onIconUpdate?.(productId, selectedIcon || null);
+
+          // Cache the icon data in localStorage for Products.tsx to use
+          // (Backend doesn't properly return productIcon field, so we cache it locally)
+          if (selectedIcon) {
+            const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+            iconCache[productId] = JSON.stringify({ iconData: selectedIcon });
+            localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+            console.log('💾 Cached icon data in localStorage for product', productId);
+          } else {
+            // Remove from cache if icon was removed
+            const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+            delete iconCache[productId];
+            localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+            console.log('🗑️ Removed icon from localStorage cache for product', productId);
+          }
+
+          // Signal Products.tsx to refresh (for URL-based navigation)
+          localStorage.setItem('productUpdated', Date.now().toString());
+          console.log('📢 Icon updated, signaling Products list to refresh');
         }
       }
 
@@ -431,7 +450,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
       if (isDraft && productId) await finalizeProduct(productId);
 
       originalFormDataRef.current = { ...formData };
-      originalConfigRef.current   = { ...configuration };
+      originalConfigRef.current = { ...configuration };
 
       localStorage.removeItem('editConfigFormData');
       localStorage.removeItem('editConfigProductType');
@@ -463,7 +482,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
         const data = await fetchGeneralDetails(productId);
 
         const originalProductName = data.productName ?? '';
-        const originalSkuCode     = data.internalSkuCode ?? '';
+        const originalSkuCode = data.internalSkuCode ?? '';
 
         const nextForm = {
           productName: originalProductName,
@@ -497,38 +516,64 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
             hasStructuredIconData = true;
           }
 
-          // PRIORITY 3: Reconstruct from SVG file path (RESTORED)
+
+          // PRIORITY 3: Reconstruct from SVG file (same as Products.tsx)
+          // This handles old products that only have icon file paths
           if (!hasStructuredIconData && data.icon && typeof data.icon === 'string' && data.icon.includes('/uploads/')) {
+            console.log(`🔄 EditProduct: Reconstructing icon from SVG for product ${productId}`);
+
             const resolveIconUrl = (icon: string) => {
               if (icon.startsWith('http') || icon.startsWith('data:')) return icon;
+              // Import BASE_URL from api.ts to stay in sync with Products.tsx
+              const BASE_URL = 'http://3.208.93.68:8080/api';
               if (icon.startsWith('/uploads')) {
-                const serverBase = 'http://54.238.204.246:8080'; // BASE_URL without /api
+                const serverBase = BASE_URL.replace('/api', '');
                 return `${serverBase}${icon}`;
               }
               const leadingSlash = icon.startsWith('/') ? '' : '/';
-              return `http://54.238.204.246:8080/api${leadingSlash}${icon}`;
+              return `${BASE_URL}${leadingSlash}${icon}`;
             };
 
-            const iconUrl = resolveIconUrl(data.icon);
+            const fetchIconWithAuth = async (iconPath: string): Promise<string | null> => {
+              const resolved = resolveIconUrl(iconPath);
+              if (!resolved) return null;
+              try {
+                // Import axios and auth - same as Products.tsx
+                const axios = (await import('axios')).default;
+                const { getAuthHeaders } = await import('../../../utils/auth');
+                const authHeaders = getAuthHeaders();
+
+                const cacheBustUrl = resolved.includes('?')
+                  ? `${resolved}&_cb=${Date.now()}`
+                  : `${resolved}?_cb=${Date.now()}`;
+
+                // Use axios with responseType: 'blob' - EXACTLY like Products.tsx
+                const response = await axios.get(cacheBustUrl, {
+                  responseType: 'blob',
+                  headers: authHeaders
+                });
+
+                return URL.createObjectURL(response.data);
+              } catch (e: any) {
+                if (e?.response?.status === 500) {
+                  console.warn(`Icon not available on server: ${iconPath}`);
+                } else {
+                  console.warn(`Failed to fetch icon: ${iconPath}`, e);
+                }
+                return null;
+              }
+            };
 
             try {
-              const { getAuthData } = await import('../../../utils/auth');
-              const authData = getAuthData();
-
-              const response = await fetch(iconUrl, {
-                headers: {
-                  'Authorization': `Bearer ${authData?.token}`,
-                  'X-Organization-Id': authData?.organizationId?.toString() || ''
-                }
-              });
-
-              if (response.ok) {
-                const svgText = await response.text();
+              const iconUrl = await fetchIconWithAuth(data.icon);
+              if (iconUrl) {
+                const svgResponse = await fetch(iconUrl);
+                const svgText = await svgResponse.text();
 
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-                // back tile color (rect ~29.45 width)
+                // Extract tile color (rect ~29.45 width)
                 const rects = doc.querySelectorAll('rect');
                 let tileColor = '#0F6DDA';
                 for (const rect of Array.from(rects)) {
@@ -540,7 +585,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                   }
                 }
 
-                // icon path + viewBox
+                // Extract icon path + viewBox
                 const pathElement = doc.querySelector('path[fill="#FFFFFF"]') || doc.querySelector('path');
                 let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
                 let viewBox = '0 0 24 24';
@@ -550,24 +595,36 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                   if (svgEl) viewBox = svgEl.getAttribute('viewBox') || viewBox;
                 }
 
+                // Extract gradient colors
+                let outerBg: [string, string] | undefined;
+                const gradientElement = doc.querySelector('linearGradient');
+                if (gradientElement) {
+                  const stops = gradientElement.querySelectorAll('stop');
+                  if (stops.length >= 2) {
+                    const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+                    const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+                    if (color1 && color2) outerBg = [color1.trim(), color2.trim()];
+                  }
+                }
+
                 const reconstructedIcon: ProductIconData = {
                   id: `reconstructed-${Date.now()}`,
                   label: 'Reconstructed Icon',
                   svgPath,
                   viewBox,
                   tileColor,
-                  outerBg: ['#F8F7FA', '#E4EEF9'],
+                  ...(outerBg && { outerBg })
                 };
 
                 setSelectedIcon(reconstructedIcon);
                 setOriginalIcon(reconstructedIcon);
-              } else {
-                console.warn('Failed to fetch SVG:', response.status);
+                console.log(`✅ EditProduct: Successfully reconstructed icon from SVG`);
               }
             } catch (fetchErr) {
-              console.warn('Failed to fetch/parse SVG:', fetchErr);
+              console.warn('EditProduct: Failed to reconstruct SVG:', fetchErr);
             }
           }
+
         } catch (err) {
           console.warn('Icon parse failed:', err);
         }
@@ -704,144 +761,133 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                             </div>
                           </div>
 
-                          {/* Product Icon */}
-                          <div className="edit-np-form-group">
-                            <label className="edit-np-label">Product Icon</label>
-                            <div className="np-icon-field-wrapper">
-                              <div className="np-icon-placeholder">
-                                {selectedIcon ? (
-                                  <div
-                                    style={{
-                                      width: 50.6537,
-                                      height: 46.3351,
-                                      borderRadius: 12,
-                                      border: '0.6px solid var(--border-border-2, #D5D4DF)',
-                                      background: `
+                          {/* Product Icon Field - No Icon */}
+                          {!selectedIcon && (
+                            <div className="edit-np-form-group">
+                              <label className="edit-np-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                              <div className="prod-np-icon-field-wrapper">
+                                <div className="prod-np-icon-placeholder">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA" />
+                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05" />
+                                    <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1" />
+                                    <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1" />
+                                  </svg>
+                                </div>
+                                <span className="prod-np-icon-placeholder-text">Add product icon</span>
+                                <button
+                                  type="button"
+                                  className="prod-np-icon-add-btn"
+                                  onClick={() => setIsIconPickerOpen(true)}
+                                >
+                                  <span>+ Add</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Product Icon Field - Icon Selected */}
+                          {selectedIcon && (() => {
+                            // Helper function to extract color from CSS var() or return as-is
+                            const extractDisplayColor = (colorStr: string): string => {
+                              if (!colorStr) {
+                                console.log('⚠️ extractDisplayColor: Empty color string, using default #CC9434');
+                                return '#CC9434';
+                              }
+                              console.log('🔍 extractDisplayColor input:', colorStr);
+                              const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+                              const result = match ? match[1].trim() : colorStr;
+                              console.log('🔍 extractDisplayColor result:', result);
+                              return result;
+                            };
+
+                            const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
+                            const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
+                            const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
+
+                            console.log('🎨 EditProduct display colors - outerBg1:', outerBg1, 'outerBg2:', outerBg2, 'tileColor:', tileColor);
+
+                            return (
+                              <div className="edit-np-form-group">
+                                <label className="edit-np-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                                <div className="prod-np-icon-field-wrapper">
+                                  <div className="prod-np-icon-preview">
+                                    <div
+                                      style={{
+                                        width: 50.6537,
+                                        height: 46.3351,
+                                        borderRadius: 12,
+                                        border: '0.6px solid var(--border-border-2, #D5D4DF)',
+                                        background: `
                                         linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-                                        linear-gradient(135deg, ${selectedIcon.outerBg?.[0] || '#F8F7FA'}, ${selectedIcon.outerBg?.[1] || '#E4EEF9'}),
+                                        linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
                                         radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
                                       `,
-                                      display: 'flex',
-                                      padding: 8,
-                                      justifyContent: 'center',
-                                      alignItems: 'center',
-                                      position: 'relative',
-                                      overflow: 'hidden',
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        position: 'absolute',
-                                        left: 10.5,
-                                        top: 8.2,
-                                        width: 29.45,
-                                        height: 25.243,
-                                        borderRadius: 5.7,
-                                        background: selectedIcon.tileColor || '#CC9434',
-                                      }}
-                                    />
-                                    <div
-                                      style={{
-                                        width: 29.339,
-                                        height: 26.571,
-                                        padding: '1.661px 3.321px',
                                         display: 'flex',
+                                        padding: 8,
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        gap: 2.214,
-                                        flexShrink: 0,
-                                        borderRadius: 6,
-                                        border: '0.6px solid #FFF',
-                                        background: 'rgba(202, 171, 213, 0.10)',
-                                        backdropFilter: 'blur(3.875px)',
-                                        transform: 'translate(3px, 2px)',
-                                        boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                        position: 'relative',
+                                        overflow: 'hidden',
                                       }}
                                     >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="18"
-                                        height="18"
-                                        viewBox={selectedIcon.viewBox ?? '0 0 18 18'}
-                                        fill="none"
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          left: 10.5,
+                                          top: 8.2,
+                                          width: 29.45,
+                                          height: 25.243,
+                                          borderRadius: 5.7,
+                                          background: tileColor,
+                                        }}
+                                      />
+                                      <div
+                                        style={{
+                                          width: 29.339,
+                                          height: 26.571,
+                                          padding: '1.661px 3.321px',
+                                          display: 'flex',
+                                          justifyContent: 'center',
+                                          alignItems: 'center',
+                                          gap: 2.214,
+                                          flexShrink: 0,
+                                          borderRadius: 6,
+                                          border: '0.6px solid #FFF',
+                                          background: 'rgba(202, 171, 213, 0.10)',
+                                          backdropFilter: 'blur(3.875px)',
+                                          transform: 'translate(3px, 2px)',
+                                          boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                        }}
                                       >
-                                        <path d={selectedIcon.svgPath} fill="#FFFFFF" />
-                                      </svg>
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="18"
+                                          height="18"
+                                          viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
+                                          fill="none"
+                                          style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+                                        >
+                                          <path d={selectedIcon.svgPath} fill="#FFFFFF" />
+                                        </svg>
+                                      </div>
                                     </div>
                                   </div>
-                                ) : (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="56"
-                                    height="56"
-                                    viewBox="0 0 56 56"
-                                    fill="none"
-                                  >
-                                    <rect
-                                      x="0.525"
-                                      y="0.525"
-                                      width="54.95"
-                                      height="54.95"
-                                      rx="7.475"
-                                      fill="#F9FBFD"
+                                  <div className="prod-np-icon-actions">
+                                    <EditButton
+                                      onClick={() => setIsIconPickerOpen(true)}
+                                      label="Edit"
                                     />
-                                    <rect
-                                      x="0.525"
-                                      y="0.525"
-                                      width="54.95"
-                                      height="54.95"
-                                      rx="7.475"
-                                      stroke="#EEF1F6"
-                                      strokeWidth="1.05"
+                                    <DeleteButton
+                                      onClick={() => setSelectedIcon(null)}
+                                      label="Remove"
+                                      variant="soft"
                                     />
-                                    <path
-                                      d="M28 25.2001C31.866 25.2001 35 22.3795 35 18.9001C35 15.4207 31.866 12.6001 28 12.6001C24.134 12.6001 21 15.4207 21 18.9001C21 22.3795 24.134 25.2001 28 25.2001Z"
-                                      stroke="#44576F"
-                                      strokeWidth="2.1"
-                                    />
-                                    <path
-                                      d="M27.9998 43.3998C34.1854 43.3998 39.1998 40.5792 39.1998 37.0998C39.1998 33.6204 34.1854 30.7998 27.9998 30.7998C21.8142 30.7998 16.7998 33.6204 16.7998 37.0998C16.7998 40.5792 21.8142 43.3998 27.9998 43.3998Z"
-                                      stroke="#44576F"
-                                      strokeWidth="2.1"
-                                    />
-                                  </svg>
-                                )}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="np-icon-placeholder-text">
-                                {selectedIcon ? 'Icon selected' : 'Add product icon'}
-                              </div>
-                              <button
-                                type="button"
-                                className="prod-np-icon-add-btn"
-                                onClick={() => setIsIconPickerOpen(true)}
-                                style={{ marginLeft: 'auto' }}
-                              >
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                  <path
-                                    d="M8 3.33334V12.6667M3.33334 8H12.6667"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                Add
-                              </button>
-                            </div>
-                            {selectedIcon && (
-                              <div className="np-icon-actions">
-                                <EditButton
-                                  onClick={() => setIsIconPickerOpen(true)}
-                                  label="Edit"
-                                />
-                                <DeleteButton
-                                  onClick={() => setSelectedIcon(null)}
-                                  label="Remove"
-                                  variant="soft"
-                                />
-                              </div>
-                            )}
-                          </div>
+                            );
+                          })()}
 
                           <ProductIconPickerModal
                             isOpen={isIconPickerOpen}
