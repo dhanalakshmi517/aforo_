@@ -37,19 +37,43 @@
   color: #d93025;
 }
 
+.data-status-staged {
+  background: #EFF3FA;
+  color: #5C6C84;
+}
+
+/* Title + toolbar row */
+.history-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 4px 10px 4px;
+}
+
 .data-toolbar {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
-  padding: 4px 4px 10px 4px;
   position: relative; /* anchor for filter popover */
+}
+
+/* Section title above history table */
+.data-section-title {
+  margin: 0;
+color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  line-height: var(--line-height-heading-h6);
+  margin-left: 20px;
 }
 
 /* Search */
 .data-search {
   position: relative;
-  width: 200px;
+  width: 150px;
   max-width: 42ch;
 }
 .data-search-icon {
@@ -182,31 +206,27 @@
 
 /* Column specific widths */
 .col-sno {
-  width: 80px; /* Fixed width for S.No column */
-  min-width: 80px;
+  width: auto;
 }
 
 .col-name {
-  min-width: 200px; /* Minimum width for name column */
+  width: auto;
 }
 
 .col-type {
-  width: 140px; /* Fixed width for ingestion type */
-  min-width: 140px;
+  width: auto;
 }
 
 .col-date {
-  width: 180px; /* Fixed width for date column */
-  min-width: 180px;
+  width: auto;
 }
 
 .col-status {
-  width: 100px; /* Fixed width for status */
-  min-width: 100px;
+  width: auto;
 }
 
 .col-notes {
-  min-width: 200px;
+  width: auto;
 }
 
 .data-table thead th {
@@ -283,8 +303,14 @@
 
 .data-empty-hint {
   text-align: center;
-  color: var(--color-neutral-600);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
+  color: var(--color-neutral-1000);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */;
   margin: 0;
 }

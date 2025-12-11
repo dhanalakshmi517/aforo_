@@ -41,13 +41,13 @@ line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
 .ch-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap:28px;
 }
 
 /* Shared card styles */
 .ch-card {
   flex: 1 1 0;
-  min-width: 280px;
+  min-width: 300px;
   background: var(--color-neutral-white);
   border-radius: 16px;
   padding: 28px;
@@ -139,12 +139,14 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-left:-10px;
 }
 
 .ch-health-stat {
   border-radius: 16px;
   padding: 16px;
   box-sizing: border-box;
+
 }
 
 .ch-health-stat-title {

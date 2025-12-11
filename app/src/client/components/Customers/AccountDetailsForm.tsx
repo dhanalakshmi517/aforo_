@@ -363,7 +363,7 @@ const AccountDetailsForm: React.FC<Props> = ({
       <div className="address-section">
         <h4>Billing Address</h4>
         <div className="acc-form-group">
-          <label>Customer Address Line 1</label>
+          <label>Billing Address Line 1</label>
           <input
             type="text"
             placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"

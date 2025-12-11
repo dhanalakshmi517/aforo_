@@ -167,6 +167,27 @@
   cursor: pointer;
 }
 
+/* Success/loader styles for the SecondaryButton in apply-all state */
+.af-secondary-color-btn.di-notes-applyall-success {
+  background: #E8FAF0;         /* light green */
+  color: #1D734B;              /* green text */
+  border-color: #C2EAD3;
+}
+
+.af-secondary-color-btn.di-notes-applyall-success:disabled {
+  background: #E8FAF0;
+  color: #1D734B;
+  border-color: #C2EAD3;
+}
+
+.di-notes-success-text {
+  color: #1D734B;
+}
+
+.di-notes-success-icon svg {
+  color: #1D734B;
+}
+
 /* Footer */
 .di-modal-footer {
   display: flex;

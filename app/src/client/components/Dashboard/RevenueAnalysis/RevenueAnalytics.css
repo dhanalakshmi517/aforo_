@@ -37,7 +37,7 @@ line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
 .revA-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 28px;
 }
 
 /* cards */

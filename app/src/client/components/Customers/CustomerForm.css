@@ -388,7 +388,8 @@ body,
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  overflow-y: auto;
+  /* Let the inner section scroll instead of the whole form so footer stays fixed */
+  overflow-y: visible;
   overflow-x: visible;
   padding-bottom: 15px;
   gap: 16px;
@@ -399,7 +400,8 @@ body,
 .cust-np-form-section {
   flex: 1;
   min-height: 0;
-  overflow-y: visible;
+  /* This is the scrolling region inside the card */
+  overflow-y: auto;
   overflow-x: visible;
   width: 100%;
   max-width: 100%;

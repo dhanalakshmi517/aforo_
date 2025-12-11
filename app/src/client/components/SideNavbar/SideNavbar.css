@@ -15,7 +15,7 @@
 }
 
 .sidebar.collapsible {
-  width: 80px;
+  width: 74px;
   transition: width 0.3s ease;
 }
 
@@ -26,7 +26,7 @@
 .sidebar.hidden { display: none; }
 
 .logo {
-  margin-left: 33px;
+  margin-left: 25px;
   margin-top: 20px;
 }
 
@@ -83,14 +83,21 @@
 }
 
 .sidebar.collapsible .nav-item {
-  padding: 12px;
-  justify-content: center;
-  margin-right: 8px;
-  margin-left: 8px;
+  /* Use the same layout in both collapsed and hover states so icons don't jump */
+  padding: 10px;
+  justify-content: flex-start;
+  margin-right: 16px;
+  margin-left: 16px;
+}
+
+/* When sidebar is collapsed, keep active item padding compact as well */
+.sidebar.collapsible .nav-item.active {
+  padding: 10px;
 }
 
 .sidebar.collapsible:hover .nav-item {
-  padding: 12px 16px;
+  /* Keep layout identical on hover; only text visibility changes via .tab-name rules */
+  padding: 10px;
   justify-content: flex-start;
   margin-right: 16px;
   margin-left: 16px;

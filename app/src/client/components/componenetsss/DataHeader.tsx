@@ -24,6 +24,8 @@ export interface DataHeaderProps {
   toggleRightLabel?: string;            // default: 'API'
   toggleValue?: 'left' | 'right';       // controlled value
   onToggleChange?: (v: 'left' | 'right') => void;
+  /** Optional extra divider at the far right, after notifications */
+  showTrailingDivider?: boolean;
 }
 
 const DataHeader: React.FC<DataHeaderProps> = ({
@@ -43,7 +45,8 @@ const DataHeader: React.FC<DataHeaderProps> = ({
   toggleLeftLabel = 'Manual',
   toggleRightLabel = 'API',
   toggleValue,
-  onToggleChange
+  onToggleChange,
+  showTrailingDivider,
 }) => {
   // allow both controlled & uncontrolled
   const [localToggle, setLocalToggle] = useState<'left' | 'right'>('left');
@@ -120,6 +123,15 @@ const DataHeader: React.FC<DataHeaderProps> = ({
 
         {/* Divider after primary */}
         {showPrimary && (
+          <div className="header-divider" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
+              <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
+            </svg>
+          </div>
+        )}
+
+        {/* Optional divider before the icon buttons (settings + notifications) */}
+        {showTrailingDivider && (
           <div className="header-divider" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
               <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>

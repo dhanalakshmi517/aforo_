@@ -150,12 +150,14 @@
   background: var(--surface-layer-4, #FFF);
   color: #373B40;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
+  box-shadow:var(--shadow-5);
 }
-.rp-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent; box-shadow: none; }
-.rp-filter-btn.is-selected { border: 1px solid #004B80; background: #E1F4FB; color: #004B80; box-shadow: none; }
+.rp-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent;   box-shadow:var(--shadow-6);
+ }
+.rp-filter-btn.is-selected { border: 1px solid #004B80; background:var(--color-neutral-50); color:var(--color-primary-700);   box-shadow:var(--shadow-5);
+ }
 .rp-filter-btn.is-disabled,
-.rp-filter-btn:disabled { background:var(--color-neutral-250); border:1px solid transparent; color:var(--color-neutral-400); cursor:not-allowed; box-shadow:none; pointer-events:none; }
+.rp-filter-btn:disabled { background:var(--color-neutral-150); border:1px solid transparent; color:var(--color-neutral-300); cursor:not-allowed; box-shadow:none; pointer-events:none; }
 
 /* ================= Header Divider ================= */
 .header-divider {

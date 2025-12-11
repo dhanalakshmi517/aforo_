@@ -47,7 +47,7 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
 .cs-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 28px;
 }
 
 .cs-card {

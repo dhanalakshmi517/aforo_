@@ -112,9 +112,9 @@ font-style: normal;
 font-weight: 700;
 line-height: var(--line-height-body-sm); 
 }
-.badge[data-variant="very high"] {
-  background:#F8ECFF;
-  color: #8533BC;
+.badge[data-variant="failed"] {
+  background:#FFECEC;
+  color: #C33235;
 
 font-size: var(--font-size-sm);
 font-style: normal;
@@ -122,3 +122,51 @@ font-weight: 700;
 line-height: var(--line-height-body-sm); 
 }
 
+
+.badge[data-variant="success"] {
+  background: #E2FFDC;
+  color:#39A424;
+
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm); 
+}
+
+
+.badge[data-variant="partial"] {
+  background: #FFF0DE;
+  color:#C86F0F;
+
+font-size: var(--font-size-sm);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm); 
+}
+
+/* Uploading state with spinner */
+.badge[data-variant="uploading"] {
+  background: #EBF5FF;
+  color: #247EA1;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-body-sm);
+}
+
+.badge-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+}
+
+.badge-spinner svg {
+  animation: badge-spin 0.8s linear infinite;
+}
+
+@keyframes badge-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

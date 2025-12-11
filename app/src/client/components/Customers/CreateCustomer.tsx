@@ -31,9 +31,9 @@ interface CreateCustomerProps {
 type StepKey = "general" | "billing" | "review";
 
 const steps = [
-  { id: 1, key: "general" as StepKey, title: "Customer Details", desc: "Enter core information for the customer." },
-  { id: 2, key: "billing" as StepKey,  title:"Account Details",  desc: "Configure billing frequency and plan." },
-  { id: 3, key: "review"  as StepKey,  title: "Review & Confirm", desc: "Double-check everything before saving." },
+  { id: 1, key: "general" as StepKey, title: "Customer Details", desc: "Fill in your basic details to proceed." },
+  { id: 2, key: "billing" as StepKey,  title:"Account Details",  desc: "Set up your account credentials securely" },
+  { id: 3, key: "review"  as StepKey,  title: "Review & Confirm", desc: "Check and Finalize details." },
 ];
 
 const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer, initialLogoUrl = null }) => {
