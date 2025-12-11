@@ -18,7 +18,7 @@ export type FileRow = {
   id: number;
   file?: File;
   name: string;
-  status: "Staged" | "Uploaded" | "Failed"; // show "Staged" like the mock
+  status: "Staged" | "Uploading" | "Uploaded" | "Failed"; // show "Staged" like the mock
   note?: string;
   uploadedAt: Date;
 };
@@ -146,6 +146,15 @@ const DataIngestionPage: React.FC = () => {
       const filesToUpload = selectedFiles.map(row => row.file).filter(Boolean) as File[];
       const descriptions = selectedFiles.map(row => row.note || '');
 
+      // Update status to "Uploading" for selected files
+      setRows(prevRows =>
+        prevRows.map((row, index) =>
+          selectedRows.has(index)
+            ? { ...row, status: 'Uploading' as const }
+            : row
+        )
+      );
+
       // Initialize progress
       setUploadProgress({ current: 0, total: filesToUpload.length });
 
@@ -188,20 +197,24 @@ const DataIngestionPage: React.FC = () => {
       console.log('API Response:', result);
 
       if (result.success) {
-        // Update the status of uploaded files
+        // Remove uploaded files from the ingestion tab (move to history)
         setRows(prevRows =>
-          prevRows.map((row, index) =>
-            selectedRows.has(index)
-              ? { ...row, status: 'Uploaded' as const }
-              : row
-          )
+          prevRows.filter((row, index) => !selectedRows.has(index))
         );
         // Clear selection after successful upload
         setSelectedRows(new Set());
       } else {
-        // Handle upload failure
+        // Handle upload failure - update status to Failed
         console.error("Failed to ingest files:", result.message);
-        // You might want to show an error message to the user here
+        setRows(prevRows =>
+          prevRows.map((row, index) =>
+            selectedRows.has(index)
+              ? { ...row, status: "Failed" as const }
+              : row
+          )
+        );
+        // Clear selection on failure
+        setSelectedRows(new Set());
       }
     } catch (error) {
       console.error("Error during file ingestion:", error);
@@ -213,6 +226,8 @@ const DataIngestionPage: React.FC = () => {
             : row
         )
       );
+      // Clear selection on error
+      setSelectedRows(new Set());
     } finally {
       setIsLoading(false);
       setUploadProgress({ current: 0, total: 0 });
@@ -486,27 +501,16 @@ const DataIngestionPage: React.FC = () => {
             )}
 
             {activeTab === 'history' && (
-              <IngestionHistory 
-                rows={rows
-                  .filter(row => row.status !== 'Staged') // Only include uploaded or failed files
-                  .map((row, idx) => ({
-                    id: row.id,
-                    name: row.name,
-                    ingestionType: mode === "left" ? "Manual" : "API",
-                    ingestedOn: row.uploadedAt,
-                    status: row.status === "Uploaded" ? "Success" : "Failed",
-                    note: row.note,
-                  }))}
-                showSmartDetection={showSmartDetection}
-                onSmartDetectionClose={() => setShowSmartDetection(false)}
-                onCheckboxChange={(checked: boolean) => {
-                  setDontShowAgain(checked);
-                  if (checked) {
-                    localStorage.setItem('hideSmartDetection', 'true');
-                  }
-                }}
-                dontShowAgain={dontShowAgain}
-              />
+              <IngestionHistory rows={rows
+                .filter(row => row.status !== 'Staged') // Only include uploaded or failed files
+                .map((row, idx) => ({
+                  id: row.id,
+                  name: row.name,
+                  ingestionType: mode === "left" ? "Manual" : "API",
+                  ingestedOn: row.uploadedAt,
+                  status: row.status === "Uploaded" ? "Success" : "Failed",
+                  note: row.note,
+                }))} />
             )}
 
           </div>

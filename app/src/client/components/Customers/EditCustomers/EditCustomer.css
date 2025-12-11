@@ -184,17 +184,7 @@ html, body, #root{
   text-align: left;
   margin-bottom: 2px;
 }
-.np-step__title:hover{
-  color: var(--color-neutral-1700);
 
-  /* body/md/med */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-lg);
-    
-}
 .np-step__desc{ color: var(--color-neutral-1400);
 
   /* body/md/reg */
@@ -231,7 +221,7 @@ html, body, #root{
 .editsub-np-step.active {
   border-left-color: var(--color-primary-800);
   border-left-width: 3px;
-  height: 35px;
+  height: 25px;
   margin-top: -5px;
 }
 
@@ -572,6 +562,14 @@ font-weight: 500;
 line-height: var(--line-height-body-md);
 }
 
+.edit-np--label {
+  color: var(--color-neutral-1700);
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md);
+}
 .np-icon-field-wrapper {
   display: flex;
   align-items: center;

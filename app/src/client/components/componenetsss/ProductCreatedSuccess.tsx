@@ -3,13 +3,39 @@ import "./ProductCreatedSuccess.css";
 import PrimaryButton from "./PrimaryButton";
 
 type Props = {
+  /**
+   * Name of the thing that was created (product or metric).
+   * For backwards compatibility this is still called productName.
+   */
   productName?: string;
+
+  /** Default handler for the primary button in the original product flow */
   onGoAllProducts?: () => void;
+
+  /** Optional override for the title text */
+  titleOverride?: string;
+
+  /** Optional override for the subtitle (small paragraph under title) */
+  subtitleOverride?: string;
+
+  /** Optional override for the bullet/step lines */
+  stepsOverride?: string[];
+
+  /** Optional override for the primary button label */
+  primaryLabelOverride?: string;
+
+  /** Optional override for the primary button click handler */
+  onPrimaryClick?: () => void;
 };
 
 const ProductCreatedSuccess: React.FC<Props> = ({
   productName = "Google Maps API",
   onGoAllProducts,
+  titleOverride,
+  subtitleOverride,
+  stepsOverride,
+  primaryLabelOverride,
+  onPrimaryClick,
 }) => {
   const pathRef = useRef<SVGPathElement | null>(null);
 
@@ -26,6 +52,23 @@ const ProductCreatedSuccess: React.FC<Props> = ({
     path.getBoundingClientRect();
     path.style.strokeDashoffset = "0";
   }, []);
+
+  const effectiveTitle =
+    titleOverride ?? `“${productName}” Product Created ${"Successfully"}`;
+
+  const effectiveSubtitle =
+    subtitleOverride ?? "To start selling, please complete the next steps:";
+
+  const effectiveSteps =
+    stepsOverride ?? [
+      "•Add billable metrics to track usage.",
+      "•Create rate plans for those metrics.",
+      "•Market & sell to move the product live.",
+    ];
+
+  const effectivePrimaryLabel = primaryLabelOverride ?? "Go to All Products";
+
+  const handlePrimary = onPrimaryClick ?? onGoAllProducts;
 
   return (
     <div className="pcs-wrap">
@@ -69,24 +112,20 @@ const ProductCreatedSuccess: React.FC<Props> = ({
           </div>
         </div>
 
-        <h2 className="pcs-title">
-          “{productName}” Product Created <br /> Successfully
-        </h2>
+        <h2 className="pcs-title">{effectiveTitle}</h2>
 
-        <p className="pcs-sub">
-          To start selling, please complete the next steps:
-        </p>
+        <p className="pcs-sub">{effectiveSubtitle}</p>
         <ul className="pcs-steps">
-          <li>•Add billable metrics to track usage.</li>
-          <li>•Create rate plans for those metrics.</li>
-          <li>•Market &amp; sell to move the product live.</li>
+          {effectiveSteps.map((line, idx) => (
+            <li key={idx}>{line}</li>
+          ))}
         </ul>
 
         <PrimaryButton
-          onClick={onGoAllProducts}
-          aria-label="Go to All Products"
+          onClick={handlePrimary}
+          aria-label={effectivePrimaryLabel}
         >
-          Go to All Products
+          {effectivePrimaryLabel}
         </PrimaryButton>
       </div>
     </div>

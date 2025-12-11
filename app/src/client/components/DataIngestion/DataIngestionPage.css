@@ -365,6 +365,8 @@ line-height: var(--line-height-body-md);
 .data-td-status .data-status-chip {
   display: inline-flex;
   margin: 0 auto;
+    margin-left: -15px;
+
 }
 
 .data-td-uploaded { 
@@ -444,6 +446,7 @@ line-height: var(--line-height-body-md);
   font: 500 12px/24px var(--type-font-family-primary, "IBM Plex Sans");
 }
 .data-status-staged   { background: #EFF3FA; color: #5C6C84; }
+.data-status-uploading { background: #E3F2FD; color: #1976D2; }
 .data-status-uploaded { background: #E8FAF0; color: #1D734B; }
 .data-status-failed   { background: #FFECEC; color: #B42318; }
 
@@ -481,8 +484,11 @@ line-height: var(--line-height-body-md);
 /* Edit button styling handled by EditIconButton component */
 
 /* ================= Empty State ================= */
-.data-empty-row td {
+.data-empty-row {
   height: clamp(280px, calc(100vh - var(--data-header-h) - 220px), 520px);
+}
+.data-empty-row td {
+  height: 100%;
   padding: 0;
   vertical-align: middle;
 }

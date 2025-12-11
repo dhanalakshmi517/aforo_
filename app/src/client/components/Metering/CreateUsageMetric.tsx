@@ -10,6 +10,7 @@ import SaveDraft from '../componenetsss/SaveDraft';
 import { useToast } from '../componenetsss/ToastProvider';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import SecondaryButton from '../componenetsss/SecondaryButton';
+import ProductCreatedSuccess from '../componenetsss/ProductCreatedSuccess';
 
 import {
   getProducts,
@@ -105,6 +106,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // form
   const [metricId, setMetricId] = useState<number | null>(null);
@@ -383,6 +385,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         if (!isDraft && !skipFinalize) {
           const finalized = await finalizeBillableMetric(metricId);
           if (!finalized) throw new Error('Failed to finalize metric');
+          setShowSuccess(true);
         }
         return true;
       } else {
@@ -393,6 +396,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         if (!isDraft && !skipFinalize) {
           const finalized = await finalizeBillableMetric(res.id);
           if (!finalized) throw new Error('Failed to finalize metric');
+          setShowSuccess(true);
         }
         return true;
       }
@@ -427,8 +431,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       setSaving(true);
       const finalized = await finalizeBillableMetric(metricId);
       setSaving(false);
-      if (finalized) onClose();
-      else alert('Finalize failed');
+      if (finalized) {
+        setShowSuccess(true);
+      } else {
+        alert('Finalize failed');
+      }
     }
   };
 
@@ -496,9 +503,26 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     </span>
   );
 
+  const handleGoAllMetrics = () => {
+    navigate('/get-started/metering');
+  };
 
   return (
     <>
+      {showSuccess ? (
+        <ProductCreatedSuccess
+          productName={metricName}
+          titleOverride={`“${metricName || 'Usage Metric'}” Usage Metric Created Successfully`}
+          subtitleOverride="To start billing with this metric, please complete the next steps:"
+          stepsOverride={[
+            '•Attach this metric to your products or plans.',
+            '•Configure rate plans using this metric.',
+          ]}
+          primaryLabelOverride="Go to All Usage Metrics"
+          onPrimaryClick={handleGoAllMetrics}
+        />
+      ) : (
+        <>
       <TopBar
         title="Create New Usage Metric"
         onBack={handleTopbarBack}
@@ -784,8 +808,16 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 setSaving(true);
                                 const finalized = await finalizeBillableMetric(metricId);
                                 setSaving(false);
-                                if (finalized) onClose();
-                                else alert('Finalize failed');
+                                if (finalized) {
+                                  setShowSuccess(true);
+                                  showToast({
+                                    kind: 'success',
+                                    title: 'Usage Metric Created Successfully',
+                                    message: 'Your usage metric has been created successfully.',
+                                  });
+                                } else {
+                                  alert('Finalize failed');
+                                }
                               }}
                               disabled={saving}
                             >
@@ -832,6 +864,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         }}
         onCancel={() => setShowDeleteConfirm(false)}
       />
+        </>
+      )}
     </>
   );
 }

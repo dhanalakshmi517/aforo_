@@ -83,7 +83,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
+            {label}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
         <input
@@ -191,7 +191,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
+            {label}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
 
@@ -489,7 +489,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
+            {label}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
         <textarea

@@ -776,16 +776,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
             }}
           />
 
-      <div className="np-viewport">
-        <div className="np-card">
-          <div className="np-grid">
+      <div className="prod-np-viewport">
+        <div className="prod-np-card">
+          <div className="prod-np-grid">
             {/* LEFT rail */}
-            <aside className="np-rail" data-modal-open={isIconPickerOpen ? 'true' : 'false'} style={{
+            <aside className="prod-np-rail" data-modal-open={isIconPickerOpen ? 'true' : 'false'} style={{
               pointerEvents: isIconPickerOpen ? 'none' : 'auto',
               opacity: isIconPickerOpen ? 0.5 : 1,
               transition: 'opacity 0.2s'
             }}>
-              <nav className="np-steps">
+              <nav className="prod-np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
@@ -799,7 +799,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       key={step.id}
                       type="button"
                       className={[
-                        "np-step",
+                        "prod-np-step",
                         isActive && !isModalOpen ? "active" : "",
                         isCompleted ? "completed" : "",
                         isDisabled || isModalOpen ? "disabled" : ""
@@ -809,9 +809,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       title={isDisabled ? "Please complete the configuration first" : isModalOpen ? "Close the icon picker first" : ""}
                     >
                       {/* Bullet + connector column */}
-                      <span className="np-step__bullet" aria-hidden="true">
+                      <span className="prod-np-step__bullet" aria-hidden="true">
                         {/* Circle bullet */}
-                        <span className="np-step__icon">
+                        <span className="prod-np-step__icon">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <circle cx="12" cy="12" r="11" stroke={isModalOpen ? "#C3C2D0" : (isActive ? "var(--color-primary-800)" : "#C3C2D0")} strokeWidth="2" />
                             <circle cx="12" cy="12" r="6" fill={isModalOpen ? "#C3C2D0" : (isActive ? "var(--color-primary-800)" : "#C3C2D0")} />
@@ -819,13 +819,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                         </span>
 
                         {/* Vertical connector (hidden on last step) */}
-                        {showConnector && <span className="np-step__connector" />}
+                        {showConnector && <span className="prod-np-step__connector" />}
                       </span>
 
                       {/* Text column */}
-                      <span className="np-step__text">
-                        <span className="np-step__title">{step.title}</span>
-                        <span className="np-step__desc">{step.desc}</span>
+                      <span className="prod-np-step__text">
+                        <span className="prod-np-step__title">{step.title}</span>
+                        <span className="prod-np-step__desc">{step.desc}</span>
                       </span>
                     </button>
                   );
@@ -834,20 +834,20 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
             </aside>
 
             {/* MAIN area */}
-            <main className="np-main">
+            <main className="prod-np-main">
               {/* faint separators behind content */}
               <div className="af-skel-rule af-skel-rule--top" />
-              <div className="np-main__inner">
-                <div className="np-body">
-                  <form className="np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="np-form-section">
+              <div className="prod-np-main__inner">
+                <div className="prod-np-body">
+                  <form className="prod-np-form" onSubmit={(e) => e.preventDefault()}>
+                    <div className="prod-np-form-section">
                       {activeTab === "general" && (
                         <section>
-                          <div className="np-section-header">
-                            <h3 className="np-section-title">GENERAL DETAILS</h3>
+                          <div className="prod-np-section-header">
+                            <h3 className="prod-np-section-title">GENERAL DETAILS</h3>
                           </div>
 
-                          <div className="np-grid ">
+                          <div className="prod-np-grid ">
                             <InputField
                               label="Product Name"
                               value={formData.productName}
@@ -856,18 +856,19 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               placeholder="eg. Google Maps API"
                             />
                             <InputField
-                              label="Version (Optional)"
+                              label="Version"
                               value={formData.version}
                               onChange={handleFieldChange('version')}
                               placeholder="eg., 2.3-VOS"
+                              optional
                             />
                             
                             {/* Product Icon Field - Add */}
                             {!selectedIcon && (
-                              <div className="np-form-group">
-                                <label className="if-label">Product Icon (optional)</label>
-                                <div className="np-icon-field-wrapper">
-                                  <div className="np-icon-placeholder">
+                              <div className="prod-np-form-group">
+                                <label className="if-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                                <div className="prod-np-icon-field-wrapper">
+                                  <div className="prod-np-icon-placeholder">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
                                       <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA"/>
                                       <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05"/>
@@ -875,10 +876,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                       <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1"/>
                                     </svg>
                                   </div>
-                                  <span className="np-icon-placeholder-text">Add product icon</span>
+                                  <span className="prod-np-icon-placeholder-text">Add product icon</span>
                                   <button
                                     type="button"
-                                    className="np-icon-add-btn"
+                                    className="prod-np-icon-add-btn"
                                     onClick={() => setIsIconPickerOpen(true)}
                                   >
                                     <span>+ Add</span>
@@ -909,10 +910,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               console.log('🎨 Display colors - outerBg1:', outerBg1, 'outerBg2:', outerBg2, 'tileColor:', tileColor);
                               
                               return (
-                              <div className="np-form-group">
-                                <label className="if-label">Product Icon</label>
-                                <div className="np-icon-field-wrapper">
-                                  <div className="np-icon-preview">
+                              <div className="prod-np-form-group">
+                                <label className="if-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                                <div className="prod-np-icon-field-wrapper">
+                                  <div className="prod-np-icon-preview">
                                     <div
                                       style={{
                                         width: 50.6537,
@@ -974,7 +975,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="np-icon-actions">
+                                  <div className="prod-np-icon-actions">
                                     <EditButton
                                       onClick={() => setIsIconPickerOpen(true)}
                                       label="Edit"
@@ -998,10 +999,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               error={errors.skuCode}
                             />
                             <TextareaField
-                              label="Description (Optional)"
+                              label="Description"
                               value={formData.description}
                               onChange={handleFieldChange('description')}
                               placeholder="eg. Mapping service API for location-based apps..."
+                              optional
                             />
                           </div>
                           
@@ -1021,8 +1023,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                       {activeTab === "configuration" && (
                         <section>
-                          <div className="np-section-header" style={{display:'flex',alignItems:'center'}}>
-                            <h3 className="np-section-title">CONFIGURATION</h3>
+                          <div className="prod-np-section-header" style={{display:'flex',alignItems:'center'}}>
+                            <h3 className="prod-np-section-title">CONFIGURATION</h3>
                             {isConfigurationLocked && <LockBadge />}
                             {createdProductId && (
                               <div className="text-sm text-gray-500 mt-1">
@@ -1054,8 +1056,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                       {activeTab === "review" && createdProductId && configuration.productType ? (
                         <section>
-                          <div className="np-section-header">
-                            <h3 className="np-section-title">REVIEW & CONFIRM</h3>
+                          <div className="prod-np-section-header">
+                            <h3 className="prod-np-section-title">REVIEW & CONFIRM</h3>
                           </div>
                           <ProductReview generalDetails={formData} configuration={configuration} />
                           {/* Hidden ConfigurationTab to keep ref alive */}
@@ -1073,11 +1075,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                           </div>
                         </section>
                       ) : activeTab === "review" ? (
-                        <div className="np-section-header">
-                          <h3 className="np-section-title">Please complete the configuration first</h3>
+                        <div className="prod-np-section-header">
+                          <h3 className="prod-np-section-title">Please complete the configuration first</h3>
                           <p>Click 'Back' to complete the required configuration steps.</p>
                           <button 
-                            className="np-btn np-btn--primary mt-4"
+                            className="prod-np-btn prod-np-btn--primary mt-4"
                             onClick={() => gotoStep(1)}
                           >
                             Back to Configuration
@@ -1087,13 +1089,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                     </div>
 
                     {/* Footer actions on a line */}
-                    <div className="np-form-footer" style={{position:'relative'}}>
+                    <div className="prod-np-form-footer" style={{position:'relative'}}>
                       {activeTab === "general" && (
                         <>
                           {errors.form && (
-                            <div className="np-error-message">{errors.form}</div>
+                            <div className="prod-np-error-message">{errors.form}</div>
                           )}
-                          <div className="np-btn-group np-btn-group--next">
+                          <div className="prod-np-btn-group prod-np-btn-group--next">
                           <PrimaryButton
                             type="button"
                             onClick={handleSaveAndNext}
@@ -1109,7 +1111,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                           {isConfigurationLocked ? (
                             // ONLY the hint when locked (no buttons)
                             <div
-                              className="np-footer-hint"
+                              className="prod-np-footer-hint"
                               style={{
                                 position: 'absolute',
                                 left: '50%',
@@ -1134,7 +1136,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   Back
                                 </SecondaryButton>
                               </div>
-                              <div className="np-btn-group np-btn-group--next">
+                              <div className="prod-np-btn-group prod-np-btn-group--next">
                               <PrimaryButton
                                 type="button"
                                 onClick={async () => {
@@ -1168,7 +1170,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                       {activeTab === "review" && (
                         <>
-                          <div className="np-btn-group np-btn-group--back">
+                          <div className="prod-np-btn-group prod-np-btn-group--back">
                             <SecondaryButton
                               type="button"
                               onClick={() => gotoStep(1)}
@@ -1176,7 +1178,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               Back
                             </SecondaryButton>
                           </div>
-                          <div className="np-btn-group np-btn-group--next">
+                          <div className="prod-np-btn-group prod-np-btn-group--next">
                             <PrimaryButton 
                               type="button" 
                               onClick={async () => {
@@ -1323,4 +1325,3 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     </>
   );
 }
-

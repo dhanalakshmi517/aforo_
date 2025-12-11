@@ -7,6 +7,7 @@ import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
+import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
 
 import { getProducts, Product, updateBillableMetric } from './api';
 import { getBillableMetricById } from './api';
@@ -456,6 +457,8 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                       )}
                     </div>
 
+                    <div className="af-skel-rule af-skel-rule--bottom" />
+
                     {/* FOOTER – same alignment pattern */}
                     <div className="editmet-np-form-footer">
                       <div className="editmet-np-btn-group editmet-np-btn-group--back">
@@ -497,47 +500,46 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                 </div>
               </div>
 
-              {/* Skeleton rule hook if you’re using it in CSS */}
-              <div className="af-skel-rule af-skel-rule--bottom" />
             </main>
           </div>
-
-          {/* Same modal shell as your other editors */}
-          <SaveAsDraftModal
-            isOpen={showSaveDraftModal}
-            onSave={() => {
-              setShowSaveDraftModal(false);
-              onClose();
-            }}
-            onDelete={() => {
-              setShowSaveDraftModal(false);
-              onClose();
-            }}
-          />
-
-          <ConfirmDeleteModal
-            isOpen={showDeleteConfirm}
-            productName={metricName || 'this metric'}
-            onConfirm={() => {
-              setShowDeleteConfirm(false);
-              onClose();
-            }}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
-
-          <EditPopup
-            isOpen={showEditPopup}
-            onDismiss={() => setShowEditPopup(false)}
-            onClose={() => {
-              setShowEditPopup(false);
-              onClose();
-            }}
-            onSave={async () => {
-              await handleSaveDraft();
-              onClose();
-            }}
-          />
         </div>
+
+        <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} className="editmet-np-scrollbar" />
+
+        <SaveAsDraftModal
+          isOpen={showSaveDraftModal}
+          onSave={() => {
+            setShowSaveDraftModal(false);
+            onClose();
+          }}
+          onDelete={() => {
+            setShowSaveDraftModal(false);
+            onClose();
+          }}
+        />
+
+        <ConfirmDeleteModal
+          isOpen={showDeleteConfirm}
+          productName={metricName || 'this metric'}
+          onConfirm={() => {
+            setShowDeleteConfirm(false);
+            onClose();
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+
+        <EditPopup
+          isOpen={showEditPopup}
+          onDismiss={() => setShowEditPopup(false)}
+          onClose={() => {
+            setShowEditPopup(false);
+            onClose();
+          }}
+          onSave={async () => {
+            await handleSaveDraft();
+            onClose();
+          }}
+        />
       </div>
     </>
   );

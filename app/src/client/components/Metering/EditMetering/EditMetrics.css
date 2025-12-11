@@ -44,6 +44,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 /* Grid */
@@ -74,11 +75,19 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   position: relative;
-  gap: 18px;
+  gap: 0;
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
 }
 
+
+.editmet-np-label{
+    color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+}
 /* Step */
 .editmet-np-step {
   display: flex;
@@ -90,6 +99,7 @@ html, body, #root {
   border-left: 3px solid transparent;
   width: 100%;
   cursor: pointer;
+  min-height: 35px; /* ensure all steps reserve same vertical space */
 }
 
 .editmet-np-step__title {
@@ -104,8 +114,9 @@ html, body, #root {
 .editmet-np-step.active {
   border-left-color: var(--color-primary-800);
   border-left-width: 3px;
+  /* keep same vertical size as other steps to avoid jumping */
   height: 35px;
-  margin-top: 5px;
+  margin-top: 0;
 }
 
 .editmet-np-step.active .editmet-np-step__title {
@@ -160,7 +171,7 @@ html, body, #root {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: 15px;
+  padding-bottom: 8px;
 }
 
 .editmet-np-section-header {
@@ -184,13 +195,14 @@ html, body, #root {
 .editmet-np-form-footer {
   position: relative;
   margin: 0 -24px;
-  padding: 16px 24px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid var(--color-neutral-300);
+  align-items: center;
   background: #fff;
   flex-shrink: 0;
   margin-top: auto;           /* pins footer to bottom */
+  border-top: 1px solid var(--color-neutral-300);
 }
 
 .editmet-np-btn-group { 
@@ -274,4 +286,13 @@ html, body, #root {
     grid-template-columns: 1fr; 
     grid-template-rows: auto 1fr; 
   }
+}
+
+/* Vertical scrollbar positioning */
+.editmet-np-scrollbar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 50%;
+  pointer-events: none;
 }

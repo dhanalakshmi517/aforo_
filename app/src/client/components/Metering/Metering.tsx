@@ -183,19 +183,25 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
   };
 
-  // Define metric color palette
-  const metricColors = [
-    'rgba(234, 212, 174, 0.15)',
-    'rgba(226, 182, 190, 0.15)',
-    'rgba(226, 182, 204, 0.15)',
-    'rgba(220, 182, 226, 0.15)',
-    'rgba(204, 183, 225, 0.15)',
-    'rgba(196, 183, 225, 0.15)',
-    'rgba(174, 234, 214, 0.15)'
+  // Define metric color palette with bg and text colors
+  const metricColorPalette = [
+    { bg: '#EAD4AE', text: '#81632E' }, // lilac
+    { bg: '#E2B6BE', text: '#AA3C4E' }, // pink
+    { bg: '#E2B6CC', text: '#AC3C73' }, // blue
+    { bg: '#DCB6E2', text: '#90449C' }, // teal
+    { bg: '#CCB7E1', text: '#693E92' }, // orange
+    { bg: '#C4B7E1', text: '#6547A8' }, // green
+    { bg: '#B7B8E1', text: '#4749AF' }, // red
+    { bg: '#B6C7E2', text: '#2A559C' }, // indigo
+    { bg: '#AED7EA', text: '#1C5F7D' }, // warm orange
+    { bg: '#AEE1EA', text: '#206D79' }, // teal
+    { bg: '#AEEAD6', text: '#1C6C51' }, // mint
+    { bg: '#AEEAC4', text: '#2AA055' }, // green
+    { bg: '#AFE9E3', text: '#177167' }  // cyan
   ];
 
   // Helper function to get metric color by index
-  const getMetricColor = (idx: number) => metricColors[idx % metricColors.length];
+  const getMetricColor = (idx: number) => metricColorPalette[idx % metricColorPalette.length];
 
   const filteredMetrics = metrics
     .filter((m) =>
@@ -240,7 +246,33 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
           <tbody>
             {filteredMetrics.map((metric, idx) => (
               <tr key={metric.id}>
-                <td className="metrics-cell"><div className="metrics-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}><div className="metric-item" style={{ backgroundColor: getMetricColor(idx) }}><div className="metric-content"><div className="metric-uom" title={metric.unit}>{display(metric.unit && metric.unit.length > 3 ? `${metric.unit.substring(0, 3)}...` : metric.unit)}</div><div className="metric-name" title={metric.usageMetric}>{display(metric.usageMetric && metric.usageMetric.length > 3 ? `${metric.usageMetric.substring(0, 3)}...` : metric.usageMetric)}</div></div></div><span style={{ marginLeft: 4 }}>{display(metric.usageMetric)}</span></div></td>
+                <td className="metrics-cell">
+                  <div className="metrics-wrapper">
+                    <div 
+                      className="metric-item" 
+                      style={{ 
+                        backgroundColor: getMetricColor(idx).bg, 
+                        color: getMetricColor(idx).text 
+                      }}
+                    >
+                      <div className="metric-content">
+                        <div className="metric-uom" title={metric.unit}>
+                          {display(metric.unit && metric.unit.length > 3
+                            ? metric.unit.substring(0, 3)   // only first 3 letters, no dots
+                            : metric.unit
+                          )}
+                        </div>
+                        <div className="metric-name" title={metric.usageMetric}>
+                          {display(metric.usageMetric && metric.usageMetric.length > 3
+                            ? `${metric.usageMetric.substring(0, 3)}...`  // first 3 letters + dots
+                            : metric.usageMetric
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="metric-label">{display(metric.usageMetric)}</span>
+                  </div>
+                </td>
                 <td>{display(metric.productName)}</td>
                 <td>{display(metric.unit)}</td>
                 <td>
@@ -260,7 +292,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                     />
                   ) : (
                     <EditIconButton
-                      onClick={() => { setSelectedMetricId(metric.id); setShowEditMetricForm(true); }}
+                      onClick={() => navigate(`/get-started/metering/${metric.id}/edit`)}
                       title="Edit metric"
                     />
                   )}

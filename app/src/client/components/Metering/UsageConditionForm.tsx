@@ -149,7 +149,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
       {filters.map((filter, index) => (
         <div key={filter.id} className="filter-box">
           <div className="filter-header">
-            <p>FILTER CONDITION {index + 1}</p>
+            <p>USAGE CONDITION {index + 1}</p>
             <DeleteIconButton
               onClick={() => handleRemove(filter.id)}
               disabled={locked}

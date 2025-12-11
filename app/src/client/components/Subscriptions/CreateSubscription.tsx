@@ -466,6 +466,7 @@ export default function CreateSubscription({
           placeholder="Enter admin notes"
           value={planDescription}
           onChange={setPlanDescription}
+          optional
         />
       </div>
     </div>

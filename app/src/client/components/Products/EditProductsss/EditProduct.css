@@ -103,10 +103,45 @@ html, body, #root {
 .editprod-np-step.active {
   border-left-color: var(--color-primary-800);
     border-left-width: 3px;
-  height: 35px;
-  margin-top: 5px;
+  height: 25px;
+  margin-top: 12px;
 }
 
+
+
+.prod-np-icon-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: 30px;
+  padding: 4px 16px;
+  background:var(--color-primary-000);
+color: var(--color-primary-800);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.prod-np-icon-add-btn:hover {
+  background: var(--color-primary-100);
+}
+
+.prod-np-icon-add-btn:active {
+  background: var(--color-primary-200);
+  transform: translateY(0);
+}
+
+.prod-np-icon-add-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary-400);
+}
 .editprod-np-step.active .editprod-np-step__title {
   color: var(--color-neutral-black);
   font-weight: 500;
