@@ -318,7 +318,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         aggregationFunction: aggregationFunction || undefined,
         aggregationWindow: aggregationWindow || undefined,
         billingCriteria: billingCriteria || undefined,
-        version: version?.trim() ? version.trim() : undefined,
+        // Version is required by backend - use default if not provided
+        version: version?.trim() || 'v1.0',
         description: description?.trim() ? description.trim() : undefined,
         usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : [],
       };
@@ -331,7 +332,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       };
       if (metricName.trim()) payload.metricName = metricName.trim();
       if (selectedProductId) payload.productId = Number(selectedProductId);
-      if (version.trim()) payload.version = version.trim();
+      // Version with default for drafts
+      payload.version = version?.trim() || 'v1.0';
       if (unitOfMeasure.trim()) payload.unitOfMeasure = unitOfMeasure.trim();
       if (description.trim()) payload.description = description.trim();
       if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
@@ -345,11 +347,12 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       metricName: metricName.trim(),
       productId: Number(selectedProductId),
       unitOfMeasure: unitOfMeasure.trim(),
+      // Version is required by backend - use default if not provided
+      version: version?.trim() || 'v1.0',
       usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : []
     };
 
     // Only include optional fields if they have values
-    if (version?.trim()) payload.version = version.trim();
     if (description?.trim()) payload.description = description.trim();
     if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
     if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
@@ -368,7 +371,35 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     if (metricId) {
       const nonIdKeys = Object.keys(payload).filter(k => k !== 'metricId');
       if (nonIdKeys.length === 0) {
+        // Before finalizing, clean up any null values that might exist
         if (!isDraft && !skipFinalize) {
+          // Send an update to explicitly clear null optional fields
+          const cleanupPayload: any = { metricId };
+
+          // Only include non-empty values to overwrite nulls
+          if (metricName?.trim()) cleanupPayload.metricName = metricName.trim();
+          if (selectedProductId) cleanupPayload.productId = Number(selectedProductId);
+          if (unitOfMeasure?.trim()) cleanupPayload.unitOfMeasure = unitOfMeasure.trim();
+
+          // Version is required by backend for finalization - use default if not provided
+          cleanupPayload.version = version?.trim() || 'v1.0';
+
+          if (description?.trim()) cleanupPayload.description = description.trim();
+          if (aggregationFunction?.trim()) cleanupPayload.aggregationFunction = aggregationFunction.trim();
+          if (aggregationWindow?.trim()) cleanupPayload.aggregationWindow = aggregationWindow.trim();
+          if (billingCriteria?.trim()) cleanupPayload.billingCriteria = billingCriteria.trim();
+
+          const validConditions = usageConditions.filter(c =>
+            c.dimension?.trim() && c.operator?.trim() && c.value?.trim()
+          );
+          if (validConditions.length > 0) {
+            cleanupPayload.usageConditions = validConditions;
+          }
+
+          // Send cleanup update
+          await updateBillableMetric(metricId, cleanupPayload);
+
+          // Now finalize
           const finalized = await finalizeBillableMetric(metricId);
           if (!finalized) {
             setErrors(prev => ({ ...prev, form: 'Failed to finalize metric' }));

@@ -215,6 +215,27 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         if (localIconJson) {
           const parsedLocal = parseProductIconField(localIconJson);
           iconData = extractIconData(parsedLocal, product.productName || 'Product');
+          if (iconData) {
+            console.log(`✅ Using in-memory cached icon for ${product.productId}`);
+          }
+        }
+
+        // Check localStorage cache (persistent across page refreshes)
+        // This is needed because backend doesn't properly return productIcon field
+        if (!iconData) {
+          try {
+            const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+            const cachedIconJson = iconCache[product.productId];
+            if (cachedIconJson) {
+              const parsedCache = parseProductIconField(cachedIconJson);
+              iconData = extractIconData(parsedCache, product.productName || 'Product');
+              if (iconData) {
+                console.log(`✅ Using localStorage cached icon for ${product.productId}:`, iconData);
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to read icon cache from localStorage:', e);
+          }
         }
 
         // Backend `productIcon` (robust parsing)
@@ -625,9 +646,15 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     fetchProducts();
   }, [fetchProducts]);
 
-  // Refresh products when user returns from NewProduct page
+  // Refresh products when user returns from NewProduct/EditProduct page
   useEffect(() => {
     console.log('🔄 Location changed, refreshing products list...');
+    // Check for pending updates first (icon changes from EditProduct)
+    const updateSignal = localStorage.getItem('productUpdated');
+    if (updateSignal) {
+      console.log('🔄 Found product update signal on location change, refreshing...');
+      localStorage.removeItem('productUpdated');
+    }
     fetchProducts();
   }, [location.pathname, fetchProducts]);
 
@@ -937,7 +964,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
                                 // Use product icon color if available, otherwise use random color
                                 const metricTileColor = product.iconData?.tileColor || '#0F6DDA';
-                                
+
                                 // Convert hex to RGB for light background
                                 const hexToRgb = (hex: string) => {
                                   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -973,11 +1000,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                       height: '100%',
                                       gap: '0px'
                                     }}>
-                                      <div 
-                                        className="metric-uom" 
+                                      <div
+                                        className="metric-uom"
                                         title={metric.unitOfMeasure}
-                                        style={{ 
-                                          color: metricTileColor, 
+                                        style={{
+                                          color: metricTileColor,
                                           opacity: 1,
                                           textAlign: 'center',
                                           width: '100%',
@@ -993,11 +1020,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                       >
                                         {truncatedUOM}
                                       </div>
-                                      <div 
-                                        className="metric-name" 
+                                      <div
+                                        className="metric-name"
                                         title={metric.metricName}
-                                        style={{ 
-                                          color: metricTileColor, 
+                                        style={{
+                                          color: metricTileColor,
                                           opacity: 0.9,
                                           textAlign: 'center',
                                           width: '100%',
@@ -1011,7 +1038,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                           fontWeight: 300,
                                           lineHeight: '10px',
                                           letterSpacing: '-0.2px',
-                                          marginTop:'-2px'
+                                          marginTop: '-2px'
                                         } as React.CSSProperties}
                                       >
                                         {truncatedName}

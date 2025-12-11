@@ -78,10 +78,10 @@ export async function getUsageMetrics(): Promise<UsageMetricDTO[]> {
     const data = Array.isArray(payload)
       ? payload
       : Array.isArray((payload as any)?.data)
-      ? (payload as any).data
-      : Array.isArray((payload as any)?.content)
-      ? (payload as any).content
-      : [];
+        ? (payload as any).data
+        : Array.isArray((payload as any)?.content)
+          ? (payload as any).content
+          : [];
 
     return data;
   } catch (error) {
@@ -96,14 +96,14 @@ export async function getUsageMetric(id: number): Promise<UsageMetricDTO | null>
       headers: getAuthHeaders(),
     });
     if (!response.ok) return null;
-    
+
     const data = await response.json();
-    
+
     // If the API doesn't return usageConditions, initialize it as an empty array
     if (!data.usageConditions) {
       data.usageConditions = [];
     }
-    
+
     return data;
   } catch (e) {
     console.error('Error fetching metric', e);
@@ -145,7 +145,7 @@ export async function createBillableMetric(
     });
 
     console.log('Create response status:', response.status);
-    
+
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}`;
       try {
@@ -214,7 +214,20 @@ export async function finalizeBillableMetric(metricId: number): Promise<boolean>
       `${METRICS_BASE_URL}/billable-metrics/${metricId}/finalize`,
       { method: 'POST', headers: getAuthHeaders() }
     );
-    return response.ok;
+
+    if (!response.ok) {
+      // Log the error details
+      console.error('❌ Finalize failed with status:', response.status);
+      try {
+        const errorData = await response.json();
+        console.error('❌ Finalize error details:', JSON.stringify(errorData, null, 2));
+      } catch {
+        console.error('❌ No error details in response body');
+      }
+      return false;
+    }
+
+    return true;
   } catch (error) {
     console.error('Error finalizing billable metric:', error);
     return false;
@@ -247,10 +260,10 @@ export async function getProducts(): Promise<Product[]> {
     const data = Array.isArray(payload)
       ? payload
       : Array.isArray((payload as any)?.data)
-      ? (payload as any).data
-      : Array.isArray((payload as any)?.content)
-      ? (payload as any).content
-      : [];
+        ? (payload as any).data
+        : Array.isArray((payload as any)?.content)
+          ? (payload as any).content
+          : [];
 
     console.log('Products API processed data:', data);
     console.log('Products count:', data.length);
