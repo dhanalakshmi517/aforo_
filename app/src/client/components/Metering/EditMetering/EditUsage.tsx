@@ -142,8 +142,9 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
             </div>
 
             <div className="column">
+                      <label>Value</label>
+
               <InputField
-                label="Value"
                 type="text"
                 placeholder="Enter value"
                 value={filter.value}

@@ -242,13 +242,13 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   max-height: calc(100vh - 180px);
   overflow-y: auto;
   overflow-x: hidden;
-  width: calc(100% - 20px);
+  width: calc(100% - 10px);
   margin-right: 0;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   margin-top: 15px;
   background-color: white;
   border-radius: var(--border-radius-lg);
-  padding: 10px 10px 10px 12px;
+  padding: 8px 8px 8px 10px;
   box-shadow: 0 18px 54px rgba(0,0,0,0.07), 0 2.254px 43.336px rgba(0,0,0,0);
   position: relative;
   scrollbar-width: none;

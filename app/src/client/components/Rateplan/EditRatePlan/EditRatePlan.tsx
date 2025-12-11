@@ -800,7 +800,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                 </div>
               </div>
               {/* if you have skeleton rules in CSS, they’ll hook here */}
-              {/* <div className="af-skel-rule af-skel-rule--bottom" /> */}
+              <div className="af-skel-rule af-skel-rule--bottom" />
             </main>
           </div>
         </div>

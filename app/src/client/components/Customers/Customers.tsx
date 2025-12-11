@@ -283,8 +283,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   useEffect(() => { if (!showNewCustomerForm) fetchCustomersAndLogos(); }, [showNewCustomerForm]);
 
   const handleNewCustomer = () => {
-    setResumeDraft(null);
-    setShowNewCustomerForm(true);
+    navigate('/get-started/customers/new');
   };
   const handleCloseForm = () => {
     setShowNewCustomerForm(false);

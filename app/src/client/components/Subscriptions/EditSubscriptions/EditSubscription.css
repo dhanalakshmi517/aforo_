@@ -231,8 +231,9 @@ html, body, #root{
 .editsub-np-step.active {
   border-left-color: var(--color-primary-800);
   border-left-width: 3px;
-  height: 35px;
-  margin-top: 8px;
+  height: auto;
+  margin-top: 0;
+  padding-left: 12px;
 }
 
 /* Override active state when disabled */
@@ -398,7 +399,6 @@ text-transform: uppercase;
   align-items: center;
  margin-top: auto;
   margin-bottom: 24px;
-  border-top: 1px solid var(--color-neutral-300);
 }
 
 .editsub-np-btn-group { 

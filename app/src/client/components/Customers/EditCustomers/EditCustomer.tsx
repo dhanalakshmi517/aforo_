@@ -16,6 +16,8 @@ import TopBar from '../../TopBar/TopBar';
 import LogoUploader from '../LogoUploader';
 import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
+import PrimaryButton from '../../componenetsss/PrimaryButton';
+import SecondaryButton from '../../componenetsss/SecondaryButton';
 
 import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
 
@@ -422,9 +424,8 @@ const EditCustomer: React.FC = () => {
           <div className="edit-np-section">
             <div className="edit-np-form-row">
               <div className="edit-np-form-group">
-                <label className="edit-np-label">Company Name</label>
                 <InputField
-                  label=""
+                  label="Company Name"
                   value={companyName}
                   placeholder="Enter company name"
                   onChange={val => {
@@ -606,24 +607,20 @@ const EditCustomer: React.FC = () => {
                     <div className="editsub-np-form-footer">
                       <div className="editsub-np-btn-group editsub-np-btn-group--back">
                         {activeTab !== 'details' && (
-                          <button
-                            type="button"
-                            className="np-btn np-btn--ghost"
+                          <SecondaryButton
                             onClick={handlePreviousStep}
                           >
                             Back
-                          </button>
+                          </SecondaryButton>
                         )}
                       </div>
 
                       <div className="editsub-np-btn-group editsub-np-btn-group--next">
-                        <button
-                          type="button"
-                          className="np-btn np-btn--primary"
+                        <PrimaryButton
                           onClick={handleNextStep}
                         >
                           {activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
-                        </button>
+                        </PrimaryButton>
                       </div>
                     </div>
                   </form>

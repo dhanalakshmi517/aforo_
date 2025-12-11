@@ -587,7 +587,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   // ============================================================
   // FIXED: RatePlanIcon Component in RatePlans.tsx
   // ============================================================
-  const RatePlanIcon: React.FC<{ iconData: ProductIconData | null; iconUrl: string | null }> = ({ iconData, iconUrl }) => {
+  const RatePlanIcon: React.FC<{ iconData: ProductIconData | null; iconUrl: string | null }> = ({ iconData, iconUrl }: { iconData: ProductIconData | null; iconUrl: string | null }) => {
     // Fallback UI when no icon is available
     if (!iconData) {
       return (
@@ -1029,7 +1029,6 @@ const RatePlans: React.FC<RatePlansProps> = ({
               filterDisabled={!hasRows}
               showPrimary={hasRows}
               showIntegrations={filteredPlans.length > 0} />
-
             <div className="customers-table-wrapper">
               <table className="customers-table">
                 <colgroup>

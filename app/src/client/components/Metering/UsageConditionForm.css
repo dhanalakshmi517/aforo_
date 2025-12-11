@@ -1,5 +1,7 @@
 @import "../Variables/Variables.css";
 
+
+
 .usage-form-container {
   padding: 10px;
 }
@@ -8,28 +10,31 @@
   position: relative;
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-200);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
+  border-radius:var(--border-radius-sm);
+  padding: 12px 16px;           /* slightly tighter padding */
+  margin-bottom: 0px;           /* smaller gap between filter rows */
   width: 100%;
-  max-width: 500px;
+  max-width: 350px;
   box-sizing: border-box;
 }
 
 .filter-box label {
   display:block;
-  margin-bottom:6px;
+  margin-bottom:2px;            /* even tighter label–field gap */
+
   color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-weight:400;
+  font-weight:500;              /* stronger label */
 }
 
 .filter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px; /* header closer to fields */
+  padding-bottom: 6px; /* space above divider */
+  border-bottom: 1px solid var(--color-neutral-200); /* subtle bottom line like design */
 }
 
 .filter-header p {
@@ -38,7 +43,7 @@
 
 /* body/sm/bold */
 font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
+font-size: var(--font-size-sm);
 font-style: normal;
 font-weight: 700;
 line-height: var(--line-height-body-sm); /* 150% */
@@ -56,8 +61,8 @@ line-height: var(--line-height-body-sm); /* 150% */
 
 .condition-row {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;      /* smaller horizontal gap */
+  margin-bottom: 6px;  /* less space under Dimension row */
 }
 
 .condition-field {
@@ -67,8 +72,8 @@ line-height: var(--line-height-body-sm); /* 150% */
 
 .operator-value-group {
   display: flex;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 12px;      /* smaller gap between Operator and Value */
+  margin-top: 8px;  /* bring Operator/Value closer to Dimension */
 }
 
 .operator-field,
@@ -92,12 +97,12 @@ line-height: var(--line-height-body-sm); /* 150% */
   border-radius: var(--border-radius-sm);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  color: var(--color-neutral-1200);
-  background-color: var(--color-neutral-white);
+  color: var(--color-text);
+  background-color: white !important;
 }
 
 .value-field .if-field input:disabled {
-  background-color: var(--color-neutral-100);
+  background-color: var(--color-neutral-white);
   color: var(--color-neutral-600);
   cursor: not-allowed;
 }
@@ -116,13 +121,14 @@ line-height: var(--line-height-body-sm); /* 150% */
 
 .column label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 2px;            /* tighter label–field spacing */
+
   color: var(--color-neutral-1400);
 
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;              /* bolder labels */
   line-height: var(--line-height-body-md);
 }
 
@@ -146,7 +152,7 @@ line-height: var(--line-height-body-sm); /* 150% */
 input[type='text'] {
   width: 100%;
   padding: 6px 10px;
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* less vertical gap between stacked fields */
   border-radius: 6px;
   border: 1px solid var(--color-neutral-200);
   font-size: 14px;
@@ -158,21 +164,20 @@ input[type='text'] {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--color-neutral-800);
+  color: var(--color-neutral-1700);
 
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-xs);
-  margin-bottom: 12px;
   cursor: pointer;
 }
 
 .row {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 10px;
+  flex-wrap: nowrap;
   font-size: var(--font-size-md);
   font-weight: 400;
 }
@@ -184,7 +189,8 @@ input[type='text'] {
 .column select:not([disabled]) {
   width: 100%;
   padding: 6px 10px;
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* less vertical gap between stacked fields */
+
   border-radius: 6px;
   border: 1px solid var(--color-neutral-200);
   background-color: white !important;
@@ -236,6 +242,7 @@ input[type='text'] {
 }
 
 .add-btn {
+  margin-top: 15px;
   padding: 8px 20px;
   background-color: var(--color-primary-000);
   border: 1px solid var(--color-neutral-200);
@@ -252,11 +259,15 @@ input[type='text'] {
 }
 
 .billing-section {
-  margin-top: 20px;
+    width:350px;
+    margin-top:10px;
+
+    
+
 }
 
 .billing-criteria-dropdown {
-  width: 50%;
+  width: 380px;
   padding: 8px 12px;
   font-size: var(--font-size-md);
   border-radius: var(--border-radius-sm);
@@ -269,7 +280,21 @@ input[type='text'] {
 }
 
 .billing-note {
-  font-size: 12px;
-  color: #777;
+  display: inline-flex;              /* icon + text side by side */
+  align-items: flex-start;
+  gap: 4px;                          /* small space between svg and text */
+  color: var(--color-neutral-1000);
+
+  /* body/xs/med */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-xs, 10px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-xs, 16px); /* 160% */
   margin-top: 6px;
+}
+
+.billing-note svg {
+  flex-shrink: 0;                    /* keep icon size fixed */
+  margin-top: 2px;                   /* align visually with first text line */
 }

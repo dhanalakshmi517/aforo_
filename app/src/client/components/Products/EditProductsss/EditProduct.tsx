@@ -812,7 +812,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                               </div>
                               <button
                                 type="button"
-                                className="np-icon-add-btn-small"
+                                className="prod-np-icon-add-btn"
                                 onClick={() => setIsIconPickerOpen(true)}
                                 style={{ marginLeft: 'auto' }}
                               >

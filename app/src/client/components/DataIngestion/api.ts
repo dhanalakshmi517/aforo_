@@ -33,7 +33,7 @@ export const ingestFiles = async (
   files: File[],
   descriptions: string[],
   ingestType: string = 'MANUAL',
-  validateNow: boolean = false
+  validateNow: boolean = true
 ): Promise<FileIngestResponse> => {
   const formData = new FormData();
 

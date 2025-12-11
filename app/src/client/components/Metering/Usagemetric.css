@@ -216,7 +216,7 @@ html, body, #root{
 /* Connector line container */
 .met-np-step__connector {
   position: absolute;
-  top: 24px; /* Start from the bottom of the circle */
+  top: 22px; /* Start from the bottom of the circle */
   left: 11px;
   z-index: 1;
   width: 2px;
@@ -274,7 +274,7 @@ html, body, #root{
 
 .met-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
 .met-np-step__title{
-   color: var(--color-neutral-1400);
+   color: var(--color-neutral-800);
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -284,6 +284,7 @@ font-weight: 400;
 line-height: var(--line-height-body-lg); /* 150% */
 text-align: left;
 margin-bottom: 2px;
+margin-top: -2px
 }
 .met-np-step__desc{ color: var(--color-neutral-1400);
 
@@ -384,7 +385,7 @@ margin-bottom: 2px;
   background:#fff;
   z-index:5;
   margin:4px -24px 18px -24px; /* match NewProduct spacing */
-  padding:0 24px;   
+  padding:0 24px 12px 24px;   
  
 }
 .met-np-section-title{

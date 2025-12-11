@@ -478,7 +478,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                             />
 
                             <div className="cust-np-field">
-                              <label className="customer-visually-hidden">Company Logo</label>
+                              <label className="customer-visually-hidden">Company Logo (Optional)</label>
                               <LogoUploader
                                 logo={companyLogo}
                                 logoUrl={initialLogoUrl}
@@ -502,6 +502,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                               value={companyType}
                               onChange={setCompanyType}
                               error={errors.companyType}
+                              optional
                               options={[
                                 { value: '', label: 'Select Company Type' },
                                 { value: 'INDIVIDUAL', label: 'Individual' },

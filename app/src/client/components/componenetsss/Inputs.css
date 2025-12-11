@@ -39,6 +39,18 @@
   font-weight: 500;
   line-height: var(--line-height-body-md);
   user-select: none;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Optional text styling */
+.if-label .if-optional {
+  color: var(--color-neutral-500);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
 }
 
 /* ---------- DEFAULT (base) ---------- */
@@ -95,8 +107,8 @@
 
 /* ---------- ERROR ---------- */
 .if-control.is-error {
-  border-color: var(--color-error-200) !important;
-  background-color: var(--color-error-100) !important; /* lighter red background */
+  border-color: var(--color-error-300) !important;
+  background-color: var(--color-neutral-white) !important; /* lighter red background */
 }
 
 /* ---------- DISABLED ---------- */

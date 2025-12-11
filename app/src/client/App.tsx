@@ -43,6 +43,9 @@ const Customers = React.lazy(customersLoader) as React.ComponentType<any>;
 const editCustomerLoader = () => import('./components/Customers/EditCustomers/EditCustomer');
 const EditCustomer = React.lazy(editCustomerLoader) as React.ComponentType<any>;
 
+const createCustomerLoader = () => import('./components/Customers/CreateCustomer');
+const CreateCustomer = React.lazy(createCustomerLoader) as React.ComponentType<any>;
+
 const productsLoader = () => import('./components/Products/Products');
 const Products = React.lazy(productsLoader) as React.ComponentType<any>;
 const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
@@ -57,6 +60,8 @@ const meteringLoader = () => import('./components/Metering/Metering');
 const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
 const createUsageMetricLoader = () => import('./components/Metering/CreateUsageMetric');
 const CreateUsageMetric = React.lazy(createUsageMetricLoader) as React.ComponentType<any>;
+const editMetricsLoader = () => import('./components/Metering/EditMetering/EditMetrics');
+const EditMetrics = React.lazy(editMetricsLoader) as React.ComponentType<any>;
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
 const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
 const createSubscriptionLoader = () => import('./components/Subscriptions/CreateSubscription');
@@ -74,6 +79,8 @@ import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
 
 const ratePlansLoader = () => import('./components/Rateplan/RatePlans');
 const RatePlans = React.lazy(ratePlansLoader) as React.ComponentType<any>;
+const createPricePlanLoader = () => import('./components/Rateplan/CreatePricePlan');
+const CreatePricePlan = React.lazy(createPricePlanLoader) as React.ComponentType<any>;
 const editPlanLoader = () => import('./components/Rateplan/EditRatePlan/EditRatePlan');
 const EditPlan = React.lazy(editPlanLoader) as React.ComponentType<any>;
 
@@ -213,14 +220,17 @@ export default function App() {
   // Prefetch heavy modules (also edit screen)
   useEffect(() => {
     customersLoader();
+    createCustomerLoader();
     productsLoader();
     newProductLoader();
     editProductLoader();
     meteringLoader();
     createUsageMetricLoader();
+    editMetricsLoader();
     subscriptionsLoader();
     createSubscriptionLoader();
     ratePlansLoader();
+    createPricePlanLoader();
     editPlanLoader();
     editCustomerLoader();
     dataIngestionLoader();
@@ -591,6 +601,22 @@ export default function App() {
                 }
               />
 
+              {/* Create Price Plan */}
+              <Route
+                path="/get-started/rate-plans/new"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen px-6 py-6 bg-white">
+                      <div className="w-full">
+                        <Suspense fallback={RouteSpinner}>
+                          <CreatePricePlan onClose={() => navigate('/get-started/rate-plans')} />
+                        </Suspense>
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Products list */}
               <Route
                 path="/get-started/products"
@@ -681,6 +707,18 @@ export default function App() {
                 }
               />
 
+              {/* Edit Metric – no sidebar */}
+              <Route
+                path="/get-started/metering/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={RouteSpinner}>
+                      <EditMetrics onClose={() => navigate('/get-started/metering')} />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Subscriptions list */}
               <Route
                 path="/get-started/subscriptions"
@@ -752,6 +790,22 @@ export default function App() {
                       <div className="w-full">
                         <Suspense fallback={RouteSpinner}>
                           <EditCustomer />
+                        </Suspense>
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Create Customer */}
+              <Route
+                path="/get-started/customers/new"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen px-6 py-6 bg-white">
+                      <div className="w-full">
+                        <Suspense fallback={RouteSpinner}>
+                          <CreateCustomer onClose={() => navigate('/get-started/customers')} />
                         </Suspense>
                       </div>
                     </div>
