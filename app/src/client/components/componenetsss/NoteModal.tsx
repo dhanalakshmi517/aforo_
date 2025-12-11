@@ -23,6 +23,7 @@ export type NoteModalProps = {
   onClose: () => void;
   onSave: (value: string) => void;
   onSaveAll: (value: string) => void;
+  totalFiles: number;
 };
 
 const NoteModal: React.FC<NoteModalProps> = ({
@@ -32,12 +33,18 @@ const NoteModal: React.FC<NoteModalProps> = ({
   onClose,
   onSave,
   onSaveAll,
+  totalFiles,
 }) => {
   const [value, setValue] = useState(initialValue);
-  const [isApplyToAllChecked, setIsApplyToAllChecked] = useState(false);
+  const [appliedToAll, setAppliedToAll] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => setValue(initialValue), [initialValue, open]);
+  const hasMultipleFiles = totalFiles > 1;
+
+  useEffect(() => {
+    setValue(initialValue);
+    setAppliedToAll(false);
+  }, [initialValue, open]);
 
   // ESC to close
   useEffect(() => {
@@ -96,28 +103,35 @@ const NoteModal: React.FC<NoteModalProps> = ({
   <div className="di-notes-footer-row">
     <SecondaryButton
       onClick={() => {
+        if (!hasMultipleFiles) return;
         onSaveAll(value);
-        setValue('');
-        setIsApplyToAllChecked(false);
+        setAppliedToAll(true);
       }}
+      disabled={!hasMultipleFiles}
     >
-      {/* <PlusIcon /> */}
       Add same note to all files
     </SecondaryButton>
     <label className="di-notes-checkbox">
       <input
         type="checkbox"
-        checked={isApplyToAllChecked}
-        onChange={(e) => {
-          setIsApplyToAllChecked(e.target.checked);
-          if (e.target.checked) {
-            onSave(value);
-            setValue('');
-          }
+        checked
+        onClick={() => {
+          // Apply note to this single file when the checkbox is pressed
+          onSave(value);
         }}
       />
     </label>
   </div>
+  {appliedToAll && hasMultipleFiles && (
+    <div className="di-notes-success">
+      <span className="di-notes-success-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="10" viewBox="0 0 13 10" fill="none">
+          <path d="M11.6667 1L4.33333 8.33333L1 5" stroke="#389315" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </span>
+      <span className="di-notes-success-text">added note to all files</span>
+    </div>
+  )}
 </div>
 
       </div>

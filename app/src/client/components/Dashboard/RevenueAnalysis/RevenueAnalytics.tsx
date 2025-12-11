@@ -132,12 +132,12 @@ const RevenueAnalytics: React.FC = () => {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#5271FF"
+                  stroke="#6685CC"
                   strokeWidth={3}
                   dot={false}
                   activeDot={{
                     r: 6,
-                    stroke: "#1E3A8A",
+                    stroke: "#6685CC",
                     strokeWidth: 2,
                     fill: "#ffffff",
                   }}

@@ -1,4 +1,5 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import DataHeader from "../componenetsss/DataHeader";
 import NoteModal from "../componenetsss/NoteModal";
 import ProgressBar from "../componenetsss/ProgressBar";
@@ -10,9 +11,12 @@ import EditIconButton from "../componenetsss/EditIconButton";
 import DeleteButton from "../componenetsss/DeleteButton";
 import OutlinedButton from "../componenetsss/OutlinedButton";
 import SmartDuplicateDetection from "../componenetsss/SmartDuplicateDetection";
-import { ingestFiles } from "./api";
+import StatusBadge from "../componenetsss/StatusBadge";
+
+import { ingestFiles, fetchIngestionFiles, IngestionFile } from "./api";
+
 import "./DataIngestionPage.css";
-import IngestionHistory from "./IngestionHistory";
+import IngestionHistory, { HistoryRow } from "./IngestionHistory";
 
 export type FileRow = {
   id: number;
@@ -27,6 +31,7 @@ const DataIngestionPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"ingestion" | "history">("ingestion");
   const [mode, setMode] = useState<"left" | "right">("left"); // 'left' = Manual, 'right' = API
   const [rows, setRows] = useState<FileRow[]>([]);
+  const [historyRows, setHistoryRows] = useState<HistoryRow[]>([]);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [currentNoteFile, setCurrentNoteFile] = useState<FileRow | null>(null);
@@ -36,6 +41,44 @@ const DataIngestionPage: React.FC = () => {
 
   const canIngest = selectedRows.size > 0;
   const allSelected = rows.length > 0 && selectedRows.size === rows.length;
+
+  // Load history from backend when History tab becomes active
+  useEffect(() => {
+    if (activeTab !== 'history') return;
+
+    const loadHistory = async () => {
+      try {
+        const files: IngestionFile[] = await fetchIngestionFiles();
+
+        const mapped: HistoryRow[] = files.map((f) => {
+          let status: HistoryRow["status"];
+          const backendStatus = f.status?.toUpperCase();
+
+          if (backendStatus === 'FAILED') {
+            status = 'Failed';
+          } else if (backendStatus === 'STAGED') {
+            status = 'Staged';
+          } else {
+            status = 'Success';
+          }
+
+          return {
+            id: f.fileId,
+            name: f.fileName,
+            ingestedOn: new Date(f.uploadedAt),
+            status,
+            note: f.description ?? '',
+          };
+        });
+
+        setHistoryRows(mapped);
+      } catch (err) {
+        console.error('Failed to load ingestion history', err);
+      }
+    };
+
+    loadHistory();
+  }, [activeTab]);
 
   const columns = useMemo(
     () => [
@@ -60,7 +103,7 @@ const DataIngestionPage: React.FC = () => {
       { key: "name", label: "File Name" },
       { key: "status", label: "Status" },
       { key: "uploaded", label: "Uploaded On" },
-      { key: "notes", label: " Notes" },
+      { key: "notes", label: " Notes/description" },
       { key: "actions", label: "Actions" },
     ],
     [allSelected, rows.length]
@@ -69,7 +112,10 @@ const DataIngestionPage: React.FC = () => {
   const openPicker = () => fileInputRef.current?.click();
   const addMoreFiles = openPicker;
 
-  const clearAll = () => setRows([]);
+  const clearAll = () => {
+    setRows([]);
+    setSelectedRows(new Set());
+  };
 
   const downloadSampleFile = () => {
     const sampleData = {
@@ -123,7 +169,17 @@ const DataIngestionPage: React.FC = () => {
     e.target.value = "";
   };
 
-  const removeRow = (id: number) => setRows(prev => prev.filter(r => r.id !== id));
+  const removeRow = (indexToRemove: number) => {
+    setRows(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    setSelectedRows(prev => {
+      const next = new Set<number>();
+      prev.forEach((idx) => {
+        if (idx === indexToRemove) return; // removed row
+        next.add(idx > indexToRemove ? idx - 1 : idx);
+      });
+      return next;
+    });
+  };
 
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
@@ -139,8 +195,11 @@ const DataIngestionPage: React.FC = () => {
 
     try {
       setIsLoading(true);
-      // Only get selected rows
-      const selectedFiles = Array.from(selectedRows).map(index => rows[index]);
+      // Only get selected rows (ignore any stale indices defensively)
+      const selectedFiles = Array.from(selectedRows)
+        .map(index => rows[index])
+        .filter((row): row is FileRow => Boolean(row));
+
       console.log('Selected files:', selectedFiles);
 
       const filesToUpload = selectedFiles.map(row => row.file).filter(Boolean) as File[];
@@ -197,7 +256,19 @@ const DataIngestionPage: React.FC = () => {
       console.log('API Response:', result);
 
       if (result.success) {
-        // Remove uploaded files from the ingestion tab (move to history)
+        // Add successful uploads to history
+        setHistoryRows(prev => [
+          ...prev,
+          ...selectedFiles.map(row => ({
+            id: row.id,
+            name: row.name,
+            ingestedOn: row.uploadedAt,
+            status: "Success" as const,
+            note: row.note,
+          })),
+        ]);
+
+        // Remove uploaded files from the ingestion tab
         setRows(prevRows =>
           prevRows.filter((row, index) => !selectedRows.has(index))
         );
@@ -206,6 +277,19 @@ const DataIngestionPage: React.FC = () => {
       } else {
         // Handle upload failure - update status to Failed
         console.error("Failed to ingest files:", result.message);
+
+        // Add failed uploads to history
+        setHistoryRows(prev => [
+          ...prev,
+          ...selectedFiles.map(row => ({
+            id: row.id,
+            name: row.name,
+            ingestedOn: row.uploadedAt,
+            status: "Failed" as const,
+            note: row.note,
+          })),
+        ]);
+
         setRows(prevRows =>
           prevRows.map((row, index) =>
             selectedRows.has(index)
@@ -218,7 +302,22 @@ const DataIngestionPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error during file ingestion:", error);
-      // Update status for failed files
+      // Add failed uploads to history and update status
+      const selectedFiles = Array.from(selectedRows)
+        .map(index => rows[index])
+        .filter((row): row is FileRow => Boolean(row));
+
+      setHistoryRows(prev => [
+        ...prev,
+        ...selectedFiles.map(row => ({
+          id: row.id,
+          name: row.name,
+          ingestedOn: row.uploadedAt,
+          status: "Failed" as const,
+          note: row.note,
+        })),
+      ]);
+
       setRows(prevRows =>
         prevRows.map((row, index) =>
           selectedRows.has(index)
@@ -226,6 +325,7 @@ const DataIngestionPage: React.FC = () => {
             : row
         )
       );
+
       // Clear selection on error
       setSelectedRows(new Set());
     } finally {
@@ -264,9 +364,6 @@ const DataIngestionPage: React.FC = () => {
       minute: "2-digit",
     });
 
-  // Filter out staged files for history view
-  const historyData = rows.filter(row => row.status !== "Staged");
-
   return (
     <div className="check-container">
       <div className="data-page">
@@ -282,6 +379,7 @@ const DataIngestionPage: React.FC = () => {
           onToggleChange={setMode}
           onSettingsClick={() => { }}
           onNotificationsClick={() => { }}
+          showTrailingDivider
         />
         <div className="data-content">
           <div className="data-tabs">
@@ -374,7 +472,7 @@ const DataIngestionPage: React.FC = () => {
                                 <p className="data-empty-hint">
                                   You didn't have any files yet. Click on add files to start Ingestion
                                 </p>
-                                <TertiaryButton onClick={openPicker}>
+                                <TertiaryButton onClick={openPicker} className="data-upload-files-btn">
                                   + Upload files
                                 </TertiaryButton>
                                 <OutlinedButton
@@ -382,8 +480,8 @@ const DataIngestionPage: React.FC = () => {
                                   onClick={downloadSampleFile}
                                   iconLeft={
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                      <path d="M6.75 8.75V0.75M6.75 8.75L3.41667 5.41667M6.75 8.75L10.0833 5.41667M12.75 8.75V11.4167C12.75 11.7703 12.6095 12.1094 12.3595 12.3595C12.1094 12.6095 11.7703 12.75 11.4167 12.75H2.08333C1.72971 12.75 1.39057 12.6095 1.14052 12.3595C0.890476 12.1094 0.75 11.7703 0.75 11.4167V8.75" stroke="#004B80" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
+  <path d="M6.75 8.75V0.75M6.75 8.75L3.41667 5.41667M6.75 8.75L10.0833 5.41667M12.75 8.75V11.4167C12.75 11.7703 12.6095 12.1094 12.3595 12.3595C12.1094 12.6095 11.7703 12.75 11.4167 12.75H2.08333C1.72971 12.75 1.39057 12.6095 1.14052 12.3595C0.890476 12.1094 0.75 11.7703 0.75 11.4167V8.75" stroke="#2A455E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                                   }
                                 />
 
@@ -422,22 +520,24 @@ const DataIngestionPage: React.FC = () => {
                                     </svg>
                                   </span>
                                   <span className="data-file-name" title={r.name}>{r.name}</span>
-                                  <button
-                                    type="button"
-                                    className="data-file-remove"
-                                    aria-label={`Remove ${r.name}`}
-                                    onClick={() => removeRow(r.id)}
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 10 11" fill="none">
-                                      <path d="M9 1.6001L1 9.6001M1 1.6001L9 9.6001" stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  </button>
                                 </span>
                               </td>
 
                               {/* Status column */}
                               <td className="data-td-status">
-                                <span className={`data-status-chip data-status-${r.status.toLowerCase()}`}>{r.status}</span>
+                                <StatusBadge
+                                  label={r.status}
+                                  variant={
+                                    r.status === "Failed"
+                                      ? "failed"
+                                      : r.status === "Staged"
+                                      ? "staged"
+                                      : r.status === "Uploading"
+                                      ? "uploading"
+                                      : "success"
+                                  }
+                                  size="sm"
+                                />
                               </td>
 
                               {/* Uploaded On */}
@@ -478,7 +578,7 @@ const DataIngestionPage: React.FC = () => {
                               {/* Actions column */}
                               <td className="data-td-actions">
                                 <DeleteButton
-                                  onClick={() => removeRow(r.id)}
+                                  onClick={() => removeRow(idx)}
                                   label="Remove"
                                   variant="soft"
                                   customIcon={
@@ -501,18 +601,8 @@ const DataIngestionPage: React.FC = () => {
             )}
 
             {activeTab === 'history' && (
-              <IngestionHistory rows={rows
-                .filter(row => row.status !== 'Staged') // Only include uploaded or failed files
-                .map((row, idx) => ({
-                  id: row.id,
-                  name: row.name,
-                  ingestionType: mode === "left" ? "Manual" : "API",
-                  ingestedOn: row.uploadedAt,
-                  status: row.status === "Uploaded" ? "Success" : "Failed",
-                  note: row.note,
-                }))} />
+              <IngestionHistory rows={historyRows} />
             )}
-
           </div>
 
           <input
@@ -530,6 +620,7 @@ const DataIngestionPage: React.FC = () => {
             initialValue={currentNoteFile?.note || ''}
             onSave={handleSaveNote}
             onSaveAll={handleSaveNoteToAll}
+            totalFiles={rows.length}
             onClose={() => setShowNoteModal(false)}
           />
 

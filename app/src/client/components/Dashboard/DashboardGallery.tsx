@@ -78,6 +78,11 @@ const DashboardGallery: React.FC<Props> = ({ cards = defaultCards, onCardClick }
   };
 
   const handleCardClick = (card: DashboardCard) => {
+    // Do nothing for Product Analysis card
+    if (card.id === "product") {
+      return;
+    }
+
     onCardClick?.(card);
 
     if (card.id === "cust") {
@@ -119,7 +124,12 @@ const DashboardGallery: React.FC<Props> = ({ cards = defaultCards, onCardClick }
             }}
           >
             <div className="dg-media">
-              {!loadedImages.has(c.id) && <div className="dg-skeleton" />}
+              {!loadedImages.has(c.id) && (
+                <div className="dg-skeleton">
+                  <div className="dg-spinner"></div>
+                  <p className="dg-loading-text">Loading ...</p>
+                </div>
+              )}
               <img 
                 className={`dg-img ${loadedImages.has(c.id) ? "dg-img--loaded" : ""}`}
                 src={c.imageSrc} 

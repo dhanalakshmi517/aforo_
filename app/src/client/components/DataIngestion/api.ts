@@ -11,6 +11,29 @@ export interface FileIngestResponse {
   errorData?: any;
 }
 
+// Shape of a file record returned by GET /files
+export interface IngestionFile {
+  fileId: number;
+  organizationId: number;
+  fileName: string;
+  description: string | null;
+  sizeBytes: number;
+  checksum: string;
+  ingestType: string;
+  contentType: string;
+  compression: string;
+  uploadedAt: string;   // ISO timestamp
+  startedAt: string | null;
+  finishedAt: string | null;
+  status: string;       // e.g. STAGED, UPLOADED, FAILED
+  successPercentage: number;
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  duplicateCount: number;
+  errorSamples: any[];
+}
+
 // Centralized error pass-through (kept if you want to redirect on 401 elsewhere)
 const handleApiError = (error: any) => {
   if (error.response?.status === 401) {
@@ -87,4 +110,17 @@ export const ingestFiles = async (
       errorData: error.response?.data
     };
   }
+};
+
+// Fetch all ingestion files for history tab
+export const fetchIngestionFiles = async (): Promise<IngestionFile[]> => {
+  const headers = getAuthHeaders();
+  const endpoint = `${INGESTION_BASE_URL}/files`;
+
+  const response = await axios.get<IngestionFile[]>(endpoint, {
+    headers,
+    withCredentials: false,
+  });
+
+  return response.data ?? [];
 };

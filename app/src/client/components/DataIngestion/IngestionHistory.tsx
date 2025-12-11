@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from "react";
 import "./IngestionHistory.css";
 import dashboardEmpty from "./dataingestion.svg";
+import StatusBadge from "../componenetsss/StatusBadge";
 
 export type HistoryRow = {
   id: number;
   name: string;
   ingestedOn: Date;
-  status: "Success" | "Failed";
+  status: "Success" | "Failed" | "Staged";
   note?: string;
 };
 
@@ -17,7 +18,7 @@ interface Props {
 const IngestionHistory: React.FC<Props> = ({ rows }) => {
   const [query, setQuery] = useState("");
   const [showFilter, setShowFilter] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<"All" | "Success" | "Failed">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Success" | "Failed" | "Staged">("All");
 
   const formatDate = (d: Date) =>
     d.toLocaleString(undefined, {
@@ -52,50 +53,52 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
 
   return (
     <>
-      <div className="data-toolbar">
-        <div className="data-search">
-          <svg
-            aria-hidden
-            className="data-search-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <path
-              d="M11.5 11.5L15 15"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <circle
-              cx="7.25"
-              cy="7.25"
-              r="5.75"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-          </svg>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            className="data-search-input"
-            aria-label="Search ingestion history"
-          />
-          {query && (
-            <button
-              className="data-search-clear"
-              onClick={() => setQuery("")}
-              aria-label="Clear"
+      <div className="history-header-row">
+        <h2 className="data-section-title">Manual Ingestion History</h2>
+        <div className="data-toolbar">
+          <div className="data-search">
+            <svg
+              aria-hidden
+              className="data-search-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
             >
-              ×
-            </button>
-          )}
-        </div>
+              <path
+                d="M11.5 11.5L15 15"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="7.25"
+                cy="7.25"
+                r="5.75"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+            </svg>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              className="data-search-input"
+              aria-label="Search ingestion history"
+            />
+            {query && (
+              <button
+                className="data-search-clear"
+                onClick={() => setQuery("")}
+                aria-label="Clear"
+              >
+                ×
+              </button>
+            )}
+          </div>
 
-        <div className="data-filter">
+          <div className="data-filter">
           <button
             className={`data-filter-btn ${showFilter ? "is-open" : ""}`}
             onClick={() => setShowFilter((s) => !s)}
@@ -125,7 +128,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
               <div className="data-filter-row">
                 <label className="data-filter-label">Status</label>
                 <div className="data-filter-pills">
-                  {(["All", "Success", "Failed"] as const).map((opt) => (
+                  {(["All", "Success", "Failed", "Staged"] as const).map((opt) => (
                     <button
                       key={opt}
                       className={`data-pill ${
@@ -148,6 +151,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
 
@@ -211,11 +215,17 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
                     <td>{r.name}</td>
                     <td>{formatDate(r.ingestedOn)}</td>
                     <td>
-                      <span
-                        className={`data-status-chip data-status-${r.status.toLowerCase()}`}
-                      >
-                        {r.status}
-                      </span>
+                      <StatusBadge
+                        label={r.status}
+                        variant={
+                          r.status === "Failed"
+                            ? "failed"
+                            : r.status === "Staged"
+                            ? "staged"
+                            : "success"
+                        }
+                        size="sm"
+                      />
                     </td>
                     <td>{r.note || "-"}</td>
                   </tr>

@@ -61,9 +61,9 @@ const ProductCreatedSuccess: React.FC<Props> = ({
 
   const effectiveSteps =
     stepsOverride ?? [
-      "•Add billable metrics to track usage.",
-      "•Create rate plans for those metrics.",
-      "•Market & sell to move the product live.",
+      "• Add billable metrics to track usage.",
+      "• Create rate plans for those metrics.",
+      "• Market & sell to move the product live.",
     ];
 
   const effectivePrimaryLabel = primaryLabelOverride ?? "Go to All Products";

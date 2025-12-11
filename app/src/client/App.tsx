@@ -394,6 +394,25 @@ export default function App() {
                         hidden={!showSidebar}
                       />
                       <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                        <DashboardGallery />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Dashboards list */}
+              <Route
+                path="/get-started/dashboards"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <SideNavbar
+                        activeTab={currentTab}
+                        onTabClick={handleSidebarClick}
+                        hidden={!showSidebar}
+                      />
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <DashboardGallery
                           onCardClick={(card) => {
                             if (card.id === 'product') {
@@ -494,6 +513,8 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+
+
 
               {/* Rate Plans list */}
               <Route
@@ -824,7 +845,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '14rem' : '0' }}>
                         <Suspense fallback={RouteSpinner}>
                           <DataIngestionPage />
                         </Suspense>

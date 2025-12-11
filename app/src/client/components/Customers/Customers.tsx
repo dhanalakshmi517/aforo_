@@ -335,8 +335,8 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                     <tr>
                       <th>Company Name </th>
                       <th>Customer </th>
-                      <th>Status </th>
                       <th>Created On </th>
+                      <th>Status </th>
                       <th className="actions-cell">Actions </th>
                     </tr>
                   </thead>
@@ -409,7 +409,10 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                             </div>
                           </td>
 
-                          {/* 3) Status */}
+                          {/* 3) Created On */}
+                          <td>{formatDateStr(customer.createdOn)}</td>
+
+                          {/* 4) Status */}
                           <td>
                             <StatusBadge
                               label={customer.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1).toLowerCase() : "N/A"}
@@ -417,9 +420,6 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                               size="sm"
                             />
                           </td>
-
-                          {/* 4) Created On */}
-                          <td>{formatDateStr(customer.createdOn)}</td>
 
                           {/* 5) Actions */}
                           <td className="actions-cell">

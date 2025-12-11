@@ -1093,11 +1093,10 @@ const CreatePricePlan = React.forwardRef<
                         // Show normal buttons when unlocked
                         <>
                           <div className="rate-np-btn-group rate-np-btn-group--back">
-                            {currentStep > 0 && (
-                              <SecondaryButton type="button" onClick={handleBack}>
-                                Back
-                              </SecondaryButton>
-                            )}
+                            {/* 🔁 Back is now ALWAYS rendered */}
+                            <SecondaryButton type="button" onClick={handleBack}>
+                              Back
+                            </SecondaryButton>
                           </div>
 
                           <div className="rate-np-btn-group rate-np-btn-group--next">

@@ -5,11 +5,10 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;               
-  padding: 8px 16px 0 16px;
   box-sizing: border-box;
   position: relative;
   width: 100%;
-  max-width: 100%;
+  background-color: var(--color-neutral-white);
 }
 
 :root { --data-header-h: 72px; }
@@ -112,6 +111,7 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+
 }
 
 /* ================= Progress Bar Container ================= */
@@ -133,16 +133,19 @@
   flex-direction: column;
   background: var(--color-netral-white);
   border-radius: 12px;
-box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02);
+  box-shadow: var(--shadow-1);
 
   flex: 1;
   min-height: 0;
-  margin-bottom: clamp(8px, 1vh, 16px); /* Responsive gap at bottom */
+  margin-bottom: clamp(8px, 1vh, 14px); /* Responsive gap at bottom */
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
-  width: 100%;
-  max-width: 100%;
+  width:calc(100% - 20px);
+  border:1px solid var(--color-neutral-300);
+  margin-left: 10px;
+
+
 }
 
 .data-table-scroll {
@@ -169,7 +172,6 @@ box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0
   font-size: var(--font-size-lg);
   font-weight: 500;
   line-height: var(--line-height-heading-h6);
-  margin-top: -4px; 
   /* Added negative margin to pull it up slightly */
 }
 
@@ -244,6 +246,9 @@ box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0
   cursor: not-allowed;
 }
 
+.data-upload-files-btn{
+  width:200px;
+}
 /* ================= Table Area ================= */
 /* .data-table-scroll {
   width: 100%;
@@ -269,25 +274,24 @@ box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0
   max-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  /* min-width: 920px; */
-  table-layout: fixed;
+  table-layout: auto; /* flexible columns */
   border: none;
   background-color: var(--color-neutral-white);
   box-sizing: border-box;
 }
 
 .data-table thead th {
-  background: var(--color-neutral-150);
+  background: var(--color-neutral-100);
   color: var(--color-neutral-1000);
   height: 32px auto;
   padding: 6px 16px;
   text-align: left;
 
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
   border: none;
   position: sticky;
   top: 0;
@@ -321,7 +325,6 @@ line-height: var(--line-height-body-md);
 }
 
 .data-td-sno { 
-  width: 80px;
   color: var(--color-neutral-800);
   text-align: left;
   padding: 12px 12px;
@@ -347,8 +350,6 @@ line-height: var(--line-height-body-md);
 
 
 .data-td-name { 
-  min-width: 200px;
-  max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -356,34 +357,32 @@ line-height: var(--line-height-body-md);
 }
 
 .data-td-status { 
-  width: 140px;
   text-align: center;
   padding: 12px 12px;
   vertical-align: middle;
 }
 
-.data-td-status .data-status-chip {
+.data-td-status .badge {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto;
-    margin-left: -15px;
-
 }
 
-.data-td-uploaded { 
-  width: 200px; 
-  color: var(--color-neutral-800);
-  padding: 12px 12px;
+/* Slight left nudge only for Staged StatusBadge in ingestion table */
+.data-td-status .badge[data-variant="staged"] {
+  margin-left: -40px;
 }
 
-.data-td-notes, .data-th-notes { 
-  min-width: 200px;
-  max-width: 300px; /* Set a reasonable max width */
-  padding: 12px 12px;
-  overflow: hidden; /* Prevent content from spilling out */
+.data-td-status .badge[data-variant="failed"] {
+  margin-left: -40px;
+}
+
+.data-td-status .badge[data-variant="uploading"] {
+  margin-left: -40px;
 }
 
 .data-td-actions, .data-th-actions { 
-  width: 120px;
   padding: 12px 12px;
   text-align: center;
   vertical-align: middle;
@@ -518,7 +517,7 @@ line-height: var(--line-height-body-md);
 }
 .data-select-btn svg { color: var(--color-primary-800); }
 .data-empty-hint {
-  margin: 0;
+  margin-bottom: 12px;
   color: var(--color-neutral-1000);
 
   font-family: var(--font-family-primary);
