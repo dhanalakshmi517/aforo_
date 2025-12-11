@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './EditBillable.css'; // Keep this as-is if you are reusing the same styles
 import { fetchBillableMetrics, BillableMetric } from '../api';
+import { setRatePlanData } from '../utils/sessionStorage';
 
 interface Metric {
   id: number;
@@ -49,10 +50,10 @@ const EditBillable: React.FC<EditBillableProps> = ({ productName, selectedMetric
         if (productName) {
           data = data.filter((m: any) => m.productName === productName);
         }
-        
-        const colorClasses = ['bg-orange-100 text-orange-600','bg-purple-100 text-purple-600','bg-yellow-100 text-yellow-700','bg-teal-100 text-teal-700','bg-blue-100 text-blue-700','bg-pink-100 text-pink-600','bg-green-100 text-green-700'];
+
+        const colorClasses = ['bg-orange-100 text-orange-600', 'bg-purple-100 text-purple-600', 'bg-yellow-100 text-yellow-700', 'bg-teal-100 text-teal-700', 'bg-blue-100 text-blue-700', 'bg-pink-100 text-pink-600', 'bg-green-100 text-green-700'];
         const mapped: Metric[] = data.map((m, idx) => ({
-          id: (m as any).metricId ?? (m as any).billableMetricId,
+          id: Number((m as any).metricId ?? (m as any).billableMetricId),
           title: m.metricName,
           subtitle: '',
           iconText: m.metricName.slice(0, 3).toUpperCase(),
@@ -92,7 +93,29 @@ const EditBillable: React.FC<EditBillableProps> = ({ productName, selectedMetric
               name="metric"
               value={metric.id}
               checked={selectedMetricId === metric.id}
-              onChange={() => onSelectMetric(metric.id)}
+              onChange={async () => {
+                onSelectMetric(metric.id);
+
+                // Fetch full metric details for session storage
+                try {
+                  const { fetchBillableMetricById } = await import('../api');
+                  const fullMetric = await fetchBillableMetricById(metric.id);
+
+                  if (fullMetric) {
+                    setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName || metric.title);
+                    setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description || '');
+                    setRatePlanData('BILLABLE_METRIC_UNIT', fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '');
+                    setRatePlanData('BILLABLE_METRIC_AGGREGATION', (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '');
+                  }
+                } catch (error) {
+                  console.error('Failed to fetch full metric details:', error);
+                  // Fallback to basic data
+                  setRatePlanData('BILLABLE_METRIC_NAME', metric.title);
+                  setRatePlanData('BILLABLE_METRIC_DESCRIPTION', metric.subtitle || '');
+                  if (metric.unit) setRatePlanData('BILLABLE_METRIC_UNIT', metric.unit);
+                  if (metric.aggregation) setRatePlanData('BILLABLE_METRIC_AGGREGATION', metric.aggregation);
+                }
+              }}
               className="hidden"
             />
             <RadioIcon active={selectedMetricId === metric.id} />

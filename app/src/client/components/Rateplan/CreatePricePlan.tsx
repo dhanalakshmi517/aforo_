@@ -211,12 +211,14 @@ const CreatePricePlan = React.forwardRef<
       if (!currentStep || currentStep === 0) {
         clearAllRatePlanData();
       }
-      hydrateFormData(draftData);
+      (async () => {
+        await hydrateFormData(draftData);
+      })();
     } else if (isResuming && resumeDraftId) {
       (async () => {
         try {
           const plan = await fetchRatePlanWithDetails(resumeDraftId);
-          hydrateFormData(plan);
+          await hydrateFormData(plan);
         } catch (e) {
           console.error("❌ Failed to hydrate draft", e);
         }
@@ -310,7 +312,7 @@ const CreatePricePlan = React.forwardRef<
     fetchCurrentDataForStep();
   }, [currentStep, ratePlanId, persistentDraftData]);
 
-  const hydrateFormData = (plan: any) => {
+  const hydrateFormData = async (plan: any) => {
     setRatePlanId(plan.ratePlanId);
     setPlanName(plan.ratePlanName ?? "");
     setPlanDescription(plan.description ?? "");
@@ -318,6 +320,28 @@ const CreatePricePlan = React.forwardRef<
     setSelectedProductName(plan.productName ?? plan.product?.productName ?? "");
     setPaymentMethod(plan.paymentType ?? "");
     if (plan.billableMetricId) setSelectedMetricId(Number(plan.billableMetricId));
+
+    // Fetch and store billable metric details for draft
+    if (plan.billableMetricId) {
+      try {
+        const { fetchBillableMetricById } = await import('./api');
+        const fullMetric = await fetchBillableMetricById(Number(plan.billableMetricId));
+        if (fullMetric) {
+          setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName);
+          if ((fullMetric as any).description) {
+            setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description);
+          }
+          if (fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort) {
+            setRatePlanData('BILLABLE_METRIC_UNIT', fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '');
+          }
+          if ((fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType) {
+            setRatePlanData('BILLABLE_METRIC_AGGREGATION', (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch billable metric details:', error);
+      }
+    }
 
     setDraftPricingData(plan);
     setDraftExtrasData(plan);

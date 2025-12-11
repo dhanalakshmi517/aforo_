@@ -189,6 +189,28 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           setRatePlanData('PRODUCT_NAME', plan.productName || plan.product?.productName || '');
         }
 
+        // Fetch and store billable metric details
+        if (plan.billableMetricId) {
+          try {
+            const { fetchBillableMetricById } = await import('../api');
+            const fullMetric = await fetchBillableMetricById(Number(plan.billableMetricId));
+            if (fullMetric) {
+              setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName);
+              if ((fullMetric as any).description) {
+                setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description);
+              }
+              if (fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort) {
+                setRatePlanData('BILLABLE_METRIC_UNIT', fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '');
+              }
+              if ((fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType) {
+                setRatePlanData('BILLABLE_METRIC_AGGREGATION', (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '');
+              }
+            }
+          } catch (error) {
+            console.error('Failed to fetch billable metric details:', error);
+          }
+        }
+
         // PRICING MODEL HINTS IN LOCALSTORAGE
         if (plan.flatFeeAmount)
           localStorage.setItem('pricingModel', 'Flat Fee');
