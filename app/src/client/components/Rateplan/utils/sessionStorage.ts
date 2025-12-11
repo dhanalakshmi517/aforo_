@@ -60,9 +60,9 @@ export const clearCurrentSession = (): void => {
       keysToRemove.push(key);
     }
   }
-  
+
   keysToRemove.forEach(key => localStorage.removeItem(key));
-  
+
   // Clear session storage
   sessionStorage.removeItem('ratePlanSessionId');
   currentSessionId = null;
@@ -72,7 +72,7 @@ export const clearCurrentSession = (): void => {
 export const clearAllRatePlanData = (): void => {
   // Clear current session
   clearCurrentSession();
-  
+
   // Also clear any legacy localStorage keys that might be cached
   const legacyKeys = [
     'pricingModel', 'flatFeeAmount', 'flatFeeApiCalls', 'flatFeeOverage', 'flatFeeGrace',
@@ -80,9 +80,9 @@ export const clearAllRatePlanData = (): void => {
     'volumeTiers', 'volumeOverage', 'volumeGrace',
     'stairTiers', 'stairOverage', 'stairGrace'
   ];
-  
+
   legacyKeys.forEach(key => localStorage.removeItem(key));
-  
+
   // Initialize a fresh session
   initializeSession();
 };
@@ -91,14 +91,14 @@ export const clearAllRatePlanData = (): void => {
 export const clearOldSessions = (): void => {
   const currentSession = getCurrentSessionId();
   const keysToRemove: string[] = [];
-  
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith('rateplan_') && !key.startsWith(`${currentSession}_`)) {
       keysToRemove.push(key);
     }
   }
-  
+
   keysToRemove.forEach(key => localStorage.removeItem(key));
 };
 
@@ -107,49 +107,55 @@ export const RATE_PLAN_KEYS = {
   // Wizard state
   WIZARD_STEP: 'WIZARD_STEP',
   CURRENT_STEP: 'CURRENT_STEP',
-  
+
+  // Plan details
+  PLAN_NAME: 'PLAN_NAME',
+  PLAN_DESCRIPTION: 'PLAN_DESCRIPTION',
+  BILLING_FREQUENCY: 'BILLING_FREQUENCY',
+  PRODUCT_NAME: 'PRODUCT_NAME',
+
   // Billable metric details
   BILLABLE_METRIC_NAME: 'BILLABLE_METRIC_NAME',
   BILLABLE_METRIC_DESCRIPTION: 'BILLABLE_METRIC_DESCRIPTION',
   BILLABLE_METRIC_UNIT: 'BILLABLE_METRIC_UNIT',
   BILLABLE_METRIC_AGGREGATION: 'BILLABLE_METRIC_AGGREGATION',
-  
+
   // Pricing model
   PRICING_MODEL: 'PRICING_MODEL',
-  
+
   // Flat Fee pricing
   FLAT_FEE_AMOUNT: 'FLAT_FEE_AMOUNT',
   FLAT_FEE_API_CALLS: 'FLAT_FEE_API_CALLS',
   FLAT_FEE_OVERAGE: 'FLAT_FEE_OVERAGE',
   FLAT_FEE_GRACE: 'FLAT_FEE_GRACE',
-  
+
   // Usage-based pricing
   USAGE_PER_UNIT_AMOUNT: 'USAGE_PER_UNIT_AMOUNT',
-  
+
   // Tiered pricing
   TIERED_TIERS: 'TIERED_TIERS',
   TIERED_OVERAGE: 'TIERED_OVERAGE',
   TIERED_GRACE: 'TIERED_GRACE',
   TIERED_NO_UPPER_LIMIT: 'TIERED_NO_UPPER_LIMIT',
-  
+
   // Volume pricing
   VOLUME_TIERS: 'VOLUME_TIERS',
   VOLUME_OVERAGE: 'VOLUME_OVERAGE',
   VOLUME_GRACE: 'VOLUME_GRACE',
   VOLUME_NO_UPPER_LIMIT: 'VOLUME_NO_UPPER_LIMIT',
-  
+
   // Stair-step pricing
   STAIR_TIERS: 'STAIR_TIERS',
   STAIR_OVERAGE: 'STAIR_OVERAGE',
   STAIR_GRACE: 'STAIR_GRACE',
   STAIR_NO_UPPER_LIMIT: 'STAIR_NO_UPPER_LIMIT',
-  
+
   // Extras - Setup Fee
   SETUP_FEE: 'SETUP_FEE',
   SETUP_FEE_AMOUNT: 'SETUP_FEE_AMOUNT',
   SETUP_APPLICATION_TIMING: 'SETUP_APPLICATION_TIMING',
   SETUP_INVOICE_DESC: 'SETUP_INVOICE_DESC',
-  
+
   // Extras - Discounts
   DISCOUNT_PERCENT: 'DISCOUNT_PERCENT',
   DISCOUNT_FLAT: 'DISCOUNT_FLAT',
@@ -159,7 +165,7 @@ export const RATE_PLAN_KEYS = {
   ELIGIBILITY: 'ELIGIBILITY',
   DISCOUNT_START: 'DISCOUNT_START',
   DISCOUNT_END: 'DISCOUNT_END',
-  
+
   // Extras - Freemium
   FREEMIUM_UNITS: 'FREEMIUM_UNITS',
   FREEMIUM_TYPE: 'FREEMIUM_TYPE',
@@ -167,7 +173,7 @@ export const RATE_PLAN_KEYS = {
   FREE_TRIAL_DURATION: 'FREE_TRIAL_DURATION',
   FREEMIUM_START: 'FREEMIUM_START',
   FREEMIUM_END: 'FREEMIUM_END',
-  
+
   // Extras - Minimum Commitment
   MINIMUM_USAGE: 'MINIMUM_USAGE',
   MINIMUM_CHARGE: 'MINIMUM_CHARGE',

@@ -4,7 +4,7 @@ import '../index.css';
 import 'flag-icons/css/flag-icons.min.css';
 import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
-import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import SignIn from './components/Landing/SignIn';
 import { ToastProvider } from './components/componenetsss/ToastProvider';
 import TremorProvider from './components/TremorProvider';
@@ -107,6 +107,13 @@ import RevenueAnalyticsDash3 from './components/Dashboard/RevenueAnalysis/Revenu
 import RevenueAnalyticsDash4 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash4';
 import GrowthOpportunities from './components/Dashboard/RevenueAnalysis/GrowthOpportunities';
 import RevenueAnalyticsDash5 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash5';
+
+// Wrapper to extract route params for EditMetrics
+function EditMetricsWrapper() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  return <EditMetrics metricId={id} onClose={() => navigate('/get-started/metering')} />;
+}
 
 export default function App() {
   const navigate = useNavigate();
@@ -449,7 +456,7 @@ export default function App() {
                           <CustomerOverviewStats />
                           <CustomerHealthOverview />
                           <TopAtRiskCustomers />
-                          <TopHealthyCustomers/>
+                          <TopHealthyCustomers />
                           <TopChurningCustomers />
                           <CustomerSegmentation />
                           <NewVsExistingAndIndustries />
@@ -482,10 +489,10 @@ export default function App() {
                         <div style={{ padding: '20px' }}>
                           <RevenueSummaryCards />
                           <RevenueAnalytics />
-                          <RevenuAnalyticsDash1/>
-                          <RevenueAnalyticsDash2/>
-                          <RevenueAnalyticsDash3/>
-                          <GrowthOpportunities/>
+                          <RevenuAnalyticsDash1 />
+                          <RevenueAnalyticsDash2 />
+                          <RevenueAnalyticsDash3 />
+                          <GrowthOpportunities />
                           <RevenueAnalyticsDash4 />
                           <RevenueAnalyticsDash5 />
                         </div>
@@ -713,7 +720,7 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Suspense fallback={RouteSpinner}>
-                      <EditMetrics onClose={() => navigate('/get-started/metering')} />
+                      <EditMetricsWrapper />
                     </Suspense>
                   </ProtectedRoute>
                 }

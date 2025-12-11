@@ -288,11 +288,9 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     if (aIsDraft && !bIsDraft) return -1;
     if (!aIsDraft && bIsDraft) return 1;
 
-    // Priority 2: Within same status group, sort by creation time (newest first)
-    const aTime = new Date((a as any).createdOn || (a as any).createdAt || 0).getTime();
-    const bTime = new Date((b as any).createdOn || (b as any).createdAt || 0).getTime();
-
-    return bTime - aTime; // Descending order (newest first)
+    // Priority 2: Sort by subscriptionId (LIFO - higher IDs = newer = first)
+    // This is more reliable than parsing date strings
+    return b.subscriptionId - a.subscriptionId;
   });
 
   const isEmpty = subscriptions.length === 0;
@@ -361,9 +359,14 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                         className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
                         aria-label={`${cust?.customerName || 'Customer'} logo`}
                         role="img"
+                        style={logo ? {
+                          backgroundImage: `url(${logo})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
+                        } : undefined}
                       >
-                        {logo ? <img className="customer-logo-img" src={logo} alt="" /> : null}
-                        <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>
+                        {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
                       </div>
                       <div className="cust-block">
                         <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
