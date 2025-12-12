@@ -444,7 +444,10 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main
+                        className="flex-1 px-6 py-6 bg-white"
+                        style={{ marginLeft: showSidebar ? '15rem' : '0' }}
+                      >
                         <ProductAnalyticsPage />
                       </main>
                     </div>
@@ -469,9 +472,19 @@ export default function App() {
                           collapsible={true}
                         />
                       </div>
-                      <main className="flex-1 flex flex-col overflow-y-auto" style={{ backgroundColor: "#F9FBFD", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
+                      <main
+                        className="flex-1 flex flex-col"
+                        style={{
+                          backgroundColor: "#F9FBFD",
+                          marginLeft: sidebarHovered ? '15rem' : '80px',
+                          transition: 'margin-left 0.3s ease'
+                        }}
+                      >
                         <CustomerOverviewHeader />
-                        <div className="flex-1" style={{ padding: '20px' }}>
+                        <div
+                          className="flex-1 overflow-y-auto"
+                          style={{ padding: '20px' }}
+                        >
                           <CustomerOverviewStats />
                           <CustomerHealthOverview />
                           <TopAtRiskCustomers />
@@ -503,9 +516,21 @@ export default function App() {
                           collapsible={true}
                         />
                       </div>
-                      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#FBFDFF", marginLeft: sidebarHovered ? '15rem' : '80px', transition: 'margin-left 0.3s ease' }}>
-                        <RevenueAnalysisHeader />
-                        <div style={{ padding: '20px' }}>
+                      <main
+                        className="flex-1 flex flex-col"
+                        style={{
+                          backgroundColor: "#FBFDFF",
+                          marginLeft: sidebarHovered ? '15rem' : '80px',
+                          transition: 'margin-left 0.3s ease'
+                        }}
+                      >
+                        <div className="sticky top-0">
+                          <RevenueAnalysisHeader />
+                        </div>
+                        <div
+                          className="flex-1 overflow-y-auto"
+                          style={{ padding: '20px' }}
+                        >
                           <RevenueSummaryCards />
                           <RevenueAnalytics />
                           <RevenuAnalyticsDash1 />
@@ -521,8 +546,6 @@ export default function App() {
                 }
               />
 
-
-
               {/* Rate Plans list */}
               <Route
                 path="/get-started/rate-plans"
@@ -534,7 +557,10 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-3 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main
+                        className="flex-1 px-3 py-6 bg-white"
+                        style={{ marginLeft: showSidebar ? '15rem' : '0' }}
+                      >
                         <RatePlans
                           ratePlans={ratePlans}
                           setRatePlans={setRatePlans}
@@ -852,7 +878,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '14rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
                         <Suspense fallback={RouteSpinner}>
                           <DataIngestionPage />
                         </Suspense>

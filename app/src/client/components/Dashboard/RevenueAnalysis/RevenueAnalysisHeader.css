@@ -10,6 +10,9 @@
     var(--scale-400, 16px) var(--scale-700, 28px);
   border-bottom: 1px solid var(--border-subtle, #e4e7ec);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* Top row: breadcrumb + icons */

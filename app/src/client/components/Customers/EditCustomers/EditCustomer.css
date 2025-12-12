@@ -562,7 +562,7 @@ font-weight: 500;
 line-height: var(--line-height-body-md);
 }
 
-.edit-np--label {
+.editcust-np--label {
   color: var(--color-neutral-1700);
 font-family: var(--font-family-primary);
 font-size: var(--font-size-md);

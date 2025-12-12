@@ -146,7 +146,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
               />
             </svg>
           </span>
-          <span className="di-notes-success-text">pplying note to all files…</span>
+          <span className="di-notes-success-text">Applying note to all files…</span>
         </>
       ) : appliedToAll ? (
         <>

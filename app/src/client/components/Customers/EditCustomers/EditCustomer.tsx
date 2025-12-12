@@ -450,8 +450,8 @@ const EditCustomer: React.FC = () => {
               </div>
 
             
-              <div className="edit-np-form-group">
-                <label className="edit-np-label">Company Logo</label>
+              <div className="editcust-np-form-group">
+                <label className="editcust-np-label">Company Logo</label>
                 <LogoUploader
                   logo={companyLogo}
                   logoUrl={companyLogoUrl}
@@ -460,9 +460,8 @@ const EditCustomer: React.FC = () => {
                 />
               </div>
               <div className="edit-np-form-group">
-                <label className="edit-np-label">Customer Name</label>
                 <InputField
-                  label=""
+                  label="Customer Name"
                   value={customerName}
                   placeholder="Enter customer name"
                   onChange={val => {
@@ -488,9 +487,8 @@ const EditCustomer: React.FC = () => {
 
             <div className="edit-np-form-row">
               <div className="edit-np-form-group">
-                <label className="edit-np-label">Company Type</label>
                 <SelectField
-                  label=""
+                  label="Comapny Type"
                   value={companyType}
                   onChange={val => {
                     setCompanyType(val);
