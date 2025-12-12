@@ -21,52 +21,38 @@ import SecondaryButton from '../../componenetsss/SecondaryButton';
 
 import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
 
-/* ---------- helpers copied from Customers list ---------- */
-const FILE_HOST = 'http://44.201.19.187:8081/';
+/* ---------- helpers for logo fetching (optimized) ---------- */
+const FILE_HOST = 'http://44.201.19.187:8081';
 
 const absolutizeUpload = (path: string) => {
   const clean = path.replace(/\\/g, '/').trim();
   if (/^https?:\/\//i.test(clean)) return clean;
-  return `${FILE_HOST}${clean.startsWith('/') ? '' : '/'}${clean}`;
+  const separator = clean.startsWith('/') ? '' : '/';
+  return `${FILE_HOST}${separator}${clean}`;
 };
 
+/**
+ * Resolve logo URL for display - optimized version
+ * Goes straight to authenticated fetch since direct URLs require auth (401)
+ */
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
   const url = absolutizeUpload(uploadPath);
-  console.log('EditCustomer - Resolving logo URL:', url);
 
-  // First try: Direct URL
-  try {
-    const directUrl = url;
-    console.log('EditCustomer - Trying direct URL:', directUrl);
-    const testRes = await fetch(directUrl, {
-      method: 'HEAD',
-      cache: 'no-store',
-    });
-    if (testRes.ok) {
-      console.log('EditCustomer - Direct URL works, using it:', directUrl);
-      return directUrl;
-    }
-  } catch (error) {
-    console.log('EditCustomer - Direct URL failed, trying authenticated fetch:', error);
-  }
-
-  // Second try: authenticated fetch
+  // Skip direct URL check - it always fails with 401
+  // Go straight to authenticated fetch
   try {
     const res = await fetch(url, {
       method: 'GET',
       headers: { ...getAuthHeaders(), Accept: 'image/*' },
       cache: 'no-store',
     });
-    console.log('EditCustomer - Authenticated fetch response:', res.status, res.statusText);
     if (!res.ok) {
-      console.error('EditCustomer - Authenticated fetch failed:', res.status, res.statusText);
+      console.error('EditCustomer - Logo fetch failed:', res.status);
       return null;
     }
     const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    console.log('EditCustomer - Logo blob URL created:', objectUrl);
-    return objectUrl;
+    return URL.createObjectURL(blob);
   } catch (error) {
     console.error('EditCustomer - Logo fetch error:', error);
     return null;
@@ -122,27 +108,10 @@ const EditCustomer: React.FC = () => {
     if (!id) return;
     setLoading(true);
     getCustomer(id)
-      .then(async (data: Customer) => {
+      .then((data: Customer) => {
         setCompanyName(data.companyName ?? '');
         setCustomerName(data.customerName ?? '');
         setCompanyType(data.companyType ?? '');
-
-        const rawPath =
-          (data as any).companyLogoUrl ??
-          (data as any).logoUrl ??
-          (data as any).logo ??
-          null;
-
-        const blobUrl = await resolveLogoSrc(rawPath ?? undefined);
-        if (blobUrl) {
-          if (lastBlobUrlRef.current && lastBlobUrlRef.current.startsWith('blob:')) {
-            URL.revokeObjectURL(lastBlobUrlRef.current);
-          }
-          lastBlobUrlRef.current = blobUrl;
-          setCompanyLogoUrl(blobUrl);
-        } else {
-          setCompanyLogoUrl(null);
-        }
 
         const account: AccountDetailsData = {
           phoneNumber: (data as any).phoneNumber ?? '',
@@ -170,6 +139,25 @@ const EditCustomer: React.FC = () => {
           companyType: data.companyType ?? '',
           accountDetails: account,
         });
+
+        // Load logo asynchronously (don't block form display)
+        const rawPath =
+          (data as any).companyLogoUrl ??
+          (data as any).logoUrl ??
+          (data as any).logo ??
+          null;
+
+        if (rawPath) {
+          resolveLogoSrc(rawPath).then(blobUrl => {
+            if (blobUrl) {
+              if (lastBlobUrlRef.current && lastBlobUrlRef.current.startsWith('blob:')) {
+                URL.revokeObjectURL(lastBlobUrlRef.current);
+              }
+              lastBlobUrlRef.current = blobUrl;
+              setCompanyLogoUrl(blobUrl);
+            }
+          });
+        }
       })
       .catch((err: unknown) => console.error('Failed to fetch customer', err))
       .finally(() => {
@@ -230,8 +218,8 @@ const EditCustomer: React.FC = () => {
     const tab = (first === 'customer'
       ? 'details'
       : first === 'billing'
-      ? 'account'
-      : 'review') as ActiveTab;
+        ? 'account'
+        : 'review') as ActiveTab;
     setActiveTab(tab);
   };
 
@@ -345,6 +333,11 @@ const EditCustomer: React.FC = () => {
   const hasChanges = () => {
     if (!originalData) return false;
 
+    // Check if user uploaded a new logo
+    if (companyLogo !== null) {
+      return true;
+    }
+
     if (
       originalData.customerName !== customerName ||
       originalData.companyName !== companyName ||
@@ -386,7 +379,16 @@ const EditCustomer: React.FC = () => {
 
   // ------- Logo handlers -------
   const handleLogoChange = async (file: File | null) => {
-    if (!id || !file) return;
+    if (!id) return;
+
+    // Handle removal case - when LogoUploader calls onChange(null)
+    if (!file) {
+      // Clear local file state - the onRemove callback handles server deletion
+      setCompanyLogo(null);
+      return;
+    }
+
+    // Handle new file upload
     try {
       await updateCustomerLogo(id, file);
       setCompanyLogo(file);
@@ -449,7 +451,7 @@ const EditCustomer: React.FC = () => {
                 />
               </div>
 
-            
+
               <div className="editcust-np-form-group">
                 <label className="editcust-np-label">Company Logo</label>
                 <LogoUploader

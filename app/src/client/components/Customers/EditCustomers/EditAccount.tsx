@@ -67,7 +67,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
 
   // Fetch country list once
   useEffect(() => {
-    fetch('http://43.206.110.213:8081/v1/api/meta/countries')
+    fetch('http://44.201.19.187:8081/v1/api/meta/countries')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -133,12 +133,12 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
     <button type="button" className="checkbox-btn" onClick={onToggle} aria-label="Toggle same as billing">
       {checked ? (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#2D7CA4">
-          <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#0066cc" strokeWidth="1.2"/>
+          <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#0066cc" strokeWidth="1.2" />
           <path d="M8 12.5L10.5 15L16 9.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ) : (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2"/>
+          <path d="M4 12C4 8.22876 4 6.34314 5.17158 5.17158C6.34314 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17158C20 6.34314 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34314 20 5.17158 18.8284C4 17.6569 4 15.7712 4 12Z" stroke="#E6E5E6" strokeWidth="1.2" />
         </svg>
       )}
     </button>
@@ -173,7 +173,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
     if (newVal) {
       setCustomerAddress({ ...billingAddress });
       // clear customer address errors when disabled
-      ['line1','line2','city','state','zip','country'].forEach((f) => clearErr(`customer_${f}`));
+      ['line1', 'line2', 'city', 'state', 'zip', 'country'].forEach((f) => clearErr(`customer_${f}`));
     } else {
       setCustomerAddress({ line1: '', line2: '', city: '', state: '', zip: '', country: '' });
     }
@@ -210,7 +210,6 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           value={primaryEmail}
           placeholder="e.g., johndoe@example.com"
           type="email"
-          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
           onChange={(val) => {
             setPrimaryEmail(val);
             if (!val.trim()) setErr('primaryEmail', 'This is a required field');
@@ -234,7 +233,6 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
               type="email"
               placeholder="e.g., johndoe@example.com"
               value={email}
-              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
               onChange={(val) => updateAdditionalEmail(idx, val)}
             />
           </div>
@@ -418,7 +416,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
         </div>
       </div>
     </div>
- );
+  );
 };
 
 export default EditAccount;
