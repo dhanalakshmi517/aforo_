@@ -139,10 +139,10 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
       if (!metricName.trim()) e.metricName = 'Metric name is required';
       if (!selectedProductId) e.product = 'Product is required';
       if (!unitOfMeasure) e.unitOfMeasure = 'Unit of Measure is required';
-      if (!aggregationFunction) e.aggregationFunction = 'Aggregation Function is required';
+      // Note: Aggregation Function and Aggregation Window are optional
     }
     if (index === 2) {
-      if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !aggregationFunction) {
+      if (!metricName.trim() || !selectedProductId || !unitOfMeasure) {
         e.form = 'Please fill all required fields';
       }
     }
@@ -347,7 +347,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
           </div>
 
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Aggregation Function</label>
+            <label className="editmet-np-label">Aggregation Function (optional)</label>
             <EditAggregationFunction
               productType={selectedProductType}
               unitOfMeasure={unitOfMeasure}
@@ -359,19 +359,18 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                   setErrors(rest);
                 }
               }}
+              optional={true}
             />
-            {errors.aggregationFunction && (
-              <div className="npmet-error-message">{errors.aggregationFunction}</div>
-            )}
           </div>
 
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Aggregation Window</label>
+            <label className="editmet-np-label">Aggregation Window (optional)</label>
             <EditAggregationWindow
               productType={selectedProductType}
               unitOfMeasure={unitOfMeasure}
               value={aggregationWindow}
               onChange={setAggregationWindow}
+              optional={true}
             />
           </div>
         </div>
@@ -396,9 +395,8 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                     <button
                       key={step.id}
                       type="button"
-                      className={`editmet-np-step ${isActive ? 'active' : ''} ${
-                        isCompleted ? 'completed' : ''
-                      }`.trim()}
+                      className={`editmet-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''
+                        }`.trim()}
                       onClick={() => gotoStep(index)}
                     >
                       <span className="editmet-np-step__title">{step.title}</span>

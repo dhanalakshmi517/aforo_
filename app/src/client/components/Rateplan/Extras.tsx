@@ -20,6 +20,7 @@ interface ExtrasProps {
   noUpperLimit: boolean;
   draftData?: any; // Draft data from backend
   locked?: boolean;
+  onFieldChange?: () => void;
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -44,7 +45,7 @@ const uiToApiFreemium = (raw: string | undefined | null): APIFreemiumType => {
   return 'FREE_UNITS';
 };
 
-const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, locked = false }, ref) => {
+const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, locked = false, onFieldChange }, ref) => {
   // ✅ Optional guarded clear: only when switching between two *different* valid plans
   const prevRatePlanIdRef = useRef<number | null>(null);
 

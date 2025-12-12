@@ -203,6 +203,17 @@ const CreatePricePlan = React.forwardRef<
     };
   }, [currentStep]);
 
+  // ✅ Reset saved state when navigating between steps
+  // This ensures "Saved as Draft" button resets on each step
+  const prevStepRef = useRef<number>(currentStep);
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      // Step changed, reset the saved state
+      onFieldChange?.();
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep, onFieldChange]);
+
   useEffect(() => {
     if (draftData) {
       // Don't clear session storage when loading draft data for existing session
@@ -1011,11 +1022,12 @@ const CreatePricePlan = React.forwardRef<
             draftData={draftPricingData}
             isFreshCreation={isFreshCreation}
             locked={isStep2Locked}
+            onFieldChange={onFieldChange}
           />
         );
       case 3: {
         const extrasData = persistentDraftData || draftExtrasData || currentStepData;
-        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={extrasData} locked={isStep3Locked} />;
+        return <Extras ref={extrasRef} ratePlanId={ratePlanId} noUpperLimit={false} draftData={extrasData} locked={isStep3Locked} onFieldChange={onFieldChange} />;
       }
       case 4: {
         const planDetails = {
