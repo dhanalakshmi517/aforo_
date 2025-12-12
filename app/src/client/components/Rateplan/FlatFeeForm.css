@@ -15,6 +15,7 @@
   border: 1px solid var(--color-neutral-200);
   margin-top: 30px;
   font-family: var(--font-family-primary);
+  margin-left: 0;
 }
 
 /* Left side (fields) */
@@ -42,7 +43,7 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   line-height: var(--line-height-body-md);
   display: flex;
   flex-direction: column;
@@ -77,7 +78,9 @@
 .form-section input:focus,
 .ff-label input:focus {
   outline: none;
-  border: 2px solid var(--primary-primary-6, #7C3AED);
+  border: 1px solid var(--color-primary-800);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+
 }
 
 /* Placeholder look */
@@ -85,8 +88,7 @@
 .ff-label input::placeholder {
   color: var(--color-text-placeholder, #B3B9BF);
   font-family: var(--font-family-primary);
-  font-size: 16px;
-  line-height: 24px;
+  font-size:var(--font-size-md);
   font-weight: 400;
   opacity: .9;
 }
@@ -107,50 +109,96 @@
 .example-section {
   flex: 1 1 40%;
   min-width: 260px;
-  background: var(--color-info-100);
+  background: #F5F9FF;
   border-radius: var(--border-radius-lg);
-  padding: 16px;
+  padding: 16px 18px;
   border: 1px solid var(--color-neutral-200);
   width: 410px;
   height: 200px;
 }
 
-.example-section h4 {
+.example-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.example-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  background:var(--color-primary-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.example-header-text h4 {
   margin: 0;
-  color: var(--color-neutral-700);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: normal;
-  font-weight: 300;
-  line-height: var(--line-height-body-lg);
+  color: var(--color-neutral-900);
+
+/* body/xs/thin */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: italic;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
+  text-transform: uppercase;
 }
 
 .linklike {
   background: none;
   border: none;
-  color: var(--color-primary-900);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-weight: 400;
+ color: var(--color-neutral-900);
+
+/* body/lg/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
 }
 
-.consumer-note {
-  margin-top: 1px;
-  margin-bottom: 20px;
+.example-main {
+  margin: 4px 0 10px 0;
   color: var(--color-neutral-800);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-lg);
-  font-style: italic;
-  font-weight: 200;
-  line-height: var(--line-height-body-lg);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+}
+
+.example-main strong {
+   color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+}
+
+.consumer-note {
+  margin: 0;
+  color: var(--color-neutral-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-sm);
 }
 
 .note-title {
-  font-weight: bold;
-  font-style: normal;
+color: var(--color-primary-700);
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
 }
 
 /* Responsive parity with UsageBased */

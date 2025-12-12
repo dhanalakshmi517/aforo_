@@ -90,7 +90,7 @@ line-height: var(--line-height-heading-h4);}
   }
 
     /* right side */
-  .af-topbar__right{ display:flex; align-items:center; gap:8px; }
+  .af-topbar__right{ display:flex; align-items:center; gap:2px; }
 
   /* Icon buttons */
   .af-topbar__icon-btn {
@@ -105,12 +105,10 @@ line-height: var(--line-height-heading-h4);}
     cursor: pointer;
   }
 
-  /* Add margin to first icon button to create gap from action buttons */
+  /* No extra margin between the two icon buttons */
   .af-topbar__icon-btn:first-of-type {
-    margin-right: 16px;
+    margin-right: 0;
   }
-
-  
 
   .af-topbar__icon-btn:active:not(:disabled) {
     border-color: var(--color-neutral-400);

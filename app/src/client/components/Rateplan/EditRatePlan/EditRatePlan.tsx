@@ -1,12 +1,15 @@
-import * as React from 'react';
-import { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../../componenetsss/TopBar';
-import EditPopup from '../../componenetsss/EditPopUp';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
+import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
+import { useToast } from '../../componenetsss/ToastProvider';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
+import EditPopup from '../../componenetsss/EditPopUp';
+import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
+import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
 
 import EditBillable from './EditBillable';
 import EditPricing from './EditPricing';
@@ -34,51 +37,41 @@ interface EditRatePlanProps {
 }
 
 const steps = [
-  { id: 1, title: 'Plan Details', desc: 'Define the basic information and structure of your plan.' },
-  { id: 2, title: 'Select Billable Metric', desc: 'Select or define a Billable Metric' },
-  { id: 3, title: 'Pricing Model Setup', desc: 'Configure how pricing will work for this plan.' },
-  { id: 4, title: 'Extras', desc: 'Add optional features or benefits to enhance your plan.' },
-  { id: 5, title: 'Review & Confirm', desc: 'Check and finalize details.' },
+  { id: 1, title: 'Plan Details' },
+  { id: 2, title: 'Select Billable Metric' },
+  { id: 3, title: 'Pricing Model Setup' },
+  { id: 4, title: 'Extras' },
+  { id: 5, title: 'Review & Confirm' },
 ];
 
 const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
 
   const raw = (location.state || {}) as any;
-  const ratePlanId: number | undefined = raw?.plan?.ratePlanId ?? raw.ratePlanId;
+  const ratePlanId: number | undefined = raw?.plan?.ratePlanId ?? raw?.ratePlanId;
 
   const initial = useMemo(() => {
     const p = raw?.plan ?? raw ?? {};
     return {
-      ratePlanName:
-        p.ratePlanName ??
-        raw.ratePlanName ??
-        '',
-      description:
-        p.description ??
-        raw.description ??
-        '',
-      billingFrequency:
-        p.billingFrequency ??
-        raw.billingFrequency ??
-        '',
+      ratePlanName: p.ratePlanName ?? raw?.ratePlanName ?? '',
+      description: p.description ?? raw?.description ?? '',
+      billingFrequency: p.billingFrequency ?? raw?.billingFrequency ?? '',
       productName:
         p.productName ??
         p.product?.productName ??
-        raw.productName ??
-        raw.product?.productName ??
+        raw?.productName ??
+        raw?.product?.productName ??
         '',
-      paymentType:
-        p.paymentType ??
-        raw.paymentType ??
-        '',
+      paymentType: p.paymentType ?? raw?.paymentType ?? '',
+      billableMetricId: p.billableMetricId ?? raw?.billableMetricId ?? null,
     };
   }, [raw]);
 
-  const exitToList = () =>
-    onClose ? onClose() : navigate('/get-started/rate-plans');
+  const exitToList = () => (onClose ? onClose() : navigate('/get-started/rate-plans'));
 
+  // rails / tabs
   const [currentStep, setCurrentStep] = useState(0);
   const activeTab: ActiveTab =
     currentStep === 0
@@ -91,137 +84,130 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             ? 'extras'
             : 'review';
 
+  // TopBar draft state + modals
+  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
+  const [showEditPopup, setShowEditPopup] = useState(false);
+
+  // form state
   const [loading, setLoading] = useState(false);
 
-  const [ratePlanName, setRatePlanName] = useState<string>(
-    initial.ratePlanName,
-  );
+  const [ratePlanName, setRatePlanName] = useState<string>(initial.ratePlanName);
   const [description, setDescription] = useState<string>(initial.description);
-  const [billingFrequency, setBillingFrequency] = useState<string>(
-    initial.billingFrequency,
-  );
-  const [selectedProductName, setSelectedProductName] = useState<string>(
-    initial.productName,
-  );
+  const [billingFrequency, setBillingFrequency] = useState<string>(initial.billingFrequency);
+  const [selectedProductName, setSelectedProductName] = useState<string>(initial.productName);
   const [paymentType, setPaymentType] = useState<string>(initial.paymentType);
+  const [selectedMetricId, setSelectedMetricId] = useState<number | null>(
+    initial.billableMetricId ? Number(initial.billableMetricId) : null,
+  );
 
-  const [products, setProducts] = useState<
-    Array<{ productId: number; productName: string }>
-  >([]);
+  const [products, setProducts] = useState<Array<{ productId: number; productName: string }>>([]);
   const [productError, setProductError] = useState<string>('');
-  const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [draftData, setDraftData] = useState<any>(null);
 
-  // CHANGE DETECTION
-  const originalDataRef = useRef<typeof initial | null>(null);
-
-  const hasPendingChanges = () => {
-    const orig = originalDataRef.current;
-    if (!orig) return false;
-
-    const currentData = {
-      ratePlanName,
-      description,
-      billingFrequency,
-      productName: selectedProductName,
-      paymentType,
-    };
-
-    return JSON.stringify(orig) !== JSON.stringify(currentData);
-  };
-
-  // Save-as-draft modal
-  const [showSaveModal, setShowSaveModal] = useState(false);
-
   // child savers
-  const [savePricingFn, setSavePricingFn] =
-    useState<null | (() => Promise<void>)>(null);
-  const [saveExtrasFn, setSaveExtrasFn] =
-    useState<null | (() => Promise<void>)>(null);
+  const [savePricingFn, setSavePricingFn] = useState<null | (() => Promise<void>)>(null);
+  const [saveExtrasFn, setSaveExtrasFn] = useState<null | (() => Promise<void>)>(null);
 
+  // originals for diff-only updates
+  const [originalValues, setOriginalValues] = useState<any>({});
+  const originalValuesRef = useRef<any>({});
+  useEffect(() => {
+    originalValuesRef.current = originalValues;
+  }, [originalValues]);
+
+  // fetch products
   useEffect(() => {
     document.body.classList.add('edit-product-page');
 
-    (async () => {
-      try {
-        const prods = await fetchProducts();
+    fetchProducts()
+      .then((prods: any[]) => {
         setProducts(
-          prods.map((p: any) => ({
+          (prods || []).map(p => ({
             productId: Number(p.productId),
             productName: p.productName,
           })),
         );
-      } catch {
-        setProductError('Failed to load products');
-      }
-    })();
+      })
+      .catch(() => setProductError('Failed to load products'));
 
-    const loadPlan = async () => {
-      if (!ratePlanId) return;
+    return () => {
+      document.body.classList.remove('edit-product-page');
+    };
+  }, []);
+
+  // prefill plan details
+  useEffect(() => {
+    if (!ratePlanId) return;
+
+    (async () => {
       try {
+        setLoading(true);
         const plan = await fetchRatePlanWithDetails(ratePlanId);
-        setRatePlanName(plan.ratePlanName || '');
-        setDescription(plan.description || '');
-        setBillingFrequency(plan.billingFrequency || '');
-        setPaymentType(plan.paymentType || '');
-        setSelectedProductName(
-          plan.productName || plan.product?.productName || '',
-        );
-        if (plan.billableMetricId)
-          setSelectedMetricId(Number(plan.billableMetricId));
-        setDraftData(plan);
 
-        originalDataRef.current = {
+        const productNameResolved = plan.productName || plan.product?.productName || '';
+        const original = {
           ratePlanName: plan.ratePlanName || '',
           description: plan.description || '',
           billingFrequency: plan.billingFrequency || '',
-          productName: plan.productName || plan.product?.productName || '',
+          productName: productNameResolved,
           paymentType: plan.paymentType || '',
+          billableMetricId: plan.billableMetricId ? Number(plan.billableMetricId) : null,
         };
 
-        // Store plan details in session storage for EditReview
-        if (plan.ratePlanName) setRatePlanData('PLAN_NAME', plan.ratePlanName);
-        if (plan.description) setRatePlanData('PLAN_DESCRIPTION', plan.description);
-        if (plan.billingFrequency) setRatePlanData('BILLING_FREQUENCY', plan.billingFrequency);
-        if (plan.productName || plan.product?.productName) {
-          setRatePlanData('PRODUCT_NAME', plan.productName || plan.product?.productName || '');
-        }
+        setOriginalValues(original);
 
-        // Fetch and store billable metric details
-        if (plan.billableMetricId) {
+        setRatePlanName(original.ratePlanName);
+        setDescription(original.description);
+        setBillingFrequency(original.billingFrequency);
+        setSelectedProductName(original.productName);
+        setPaymentType(original.paymentType);
+        setSelectedMetricId(original.billableMetricId);
+
+        setDraftData(plan);
+
+        // session storage for review
+        if (original.ratePlanName) setRatePlanData('PLAN_NAME', original.ratePlanName);
+        if (original.description) setRatePlanData('PLAN_DESCRIPTION', original.description);
+        if (original.billingFrequency) setRatePlanData('BILLING_FREQUENCY', original.billingFrequency);
+        if (original.productName) setRatePlanData('PRODUCT_NAME', original.productName);
+
+        // billable metric details -> session storage
+        if (original.billableMetricId) {
           try {
             const { fetchBillableMetricById } = await import('../api');
-            const fullMetric = await fetchBillableMetricById(Number(plan.billableMetricId));
+            const fullMetric = await fetchBillableMetricById(original.billableMetricId);
             if (fullMetric) {
               setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName);
               if ((fullMetric as any).description) {
                 setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description);
               }
               if (fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort) {
-                setRatePlanData('BILLABLE_METRIC_UNIT', fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '');
+                setRatePlanData(
+                  'BILLABLE_METRIC_UNIT',
+                  fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '',
+                );
               }
               if ((fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType) {
-                setRatePlanData('BILLABLE_METRIC_AGGREGATION', (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '');
+                setRatePlanData(
+                  'BILLABLE_METRIC_AGGREGATION',
+                  (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '',
+                );
               }
             }
-          } catch (error) {
-            console.error('Failed to fetch billable metric details:', error);
+          } catch (e) {
+            console.error('Failed to fetch billable metric details:', e);
           }
         }
 
-        // PRICING MODEL HINTS IN LOCALSTORAGE
-        if (plan.flatFeeAmount)
-          localStorage.setItem('pricingModel', 'Flat Fee');
-        else if (plan.volumePricing)
-          localStorage.setItem('pricingModel', 'Volume-Based');
-        else if (plan.tieredPricing)
-          localStorage.setItem('pricingModel', 'Tiered Pricing');
-        else if (plan.stairStepPricing)
-          localStorage.setItem('pricingModel', 'Stairstep');
-        else if (plan.perUnitAmount)
-          localStorage.setItem('pricingModel', 'Usage-Based');
+        // pricing model hints for EditPricing/EditExtras (keep your existing behavior)
+        if (plan.flatFeeAmount) localStorage.setItem('pricingModel', 'Flat Fee');
+        else if (plan.volumePricing) localStorage.setItem('pricingModel', 'Volume-Based');
+        else if (plan.tieredPricing) localStorage.setItem('pricingModel', 'Tiered Pricing');
+        else if (plan.stairStepPricing) localStorage.setItem('pricingModel', 'Stairstep');
+        else if (plan.perUnitAmount) localStorage.setItem('pricingModel', 'Usage-Based');
 
         if (plan.volumePricing?.tiers) {
           localStorage.setItem(
@@ -234,15 +220,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
               })),
             ),
           );
-          localStorage.setItem(
-            'volumeOverage',
-            String(plan.volumePricing.overageUnitRate || ''),
-          );
-          localStorage.setItem(
-            'volumeGrace',
-            String(plan.volumePricing.graceBuffer || ''),
-          );
+          localStorage.setItem('volumeOverage', String(plan.volumePricing.overageUnitRate || ''));
+          localStorage.setItem('volumeGrace', String(plan.volumePricing.graceBuffer || ''));
         }
+
         if (plan.tieredPricing?.tiers) {
           localStorage.setItem(
             'tieredTiers',
@@ -254,15 +235,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
               })),
             ),
           );
-          localStorage.setItem(
-            'tieredOverage',
-            String(plan.tieredPricing.overageUnitRate || ''),
-          );
-          localStorage.setItem(
-            'tieredGrace',
-            String(plan.tieredPricing.graceBuffer || ''),
-          );
+          localStorage.setItem('tieredOverage', String(plan.tieredPricing.overageUnitRate || ''));
+          localStorage.setItem('tieredGrace', String(plan.tieredPricing.graceBuffer || ''));
         }
+
         if (plan.stairStepPricing?.tiers) {
           localStorage.setItem(
             'stairTiers',
@@ -274,66 +250,36 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
               })),
             ),
           );
-          localStorage.setItem(
-            'stairOverage',
-            String(plan.stairStepPricing.overageUnitRate || ''),
-          );
-          localStorage.setItem(
-            'stairGrace',
-            String(plan.stairStepPricing.graceBuffer || ''),
-          );
+          localStorage.setItem('stairOverage', String(plan.stairStepPricing.overageUnitRate || ''));
+          localStorage.setItem('stairGrace', String(plan.stairStepPricing.graceBuffer || ''));
         }
-        if (plan.perUnitAmount)
-          localStorage.setItem('usagePerUnit', String(plan.perUnitAmount));
+
+        if (plan.perUnitAmount) localStorage.setItem('usagePerUnit', String(plan.perUnitAmount));
 
         if (plan.setupFee) {
           localStorage.setItem('setupFee', String(plan.setupFee.setupFee));
-          localStorage.setItem(
-            'setupApplicationTiming',
-            String(plan.setupFee.applicationTiming),
-          );
-          localStorage.setItem(
-            'setupInvoiceDesc',
-            plan.setupFee.invoiceDescription || '',
-          );
+          localStorage.setItem('setupApplicationTiming', String(plan.setupFee.applicationTiming));
+          localStorage.setItem('setupInvoiceDesc', plan.setupFee.invoiceDescription || '');
         }
+
         if (plan.minimumCommitment) {
-          localStorage.setItem(
-            'minUsage',
-            String(plan.minimumCommitment.minimumUsage || ''),
-          );
-          localStorage.setItem(
-            'minCharge',
-            String(plan.minimumCommitment.minimumCharge || ''),
-          );
+          localStorage.setItem('minUsage', String(plan.minimumCommitment.minimumUsage || ''));
+          localStorage.setItem('minCharge', String(plan.minimumCommitment.minimumCharge || ''));
         }
+
         if (plan.discount) {
           localStorage.setItem('discountType', plan.discount.discountType);
-          localStorage.setItem(
-            'percentageDiscount',
-            String(plan.discount.percentageDiscount || ''),
-          );
-          localStorage.setItem(
-            'flatDiscountAmount',
-            String(plan.discount.flatDiscountAmount || ''),
-          );
-          localStorage.setItem(
-            'eligibility',
-            plan.discount.eligibility || '',
-          );
+          localStorage.setItem('percentageDiscount', String(plan.discount.percentageDiscount || ''));
+          localStorage.setItem('flatDiscountAmount', String(plan.discount.flatDiscountAmount || ''));
+          localStorage.setItem('eligibility', plan.discount.eligibility || '');
           localStorage.setItem('discountStart', plan.discount.startDate || '');
           localStorage.setItem('discountEnd', plan.discount.endDate || '');
         }
+
         if (plan.freemium) {
           localStorage.setItem('freemiumType', plan.freemium.freemiumType);
-          localStorage.setItem(
-            'freeUnits',
-            String(plan.freemium.freeUnits || ''),
-          );
-          localStorage.setItem(
-            'freeTrialDuration',
-            String(plan.freemium.freeTrialDuration || ''),
-          );
+          localStorage.setItem('freeUnits', String(plan.freemium.freeUnits || ''));
+          localStorage.setItem('freeTrialDuration', String(plan.freemium.freeTrialDuration || ''));
           localStorage.setItem('freeStart', plan.freemium.startDate || '');
           localStorage.setItem('freeEnd', plan.freemium.endDate || '');
         }
@@ -341,236 +287,177 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         console.error('Failed to fetch detailed plan', e);
         try {
           const basicPlan = await fetchRatePlan(ratePlanId);
-          setRatePlanName(basicPlan.ratePlanName || '');
-          setDescription(basicPlan.description || '');
-          setBillingFrequency(basicPlan.billingFrequency || '');
-          setPaymentType(basicPlan.paymentType || '');
-          setSelectedProductName(
-            basicPlan.productName || basicPlan.product?.productName || '',
-          );
+          const productNameResolved = basicPlan.productName || basicPlan.product?.productName || '';
+          const original = {
+            ratePlanName: basicPlan.ratePlanName || '',
+            description: basicPlan.description || '',
+            billingFrequency: basicPlan.billingFrequency || '',
+            productName: productNameResolved,
+            paymentType: basicPlan.paymentType || '',
+            billableMetricId: basicPlan.billableMetricId ? Number(basicPlan.billableMetricId) : null,
+          };
+          setOriginalValues(original);
+
+          setRatePlanName(original.ratePlanName);
+          setDescription(original.description);
+          setBillingFrequency(original.billingFrequency);
+          setSelectedProductName(original.productName);
+          setPaymentType(original.paymentType);
+          setSelectedMetricId(original.billableMetricId);
         } catch (fallbackError) {
           console.error('Failed to fetch basic plan data:', fallbackError);
         }
+      } finally {
+        setLoading(false);
       }
-    };
-
-    loadPlan();
-
-    return () => {
-      document.body.classList.remove('edit-product-page');
-    };
+    })();
   }, [ratePlanId]);
 
-  const goToStep = (index: number) => setCurrentStep(index);
+  const gotoStep = (index: number) => setCurrentStep(index);
 
-  const validateDetails = (): boolean => {
+  const validateStep = (index: number): boolean => {
     const e: Record<string, string> = {};
-    if (!ratePlanName.trim()) e.ratePlanName = 'This is a required field';
-    if (!billingFrequency)
-      e.billingFrequency = 'This is a required field';
-    if (!selectedProductName)
-      e.selectedProductName = 'This is a required field';
-    if (!paymentType) e.paymentType = 'This is a required field';
+
+    if (index === 0) {
+      if (!ratePlanName.trim()) e.ratePlanName = 'This is a required field';
+      if (!billingFrequency) e.billingFrequency = 'This is a required field';
+      if (!selectedProductName) e.selectedProductName = 'This is a required field';
+      if (!paymentType) e.paymentType = 'This is a required field';
+    }
+
+    if (index === 4) {
+      if (!ratePlanName.trim() || !billingFrequency || !selectedProductName || !paymentType) {
+        e.form = 'Please fill all required fields';
+      }
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const persistPlan = async (isDraft: boolean): Promise<boolean> => {
-    if (!ratePlanId) return true;
-    try {
-      setLoading(true);
-      let productId: number | undefined;
-      if (selectedProductName && !productError) {
-        const p = products.find(
-          pr => pr.productName === selectedProductName,
-        );
-        productId = p?.productId ? Number(p.productId) : undefined;
-      }
+  const resolveSelectedProductId = (): number | undefined => {
+    if (!selectedProductName || productError) return undefined;
+    const found = products.find(p => p.productName === selectedProductName);
+    return found?.productId ? Number(found.productId) : undefined;
+  };
 
-      const payload: Partial<RatePlanRequest> & { status?: string } = {
+  const buildChangedPayload = (opts?: { isDraft?: boolean }) => {
+    const orig = originalValuesRef.current || {};
+    const payload: Partial<RatePlanRequest> & { status?: string } = {};
+
+    const pushIfChanged = (key: keyof RatePlanRequest, value: any) => {
+      if (value !== orig[key]) (payload as any)[key] = value;
+    };
+
+    pushIfChanged('ratePlanName', ratePlanName);
+    pushIfChanged('description', description);
+    pushIfChanged('billingFrequency', billingFrequency as any);
+    pushIfChanged('paymentType', paymentType as any);
+
+    const productId = resolveSelectedProductId();
+    if (productId && productId !== orig.productId) payload.productId = productId;
+
+    const bmId = selectedMetricId || undefined;
+    if (bmId !== orig.billableMetricId) payload.billableMetricId = bmId;
+
+    if (opts?.isDraft) payload.status = 'DRAFT';
+
+    // remove undefined keys
+    Object.keys(payload).forEach(k => {
+      const key = k as keyof typeof payload;
+      if (payload[key] === undefined) delete payload[key];
+    });
+
+    return payload;
+  };
+
+  const hasChanges = () => {
+    if (!ratePlanId) return false;
+    const payload = buildChangedPayload();
+    return Object.keys(payload).length > 0;
+  };
+
+  const refreshDraftData = async () => {
+    if (!ratePlanId) return;
+    try {
+      const freshData = await fetchRatePlanWithDetails(ratePlanId);
+      setDraftData(freshData);
+    } catch (e) {
+      console.warn('Failed to refresh draft data:', e);
+    }
+  };
+
+  const persistOnlyDetails = async (isDraft: boolean) => {
+    if (!ratePlanId) return true;
+
+    const payload = buildChangedPayload({ isDraft });
+    if (!Object.keys(payload).length) return true;
+
+    try {
+      await updateRatePlan(ratePlanId, payload);
+      // Update originals after successful save
+      setOriginalValues((prev: any) => ({
+        ...prev,
         ratePlanName,
         description,
-        billingFrequency: billingFrequency as any,
-        paymentType: paymentType as any,
-        productId: productId || undefined,
-        billableMetricId: selectedMetricId || undefined,
-      };
-
-      Object.keys(payload).forEach(key => {
-        if (payload[key as keyof typeof payload] === undefined) {
-          delete payload[key as keyof typeof payload];
-        }
-      });
-
-      if (isDraft) payload.status = 'DRAFT';
-
-      console.log('EditRatePlan - API Payload:', payload);
-      await updateRatePlan(ratePlanId, payload);
+        billingFrequency,
+        paymentType,
+        productName: selectedProductName,
+        productId: resolveSelectedProductId() || prev.productId,
+        billableMetricId: selectedMetricId,
+      }));
       return true;
     } catch (err: any) {
-      alert(err?.message || 'Failed to save rate plan');
+      console.error('Update rate plan failed:', err);
+      showToast({
+        kind: 'error',
+        title: 'Failed to Save',
+        message: err?.message || 'Could not update rate plan. Please try again.',
+      });
       return false;
+    }
+  };
+
+  const handleSubmitFinal = async () => {
+    if (!ratePlanId) {
+      exitToList();
+      return;
+    }
+    if (!validateStep(4)) return;
+
+    try {
+      setLoading(true);
+
+      // always save current step details diff-only
+      const ok = await persistOnlyDetails(false);
+      if (!ok) return;
+
+      showToast({
+        kind: 'success',
+        title: 'Changes Saved',
+        message: 'Rate plan updated successfully.',
+      });
+
+      exitToList();
     } finally {
       setLoading(false);
     }
   };
 
-  const handleNextStep = async () => {
-    if (activeTab === 'details') {
-      if (!validateDetails()) return;
-      goToStep(1);
-      return;
-    }
-
-    if (activeTab === 'billable') {
-      goToStep(2);
-      return;
-    }
-
-    if (activeTab === 'pricing') {
-      if (savePricingFn) {
-        try {
-          setLoading(true);
-          await savePricingFn();
-          if (ratePlanId) {
-            try {
-              const freshData = await fetchRatePlanWithDetails(ratePlanId);
-              setDraftData(freshData);
-              console.log(
-                'EditRatePlan - Refreshed draft data after pricing save:',
-                freshData,
-              );
-            } catch (e) {
-              console.warn(
-                'Failed to refresh data after pricing save:',
-                e,
-              );
-            }
-          }
-        } catch (e: any) {
-          console.error('Failed to save pricing:', e);
-          setLoading(false);
-          return;
-        }
-      }
-      setLoading(false);
-      goToStep(3);
-      return;
-    }
-
-    if (activeTab === 'extras') {
-      if (saveExtrasFn) {
-        try {
-          setLoading(true);
-          await saveExtrasFn();
-          if (ratePlanId) {
-            try {
-              const freshData = await fetchRatePlanWithDetails(ratePlanId);
-              setDraftData(freshData);
-              console.log(
-                'EditRatePlan - Refreshed draft data after extras save:',
-                freshData,
-              );
-            } catch (e) {
-              console.warn(
-                'Failed to refresh data after extras save:',
-                e,
-              );
-            }
-          }
-        } catch (e: any) {
-          console.error('Failed to save extras:', e);
-          setLoading(false);
-          return;
-        }
-      }
-      setLoading(false);
-      goToStep(4);
-      return;
-    }
-
-    if (activeTab === 'review') {
-      const ok = await persistPlan(false);
-      if (ok) navigate('/get-started/rate-plans');
-    }
-  };
-
-  const handlePreviousStep = () => {
-    if (currentStep > 0) {
-      goToStep(currentStep - 1);
-    } else {
-      setShowSaveModal(true);
-    }
-  };
-
-  // sidebar step click – same behaviour as your multi-step skeleton
-  const handleSidebarStepClick = async (targetIndex: number) => {
-    if (targetIndex === currentStep) return;
+  const handleSaveDraft = async () => {
+    if (!ratePlanId || draftStatus === 'saving') return;
 
     try {
-      if (activeTab === 'details') {
-        if (!validateDetails()) {
-          setCurrentStep(0);
-          return;
-        }
-      } else if (activeTab === 'pricing') {
-        if (savePricingFn) {
-          setLoading(true);
-          await savePricingFn();
-          if (ratePlanId) {
-            try {
-              const freshData = await fetchRatePlanWithDetails(ratePlanId);
-              setDraftData(freshData);
-              console.log(
-                'EditRatePlan - Refreshed draft data after pricing save (sidebar):',
-                freshData,
-              );
-            } catch (e) {
-              console.warn(
-                'Failed to refresh data after pricing save:',
-                e,
-              );
-            }
-          }
-          setLoading(false);
-        }
-      } else if (activeTab === 'extras') {
-        if (saveExtrasFn) {
-          setLoading(true);
-          await saveExtrasFn();
-          if (ratePlanId) {
-            try {
-              const freshData = await fetchRatePlanWithDetails(ratePlanId);
-              setDraftData(freshData);
-              console.log(
-                'EditRatePlan - Refreshed draft data after extras save (sidebar):',
-                freshData,
-              );
-            } catch (e) {
-              console.warn(
-                'Failed to refresh data after extras save:',
-                e,
-              );
-            }
-          }
-          setLoading(false);
-        }
+      setDraftStatus('saving');
+
+      // Save Details diff-only
+      const ok = await persistOnlyDetails(true);
+      if (!ok) {
+        setDraftStatus('idle');
+        return;
       }
-    } catch (e) {
-      console.error('Sidebar navigation save failed:', e);
-      setLoading(false);
-      return;
-    }
 
-    setCurrentStep(targetIndex);
-  };
-
-  const handleSaveDraft = async () => {
-    if (activeTab === 'details' && !validateDetails()) return;
-
-    const ok = await persistPlan(true);
-
-    if (ok) {
+      // Save child tabs too (best effort)
       if (savePricingFn) {
         try {
           await savePricingFn();
@@ -585,182 +472,261 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           console.warn('Extras draft save warning:', e);
         }
       }
-    }
 
-    setShowSaveModal(false);
-    exitToList();
-  };
+      setDraftStatus('saved');
+      showToast({
+        kind: 'success',
+        title: 'Draft Saved',
+        message: 'Rate plan draft saved successfully.',
+      });
 
-  const handleDelete = async () => {
-    if (!ratePlanId) return;
-    try {
-      setLoading(true);
-      await deleteRatePlan(ratePlanId);
-      setShowSaveModal(false);
+      setTimeout(() => setDraftStatus('idle'), 3500);
       exitToList();
-    } catch (e: any) {
-      alert(e?.message || 'Failed to delete rate plan');
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      console.error('Save draft failed:', e);
+      setDraftStatus('idle');
+      showToast({
+        kind: 'error',
+        title: 'Failed to Save Draft',
+        message: 'Unable to save draft. Please try again.',
+      });
     }
   };
 
-  const renderStepContent = () => {
-    switch (activeTab) {
-      case 'details':
-        return (
-          <div className="editrate-np-section">
-            <div className="editrate-np-form-row">
-              <div className="editrate-np-form-group">
-                <label className="editrate-np-label">Rate Plan Name</label>
-                <InputField
-                  value={ratePlanName}
-                  onChange={setRatePlanName}
-                  placeholder="e.g., Pro Plan, Enterprise Plan"
-                  error={errors.ratePlanName}
-                />
-              </div>
-              <div className="editrate-np-form-group">
-                <label className="editrate-np-label">Billing Frequency</label>
-                <SelectField
-                  value={billingFrequency}
-                  onChange={setBillingFrequency}
-                  placeholder="Select billing cycle"
-                  options={[
-                    { label: 'Monthly', value: 'MONTHLY' },
-                    { label: 'Yearly', value: 'YEARLY' },
-                    { label: 'Weekly', value: 'WEEKLY' },
-                    { label: 'Daily', value: 'DAILY' },
-                    { label: 'Hourly', value: 'HOURLY' },
-                  ]}
-                  error={errors.billingFrequency}
-                />
-              </div>
-            </div>
+  const handleBack = () => {
+    if (hasChanges()) setShowEditPopup(true);
+    else exitToList();
+  };
 
-            <div className="editrate-np-form-row">
-              <div className="editrate-np-form-group">
-                <label className="editrate-np-label">Select Product</label>
-                <SelectField
-                  value={selectedProductName}
-                  onChange={setSelectedProductName}
-                  placeholder={
-                    productError
-                      ? 'Failed to load products'
-                      : 'Select Product'
-                  }
-                  options={
-                    productError
-                      ? []
-                      : products.map(p => ({
-                        label: p.productName,
-                        value: p.productName,
-                      }))
-                  }
-                  error={errors.selectedProductName}
-                />
-              </div>
-
-              <div className="editrate-np-form-group">
-                <label className="editrate-np-label">Payment Type</label>
-                <SelectField
-                  value={paymentType}
-                  onChange={setPaymentType}
-                  placeholder="Select payment method"
-                  options={[
-                    { label: 'Post-Paid', value: 'POSTPAID' },
-                    { label: 'Pre-Paid', value: 'PREPAID' },
-                  ]}
-                  error={errors.paymentType}
-                />
-              </div>
-            </div>
-
-            <div className="editrate-np-form-group">
-              <label className="editrate-np-label">Rate Plan Description</label>
-              <TextareaField
-                value={description}
-                onChange={setDescription}
-                placeholder="Describe who this plan is for, limits, and benefits..."
-              />
-            </div>
-          </div>
-        );
-      case 'billable':
-        return (
-          <div className="editrate-np-section">
-            <div className="editrate-np-configuration-tab">
-              <EditBillable
-                productName={selectedProductName}
-                selectedMetricId={selectedMetricId}
-                onSelectMetric={setSelectedMetricId}
-              />
-            </div>
-          </div>
-        );
-      case 'pricing':
-        return (
-          <div className="editrate-np-section">
-            <div className="edit-np-configuration-tab">
-              <EditPricing
-                key={`pricing-${draftData?.lastUpdated || Date.now()}`}
-                ratePlanId={ratePlanId}
-                draftData={draftData}
-                registerSavePricing={fn => setSavePricingFn(() => fn)}
-              />
-            </div>
-          </div>
-        );
-      case 'extras':
-        return (
-          <div className="editrate-np-section">
-            <div className="editrate-np-configuration-tab">
-              <EditExtras
-                key={`extras-${draftData?.lastUpdated || Date.now()}`}
-                noUpperLimit={false}
-                ratePlanId={ratePlanId}
-                draftData={draftData}
-                registerSaveExtras={fn => setSaveExtrasFn(() => fn)}
-              />
-            </div>
-          </div>
-        );
-      case 'review':
-        return (
-          <div className="editrate-np-section">
-            <div className="editrate-np-review-container">
-              <EditReview />
-            </div>
-          </div>
-        );
-      default:
-        return <p>Coming soon...</p>;
+  const handleNext = async () => {
+    if (activeTab === 'details') {
+      if (!validateStep(0)) return;
+      gotoStep(1);
+      return;
     }
+
+    if (activeTab === 'billable') {
+      gotoStep(2);
+      return;
+    }
+
+    if (activeTab === 'pricing') {
+      try {
+        if (savePricingFn) {
+          setLoading(true);
+          await savePricingFn();
+          await refreshDraftData();
+        }
+        gotoStep(3);
+      } catch (e) {
+        console.error('Failed to save pricing:', e);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (activeTab === 'extras') {
+      try {
+        if (saveExtrasFn) {
+          setLoading(true);
+          await saveExtrasFn();
+          await refreshDraftData();
+        }
+        gotoStep(4);
+      } catch (e) {
+        console.error('Failed to save extras:', e);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (activeTab === 'review') {
+      await handleSubmitFinal();
+    }
+  };
+
+  const handleSidebarStepClick = async (targetIndex: number) => {
+    if (targetIndex === currentStep) return;
+
+    // same behavior as Metrics: validate/save current step before jump
+    try {
+      if (activeTab === 'details') {
+        if (!validateStep(0)) {
+          setCurrentStep(0);
+          return;
+        }
+      } else if (activeTab === 'pricing') {
+        if (savePricingFn) {
+          setLoading(true);
+          await savePricingFn();
+          await refreshDraftData();
+          setLoading(false);
+        }
+      } else if (activeTab === 'extras') {
+        if (saveExtrasFn) {
+          setLoading(true);
+          await saveExtrasFn();
+          await refreshDraftData();
+          setLoading(false);
+        }
+      }
+    } catch (e) {
+      console.error('Sidebar navigation save failed:', e);
+      setLoading(false);
+      return;
+    }
+
+    setCurrentStep(targetIndex);
+  };
+
+  const renderDetailsTab = () => (
+    <div className="editrate-np-section">
+      <div className="editrate-np-form-row">
+        <div className="editrate-np-form-group">
+          <label className="editrate-np-label">Rate Plan Name</label>
+          <InputField
+            value={ratePlanName}
+            onChange={setRatePlanName}
+            placeholder="e.g., Pro Plan, Enterprise Plan"
+            error={errors.ratePlanName}
+          />
+        </div>
+
+        <div className="editrate-np-form-group">
+          <label className="editrate-np-label">Billing Frequency</label>
+          <SelectField
+            value={billingFrequency}
+            onChange={setBillingFrequency}
+            placeholder="Select billing cycle"
+            options={[
+              { label: 'Monthly', value: 'MONTHLY' },
+              { label: 'Yearly', value: 'YEARLY' },
+              { label: 'Weekly', value: 'WEEKLY' },
+              { label: 'Daily', value: 'DAILY' },
+              { label: 'Hourly', value: 'HOURLY' },
+            ]}
+            error={errors.billingFrequency}
+          />
+        </div>
+      </div>
+
+      <div className="editrate-np-form-row">
+        <div className="editrate-np-form-group">
+          <label className="editrate-np-label">Select Product</label>
+          <SelectField
+            value={selectedProductName}
+            onChange={setSelectedProductName}
+            placeholder={productError ? 'Failed to load products' : 'Select Product'}
+            options={
+              productError
+                ? []
+                : products.map(p => ({
+                    label: p.productName,
+                    value: p.productName,
+                  }))
+            }
+            error={errors.selectedProductName}
+          />
+        </div>
+
+        <div className="editrate-np-form-group">
+          <label className="editrate-np-label">Payment Type</label>
+          <SelectField
+            value={paymentType}
+            onChange={setPaymentType}
+            placeholder="Select payment method"
+            options={[
+              { label: 'Post-Paid', value: 'POSTPAID' },
+              { label: 'Pre-Paid', value: 'PREPAID' },
+            ]}
+            error={errors.paymentType}
+          />
+        </div>
+      </div>
+
+      <div className="editrate-np-form-group">
+        <label className="editrate-np-label">Rate Plan Description</label>
+        <TextareaField
+          value={description}
+          onChange={setDescription}
+          placeholder="Describe who this plan is for, limits, and benefits..."
+        />
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
+
+    if (activeTab === 'details') return renderDetailsTab();
+
+    if (activeTab === 'billable') {
+      return (
+        <div className="editrate-np-section">
+          <div className="editrate-np-configuration-tab">
+            <EditBillable
+              productName={selectedProductName}
+              selectedMetricId={selectedMetricId}
+              onSelectMetric={setSelectedMetricId}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'pricing') {
+      return (
+        <div className="editrate-np-section">
+          <div className="editrate-np-configuration-tab">
+            <EditPricing
+              key={`pricing-${draftData?.lastUpdated || Date.now()}`}
+              ratePlanId={ratePlanId}
+              draftData={draftData}
+              registerSavePricing={fn => setSavePricingFn(() => fn)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'extras') {
+      return (
+        <div className="editrate-np-section">
+          <div className="editrate-np-configuration-tab">
+            <EditExtras
+              key={`extras-${draftData?.lastUpdated || Date.now()}`}
+              noUpperLimit={false}
+              ratePlanId={ratePlanId}
+              draftData={draftData}
+              registerSaveExtras={fn => setSaveExtrasFn(() => fn)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="editrate-np-section">
+        <div className="editrate-np-review-container">
+          <EditReview />
+        </div>
+      </div>
+    );
   };
 
   return (
     <>
       <TopBar
-        title={
-          ratePlanName?.trim()
-            ? `Edit "${ratePlanName}"`
-            : 'Edit Rate Plan'
-        }
-        onBack={() => {
-          const hasChanges = hasPendingChanges();
-          if (hasChanges) {
-            setShowSaveModal(true);
-          } else {
-            exitToList();
-          }
-        }}
+        title={ratePlanName?.trim() ? `Edit "${ratePlanName}"` : 'Edit Rate Plan'}
+        onBack={handleBack}
       />
 
-      {/* same skeleton structure as EditSubscription: viewport -> card -> grid -> rail + main */}
       <div className="editrate-np-viewport">
         <div className="editrate-np-card">
           <div className="editrate-np-grid">
-            {/* LEFT rail */}
+            {/* Left rail */}
             <aside className="editrate-np-rail">
               <nav className="editrate-np-steps">
                 {steps.map((step, index) => {
@@ -770,43 +736,39 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                     <button
                       key={step.id}
                       type="button"
-                      className={[
-                        'editrate-np-step',
-                        isActive ? 'active' : '',
-                        isCompleted ? 'completed' : '',
-                      ]
-                        .join(' ')
-                        .trim()}
+                      className={`editrate-np-step ${isActive ? 'active' : ''} ${
+                        isCompleted ? 'completed' : ''
+                      }`.trim()}
                       onClick={() => handleSidebarStepClick(index)}
                     >
-                      <span className="editrate-np-step__title">
-                        {step.title}
-                      </span>
+                      <span className="editrate-np-step__title">{step.title}</span>
                     </button>
                   );
                 })}
               </nav>
             </aside>
 
-            {/* MAIN area – matches EditSubscription skeleton: main -> main__inner -> body -> form */}
+            {/* MAIN area – aligned with Metrics skeleton */}
             <main className="editrate-np-main">
               <div className="editrate-np-main__inner">
                 <div className="editrate-np-body">
                   <form
                     className="editrate-np-form"
-                    onSubmit={e => e.preventDefault()}
+                    onSubmit={e => {
+                      e.preventDefault();
+                    }}
                   >
-                    <div className="editrate-np-form-section">
-                      {renderStepContent()}
-                    </div>
+                    <div className="editrate-np-form-section">{renderContent()}</div>
 
-                    {/* FOOTER actions – aligned like EditSubscription */}
+                    <div className="af-skel-rule af-skel-rule--bottom" />
+
+                    {/* FOOTER – same alignment pattern */}
                     <div className="editrate-np-form-footer">
                       <div className="editrate-np-btn-group editrate-np-btn-group--back">
-                        {currentStep > 0 && (
+                        {activeTab !== 'details' && (
                           <SecondaryButton
                             type="button"
-                            onClick={handlePreviousStep}
+                            onClick={() => gotoStep(Math.max(0, currentStep - 1))}
                             disabled={loading}
                           >
                             Back
@@ -815,38 +777,89 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                       </div>
 
                       <div className="editrate-np-btn-group editrate-np-btn-group--next">
-                        <PrimaryButton
-                          type="button"
-                          onClick={handleNextStep}
-                          disabled={loading}
-                        >
-                          {loading
-                            ? 'Saving...'
-                            : activeTab === 'review'
-                              ? 'Save Changes'
-                              : 'Save & Next'}
-                        </PrimaryButton>
+                        {activeTab !== 'review' ? (
+                          <PrimaryButton type="button" onClick={handleNext} disabled={loading}>
+                            {loading ? 'Saving...' : 'Next'}
+                          </PrimaryButton>
+                        ) : (
+                          <PrimaryButton type="button" onClick={handleSubmitFinal} disabled={loading}>
+                            {loading ? 'Saving...' : 'Save changes'}
+                          </PrimaryButton>
+                        )}
                       </div>
                     </div>
                   </form>
                 </div>
               </div>
-              {/* if you have skeleton rules in CSS, they’ll hook here */}
-              <div className="af-skel-rule af-skel-rule--bottom" />
             </main>
           </div>
         </div>
+
+        <VerticalScrollbar
+          height="100%"
+          color="#D9DFE8"
+          thickness={4}
+          className="editrate-np-scrollbar"
+        />
+
+        <SaveAsDraftModal
+          isOpen={showSaveDraftModal}
+          onSave={() => {
+            setShowSaveDraftModal(false);
+            exitToList();
+          }}
+          onDelete={() => {
+            setShowSaveDraftModal(false);
+            setShowDeleteConfirm(true);
+          }}
+        />
+
+        <ConfirmDeleteModal
+          isOpen={showDeleteConfirm}
+          productName={ratePlanName || 'this plan'}
+          onConfirm={async () => {
+            if (!ratePlanId) {
+              setShowDeleteConfirm(false);
+              exitToList();
+              return;
+            }
+            try {
+              setLoading(true);
+              await deleteRatePlan(ratePlanId);
+              showToast({
+                kind: 'success',
+                title: 'Deleted',
+                message: 'Rate plan deleted successfully.',
+              });
+              setShowDeleteConfirm(false);
+              exitToList();
+            } catch (e: any) {
+              console.error('Delete failed:', e);
+              showToast({
+                kind: 'error',
+                title: 'Failed to Delete',
+                message: e?.message || 'Could not delete rate plan.',
+              });
+            } finally {
+              setLoading(false);
+            }
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+
+        <EditPopup
+          isOpen={showEditPopup}
+          onDismiss={() => setShowEditPopup(false)}
+          onClose={() => {
+            setShowEditPopup(false);
+            exitToList();
+          }}
+          onSave={async () => {
+            await handleSaveDraft();
+            setShowEditPopup(false);
+          }}
+        />
       </div>
-
-      <EditPopup
-        isOpen={showSaveModal}
-        onClose={() => setShowSaveModal(false)}
-        onDismiss={() => setShowSaveModal(false)}
-        onSave={handleSaveDraft}
-      />
-
-      {/* Optional: delete handler is defined; hook it into any UI you have (menu, button, etc.) */}
-      {/* Example: <DangerButton onClick={handleDelete}>Delete Plan</DangerButton> */}
     </>
   );
 };

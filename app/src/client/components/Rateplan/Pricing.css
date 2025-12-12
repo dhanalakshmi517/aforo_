@@ -75,6 +75,14 @@
   text-align: left;
   width: 100%;
   padding: 0 24px;
+  margin-left: -10px;
+}
+
+/* Nested subform wrapper under the select (no extra horizontal padding/shift) */
+.pricing-container.pricing-subform {
+  padding: 0;
+  /* small left shift so the card aligns visually with the select */
+  margin-left: -10px;
 }
 
 .left-section {

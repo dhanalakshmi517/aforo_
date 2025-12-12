@@ -101,7 +101,6 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
           <div className="data-filter">
           <button
             className={`data-filter-btn ${showFilter ? "is-open" : ""}`}
-            onClick={() => setShowFilter((s) => !s)}
             aria-haspopup="menu"
             aria-expanded={showFilter}
             aria-label="Filter"
@@ -123,7 +122,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
             </svg>
           </button>
 
-          {showFilter && (
+          {false && showFilter && (
             <div className="data-filter-menu" role="menu">
               <div className="data-filter-row">
                 <label className="data-filter-label">Status</label>
@@ -172,7 +171,7 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
                 <th>File Name</th>
                 <th>Ingested On</th>
                 <th>Status</th>
-                <th>Notes</th>
+                <th>Notes/description</th>
               </tr>
             </thead>
 

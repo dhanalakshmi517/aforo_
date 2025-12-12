@@ -83,6 +83,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const [deleteMetricId, setDeleteMetricId] = useState<number | null>(null);
   const [deleteMetricName, setDeleteMetricName] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   // toast handled via context
   const { showToast } = useToast();
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
@@ -134,6 +135,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   };
 
   const fetchMetrics = React.useCallback(async () => {
+    setIsLoading(true);
     try {
       const data: UsageMetricDTO[] = await getUsageMetrics();
       const mapped: Metric[] = data.map((m) => {
@@ -162,6 +164,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     } catch (err) {
       console.error(err);
       if (String(err).includes("401")) logout();
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -244,66 +248,16 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
             </tr>
           </thead>
           <tbody>
-            {filteredMetrics.map((metric, idx) => (
-              <tr key={metric.id}>
-                <td className="metrics-cell">
-                  <div className="metrics-wrapper">
-                    <div 
-                      className="metric-item" 
-                      style={{ 
-                        backgroundColor: getMetricColor(idx).bg, 
-                        color: getMetricColor(idx).text 
-                      }}
-                    >
-                      <div className="metric-content">
-                        <div className="metric-uom" title={metric.unit}>
-                          {display(metric.unit && metric.unit.length > 3
-                            ? metric.unit.substring(0, 3)   // only first 3 letters, no dots
-                            : metric.unit
-                          )}
-                        </div>
-                        <div className="metric-name" title={metric.usageMetric}>
-                          {display(metric.usageMetric && metric.usageMetric.length > 3
-                            ? `${metric.usageMetric.substring(0, 3)}...`  // first 3 letters + dots
-                            : metric.usageMetric
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="metric-label">{display(metric.usageMetric)}</span>
+            {isLoading && metrics.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                  <div className="metrics-loading-state">
+                    <div className="spinner"></div>
+                    <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading billable metrics...</p>
                   </div>
                 </td>
-                <td>{display(metric.productName)}</td>
-                <td>{display(metric.unit)}</td>
-                <td>
-                  <StatusBadge
-                    label={formatStatus(metric.status)}
-                    variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
-                    size="sm"
-                  />
-                </td>
-                <td>{display(metric.createdOn)}</td>
-
-                <td className="actions-cell"><div className="product-action-buttons">
-                  {metric.status?.toLowerCase() === 'draft' ? (
-                    <RetryIconButton
-                      onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
-                      title="Continue editing draft"
-                    />
-                  ) : (
-                    <EditIconButton
-                      onClick={() => navigate(`/get-started/metering/${metric.id}/edit`)}
-                      title="Edit metric"
-                    />
-                  )}
-                  <DeleteIconButton
-                    onClick={() => handleDeleteClick(metric)}
-                    title="Delete metric"
-                  />
-                </div></td>
               </tr>
-            ))}
-            {filteredMetrics.length === 0 && (
+            ) : filteredMetrics.length === 0 ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                   <div className="metrics-empty-state">
@@ -319,6 +273,66 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                   </div>
                 </td>
               </tr>
+            ) : (
+              filteredMetrics.map((metric, idx) => (
+                <tr key={metric.id}>
+                  <td className="metrics-cell">
+                    <div className="metrics-wrapper">
+                      <div 
+                        className="metric-item" 
+                        style={{ 
+                          backgroundColor: getMetricColor(idx).bg, 
+                          color: getMetricColor(idx).text 
+                        }}
+                      >
+                        <div className="metric-content">
+                          <div className="metric-uom" title={metric.unit}>
+                            {display(metric.unit && metric.unit.length > 3
+                              ? metric.unit.substring(0, 3)   // only first 3 letters, no dots
+                              : metric.unit
+                            )}
+                          </div>
+                          <div className="metric-name" title={metric.usageMetric}>
+                            {display(metric.usageMetric && metric.usageMetric.length > 3
+                              ? `${metric.usageMetric.substring(0, 3)}...`  // first 3 letters + dots
+                              : metric.usageMetric
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="metric-label">{display(metric.usageMetric)}</span>
+                    </div>
+                  </td>
+                  <td>{display(metric.productName)}</td>
+                  <td>{display(metric.unit)}</td>
+                  <td>
+                    <StatusBadge
+                      label={formatStatus(metric.status)}
+                      variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
+                      size="sm"
+                    />
+                  </td>
+                  <td>{display(metric.createdOn)}</td>
+
+                  <td className="actions-cell"><div className="product-action-buttons">
+                    {metric.status?.toLowerCase() === 'draft' ? (
+                      <RetryIconButton
+                        onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
+                        title="Continue editing draft"
+                      />
+                    ) : (
+                      <EditIconButton
+                        onClick={() => navigate(`/get-started/metering/${metric.id}/edit`)}
+                        title="Edit metric"
+                      />
+                    )}
+                    <DeleteIconButton
+                      onClick={() => handleDeleteClick(metric)}
+                      title="Delete metric"
+                    />
+                  </div></td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

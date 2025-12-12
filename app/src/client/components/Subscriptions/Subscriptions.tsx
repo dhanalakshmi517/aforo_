@@ -132,6 +132,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   const [subscriptions, setSubscriptions] = useState<SubscriptionType[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<SubscriptionType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // lookups for names/emails/logos
   const [customers, setCustomers] = useState<CustomerLite[]>([]);
@@ -150,9 +151,16 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   }, [ratePlans]);
 
   const fetchSubs = () => {
+    setIsLoading(true);
     Api.getSubscriptions()
-      .then(data => setSubscriptions(data ?? []))
-      .catch(err => console.error('Failed to fetch subscriptions', err));
+      .then(data => {
+        setSubscriptions(data ?? []);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch subscriptions', err);
+        setIsLoading(false);
+      });
   };
 
   const fetchLookups = async () => {
@@ -339,98 +347,130 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
           </thead>
 
           <tbody>
-            {filtered.map(sub => {
-              const cust = customerMap.get(sub.customerId);
-              const rp = ratePlanMap.get(sub.ratePlanId);
-
-              // Backend already returns formatted date string, so use it directly
-              const purchased = (sub as any).createdOn ||
-                formatIST((sub as any).createdAt) ||
-                formatIST((sub as any).startDate) ||
-                '—';
-              const logo = cust?.__resolvedLogoSrc || null;
-
-              return (
-                <tr key={sub.subscriptionId}>
-                  {/* Customer: logo + name + email */}
-                  <td className="sub-customer-cell">
-                    <div className="cell-flex">
-                      <div
-                        className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
-                        aria-label={`${cust?.customerName || 'Customer'} logo`}
-                        role="img"
-                        style={logo ? {
-                          backgroundImage: `url(${logo})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat'
-                        } : undefined}
-                      >
-                        {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
-                      </div>
-                      <div className="cust-block">
-                        <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
-                        <div className="cust-email">{cust?.primaryEmail || '—'}</div>
-                      </div>
+            {isLoading && subscriptions.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                  <div className="subscriptions-loading-state">
+                    <div className="spinner"></div>
+                    <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading purchases...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : filtered.length === 0 && !isLoading ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                  <div className="subscriptions-empty-state">
+                    <img src={purchaseSvg} alt="No purchases" style={{ width: 190, height: 190 }} />
+                    <p style={{ marginTop: '16px', color: '#666', fontSize: '14px', textAlign: 'center' }}>
+                      No Purchases yet. Click 'New Purchase' to create your First Purchase.
+                    </p>
+                    <div style={{ marginTop: '12px' }}>
+                      <PrimaryButton onClick={() => navigate('/get-started/subscriptions/new')}>
+                        + New Purchase
+                      </PrimaryButton>
                     </div>
-                  </td>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filtered.map(sub => {
+                const cust = customerMap.get(sub.customerId);
+                const rp = ratePlanMap.get(sub.ratePlanId);
 
-                  {/* Rate Plan chip */}
-                  <td><RatePlanChip name={rp?.ratePlanName || `Plan ${sub.ratePlanId}`} /></td>
+                // Backend may return date with line breaks (e.g. "...\nIST"),
+                // normalize it to a single line so CSS can truncate with ellipsis.
+                const rawPurchased = (sub as any).createdOn ||
+                  formatIST((sub as any).createdAt) ||
+                  formatIST((sub as any).startDate) ||
+                  '—';
+                const purchased = typeof rawPurchased === 'string'
+                  ? rawPurchased.replace(/\s+/g, ' ').trim()
+                  : rawPurchased;
 
-                  {/* Payment Type pill */}
-                  <td><PaymentPill value={sub.paymentType} /></td>
+                const logo = cust?.__resolvedLogoSrc || null;
 
-                  {/* Purchased On */}
-                  <td>{purchased}</td>
+                return (
+                  <tr key={sub.subscriptionId}>
+                    {/* Customer: logo + name + email */}
+                    <td className="sub-customer-cell">
+                      <div className="cell-flex">
+                        <div
+                          className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
+                          aria-label={`${cust?.customerName || 'Customer'} logo`}
+                          role="img"
+                          style={logo ? {
+                            backgroundImage: `url(${logo})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat'
+                          } : undefined}
+                        >
+                          {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
+                        </div>
+                        <div className="cust-block">
+                          <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
+                          <div className="cust-email">{cust?.primaryEmail || '—'}</div>
+                        </div>
+                      </div>
+                    </td>
 
-                  {/* Status */}
-                  <td>
-                    <StatusBadge
-                      label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
-                      variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
-                      size="sm"
-                    />
-                  </td>
+                    {/* Rate Plan chip */}
+                    <td><RatePlanChip name={rp?.ratePlanName || `Plan ${sub.ratePlanId}`} /></td>
 
-                  {/* Actions (Download, Edit/Resume, Delete) */}
-                  <td className="actions-cell">
-                    <div className="product-action-buttons">
-                      {/* Download */}
-                      <button
-                        className="download-button"
-                        onClick={() => handleDownload(sub)}
-                        title="Download"
-                        aria-label="Download"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
-                          <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
-                            stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
+                    {/* Payment Type pill */}
+                    <td><PaymentPill value={sub.paymentType} /></td>
 
-                      {sub.status?.toLowerCase() === 'draft' ? (
-                        <RetryIconButton
-                          onClick={() => setDraftSub(sub)}
-                          title="Continue editing draft"
-                        />
-                      ) : (
-                        <EditIconButton
-                          onClick={() => setEditingSub(sub)}
-                          title="Edit subscription"
-                        />
-                      )}
+                    {/* Purchased On */}
+                    <td>{purchased}</td>
 
-                      {/* Delete */}
-                      <DeleteIconButton
-                        onClick={() => handleDelete(sub)}
-                        title="Delete subscription"
+                    {/* Status */}
+                    <td>
+                      <StatusBadge
+                        label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
+                        variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
+                        size="sm"
                       />
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+
+                    {/* Actions (Download, Edit/Resume, Delete) */}
+                    <td className="actions-cell">
+                      <div className="product-action-buttons">
+                        {/* Download */}
+                        <button
+                          className="download-button"
+                          onClick={() => handleDownload(sub)}
+                          title="Download"
+                          aria-label="Download"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
+                            <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
+                            stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+
+                        {sub.status?.toLowerCase() === 'draft' ? (
+                          <RetryIconButton
+                            onClick={() => setDraftSub(sub)}
+                            title="Continue editing draft"
+                          />
+                        ) : (
+                          <EditIconButton
+                            onClick={() => setEditingSub(sub)}
+                            title="Edit subscription"
+                          />
+                        )}
+
+                        {/* Delete */}
+                        <DeleteIconButton
+                          onClick={() => handleDelete(sub)}
+                          title="Delete subscription"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
 

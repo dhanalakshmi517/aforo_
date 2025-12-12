@@ -7,6 +7,7 @@ import {
 } from './api';
 import { setRatePlanData, getRatePlanData } from './utils/sessionStorage';
 import './Pricing.css';
+import { SelectField } from '../componenetsss/Inputs';
 
 import FlatFeeForm, { FlatFeePayload, FlatFeeHandle } from './FlatFeeForm';
 import Tiered, { TieredHandle } from './Tiered';
@@ -33,7 +34,6 @@ interface PricingProps {
   draftData?: any;
   isFreshCreation?: boolean;
   locked?: boolean;
-  onFieldChange?: () => void;
 }
 
 type PricingErrors = {
@@ -47,7 +47,7 @@ type PricingErrors = {
 };
 
 const Pricing = forwardRef<PricingHandle, PricingProps>(
-  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false, locked = false, onFieldChange }, ref) => {
+  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false, locked = false }, ref) => {
     const [selected, setSelected] = useState('');
     const [errors, setErrors] = useState<PricingErrors>({});
 
@@ -608,40 +608,33 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
     return (
       <div className="pricing-container">
         <div className="left-section">
-          <label className="dropdown-label">Pricing</label>
-
-          <select
-            className={`custom-select ${errors.select ? 'has-error' : ''}`}
+          <SelectField
+            label="Pricing"
             value={selected}
-            onChange={e => {
-              const v = e.target.value;
-              console.log('🎯 Pricing: User selected pricing model:', v);
-              setSelected(v);
-              onFieldChange?.(); // Reset saved state when pricing model changes
-              if (v === 'Tiered Pricing' && tiers.length === 0) {
+            onChange={v => {
+              const value = v;
+              console.log('🎯 Pricing: User selected pricing model:', value);
+              setSelected(value);
+              if (value === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }
             }}
-          >
-            <option value="">Select a pricing model</option>
-            <option value="Flat Fee">Flat Fee</option>
-            <option value="Tiered Pricing">Tiered Pricing</option>
-            <option value="Volume-Based">Volume-Based</option>
-            <option value="Usage-Based">Usage-Based</option>
-            <option value="Stairstep">Stairstep</option>
-          </select>
-
-          {(errors.select || validationErrors.pricingModel) && (
-            <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
-              {errors.select || validationErrors.pricingModel}
-            </div>
-          )}
+            options={[
+              { label: 'Flat Fee', value: 'Flat Fee' },
+              { label: 'Tiered Pricing', value: 'Tiered Pricing' },
+              { label: 'Volume-Based', value: 'Volume-Based' },
+              { label: 'Usage-Based', value: 'Usage-Based' },
+              { label: 'Stairstep', value: 'Stairstep' },
+            ]}
+            placeholderOption="Select a pricing model"
+            error={errors.select || validationErrors.pricingModel}
+          />
 
           {errors.general && <div className="inline-error">{errors.general}</div>}
 
           {selected === 'Flat Fee' && (
             <>
-              <div className="pricing-container">
+              <div className="pricing-container pricing-subform">
                 <FlatFeeForm
                   ref={flatFeeRef}
                   data={flatFee}
@@ -656,7 +649,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
           {selected === 'Tiered Pricing' && (
             <>
-              <div className="pricing-container">
+              <div className="pricing-container pricing-subform">
                 <Tiered
                   ref={tieredRef}
                   tiers={(() => {
@@ -698,7 +691,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
           {selected === 'Volume-Based' && (
             <>
-              <div className="pricing-container">
+              <div className="pricing-container pricing-subform">
                 <Volume
                   ref={volumeRef}
                   tiers={(() => {
@@ -753,7 +746,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
           {selected === 'Stairstep' && (
             <>
-              <div className="pricing-container">
+              <div className="pricing-container pricing-subform">
                 <StairStep
                   ref={stairStepRef}
                   validationErrors={validationErrors}
@@ -793,7 +786,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
           {selected === 'Usage-Based' && (
             <>
-              <div className="pricing-container">
+              <div className="pricing-container pricing-subform">
                 <UsageBased
                   ref={usageBasedRef}
                   data={usage}

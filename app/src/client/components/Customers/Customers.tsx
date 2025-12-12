@@ -342,9 +342,18 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                   </thead>
 
                   <tbody>
-                    {loading && <tr><td colSpan={5}>Loading...</td></tr>}
-                    {errorMsg && <tr><td colSpan={5}>{errorMsg}</td></tr>}
-                    {customers.length === 0 && !loading && !errorMsg && (
+                    {loading && customers.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="customers-loading-state">
+                            <div className="spinner"></div>
+                            <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading customers...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : errorMsg ? (
+                      <tr><td colSpan={5}>{errorMsg}</td></tr>
+                    ) : customers.length === 0 && !loading ? (
                       <tr>
                         <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="customers-empty-state">
@@ -360,7 +369,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                           </div>
                         </td>
                       </tr>
-                    )}
+                    ) : null}
 
                     {filteredCustomers.map((customer) => {
                       const id = customer.customerId ?? customer.id;

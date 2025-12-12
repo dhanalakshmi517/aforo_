@@ -91,9 +91,11 @@
 }
 
 .input-small:focus,
-.input-large:focus {
+.input-large:focus,
+.input-extra:focus {
   outline: none;
-  border-color: var(--color-neutral-300);
+  border-color: var(--color-primary-800);
+  box-shadow: 0 0 0 2px rgba(76, 126, 255, 0.18);
 }
 
 .input-small::placeholder,
@@ -101,7 +103,7 @@
 .input-extra::placeholder {
   color: var(--color-text-placeholder, #B3B9BF);
   font-size: 16px;
-  line-height: 24px;
+  line-height: var(--line-height-body-lg);
   font-weight: 400;
   opacity: .9;
 }
@@ -187,7 +189,7 @@
 }
 
 .input-extra {
-  width: 350px;
+  width: 250px;
   height: 40px;
   padding: 8px 12px;
   border: 1px solid var(--color-neutral-200);
@@ -217,12 +219,12 @@
 
 .stair-example-section {
   flex: 1;
+  min-width: 260px;
+  background: #F5F9FF;
   background: var(--color-info-100);
   border-radius: var(--border-radius-lg);
   padding: 16px;
   border: 1px solid var(--color-neutral-200);
-  width: 435px;
-  height: 320px;
 }
 
 .stair-example-section h4 {

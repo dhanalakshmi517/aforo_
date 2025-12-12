@@ -134,18 +134,17 @@
   background: var(--color-netral-white);
   border-radius: 12px;
   box-shadow: var(--shadow-1);
-
+ 
   flex: 1;
   min-height: 0;
   margin-bottom: clamp(8px, 1vh, 14px); /* Responsive gap at bottom */
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
-  width:calc(100% - 20px);
-  border:1px solid var(--color-neutral-300);
-  margin-left: 10px;
-
-
+  /* Center card with equal left/right gap inside its container */
+  width: calc(100% - 10px);
+  margin: 0 auto;
+  border: 1px solid var(--color-neutral-300);
 }
 
 .data-table-scroll {
@@ -280,6 +279,12 @@
   box-sizing: border-box;
 }
 
+/* Fixed width for File Name column */
+.col-name {
+  width: 400px;
+  max-width: 400px;
+}
+
 .data-table thead th {
   background: var(--color-neutral-100);
   color: var(--color-neutral-1000);
@@ -371,15 +376,15 @@
 
 /* Slight left nudge only for Staged StatusBadge in ingestion table */
 .data-td-status .badge[data-variant="staged"] {
-  margin-left: -40px;
+  margin-left: -50px;
 }
 
 .data-td-status .badge[data-variant="failed"] {
-  margin-left: -40px;
+  margin-left: -50px;
 }
 
 .data-td-status .badge[data-variant="uploading"] {
-  margin-left: -40px;
+  margin-left: -50px;
 }
 
 .data-td-actions, .data-th-actions { 
@@ -455,6 +460,29 @@
   color: var(--color-primary-800);
   font: 500 13px/20px var(--type-font-family-primary, "IBM Plex Sans");
   cursor: pointer;
+}
+
+.data-add-note-btn {
+  border: none;
+  background: transparent;
+  color: var(--color-primary-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 430;
+  line-height: var(--line-height-body-md);
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.data-add-note-btn:hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+}
+
+.data-add-note-btn:active {
+  color: var(--color-primary-800);
 }
 
 /* Notes container with text truncation */

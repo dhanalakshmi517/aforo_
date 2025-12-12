@@ -7,7 +7,6 @@ html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
 
 /* Viewport */
 .rate-np-viewport {
-  border-bottom: 1px solid var(--color-neutral-300);
   padding: var(--np-gap-top) var(--np-gap-right) 30px var(--np-gap-left);
   box-sizing: border-box;
   height: calc(100vh - 40px);
@@ -308,6 +307,7 @@ html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
   background: #fff;
   margin:4px -24px 18px -24px;
   padding:0 24px;
+  border-bottom: 1px solid var(--color-neutral-300);
 }
 .rate-np-section-title {
   color: var(--color-neutral-800);
@@ -316,13 +316,6 @@ html, body, #root { height: 100%; margin: 0; padding: 0; overflow: visible; }
   font-weight: 400;
   line-height: var(--line-height-heading-h6);
   text-transform: uppercase;
-}
-.rate-np-section-header::after {
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-5px;
-  height:1px;
-  background:var(--color-neutral-300);
 }
 
 /* Footer */
