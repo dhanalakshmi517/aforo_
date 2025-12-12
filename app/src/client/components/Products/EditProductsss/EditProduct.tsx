@@ -496,8 +496,31 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
         try {
           let hasStructuredIconData = false;
 
-          // PRIORITY 1: structured JSON in productIcon
-          if (data.productIcon) {
+          // PRIORITY 0: Check localStorage cache FIRST (has the most up-to-date icon data)
+          // This is necessary because backend doesn't properly return productIcon field
+          try {
+            const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+            const cachedIconJson = iconCache[productId];
+            if (cachedIconJson) {
+              const parsedCache = typeof cachedIconJson === 'string' ? JSON.parse(cachedIconJson) : cachedIconJson;
+              if (parsedCache?.iconData) {
+                console.log(`✅ EditProduct: Using localStorage cached icon for ${productId}`);
+                setSelectedIcon(parsedCache.iconData as ProductIconData);
+                setOriginalIcon(parsedCache.iconData as ProductIconData);
+                hasStructuredIconData = true;
+              } else if (parsedCache?.id && parsedCache?.svgPath) {
+                console.log(`✅ EditProduct: Using localStorage cached icon (direct) for ${productId}`);
+                setSelectedIcon(parsedCache as ProductIconData);
+                setOriginalIcon(parsedCache as ProductIconData);
+                hasStructuredIconData = true;
+              }
+            }
+          } catch (cacheErr) {
+            console.warn('EditProduct: Failed to read icon cache from localStorage:', cacheErr);
+          }
+
+          // PRIORITY 1: structured JSON in productIcon (backend data - only if cache miss)
+          if (!hasStructuredIconData && data.productIcon) {
             const parsed = JSON.parse(data.productIcon);
             if (parsed?.iconData) {
               setSelectedIcon(parsed.iconData as ProductIconData);
