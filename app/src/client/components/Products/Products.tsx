@@ -869,8 +869,18 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredProducts.map((product) => (
-                      <tr key={`${product.productId}-${refreshKey}`}>
+                    {isLoading && products.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="products-loading-state">
+                            <div className="spinner"></div>
+                            <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading products...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredProducts.map((product) => (
+                        <tr key={`${product.productId}-${refreshKey}`}>
                         <td className="product-name-td">
                           <div className="product-name-cell">
                             <div className="product-name-cell__icon">
@@ -1089,9 +1099,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             />
                           </div>
                         </td>
-                      </tr>
-                    ))}
-                    {filteredProducts.length === 0 && (
+                        </tr>
+                      ))
+                    )}
+                    {filteredProducts.length === 0 && !isLoading && (
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">

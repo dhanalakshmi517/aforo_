@@ -353,19 +353,42 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
           )}
         </div>
 
-        <div className="stair-example-section">
-          <h4>EXAMPLE</h4>
-          <a href="#">Stair – Step Pricing</a>
-          <table>
+        <div className="tiered-example-section stair-example-section">
+          <div className="tiered-example-header">
+            <div className="tiered-example-icon">
+             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+  <path d="M6.675 10.925H8.5C8.71283 10.925 8.891 10.8532 9.0345 10.7095C9.17817 10.566 9.25 10.3878 9.25 10.175V7.6H11.075C11.2878 7.6 11.466 7.52817 11.6095 7.3845C11.7532 7.241 11.825 7.06283 11.825 6.85V4.25H13.5C13.7128 4.25 13.891 4.17817 14.0345 4.0345C14.1782 3.891 14.25 3.71283 14.25 3.5C14.25 3.28717 14.1782 3.109 14.0345 2.9655C13.891 2.82183 13.7128 2.75 13.5 2.75H11.075C10.8622 2.75 10.684 2.82183 10.5405 2.9655C10.3968 3.109 10.325 3.28717 10.325 3.5V6.075H8.5C8.28717 6.075 8.109 6.14683 7.9655 6.2905C7.82183 6.434 7.75 6.61217 7.75 6.825V9.4H5.925C5.71217 9.4 5.534 9.47183 5.3905 9.6155C5.24683 9.759 5.175 9.93717 5.175 10.15V12.75H3.5C3.28717 12.75 3.109 12.8218 2.9655 12.9655C2.82183 13.109 2.75 13.2872 2.75 13.5C2.75 13.7128 2.82183 13.891 2.9655 14.0345C3.109 14.1782 3.28717 14.25 3.5 14.25H5.925C6.13783 14.25 6.316 14.1782 6.4595 14.0345C6.60317 13.891 6.675 13.7128 6.675 13.5V10.925ZM1.80775 17C1.30258 17 0.875 16.825 0.525 16.475C0.175 16.125 0 15.6974 0 15.1923V1.80775C0 1.30258 0.175 0.875 0.525 0.525C0.875 0.175 1.30258 0 1.80775 0H15.1923C15.6974 0 16.125 0.175 16.475 0.525C16.825 0.875 17 1.30258 17 1.80775V15.1923C17 15.6974 16.825 16.125 16.475 16.475C16.125 16.825 15.6974 17 15.1923 17H1.80775ZM1.80775 15.5H15.1923C15.2692 15.5 15.3398 15.4679 15.4038 15.4038C15.4679 15.3398 15.5 15.2692 15.5 15.1923V1.80775C15.5 1.73075 15.4679 1.66025 15.4038 1.59625C15.3398 1.53208 15.2692 1.5 15.1923 1.5H1.80775C1.73075 1.5 1.66025 1.53208 1.59625 1.59625C1.53208 1.66025 1.5 1.73075 1.5 1.80775V15.1923C1.5 15.2692 1.53208 15.3398 1.59625 15.4038C1.66025 15.4679 1.73075 15.5 1.80775 15.5Z" fill="#2A455E"/>
+</svg>
+            </div>
+            <div className="tiered-example-header-text">
+              <h4>EXAMPLE</h4>
+              <button type="button" className="tiered-example-link">Stair – Step Pricing</button>
+            </div>
+          </div>
+
+          <table className="tiered-example-table">
             <tbody>
-              <tr><td>Stair 1</td><td>1 – 200</td><td>$20</td></tr>
-              <tr><td>Stair 2</td><td>201 – 500</td><td>$30</td></tr>
-              <tr><td>Stair 3</td><td>501 – 700</td><td>$40</td></tr>
+              <tr>
+                <td className="tier-label">Stair 1</td>
+                <td className="tier-range"><strong>1 – 200</strong></td>
+                <td className="tier-price">$20</td>
+              </tr>
+              <tr>
+                <td className="tier-label">Stair 2</td>
+                <td className="tier-range"><strong>201 – 500</strong></td>
+                <td className="tier-price">$30</td>
+              </tr>
+              <tr>
+                <td className="tier-label">Stair 3</td>
+                <td className="tier-range"><strong>501 – 700</strong></td>
+                <td className="tier-price">$40</td>
+              </tr>
             </tbody>
           </table>
-          <p className="consumer-note">
-            <a href="#">You to consumer:</a><br />
-            <em>“You’ve used 300 units this billing cycle, placing you in Stair 2. Your total charge will be $30.”</em>
+
+          <p className="tiered-consumer-note">
+            <span className="tiered-note-title">You to consumer:</span><br />
+            <span className="tiered-note-text">"You’ve used 300 units this billing cycle, placing you in Stair 2. Your total charge will be $30."</span>
           </p>
         </div>
       </div>

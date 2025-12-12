@@ -2,18 +2,22 @@
 
 
 
+
+
+
+
 .customers-container {
-  padding: 0;
-width: calc(100% - 256px - 10px);
+  /* Outer gap: top 15px, left/right 10px, bottom 10px */
+  padding: 15px 10px 10px 10px;
+  width:100%;
+
   max-width: none;
   box-sizing: border-box;
-  margin-left: 20px;
-  padding-right: 10px;
-  background: #FFFFFF; /* White background color */
+  margin-left:-5px;
+  background: #FFFFFF; /* Page background */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
 }
-
 @media (max-width: 991px) { 
   .customers-container { 
     margin-left: 0; 
@@ -31,10 +35,10 @@ width: calc(100% - 256px - 10px);
 /* Duplicate block updated as well */
 .customers-container {
   padding: 0;
-width: calc(100% - 256px - 10px);
+width: calc(100% - 256px);
   max-width: none;
   box-sizing: border-box;
-  margin-left: 20px;
+  margin-left: 10px;
   padding-right: 10px;
   background: white !important;
   box-shadow: none;
@@ -60,12 +64,14 @@ width: calc(100% - 256px - 10px);
 
 
 .check-container {
-  padding: 0 20px 0px 0;
+  /* Outer gap: top 15px, left/right 10px, bottom 10px */
+  padding: 15px 13px 10px 13px;
   width: 100%;
+
   max-width: none;
   box-sizing: border-box;
-  margin-left: 20px;
-  background: #FFFFFF; /* White background color */
+  margin-left: 0;
+  background: #FFFFFF; /* Page background */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
 }
@@ -169,15 +175,15 @@ width: calc(100% - 256px - 10px);
   flex: 1 1 auto;
   min-height: calc(100vh - 110px);
   overflow: hidden;
-  width: calc(100% - 20px);
-  margin-right: 0;
-  margin-bottom: 10px;
+  width: 100%;              /* use full width inside check-container */
+  margin: 0;                /* no extra outer side gap here */
   background-color: white;
   border-radius: var(--border-radius-lg);
 
-  padding: 12px 10px 10px 12px;
+  padding: 10px 8px 10px 12px; /* inner padding controls card gap from table */
   box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07),
               0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+              border:1px solid var(--color-neutral-300);
   position: relative;
 }
 
@@ -242,13 +248,12 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   max-height: calc(100vh - 180px);
   overflow-y: auto;
   overflow-x: hidden;
-  width: calc(100% - 10px);
-  margin-right: 0;
-  margin-bottom: 5px;
-  margin-top: 15px;
+  width: 100%;
+  margin: 15px 0 5px 0;     /* vertical gaps only; horizontal handled by padding */
   background-color: white;
   border-radius: var(--border-radius-lg);
-  padding: 8px 8px 8px 10px;
+  /* Reduce bottom padding to shrink white gap below last row */
+  padding: 8px 8px 2px 2px;
   box-shadow: 0 18px 54px rgba(0,0,0,0.07), 0 2.254px 43.336px rgba(0,0,0,0);
   position: relative;
   scrollbar-width: none;
@@ -385,4 +390,29 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   width: 100%;
   height: 400px;
   gap: 8px;
+}
+
+/* Loading state spinner */
+.customers-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.customers-loading-state .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 1.5px solid var(--color-primary-800);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

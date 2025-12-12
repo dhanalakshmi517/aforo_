@@ -10,6 +10,7 @@ import EditLlmDimension from './EditLlmDimension';
 import EditLlmOperator from './EditLlmOperator';
 import { SelectField, InputField, SelectOption } from '../../componenetsss/Inputs';
 import DeleteIconButton from '../../componenetsss/DeleteIconButton';
+import SecondaryButton from '../../componenetsss/SecondaryButton';
 
 interface FilterCondition {
   id: number;
@@ -155,7 +156,9 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
         </div>
       ))}
 
-      <button className="add-btn" onClick={handleAdd}>Add Filter</button>
+      <SecondaryButton className="add-btn" onClick={handleAdd}>
+        Add Filter
+      </SecondaryButton>
 
       <div className="billing-section">
         <label>Select Billing Criteria</label>

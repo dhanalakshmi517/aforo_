@@ -1,5 +1,30 @@
 @import "../Variables/Variables.css";
 
+/* Loading state spinner */
+.subscriptions-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.subscriptions-loading-state .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-primary-100);
+  border-top: 1.5px solid var(--color-primary-700);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Page container (match Products & Customers) */
 .subscriptions-container {
   padding: 0 16px 16px 16px;
@@ -166,16 +191,18 @@
 .cust-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 
 .cust-name {
   color: var(--color-neutral-1700);
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .cust-email {
   color: var(--color-neutral-700);
+  line-height: 1.2;
 }
 
 /* --------- Date column (Purchased On) ---------- */
@@ -184,18 +211,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 240px;
-  font-size: var(--font-size-md);
+  min-width: 200px;
+  font-size: var(--font-size-sm);
   font-weight: 400;
-  line-height: 1;
-  height: 40px;
-  display: flex;
-  align-items: center;
+  line-height: 1.2;
 }
 
 /* --------- Status column ---------- */
 .subscriptions-table td:nth-child(5) {
   padding: 18px 8px 18px 24px;
+  text-align: right;
 }
 
 /* --------- Actions ---------- */
@@ -297,9 +322,9 @@
   background: var(--surface-layer-3, #F8F7FA);
   border: 0.4px solid var(--border-border-2, #D5D4DF);
   border-radius: var(--border-radius-md, 12px);
-  height: auto;
-  min-height: 52px;
-  padding: 8px 12px;
+  height: 44px;
+  min-height: 44px;
+  padding: 6px 12px;
 }
 
 .rp-name-initials {

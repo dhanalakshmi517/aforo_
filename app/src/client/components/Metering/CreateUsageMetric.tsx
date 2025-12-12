@@ -544,6 +544,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   );
 
   const handleGoAllMetrics = () => {
+    showToast({
+      kind: 'success',
+      title: 'Usage Metric Created Successfully',
+      message: 'Your usage metric has been created successfully.',
+    });
     navigate('/get-started/metering');
   };
 
@@ -850,11 +855,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     setSaving(false);
                                     if (finalized) {
                                       setShowSuccess(true);
-                                      showToast({
-                                        kind: 'success',
-                                        title: 'Usage Metric Created Successfully',
-                                        message: 'Your usage metric has been created successfully.',
-                                      });
                                     } else {
                                       showToast({
                                         kind: 'error',

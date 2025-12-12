@@ -751,37 +751,43 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
         </div>
         {activeSections.includes('setupFee') && (
           <div className="section-content">
-            <label>
-              Enter one-time Setup Fee <span className="optional">(optional)</span>
-            </label>
-            <InputField
-              type="number"
-              value={setupFeePayload.setupFee || ''}
-              onChange={(val) => {
-                const v = val;
-                setSetupFeePayload({
-                  ...setupFeePayload,
-                  setupFee: v.trim() === '' ? 0 : Number(v),
-                });
-              }}
-              placeholder="$0"
-              disabled={locked}
-            />
+            <div className="extras-two-col-row">
+              <div className="extras-field">
+                <label>
+                  Enter one-time Setup Fee <span className="optional">(optional)</span>
+                </label>
+                <InputField
+                  type="number"
+                  value={setupFeePayload.setupFee || ''}
+                  onChange={(val) => {
+                    const v = val;
+                    setSetupFeePayload({
+                      ...setupFeePayload,
+                      setupFee: v.trim() === '' ? 0 : Number(v),
+                    });
+                  }}
+                  placeholder="$0"
+                  disabled={locked}
+                />
+              </div>
 
-            <label>Application Timing</label>
-            <InputField
-              type="number"
-              value={setupFeePayload.applicationTiming || ''}
-              onChange={(val) => {
-                const v = val;
-                setSetupFeePayload({
-                  ...setupFeePayload,
-                  applicationTiming: v.trim() === '' ? 0 : Number(v),
-                });
-              }}
-              placeholder="0"
-              disabled={locked}
-            />
+              <div className="extras-field">
+                <label>Application Timing</label>
+                <InputField
+                  type="number"
+                  value={setupFeePayload.applicationTiming || ''}
+                  onChange={(val) => {
+                    const v = val;
+                    setSetupFeePayload({
+                      ...setupFeePayload,
+                      applicationTiming: v.trim() === '' ? 0 : Number(v),
+                    });
+                  }}
+                  placeholder="0"
+                  disabled={locked}
+                />
+              </div>
+            </div>
 
             <label>Invoice Description</label>
             <TextareaField
@@ -832,27 +838,42 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
         </div>
         {activeSections.includes('discounts') && (
           <div className="section-content">
-            <label>Discount Type</label>
-            <SelectField
-              value={discountForm.discountType}
-              onChange={(val) => {
-                const nextType = (val as 'PERCENTAGE' | 'FLAT') || 'PERCENTAGE';
-                console.log('👤 User manually selected discount type:', nextType);
-                userHasSelectedDiscountsRef.current = true; // Mark that user has made a selection
-                // clear the opposite field to avoid stale values
-                if (nextType === 'PERCENTAGE') {
-                  setDiscountForm({ ...discountForm, discountType: nextType, flatDiscountAmountStr: '' });
-                } else {
-                  setDiscountForm({ ...discountForm, discountType: nextType, percentageDiscountStr: '' });
-                }
-              }}
-              options={[
-                { label: '--Select--', value: '' },
-                { label: 'PERCENTAGE', value: 'PERCENTAGE' },
-                { label: 'FLAT', value: 'FLAT' },
-              ]}
-              disabled={locked}
-            />
+            <div className="extras-two-col-row">
+              <div className="extras-field">
+                <label>Discount Type</label>
+                <SelectField
+                  value={discountForm.discountType}
+                  onChange={(val) => {
+                    const nextType = (val as 'PERCENTAGE' | 'FLAT') || 'PERCENTAGE';
+                    console.log('👤 User manually selected discount type:', nextType);
+                    userHasSelectedDiscountsRef.current = true; // Mark that user has made a selection
+                    // clear the opposite field to avoid stale values
+                    if (nextType === 'PERCENTAGE') {
+                      setDiscountForm({ ...discountForm, discountType: nextType, flatDiscountAmountStr: '' });
+                    } else {
+                      setDiscountForm({ ...discountForm, discountType: nextType, percentageDiscountStr: '' });
+                    }
+                  }}
+                  options={[
+                    { label: '--Select--', value: '' },
+                    { label: 'PERCENTAGE', value: 'PERCENTAGE' },
+                    { label: 'FLAT', value: 'FLAT' },
+                  ]}
+                  disabled={locked}
+                />
+              </div>
+
+              <div className="extras-field">
+                <label>Eligibility</label>
+                <InputField
+                  type="text"
+                  value={discountForm.eligibility}
+                  onChange={(val) => setDiscountForm({ ...discountForm, eligibility: val })}
+                  placeholder="e.g. new users"
+                  disabled={locked}
+                />
+              </div>
+            </div>
 
             {/* Show only the relevant input */}
             {discountForm.discountType === 'PERCENTAGE' && (
@@ -880,15 +901,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                 />
               </>
             )}
-
-            <label>Eligibility</label>
-            <InputField
-              type="text"
-              value={discountForm.eligibility}
-              onChange={(val) => setDiscountForm({ ...discountForm, eligibility: val })}
-              placeholder="e.g. new users"
-              disabled={locked}
-            />
 
             <label>Validity Period</label>
             <div className="date-range">

@@ -19,7 +19,7 @@
 /* top title */
 .review-header {
   margin-bottom: 10px;
-  padding-left: 24px;
+  padding-left: 14px;
   padding-right: 24px;
 color: var(--color-neutral-1400);
 
@@ -68,7 +68,7 @@ line-height: var(--line-height-heading-h6, 20px); /* 142.857% */
 font-family: var(--type-font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-md, 14px);
 font-style: normal;
-font-weight: 400;
+font-weight: 420;
     margin-left:16px;
 
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
@@ -84,7 +84,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 font-family: var(--type-font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-md, 14px);
 font-style: normal;
-font-weight: 600;
+font-weight: 500;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
   text-align: right;
   margin-right: 30px;

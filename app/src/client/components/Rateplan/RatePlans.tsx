@@ -1055,11 +1055,21 @@ const RatePlans: React.FC<RatePlansProps> = ({
                     <th>Payment Type</th>
                     <th>Created on</th>
                     <th>Status</th>
-                    <th className="col-actions">Actions</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
-
-                {hasRows ? (
+                {loading && ratePlansState.length === 0 ? (
+                  <tbody>
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                        <div className="rateplan-loading-state">
+                          <div className="spinner"></div>
+                          <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading rate plans...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                ) : hasRows ? (
                   <tbody>
                     {filteredPlans.map((plan) => (
                       <tr key={plan.ratePlanId}>
@@ -1106,7 +1116,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                               <img src={RatePlansEmptyImg} alt="No rate plans" style={{ width: '190px', height: '190px' }} />
                             </div>
                             <p className="customers-empty-state-text">
-                              No Rate Plan created yet. Click ‘New Rate Plan’<br /> to create your First Rate Plan.
+                              No Rate Plan created yet. Click 'New Rate Plan'<br /> to create your First Rate Plan.
                             </p>
                             <PrimaryButton
                               onClick={() => {

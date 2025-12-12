@@ -124,3 +124,18 @@ export const fetchIngestionFiles = async (): Promise<IngestionFile[]> => {
 
   return response.data ?? [];
 };
+
+// Delete a single ingestion file by id
+export const deleteIngestionFile = async (fileId: number): Promise<void> => {
+  const headers = getAuthHeaders();
+  const endpoint = `${INGESTION_BASE_URL}/files/${fileId}`;
+
+  try {
+    await axios.delete(endpoint, {
+      headers,
+      withCredentials: false,
+    });
+  } catch (error) {
+    handleApiError(error);
+  }
+};

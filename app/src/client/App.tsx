@@ -684,7 +684,7 @@ export default function App() {
                       />
                       <main
                         className="flex-1 bg-white py-6 pl-2 pr-10"
-                        style={{ marginLeft: showSidebar ? '15rem' : '0' }}
+                        style={{ marginLeft: showSidebar ? '16rem' : '0' }}
                       >
                         <Products
                           showNewProductForm={showNewProductForm}

@@ -13,7 +13,7 @@ import OutlinedButton from "../componenetsss/OutlinedButton";
 import SmartDuplicateDetection from "../componenetsss/SmartDuplicateDetection";
 import StatusBadge from "../componenetsss/StatusBadge";
 
-import { ingestFiles, fetchIngestionFiles, IngestionFile } from "./api";
+import { ingestFiles, fetchIngestionFiles, IngestionFile, deleteIngestionFile } from "./api";
 
 import "./DataIngestionPage.css";
 import IngestionHistory, { HistoryRow } from "./IngestionHistory";
@@ -32,6 +32,7 @@ const DataIngestionPage: React.FC = () => {
   const [mode, setMode] = useState<"left" | "right">("left"); // 'left' = Manual, 'right' = API
   const [rows, setRows] = useState<FileRow[]>([]);
   const [historyRows, setHistoryRows] = useState<HistoryRow[]>([]);
+  const [failedIngestionFiles, setFailedIngestionFiles] = useState<IngestionFile[]>([]);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [currentNoteFile, setCurrentNoteFile] = useState<FileRow | null>(null);
@@ -78,6 +79,29 @@ const DataIngestionPage: React.FC = () => {
     };
 
     loadHistory();
+  }, [activeTab]);
+
+  // Load only failed / partial files for the Ingestion tab (backend view)
+  useEffect(() => {
+    if (activeTab !== 'ingestion') return;
+
+    const loadFailedIngestionFiles = async () => {
+      try {
+        const files: IngestionFile[] = await fetchIngestionFiles();
+        const filtered = files.filter((f) => {
+          const backendStatus = f.status?.toUpperCase();
+          if (!backendStatus) return false;
+          if (backendStatus === 'FAILED') return true;
+          if (backendStatus === 'PARTIALLY_INGESTED') return true;
+          return false;
+        });
+        setFailedIngestionFiles(filtered);
+      } catch (err) {
+        console.error('Failed to load failed ingestion files', err);
+      }
+    };
+
+    loadFailedIngestionFiles();
   }, [activeTab]);
 
   const columns = useMemo(
@@ -391,7 +415,6 @@ const DataIngestionPage: React.FC = () => {
             </button>
             <button
               className={`data-tab ${activeTab === 'history' ? 'is-active' : ''}`}
-              type="button"
               onClick={() => setActiveTab('history')}
             >
               Ingestion History
@@ -402,21 +425,18 @@ const DataIngestionPage: React.FC = () => {
           <div className="data-ingestion-container">
             {activeTab === 'ingestion' && (
               <>
-                {!isLoading && (
+                {!isLoading && (rows.length > 0 || failedIngestionFiles.length > 0) && (
                   <header className="data-card-header">
-                    <span>Selected Files</span>
+                    <span>Files</span>
                     <div className="data-card-actions">
-                      {rows.length > 0 ? (
-                        <>
-                          <button className="data-link-clear" type="button" onClick={clearAll}>
-                            Clear all
-                          </button>
-                          <TertiaryButton onClick={addMoreFiles}>
-
-                            + Add more files
-                          </TertiaryButton>
-                        </>
-                      ) : null}
+                      {rows.length > 0 && (
+                        <button className="data-link-clear" type="button" onClick={clearAll}>
+                          Clear all
+                        </button>
+                      )}
+                      <TertiaryButton onClick={addMoreFiles}>
+                        + Add more files
+                      </TertiaryButton>
                       <PrimaryButton
                         onClick={ingest}
                         disabled={!canIngest || isLoading}
@@ -444,7 +464,7 @@ const DataIngestionPage: React.FC = () => {
                   <div className="data-table-scroll">
                     <table className="data-table">
                       <colgroup>
-                        <col className="col-select" />
+                        <col className="col-sno" />
                         <col className="col-name" />
                         <col className="col-status" />
                         <col className="col-uploaded" />
@@ -454,22 +474,22 @@ const DataIngestionPage: React.FC = () => {
 
                       <thead>
                         <tr>
-                          <th>{columns[0].label}</th>
-                          <th>{columns[1].label}</th>
-                          <th>{columns[2].label}</th>
-                          <th>{columns[3].label}</th>
-                          <th className="data-th-notes">{columns[4].label}</th>
-                          <th className="data-th-actions">{columns[5].label}</th>
+                          <th>S.No</th>
+                          <th>File Name</th>
+                          <th>Status</th>
+                          <th>Uploaded On</th>
+                          <th>Notes/description</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
 
                       <tbody>
-                        {rows.length === 0 ? (
+                        {rows.length === 0 && failedIngestionFiles.length === 0 ? (
                           <tr className="data-empty-row">
                             <td colSpan={6}>
                               <div className="data-empty">
                                 <p className="data-empty-hint">
-                                  You didn't have any files yet. Click on add files to start Ingestion
+                                  No files. Click on add files to start Ingestion
                                 </p>
                                 <TertiaryButton onClick={openPicker} className="data-upload-files-btn">
                                   + Upload files
@@ -479,116 +499,104 @@ const DataIngestionPage: React.FC = () => {
                                   onClick={downloadSampleFile}
                                   iconLeft={
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-  <path d="M6.75 8.75V0.75M6.75 8.75L3.41667 5.41667M6.75 8.75L10.0833 5.41667M12.75 8.75V11.4167C12.75 11.7703 12.6095 12.1094 12.3595 12.3595C12.1094 12.6095 11.7703 12.75 11.4167 12.75H2.08333C1.72971 12.75 1.39057 12.6095 1.14052 12.3595C0.890476 12.1094 0.75 11.7703 0.75 11.4167V8.75" stroke="#2A455E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+                                      <path d="M6.75 8.75V0.75M6.75 8.75L3.41667 5.41667M6.75 8.75L10.0833 5.41667M12.75 8.75V11.4167C12.75 11.7703 12.6095 12.1094 12.3595 12.3595C12.1094 12.6095 11.7703 12.75 11.4167 12.75H2.08333C1.72971 12.75 1.39057 12.6095 1.14052 12.3595C0.890476 12.1094 0.75 11.7703 0.75 11.4167V8.75" stroke="#2A455E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
                                   }
                                 />
-
                               </div>
                             </td>
                           </tr>
                         ) : (
-                          rows.map((r: FileRow, idx: number) => (
-                            <tr key={r.id}>
-                              {/* Checkbox + S.No column */}
-                              <td className="data-td-sno" style={{ verticalAlign: 'middle' }}>
-                                <div className="data-checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <Checkbox
-                                    checked={selectedRows.has(idx)}
-                                    onChange={(checked) => {
-                                      const newSelected = new Set(selectedRows);
-                                      if (checked) {
-                                        newSelected.add(idx);
-                                      } else {
-                                        newSelected.delete(idx);
-                                      }
-                                      setSelectedRows(newSelected);
-                                    }}
+                          <>
+                            {rows.map((r: FileRow, idx: number) => (
+                              <tr key={r.id}>
+                                <td>{idx + 1}</td>
+                                <td>{r.name}</td>
+                                <td>
+                                  <StatusBadge
+                                    label={r.status}
+                                    variant={
+                                      r.status === "Failed"
+                                        ? "failed"
+                                        : r.status === "Staged"
+                                        ? "staged"
+                                        : r.status === "Uploading"
+                                        ? "uploading"
+                                        : "success"
+                                    }
+                                    size="sm"
                                   />
-                                  <span className="data-index-badge" style={{ fontSize: '16px', fontWeight: 'bold' }}>{idx + 1}</span>
-                                </div>
-                              </td>
+                                </td>
+                                <td>{formatUploaded(r.uploadedAt)}</td>
+                                <td>
+                                  {r.note ? (
+                                    r.note
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className="data-add-note-btn"
+                                      onClick={() => handleAddNote(r)}
+                                    >
+                                      + Add notes
+                                    </button>
+                                  )}
+                                </td>
+                                <td className="data-td-actions">
+                                  <DeleteButton
+                                    onClick={() => removeRow(idx)}
+                                    label="Remove"
+                                    variant="soft"
+                                    customIcon={
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="#ED5142" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                    }
+                                  />
+                                </td>
+                              </tr>
+                            ))}
+                            {failedIngestionFiles.map((f, index) => {
+                              const backendStatus = f.status?.toUpperCase();
+                              const isFailed = backendStatus === 'FAILED';
+                              const label = isFailed ? 'Failed' : 'Partial';
 
-                              {/* File name column: chip + remove */}
-                              <td className="data-td-name">
-                                <span className="data-file-chip">
-                                  <span className="data-file-icon">
-                                    {/* File icon */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="15" viewBox="0 0 12 15" fill="none">
-                                      <path d="M7.29789 1.11865V3.71124C7.29789 4.05504 7.43446 4.38476 7.67756 4.62786C7.92067 4.87097 8.25039 5.00754 8.59418 5.00754H11.1868M4.7053 5.65569H3.409M8.59418 8.24828H3.409M8.59418 10.8409H3.409M7.94604 1.11865H2.1127C1.7689 1.11865 1.43919 1.25523 1.19608 1.49833C0.95298 1.74143 0.816406 2.07115 0.816406 2.41495V12.7853C0.816406 13.1291 0.95298 13.4588 1.19608 13.7019C1.43919 13.945 1.7689 14.0816 2.1127 14.0816H9.89048C10.2343 14.0816 10.564 13.945 10.8071 13.7019C11.0502 13.4588 11.1868 13.1291 11.1868 12.7853V4.35939L7.94604 1.11865Z" stroke="#00365A" strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  </span>
-                                  <span className="data-file-name" title={r.name}>{r.name}</span>
-                                </span>
-                              </td>
-
-                              {/* Status column */}
-                              <td className="data-td-status">
-                                <StatusBadge
-                                  label={r.status}
-                                  variant={
-                                    r.status === "Failed"
-                                      ? "failed"
-                                      : r.status === "Staged"
-                                      ? "staged"
-                                      : r.status === "Uploading"
-                                      ? "uploading"
-                                      : "success"
-                                  }
-                                  size="sm"
-                                />
-                              </td>
-
-                              {/* Uploaded On */}
-                              <td className="data-td-uploaded">{formatUploaded(r.uploadedAt)}</td>
-
-                              {/* Notes column */}
-                              <td className="data-td-notes">
-                                {r.note ? (
-                                  <div className="data-note-container">
-                                    <span className="data-note-text">{r.note}</span>
-                                    {r.note && (
-                                      <EditIconButton
-                                        onClick={() => {
-                                          handleAddNote(r);
-                                        }}
-                                        title="Edit note"
-                                      />
-                                    )}
-                                  </div>
-                                ) : (
-                                  <button
-                                    className="data-link-notes"
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      handleAddNote(r);
-                                      return false;
-                                    }}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onMouseUp={(e) => e.stopPropagation()}
-                                  >
-                                    + Add notes
-                                  </button>
-                                )}
-                              </td>
-
-                              {/* Actions column */}
-                              <td className="data-td-actions">
-                                <DeleteButton
-                                  onClick={() => removeRow(idx)}
-                                  label="Remove"
-                                  variant="soft"
-                                  customIcon={
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                      <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="#ED5142" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  }
-                                />
-                              </td>
-                            </tr>
-                          ))
+                              return (
+                                <tr key={f.fileId}>
+                                  <td>{rows.length + index + 1}</td>
+                                  <td>{f.fileName}</td>
+                                  <td>
+                                    <StatusBadge
+                                      label={label}
+                                      variant={isFailed ? 'failed' : 'partial'}
+                                      size="sm"
+                                    />
+                                  </td>
+                                  <td>{formatUploaded(new Date(f.uploadedAt))}</td>
+                                  <td>{f.description || '-'}</td>
+                                  <td className="data-td-actions">
+                                    <DeleteButton
+                                      onClick={async () => {
+                                        try {
+                                          await deleteIngestionFile(f.fileId);
+                                          setFailedIngestionFiles(prev => prev.filter(x => x.fileId !== f.fileId));
+                                          setHistoryRows(prev => prev.filter(hr => hr.id !== f.fileId));
+                                        } catch (err) {
+                                          console.error('Failed to delete ingestion file', err);
+                                        }
+                                      }}
+                                      label="Remove"
+                                      variant="soft"
+                                      customIcon={
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                          <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="#ED5142" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                      }
+                                    />
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </>
                         )}
                       </tbody>
                     </table>
@@ -630,7 +638,6 @@ const DataIngestionPage: React.FC = () => {
                 onCheckboxChange={(checked) => {
                   setDontShowAgain(checked);
                   if (checked) {
-                    // Optionally save to localStorage
                     localStorage.setItem('hideSmartDetection', 'true');
                   }
                 }}

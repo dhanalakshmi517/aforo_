@@ -1,12 +1,26 @@
+@import "../Variables/Variables.css";
 .billable-section h2 {
-  font-size: 18px;
-  font-weight: 600;
+color: var(--color-neutral-1000);
+
+/* heading/h6/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
   margin-bottom: 6px;
+  margin-left: -15px;
 }
 
 .billable-section h2 span {
-  font-weight: 600;
-  color: #3b82f6;
+color: var(--color-neutral-1000);
+
+/* heading/h6/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
 }
 
 .billable-note {

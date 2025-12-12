@@ -117,6 +117,8 @@ body,
 .create-product-page {
   min-height: 100vh;
   background: #f7f8fb;
+    overflow-y: hidden; /* hides vertical scrollbar */
+
 }
 
 /* Viewport fills screen */

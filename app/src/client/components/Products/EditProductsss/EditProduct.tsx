@@ -1,4 +1,4 @@
-// EditProduct.tsx (RESTORED SVG FALLBACK + FIXED CHANGE DETECTION)
+// EditProduct.tsx (USING EditSubscription SHELL + CLASSNAMES)
 
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
@@ -18,19 +18,21 @@ import DeleteButton from '../../componenetsss/DeleteButton';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import ProductIconPickerModal from '../ProductIconPickerModal';
 import { ProductIconData } from '../ProductIcon';
+import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
 import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration } from './EditProductApi';
 import { finalizeProduct, deleteProduct, updateProductIcon } from '../api';
 import { listAllProducts, getProducts } from '../api';
-import "../../componenetsss/SkeletonForm.css";
+import '../../componenetsss/SkeletonForm.css';
 
-
-interface Product { productId: string; }
+interface Product {
+  productId: string;
+}
 
 const steps = [
   { id: 1, title: 'General Details', desc: 'Start with the basics of your product.' },
   { id: 2, title: 'Configuration', desc: 'Define configuration and parameters.' },
-  { id: 3, title: 'Review & Confirm', desc: 'Validate all details before finalizing.' }
+  { id: 3, title: 'Review & Confirm', desc: 'Validate all details before finalizing.' },
 ];
 
 interface EditProductProps {
@@ -41,7 +43,11 @@ interface EditProductProps {
 
 type ActiveTab = 'general' | 'configuration' | 'review';
 
-const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProductId, onIconUpdate }: EditProductProps) => {
+const EditProduct: React.FC<EditProductProps> = ({
+  onClose,
+  productId: propProductId,
+  onIconUpdate,
+}: EditProductProps) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { id: urlProductId } = useParams<{ id: string }>();
@@ -51,7 +57,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
   useEffect(() => {
     document.body.classList.add('edit-product-page');
-    return () => { document.body.classList.remove('edit-product-page'); };
+    return () => {
+      document.body.classList.remove('edit-product-page');
+    };
   }, []);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -73,22 +81,36 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     productName: '',
     version: '',
     skuCode: '',
-    description: ''
+    description: '',
   });
 
   // CHANGE DETECTION SNAPSHOTS
   const originalFormDataRef = useRef<typeof formData | null>(null);
   const originalConfigRef = useRef<Record<string, string> | null>(null);
 
-  const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
-  const [originalValues, setOriginalValues] = useState<{ productName: string; skuCode: string }>({ productName: '', skuCode: '' });
+  const [existingProducts, setExistingProducts] = useState<
+    Array<{ productName: string; skuCode: string }>
+  >([]);
+  const [originalValues, setOriginalValues] = useState<{ productName: string; skuCode: string }>(
+    { productName: '', skuCode: '' },
+  );
   const [modifiedFields, setModifiedFields] = useState<Set<string>>(new Set());
+  const formSectionRef = useRef<HTMLDivElement>(null);
+  const [scrollHeight, setScrollHeight] = useState(0);
 
   useEffect(() => {
     (async () => {
       try {
         let data: any[] = [];
-        try { data = await listAllProducts(); } catch { try { data = await getProducts(); } catch { data = []; } }
+        try {
+          data = await listAllProducts();
+        } catch {
+          try {
+            data = await getProducts();
+          } catch {
+            data = [];
+          }
+        }
         const mapped = data.map(p => ({
           productName: (p as any).productName,
           skuCode: ((p as any).internalSkuCode ?? (p as any).skuCode ?? '') as string,
@@ -116,30 +138,41 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
     if (field === 'productName') {
       const duplicate = existingProducts.some(p => {
-        if ((p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
-          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) return false;
+        if (
+          (p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
+          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()
+        )
+          return false;
         return (p.productName || '').toLowerCase() === trimmed.toLowerCase();
       });
       if (duplicate) setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
       else if (errors.productName === 'Must be unique') {
-        const { productName, ...rest } = errors; setErrors(rest);
+        const { productName, ...rest } = errors;
+        setErrors(rest);
       }
     }
 
     if (field === 'skuCode') {
       const duplicate = existingProducts.some(p => {
-        if ((p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
-          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()) return false;
+        if (
+          (p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
+          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()
+        )
+          return false;
         return (p.skuCode || '').toLowerCase() === trimmed.toLowerCase();
       });
       if (duplicate) setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
       else if (errors.skuCode === 'Must be unique') {
-        const { skuCode, ...rest } = errors; setErrors(rest);
+        const { skuCode, ...rest } = errors;
+        setErrors(rest);
       }
     }
 
     if (errors[field] && errors[field] !== 'Must be unique') {
-      setErrors(prev => { const { [field]: _, ...rest } = prev; return rest; });
+      setErrors(prev => {
+        const { [field]: _, ...rest } = prev;
+        return rest;
+      });
     }
   };
 
@@ -152,8 +185,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
     if (formData.productName && modifiedFields.has('productName')) {
       const isDuplicate = existingProducts.some(p => {
-        if (lower(p.productName || '') === lower(originalValues.productName) &&
-          lower(p.skuCode || '') === lower(originalValues.skuCode)) return false;
+        if (
+          lower(p.productName || '') === lower(originalValues.productName) &&
+          lower(p.skuCode || '') === lower(originalValues.skuCode)
+        )
+          return false;
         return lower(p.productName || '') === lower(formData.productName);
       });
       if (isDuplicate) newErrors.productName = 'Must be unique';
@@ -161,8 +197,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
 
     if (formData.skuCode && modifiedFields.has('skuCode')) {
       const isDuplicate = existingProducts.some(p => {
-        if (lower(p.productName || '') === lower(originalValues.productName) &&
-          lower(p.skuCode || '') === lower(originalValues.skuCode)) return false;
+        if (
+          lower(p.productName || '') === lower(originalValues.productName) &&
+          lower(p.skuCode || '') === lower(originalValues.skuCode)
+        )
+          return false;
         return lower(p.skuCode || '') === lower(formData.skuCode);
       });
       if (isDuplicate) newErrors.skuCode = 'Must be unique';
@@ -184,21 +223,16 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     );
   };
 
-  const handleCancel = () => setShowDeleteConfirm(true);
-
   const hasEmptyRequiredFields = () => {
-    // Check General Details tab
     if (activeTab === 'general') {
       return !formData.productName.trim() || !formData.skuCode.trim();
     }
 
-    // Check Configuration tab
     if (activeTab === 'configuration') {
       const currentProductType = configuration.productType || productType;
-      if (!currentProductType) return true; // Product type is required
+      if (!currentProductType) return true;
 
       const fields = configurationFields[currentProductType] || [];
-
       return fields.some((field: any) => {
         if (field.required) {
           const fieldValue = configuration[field.label] || '';
@@ -214,7 +248,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
   const handleConfirmDelete = async () => {
     setShowDeleteConfirm(false);
     if (productId) {
-      try { await deleteProduct(productId); } catch (e) { console.error('Failed to delete product', e); }
+      try {
+        await deleteProduct(productId);
+      } catch (e) {
+        console.error('Failed to delete product', e);
+      }
     }
     localStorage.removeItem('editConfigFormData');
     localStorage.removeItem('editConfigProductType');
@@ -226,14 +264,17 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     if (draftStatus === 'saving') return;
     try {
       setDraftStatus('saving');
-      if (!productId) { setDraftStatus('idle'); return; }
+      if (!productId) {
+        setDraftStatus('idle');
+        return;
+      }
 
       const draftPayload = {
         productName: formData.productName,
         version: formData.version,
         internalSkuCode: formData.skuCode,
         productDescription: formData.description,
-        status: 'DRAFT' as const
+        status: 'DRAFT' as const,
       };
       await updateGeneralDetails(productId, draftPayload as any);
 
@@ -256,6 +297,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
           console.error('Draft: configuration update failed:', configError);
         }
       }
+
       setDraftStatus('saved');
       setTimeout(() => setDraftStatus('idle'), 4000);
     } catch (err) {
@@ -283,6 +325,23 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     localStorage.setItem('editConfigProductType', type);
   };
 
+  // Track scroll height for custom scrollbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (formSectionRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = formSectionRef.current;
+        const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+        setScrollHeight(scrollPercentage);
+      }
+    };
+
+    const element = formSectionRef.current;
+    if (element) {
+      element.addEventListener('scroll', handleScroll);
+      return () => element.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
   // Sync configuration state when switching to review tab
   useEffect(() => {
     if (activeTab === 'review') {
@@ -290,7 +349,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
       if (latestConfigData) {
         try {
           const parsedConfig = JSON.parse(latestConfigData);
-          console.log('📋 Syncing configuration for review tab:', parsedConfig);
           setConfiguration(parsedConfig);
         } catch (e) {
           console.error('Failed to sync configuration data:', e);
@@ -302,15 +360,17 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
   const goToStep = (index: number) => {
     setCurrentStep(index);
     const firstWord = steps[index].title.split(' ')[0].toLowerCase();
-    const tab = (firstWord === 'general' ? 'general' : firstWord === 'configuration' ? 'configuration' : 'review') as ActiveTab;
+    const tab = (firstWord === 'general'
+      ? 'general'
+      : firstWord === 'configuration'
+        ? 'configuration'
+        : 'review') as ActiveTab;
 
-    // When navigating to review tab, ensure we have the latest configuration data
     if (tab === 'review') {
       const latestConfigData = localStorage.getItem('editConfigFormData');
       if (latestConfigData) {
         try {
           const parsedConfig = JSON.parse(latestConfigData);
-          console.log('🔄 Updating configuration state for review:', parsedConfig);
           setConfiguration(parsedConfig);
         } catch (e) {
           console.error('Failed to parse latest config data:', e);
@@ -324,15 +384,13 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
   // --------- CHANGE DETECTION (fixed) ----------
   const shallowEqual = (a: any, b: any) => {
     const keys = new Set<string>([...Object.keys(a || {}), ...Object.keys(b || {})]);
-    for (const k of keys) { if ((a as any)[k] !== (b as any)[k]) return false; }
+    for (const k of keys) {
+      if ((a as any)[k] !== (b as any)[k]) return false;
+    }
     return true;
   };
 
-  /** remove productType unless user really changed it */
-  const normalizeConfigsForCompare = (
-    origCfg: Record<string, string> | null,
-    currCfg: Record<string, string>
-  ) => {
+  const normalizeConfigsForCompare = (origCfg: Record<string, string> | null, currCfg: Record<string, string>) => {
     const typeChanged = localStorage.getItem('editConfigProductTypeChanged') === 'true';
     const o = { ...(origCfg || {}) };
     const c = { ...(currCfg || {}) };
@@ -347,7 +405,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     const origForm = originalFormDataRef.current;
     const origCfg = originalConfigRef.current;
 
-    // If original data hasn't loaded yet, consider as no changes
     if (!origForm || !origCfg) return false;
 
     const formChanged = !shallowEqual(origForm, formData);
@@ -357,32 +414,8 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     return formChanged || cfgChanged;
   };
 
-  const handleNextStep = async () => {
-    if (activeTab === 'general') {
-      if (!validateForm()) return;
-      goToStep(1);
-      return;
-    }
-    if (activeTab === 'configuration') {
-      goToStep(2);
-      return;
-    }
-    if (activeTab === 'review') {
-      const changesExist = hasPendingChanges() || hasIconChanged() || isDraft;
-      if (!changesExist) { onClose(); return; }
-      const success = await saveAllChanges();
-      if (success) {
-        showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
-        onClose();
-      } else {
-        showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update product. Please try again.' });
-      }
-    }
-  };
-
-  // Save all (only if edits exist)
   const saveAllChanges = async (
-    { includeGeneral = true, includeConfig = true }: { includeGeneral?: boolean; includeConfig?: boolean } = {}
+    { includeGeneral = true, includeConfig = true }: { includeGeneral?: boolean; includeConfig?: boolean } = {},
   ): Promise<boolean> => {
     if (!hasPendingChanges() && !hasIconChanged() && !isDraft) return false;
 
@@ -402,7 +435,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
           productDescription: formData.description?.trim() || '',
           status: isDraft ? 'DRAFT' : 'ACTIVE',
           productType: configuration.productType || productType || '',
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
         };
         await updateGeneralDetails(productId, generalDetailsPayload);
       }
@@ -413,24 +446,17 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
           setOriginalIcon(selectedIcon || null);
           onIconUpdate?.(productId, selectedIcon || null);
 
-          // Cache the icon data in localStorage for Products.tsx to use
-          // (Backend doesn't properly return productIcon field, so we cache it locally)
           if (selectedIcon) {
             const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
             iconCache[productId] = JSON.stringify({ iconData: selectedIcon });
             localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
-            console.log('💾 Cached icon data in localStorage for product', productId);
           } else {
-            // Remove from cache if icon was removed
             const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
             delete iconCache[productId];
             localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
-            console.log('🗑️ Removed icon from localStorage cache for product', productId);
           }
 
-          // Signal Products.tsx to refresh (for URL-based navigation)
           localStorage.setItem('productUpdated', Date.now().toString());
-          console.log('📢 Icon updated, signaling Products list to refresh');
         }
       }
 
@@ -464,7 +490,39 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
     }
   };
 
-  const handlePreviousStep = () => { if (currentStep > 0) goToStep(currentStep - 1); };
+  const handleNextStep = async () => {
+    if (activeTab === 'general') {
+      if (!validateForm()) return;
+      goToStep(1);
+      return;
+    }
+    if (activeTab === 'configuration') {
+      goToStep(2);
+      return;
+    }
+    if (activeTab === 'review') {
+      const changesExist = hasPendingChanges() || hasIconChanged() || isDraft;
+      if (!changesExist) {
+        onClose();
+        return;
+      }
+      const success = await saveAllChanges();
+      if (success) {
+        showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
+        onClose();
+      } else {
+        showToast({
+          kind: 'error',
+          title: 'Failed to Save Changes',
+          message: 'Could not update product. Please try again.',
+        });
+      }
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 0) goToStep(currentStep - 1);
+  };
 
   // Prefill and set snapshots (ORDER FIX + RESTORED ICON FALLBACK)
   useEffect(() => {
@@ -472,7 +530,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
       if (!productId) return;
       try {
         setLoading(true);
-        // Clear configuration storage when loading a new product
+
         localStorage.removeItem('editConfigFormData');
         localStorage.removeItem('editConfigProductType');
         localStorage.removeItem('editConfigFetchedData');
@@ -488,7 +546,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
           productName: originalProductName,
           version: data.version ?? '',
           skuCode: originalSkuCode,
-          description: data.productDescription ?? ''
+          description: data.productDescription ?? '',
         };
         setFormData(nextForm);
 
@@ -496,8 +554,29 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
         try {
           let hasStructuredIconData = false;
 
+          // PRIORITY 0: localStorage cache
+          try {
+            const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+            const cachedIconJson = iconCache[productId];
+            if (cachedIconJson) {
+              const parsedCache =
+                typeof cachedIconJson === 'string' ? JSON.parse(cachedIconJson) : cachedIconJson;
+              if (parsedCache?.iconData) {
+                setSelectedIcon(parsedCache.iconData as ProductIconData);
+                setOriginalIcon(parsedCache.iconData as ProductIconData);
+                hasStructuredIconData = true;
+              } else if (parsedCache?.id && parsedCache?.svgPath) {
+                setSelectedIcon(parsedCache as ProductIconData);
+                setOriginalIcon(parsedCache as ProductIconData);
+                hasStructuredIconData = true;
+              }
+            }
+          } catch (cacheErr) {
+            console.warn('EditProduct: Failed to read icon cache from localStorage:', cacheErr);
+          }
+
           // PRIORITY 1: structured JSON in productIcon
-          if (data.productIcon) {
+          if (!hasStructuredIconData && data.productIcon) {
             const parsed = JSON.parse(data.productIcon);
             if (parsed?.iconData) {
               setSelectedIcon(parsed.iconData as ProductIconData);
@@ -516,15 +595,15 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
             hasStructuredIconData = true;
           }
 
-
-          // PRIORITY 3: Reconstruct from SVG file (same as Products.tsx)
-          // This handles old products that only have icon file paths
-          if (!hasStructuredIconData && data.icon && typeof data.icon === 'string' && data.icon.includes('/uploads/')) {
-            console.log(`🔄 EditProduct: Reconstructing icon from SVG for product ${productId}`);
-
+          // PRIORITY 3: reconstruct from SVG file path
+          if (
+            !hasStructuredIconData &&
+            data.icon &&
+            typeof data.icon === 'string' &&
+            data.icon.includes('/uploads/')
+          ) {
             const resolveIconUrl = (icon: string) => {
               if (icon.startsWith('http') || icon.startsWith('data:')) return icon;
-              // Import BASE_URL from api.ts to stay in sync with Products.tsx
               const BASE_URL = 'http://3.208.93.68:8080/api';
               if (icon.startsWith('/uploads')) {
                 const serverBase = BASE_URL.replace('/api', '');
@@ -538,7 +617,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
               const resolved = resolveIconUrl(iconPath);
               if (!resolved) return null;
               try {
-                // Import axios and auth - same as Products.tsx
                 const axios = (await import('axios')).default;
                 const { getAuthHeaders } = await import('../../../utils/auth');
                 const authHeaders = getAuthHeaders();
@@ -547,19 +625,15 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                   ? `${resolved}&_cb=${Date.now()}`
                   : `${resolved}?_cb=${Date.now()}`;
 
-                // Use axios with responseType: 'blob' - EXACTLY like Products.tsx
                 const response = await axios.get(cacheBustUrl, {
                   responseType: 'blob',
-                  headers: authHeaders
+                  headers: authHeaders,
                 });
 
                 return URL.createObjectURL(response.data);
               } catch (e: any) {
-                if (e?.response?.status === 500) {
-                  console.warn(`Icon not available on server: ${iconPath}`);
-                } else {
-                  console.warn(`Failed to fetch icon: ${iconPath}`, e);
-                }
+                if (e?.response?.status === 500) console.warn(`Icon not available on server: ${iconPath}`);
+                else console.warn(`Failed to fetch icon: ${iconPath}`, e);
                 return null;
               }
             };
@@ -573,7 +647,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-                // Extract tile color (rect ~29.45 width)
                 const rects = doc.querySelectorAll('rect');
                 let tileColor = '#0F6DDA';
                 for (const rect of Array.from(rects)) {
@@ -581,12 +654,15 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                   const fill = rect.getAttribute('fill');
                   if (width && fill && fill.startsWith('#')) {
                     const w = parseFloat(width);
-                    if (w > 29 && w < 30) { tileColor = fill; break; }
+                    if (w > 29 && w < 30) {
+                      tileColor = fill;
+                      break;
+                    }
                   }
                 }
 
-                // Extract icon path + viewBox
-                const pathElement = doc.querySelector('path[fill="#FFFFFF"]') || doc.querySelector('path');
+                const pathElement =
+                  doc.querySelector('path[fill="#FFFFFF"]') || doc.querySelector('path');
                 let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
                 let viewBox = '0 0 24 24';
                 if (pathElement) {
@@ -595,7 +671,6 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                   if (svgEl) viewBox = svgEl.getAttribute('viewBox') || viewBox;
                 }
 
-                // Extract gradient colors
                 let outerBg: [string, string] | undefined;
                 const gradientElement = doc.querySelector('linearGradient');
                 if (gradientElement) {
@@ -613,18 +688,16 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                   svgPath,
                   viewBox,
                   tileColor,
-                  ...(outerBg && { outerBg })
+                  ...(outerBg && { outerBg }),
                 };
 
                 setSelectedIcon(reconstructedIcon);
                 setOriginalIcon(reconstructedIcon);
-                console.log(`✅ EditProduct: Successfully reconstructed icon from SVG`);
               }
             } catch (fetchErr) {
               console.warn('EditProduct: Failed to reconstruct SVG:', fetchErr);
             }
           }
-
         } catch (err) {
           console.warn('Icon parse failed:', err);
         }
@@ -639,18 +712,26 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
           handleProductTypeChange(data.productType);
         }
 
-        // now create snapshots (will include productType)
         originalFormDataRef.current = { ...nextForm };
 
         const fetchedConfig = (() => {
-          try { const s = localStorage.getItem('editConfigFetchedData'); return s ? JSON.parse(s) : {}; } catch { return {}; }
+          try {
+            const s = localStorage.getItem('editConfigFetchedData');
+            return s ? JSON.parse(s) : {};
+          } catch {
+            return {};
+          }
         })();
         const currentConfig = (() => {
-          try { const s = localStorage.getItem('editConfigFormData'); return s ? JSON.parse(s) : {}; } catch { return {}; }
+          try {
+            const s = localStorage.getItem('editConfigFormData');
+            return s ? JSON.parse(s) : {};
+          } catch {
+            return {};
+          }
         })();
 
-        originalConfigRef.current =
-          Object.keys(fetchedConfig).length ? fetchedConfig : currentConfig;
+        originalConfigRef.current = Object.keys(fetchedConfig).length ? fetchedConfig : currentConfig;
 
         setOriginalValues({ productName: originalProductName, skuCode: originalSkuCode });
         setIsDraft((data.status ?? '').toUpperCase() === 'DRAFT');
@@ -668,58 +749,39 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
       <TopBar
         title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
         onBack={() => {
-          // Check for empty required fields in general details first
           if (hasEmptyRequiredFields()) {
             setShowUnsavedChangesModal(true);
             return;
           }
 
-          // Only show save popup if there are actual changes
           const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
-          console.log('Back button clicked - Changes detected:', {
-            hasPendingChanges: hasPendingChanges(),
-            hasIconChanged: hasIconChanged(),
-            isDraft,
-            formData,
-            originalForm: originalFormDataRef.current,
-            configuration,
-            originalConfig: originalConfigRef.current
-          });
-
-          if (hasChanges) {
-            setShowSaveDraftModal(true);
-          } else {
-            // No changes, close directly
-            onClose();
-          }
+          if (hasChanges) setShowSaveDraftModal(true);
+          else onClose();
         }}
       />
 
-      {/* === NEW SHELL: same as EditSubscription but with editprod- prefix === */}
-      <div className="editprod-np-viewport">
-        <div className="editprod-np-card">
-          <div className="editprod-np-grid">
+      {/* === SHELL: EXACTLY LIKE EditSubscription (editsub-np-*) === */}
+      <div className="editsub-np-viewport">
+        <div className="editsub-np-card">
+          <div className="editsub-np-grid">
             {/* Sidebar / rail */}
-            <aside className="editprod-np-rail">
-              <nav className="editprod-np-steps">
+            <aside className="editsub-np-rail">
+              <nav className="editsub-np-steps">
                 {steps.map((step, index) => {
                   const isActive = index === currentStep;
                   const isCompleted = index < currentStep;
+
                   return (
                     <button
                       key={step.id}
                       type="button"
-                      className={[
-                        'editprod-np-step',
-                        isActive ? 'active' : '',
-                        isCompleted ? 'completed' : '',
-                      ]
+                      className={['editsub-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : '']
                         .join(' ')
                         .trim()}
                       onClick={() => goToStep(index)}
                     >
-                      <span className="editprod-np-step__text">
-                        <span className="editprod-np-step__title">{step.title}</span>
+                      <span className="edisub-np-step__text">
+                        <span className="editsub-np-step__title">{step.title}</span>
                       </span>
                     </button>
                   );
@@ -728,16 +790,11 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
             </aside>
 
             {/* Main content area */}
-            <main className="editprod-np-main">
-              <div className="editprod-np-main__inner">
-                <div className="editprod-np-body">
-                  <form
-                    className="editprod-np-form"
-                    onSubmit={e => {
-                      e.preventDefault();
-                    }}
-                  >
-                    <div className="editprod-np-form-section">
+            <main className="editsub-np-main">
+              <div className="editsub-np-main__inner">
+                <div className="editsub-np-body">
+                  <form className="editsub-np-form" onSubmit={e => e.preventDefault()}>
+                    <div className="editsub-np-form-section" ref={formSectionRef}>
                       {/* GENERAL */}
                       {activeTab === 'general' && (
                         <div className="edit-np-section">
@@ -751,6 +808,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                                 error={errors.productName}
                               />
                             </div>
+
                             <div className="edit-np-form-group">
                               <label className="edit-np-label">Version</label>
                               <InputField
@@ -764,7 +822,10 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                           {/* Product Icon Field - No Icon */}
                           {!selectedIcon && (
                             <div className="edit-np-form-group">
-                              <label className="edit-np-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                              <label className="edit-np-label">
+                                Product Icon <span className="if-optional">(Optional)</span>
+                              </label>
+
                               <div className="prod-np-icon-field-wrapper">
                                 <div className="prod-np-icon-placeholder">
                                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
@@ -774,7 +835,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                                     <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1" />
                                   </svg>
                                 </div>
+
                                 <span className="prod-np-icon-placeholder-text">Add product icon</span>
+
                                 <button
                                   type="button"
                                   className="prod-np-icon-add-btn"
@@ -787,107 +850,97 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                           )}
 
                           {/* Product Icon Field - Icon Selected */}
-                          {selectedIcon && (() => {
-                            // Helper function to extract color from CSS var() or return as-is
-                            const extractDisplayColor = (colorStr: string): string => {
-                              if (!colorStr) {
-                                console.log('⚠️ extractDisplayColor: Empty color string, using default #CC9434');
-                                return '#CC9434';
-                              }
-                              console.log('🔍 extractDisplayColor input:', colorStr);
-                              const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
-                              const result = match ? match[1].trim() : colorStr;
-                              console.log('🔍 extractDisplayColor result:', result);
-                              return result;
-                            };
+                          {selectedIcon &&
+                            (() => {
+                              const extractDisplayColor = (colorStr: string): string => {
+                                if (!colorStr) return '#CC9434';
+                                const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+                                return match ? match[1].trim() : colorStr;
+                              };
 
-                            const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
-                            const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
-                            const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
+                              const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
+                              const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
+                              const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
 
-                            console.log('🎨 EditProduct display colors - outerBg1:', outerBg1, 'outerBg2:', outerBg2, 'tileColor:', tileColor);
+                              return (
+                                <div className="edit-np-form-group">
+                                  <label className="edit-np-label">
+                                    Product Icon <span className="if-optional">(Optional)</span>
+                                  </label>
 
-                            return (
-                              <div className="edit-np-form-group">
-                                <label className="edit-np-label">Product Icon <span className="if-optional">(Optional)</span></label>
-                                <div className="prod-np-icon-field-wrapper">
-                                  <div className="prod-np-icon-preview">
-                                    <div
-                                      style={{
-                                        width: 50.6537,
-                                        height: 46.3351,
-                                        borderRadius: 12,
-                                        border: '0.6px solid var(--border-border-2, #D5D4DF)',
-                                        background: `
-                                        linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-                                        linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
-                                        radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
-                                      `,
-                                        display: 'flex',
-                                        padding: 8,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        position: 'relative',
-                                        overflow: 'hidden',
-                                      }}
-                                    >
+                                  <div className="prod-np-icon-field-wrapper">
+                                    <div className="prod-np-icon-preview">
                                       <div
                                         style={{
-                                          position: 'absolute',
-                                          left: 10.5,
-                                          top: 8.2,
-                                          width: 29.45,
-                                          height: 25.243,
-                                          borderRadius: 5.7,
-                                          background: tileColor,
-                                        }}
-                                      />
-                                      <div
-                                        style={{
-                                          width: 29.339,
-                                          height: 26.571,
-                                          padding: '1.661px 3.321px',
+                                          width: 50.6537,
+                                          height: 46.3351,
+                                          borderRadius: 12,
+                                          border: '0.6px solid var(--border-border-2, #D5D4DF)',
+                                          background: `
+                                            linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
+                                            linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
+                                            radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
+                                          `,
                                           display: 'flex',
+                                          padding: 8,
                                           justifyContent: 'center',
                                           alignItems: 'center',
-                                          gap: 2.214,
-                                          flexShrink: 0,
-                                          borderRadius: 6,
-                                          border: '0.6px solid #FFF',
-                                          background: 'rgba(202, 171, 213, 0.10)',
-                                          backdropFilter: 'blur(3.875px)',
-                                          transform: 'translate(3px, 2px)',
-                                          boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                          position: 'relative',
+                                          overflow: 'hidden',
                                         }}
                                       >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width="18"
-                                          height="18"
-                                          viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
-                                          fill="none"
-                                          style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+                                        <div
+                                          style={{
+                                            position: 'absolute',
+                                            left: 10.5,
+                                            top: 8.2,
+                                            width: 29.45,
+                                            height: 25.243,
+                                            borderRadius: 5.7,
+                                            background: tileColor,
+                                          }}
+                                        />
+
+                                        <div
+                                          style={{
+                                            width: 29.339,
+                                            height: 26.571,
+                                            padding: '1.661px 3.321px',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            gap: 2.214,
+                                            flexShrink: 0,
+                                            borderRadius: 6,
+                                            border: '0.6px solid #FFF',
+                                            background: 'rgba(202, 171, 213, 0.10)',
+                                            backdropFilter: 'blur(3.875px)',
+                                            transform: 'translate(3px, 2px)',
+                                            boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                          }}
                                         >
-                                          <path d={selectedIcon.svgPath} fill="#FFFFFF" />
-                                        </svg>
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="18"
+                                            height="18"
+                                            viewBox={selectedIcon.viewBox ?? '0 0 18 18'}
+                                            fill="none"
+                                            style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+                                          >
+                                            <path d={selectedIcon.svgPath} fill="#FFFFFF" />
+                                          </svg>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  <div className="prod-np-icon-actions">
-                                    <EditButton
-                                      onClick={() => setIsIconPickerOpen(true)}
-                                      label="Edit"
-                                    />
-                                    <DeleteButton
-                                      onClick={() => setSelectedIcon(null)}
-                                      label="Remove"
-                                      variant="soft"
-                                    />
+
+                                    <div className="prod-np-icon-actions">
+                                      <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
+                                      <DeleteButton onClick={() => setSelectedIcon(null)} label="Remove" variant="soft" />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })()}
+                              );
+                            })()}
 
                           <ProductIconPickerModal
                             isOpen={isIconPickerOpen}
@@ -946,11 +999,34 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                       )}
                     </div>
 
+                    {/* Custom Scrollbar (kept same logic, class renamed to editsub-*) */}
+                    {formSectionRef.current &&
+                      formSectionRef.current.scrollHeight > formSectionRef.current.clientHeight && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: `${scrollHeight}%`,
+                            transition: 'top 0.1s ease-out',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          <VerticalScrollbar
+                            height={`${
+                              (formSectionRef.current.clientHeight / formSectionRef.current.scrollHeight) * 100
+                            }%`}
+                            color="#C3C2D0"
+                            thickness={4}
+                            className="editsub-scrollbar-custom"
+                          />
+                        </div>
+                      )}
+
                     <div className="af-skel-rule af-skel-rule--bottom" />
 
-                    {/* Footer */}
-                    <div className="editprod-np-form-footer">
-                      <div className="editprod-np-btn-group editprod-np-btn-group--back">
+                    {/* Footer (EditSubscription classnames) */}
+                    <div className="editsub-np-form-footer">
+                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
                         {activeTab !== 'general' && (
                           <SecondaryButton type="button" onClick={handlePreviousStep}>
                             Back
@@ -958,15 +1034,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
                         )}
                       </div>
 
-                      <div className="editprod-np-btn-group editprod-np-btn-group--next">
+                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
                         <PrimaryButton type="button" onClick={handleNextStep} disabled={loading}>
-                          {loading
-                            ? ''
-                            : activeTab === 'review'
-                              ? isDraft
-                                ? 'Finalize Product'
-                                : 'Save Changes'
-                              : 'Save & Next'}
+                          {loading ? '' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Save Changes') : 'Save & Next'}
                         </PrimaryButton>
                       </div>
                     </div>
@@ -980,6 +1050,7 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
         </div>
       </div>
 
+      {/* Save draft popup */}
       <EditPopup
         isOpen={showSaveDraftModal}
         onClose={() => {
@@ -990,22 +1061,31 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose, productId: propProdu
         }}
         onDismiss={() => setShowSaveDraftModal(false)}
         onSave={async () => {
-          if (!validateForm()) { setShowSaveDraftModal(false); return; }
+          if (!validateForm()) {
+            setShowSaveDraftModal(false);
+            return;
+          }
           setShowSaveDraftModal(false);
 
           if (!hasPendingChanges() && !hasIconChanged() && !isDraft) {
-            onClose(); return;
+            onClose();
+            return;
           }
 
           const success = await saveAllChanges({
             includeGeneral: true,
-            includeConfig: activeTab !== 'general'
+            includeConfig: activeTab !== 'general',
           });
+
           if (success) {
             showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
             onClose();
           } else {
-            showToast({ kind: 'error', title: 'Failed to Save Changes', message: 'Could not update product. Please try again.' });
+            showToast({
+              kind: 'error',
+              title: 'Failed to Save Changes',
+              message: 'Could not update product. Please try again.',
+            });
           }
         }}
       />

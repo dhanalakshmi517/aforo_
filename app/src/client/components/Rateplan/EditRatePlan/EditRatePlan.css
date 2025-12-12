@@ -1,8 +1,8 @@
 @import "../../Variables/Variables.css";
 
 :root {
-  --editrate-np-gap-left: 120px;
-  --editrate-np-gap-right: 120px;
+  --editprod-np-gap-left: 120px;
+  --editprod-np-gap-right: 120px;
   --np-gap-top: 10px;
   --np-gap-bottom: 15px;
 }
@@ -22,7 +22,7 @@ html, body, #root {
 /* Viewport */
 .editrate-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
-  padding: var(--np-gap-top) var(--editrate-np-gap-right) 30px var(--editrate-np-gap-left);
+  padding: var(--np-gap-top) var(--editprod-np-gap-right) 30px var(--editprod-np-gap-left);
   box-sizing: border-box;
   height: calc(100vh - 20px);
   width: 100%;
@@ -34,7 +34,7 @@ html, body, #root {
 /* Card */
 .editrate-np-card {
   margin-bottom: 40px;
-  padding-bottom: 20px;
+  padding-bottom: 0;
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-lg);
@@ -44,6 +44,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 /* Grid */
@@ -66,6 +67,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 /* Steps container */
@@ -73,9 +75,17 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   position: relative;
-  gap: 18px;
+  gap: 0;
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
+}
+
+.editrate-np-label{
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
 }
 
 /* Step */
@@ -89,6 +99,7 @@ html, body, #root {
   border-left: 3px solid transparent;
   width: 100%;
   cursor: pointer;
+  min-height: 35px;
 }
 
 .editrate-np-step__title {
@@ -104,7 +115,7 @@ html, body, #root {
   border-left-color: var(--color-primary-800);
   border-left-width: 3px;
   height: 35px;
-  margin-top: 5px;
+  margin-top: 0;
 }
 
 .editrate-np-step.active .editrate-np-step__title {
@@ -119,8 +130,8 @@ html, body, #root {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  padding-bottom: var(--np-gap-bottom);
-  overflow-x: hidden;
+  padding-bottom: 0;
+  overflow: hidden;
 }
 
 .editrate-np-main__inner {
@@ -141,27 +152,25 @@ html, body, #root {
 .editrate-np-form {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
   min-height: 0;
-  /* no scroll here – only section scrolls */
   gap: 2px;
+  overflow: hidden;
 }
 
-/* Form section – this is the scroll area */
+/* Scrollbars: apply to scrolling section */
+.editrate-np-form-section::-webkit-scrollbar { width: 6px; }
+.editrate-np-form-section::-webkit-scrollbar-thumb {
+  background-color:#C3C2D0;
+  border-radius:2px;
+}
+
+/* Form section */
 .editrate-np-form-section {
   flex: 1;
-  overflow-y: auto;
-  padding-bottom: 15px;
   min-height: 0;
-}
-
-/* Scrollbars on scroll area */
-.editrate-np-form-section::-webkit-scrollbar { 
-  width: 6px; 
-}
-.editrate-np-form-section::-webkit-scrollbar-thumb { 
-  background-color:#C3C2D0; 
-  border-radius:2px; 
+  overflow-y: auto;
+  padding-bottom: 8px;
 }
 
 .editrate-np-section-header {
@@ -181,16 +190,18 @@ html, body, #root {
   text-transform: uppercase;
 }
 
-/* Footer */
+/* Footer – CLASS NAME MUST MATCH JSX: editrate-np-form-footer */
 .editrate-np-form-footer {
   position: relative;
-  margin: 0 -24px -24px -24px;
-  padding: 16px 24px;
+  margin: 0 -24px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid var(--color-neutral-300);
+  align-items: center;
   background: #fff;
   flex-shrink: 0;
+  margin-top: auto;
+  border-top: 1px solid var(--color-neutral-300);
 }
 
 .editrate-np-btn-group { 
@@ -201,7 +212,7 @@ html, body, #root {
 .editrate-np-btn-group--back { margin-right: auto; }
 .editrate-np-btn-group--next { margin-left: auto; }
 
-/* Buttons */
+/* Buttons (optional if you already style PrimaryButton/SecondaryButton) */
 .editrate-np-btn {
   user-select: none;
   height: 40px;
@@ -224,13 +235,14 @@ html, body, #root {
   color: var(--color-primary-800);
 }
 
-/* Product Icon styles */
+/* Form group */
 .editrate-np-form-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
+/* (kept from your file – only if used somewhere) */
 .np-icon-field-wrapper {
   display: flex;
   align-items: center;
@@ -251,15 +263,15 @@ html, body, #root {
 /* Responsive */
 @media (max-width: 1200px) {
   :root { 
-    --np-gap-left: 72px; 
-    --np-gap-right: 72px; 
+    --editprod-np-gap-left: 72px; 
+    --editprod-np-gap-right: 72px; 
   }
 }
 
 @media (max-width: 900px) {
   :root { 
-    --np-gap-left: 48px; 
-    --np-gap-right: 48px; 
+    --editprod-np-gap-left: 48px; 
+    --editprod-np-gap-right: 48px; 
   }
 }
 
@@ -267,11 +279,21 @@ html, body, #root {
   :root{
     --np-gap-top:24px; 
     --np-gap-bottom:15px;
-    --np-gap-left:16px; 
-    --np-gap-right:16px;
+    --editprod-np-gap-left:16px; 
+    --editprod-np-gap-right:16px;
   }
+
   .editrate-np-grid { 
     grid-template-columns: 1fr; 
     grid-template-rows: auto 1fr; 
   }
+}
+
+/* Vertical scrollbar positioning */
+.editrate-np-scrollbar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 50%;
+  pointer-events: none;
 }

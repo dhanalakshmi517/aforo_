@@ -90,6 +90,8 @@
 
   /* ⬆️ Indent to align text under the label (icon 48 + gap 8 + header PL 12 = 68) */
   padding-left: 68px;
+  margin-top: -35px;
+  margin-left: 10px;
 }
 
 .icon-btn {
@@ -123,8 +125,23 @@
   gap: 10px;
 }
 
+/* Two-column row for first pair of fields (Setup Fee, Discounts) */
+.extras-two-col-row {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.extras-field {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .section-content label {
-  color: var(--color-neutral-1400);
+  color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: 400;
@@ -148,7 +165,7 @@
 .section-content select {
   width: 80%;
   padding: 6px 10px;
-  height: 36px;
+  height: 25px;
   background-color: var(--color-neutral-100);
 }
 

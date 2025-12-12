@@ -10,7 +10,7 @@
   padding: var(--scale-400, 16px) var(--scale-500, 10px) var(--scale-400, 16px) var(--scale-700, 20px);
   box-sizing: border-box;
   background: transparent;
-  margin-top: -15px;
+  margin-top: -10px;
 }
 
 .data-header h2 {
