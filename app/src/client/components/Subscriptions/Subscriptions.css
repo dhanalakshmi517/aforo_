@@ -21,8 +21,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Page container (match Products & Customers) */
@@ -425,4 +430,15 @@
   font-weight: 500;
   line-height: var(--line-height-body-md);
   cursor: pointer;
+}
+
+/* Subscriptions empty state (inside table) */
+.subscriptions-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 400px;
+  gap: 8px;
 }
