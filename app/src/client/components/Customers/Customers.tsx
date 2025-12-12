@@ -109,40 +109,18 @@ const absolutizeUpload = (path: string) => {
 const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
   if (!uploadPath) return null;
   const url = absolutizeUpload(uploadPath);
-  console.log('Resolving logo URL:', url);
 
-  // First try: Direct URL without authentication (for public uploads)
-  try {
-    const directUrl = url;
-    console.log('Trying direct URL:', directUrl);
-    const testRes = await fetch(directUrl, {
-      method: "HEAD",
-      cache: "no-store"
-    });
-    if (testRes.ok) {
-      console.log('Direct URL works, using it:', directUrl);
-      return directUrl;
-    }
-  } catch (error) {
-    console.log('Direct URL failed, trying authenticated fetch:', error);
-  }
-
-  // Second try: Authenticated fetch with blob conversion
+  // Skip direct URL check - it always fails with 401
+  // Go straight to authenticated fetch for faster loading
   try {
     const res = await fetch(url, {
       method: "GET",
       headers: { ...getAuthHeaders(), Accept: "image/*" },
       cache: "no-store",
     });
-    console.log('Authenticated fetch response:', res.status, res.statusText);
-    if (!res.ok) {
-      console.error('Authenticated fetch failed:', res.status, res.statusText);
-      return null;
-    }
+    if (!res.ok) return null;
     const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    console.log('Logo blob URL created:', objectUrl);
-    return objectUrl;
+    return URL.createObjectURL(blob);
   } catch (error) {
     console.error('Logo fetch error:', error);
     return null;
@@ -231,22 +209,30 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     try {
       setLoading(true);
       const data = await getCustomers();
-      const withLogos: Customer[] = await Promise.all(
-        (data || []).map(async (c: Customer) => {
+
+      // Show customers immediately without waiting for logos
+      const customersWithoutLogos: Customer[] = (data || []).map((c: Customer) => ({
+        ...c,
+        __resolvedLogoSrc: null, // Will be populated async
+      }));
+      setCustomers(customersWithoutLogos);
+      setLoading(false);
+
+      // Load logos asynchronously in the background (don't block UI)
+      customersWithoutLogos.forEach(async (c, index) => {
+        if (c.companyLogoUrl) {
           const resolved = await resolveLogoSrc(c.companyLogoUrl);
-          console.log('📦 FETCHED - Customer:', c.companyName, 'resolved logo:', resolved);
-          return {
-            ...c,
-            __resolvedLogoSrc: resolved,
-          };
-        })
-      );
-      console.log('✅ Setting customers state with logos:', withLogos);
-      setCustomers(withLogos);
+          if (resolved) {
+            // Update just this customer's logo without re-fetching all
+            setCustomers(prev => prev.map((cust, i) =>
+              i === index ? { ...cust, __resolvedLogoSrc: resolved } : cust
+            ));
+          }
+        }
+      });
     } catch (err: any) {
       if (err.message?.includes("Session expired") || err.message?.includes("Not authenticated")) return;
       setErrorMsg(err.message || "Failed to load customers");
-    } finally {
       setLoading(false);
     }
   };
@@ -378,12 +364,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                       const initials = initialsFrom(companyTitle);
                       const imgSrc = customer.__resolvedLogoSrc ?? null;
                       const logoClass = `customer-logo${imgSrc ? " has-image" : " no-image"}`;
-                      console.log('🔍 RENDER - Customer:', companyTitle);
-                      console.log('  - __resolvedLogoSrc:', customer.__resolvedLogoSrc);
-                      console.log('  - imgSrc:', imgSrc);
-                      console.log('  - imgSrc truthy?:', !!imgSrc);
-                      console.log('  - companyLogoUrl:', customer.companyLogoUrl);
-                      console.log('  - logoClass:', logoClass);
+
 
                       return (
                         <tr key={id}>

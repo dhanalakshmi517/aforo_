@@ -32,8 +32,8 @@ type StepKey = "general" | "billing" | "review";
 
 const steps = [
   { id: 1, key: "general" as StepKey, title: "Customer Details", desc: "Fill in your basic details to proceed." },
-  { id: 2, key: "billing" as StepKey,  title:"Account Details",  desc: "Set up your account credentials securely" },
-  { id: 3, key: "review"  as StepKey,  title: "Review & Confirm", desc: "Check and Finalize details." },
+  { id: 2, key: "billing" as StepKey, title: "Account Details", desc: "Set up your account credentials securely" },
+  { id: 3, key: "review" as StepKey, title: "Review & Confirm", desc: "Check and Finalize details." },
 ];
 
 const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer, initialLogoUrl = null }) => {
@@ -87,7 +87,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       aria-label="Locked"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z" stroke="#75797E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
   );
@@ -95,6 +95,14 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
   // email helpers
   const initialPrimaryEmailRef = useRef<string | null>(null);
   const emailCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Track original data for change detection (like CreatePricePlan.tsx)
+  const [originalData, setOriginalData] = useState<{
+    companyName: string;
+    customerName: string;
+    companyType: string;
+    accountDetails: AccountDetailsData | null;
+  } | null>(null);
 
   useEffect(() => {
     document.body.classList.add("create-product-page");
@@ -134,6 +142,14 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
     setIsDraft(true);
     initialPrimaryEmailRef.current = draftCustomer.primaryEmail ?? "";
+
+    // Store original data for change detection
+    setOriginalData({
+      companyName: draftCustomer.companyName ?? "",
+      customerName: draftCustomer.customerName ?? "",
+      companyType: draftCustomer.companyType ?? "",
+      accountDetails: acc,
+    });
   }, [draftCustomer]);
 
   useEffect(() => {
@@ -160,7 +176,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       const exists = await checkEmailExists(email, isDraft ? customerId ?? undefined : undefined);
       if (exists) setAccountErrors(prev => ({ ...prev, primaryEmail: "This email address is already registered" }));
       else setAccountErrors(prev => { const n = { ...prev }; delete n.primaryEmail; return n; });
-    } catch {/* ignore */}
+    } catch {/* ignore */ }
   }, [isDraft, customerId]);
 
   const handleEmailBlur = useCallback(async (email: string) => { await checkEmailUniqueness(email); }, [checkEmailUniqueness]);
@@ -189,9 +205,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       if (accountDetails[k]?.trim && accountDetails[k].trim() && n[keyInErr]) delete n[keyInErr];
     };
     [
-      "phoneNumber","primaryEmail",
-      "billingAddressLine1","billingAddressLine2","billingCity","billingState","billingPostalCode","billingCountry",
-      "customerAddressLine1","customerAddressLine2","customerCity","customerState","customerPostalCode","customerCountry"
+      "phoneNumber", "primaryEmail",
+      "billingAddressLine1", "billingAddressLine2", "billingCity", "billingState", "billingPostalCode", "billingCountry",
+      "customerAddressLine1", "customerAddressLine2", "customerCity", "customerState", "customerPostalCode", "customerCountry"
     ].forEach((k) => clear(k as any, k));
     setAccountErrors(n);
   }, [accountDetails]); // eslint-disable-line
@@ -227,11 +243,11 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       }
 
       [
-        "billingAddressLine1","billingAddressLine2","billingCity","billingState","billingPostalCode","billingCountry",
-        "customerAddressLine1","customerAddressLine2","customerCity","customerState","customerPostalCode","customerCountry"
+        "billingAddressLine1", "billingAddressLine2", "billingCity", "billingState", "billingPostalCode", "billingCountry",
+        "customerAddressLine1", "customerAddressLine2", "customerCity", "customerState", "customerPostalCode", "customerCountry"
       ].forEach(k => {
         // @ts-ignore
-        if (!accountDetails?.[k]?.trim()) n[k] = `${k.replace(/([A-Z])/g," $1")} is required`;
+        if (!accountDetails?.[k]?.trim()) n[k] = `${k.replace(/([A-Z])/g, " $1")} is required`;
       });
 
       setAccountErrors({ ...accountErrors, ...n });
@@ -386,7 +402,19 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
       <TopBar
         title="Create New Customer"
         onBack={() => {
-          if (hasAnyRequiredInput || customerId) {
+          // For NEW customers: show popup if any field is filled
+          // For RESUME draft: compare with original to detect actual changes
+          const userMadeChanges = originalData
+            ? (
+              originalData.companyName !== companyName ||
+              originalData.customerName !== customerName ||
+              originalData.companyType !== companyType ||
+              companyLogo !== null ||
+              JSON.stringify(originalData.accountDetails) !== JSON.stringify(accountDetails)
+            )
+            : hasAnyRequiredInput;
+
+          if (userMadeChanges) {
             setShowSaveDraftModal(true);
           } else {
             onClose();
@@ -483,7 +511,6 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                                 logo={companyLogo}
                                 logoUrl={initialLogoUrl}
                                 onChange={(file) => {
-                                  console.log('CreateCustomer: Logo file selected:', file);
                                   setCompanyLogo(file);
                                 }}
                               />
@@ -516,7 +543,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                       {/* STEP 2: BILLING */}
                       {activeTab === "billing" && (
                         <section>
-                          <div className="cust-np-section-header" style={{display:'flex',alignItems:'center'}}>
+                          <div className="cust-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
                             <h3 className="cust-np-section-title">ACCOUNT DETAILS</h3>
                             {isBillingLocked && <LockBadge />}
                           </div>
@@ -550,7 +577,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                     </div>
 
                     {/* Footer actions */}
-                    <div className="cust-np-form-footer" style={{position:'relative'}}>
+                    <div className="cust-np-form-footer" style={{ position: 'relative' }}>
                       {activeTab === "billing" && isBillingLocked ? (
                         <div
                           className="cust-np-footer-hint"

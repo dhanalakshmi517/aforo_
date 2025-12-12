@@ -30,23 +30,22 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    console.log('LogoUploader: File selected:', file);
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file.');
       return;
     }
     setImgError(false);          // reset any previous image error
-    console.log('LogoUploader: Calling onChange with file:', file);
     onChange(file);
     onEdit?.();
   };
 
-  // Treat only a valid non-empty URL (and not errored) as “has image”
+  // Treat only a valid non-empty URL as "has image" - don't factor in imgError
+  // This ensures Edit/Remove buttons remain visible even if image fails to load (CORS)
   const validUrl = isTruthyUrl(logoUrl) ? logoUrl : null;
-  const hasImage = !!logo || (!!validUrl && !imgError);
-  
-  console.log('LogoUploader render:', { logo, logoUrl, validUrl, hasImage, imgError });
+  const hasImage = !!logo || !!validUrl;
+
+
 
   const previewSrc = useMemo(() => {
     if (logo) return URL.createObjectURL(logo);
@@ -101,9 +100,10 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({
   }
 
   // ─────────── PREVIEW STATE ───────────
+  // Use backgroundImage like Customers.tsx - more reliable for blob URLs
   return (
     <div className="logo-uploader is-preview-state" onClick={openPicker} role="button" tabIndex={0}>
-      <div 
+      <div
         className="logo-preview-container"
         style={{
           width: '56px',
@@ -113,11 +113,11 @@ const LogoUploader: React.FC<LogoUploaderProps> = ({
           borderRadius: '50%',
           overflow: 'hidden',
           flexShrink: 0,
-          backgroundImage: `url(${previewSrc})`,
+          backgroundColor: '#F8F7FA',
+          backgroundImage: previewSrc ? `url(${previewSrc})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundColor: '#F8F7FA'
+          backgroundRepeat: 'no-repeat'
         }}
         aria-label="Company logo preview"
       />
