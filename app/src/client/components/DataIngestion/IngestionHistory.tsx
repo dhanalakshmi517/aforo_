@@ -7,7 +7,7 @@ export type HistoryRow = {
   id: number;
   name: string;
   ingestedOn: Date;
-  status: "Success" | "Failed" | "Staged";
+  status: "Success" | "Failed" | "Staged" | "Partial";
   note?: string;
 };
 
@@ -221,6 +221,8 @@ const IngestionHistory: React.FC<Props> = ({ rows }) => {
                             ? "failed"
                             : r.status === "Staged"
                             ? "staged"
+                            : r.status === "Partial"
+                            ? "partial"
                             : "success"
                         }
                         size="sm"

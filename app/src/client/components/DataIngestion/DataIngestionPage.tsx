@@ -43,6 +43,22 @@ const DataIngestionPage: React.FC = () => {
   const canIngest = selectedRows.size > 0;
   const allSelected = rows.length > 0 && selectedRows.size === rows.length;
 
+  const loadFailedIngestionFiles = async () => {
+    try {
+      const files: IngestionFile[] = await fetchIngestionFiles();
+      const filtered = files.filter((f) => {
+        const backendStatus = f.status?.toUpperCase();
+        if (!backendStatus) return false;
+        if (backendStatus === 'FAILED') return true;
+        if (backendStatus === 'PARTIALLY_INGESTED') return true;
+        return false;
+      });
+      setFailedIngestionFiles(filtered);
+    } catch (err) {
+      console.error('Failed to load failed ingestion files', err);
+    }
+  };
+
   // Load history from backend when History tab becomes active
   useEffect(() => {
     if (activeTab !== 'history') return;
@@ -59,6 +75,8 @@ const DataIngestionPage: React.FC = () => {
             status = 'Failed';
           } else if (backendStatus === 'STAGED') {
             status = 'Staged';
+          } else if (backendStatus === 'PARTIALLY_INGESTED') {
+            status = 'Partial';
           } else {
             status = 'Success';
           }
@@ -84,23 +102,6 @@ const DataIngestionPage: React.FC = () => {
   // Load only failed / partial files for the Ingestion tab (backend view)
   useEffect(() => {
     if (activeTab !== 'ingestion') return;
-
-    const loadFailedIngestionFiles = async () => {
-      try {
-        const files: IngestionFile[] = await fetchIngestionFiles();
-        const filtered = files.filter((f) => {
-          const backendStatus = f.status?.toUpperCase();
-          if (!backendStatus) return false;
-          if (backendStatus === 'FAILED') return true;
-          if (backendStatus === 'PARTIALLY_INGESTED') return true;
-          return false;
-        });
-        setFailedIngestionFiles(filtered);
-      } catch (err) {
-        console.error('Failed to load failed ingestion files', err);
-      }
-    };
-
     loadFailedIngestionFiles();
   }, [activeTab]);
 
@@ -324,6 +325,7 @@ const DataIngestionPage: React.FC = () => {
         // Clear selection on failure
         setSelectedRows(new Set());
       }
+      await loadFailedIngestionFiles();
     } catch (error) {
       console.error("Error during file ingestion:", error);
       // Add failed uploads to history and update status
@@ -352,6 +354,7 @@ const DataIngestionPage: React.FC = () => {
 
       // Clear selection on error
       setSelectedRows(new Set());
+      await loadFailedIngestionFiles();
     } finally {
       setIsLoading(false);
       setUploadProgress({ current: 0, total: 0 });
