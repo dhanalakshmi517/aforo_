@@ -130,9 +130,9 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   const [editingSub, setEditingSub] = useState<SubscriptionType | null>(null);
   const [draftSub, setDraftSub] = useState<SubscriptionType | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<SubscriptionType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   // lookups for names/emails/logos
   const [customers, setCustomers] = useState<CustomerLite[]>([]);
@@ -356,37 +356,16 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                   </div>
                 </td>
               </tr>
-            ) : filtered.length === 0 && !isLoading ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                  <div className="subscriptions-empty-state">
-                    <img src={purchaseSvg} alt="No purchases" style={{ width: 190, height: 190 }} />
-                    <p style={{ marginTop: '16px', color: '#666', fontSize: '14px', textAlign: 'center' }}>
-                      No Purchases yet. Click 'New Purchase' to create your First Purchase.
-                    </p>
-                    <div style={{ marginTop: '12px' }}>
-                      <PrimaryButton onClick={() => navigate('/get-started/subscriptions/new')}>
-                        + New Purchase
-                      </PrimaryButton>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ) : (
+            ) : subscriptions.length > 0 ? (
               filtered.map(sub => {
                 const cust = customerMap.get(sub.customerId);
                 const rp = ratePlanMap.get(sub.ratePlanId);
 
-                // Backend may return date with line breaks (e.g. "...\nIST"),
-                // normalize it to a single line so CSS can truncate with ellipsis.
-                const rawPurchased = (sub as any).createdOn ||
+                // Backend already returns formatted date string, so use it directly
+                const purchased = (sub as any).createdOn ||
                   formatIST((sub as any).createdAt) ||
                   formatIST((sub as any).startDate) ||
                   '—';
-                const purchased = typeof rawPurchased === 'string'
-                  ? rawPurchased.replace(/\s+/g, ' ').trim()
-                  : rawPurchased;
-
                 const logo = cust?.__resolvedLogoSrc || null;
 
                 return (
@@ -444,7 +423,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
                             <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
-                            stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
 
@@ -470,26 +449,25 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                   </tr>
                 );
               })
+            ) : (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                  <div className="subscriptions-empty-state">
+                    <img src={purchaseSvg} alt="" className="empty-state-icon" width={190} height={190} />
+                    <p className="customers-empty-state-text">
+                      No Purchases yet. Click 'New Purchase' to create your First Purchase.
+                    </p>
+                    <PrimaryButton
+                      onClick={() => navigate('/get-started/subscriptions/new')}
+                    >
+                      + New Purchase
+                    </PrimaryButton>
+                  </div>
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
-
-        {/* EMPTY STATE OVERLAY (keeps header visible) */}
-        {isEmpty && (
-          <div className="empty-state-purchases" role="region" aria-label="No purchases yet">
-            <img src={purchaseSvg} alt="" className="empty-state-icon" width={190} height={190} />
-            <p className="empty-state-text">
-              No Purchases yet. Click ‘New Purchase’ to create your First Purchase.
-            </p>
-            <PrimaryButton
-              onClick={() => navigate('/get-started/subscriptions/new')}
-              className="empty-new-purchase-btn"
-            >
-
-              + New Purchase
-            </PrimaryButton>
-          </div>
-        )}
       </div>
 
       <ConfirmDeleteModal
