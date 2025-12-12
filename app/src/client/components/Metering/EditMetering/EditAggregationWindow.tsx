@@ -4,10 +4,13 @@ import React from 'react';
 import { SelectField, SelectOption } from '../../componenetsss/Inputs';
 
 interface EditAggregationWindowProps {
+  label?: string;
   productType: string;
   unitOfMeasure: string;
   value: string;
   onChange: (val: string) => void;
+  error?: string;
+  optional?: boolean;
 }
 
 /**
@@ -15,10 +18,13 @@ interface EditAggregationWindowProps {
  * Currently only API product rules are defined as per requirements.
  */
 const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
+  label,
   productType,
   unitOfMeasure,
   value,
   onChange,
+  error,
+  optional,
 }) => {
   const type = productType.toUpperCase();
   const uom = unitOfMeasure.toUpperCase();
@@ -110,10 +116,13 @@ const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
 
   return (
     <SelectField
+      label={label}
       value={value}
       onChange={onChange}
       options={selectOptions}
       placeholderOption="--select--"
+      error={error}
+      optional={optional}
     />
   );
 };

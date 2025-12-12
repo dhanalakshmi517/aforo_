@@ -33,6 +33,7 @@ interface PricingProps {
   draftData?: any;
   isFreshCreation?: boolean;
   locked?: boolean;
+  onFieldChange?: () => void;
 }
 
 type PricingErrors = {
@@ -46,7 +47,7 @@ type PricingErrors = {
 };
 
 const Pricing = forwardRef<PricingHandle, PricingProps>(
-  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false, locked = false }, ref) => {
+  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false, locked = false, onFieldChange }, ref) => {
     const [selected, setSelected] = useState('');
     const [errors, setErrors] = useState<PricingErrors>({});
 
@@ -616,6 +617,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
               const v = e.target.value;
               console.log('🎯 Pricing: User selected pricing model:', v);
               setSelected(v);
+              onFieldChange?.(); // Reset saved state when pricing model changes
               if (v === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }

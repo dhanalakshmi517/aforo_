@@ -3,7 +3,7 @@
 /* =========================================================
    Vars
    ========================================================= */
-:root{
+:root {
   --page-shell-pad: 20px;
   --header-gutter: 120px;
 
@@ -18,25 +18,40 @@
 /* =========================================================
    Roots
    ========================================================= */
-.main-container{ width:100%; padding:0 16px 16px 16px; box-sizing:border-box; }
+.main-container {
+  width: 100%;
+  padding: 0 16px 16px 16px;
+  box-sizing: border-box;
+}
 
 /* =========================================================
    Create Plan shell
    ========================================================= */
-.create-plan-container{ width:100%; padding:0; box-sizing:border-box; display:flex; flex-direction:column; position:relative; }
-.create-plan-body{ padding:0; box-sizing:border-box; }
+.create-plan-container {
+  width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.create-plan-body {
+  padding: 0;
+  box-sizing: border-box;
+}
 
 /* =========================================================
    List page shell
    ========================================================= */
-.rate-plan-container{
-  padding:0;
-  width:calc(100% - 256px - 5px);
-  max-width:none;
-  box-sizing:border-box;
-  padding-right:10px;
-  background:none;
-  box-shadow:none;
+.rate-plan-container {
+  padding: 0;
+  width: calc(100% - 256px - 5px);
+  max-width: none;
+  box-sizing: border-box;
+  padding-right: 10px;
+  background: none;
+  box-shadow: none;
 }
 
 .rateplan-check-container {
@@ -44,40 +59,42 @@
   width: calc(100% + 1.2rem);
   max-width: none;
   box-sizing: border-box;
-  background: #FFFFFF; /* White background color */
+  background: #FFFFFF;
+  /* White background color */
   box-shadow: none;
-  min-height: calc(100vh-10px); /* Ensure full height */
+  min-height: calc(100vh-10px);
+  /* Ensure full height */
   display: flex;
   flex-direction: column;
 }
 
-@media (max-width: 991px) { 
-  .rateplan-check-container { 
-    margin-left: 0; 
-    width: 100%; 
-  } 
+@media (max-width: 991px) {
+  .rateplan-check-container {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
-  .rateplan-check-container { 
-    width: 100%; 
-    margin-left: 0; 
+  .rateplan-check-container {
+    width: 100%;
+    margin-left: 0;
   }
 }
 
 
 
-@media (max-width: 991px) { 
-  .check-container { 
-    margin-left: 0; 
-    width: 100%; 
-  } 
+@media (max-width: 991px) {
+  .check-container {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
-  .check-container { 
-    width: 100%; 
-    margin-left: 0; 
+  .check-container {
+    width: 100%;
+    margin-left: 0;
   }
 }
 
@@ -123,170 +140,284 @@
 /* =========================================================
    Table
    ========================================================= */
-.products-table-wrapper{ width:100%; }
-.products-table{
-  width:100%; table-layout:fixed; border-collapse:collapse;
-  background:#fff; border-radius:12px; overflow:hidden; margin:0;
-  font-family:'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+.products-table-wrapper {
+  width: 100%;
+}
+
+.products-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0;
+  font-family: 'IBM Plex Sans', var(--font-family-primary), system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* column widths */
-.col-rateplan-name{ width:244px; }
-.col-product{ width:260px; }        /* Pricing model */
-.col-payment{ width:226px; }
-.col-created{ width:221px; }
-.col-status{ width:96px; }
-.col-actions{ width:97px; }
+.col-rateplan-name {
+  width: 244px;
+}
 
-.products-table thead th{
+.col-product {
+  width: 260px;
+}
+
+/* Pricing model */
+.col-payment {
+  width: 226px;
+}
+
+.col-created {
+  width: 221px;
+}
+
+.col-status {
+  width: 96px;
+}
+
+.col-actions {
+  width: 97px;
+}
+
+.products-table thead th {
   position: sticky;
   top: 0;
-  z-index: 1;                    /* stay above rows               */
-  background: var(--color-neutral-100);  /* covers rows under it   */
-  background:#F7F8FA; 
-  color:var(--text-dark); 
-  font-weight:400;
-  padding:8px 16px; 
-  text-align:left; 
-  font-size:14px;
+  z-index: 1;
+  /* stay above rows               */
+  background: var(--color-neutral-100);
+  /* covers rows under it   */
+  background: #F7F8FA;
+  color: var(--text-dark);
+  font-weight: 400;
+  padding: 8px 16px;
+  text-align: left;
+  font-size: 14px;
   border-bottom: none;
 }
-.products-table tbody td{
-  height:78px;                        /* spec */
-  padding:8px 16px;                   /* spec */
-  text-align:left; border-bottom:0.4px solid var(--border-1,#E9E9EE);
-  font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle;
+
+.products-table tbody td {
+  height: 78px;
+  /* spec */
+  padding: 8px 16px;
+  /* spec */
+  text-align: left;
+  border-bottom: 0.4px solid var(--border-1, #E9E9EE);
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
+
 /* center actions */
 .products-table .col-actions,
-.products-table td:nth-child(6){ text-align:center; }
+.products-table td:nth-child(6) {
+  text-align: center;
+}
+
+/* Actions cell - matches Products.css */
+.customers-table td.actions-cell {
+  text-align: center;
+}
+
+.customers-table th.actions-cell {
+  text-align: center;
+}
+
+.product-action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
 
 /* =========================================================
    Rate Plan "name chip" with full icon stack
    ========================================================= */
-.rp-name-chip{
-  display:flex; align-items:center; gap:8px;
+.rp-name-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: var(--surface-layer-3, #F8F7FA);
   border: 0.4px solid var(--border-border-2, #D5D4DF);
   border-radius: var(--border-radius-md, 12px);
-  height:62.33559px;                 /* Figma H Hug */
-  min-width:198px;
-  padding: 8px 28px 8px 8px;         /* spec */
+  height: 62.33559px;
+  /* Figma H Hug */
+  min-width: 198px;
+  padding: 8px 28px 8px 8px;
+  /* spec */
   flex: 1 0 0;
 }
-.rp-name-icon{
-  position:relative;
-  width:64.65374px;                  /* Figma W Hug */
-  height:46.33559px;                 /* Figma H Hug */
-  flex-shrink:0;
+
+.rp-name-icon {
+  position: relative;
+  width: 64.65374px;
+  /* Figma W Hug */
+  height: 46.33559px;
+  /* Figma H Hug */
+  flex-shrink: 0;
 }
 
 /* price tag (behind) */
-.rp-price-tag{
-  position:absolute;
-  left:0px;
-  top:10px;
-  width:20px;                        /* 20 × 26 */
-  height:26px;
-  z-index:1;
+.rp-price-tag {
+  position: absolute;
+  left: 0px;
+  top: 10px;
+  width: 20px;
+  /* 20 × 26 */
+  height: 26px;
+  z-index: 1;
 }
 
 /* Make the tag more visible: strengthen stroke/fill on its paths */
-.rp-price-tag path:first-of-type{
+.rp-price-tag path:first-of-type {
   /* body of the tag */
-  fill: rgba(235,173,204,0.55) !important;    /* up from ~0.30 */
-  stroke: #9F3E72 !important;                 /* deeper plum */
+  fill: rgba(235, 173, 204, 0.55) !important;
+  /* up from ~0.30 */
+  stroke: #9F3E72 !important;
+  /* deeper plum */
   stroke-width: .8px !important;
 }
-.rp-price-tag path:last-of-type{
+
+.rp-price-tag path:last-of-type {
   /* details & hole */
   stroke: #9F3E72 !important;
   stroke-width: .8px !important;
 }
 
 /* White thread/loop */
-.rp-tag-thread{
-  position:absolute;
-  left:16px;
-  top:6px;
-  width:10.837px;
-  height:8.136px;
-  pointer-events:none;
-  z-index:3;                         /* above bg, below glass */
+.rp-tag-thread {
+  position: absolute;
+  left: 16px;
+  top: 6px;
+  width: 10.837px;
+  height: 8.136px;
+  pointer-events: none;
+  z-index: 3;
+  /* above bg, below glass */
 }
 
 /* Background pink tile (exact spec) */
-.rp-icon-bg{
-  position:absolute;
-  left:22px;
-  top:10px;
-  width:29.45px;
-  height:25.243px;
-  border-radius:5.7px;
+.rp-icon-bg {
+  position: absolute;
+  left: 22px;
+  top: 10px;
+  width: 29.45px;
+  height: 25.243px;
+  border-radius: 5.7px;
   background: var(--multi-colors-Products-Pink---light, #D75D99);
-  z-index:2;
+  z-index: 2;
 }
 
 /* Foreground “glass” tile — upgraded glass look */
-.rp-icon-fg{
-  position:absolute;
-  left:28px;
-  top:6px;
-  width:29.45px;                     /* MUST match background tile */
-  height:25.243px;                   /* MUST match background tile */
-  border-radius:5.7px;
+.rp-icon-fg {
+  position: absolute;
+  left: 28px;
+  top: 6px;
+  width: 29.45px;
+  /* MUST match background tile */
+  height: 25.243px;
+  /* MUST match background tile */
+  border-radius: 5.7px;
   /* bright edge to sell the glass */
-  border:0.6px solid rgba(255,255,255,0.95);
+  border: 0.6px solid rgba(255, 255, 255, 0.95);
   /* soft highlight + translucency over the blur */
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.10) 100%),
-    rgba(202,171,213,0.14);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.10) 100%),
+    rgba(202, 171, 213, 0.14);
   /* depth: outside shadow + inner glow for sheen */
   box-shadow:
-    0 2px 6px rgba(0,0,0,0.08),
-    inset 1px 1px 0 rgba(255,255,255,0.35),
-    inset -2px -4px 8px rgba(148,51,119,0.18);
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset -2px -4px 8px rgba(148, 51, 119, 0.18);
   /* glassy background refraction */
   backdrop-filter: saturate(140%) blur(5px);
   -webkit-backdrop-filter: saturate(140%) blur(5px);
 
-  display:flex; align-items:center; justify-content:center;
-  padding:0;                          /* avoid squeezing inner box */
-  z-index:4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  /* avoid squeezing inner box */
+  z-index: 4;
 }
 
 /* Inner bordered opac block carrying the 16px glyph */
-.rp-icon-inner{
-  width:29.45px;                      /* same box as spec */
-  height:25.243px;
-  border-radius:12px;
-  border:0.6px solid var(--border-border-2,#D5D4DF);
-  background: var(--multi-colors-Products-Pink-opac-1, rgba(235,173,204,0.30));
-  display:flex; align-items:center; justify-content:center;
-  padding:8px 8px 8px 6px;            /* figma */
-  gap:-4px;
+.rp-icon-inner {
+  width: 29.45px;
+  /* same box as spec */
+  height: 25.243px;
+  border-radius: 12px;
+  border: 0.6px solid var(--border-border-2, #D5D4DF);
+  background: var(--multi-colors-Products-Pink-opac-1, rgba(235, 173, 204, 0.30));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 8px 8px 6px;
+  /* figma */
+  gap: -4px;
 }
 
-.rp-name-texts{ display:flex; flex-direction:column; justify-content:center; }
-.rp-name-title{ font-size:14px; line-height:20px; color:#12161B; font-weight:600; }
-.rp-name-subtitle{ margin-top:2px; font-size:10px; line-height:16px; color:#1A2126; }
+.rp-name-texts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.rp-name-title {
+  font-size: 14px;
+  line-height: 20px;
+  color: #12161B;
+  font-weight: 600;
+}
+
+.rp-name-subtitle {
+  margin-top: 2px;
+  font-size: 10px;
+  line-height: 16px;
+  color: #1A2126;
+}
 
 /* =========================================================
    Pricing model cell
    ========================================================= */
-.pricing-cell{ display:flex; align-items:center; gap:10px; }
-.pricing-model-name{ font-size:13px; color:#0F172A; min-width:32px; }
-.pricing-skel{
-  width:180px; height:20px; border-radius:6px;
-  background:linear-gradient(90deg,#f2f2f5 0%,#e9e9ee 50%,#f2f2f5 100%);
-  background-size:200% 100%; animation:sk 1.2s infinite;
+.pricing-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-@keyframes sk{ 0%{background-position:0% 0} 100%{background-position:200% 0} }
+
+.pricing-model-name {
+  font-size: 13px;
+  color: #0F172A;
+  min-width: 32px;
+}
+
+.pricing-skel {
+  width: 180px;
+  height: 20px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f2f2f5 0%, #e9e9ee 50%, #f2f2f5 100%);
+  background-size: 200% 100%;
+  animation: sk 1.2s infinite;
+}
+
+@keyframes sk {
+  0% {
+    background-position: 0% 0
+  }
+
+  100% {
+    background-position: 200% 0
+  }
+}
 
 /* =========================================================
    Billable metric badge — bigger so UOM + metric fit
    ========================================================= */
-.bm-badge{
+.bm-badge {
   border-radius: var(--border-radius-sm, 8px);
   border: 0.6px solid var(--billable-metric-stroke---light, #F6F6F6);
   background: var(--multi-colors-Products-Violet-opac-1, rgba(192, 173, 235, 0.30));
@@ -305,7 +436,7 @@
 }
 
 /* UOM typography */
-.bm-badge-uom{
+.bm-badge-uom {
   color: var(--text-text-darkest, #1A2126);
   font-family: "Aeonik Mono VF", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 12px;
@@ -314,23 +445,24 @@
   line-height: 16px;
   letter-spacing: -1px;
 
-  display:block;
-  padding:0;
-  height:auto;
-  min-width:0;
-  border-radius:0;
-  background:transparent;
+  display: block;
+  padding: 0;
+  height: auto;
+  min-width: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 /* Metric name specs */
-.bm-badge-sub{
+.bm-badge-sub {
   overflow: hidden;
   color: var(--text-text-darkest, #1A2126);
   font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 9px;
   font-style: normal;
   font-weight: 300;
-  line-height: 10px;  /* 111.111% */
+  line-height: 10px;
+  /* 111.111% */
   letter-spacing: -0.2px;
 
   display: -webkit-box;
@@ -343,28 +475,66 @@
 /* =========================================================
    Pills (Payment)
    ========================================================= */
-.pill{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:2px 10px; height:24px;
-  border-radius:9999px; border:1px solid #D8DEE7;
-  background:#fff; color:#1A2126; font-size:12px; line-height:18px; font-weight:400;
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 10px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid #D8DEE7;
+  background: #fff;
+  color: #1A2126;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
 }
-.pill-icon{ display:inline-flex; width:18px; height:18px; }
-.pill .pill-icon svg{ display:block; }
-.pill--unknown{ color:#6B7280; }
+
+.pill-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.pill .pill-icon svg {
+  display: block;
+}
+
+.pill--unknown {
+  color: #6B7280;
+}
 
 /* =========================================================
    Status badge
    ========================================================= */
-.status-badge{
-  display:inline-flex; align-items:center;
-  height:28px; padding:0 10px; border-radius:14px;
-  font-family:'IBM Plex Sans'; font-size:12px; font-weight:700; line-height:18px;
-  color:#0F172A; background:#EDEFF2;
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  font-family: 'IBM Plex Sans';
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #0F172A;
+  background: #EDEFF2;
 }
-.status-badge.active{ background:#E6F7EA; color:#107A3E; }
-.status-badge.draft{ background:#EEEAF7; color:#5D41A3; }
-.status-badge.staged{ background:#E6F2FB; color:#2676B8; }
+
+.status-badge.active {
+  background: #E6F7EA;
+  color: #107A3E;
+}
+
+.status-badge.draft {
+  background: #EEEAF7;
+  color: #5D41A3;
+}
+
+.status-badge.staged {
+  background: #E6F2FB;
+  color: #2676B8;
+}
 
 /* =========================================================
    Row action buttons
@@ -379,31 +549,144 @@
 /* =========================================================
    Empty state (shared) & in-table variant
    ========================================================= */
-.pp-empty-area{ width:100%; box-sizing:border-box; padding:0; display:flex; justify-content:center; flex: 1; }
-.rate-empty{ width:100%; max-width:720px; min-height:288px; display:flex; flex-direction:column; align-items:center; gap:24px; }
-.rate-empty-illustration svg{ width:160px; height:160px; display:block; }
-.products-empty-state-text{ margin:0; text-align:center; font-family:'IBM Plex Sans'; color:var(--text-dark); font-size:20px; line-height:30px; font-weight:400; }
-.empty-new-rate-btn{ height:48px; padding:0 24px; border-radius:12px; background:var(--surface-sidebar); color:#fff; border:none; display:inline-flex; align-items:center; gap:12px; font-weight:600; cursor:pointer; }
-.empty-new-rate-btn:hover{ filter:brightness(0.98); }
-.empty-btn-plus{ display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center; font-size:20px; line-height:20px; }
+.pp-empty-area {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
 
-.pp-empty-row td{ border:none !important; padding:0 !important; text-align:center; background:#fff; height: 100%; }
-.pp-empty-area.in-table{ padding:0; width:100%; display:flex; justify-content:center; }
-.pp-empty-row .rate-empty{ max-width:720px; width:100%; margin:0 auto; }
-.pp-empty-row .rate-empty-illustration svg{ width:160px; height:160px; }
-.pp-empty-row .products-empty-state-text{ font-size:20px; line-height:30px; color:#6B6F76; font-weight:400; margin:0; }
-.pp-empty-row .empty-new-rate-btn{ height:48px; padding:0 24px; border-radius:12px; font-weight:600; }
+.rate-empty {
+  width: 100%;
+  max-width: 720px;
+  min-height: 288px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.rate-empty-illustration svg {
+  width: 160px;
+  height: 160px;
+  display: block;
+}
+
+.products-empty-state-text {
+  margin: 0;
+  text-align: center;
+  font-family: 'IBM Plex Sans';
+  color: var(--text-dark);
+  font-size: 20px;
+  line-height: 30px;
+  font-weight: 400;
+}
+
+.empty-new-rate-btn {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: var(--surface-sidebar);
+  color: #fff;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-new-rate-btn:hover {
+  filter: brightness(0.98);
+}
+
+.empty-btn-plus {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.pp-empty-row td {
+  border: none !important;
+  padding: 0 !important;
+  text-align: center;
+  background: #fff;
+  height: 100%;
+}
+
+.pp-empty-area.in-table {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.pp-empty-row .rate-empty {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.pp-empty-row .rate-empty-illustration svg {
+  width: 160px;
+  height: 160px;
+}
+
+.pp-empty-row .products-empty-state-text {
+  font-size: 20px;
+  line-height: 30px;
+  color: #6B6F76;
+  font-weight: 400;
+  margin: 0;
+}
+
+.pp-empty-row .empty-new-rate-btn {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  font-weight: 600;
+}
 
 /* =========================================================
    Responsive
    ========================================================= */
-@media (max-width: 1280px){ .pp-empty-area{ padding:120px 80px; } }
-@media (max-width: 1024px){
-  .create-plan-body{ padding:0; }
+@media (max-width: 1280px) {
+  .pp-empty-area {
+    padding: 120px 80px;
+  }
 }
-@media (max-width: 991px){ .rate-plan-container{ margin-left:0; width:100%; } }
-@media (max-width: 768px){
-  .rate-plan-container{ width:100%; margin-left:0; }
-  .products-table{ display:block; overflow-x:auto; }
-  .pp-empty-area{ padding:80px 24px; }
+
+@media (max-width: 1024px) {
+  .create-plan-body {
+    padding: 0;
+  }
+}
+
+@media (max-width: 991px) {
+  .rate-plan-container {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .rate-plan-container {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .products-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .pp-empty-area {
+    padding: 80px 24px;
+  }
 }

@@ -96,6 +96,39 @@ const firstNonEmpty = (obj: any, paths: string[], fallback = ''): string => {
   return fallback;
 };
 
+/** Robustly normalize/parse anything we might get in `productIcon` */
+const parseProductIconField = (raw: any): any => {
+  let v = raw;
+  if (typeof v === 'string') {
+    try { v = JSON.parse(v); } catch { /* keep as is */ }
+  }
+  if (typeof v === 'string') {
+    try { v = JSON.parse(v); } catch { /* keep as is */ }
+  }
+  return v;
+};
+
+const extractIconData = (parsed: any, fallbackLabel: string): ProductIconData | null => {
+  if (!parsed) return null;
+  if (parsed.iconData && typeof parsed.iconData === 'object') {
+    return parsed.iconData as ProductIconData;
+  }
+  if (parsed.id && parsed.svgPath) {
+    return parsed as ProductIconData;
+  }
+  if (parsed.svgPath || parsed.svgContent) {
+    return {
+      id: `derived-${Date.now()}`,
+      label: fallbackLabel,
+      svgPath: parsed.svgPath || 'M12 2L2 7L12 12L22 7L12 2Z',
+      viewBox: parsed.viewBox || '0 0 24 24',
+      tileColor: parsed.tileColor || '#0F6DDA',
+      outerBg: parsed.outerBg
+    };
+  }
+  return null;
+};
+
 /* ---------------- Component ---------------- */
 export interface RatePlansProps {
   showCreatePlan: boolean;
@@ -306,7 +339,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, [filteredPlans, detailsById]);
 
   // ============================================================
-  // Product icon fetch (FIX: correct base/origin for /uploads)
+  // Product icon fetch (ENHANCED: multiple fallbacks + debugging)
   // ============================================================
   const fetchProductIcon = async (productId: number) => {
     if (loadingProductIcons.has(productId) || productIcons[productId]) {
@@ -321,48 +354,105 @@ const RatePlans: React.FC<RatePlansProps> = ({
       const product = products.find(p => parseInt(p.productId) === productId);
 
       if (!product) {
-        console.log(`❌ Product with ID ${productId} not found`);
+        console.log(`❌ RatePlans: Product with ID ${productId} not found in products list`);
         setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
         return;
       }
 
+      console.log(`🔍 RatePlans: Found product ${productId} (${product.productName}), checking for icon...`);
+      console.log(`🔍 RatePlans: product.productId type: ${typeof product.productId}, value: ${product.productId}`);
+      console.log(`🔍 RatePlans: product.productIcon exists:`, !!product.productIcon);
+      console.log(`🔍 RatePlans: product.icon exists:`, !!product.icon);
+
       let iconData: ProductIconData | null = null;
       let iconUrl: string | null = null;
 
-      // ✅ PRIORITY 1: Check for structured productIcon field (saved during product creation)
-      if (product.productIcon && product.productIcon !== 'null' && product.productIcon !== '') {
-        try {
-          const parsed = typeof product.productIcon === 'string'
-            ? JSON.parse(product.productIcon)
-            : product.productIcon;
+      // ✅ PRIORITY 0: Check localStorage cache first (same as Products.tsx)
+      // Try BOTH string and number keys since different components may store differently
+      try {
+        const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+        console.log(`🔍 RatePlans: iconDataCache keys:`, Object.keys(iconCache));
 
-          if (parsed?.id && parsed?.svgPath && parsed?.tileColor) {
-            iconData = {
-              id: parsed.id,
-              label: parsed.label || product.productName || 'Product',
-              svgPath: parsed.svgPath,
-              tileColor: parsed.tileColor,
-              viewBox: parsed.viewBox || '0 0 24 24',
-              ...(parsed.outerBg && { outerBg: parsed.outerBg })
-            } as ProductIconData;
-          } else if (parsed?.iconData) {
-            iconData = parsed.iconData as ProductIconData;
+        // Try string key first (most common), then number key
+        let cachedIconJson = iconCache[product.productId] || iconCache[String(productId)] || iconCache[productId];
+
+        if (cachedIconJson) {
+          console.log(`✅ RatePlans: Found cached icon for ${productId} in localStorage`);
+          const parsedCache = parseProductIconField(cachedIconJson);
+          iconData = extractIconData(parsedCache, product.productName || 'Product');
+          if (iconData) {
+            console.log(`✅ RatePlans: Successfully extracted cached icon for ${productId}:`, iconData);
+          } else {
+            console.log(`⚠️ RatePlans: Cache entry found but extractIconData returned null`);
+          }
+        } else {
+          console.log(`⚠️ RatePlans: No cached icon found for ${productId} (tried keys: ${product.productId}, ${productId})`);
+        }
+      } catch (e) {
+        console.warn('Failed to read icon cache from localStorage:', e);
+      }
+
+      // ✅ PRIORITY 1: Check for structured productIcon field from API response
+      if (!iconData && product.productIcon && product.productIcon !== 'null' && product.productIcon !== '') {
+        console.log(`🔍 RatePlans: Trying to parse productIcon field for ${productId}`);
+        try {
+          const parsed = parseProductIconField(product.productIcon);
+          console.log(`🔍 RatePlans: Parsed productIcon:`, parsed);
+
+          iconData = extractIconData(parsed, product.productName || 'Product');
+          if (iconData) {
+            console.log(`✅ RatePlans: Successfully extracted iconData from productIcon field for ${productId}`);
+          } else {
+            console.log(`⚠️ RatePlans: productIcon field exists but extractIconData returned null`);
           }
         } catch (e) {
           console.error('❌ Error parsing productIcon JSON:', e);
         }
       }
 
+      // ✅ PRIORITY 1.5: Try fetching individual product for more complete data
+      if (!iconData) {
+        console.log(`🔍 RatePlans: Trying individual product fetch for ${productId}...`);
+        try {
+          const { getProductById } = await import('../Products/api');
+          const individualProduct = await getProductById(product.productId);
+          if (individualProduct?.productIcon) {
+            console.log(`✅ RatePlans: Found productIcon in individual fetch for ${productId}`);
+            const parsed = parseProductIconField(individualProduct.productIcon);
+            iconData = extractIconData(parsed, product.productName || 'Product');
+            if (iconData) {
+              console.log(`✅ RatePlans: Successfully extracted iconData from individual fetch for ${productId}`);
+              // Cache it for future use
+              try {
+                const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+                iconCache[product.productId] = JSON.stringify({ iconData });
+                localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+                console.log(`💾 RatePlans: Cached icon data for ${productId}`);
+              } catch (e) {
+                console.warn('Failed to cache icon data:', e);
+              }
+            }
+          } else {
+            console.log(`⚠️ RatePlans: Individual fetch also has no productIcon for ${productId}`);
+          }
+        } catch (e) {
+          console.error(`❌ RatePlans: Error fetching individual product ${productId}:`, e);
+        }
+      }
+
       // ✅ PRIORITY 2: Only if no structured data, try to fetch from URL
       if (!iconData && product.icon) {
+        console.log(`🔍 RatePlans: Trying to fetch icon from URL: ${product.icon}`);
         try {
           const authHeaders = getAuthHeaders();
           const resolvedUrl =
             product.icon.startsWith('http')
               ? product.icon
               : product.icon.startsWith('/uploads')
-                ? `${API_ORIGIN}${product.icon}` // <-- key fix: use ORIGIN (no /api) for /uploads
+                ? `${API_ORIGIN}${product.icon}`
                 : `${API_BASE_URL}${product.icon.startsWith('/') ? '' : '/'}${product.icon}`;
+
+          console.log(`🔍 RatePlans: Resolved icon URL: ${resolvedUrl}`);
 
           const response = await axios.get(resolvedUrl, {
             responseType: 'blob',
@@ -377,38 +467,47 @@ const RatePlans: React.FC<RatePlansProps> = ({
           const parser = new DOMParser();
           const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-          // Extract tile color from the background rect
+          // Extract tile color - try multiple selectors
           const rects = doc.querySelectorAll('rect');
           let tileColor = '#0F6DDA';
           for (const rect of rects) {
             const width = rect.getAttribute('width');
             const fill = rect.getAttribute('fill');
-            if (width && parseFloat(width) > 29 && parseFloat(width) < 30 && fill && fill.startsWith('#')) {
+            if (fill && fill.startsWith('#') && fill !== '#FFF' && fill !== '#FFFFFF' && fill !== '#fff' && fill !== '#ffffff') {
+              // Use the first non-white colored rect
               tileColor = fill;
               break;
             }
           }
 
-          // Extract icon path and viewBox
-          const pathElement = doc.querySelector('path[fill="#FFFFFF"]');
-          let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
+          // Extract icon path - try multiple selectors
+          const pathElement = doc.querySelector('path[fill="#FFFFFF"]')
+            || doc.querySelector('path[fill="#fff"]')
+            || doc.querySelector('path[fill="white"]')
+            || doc.querySelector('path[fill="currentColor"]')
+            || doc.querySelector('path');
+
+          let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z'; // Default fallback
           let viewBox = '0 0 24 24';
+
           if (pathElement) {
             svgPath = pathElement.getAttribute('d') || svgPath;
-            const svgElement = pathElement.closest('svg');
+            const svgElement = doc.querySelector('svg');
             if (svgElement) {
               viewBox = svgElement.getAttribute('viewBox') || viewBox;
             }
           }
 
-          // Extract gradient colors
+          // Extract gradient colors if available
           let outerBg: [string, string] | undefined;
           const gradientElement = doc.querySelector('linearGradient');
           if (gradientElement) {
             const stops = gradientElement.querySelectorAll('stop');
             if (stops.length >= 2) {
-              const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
-              const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+              const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1]
+                || stops[0].getAttribute('stop-color');
+              const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1]
+                || stops[1].getAttribute('stop-color');
               if (color1 && color2) {
                 outerBg = [color1.trim(), color2.trim()];
               }
@@ -423,13 +522,16 @@ const RatePlans: React.FC<RatePlansProps> = ({
             viewBox,
             ...(outerBg && { outerBg })
           };
+
+          console.log(`✅ RatePlans: Extracted icon from SVG URL for ${productId}:`, iconData);
         } catch (e: any) {
-          console.error('❌ Error fetching product icon from URL:', e);
+          console.error(`❌ RatePlans: Error fetching product icon from URL for ${productId}:`, e?.message || e);
         }
       }
 
       // ✅ PRIORITY 3: Create deterministic fallback only if absolutely no icon data
       if (!iconData && !iconUrl) {
+        console.log(`⚠️ RatePlans: No icon data found, using fallback for ${productId}`);
         const colors = ['#0F6DDA', '#23A36D', '#CC9434', '#E3ADEB', '#FF6B6B', '#4ECDC4', '#95E77E', '#FFD93D'];
         const colorIndex = productId % colors.length;
 
@@ -442,6 +544,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
         };
       }
 
+      console.log(`✅ RatePlans: Final icon for ${productId}:`, iconData ? 'Found' : 'Fallback');
       setProductIcons(prev => ({ ...prev, [productId]: { iconData, iconUrl } }));
     } catch (e) {
       console.error('Error loading product icon:', e);
@@ -542,16 +645,16 @@ const RatePlans: React.FC<RatePlansProps> = ({
       return (
         <span className="pill pill--prepaid">
           <span className="pill-icon" aria-hidden="true">
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-  <g clip-path="url(#clip0_14251_15772)">
-    <path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#19222D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-  <defs>
-    <clipPath id="clip0_14251_15772">
-      <rect width="16" height="16" fill="white"/>
-    </clipPath>
-  </defs>
-</svg>          </span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <g clip-path="url(#clip0_14251_15772)">
+                <path d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z" stroke="#19222D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+              </g>
+              <defs>
+                <clipPath id="clip0_14251_15772">
+                  <rect width="16" height="16" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>          </span>
           Pre-paid
         </span>
       );
@@ -560,9 +663,9 @@ const RatePlans: React.FC<RatePlansProps> = ({
       return (
         <span className="pill pill--postpaid">
           <span className="pill-icon" aria-hidden="true">
-<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-  <path d="M4.0124 13.6C2.89133 13.6 1.94233 13.2115 1.1654 12.4346C0.388467 11.6577 0 10.7087 0 9.5876C0 9.11693 0.0802666 8.65953 0.2408 8.2154C0.401333 7.77127 0.631333 7.36873 0.9308 7.0078L3.33813 4.11263C3.5917 3.80767 3.64109 3.38169 3.46402 3.02681L2.67551 1.44646C2.34378 0.781608 2.8273 0 3.57031 0H10.0297C10.7727 0 11.2562 0.781609 10.9245 1.44646L10.136 3.02681C9.95891 3.38169 10.0083 3.80767 10.2619 4.11263L12.6692 7.0078C12.9687 7.36873 13.1987 7.77127 13.3592 8.2154C13.5197 8.65953 13.6 9.11693 13.6 9.5876C13.6 10.7087 13.2095 11.6577 12.4284 12.4346C11.6475 13.2115 10.7005 13.6 9.5876 13.6H4.0124ZM6.8 9.7922C6.40107 9.7922 6.06033 9.65093 5.7778 9.3684C5.49513 9.08587 5.3538 8.74513 5.3538 8.3462C5.3538 7.94713 5.49513 7.60633 5.7778 7.3238C6.06033 7.04127 6.40107 6.9 6.8 6.9C7.19893 6.9 7.53967 7.04127 7.8222 7.3238C8.10487 7.60633 8.2462 7.94713 8.2462 8.3462C8.2462 8.74513 8.10487 9.08587 7.8222 9.3684C7.53967 9.65093 7.19893 9.7922 6.8 9.7922ZM4.57702 2.54864C4.74669 2.88664 5.09253 3.1 5.47073 3.1H8.13466C8.51401 3.1 8.86069 2.88535 9.0298 2.54578L9.556 1.48916C9.62221 1.35619 9.52551 1.2 9.37697 1.2H4.22419C4.07537 1.2 3.97868 1.35673 4.04544 1.48973L4.57702 2.54864ZM4.0124 12.4H9.5876C10.3733 12.4 11.0385 12.1264 11.583 11.5792C12.1277 11.032 12.4 10.3681 12.4 9.5876C12.4 9.25733 12.3433 8.93713 12.23 8.627C12.1167 8.31673 11.9549 8.03647 11.7446 7.7862L9.14287 4.66028C8.95287 4.43201 8.67125 4.3 8.37426 4.3H5.2434C4.94775 4.3 4.66726 4.43082 4.47726 4.65732L1.863 7.7738C1.65273 8.02407 1.48967 8.3064 1.3738 8.6208C1.25793 8.93507 1.2 9.25733 1.2 9.5876C1.2 10.3681 1.4736 11.032 2.0208 11.5792C2.568 12.1264 3.23187 12.4 4.0124 12.4Z" fill="#19222D"/>
-</svg>          </span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M4.0124 13.6C2.89133 13.6 1.94233 13.2115 1.1654 12.4346C0.388467 11.6577 0 10.7087 0 9.5876C0 9.11693 0.0802666 8.65953 0.2408 8.2154C0.401333 7.77127 0.631333 7.36873 0.9308 7.0078L3.33813 4.11263C3.5917 3.80767 3.64109 3.38169 3.46402 3.02681L2.67551 1.44646C2.34378 0.781608 2.8273 0 3.57031 0H10.0297C10.7727 0 11.2562 0.781609 10.9245 1.44646L10.136 3.02681C9.95891 3.38169 10.0083 3.80767 10.2619 4.11263L12.6692 7.0078C12.9687 7.36873 13.1987 7.77127 13.3592 8.2154C13.5197 8.65953 13.6 9.11693 13.6 9.5876C13.6 10.7087 13.2095 11.6577 12.4284 12.4346C11.6475 13.2115 10.7005 13.6 9.5876 13.6H4.0124ZM6.8 9.7922C6.40107 9.7922 6.06033 9.65093 5.7778 9.3684C5.49513 9.08587 5.3538 8.74513 5.3538 8.3462C5.3538 7.94713 5.49513 7.60633 5.7778 7.3238C6.06033 7.04127 6.40107 6.9 6.8 6.9C7.19893 6.9 7.53967 7.04127 7.8222 7.3238C8.10487 7.60633 8.2462 7.94713 8.2462 8.3462C8.2462 8.74513 8.10487 9.08587 7.8222 9.3684C7.53967 9.65093 7.19893 9.7922 6.8 9.7922ZM4.57702 2.54864C4.74669 2.88664 5.09253 3.1 5.47073 3.1H8.13466C8.51401 3.1 8.86069 2.88535 9.0298 2.54578L9.556 1.48916C9.62221 1.35619 9.52551 1.2 9.37697 1.2H4.22419C4.07537 1.2 3.97868 1.35673 4.04544 1.48973L4.57702 2.54864ZM4.0124 12.4H9.5876C10.3733 12.4 11.0385 12.1264 11.583 11.5792C12.1277 11.032 12.4 10.3681 12.4 9.5876C12.4 9.25733 12.3433 8.93713 12.23 8.627C12.1167 8.31673 11.9549 8.03647 11.7446 7.7862L9.14287 4.66028C8.95287 4.43201 8.67125 4.3 8.37426 4.3H5.2434C4.94775 4.3 4.66726 4.43082 4.47726 4.65732L1.863 7.7738C1.65273 8.02407 1.48967 8.3064 1.3738 8.6208C1.25793 8.93507 1.2 9.25733 1.2 9.5876C1.2 10.3681 1.4736 11.032 2.0208 11.5792C2.568 12.1264 3.23187 12.4 4.0124 12.4Z" fill="#19222D" />
+            </svg>          </span>
           Post-paid
         </span>
       );
@@ -609,7 +712,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
           borderRadius: '12px',
           border: '0.6px solid var(--border-border-2, #D5D4DF)',
           background: 'var(--multi-colors-Products-Fuchsia-opac-1, rgba(227, 173, 235, 0.30))',
-          width: '48px',
+          width: '58px',
           height: '48px',
           position: 'relative'
         }}>
@@ -632,73 +735,32 @@ const RatePlans: React.FC<RatePlansProps> = ({
             )}
           </div>
 
-          {/* Front Thread */}
+          {/* Purchase Tag - positioned on left side */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="13"
-            height="10"
-            viewBox="0 0 13 10"
+            width="14"
+            height="19"
+            viewBox="0 0 14 19"
             fill="none"
             style={{
               position: 'absolute',
-              bottom: '3px',
-              right: '3px',
-              width: '10.837px',
-              height: '8.136px',
-              flexShrink: 0,
-              zIndex: 2
-            }}
-          >
-            <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round" />
-          </svg>
-
-          {/* Purchase Tag */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="21"
-            height="21"
-            viewBox="0 0 21 21"
-            fill="none"
-            style={{
-              position: 'absolute',
-              bottom: '-4px',
-              right: '-4px',
-              width: '19.627px',
-              height: '19.627px',
+              top: '8px',
+              left: '1px',
+              width: '13px',
+              height: '17.944px',
               flexShrink: 0,
               zIndex: 3
             }}
           >
+            <path d="M0.405344 9.873C0.401952 9.56718 0.520179 9.27253 0.73402 9.05386L3.62623 6.09766C3.84014 5.87903 4.13213 5.75432 4.43799 5.75097C4.74384 5.74762 5.0385 5.86591 5.25713 6.07982L8.21333 8.97203C8.4319 9.18597 8.55655 9.47796 8.55985 9.78379L8.6375 16.8815C8.64038 17.2509 8.49696 17.6066 8.23857 17.8707C7.98017 18.1348 7.62779 18.2859 7.25834 18.2911L1.89267 18.3498C1.5232 18.3527 1.16759 18.2093 0.903481 17.9509C0.639372 17.6925 0.488211 17.3401 0.482998 16.9707L0.405344 9.873Z" fill="url(#paint0_linear_rp_fallback)" fillOpacity="0.2" style={{ mixBlendMode: 'hard-light' }} />
+            <path d="M0.405344 9.873C0.401952 9.56718 0.520179 9.27253 0.73402 9.05386L3.62623 6.09766C3.84014 5.87903 4.13213 5.75432 4.43799 5.75097C4.74384 5.74762 5.0385 5.86591 5.25713 6.07982L8.21333 8.97203C8.4319 9.18597 8.55655 9.47796 8.55985 9.78379L8.6375 16.8815C8.64038 17.2509 8.49696 17.6066 8.23857 17.8707C7.98017 18.1348 7.62779 18.2859 7.25834 18.2911L1.89267 18.3498C1.5232 18.3527 1.16759 18.2093 0.903481 17.9509C0.639372 17.6925 0.488211 17.3401 0.482998 16.9707L0.405344 9.873Z" fill="#E3ADEB" fillOpacity="0.3" />
+            <path d="M0.405344 9.873L0.810941 9.86857L0.81094 9.86851L0.405344 9.873ZM0.73402 9.05386L0.444082 8.7702L0.444021 8.77026L0.73402 9.05386ZM3.62623 6.09766L3.91617 6.38132L3.62623 6.09766ZM5.25713 6.07982L5.54079 5.78988L5.25713 6.07982ZM8.21333 8.97203L8.49705 8.68215L8.49699 8.68209L8.21333 8.97203ZM8.55985 9.78379L8.15425 9.78816L8.15425 9.78823L8.55985 9.78379ZM8.6375 16.8815L9.04311 16.8783L9.0431 16.877L8.6375 16.8815ZM7.25834 18.2911L7.26278 18.6967L7.26406 18.6967L7.25834 18.2911ZM1.89267 18.3498L1.89583 18.7555L1.89711 18.7554L1.89267 18.3498ZM0.482998 16.9707L0.0773999 16.9751L0.077418 16.9764L0.482998 16.9707ZM1.97945 14.5368C1.75547 14.5331 1.57091 14.7117 1.56723 14.9357C1.56355 15.1597 1.74215 15.3442 1.96614 15.3479L1.9728 14.9423L1.97945 14.5368ZM5.70527 15.4093C5.92926 15.413 6.11382 15.2344 6.1175 15.0104C6.12117 14.7864 5.94258 14.6018 5.71859 14.5982L5.71193 15.0037L5.70527 15.4093ZM1.8994 16.2076C1.67538 16.2087 1.49466 16.3912 1.49575 16.6152C1.49684 16.8392 1.67932 17.0199 1.90334 17.0189L1.90137 16.6132L1.8994 16.2076ZM3.97158 17.0088C4.1956 17.0077 4.37631 16.8252 4.37523 16.6012C4.37414 16.3772 4.19165 16.1965 3.96764 16.1976L3.96961 16.6032L3.97158 17.0088ZM13.0429 3.40146C13.1432 3.60178 13.3869 3.68288 13.5872 3.5826C13.7875 3.48232 13.8686 3.23864 13.7683 3.03832L13.4056 3.21989L13.0429 3.40146ZM4.04881 7.86447C4.13581 8.0709 4.37369 8.16772 4.58012 8.08072C4.78656 7.99371 4.88337 7.75583 4.79637 7.5494L4.42259 7.70694L4.04881 7.86447ZM7.06014 7.8438L7.39197 8.07707C7.70877 7.62643 8.03961 7.26451 8.46076 7.01157C8.87745 6.76131 9.41143 6.60059 10.1607 6.60059V6.19497V5.78935C9.28747 5.78935 8.60442 5.97899 8.04308 6.31612C7.48621 6.65057 7.07802 7.11306 6.72831 7.61053L7.06014 7.8438ZM0.405344 9.873L0.81094 9.86851C0.808741 9.67024 0.885387 9.47922 1.02402 9.33746L0.73402 9.05386L0.444021 8.77026C0.154971 9.06583 -0.00483659 9.46411 -0.000251353 9.8775L0.405344 9.873ZM0.73402 9.05386L1.02396 9.33752L3.91617 6.38132L3.62623 6.09766L3.33629 5.814L0.444082 8.7702L0.73402 9.05386ZM3.62623 6.09766L3.91617 6.38132C4.05484 6.23958 4.24414 6.15874 4.44242 6.15657L4.43799 5.75097L4.43355 5.34537C4.02012 5.3499 3.62543 5.51847 3.33629 5.814L3.62623 6.09766ZM4.43799 5.75097L4.44242 6.15657C4.64071 6.1544 4.83173 6.23108 4.97347 6.36976L5.25713 6.07982L5.54079 5.78988C5.24526 5.50074 4.84697 5.34085 4.43355 5.34537L4.43799 5.75097ZM5.25713 6.07982L4.97347 6.36976L7.92967 9.26197L8.21333 8.97203L8.49699 8.68209L5.54079 5.78988L5.25713 6.07982ZM8.21333 8.97203L7.92961 9.26191C8.07131 9.4006 8.15211 9.5899 8.15425 9.78816L8.55985 9.78379L8.96545 9.77941C8.96099 9.36602 8.7925 8.97133 8.49705 8.68215L8.21333 8.97203ZM8.55985 9.78379L8.15425 9.78823L8.23191 16.8859L8.6375 16.8815L9.0431 16.877L8.96545 9.77935L8.55985 9.78379ZM8.6375 16.8815L8.23189 16.8846C8.23393 17.147 8.1321 17.3995 7.94863 17.587L8.23857 17.8707L8.5285 18.1543C8.86182 17.8136 9.04682 17.3549 9.04311 16.8783L8.6375 16.8815ZM8.23857 17.8707L7.94863 17.587C7.76516 17.7745 7.51495 17.8819 7.25262 17.8856L7.25834 18.2911L7.26406 18.6967C7.74063 18.69 8.19519 18.495 8.5285 18.1543L8.23857 17.8707ZM7.25834 18.2911L7.2539 17.8855L1.88824 17.9443L1.89267 18.3498L1.89711 18.7554L7.26278 18.6967L7.25834 18.2911ZM1.89267 18.3498L1.88952 17.9442C1.62718 17.9463 1.37468 17.8444 1.18714 17.661L0.903481 17.9509L0.619819 18.2409C0.960506 18.5742 1.41922 18.7592 1.89583 18.7555L1.89267 18.3498ZM0.903481 17.9509L1.18714 17.661C0.999612 17.4775 0.89228 17.2273 0.888579 16.965L0.482998 16.9707L0.077418 16.9764C0.0841416 17.453 0.279132 17.9075 0.619819 18.2409L0.903481 17.9509ZM0.482998 16.9707L0.888595 16.9662L0.810941 9.86857L0.405344 9.873L-0.000252038 9.87744L0.0774019 16.9751L0.482998 16.9707ZM1.9728 14.9423L1.96614 15.3479L5.70527 15.4093L5.71193 15.0037L5.71859 14.5982L1.97945 14.5368L1.9728 14.9423ZM1.90137 16.6132L1.90334 17.0189L3.97158 17.0088L3.96961 16.6032L3.96764 16.1976L1.8994 16.2076L1.90137 16.6132ZM13.4056 3.21989L13.7683 3.03832C13.1495 1.80214 11.9882 0.93063 10.6903 0.449087C9.39204 -0.0326103 7.91818 -0.139654 6.62407 0.191071C5.32529 0.522991 4.18033 1.30614 3.62134 2.61958C3.06508 3.92662 3.12552 5.67378 4.04881 7.86447L4.42259 7.70694L4.79637 7.5494C3.92318 5.47759 3.92751 3.97179 4.36779 2.93726C4.80535 1.90913 5.70959 1.26209 6.82494 0.977052C7.94497 0.690815 9.25018 0.780034 10.4082 1.20967C11.5665 1.63945 12.5388 2.39434 13.0429 3.40146L13.4056 3.21989Z" fill="#AB51B9" />
             <defs>
-              <clipPath id="bgblur_purchase_tag_clip">
-                <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" />
-              </clipPath>
+              <linearGradient id="paint0_linear_rp_fallback" x1="11.43" y1="12.5616" x2="0.771129" y2="8.13689" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#291515" />
+                <stop offset="1" stopColor="#EFEFEF" />
+              </linearGradient>
             </defs>
-            <foreignObject x="3.03555" y="-0.172949" width="14.5764" height="18.7165">
-              <div style={{ backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%' }}></div>
-            </foreignObject>
-            <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round" />
-          </svg>
-
-          {/* Back Thread */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="7"
-            height="4"
-            viewBox="0 0 7 4"
-            fill="none"
-            style={{
-              position: 'absolute',
-              bottom: '11px',
-              right: '11px',
-              width: '6px',
-              height: '2.551px',
-              flexShrink: 0,
-              zIndex: 1
-            }}
-          >
-            <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6" />
           </svg>
         </div>
       );
@@ -723,6 +785,8 @@ const RatePlans: React.FC<RatePlansProps> = ({
         borderRadius: '12px',
         border: '0.6px solid var(--border-border-2, #D5D4DF)',
         background: hexToRgba(tile, 0.30),
+        width: '58px',
+        height: '48px',
         position: 'relative'
       }}>
         {/* BACK TILE (brand solid) */}
@@ -773,73 +837,32 @@ const RatePlans: React.FC<RatePlansProps> = ({
           </svg>
         </div>
 
-        {/* Front Thread */}
+        {/* Purchase Tag - positioned on left side, using icon's tile color */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="13"
-          height="10"
-          viewBox="0 0 13 10"
+          width="14"
+          height="19"
+          viewBox="0 0 14 19"
           fill="none"
           style={{
             position: 'absolute',
-            bottom: '3px',
-            right: '3px',
-            width: '10.837px',
-            height: '8.136px',
-            flexShrink: 0,
-            zIndex: 2
-          }}
-        >
-          <path d="M12.0003 4.42164C9.50001 -0.57812 -1.99973 -0.0781536 2.00008 9.42188" stroke="white" strokeWidth="0.6" strokeLinecap="round" />
-        </svg>
-
-        {/* Purchase Tag */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="21"
-          height="21"
-          viewBox="0 0 21 21"
-          fill="none"
-          style={{
-            position: 'absolute',
-            bottom: '-4px',
-            right: '-4px',
-            width: '19.627px',
-            height: '19.627px',
+            top: '8px',
+            left: '1px',
+            width: '13px',
+            height: '17.944px',
             flexShrink: 0,
             zIndex: 3
           }}
         >
+          <path d="M0.405344 9.873C0.401952 9.56718 0.520179 9.27253 0.73402 9.05386L3.62623 6.09766C3.84014 5.87903 4.13213 5.75432 4.43799 5.75097C4.74384 5.74762 5.0385 5.86591 5.25713 6.07982L8.21333 8.97203C8.4319 9.18597 8.55655 9.47796 8.55985 9.78379L8.6375 16.8815C8.64038 17.2509 8.49696 17.6066 8.23857 17.8707C7.98017 18.1348 7.62779 18.2859 7.25834 18.2911L1.89267 18.3498C1.5232 18.3527 1.16759 18.2093 0.903481 17.9509C0.639372 17.6925 0.488211 17.3401 0.482998 16.9707L0.405344 9.873Z" fill={`url(#paint0_linear_rp_main)`} fillOpacity="0.2" style={{ mixBlendMode: 'hard-light' }} />
+          <path d="M0.405344 9.873C0.401952 9.56718 0.520179 9.27253 0.73402 9.05386L3.62623 6.09766C3.84014 5.87903 4.13213 5.75432 4.43799 5.75097C4.74384 5.74762 5.0385 5.86591 5.25713 6.07982L8.21333 8.97203C8.4319 9.18597 8.55655 9.47796 8.55985 9.78379L8.6375 16.8815C8.64038 17.2509 8.49696 17.6066 8.23857 17.8707C7.98017 18.1348 7.62779 18.2859 7.25834 18.2911L1.89267 18.3498C1.5232 18.3527 1.16759 18.2093 0.903481 17.9509C0.639372 17.6925 0.488211 17.3401 0.482998 16.9707L0.405344 9.873Z" fill={hexToRgba(tile, 0.3)} />
+          <path d="M0.405344 9.873L0.810941 9.86857L0.81094 9.86851L0.405344 9.873ZM0.73402 9.05386L0.444082 8.7702L0.444021 8.77026L0.73402 9.05386ZM3.62623 6.09766L3.91617 6.38132L3.62623 6.09766ZM5.25713 6.07982L5.54079 5.78988L5.25713 6.07982ZM8.21333 8.97203L8.49705 8.68215L8.49699 8.68209L8.21333 8.97203ZM8.55985 9.78379L8.15425 9.78816L8.15425 9.78823L8.55985 9.78379ZM8.6375 16.8815L9.04311 16.8783L9.0431 16.877L8.6375 16.8815ZM7.25834 18.2911L7.26278 18.6967L7.26406 18.6967L7.25834 18.2911ZM1.89267 18.3498L1.89583 18.7555L1.89711 18.7554L1.89267 18.3498ZM0.482998 16.9707L0.0773999 16.9751L0.077418 16.9764L0.482998 16.9707ZM1.97945 14.5368C1.75547 14.5331 1.57091 14.7117 1.56723 14.9357C1.56355 15.1597 1.74215 15.3442 1.96614 15.3479L1.9728 14.9423L1.97945 14.5368ZM5.70527 15.4093C5.92926 15.413 6.11382 15.2344 6.1175 15.0104C6.12117 14.7864 5.94258 14.6018 5.71859 14.5982L5.71193 15.0037L5.70527 15.4093ZM1.8994 16.2076C1.67538 16.2087 1.49466 16.3912 1.49575 16.6152C1.49684 16.8392 1.67932 17.0199 1.90334 17.0189L1.90137 16.6132L1.8994 16.2076ZM3.97158 17.0088C4.1956 17.0077 4.37631 16.8252 4.37523 16.6012C4.37414 16.3772 4.19165 16.1965 3.96764 16.1976L3.96961 16.6032L3.97158 17.0088ZM13.0429 3.40146C13.1432 3.60178 13.3869 3.68288 13.5872 3.5826C13.7875 3.48232 13.8686 3.23864 13.7683 3.03832L13.4056 3.21989L13.0429 3.40146ZM4.04881 7.86447C4.13581 8.0709 4.37369 8.16772 4.58012 8.08072C4.78656 7.99371 4.88337 7.75583 4.79637 7.5494L4.42259 7.70694L4.04881 7.86447ZM7.06014 7.8438L7.39197 8.07707C7.70877 7.62643 8.03961 7.26451 8.46076 7.01157C8.87745 6.76131 9.41143 6.60059 10.1607 6.60059V6.19497V5.78935C9.28747 5.78935 8.60442 5.97899 8.04308 6.31612C7.48621 6.65057 7.07802 7.11306 6.72831 7.61053L7.06014 7.8438ZM0.405344 9.873L0.81094 9.86851C0.808741 9.67024 0.885387 9.47922 1.02402 9.33746L0.73402 9.05386L0.444021 8.77026C0.154971 9.06583 -0.00483659 9.46411 -0.000251353 9.8775L0.405344 9.873ZM0.73402 9.05386L1.02396 9.33752L3.91617 6.38132L3.62623 6.09766L3.33629 5.814L0.444082 8.7702L0.73402 9.05386ZM3.62623 6.09766L3.91617 6.38132C4.05484 6.23958 4.24414 6.15874 4.44242 6.15657L4.43799 5.75097L4.43355 5.34537C4.02012 5.3499 3.62543 5.51847 3.33629 5.814L3.62623 6.09766ZM4.43799 5.75097L4.44242 6.15657C4.64071 6.1544 4.83173 6.23108 4.97347 6.36976L5.25713 6.07982L5.54079 5.78988C5.24526 5.50074 4.84697 5.34085 4.43355 5.34537L4.43799 5.75097ZM5.25713 6.07982L4.97347 6.36976L7.92967 9.26197L8.21333 8.97203L8.49699 8.68209L5.54079 5.78988L5.25713 6.07982ZM8.21333 8.97203L7.92961 9.26191C8.07131 9.4006 8.15211 9.5899 8.15425 9.78816L8.55985 9.78379L8.96545 9.77941C8.96099 9.36602 8.7925 8.97133 8.49705 8.68215L8.21333 8.97203ZM8.55985 9.78379L8.15425 9.78823L8.23191 16.8859L8.6375 16.8815L9.0431 16.877L8.96545 9.77935L8.55985 9.78379ZM8.6375 16.8815L8.23189 16.8846C8.23393 17.147 8.1321 17.3995 7.94863 17.587L8.23857 17.8707L8.5285 18.1543C8.86182 17.8136 9.04682 17.3549 9.04311 16.8783L8.6375 16.8815ZM8.23857 17.8707L7.94863 17.587C7.76516 17.7745 7.51495 17.8819 7.25262 17.8856L7.25834 18.2911L7.26406 18.6967C7.74063 18.69 8.19519 18.495 8.5285 18.1543L8.23857 17.8707ZM7.25834 18.2911L7.2539 17.8855L1.88824 17.9443L1.89267 18.3498L1.89711 18.7554L7.26278 18.6967L7.25834 18.2911ZM1.89267 18.3498L1.88952 17.9442C1.62718 17.9463 1.37468 17.8444 1.18714 17.661L0.903481 17.9509L0.619819 18.2409C0.960506 18.5742 1.41922 18.7592 1.89583 18.7555L1.89267 18.3498ZM0.903481 17.9509L1.18714 17.661C0.999612 17.4775 0.89228 17.2273 0.888579 16.965L0.482998 16.9707L0.077418 16.9764C0.0841416 17.453 0.279132 17.9075 0.619819 18.2409L0.903481 17.9509ZM0.482998 16.9707L0.888595 16.9662L0.810941 9.86857L0.405344 9.873L-0.000252038 9.87744L0.0774019 16.9751L0.482998 16.9707ZM1.9728 14.9423L1.96614 15.3479L5.70527 15.4093L5.71193 15.0037L5.71859 14.5982L1.97945 14.5368L1.9728 14.9423ZM1.90137 16.6132L1.90334 17.0189L3.97158 17.0088L3.96961 16.6032L3.96764 16.1976L1.8994 16.2076L1.90137 16.6132ZM13.4056 3.21989L13.7683 3.03832C13.1495 1.80214 11.9882 0.93063 10.6903 0.449087C9.39204 -0.0326103 7.91818 -0.139654 6.62407 0.191071C5.32529 0.522991 4.18033 1.30614 3.62134 2.61958C3.06508 3.92662 3.12552 5.67378 4.04881 7.86447L4.42259 7.70694L4.79637 7.5494C3.92318 5.47759 3.92751 3.97179 4.36779 2.93726C4.80535 1.90913 5.70959 1.26209 6.82494 0.977052C7.94497 0.690815 9.25018 0.780034 10.4082 1.20967C11.5665 1.63945 12.5388 2.39434 13.0429 3.40146L13.4056 3.21989Z" fill={tile} />
           <defs>
-            <clipPath id="bgblur_purchase_tag_clip">
-              <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" />
-            </clipPath>
+            <linearGradient id="paint0_linear_rp_main" x1="11.43" y1="12.5616" x2="0.771129" y2="8.13689" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#291515" />
+              <stop offset="1" stopColor="#EFEFEF" />
+            </linearGradient>
           </defs>
-          <foreignObject x="3.03555" y="-0.172949" width="14.5764" height="18.7165">
-            <div style={{ backdropFilter: 'blur(0.45px)', clipPath: 'url(#bgblur_purchase_tag_clip)', height: '100%', width: '100%' }}></div>
-          </foreignObject>
-          <path d="M6.36221 5.08439C6.44348 4.71625 6.66766 4.39546 6.98544 4.19259L11.283 1.45027C11.6009 1.24746 11.9863 1.17921 12.3544 1.26054C12.7226 1.34188 13.0434 1.56613 13.2462 1.88398L15.9885 6.18156C16.1912 6.49942 16.2594 6.88479 16.178 7.25291L14.2905 15.7966C14.1909 16.241 13.9194 16.628 13.5355 16.873C13.1515 17.118 12.6863 17.2011 12.2412 17.1043L5.78241 15.6774C5.33799 15.5777 4.95104 15.3063 4.70604 14.9223C4.46104 14.5384 4.37789 14.0731 4.47473 13.6281L6.36221 5.08439Z" fill="#CDADEB" fillOpacity="0.3" stroke="#C75ED7" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M8.03722 11.0566L12.522 12.1229M7.50775 13.049L10.0001 13.5859M12.0004 3.0493C11.8337 3.0493 11.5004 3.1493 11.5004 3.5493C11.5004 3.91754 12.3139 4.01453 12.5429 3.64058C12.7531 3.29737 12.2848 2.7646 12.0004 3.0493Z" stroke="#C75ED7" strokeWidth="0.6" strokeLinecap="round" />
-        </svg>
-
-        {/* Back Thread */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="7"
-          height="4"
-          viewBox="0 0 7 4"
-          fill="none"
-          style={{
-            position: 'absolute',
-            bottom: '11px',
-            right: '11px',
-            width: '6px',
-            height: '2.551px',
-            flexShrink: 0,
-            zIndex: 1
-          }}
-        >
-          <path d="M1 1.42204C5.00057 5.4219 5.00032 0.421875 7.00032 0.421875" stroke="white" strokeWidth="0.6" />
         </svg>
       </div>
     );
@@ -948,8 +971,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                     return;
                   }
                   setDraftSaved(true); // Mark as saved
-                  // Stay on the same page after saving
-                  showToast?.({ message: 'Draft saved', kind: 'success' });
+                  // Stay on the same page after saving - button state change is sufficient feedback
                 }
               }}
             />
@@ -1055,7 +1077,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                     <th>Payment Type</th>
                     <th>Created on</th>
                     <th>Status</th>
-                    <th className="col-actions">Actions</th>
+                    <th className="actions-cell">Actions</th>
                   </tr>
                 </thead>
 
@@ -1074,7 +1096,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                             size="sm"
                           />
                         </td>
-                        <td>
+                        <td className="actions-cell">
                           <div className="product-action-buttons">
                             {plan.status?.toLowerCase() === 'draft' ? (
                               <RetryIconButton
