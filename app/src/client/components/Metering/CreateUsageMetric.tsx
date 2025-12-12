@@ -263,9 +263,20 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
     if (step === 1) {
       const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
-      if (!first.dimension) step1CondErrors['0.dimension'] = 'Dimension is required';
-      if (!first.operator) step1CondErrors['0.operator'] = 'Operator is required';
-      if (!first.value) step1CondErrors['0.value'] = 'Value is required';
+
+      // Check if user has started filling any usage condition field
+      const hasStartedCondition = first.dimension || first.operator || first.value;
+
+      // Only validate usage conditions if:
+      // 1. User has started filling them (at least one field has a value), OR
+      // 2. Billing criteria requires them (Bill based on usage conditions)
+      const shouldValidateConditions = hasStartedCondition || billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS';
+
+      if (shouldValidateConditions) {
+        if (!first.dimension) step1CondErrors['0.dimension'] = 'Dimension is required';
+        if (!first.operator) step1CondErrors['0.operator'] = 'Operator is required';
+        if (!first.value) step1CondErrors['0.value'] = 'Value is required';
+      }
 
       const nextErrors = { ...errors };
       if (!billingCriteria) nextErrors.billingCriteria = 'Billing criteria is required';
