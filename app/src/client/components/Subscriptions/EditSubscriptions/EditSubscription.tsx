@@ -8,7 +8,7 @@ import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditReview from './EditReview';
 
-import './EditSubscription.css'; 
+import './EditSubscription.css';
 import '../../componenetsss/SkeletonForm.css';
 
 import {
@@ -159,9 +159,9 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
     () =>
       Boolean(
         (selectedCustomerId ?? null) &&
-          (selectedProductId ?? null) &&
-          (selectedRatePlanId ?? null) &&
-          paymentType,
+        (selectedProductId ?? null) &&
+        (selectedRatePlanId ?? null) &&
+        paymentType,
       ),
     [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType],
   );
@@ -258,6 +258,8 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
         title: 'Changes saved',
         message: 'Your changes have been saved successfully.',
       });
+      // Refresh the subscriptions list with updated data
+      onRefresh?.();
       onClose();
       return true;
     }
@@ -299,7 +301,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       onClick={() => goToStep(i)}
                     >
                       {/* Bullet + connector column */}
-                     
+
 
                       {/* Text column */}
                       <span className="edisub-np-step__text">
@@ -325,7 +327,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       {/* -------- DETAILS -------- */}
                       {activeTab === 'details' && (
                         <section>
-                       
+
 
                           <div className="editsub-np-grid">
                             <div className="editsub-np-form-group">
@@ -439,7 +441,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       {/* -------- REVIEW -------- */}
                       {activeTab === 'review' && (
                         <section>
-                    
+
                           <div className="edit-np-review-container">
                             <EditReview
                               customerName={selectedCustomerName}
@@ -455,7 +457,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                         </section>
                       )}
                     </div>
-                                  <div className="af-skel-rule af-skel-rule--bottom" />
+                    <div className="af-skel-rule af-skel-rule--bottom" />
 
 
                     {/* FOOTER actions – same alignment as NewProduct */}
