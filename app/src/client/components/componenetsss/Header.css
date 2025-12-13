@@ -84,6 +84,10 @@
   padding: 0;
   background: transparent;
 }
+.rp-search-input:focus {
+  outline: none;
+  box-shadow: none;
+}
 .rp-header-search.has-value .rp-search-input { width: auto; flex: 1 0 0;   border: none;
 }
 .rp-search-input::placeholder { color: var(--text-placeholder, #C3C2D0); }
