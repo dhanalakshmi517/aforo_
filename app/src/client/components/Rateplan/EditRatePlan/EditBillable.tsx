@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './EditBillable.css'; // Keep this as-is if you are reusing the same styles
+import './EditBillable.css';
 import { fetchBillableMetrics, BillableMetric } from '../api';
 import { setRatePlanData } from '../utils/sessionStorage';
+import { SelectField } from '../../componenetsss/Inputs';
 
 interface Metric {
   id: number;
@@ -12,6 +13,11 @@ interface Metric {
   iconClass: string;
   unit?: string;
   aggregation?: string;
+}
+
+interface Product {
+  productId: string | number;
+  productName: string;
 }
 
 const RadioIcon: React.FC<{ active: boolean }> = ({ active }) => (
@@ -35,20 +41,30 @@ const RadioIcon: React.FC<{ active: boolean }> = ({ active }) => (
 );
 
 interface EditBillableProps {
-  productName?: string;
+  products: Product[];
+  productError: string;
+  selectedProductName: string;
+  onSelectProduct: (productName: string) => void;
   selectedMetricId: number | null;
   onSelectMetric: (id: number) => void;
 }
 
-const EditBillable: React.FC<EditBillableProps> = ({ productName, selectedMetricId, onSelectMetric }) => {
+const EditBillable: React.FC<EditBillableProps> = ({
+  products,
+  productError,
+  selectedProductName,
+  onSelectProduct,
+  selectedMetricId,
+  onSelectMetric
+}) => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
 
   useEffect(() => {
     const loadMetrics = async () => {
       try {
-        let data: BillableMetric[] = await fetchBillableMetrics(productName);
-        if (productName) {
-          data = data.filter((m: any) => m.productName === productName);
+        let data: BillableMetric[] = await fetchBillableMetrics(selectedProductName);
+        if (selectedProductName) {
+          data = data.filter((m: any) => m.productName === selectedProductName);
         }
 
         const colorClasses = ['bg-orange-100 text-orange-600', 'bg-purple-100 text-purple-600', 'bg-yellow-100 text-yellow-700', 'bg-teal-100 text-teal-700', 'bg-blue-100 text-blue-700', 'bg-pink-100 text-pink-600', 'bg-green-100 text-green-700'];
@@ -68,70 +84,109 @@ const EditBillable: React.FC<EditBillableProps> = ({ productName, selectedMetric
       }
     };
 
-    loadMetrics();
-  }, [productName]);
+    if (selectedProductName) {
+      loadMetrics();
+    } else {
+      setMetrics([]);
+    }
+  }, [selectedProductName]);
 
   return (
     <div className="billable-section">
-      <h2>
-        Billable metrics applicable for <span>"{productName || 'Selected Product'}"</span>
-      </h2>
-      <p className="billable-note">
-        Billable metrics must be defined before adding them to a rate plan. Save this rate
-        <br />
-        plan as draft to create a new one now.
-      </p>
-
-      <div className="billable-metric-grid">
-        {metrics.map((metric) => (
-          <label
-            key={metric.id}
-            className={`billable-metric-card ${selectedMetricId === metric.id ? 'selected' : ''}`}
-          >
-            <input
-              type="radio"
-              name="metric"
-              value={metric.id}
-              checked={selectedMetricId === metric.id}
-              onChange={async () => {
-                onSelectMetric(metric.id);
-
-                // Fetch full metric details for session storage
-                try {
-                  const { fetchBillableMetricById } = await import('../api');
-                  const fullMetric = await fetchBillableMetricById(metric.id);
-
-                  if (fullMetric) {
-                    setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName || metric.title);
-                    setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description || '');
-                    setRatePlanData('BILLABLE_METRIC_UNIT', fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '');
-                    setRatePlanData('BILLABLE_METRIC_AGGREGATION', (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '');
-                  }
-                } catch (error) {
-                  console.error('Failed to fetch full metric details:', error);
-                  // Fallback to basic data
-                  setRatePlanData('BILLABLE_METRIC_NAME', metric.title);
-                  setRatePlanData('BILLABLE_METRIC_DESCRIPTION', metric.subtitle || '');
-                  if (metric.unit) setRatePlanData('BILLABLE_METRIC_UNIT', metric.unit);
-                  if (metric.aggregation) setRatePlanData('BILLABLE_METRIC_AGGREGATION', metric.aggregation);
-                }
-              }}
-              className="hidden"
-            />
-            <RadioIcon active={selectedMetricId === metric.id} />
-            <div className="billable-metric-content">
-              <div className="billable-metric-info">
-                <div className="billable-metric-title">{metric.title}</div>
-                <div className="billable-metric-subtitle">Metric Unit</div>
-              </div>
-              <div className={`billable-icon-box ${metric.iconClass}`}>
-                <div className="billable-icon-text">{metric.iconText}</div>
-                <div className="billable-icon-sub">{metric.iconSubText}</div>
-              </div>
-            </div>
-          </label>
-        ))}
+      {/* Product Selection Dropdown */}
+      <div style={{ marginBottom: '24px', maxWidth: '539px' }}>
+        <SelectField
+          label="Select Product"
+          value={selectedProductName}
+          onChange={(v: string) => {
+            onSelectProduct(v);
+          }}
+          placeholder="Select Product"
+          options={
+            productError
+              ? []
+              : products.map((p) => ({
+                label: p.productName,
+                value: p.productName,
+              }))
+          }
+        />
       </div>
+
+      {selectedProductName && (
+        <div className="billable-metric-grid">
+          {metrics.length === 0 ? (
+            <div style={{
+              padding: '24px',
+              textAlign: 'center',
+              color: '#6b7280',
+              fontSize: '14px'
+            }}>
+              No billable metrics found for this product.
+            </div>
+          ) : (
+            metrics.map((metric) => (
+              <label
+                key={metric.id}
+                className={`billable-metric-card ${selectedMetricId === metric.id ? 'selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="metric"
+                  value={metric.id}
+                  checked={selectedMetricId === metric.id}
+                  onChange={async () => {
+                    onSelectMetric(metric.id);
+
+                    // Fetch full metric details for session storage
+                    try {
+                      const { fetchBillableMetricById } = await import('../api');
+                      const fullMetric = await fetchBillableMetricById(metric.id);
+
+                      if (fullMetric) {
+                        setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName || metric.title);
+                        setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description || '');
+                        setRatePlanData('BILLABLE_METRIC_UNIT', fullMetric.unitOfMeasure || fullMetric.uom || fullMetric.uomShort || '');
+                        setRatePlanData('BILLABLE_METRIC_AGGREGATION', (fullMetric as any).aggregationFunction || (fullMetric as any).aggregationType || '');
+                      }
+                    } catch (error) {
+                      console.error('Failed to fetch full metric details:', error);
+                      // Fallback to basic data
+                      setRatePlanData('BILLABLE_METRIC_NAME', metric.title);
+                      setRatePlanData('BILLABLE_METRIC_DESCRIPTION', metric.subtitle || '');
+                      if (metric.unit) setRatePlanData('BILLABLE_METRIC_UNIT', metric.unit);
+                      if (metric.aggregation) setRatePlanData('BILLABLE_METRIC_AGGREGATION', metric.aggregation);
+                    }
+                  }}
+                  className="hidden"
+                />
+                <RadioIcon active={selectedMetricId === metric.id} />
+                <div className="billable-metric-content">
+                  <div className="billable-metric-info">
+                    <div className="billable-metric-title">{metric.title}</div>
+                    <div className="billable-metric-subtitle">Metric Unit</div>
+                  </div>
+                  <div className={`billable-icon-box ${metric.iconClass}`}>
+                    <div className="billable-icon-text">{metric.iconText}</div>
+                    <div className="billable-icon-sub">{metric.iconSubText}</div>
+                  </div>
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+      )}
+
+      {!selectedProductName && (
+        <div style={{
+          padding: '48px 24px',
+          textAlign: 'center',
+          color: '#6b7280',
+          fontSize: '14px'
+        }}>
+          Please select a product to view available billable metrics.
+        </div>
+      )}
     </div>
   );
 };
