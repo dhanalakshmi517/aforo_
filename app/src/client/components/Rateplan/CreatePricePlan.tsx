@@ -450,15 +450,31 @@ const CreatePricePlan = React.forwardRef<
       const overage = getRatePlanData("VOLUME_OVERAGE");
       const noUpperLimit = getRatePlanData("VOLUME_NO_UPPER_LIMIT") === "true";
       if (volumeTiers.length === 0) e.volumeTiers = "At least one volume tier is required";
+      // Validate all tier fields are filled
+      const hasInvalidTier = volumeTiers.some(
+        (tier: any) =>
+          tier.from === null || tier.from === undefined || tier.from === '' ||
+          tier.price === null || tier.price === undefined || tier.price === '' ||
+          (!tier.isUnlimited && (tier.to === null || tier.to === undefined || tier.to === ''))
+      );
+      if (hasInvalidTier) e.volumeTiers = "All tier fields are required";
       if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
         e.volumeOverage = "Overage unit rate is required when no unlimited tier";
       }
     } else if (selectedPricingModel === "Stairstep") {
       const stairTiers = JSON.parse(getRatePlanData("STAIR_TIERS") || "[]");
       const overage = getRatePlanData("STAIR_OVERAGE");
+      const noUpperLimit = getRatePlanData("STAIR_NO_UPPER_LIMIT") === "true";
       if (stairTiers.length === 0) e.stairTiers = "At least one stair tier is required";
-      const hasUnlimited = stairTiers.some((t: any) => t.isUnlimited);
-      if (!hasUnlimited && (!overage || Number(overage) <= 0)) {
+      // Validate all stair fields are filled
+      const hasInvalidStair = stairTiers.some(
+        (stair: any) =>
+          !stair.from?.toString().trim() ||
+          !stair.cost?.toString().trim() ||
+          (!stair.isUnlimited && !stair.to?.toString().trim())
+      );
+      if (hasInvalidStair) e.stairTiers = "All stair fields are required";
+      if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
         e.stairOverage = "Overage charge is required when no unlimited tier";
       }
     }
@@ -895,6 +911,13 @@ const CreatePricePlan = React.forwardRef<
             ref={pricingRef}
             ratePlanId={ratePlanId}
             validationErrors={errors}
+            onClearError={(key) => {
+              setErrors((prev) => {
+                if (!prev[key]) return prev;
+                const { [key]: _omit, ...rest } = prev;
+                return rest;
+              });
+            }}
             draftData={draftPricingData}
             isFreshCreation={isFreshCreation}
             locked={isStep2Locked}
