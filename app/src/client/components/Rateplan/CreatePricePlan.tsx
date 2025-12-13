@@ -35,6 +35,7 @@ import Review from "./Review";
 import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
+import ProductCreatedSuccess from "../componenetsss/ProductCreatedSuccess";
 
 import "./CreatePricePlan.css";
 import "../Products/NewProducts/NewProduct.css";
@@ -51,7 +52,7 @@ interface CreatePricePlanProps {
 
 const steps = [
   { id: 1, title: "Plan Details", desc: "Define the basic information and structure of your plan." },
-  { id: 2, title: "Select Billable Metric", desc: "Select or define a Billable Metric" },
+  { id: 2, title: "Product & Billable Unit", desc: "Select product and define a Billable Metric" },
   { id: 3, title: "Pricing Model Setup", desc: "Configure how pricing will work for this plan." },
   { id: 4, title: "Extras", desc: "Add optional features or benefits to enhance your plan." },
   { id: 5, title: "Review & confirm", desc: "Check and Finalize details." },
@@ -89,6 +90,7 @@ const CreatePricePlan = React.forwardRef<
   });
 
   const [saving, setSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [planName, setPlanName] = useState("");
   const [planDescription, setPlanDescription] = useState("");
@@ -294,10 +296,12 @@ const CreatePricePlan = React.forwardRef<
 
   // ===== Lock logic =====
   const isStep0Filled = React.useMemo(() => {
-    return Boolean(planName.trim() && billingFrequency && selectedProductName && paymentMethod);
-  }, [planName, billingFrequency, selectedProductName, paymentMethod]);
+    return Boolean(planName.trim() && billingFrequency && paymentMethod);
+  }, [planName, billingFrequency, paymentMethod]);
 
-  const isStep1Filled = React.useMemo(() => selectedMetricId !== null, [selectedMetricId]);
+  const isStep1Filled = React.useMemo(() => {
+    return Boolean(selectedProductName && selectedMetricId !== null);
+  }, [selectedProductName, selectedMetricId]);
 
   const isStep2Filled = React.useMemo(() => {
     const pricingModel = getRatePlanData("PRICING_MODEL");
@@ -405,7 +409,6 @@ const CreatePricePlan = React.forwardRef<
     const e: Record<string, string> = {};
     if (!planName.trim()) e.planName = "This is required field";
     if (!billingFrequency) e.billingFrequency = "This is required field";
-    if (!selectedProductName) e.selectedProductName = "This is required field";
     if (!paymentMethod) e.paymentMethod = "This is required field";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -715,14 +718,8 @@ const CreatePricePlan = React.forwardRef<
         setSaving(true);
         await confirmRatePlan(ratePlanId);
 
-        showToast({
-          kind: "success",
-          title: "Rate Plan Created",
-          message: "Rate plan created successfully.",
-        });
-
-        onClose();
-        navigate("/get-started/rate-plans");
+        // Show success page instead of navigating immediately
+        setShowSuccess(true);
       } catch (e) {
         console.error("Confirm failed", e);
         setErrors((prev) => ({ ...prev, form: "Failed to finalize rate plan. Please try again." }));
@@ -735,15 +732,22 @@ const CreatePricePlan = React.forwardRef<
     if (currentStep === 0 && !validateStep0()) return;
 
     if (currentStep === 1) {
-      if (selectedMetricId === null) {
-        setErrors({ billableMetric: "This is required field" });
+      const e: Record<string, string> = {};
+      if (!selectedProductName) e.selectedProductName = "This is required field";
+      if (selectedMetricId === null) e.billableMetric = "This is required field";
+
+      if (Object.keys(e).length > 0) {
+        setErrors(e);
         return;
       }
+
       if (ratePlanId) {
         try {
           setSaving(true);
           const selectedProduct = products.find((p) => p.productName === selectedProductName);
-          const updatePayload: Partial<RatePlanRequest> = { billableMetricId: selectedMetricId };
+          const updatePayload: Partial<RatePlanRequest> = {
+            billableMetricId: selectedMetricId as number  // Already validated above
+          };
           if (selectedProduct) updatePayload.productId = Number(selectedProduct.productId);
           await updateRatePlan(ratePlanId, updatePayload as any);
         } catch (e) {
@@ -836,25 +840,6 @@ const CreatePricePlan = React.forwardRef<
               error={errors.billingFrequency}
             />
             <SelectField
-              label="Select Product"
-              value={selectedProductName}
-              onChange={(v: string) => {
-                setSelectedProductName(v);
-                clearErrorIfValid("selectedProductName", !!v);
-                onFieldChange?.();
-              }}
-              placeholder="Select Product"
-              options={
-                productError
-                  ? []
-                  : products.map((p) => ({
-                    label: p.productName,
-                    value: p.productName,
-                  }))
-              }
-              error={errors.selectedProductName}
-            />
-            <SelectField
               label="Payment type"
               value={paymentMethod}
               onChange={(v: string) => {
@@ -887,7 +872,16 @@ const CreatePricePlan = React.forwardRef<
         return (
           <>
             <Billable
-              productName={selectedProductName}
+              products={products}
+              productError={productError}
+              selectedProductName={selectedProductName}
+              onSelectProduct={(productName) => {
+                setSelectedProductName(productName);
+                clearErrorIfValid("selectedProductName", !!productName);
+                // Reset selected metric when product changes
+                setSelectedMetricId(null);
+                onFieldChange?.();
+              }}
               selectedMetricId={selectedMetricId}
               onSelectMetric={(id) => {
                 setSelectedMetricId(id);
@@ -896,6 +890,11 @@ const CreatePricePlan = React.forwardRef<
               }}
               locked={isStep1Locked}
             />
+            {errors.selectedProductName && (
+              <div className="rate-np-error-message" style={{ marginTop: 10 }}>
+                {errors.selectedProductName}
+              </div>
+            )}
             {errors.billableMetric && (
               <div className="rate-np-error-message" style={{ marginTop: 10 }}>
                 {errors.billableMetric}
@@ -950,6 +949,31 @@ const CreatePricePlan = React.forwardRef<
     (currentStep === 2 && isStep2Locked) ||
     (currentStep === 3 && isStep3Locked) ||
     (currentStep === 4 && isStep4Locked);
+
+  // Handle "Go to All Rate Plans" button click
+  const handleGoToRatePlans = () => {
+    clearAllRatePlanData();
+    onClose();
+    navigate("/get-started/rate-plans");
+  };
+
+  // If showing success page, render that instead of the form
+  if (showSuccess) {
+    return (
+      <ProductCreatedSuccess
+        productName={planName}
+        titleOverride={`"${planName}" Rate Plan Created Successfully`}
+        subtitleOverride="You can now start using this rate plan:"
+        stepsOverride={[
+          "• Assign this rate plan to customers.",
+          "• Create subscriptions using this plan.",
+          "• Monitor usage and billing.",
+        ]}
+        primaryLabelOverride="Go to All Rate Plans"
+        onPrimaryClick={handleGoToRatePlans}
+      />
+    );
+  }
 
   return (
     <>

@@ -38,7 +38,7 @@ interface EditRatePlanProps {
 
 const steps = [
   { id: 1, title: 'Plan Details' },
-  { id: 2, title: 'Select Billable Metric' },
+  { id: 2, title: 'Product & Billable Unit' },
   { id: 3, title: 'Pricing Model Setup' },
   { id: 4, title: 'Extras' },
   { id: 5, title: 'Review & Confirm' },
@@ -321,8 +321,12 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     if (index === 0) {
       if (!ratePlanName.trim()) e.ratePlanName = 'This is a required field';
       if (!billingFrequency) e.billingFrequency = 'This is a required field';
-      if (!selectedProductName) e.selectedProductName = 'This is a required field';
       if (!paymentType) e.paymentType = 'This is a required field';
+    }
+
+    if (index === 1) {
+      if (!selectedProductName) e.selectedProductName = 'This is a required field';
+      if (selectedMetricId === null) e.selectedMetricId = 'This is a required field';
     }
 
     if (index === 4) {
@@ -506,6 +510,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     }
 
     if (activeTab === 'billable') {
+      if (!validateStep(1)) return;
       gotoStep(2);
       return;
     }
@@ -614,24 +619,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
       <div className="editrate-np-form-row">
         <div className="editrate-np-form-group">
-          <label className="editrate-np-label">Select Product</label>
-          <SelectField
-            value={selectedProductName}
-            onChange={setSelectedProductName}
-            placeholder={productError ? 'Failed to load products' : 'Select Product'}
-            options={
-              productError
-                ? []
-                : products.map(p => ({
-                    label: p.productName,
-                    value: p.productName,
-                  }))
-            }
-            error={errors.selectedProductName}
-          />
-        </div>
-
-        <div className="editrate-np-form-group">
           <label className="editrate-np-label">Payment Type</label>
           <SelectField
             value={paymentType}
@@ -667,7 +654,14 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         <div className="editrate-np-section">
           <div className="editrate-np-configuration-tab">
             <EditBillable
-              productName={selectedProductName}
+              products={products}
+              productError={productError}
+              selectedProductName={selectedProductName}
+              onSelectProduct={(productName) => {
+                setSelectedProductName(productName);
+                // Reset selected metric when product changes
+                setSelectedMetricId(null);
+              }}
               selectedMetricId={selectedMetricId}
               onSelectMetric={setSelectedMetricId}
             />
@@ -736,9 +730,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                     <button
                       key={step.id}
                       type="button"
-                      className={`editrate-np-step ${isActive ? 'active' : ''} ${
-                        isCompleted ? 'completed' : ''
-                      }`.trim()}
+                      className={`editrate-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''
+                        }`.trim()}
                       onClick={() => handleSidebarStepClick(index)}
                     >
                       <span className="editrate-np-step__title">{step.title}</span>
