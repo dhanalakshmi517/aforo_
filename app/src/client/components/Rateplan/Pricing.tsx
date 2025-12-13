@@ -580,6 +580,12 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
       } else if (isVolume) {
         setRatePlanData('VOLUME_TIERS', JSON.stringify(mirror));
       }
+
+      // Clear parent validation errors when user edits tier data
+      if (value.trim() && onClearError) {
+        if (isTiered) onClearError('tieredTiers');
+        if (isVolume) onClearError('volumeTiers');
+      }
     };
 
     const toStr = (n: number | null | undefined) =>
@@ -682,6 +688,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                     }
                   }}
                   validationErrors={validationErrors}
+                  onClearError={onClearError}
                   overageCharge={String(overageUnitRate || '')}
                   graceBuffer={String(graceBuffer || '')}
                   locked={locked}
@@ -739,6 +746,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   setGraceBuffer={setGraceBuffer}
                   // ❌ don’t surface “volumeOverage” when unlimited
                   validationErrors={volumeValidationErrors}
+                  onClearError={onClearError}
                   locked={locked}
                 />
               </div>
@@ -779,6 +787,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                     setGraceBuffer(n === '' ? 0 : Number(n));
                     setRatePlanData('STAIR_GRACE', n);
                   }}
+                  onClearError={onClearError}
                   locked={locked}
                 />
               </div>
