@@ -514,10 +514,9 @@ const CreatePricePlan = React.forwardRef<
   const onStepClick = async (index: number) => {
     if (index === currentStep) return;
 
-    // locked guards (like your NewProduct review-lock)
-    if (index === 1 && isStep1Locked) return;
-    if (index === 2 && isStep2Locked) return;
-    if (index === 3 && isStep3Locked) return;
+    // Only block navigation to Review step (step 4) if prerequisites not met
+    // Allow navigation to other locked steps to show them in locked state
+    // This matches NewProduct behavior where only Review tab is disabled in sidebar
     if (index === 4 && isStep4Locked) return;
 
     const ok = await canNavigateTo(index);
@@ -779,12 +778,12 @@ const CreatePricePlan = React.forwardRef<
     currentStep === 0
       ? "details"
       : currentStep === 1
-      ? "billable"
-      : currentStep === 2
-      ? "pricing"
-      : currentStep === 3
-      ? "extras"
-      : "review";
+        ? "billable"
+        : currentStep === 2
+          ? "pricing"
+          : currentStep === 3
+            ? "extras"
+            : "review";
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -833,9 +832,9 @@ const CreatePricePlan = React.forwardRef<
                 productError
                   ? []
                   : products.map((p) => ({
-                      label: p.productName,
-                      value: p.productName,
-                    }))
+                    label: p.productName,
+                    value: p.productName,
+                  }))
               }
               error={errors.selectedProductName}
             />
@@ -942,12 +941,10 @@ const CreatePricePlan = React.forwardRef<
                   const isCompleted = i < currentStep;
                   const showConnector = i < steps.length - 1;
 
-                  // lock rules per step
-                  const isDisabled =
-                    (i === 1 && isStep1Locked) ||
-                    (i === 2 && isStep2Locked) ||
-                    (i === 3 && isStep3Locked) ||
-                    (i === 4 && isStep4Locked);
+                  // Only disable Review step in sidebar (like NewProduct)
+                  // Other steps are clickable but show as locked with disabled fields
+                  const isReviewStep = i === 4;
+                  const isDisabled = isReviewStep && isStep4Locked;
 
                   return (
                     <button
@@ -1037,8 +1034,8 @@ const CreatePricePlan = React.forwardRef<
                                   ? "Submitting..."
                                   : "Saving..."
                                 : currentStep === steps.length - 1
-                                ? "Create Rate Plan"
-                                : "Save & Next"}
+                                  ? "Create Rate Plan"
+                                  : "Save & Next"}
                             </PrimaryButton>
                           </div>
                         </>

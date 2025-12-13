@@ -31,6 +31,7 @@ export interface PricingHandle {
 interface PricingProps {
   ratePlanId: number | null;
   validationErrors?: Record<string, string>;
+  onClearError?: (key: string) => void;
   draftData?: any;
   isFreshCreation?: boolean;
   locked?: boolean;
@@ -47,7 +48,7 @@ type PricingErrors = {
 };
 
 const Pricing = forwardRef<PricingHandle, PricingProps>(
-  ({ ratePlanId, validationErrors = {}, draftData, isFreshCreation = false, locked = false }, ref) => {
+  ({ ratePlanId, validationErrors = {}, onClearError, draftData, isFreshCreation = false, locked = false }, ref) => {
     const [selected, setSelected] = useState('');
     const [errors, setErrors] = useState<PricingErrors>({});
 
@@ -640,6 +641,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   data={flatFee}
                   onChange={setFlatFee}
                   validationErrors={validationErrors}
+                  onClearError={onClearError}
                   locked={locked}
                 />
               </div>
@@ -792,6 +794,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                   data={usage}
                   onChange={setUsage}
                   validationErrors={validationErrors}
+                  onClearError={onClearError}
                   locked={locked}
                 />
               </div>
