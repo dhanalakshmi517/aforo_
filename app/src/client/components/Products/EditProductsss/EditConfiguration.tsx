@@ -198,7 +198,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     const validate = (): boolean => {
       if (!productType) {
-        setError('Please select a product type first');
+        setError('');
         return false;
       }
       const fields = configurationFields[productType] || [];
@@ -209,7 +209,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         }
       });
       setFieldErrors(errs);
-      setError(Object.keys(errs).length ? 'Please fix the highlighted fields.' : '');
+      setError('');
       return Object.keys(errs).length === 0;
     };
 
@@ -465,7 +465,6 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         {productType && (
           <div className="configuration-fields">
-            {error && <div className="error-message">{error}</div>}
             <div className="form-fields">
               {configurationFields[productType]?.map((field: FieldProps, index: number) => renderField(field, index))}
             </div>
