@@ -496,7 +496,12 @@ const EditProduct: React.FC<EditProductProps> = ({
       goToStep(1);
       return;
     }
+
     if (activeTab === 'configuration') {
+      // Run configuration tab validation via the exposed submit() method.
+      // Only proceed to the Review step if submit() returns true.
+      const ok = await configRef.current?.submit();
+      if (!ok) return;
       goToStep(2);
       return;
     }
