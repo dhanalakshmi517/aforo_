@@ -352,6 +352,37 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   };
 
   const gotoStep = async (index: number, skipSave: boolean = false) => {
+    // Basic guard: prevent invalid index
+    if (index < 0 || index >= steps.length) return;
+
+    // Block moving away from General only when the user started filling something
+    // but some required fields are still missing.
+    if (currentStep === 0 && index > 0) {
+      const productNameEmpty = !formData.productName.trim();
+      const skuCodeEmpty = !formData.skuCode.trim();
+
+      // If user has not typed anything in any of the tracked fields
+      // (productName, version, skuCode, description, icon),
+      // allow navigation so Configuration can show its locked UI.
+      if (!hasAnyRequiredInput) {
+        // no validation, continue to step change
+      } else {
+        // User has entered something; now enforce required-field validation
+        const newErrors: Record<string, string> = {};
+        if (productNameEmpty) {
+          newErrors.productName = 'This field is required';
+        }
+        if (skuCodeEmpty) {
+          newErrors.skuCode = 'This field is required';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+          setErrors(prev => ({ ...prev, ...newErrors }));
+          return;
+        }
+      }
+    }
+
     // when jumping forward, make sure we have a product record
     if (index > currentStep && !skipSave) {
       // 1️⃣ From General ➜ Configuration or further: create/update product shell first

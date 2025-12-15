@@ -190,13 +190,13 @@
 --color-primary-600: #0A79B8 ;
 --color-primary-700: #026BB0 ;
 --color-primary-750: #025A94;
---color-primary-800: #024C7E;
---color-primary-900: #2A3F55;
---color-primary-1000: #293D51;
---color-primary-1100: #002843;
---color-primary-1200: #002137;
---color-primary-1300: #001F31;
---color-primary-1400: #001520;
+--color-primary-800:#034A7D;
+--color-primary-900: #054776;
+--color-primary-1000: #074470;
+--color-primary-1100: #08416A;
+--color-primary-1200: #0B3F64;
+--color-primary-1300: #0C3B5C;
+--color-primary-1400: #0E3855;
 
   /* Secondary Color Palette */
   --color-secondary-100: #FFEBD6;
