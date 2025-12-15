@@ -111,6 +111,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const [savePricingFn, setSavePricingFn] = useState<null | (() => Promise<void>)>(null);
   const [saveExtrasFn, setSaveExtrasFn] = useState<null | (() => Promise<void>)>(null);
 
+  // pricing validation
+  const [validatePricingFn, setValidatePricingFn] = useState<null | ((setErrors: (e: Record<string, string>) => void) => boolean)>(null);
+
   // originals for diff-only updates
   const [originalValues, setOriginalValues] = useState<any>({});
   const originalValuesRef = useRef<any>({});
@@ -329,6 +332,15 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
       if (selectedMetricId === null) e.selectedMetricId = 'This is a required field';
     }
 
+    if (index === 2) {
+      // Validate pricing step using child component's validation
+      if (validatePricingFn) {
+        const isValid = validatePricingFn(setErrors);
+        // Errors are already set by validatePricingFn via setErrors
+        if (!isValid) return false;
+      }
+    }
+
     if (index === 4) {
       if (!ratePlanName.trim() || !billingFrequency || !selectedProductName || !paymentType) {
         e.form = 'Please fill all required fields';
@@ -337,6 +349,18 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
     setErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  // Inline error clearing (matches CreatePricePlan pattern)
+  const clearErrorIfValid = (key: string, isValid: boolean) => {
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+      if (isValid) {
+        const { [key]: _omit, ...rest } = prev;
+        return rest;
+      }
+      return prev;
+    });
   };
 
   const resolveSelectedProductId = (): number | undefined => {
@@ -516,6 +540,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     }
 
     if (activeTab === 'pricing') {
+      // Validate pricing before saving and proceeding
+      if (!validateStep(2)) return;
+
       try {
         if (savePricingFn) {
           setLoading(true);
@@ -594,7 +621,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           label='Rate Plan Name'
           required
             value={ratePlanName}
-            onChange={setRatePlanName}
+            onChange={(v: string) => {
+              setRatePlanName(v);
+              clearErrorIfValid('ratePlanName', v.trim().length > 0);
+            }}
             placeholder="e.g., Pro Plan, Enterprise Plan"
             error={errors.ratePlanName}
           />
@@ -605,7 +635,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           label='Billing Frequency'
           required
             value={billingFrequency}
-            onChange={setBillingFrequency}
+            onChange={(v: string) => {
+              setBillingFrequency(v);
+              clearErrorIfValid('billingFrequency', Boolean(v));
+            }}
             placeholder="Select billing cycle"
             options={[
               { label: 'Monthly', value: 'MONTHLY' },
@@ -626,7 +659,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                   required
 
             value={paymentType}
-            onChange={setPaymentType}
+            onChange={(v: string) => {
+              setPaymentType(v);
+              clearErrorIfValid('paymentType', Boolean(v));
+            }}
             placeholder="Select payment method"
             options={[
               { label: 'Post-Paid', value: 'POSTPAID' },
@@ -663,11 +699,15 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
               selectedProductName={selectedProductName}
               onSelectProduct={(productName) => {
                 setSelectedProductName(productName);
+                clearErrorIfValid('selectedProductName', Boolean(productName));
                 // Reset selected metric when product changes
                 setSelectedMetricId(null);
               }}
               selectedMetricId={selectedMetricId}
-              onSelectMetric={setSelectedMetricId}
+              onSelectMetric={(metricId) => {
+                setSelectedMetricId(metricId);
+                clearErrorIfValid('selectedMetricId', metricId !== null);
+              }}
             />
           </div>
         </div>
@@ -683,6 +723,14 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
               ratePlanId={ratePlanId}
               draftData={draftData}
               registerSavePricing={fn => setSavePricingFn(() => fn)}
+              registerValidatePricing={fn => setValidatePricingFn(() => fn)}
+              validationErrors={errors}
+              onClearError={(key) => {
+                setErrors((prev) => {
+                  const { [key]: _omit, ...rest } = prev;
+                  return rest;
+                });
+              }}
             />
           </div>
         </div>
