@@ -590,8 +590,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     <div className="editrate-np-section">
       <div className="editrate-np-form-row">
         <div className="editrate-np-form-group">
-          <label className="editrate-np-label">Rate Plan Name</label>
           <InputField
+          label='Rate Plan Name'
+          required
             value={ratePlanName}
             onChange={setRatePlanName}
             placeholder="e.g., Pro Plan, Enterprise Plan"
@@ -600,8 +601,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         </div>
 
         <div className="editrate-np-form-group">
-          <label className="editrate-np-label">Billing Frequency</label>
           <SelectField
+          label='Billing Frequency'
+          required
             value={billingFrequency}
             onChange={setBillingFrequency}
             placeholder="Select billing cycle"
@@ -619,8 +621,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
       <div className="editrate-np-form-row">
         <div className="editrate-np-form-group">
-          <label className="editrate-np-label">Payment Type</label>
           <SelectField
+          label='Payment Type'
+                  required
+
             value={paymentType}
             onChange={setPaymentType}
             placeholder="Select payment method"

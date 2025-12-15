@@ -638,6 +638,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
           productName={(customerName || companyName || "this customer").trim()}
           onConfirm={confirmDeleteTopRight}
           onCancel={() => setShowDeleteModal(false)}
+          discardLabel="Keep editing"
+          confirmLabel="Discard"
         />
       )}
 

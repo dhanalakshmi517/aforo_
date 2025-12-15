@@ -1,29 +1,30 @@
 @import "../Variables/Variables.css";
 .rate-plan-header {
-  margin-top: -5px;
+  display: flex;
+  width: 100%;
+  padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 20px);
+  justify-content: space-between;
+  align-items: center;
+  background: #FBFDFF;
   position: relative;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 70px;
-  padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 20px);
   box-sizing: border-box;
-  background:var(--color-neutral-white);
+  margin-top: -10px;
 }
 
 .rate-plan-header h2 {
   margin: 0;
   padding: 0;
-  color: var(--color-neutral-1700);
-
-/* heading/h5/bold */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h5);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-heading-h5); /* 140% */
-  flex: 1 1 auto;
+  color: var(--text-text-darkest, #1A2126);
+  
+  /* heading/h6/bold */
+  font-family: var(--type-font-family-primary, "IBM Plex Sans");
+  font-size: var(--fontsize-heading-h6, 18px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+  flex: 0 0 auto;
+  margin-left: -10px;
 }
 
 /* Renamed to avoid conflicts with RatePlan.css */
@@ -44,9 +45,8 @@ line-height: var(--line-height-heading-h5); /* 140% */
   height: 36px;
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-neutral-300);
-  background: var(--color-neutral-white);
+  background: var(--color-neutral-50);
   box-sizing: border-box;
-  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 .rp-header-search:hover { background: var(--color-neutral-100); border-color: var(--color-neutral-300); }
 .rp-header-search.is-active,

@@ -333,6 +333,8 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                             <div className="editsub-np-form-group">
                               <SelectField
                                 label="Customer Name"
+                                        required
+
                                 value={selectedCustomerId?.toString() || ''}
                                 onChange={value => {
                                   const id = Number(value);
@@ -357,6 +359,8 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                             <div className="editsub-np-form-group">
                               <SelectField
                                 label="Product"
+                                        required
+
                                 value={selectedProductId?.toString() || ''}
                                 onChange={value => {
                                   const id = Number(value);
@@ -383,6 +387,8 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                             <div className="editsub-np-form-group">
                               <SelectField
                                 label="Rate Plan"
+                                        required
+
                                 value={selectedRatePlanId?.toString() || ''}
                                 onChange={value => {
                                   const id = Number(value);
@@ -415,6 +421,8 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                             <div className="editsub-np-form-group">
                               <SelectField
                                 label="Payment Type"
+                                        required
+
                                 value={paymentType}
                                 onChange={setPaymentType}
                                 options={[

@@ -102,6 +102,9 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Auth Type',
       type: 'select',
+            required: true,
+
+
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },
@@ -775,6 +778,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             options={productOptions}
             disabled={readOnly || isLoadingConfig} // Only disable for readOnly, not locked
             error={!productType && error ? error : undefined}
+            required
           />
         </div>
 

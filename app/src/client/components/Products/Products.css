@@ -3,13 +3,15 @@
 
 body {
   font-family: "IBM Plex Sans", sans-serif;
-  background-color: white !important;
+  /* Let app-level background control the page; keep it soft, not pure white */
+  background-color: #FBFDFF;
 }
 
-/* Global white background override for Products page */
+/* Global background for Products page wrapper */
 html, body, #root, .app, .main-content {
-  background-color: white !important;
+  background-color: #FBFDFF;
 }
+
 .products-container {
   /* Use full available width; add side padding for consistent spacing */
   /* top | right | bottom | left */
@@ -18,13 +20,13 @@ html, body, #root, .app, .main-content {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-y: auto;
-  background: white; /* White background color for entire page */
+  /* Page background */
+  background: #FBFDFF;
 
   /* make it occupy viewport height minus navbar (adjust 64px if needed) */
   height: auto;
   display: flex;
   flex-direction: column;
-
 }
 
 @media (max-width: 991px) {
@@ -75,8 +77,8 @@ html, body, #root, .app, .main-content {
   width:100%;
   max-width: none;
   box-sizing: border-box;
-
-  background: white !important;
+  /* Match overall app background so there is no hard white band above the card */
+  background: #FBFDFF;
   box-shadow: none;
   min-height: 100vh;
   margin-right: 10px;
@@ -90,11 +92,10 @@ width: calc(100% - 256px);
   box-sizing: border-box;
   margin-left: 10px;
   padding-right: 10px;
-  background: white !important;
+  background: #FBFDFF;
   box-shadow: none;
   min-height: 100vh;
 }
-
 
 @media (max-width: 991px) { 
   .check-product-container { 

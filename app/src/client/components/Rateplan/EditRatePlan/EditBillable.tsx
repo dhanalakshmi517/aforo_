@@ -96,6 +96,7 @@ const EditBillable: React.FC<EditBillableProps> = ({
       {/* Product Selection Dropdown */}
       <div style={{ marginBottom: '24px', maxWidth: '539px' }}>
         <SelectField
+        required
           label="Select Product"
           value={selectedProductName}
           onChange={(v: string) => {

@@ -745,7 +745,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
     <div className="extras-container">
       {/* Setup Fee */}
       <div className="section">
-        {renderHeader('Setup Fee(Optional)', 'setupFee')}
+        {renderHeader('Setup Fee', 'setupFee')}
         <div className="description-row">
           <p className="description">Charge a one-time fee when the customer starts this plan.</p>
           <button className="icon-btn" aria-label="Add setup fee action" />
@@ -755,7 +755,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <div className="extras-two-col-row">
               <div className="extras-field">
                 <label>
-                  Enter one-time Setup Fee <span className="optional">(optional)</span>
+                  Enter one-time Setup Fee 
                 </label>
                 <InputField
                   type="number"

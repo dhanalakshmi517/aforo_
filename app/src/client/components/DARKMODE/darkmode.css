@@ -1,0 +1,11 @@
+/* darkmode-variables.css */
+[data-theme="dark"] {
+  --color-neutral-1700: #FFFFFF;
+  --color-neutral-1400:#D9DFE8;
+  --color-neutral-1000:#A6B9C9;
+  --color-neutral-800:#8BA4B8;
+  --color-neutral-600:#44576F;
+  --color-neutral-300:#25303D;
+  --color-neutral-100:#19222D;
+  --color-neutral-500:#44576F;
+}

@@ -813,6 +813,8 @@ const CreatePricePlan = React.forwardRef<
             <InputField
               label="Rate Plan Name"
               placeholder="e.g., Individual Plan, Pro Plan"
+                      required
+
               value={planName}
               onChange={(v: string) => {
                 setPlanName(v);
@@ -823,6 +825,8 @@ const CreatePricePlan = React.forwardRef<
             />
             <SelectField
               label="Billing Frequency"
+                      required
+
               value={billingFrequency}
               onChange={(v: string) => {
                 setBillingFrequency(v);
@@ -841,6 +845,8 @@ const CreatePricePlan = React.forwardRef<
             />
             <SelectField
               label="Payment type"
+                      required
+
               value={paymentMethod}
               onChange={(v: string) => {
                 setPaymentMethod(v);
@@ -872,6 +878,7 @@ const CreatePricePlan = React.forwardRef<
         return (
           <>
             <Billable
+            
               products={products}
               productError={productError}
               selectedProductName={selectedProductName}
@@ -1129,6 +1136,8 @@ const CreatePricePlan = React.forwardRef<
 
       {/* Delete confirmation modal */}
       <ConfirmDeleteModal
+         discardLabel="Keep editing"
+          confirmLabel="Discard"
         isOpen={showDeleteConfirm}
         productName={planName || "this rate plan"}
         onConfirm={async () => {

@@ -105,6 +105,7 @@ const Billable: React.FC<BillableProps> = ({
       <div style={{ marginBottom: '24px', maxWidth: '539px' }}>
         <SelectField
           label="Select Product"
+          required
           value={selectedProductName}
           onChange={(v: string) => {
             onSelectProduct(v);
