@@ -17,6 +17,8 @@ interface EditStairProps {
   onOverageChange?: (overage: string) => void;
   graceBuffer?: string;
   onGraceChange?: (grace: string) => void;
+  validationErrors?: Record<string, string>;
+  onClearError?: (key: string) => void;
 }
 
 const EditStair: React.FC<EditStairProps> = ({
@@ -27,12 +29,14 @@ const EditStair: React.FC<EditStairProps> = ({
   overageCharge: externalOverage,
   onOverageChange,
   graceBuffer: externalGrace,
-  onGraceChange
+  onGraceChange,
+  validationErrors = {},
+  onClearError
 }) => {
   // Initialize from props or localStorage fallback
   const [stairs, setStairs] = useState<Stair[]>(() => {
     if (externalStairs) return externalStairs;
-    
+
     const saved = localStorage.getItem('stairTiers');
     if (saved) {
       try {
@@ -43,7 +47,7 @@ const EditStair: React.FC<EditStairProps> = ({
           cost: r.cost ?? r.price ?? '',
           isUnlimited: r.isUnlimited ?? false,
         }));
-      } catch {}
+      } catch { }
     }
     return [{ from: '', to: '', cost: '' }];
   });
@@ -116,6 +120,11 @@ const EditStair: React.FC<EditStairProps> = ({
     const updated = [...stairs];
     (updated[index] as any)[field] = value;
     setStairs(updated);
+
+    // Clear parent validation errors when user types
+    if (value.trim() && onClearError) {
+      onClearError('stairTiers');
+    }
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
@@ -161,7 +170,7 @@ const EditStair: React.FC<EditStairProps> = ({
             />
             <button className="edit-delete-btn" onClick={() => handleDeleteStair(index)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -198,9 +207,20 @@ const EditStair: React.FC<EditStairProps> = ({
                 onChange={(e) => {
                   setOverageCharge(e.target.value);
                   onOverageChange?.(e.target.value);
+                  if (e.target.value.trim() && onClearError) {
+                    onClearError('stairOverage');
+                  }
                 }}
                 placeholder="Enter overage charge"
               />
+              {validationErrors.stairOverage && (
+                <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '3px', color: '#ED5142', fontSize: '11px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ marginRight: '3px' }}>
+                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {validationErrors.stairOverage}
+                </div>
+              )}
             </label>
             <label>
               Grace Buffer (optional)
@@ -219,6 +239,15 @@ const EditStair: React.FC<EditStairProps> = ({
         )}
 
         <button className="edit-add-stair-btn" onClick={handleAddStair}>+ Add Stair</button>
+
+        {validationErrors.stairTiers && (
+          <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '10px', color: '#ED5142', fontSize: '12px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {validationErrors.stairTiers}
+          </div>
+        )}
       </div>
     </div>
   );

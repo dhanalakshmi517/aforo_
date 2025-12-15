@@ -17,6 +17,8 @@ interface EditVolumeProps {
   onOverageChange?: (overage: string) => void;
   graceBuffer?: string;
   onGraceChange?: (grace: string) => void;
+  validationErrors?: Record<string, string>;
+  onClearError?: (key: string) => void;
 }
 
 const EditVolume: React.FC<EditVolumeProps> = ({
@@ -27,7 +29,9 @@ const EditVolume: React.FC<EditVolumeProps> = ({
   overageCharge: externalOverage,
   onOverageChange,
   graceBuffer: externalGrace,
-  onGraceChange
+  onGraceChange,
+  validationErrors = {},
+  onClearError
 }) => {
   const [tiers, setTiers] = useState<Tier[]>(externalTiers || [{ from: '', to: '', price: '' }]);
   const [unlimited, setUnlimited] = useState(externalUnlimited || false);
@@ -72,7 +76,7 @@ const EditVolume: React.FC<EditVolumeProps> = ({
   }, [graceBuffer]);
 
   const handleAddTier = () => {
-    setTiers(prev=>[...prev,{from:'',to:'',price:'', isUnlimited: false}]);
+    setTiers(prev => [...prev, { from: '', to: '', price: '', isUnlimited: false }]);
   };
 
   const handleDeleteTier = (index: number) => {
@@ -83,6 +87,11 @@ const EditVolume: React.FC<EditVolumeProps> = ({
     setTiers(prev =>
       prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[]
     );
+
+    // Clear validation error for this tier field
+    if (value.trim() && onClearError) {
+      onClearError(`tier${index}_${field}`);
+    }
   };
 
   const handleUnlimitedToggle = (checked: boolean, index: number) => {
@@ -132,7 +141,7 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             />
             <button className="edit-volume-delete-btn" onClick={() => handleDeleteTier(index)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -169,9 +178,20 @@ const EditVolume: React.FC<EditVolumeProps> = ({
                 onChange={(e) => {
                   setOverageCharge(e.target.value);
                   onOverageChange?.(e.target.value);
+                  if (e.target.value.trim() && onClearError) {
+                    onClearError('volumeOverage');
+                  }
                 }}
                 placeholder="Enter overage charge"
               />
+              {validationErrors.volumeOverage && (
+                <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '3px', color: '#ED5142', fontSize: '11px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ marginRight: '3px' }}>
+                    <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {validationErrors.volumeOverage}
+                </div>
+              )}
             </label>
             <label>
               Grace Buffer (optional)

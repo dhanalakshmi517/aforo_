@@ -150,7 +150,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
           setMetricId((data as any).metricId ?? (data as any).billableMetricId ?? null);
           setMetricName((data as any).metricName || '');
-          setSelectedProductId(String((data as any).productId));
+          // Only set productId if it's a valid value (not null/undefined)
+          const productId = (data as any).productId;
+          if (productId != null && productId !== '' && !isNaN(Number(productId))) {
+            setSelectedProductId(String(productId));
+          }
           if ((data as any).productType) setSelectedProductType((data as any).productType);
           setUnitOfMeasure((data as any).unitOfMeasure || '');
           setDescription((data as any).description || '');
@@ -225,6 +229,22 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
   const isConditionsLocked = !hasAnyRequiredInput;
 
+  // Lock review step if Usage Conditions step (step 2) is incomplete
+  const isReviewLocked = useMemo(() => {
+    // Billing criteria is always required
+    if (!billingCriteria) return true;
+
+    // Only require usage conditions if billing criteria is "Bill based on usage conditions"
+    if (billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS') {
+      const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
+      if (!first.dimension || !first.operator || !first.value) {
+        return true; // Lock if conditions are incomplete
+      }
+    }
+
+    return false; // Unlock if validation passes
+  }, [billingCriteria, usageConditions]);
+
   const handleTopbarBack = () => {
     if (hasAnyRequiredInput || metricId) {
       setShowSavePrompt(true);
@@ -262,17 +282,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
 
     if (step === 1) {
-      const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
-
-      // Check if user has started filling any usage condition field
-      const hasStartedCondition = first.dimension || first.operator || first.value;
-
-      // Only validate usage conditions if:
-      // 1. User has started filling them (at least one field has a value), OR
-      // 2. Billing criteria requires them (Bill based on usage conditions)
-      const shouldValidateConditions = hasStartedCondition || billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS';
-
-      if (shouldValidateConditions) {
+      // Only validate usage conditions if billing criteria is "Bill based on usage conditions"
+      if (billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS') {
+        const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
         if (!first.dimension) step1CondErrors['0.dimension'] = 'Dimension is required';
         if (!first.operator) step1CondErrors['0.operator'] = 'Operator is required';
         if (!first.value) step1CondErrors['0.value'] = 'Value is required';
@@ -329,8 +341,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         aggregationFunction: aggregationFunction || undefined,
         aggregationWindow: aggregationWindow || undefined,
         billingCriteria: billingCriteria || undefined,
-        // Version is required by backend - use default if not provided
-        version: version?.trim() || 'v1.0',
+        version: version?.trim() || undefined,
         description: description?.trim() ? description.trim() : undefined,
         usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : [],
       };
@@ -343,8 +354,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       };
       if (metricName.trim()) payload.metricName = metricName.trim();
       if (selectedProductId) payload.productId = Number(selectedProductId);
-      // Version with default for drafts
-      payload.version = version?.trim() || 'v1.0';
+      if (version?.trim()) payload.version = version.trim();
       if (unitOfMeasure.trim()) payload.unitOfMeasure = unitOfMeasure.trim();
       if (description.trim()) payload.description = description.trim();
       if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
@@ -358,12 +368,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       metricName: metricName.trim(),
       productId: Number(selectedProductId),
       unitOfMeasure: unitOfMeasure.trim(),
-      // Version is required by backend - use default if not provided
-      version: version?.trim() || 'v1.0',
       usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : []
     };
 
     // Only include optional fields if they have values
+    if (version?.trim()) payload.version = version.trim();
     if (description?.trim()) payload.description = description.trim();
     if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
     if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
@@ -391,10 +400,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           if (metricName?.trim()) cleanupPayload.metricName = metricName.trim();
           if (selectedProductId) cleanupPayload.productId = Number(selectedProductId);
           if (unitOfMeasure?.trim()) cleanupPayload.unitOfMeasure = unitOfMeasure.trim();
-
-          // Version is required by backend for finalization - use default if not provided
-          cleanupPayload.version = version?.trim() || 'v1.0';
-
+          if (version?.trim()) cleanupPayload.version = version.trim();
           if (description?.trim()) cleanupPayload.description = description.trim();
           if (aggregationFunction?.trim()) cleanupPayload.aggregationFunction = aggregationFunction.trim();
           if (aggregationWindow?.trim()) cleanupPayload.aggregationWindow = aggregationWindow.trim();
@@ -614,10 +620,17 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                         >
                           <span className="met-np-step__bullet" aria-hidden="true">
                             <span className="met-np-step__icon">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
-                                <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
-                              </svg>
+                              {isCompleted ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
+                                  <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                                  <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                                </svg>
+                              )}
                             </span>
                             {showConnector && <span className="met-np-step__connector" />}
                           </span>
@@ -701,6 +714,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                           }}
                                           options={opts.map(o => ({ label: o, value: o }))}
                                           error={errors.unitOfMeasure}
+                                          disabled={!selectedProductId}
                                         />
                                       );
                                     }
@@ -719,6 +733,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                           }
                                         }}
                                         error={errors.unitOfMeasure}
+                                        disabled={!selectedProductId}
                                       />
                                     );
                                   })()}
@@ -787,8 +802,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                           {/* STEP 3: REVIEW */}
                           {activeTab === 'review' && (
                             <section>
-                              <div className="met-np-section-header">
+                              <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
                                 <h3 className="met-np-section-title">REVIEW & CONFIRM</h3>
+                                {isReviewLocked && <LockBadge />}
                               </div>
                               <Review
                                 metricName={metricName}
@@ -856,33 +872,53 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                           {activeTab === 'review' && (
                             <>
-                              <div className="met-np-btn-group met-np-btn-group--back">
-                                <SecondaryButton onClick={() => gotoStep(1)}>
-                                  Back
-                                </SecondaryButton>
-                              </div>
-                              <div className="met-np-btn-group met-np-btn-group--next">
-                                <PrimaryButton
-                                  onClick={async () => {
-                                    if (!metricId) return;
-                                    setSaving(true);
-                                    const finalized = await finalizeBillableMetric(metricId);
-                                    setSaving(false);
-                                    if (finalized) {
-                                      setShowSuccess(true);
-                                    } else {
-                                      showToast({
-                                        kind: 'error',
-                                        title: 'Failed to Create Metric',
-                                        message: 'Unable to finalize the metric. Please try again.'
-                                      });
-                                    }
+                              {isReviewLocked ? (
+                                <div
+                                  className="met-np-footer-hint"
+                                  style={{
+                                    position: 'absolute',
+                                    left: '50%',
+                                    bottom: '20px',
+                                    transform: 'translateX(-50%)',
+                                    color: '#8C8F96',
+                                    fontSize: 14,
+                                    pointerEvents: 'none',
+                                    whiteSpace: 'nowrap'
                                   }}
-                                  disabled={saving}
                                 >
-                                  {saving ? 'Submitting...' : 'Create Metric'}
-                                </PrimaryButton>
-                              </div>
+                                  Complete the previous steps to unlock this step
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="met-np-btn-group met-np-btn-group--back">
+                                    <SecondaryButton onClick={() => gotoStep(1)}>
+                                      Back
+                                    </SecondaryButton>
+                                  </div>
+                                  <div className="met-np-btn-group met-np-btn-group--next">
+                                    <PrimaryButton
+                                      onClick={async () => {
+                                        if (!metricId) return;
+                                        setSaving(true);
+                                        const finalized = await finalizeBillableMetric(metricId);
+                                        setSaving(false);
+                                        if (finalized) {
+                                          setShowSuccess(true);
+                                        } else {
+                                          showToast({
+                                            kind: 'error',
+                                            title: 'Failed to Create Metric',
+                                            message: 'Unable to finalize the metric. Please try again.'
+                                          });
+                                        }
+                                      }}
+                                      disabled={saving}
+                                    >
+                                      {saving ? 'Submitting...' : 'Create Metric'}
+                                    </PrimaryButton>
+                                  </div>
+                                </>
+                              )}
                             </>
                           )}
                         </div>

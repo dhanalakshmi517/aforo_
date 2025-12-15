@@ -24,7 +24,10 @@ interface Tier {
 interface EditPricingProps {
   ratePlanId?: number;
   registerSavePricing?: (fn: () => Promise<void>) => void;
+  registerValidatePricing?: (fn: (setErrors: (e: Record<string, string>) => void) => boolean) => void;
   draftData?: any;
+  validationErrors?: Record<string, string>;
+  onClearError?: (key: string) => void;
 }
 
 const toNumber = (v: any, fallback = 0) => {
@@ -32,7 +35,7 @@ const toNumber = (v: any, fallback = 0) => {
   return Number.isFinite(n) ? n : fallback;
 };
 
-const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePricing, draftData }) => {
+const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePricing, registerValidatePricing, draftData, validationErrors = {}, onClearError }) => {
   const [selected, setSelected] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -279,11 +282,11 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
         const list = Array.isArray(saved) && saved.length > 0
           ? saved
           : tiers.map(t => ({
-              from: String(t.from ?? ''),
-              to: String(t.to ?? ''),
-              cost: String(t.price ?? ''),
-              isUnlimited: t.isUnlimited ?? false,
-            }));
+            from: String(t.from ?? ''),
+            to: String(t.to ?? ''),
+            cost: String(t.price ?? ''),
+            isUnlimited: t.isUnlimited ?? false,
+          }));
 
         const tiersToSend = list.map((s: any) => {
           const fromStr = (s.from ?? '').toString().trim();
@@ -329,6 +332,116 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
     }
   }, [registerSavePricing, handleSave]);
 
+  // Register validation function
+  const validatePricing = useCallback((setParentErrors: (e: Record<string, string>) => void): boolean => {
+    const e: Record<string, string> = {};
+
+    if (selected === 'Flat Fee') {
+      const flatFeeAmount = getRatePlanData('FLAT_FEE_AMOUNT') ?? localStorage.getItem('flatFeeAmount');
+      const numberOfApiCalls = getRatePlanData('FLAT_FEE_API_CALLS') ?? localStorage.getItem('flatFeeApiCalls');
+      const overageRate = getRatePlanData('FLAT_FEE_OVERAGE') ?? localStorage.getItem('flatFeeOverage');
+
+      if (!flatFeeAmount || !flatFeeAmount.trim() || Number(flatFeeAmount) <= 0) {
+        e.flatFeeAmount = 'Flat fee amount is required';
+      }
+      if (!numberOfApiCalls || !numberOfApiCalls.trim() || Number(numberOfApiCalls) <= 0) {
+        e.apiCalls = 'Number of API calls is required';
+      }
+      if (!overageRate || !overageRate.trim() || Number(overageRate) < 0) {
+        e.overageRate = 'Overage unit rate is required';
+      }
+    } else if (selected === 'Usage-Based') {
+      const perUnit = getRatePlanData('USAGE_PER_UNIT_AMOUNT') ?? localStorage.getItem('usagePerUnit');
+      if (!perUnit || !perUnit.trim() || Number(perUnit) <= 0) {
+        e.perUnitAmount = 'Per unit amount is required';
+      }
+    } else if (selected === 'Tiered Pricing') {
+      const saved = JSON.parse(localStorage.getItem('tieredTiers') || '[]');
+      if (!saved || saved.length === 0) {
+        e.tieredTiers = 'At least one tier is required';
+      } else {
+        // Validate each tier
+        saved.forEach((tier: any, idx: number) => {
+          if (!tier.from || tier.from === '') {
+            e[`tier${idx}_from`] = 'From value is required';
+          }
+          if (!tier.isUnlimited && (!tier.to || tier.to === '')) {
+            e[`tier${idx}_to`] = 'To value is required';
+          }
+          if (!tier.price || tier.price === '') {
+            e[`tier${idx}_price`] = 'Price is required';
+          }
+        });
+
+        // Check for overage if not unlimited
+        const lastTier = saved[saved.length - 1];
+        if (!lastTier?.isUnlimited) {
+          const overage = localStorage.getItem('tieredOverage');
+          if (!overage || !overage.trim() || Number(overage) < 0) {
+            e.tieredOverage = 'Overage charge is required when there is an upper limit';
+          }
+        }
+      }
+    } else if (selected === 'Volume-Based') {
+      const saved = JSON.parse(localStorage.getItem('volumeTiers') || '[]');
+      if (!saved || saved.length === 0) {
+        e.volumeTiers = 'At least one tier is required';
+      } else {
+        // Validate each tier
+        saved.forEach((tier: any, idx: number) => {
+          if (!tier.from || tier.from === '') {
+            e[`tier${idx}_from`] = 'From value is required';
+          }
+          if (!tier.isUnlimited && (!tier.to || tier.to === '')) {
+            e[`tier${idx}_to`] = 'To value is required';
+          }
+          if (!tier.price || tier.price === '') {
+            e[`tier${idx}_price`] = 'Price is required';
+          }
+        });
+
+        // Check for overage if not unlimited
+        const lastTier = saved[saved.length - 1];
+        if (!lastTier?.isUnlimited) {
+          const overage = localStorage.getItem('volumeOverage');
+          if (!overage || !overage.trim() || Number(overage) < 0) {
+            e.volumeOverage = 'Overage charge is required when there is an upper limit';
+          }
+        }
+      }
+    } else if (selected === 'Stairstep') {
+      const saved = JSON.parse(localStorage.getItem('stairTiers') || '[]');
+      if (!saved || saved.length === 0) {
+        e.stairTiers = 'At least one stair is required';
+      } else {
+        // Validate each stair
+        saved.forEach((stair: any, idx: number) => {
+          if (!stair.from || stair.from === '') {
+            e[`stair${idx}_from`] = 'From value is required';
+          }
+          if (!stair.isUnlimited && (!stair.to || stair.to === '')) {
+            e[`stair${idx}_to`] = 'To value is required';
+          }
+          if (!stair.cost || stair.cost === '') {
+            e[`stair${idx}_cost`] = 'Cost is required';
+          }
+        });
+      }
+    } else if (!selected) {
+      e.pricingModel = 'Please select a pricing model';
+    }
+
+    // Set errors in parent state so they flow down to child components
+    setParentErrors(e);
+    return Object.keys(e).length === 0;
+  }, [selected]);
+
+  useEffect(() => {
+    if (registerValidatePricing) {
+      registerValidatePricing(validatePricing);
+    }
+  }, [registerValidatePricing, validatePricing]);
+
   return (
     <div className="edit-pricing-container">
       <div className="ledit-eft-section">
@@ -355,12 +468,12 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
 
         {selected === 'Flat Fee' && (
           <div className="edit-pricing-container">
-            <EditFlat />
+            <EditFlat validationErrors={validationErrors} onClearError={onClearError} />
           </div>
         )}
         {selected === 'Tiered Pricing' && (
           <div className="edit-pricing-container">
-            <EditTiered 
+            <EditTiered
               tiers={tiers.map(t => ({
                 from: String(t.from ?? ''),
                 to: String(t.to ?? ''),
@@ -382,12 +495,14 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
               onOverageChange={(val) => setOverageUnitRate(Number(val) || 0)}
               graceBuffer={String(graceBuffer)}
               onGraceChange={(val) => setGraceBuffer(Number(val) || 0)}
+              validationErrors={validationErrors}
+              onClearError={onClearError}
             />
           </div>
         )}
         {selected === 'Volume-Based' && (
           <div className="edit-pricing-container">
-            <EditVolume 
+            <EditVolume
               tiers={tiers.map(t => ({
                 from: String(t.from ?? ''),
                 to: String(t.to ?? ''),
@@ -409,12 +524,14 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
               onOverageChange={(val) => setOverageUnitRate(Number(val) || 0)}
               graceBuffer={String(graceBuffer)}
               onGraceChange={(val) => setGraceBuffer(Number(val) || 0)}
+              validationErrors={validationErrors}
+              onClearError={onClearError}
             />
           </div>
         )}
         {selected === 'Stairstep' && (
           <div className="edit-pricing-container">
-            <EditStair 
+            <EditStair
               stairs={tiers.map(t => ({
                 from: String(t.from ?? ''),
                 to: String(t.to ?? ''),
@@ -436,12 +553,14 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
               onOverageChange={(val) => setOverageUnitRate(Number(val) || 0)}
               graceBuffer={String(graceBuffer)}
               onGraceChange={(val) => setGraceBuffer(Number(val) || 0)}
+              validationErrors={validationErrors}
+              onClearError={onClearError}
             />
           </div>
         )}
         {selected === 'Usage-Based' && (
           <div className="edit-pricing-container">
-            <EditUsage />
+            <EditUsage validationErrors={validationErrors} onClearError={onClearError} />
           </div>
         )}
       </div>

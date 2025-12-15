@@ -14,12 +14,12 @@ export interface UsageMetricDTO {
   metricName: string;
   productId: number;
   productName: string;
-  version: string;
   unitOfMeasure: string;
-  description: string;
-  aggregationFunction: string;
-  aggregationWindow: string;
-  billingCriteria: string;
+  version?: string;
+  description?: string;
+  aggregationFunction?: string;
+  aggregationWindow?: string;
+  billingCriteria?: string;
   usageConditions?: Array<{
     dimension: string;
     operator: string;
@@ -37,15 +37,15 @@ export interface UsageConditionPayload {
 }
 
 export interface BillableMetricPayload {
-  billingCriteria?: string;
   metricName: string;
   productId: number;
-  version: string;
   unitOfMeasure: string;
-  description: string;
-  aggregationFunction: string;
-  aggregationWindow: string;
   usageConditions: UsageConditionPayload[];
+  version?: string;
+  description?: string;
+  aggregationFunction?: string;
+  aggregationWindow?: string;
+  billingCriteria?: string;
 }
 
 export interface CreateMetricResult {
