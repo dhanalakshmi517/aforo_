@@ -74,6 +74,7 @@ const Integrations = React.lazy(integrationsLoader) as React.ComponentType<any>;
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
+import ImportProducts from './components/componenetsss/ImportProducts';
 import TieredEstimation from './components/Rateplan/Revenue/TieredEstimation';
 import StairEstimation from './components/Rateplan/Revenue/StairEstimation';
 
@@ -559,7 +560,7 @@ export default function App() {
                       />
                       <main
                         className="flex-1 "
-                        style={{ marginLeft: showSidebar ? '14rem' : '0',backgroundColor: "#FBFDFF",
+                        style={{ marginLeft: showSidebar ? '15rem' : '0',backgroundColor: "#FBFDFF",
  }}
                       >
                         <RatePlans
@@ -910,20 +911,13 @@ export default function App() {
                 }
               />
 
-              {/* Import from Kong */}
+              {/* Import Products (new shared screen) */}
               <Route
                 path="/get-started/products/import"
                 element={
                   <ProtectedRoute>
-                    <KongProductSelect
-                      onBack={() => {
-                        if (location.state?.from === 'settings') {
-                          navigate('/get-started/settings');
-                        } else {
-                          navigate(-1);
-                        }
-                      }}
-                      previousRoute={location.state?.from === 'settings' ? 'settings' : 'products'}
+                    <ImportProducts
+                      onBack={() => navigate('/get-started/products')}
                     />
                   </ProtectedRoute>
                 }

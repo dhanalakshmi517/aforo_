@@ -1,0 +1,46 @@
+@import "../Variables/Variables.css";
+.newbtn {
+  display: flex;
+  padding: 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  width: 36px;
+  height: 36px;
+
+  border: none;
+  border-radius:var(--border-radius-sm);
+
+  background: var(--color-primary-750); /* default */
+  color:var(--color-neutral-white);
+
+  cursor: pointer;
+  user-select: none;
+
+}
+
+.newbtn:hover:not(:disabled) {
+  background: var(--color-primary-750); /* hover */
+}
+
+.newbtn:active:not(:disabled) {
+  background: var(--color-primary-600); /* active */
+}
+
+.newbtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11, 95, 141, 0.25), 0 6px 14px rgba(11, 95, 141, 0.28);
+}
+
+.newbtn:disabled {
+  background: #b8c7d3; /* disabled */
+  color: #eef2f6;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.95;
+}
+
+.newbtn__icon {
+  display: block;
+}

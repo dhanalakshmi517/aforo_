@@ -226,7 +226,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         title="Billable Metrics"
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
-        primaryLabel={metrics.length > 0 ? " + New Billable Metric" : ""}
+        primaryLabel=""
         onPrimaryClick={() => navigate('/get-started/metering/new')}
         onFilterClick={() => { }}
         searchDisabled={metrics.length === 0}

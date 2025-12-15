@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import PrimaryButton from '../componenetsss/PrimaryButton';
+import NewButton from "../componenetsss/NewButton";
 import './PageHeader.css';
 
 export interface PageHeaderProps {
@@ -128,14 +128,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           </div>
         )}
 
-        {/* New Rate Plan */}
+        {/* New primary action */}
         {showPrimary && (
-          <PrimaryButton onClick={onPrimaryClick}>
-            {/* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ marginRight: '8px' }}>
-              <path d="M3.33301 8.00004H12.6663M7.99967 3.33337V12.6667" stroke="#F8F7FA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg> */}
-            {primaryLabel}
-          </PrimaryButton>
+          <div className="ph-primary-action">
+            <NewButton 
+              onClick={onPrimaryClick} 
+              ariaLabel={primaryLabel || `Create ${title}`} 
+            />
+          </div>
         )}
         {/* {showIntegrations && (
           <button className="rp-integrations-btn" aria-label="Integrations" onClick={onSettingsClick}>
