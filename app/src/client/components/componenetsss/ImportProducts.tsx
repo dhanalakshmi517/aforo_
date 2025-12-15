@@ -69,7 +69,7 @@ const ImportProducts: React.FC<ImportProductsProps> = ({
                 </svg>
               </div>
 
-              <div className="ip-gateway-name">Razorpay</div>
+              <div className="ip-gateway-name">Kong Integration</div>
               <div className="ip-gateway-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="6" height="10" viewBox="0 0 6 10" fill="none">
   <path d="M0.75 0.75L4.75 4.75L0.75 8.75" stroke="#25303D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg></div>
@@ -100,7 +100,7 @@ const ImportProducts: React.FC<ImportProductsProps> = ({
 </svg>
               </div>
 
-              <div className="ip-gateway-name">Google</div>
+              <div className="ip-gateway-name">Apigee Integration</div>
               <div className="ip-gateway-arrow">›</div>
             </button>
           </div>
