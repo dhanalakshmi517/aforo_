@@ -646,11 +646,15 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                               <div className="met-np-grid-2">
                                 {/* fields ... (unchanged) */}
-                                <InputField label="Metric Name" value={metricName} onChange={setMetricName} placeholder="eg. API Calls" error={errors.metricName} />
+                                <InputField label="Metric Name" value={metricName} onChange={setMetricName}
+                                required
+                                 placeholder="eg. API Calls" error={errors.metricName} />
                                 <div className="form-group">
                                   <SelectField
                                     label="Product"
                                     value={selectedProductId}
+                                    required
+
                                     onChange={(v: string) => {
                                       setSelectedProductId(v);
                                       const prod = products.find(p => String(p.productId) === v);
@@ -667,8 +671,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     className="select-product"
                                   />
                                 </div>
-                                <InputField label="Version" value={version} onChange={setVersion} placeholder="eg. v2.0" optional={true} />
-                                <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" optional={true} />
+                                <InputField label="Version" value={version}  required onChange={setVersion} placeholder="eg. v2.0" />
+                                <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" />
 
                                 <div className="met-np-field">
                                   {(() => {
@@ -686,6 +690,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                         <SelectField
                                           label="Unit of Measure"
                                           placeholder="Select unit (eg. calls, GB, hours)"
+                                          required
                                           value={unitOfMeasure}
                                           onChange={(v: string) => {
                                             setUnitOfMeasure(v);
@@ -704,6 +709,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       <InputField
                                         label="Unit of Measure"
                                         placeholder="Unit"
+                                        required
                                         value={unitOfMeasure}
                                         onChange={(v: string) => {
                                           setUnitOfMeasure(v);
@@ -732,7 +738,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       }
                                     }}
                                     error={errors.aggregationFunction}
-                                    optional={true}
                                   />
                                 </div>
 
@@ -750,7 +755,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       }
                                     }}
                                     error={errors.aggregationWindow}
-                                    optional={true}
                                   />
                                 </div>
                               </div>
@@ -913,6 +917,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           <ConfirmDeleteModal
             isOpen={showDeleteConfirm}
             productName={metricName || 'this metric'}
+               discardLabel="Keep editing"
+          confirmLabel="Discard"
             onConfirm={async () => {
               setShowDeleteConfirm(false);
               await deleteAndClose();

@@ -904,19 +904,19 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   onChange={handleFieldChange('productName')}
                                   error={errors.productName}
                                   placeholder="eg. Google Maps API"
+                                  required
                                 />
                                 <InputField
                                   label="Version"
                                   value={formData.version}
                                   onChange={handleFieldChange('version')}
                                   placeholder="eg., 2.3-VOS"
-                                  optional
                                 />
 
                                 {/* Product Icon Field - Add */}
                                 {!selectedIcon && (
                                   <div className="prod-np-form-group">
-                                    <label className="if-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                                    <label className="if-label">Product Icon</label>
                                     <div className="prod-np-icon-field-wrapper">
                                       <div className="prod-np-icon-placeholder">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
@@ -961,7 +961,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                                   return (
                                     <div className="prod-np-form-group">
-                                      <label className="if-label">Product Icon <span className="if-optional">(Optional)</span></label>
+                                      <label className="if-label">Product Icon</label>
                                       <div className="prod-np-icon-field-wrapper">
                                         <div className="prod-np-icon-preview">
                                           <div
@@ -1047,13 +1047,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   onChange={handleFieldChange('skuCode')}
                                   placeholder="eg. API-WTHR-STD-001"
                                   error={errors.skuCode}
+                                  required
                                 />
                                 <TextareaField
                                   label="Description"
                                   value={formData.description}
                                   onChange={handleFieldChange('description')}
                                   placeholder="eg. Mapping service API for location-based apps..."
-                                  optional
                                 />
                               </div>
 
@@ -1341,6 +1341,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           {/* Delete confirmation modal */}
           <ConfirmDeleteModal
             isOpen={showDeleteConfirm}
+               discardLabel="Keep editing"
+          confirmLabel="Discard"
             productName={formData.productName || "this product"}
             onConfirm={async () => {
               let ok = true;

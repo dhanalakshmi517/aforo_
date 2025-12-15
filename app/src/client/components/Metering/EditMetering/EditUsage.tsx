@@ -157,12 +157,13 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
       ))}
 
       <SecondaryButton className="add-btn" onClick={handleAdd}>
-        Add Filter
+        Add Usage
       </SecondaryButton>
 
       <div className="billing-section">
-        <label>Select Billing Criteria</label>
         <SelectField
+          label="Select Billing Criteria"
+          required
           value={billingCriteria}
           onChange={onBillingCriteriaChange}
           options={[

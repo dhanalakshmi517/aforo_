@@ -275,8 +275,9 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
       <div className="editmet-np-section">
         <div className="editmet-np-form-row">
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Metric Name</label>
             <InputField
+              label='Metric Name'
+              required
               value={metricName}
               onChange={setMetricName}
               placeholder="eg. API Calls"
@@ -285,8 +286,9 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
           </div>
 
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Product</label>
             <SelectField
+            label='Product'
+            required
               placeholder="Select Product"
               value={selectedProductId}
               onChange={(val: string) => {
@@ -314,13 +316,15 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
 
         <div className="editmet-np-form-row">
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Version (optional)</label>
-            <InputField value={version} onChange={setVersion} placeholder="eg. v1.0" />
+            <InputField
+            label='Version'
+            required
+             value={version} onChange={setVersion} placeholder="eg. v1.0" />
           </div>
 
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Description</label>
             <TextareaField
+            label='Description'
               value={description}
               onChange={setDescription}
               placeholder="Describe what this metric measures..."
@@ -330,9 +334,10 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
 
         <div className="editmet-np-form-row">
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Unit of Measure</label>
             <SelectField
+            label='UOM'
               placeholder="Select Unit"
+              required
               value={unitOfMeasure}
               onChange={(v: string) => {
                 setUnitOfMeasure(v);
@@ -347,8 +352,8 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
           </div>
 
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Aggregation Function (optional)</label>
             <EditAggregationFunction
+            label='Aggregatio Fuction'
               productType={selectedProductType}
               unitOfMeasure={unitOfMeasure}
               value={aggregationFunction}
@@ -359,18 +364,16 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                   setErrors(rest);
                 }
               }}
-              optional={true}
             />
           </div>
 
           <div className="editmet-np-form-group">
-            <label className="editmet-np-label">Aggregation Window (optional)</label>
             <EditAggregationWindow
+            label='Aggregationwindow'
               productType={selectedProductType}
               unitOfMeasure={unitOfMeasure}
               value={aggregationWindow}
               onChange={setAggregationWindow}
-              optional={true}
             />
           </div>
         </div>

@@ -9,6 +9,10 @@ interface ConfirmDeleteModalProps {
   entityType?: string; // e.g., "product", "customer", "item"
   onConfirm: () => void;
   onCancel: () => void;
+  /** Optional label override for the left (secondary) button. Default: "Discard" */
+  discardLabel?: string;
+  /** Optional label override for the right (primary delete) button. Default: "Yes, Delete" */
+  confirmLabel?: string;
 }
 
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
@@ -17,6 +21,8 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   entityType = "product",
   onConfirm,
   onCancel,
+  discardLabel = "Discard",
+  confirmLabel = "Yes, Delete",
 }) => {
   if (!isOpen) return null;
 
@@ -53,10 +59,10 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
 
         <div className="del-modal-actions">
           <SecondaryButton fullWidth onClick={onCancel}>
-            Discard
+            {discardLabel}
           </SecondaryButton>
           <DeleteSolidButton 
-            label="Yes, Delete"
+            label={confirmLabel}
             onClick={onConfirm}
           />
         </div>

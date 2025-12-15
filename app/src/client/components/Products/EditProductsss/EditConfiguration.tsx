@@ -31,7 +31,7 @@ export const productOptions = [
 
 export const configurationFields: Record<string, FieldProps[]> = {
   [ProductTypeEnum.API]: [
-    { label: 'Endpoint URL', type: 'text', placeholder: 'https://api.example.com/v1/endpoint', required: true },
+    { label: 'Endpoint URL', type: 'text', placeholder: 'https://api.example.com/v1/endpoint', required: true, },
     {
       label: 'Auth Type',
       type: 'select',
@@ -49,12 +49,14 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'File Format',
       type: 'select',
       required: true,
+    
       options: [
         { label: 'CSV', value: 'CSV' },
         { label: 'JSON', value: 'JSON' },
         { label: 'XML', value: 'XML' },
         { label: 'Parquet', value: 'PARQUET' },
         { label: 'Others', value: 'OTHERS' },
+
       ],
     },
     { label: 'File Location', type: 'text', placeholder: '/path/to/file or s3://bucket/key', required: true },
@@ -88,7 +90,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     },
   ],
   [ProductTypeEnum.LLMToken]: [
-    { label: 'Model Name', type: 'text', placeholder: 'gpt-4o', required: true },
+    { label: 'Model Name', type: 'text', placeholder: 'gpt-4o', required: true,},
     { label: 'Endpoint URL', type: 'text', placeholder: 'https://api.llmprovider.com/v1/chat', required: true },
     {
       label: 'Auth Type',
@@ -198,7 +200,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     const validate = (): boolean => {
       if (!productType) {
-        setError('');
+        setError('Select product type');
         return false;
       }
       const fields = configurationFields[productType] || [];
@@ -399,6 +401,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 placeholder={field.placeholder}
                 error={fieldError}
                 onBlur={handleBlur}
+                required={field.required}
               />
             </div>
           );
@@ -413,6 +416,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 onBlur={handleBlur}
                 placeholder={field.placeholder}
                 error={fieldError}
+                required={field.required}
                 min={field.min}
                 max={field.max}
                 step={field.step}
@@ -431,6 +435,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 onBlur={handleBlur}
                 placeholder={field.placeholder}
                 error={fieldError}
+                required={field.required}
               />
             </div>
           );
@@ -445,6 +450,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 onBlur={handleBlur}
                 placeholder={field.placeholder}
                 error={fieldError}
+                required={field.required}
               />
             </div>
           );
@@ -460,6 +466,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             onChange={handleProductTypeChange}
             options={[{ label: 'Select Product Type', value: '' }, ...productOptions]}
             required
+            error={error}
           />
         </div>
 

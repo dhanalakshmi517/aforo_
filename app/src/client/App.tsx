@@ -283,7 +283,7 @@ export default function App() {
   return (
     <ToastProvider>
       <TremorProvider>
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen" style={{ backgroundColor: '#FBFDFF' }}>
           <CookieConsentBanner />
           <Suspense
             fallback={
@@ -558,8 +558,9 @@ export default function App() {
                         hidden={!showSidebar}
                       />
                       <main
-                        className="flex-1 px-3 py-6 bg-white"
-                        style={{ marginLeft: showSidebar ? '15rem' : '0' }}
+                        className="flex-1 "
+                        style={{ marginLeft: showSidebar ? '14rem' : '0',backgroundColor: "#FBFDFF",
+ }}
                       >
                         <RatePlans
                           ratePlans={ratePlans}
@@ -683,8 +684,8 @@ export default function App() {
                         hidden={!showSidebar}
                       />
                       <main
-                        className="flex-1 bg-white py-6 pl-2 pr-10"
-                        style={{ marginLeft: showSidebar ? '16rem' : '0' }}
+                        className="flex-1 py-6  pr-10"
+                        style={{ marginLeft: showSidebar ? '15.5rem' : '0',backgroundColor: "#FBFDFF", }}
                       >
                         <Products
                           showNewProductForm={showNewProductForm}
@@ -735,7 +736,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6" style={{ marginLeft: showSidebar ? '15rem' : '0',backgroundColor: "#FBFDFF", }}>
                         <Metering
                           showNewUsageMetricForm={showNewUsageMetricForm}
                           setShowNewUsageMetricForm={setShowNewUsageMetricForm}
@@ -784,7 +785,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' ,backgroundColor: "#FBFDFF", }}>
                         <Subscriptions
                           showNewSubscriptionForm={showNewSubscriptionForm}
                           setShowNewSubscriptionForm={setShowNewSubscriptionForm}
@@ -824,7 +825,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 " style={{ marginLeft: showSidebar ? '15rem' : '0' ,backgroundColor: "#FBFDFF", }}>
                         <Customers
                           showNewCustomerForm={showNewCustomerForm}
                           setShowNewCustomerForm={setShowNewCustomerForm}
@@ -878,7 +879,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6 " style={{ marginLeft: showSidebar ? '15rem' : '0',backgroundColor: "#FBFDFF", }}>
                         <Suspense fallback={RouteSpinner}>
                           <DataIngestionPage />
                         </Suspense>

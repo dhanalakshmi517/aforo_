@@ -316,11 +316,11 @@ const EditProduct: React.FC<EditProductProps> = ({
   }, []);
 
   const handleProductTypeChange = (type: string) => {
-    setConfiguration(prev => {
-      const updated = { ...prev, productType: type };
-      localStorage.setItem('editConfigFormData', JSON.stringify(updated));
-      return updated;
-    });
+    // When product type changes, start a fresh configuration object
+    const updated = { productType: type } as Record<string, string>;
+    setConfiguration(updated);
+    localStorage.setItem('editConfigFormData', JSON.stringify(updated));
+
     setProductType(type);
     localStorage.setItem('editConfigProductType', type);
   };
@@ -783,7 +783,15 @@ const EditProduct: React.FC<EditProductProps> = ({
                       className={['editsub-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : '']
                         .join(' ')
                         .trim()}
-                      onClick={() => goToStep(index)}
+                      onClick={async () => {
+                        // If user is on Configuration and clicks Review & Confirm, validate config first
+                        const isReviewStep = step.id === 3;
+                        if (isReviewStep && activeTab === 'configuration') {
+                          const ok = await configRef.current?.submit();
+                          if (!ok) return;
+                        }
+                        goToStep(index);
+                      }}
                     >
                       <span className="edisub-np-step__text">
                         <span className="editsub-np-step__title">{step.title}</span>
@@ -805,18 +813,19 @@ const EditProduct: React.FC<EditProductProps> = ({
                         <div className="edit-np-section">
                           <div className="edit-np-form-row">
                             <div className="edit-np-form-group">
-                              <label className="edit-np-label">Product Name</label>
                               <InputField
+                                label="Product Name"
                                 value={formData.productName}
                                 onChange={(val: string) => handleInputChange('productName', val)}
                                 placeholder="eg. Google Maps API"
                                 error={errors.productName}
+                                required
                               />
                             </div>
 
                             <div className="edit-np-form-group">
-                              <label className="edit-np-label">Version</label>
                               <InputField
+                                label="Version"
                                 value={formData.version}
                                 onChange={(val: string) => handleInputChange('version', val)}
                                 placeholder="eg., 2.3-VOS"
@@ -828,7 +837,7 @@ const EditProduct: React.FC<EditProductProps> = ({
                           {!selectedIcon && (
                             <div className="edit-np-form-group">
                               <label className="edit-np-label">
-                                Product Icon <span className="if-optional">(Optional)</span>
+                                Product Icon 
                               </label>
 
                               <div className="prod-np-icon-field-wrapper">
@@ -870,7 +879,7 @@ const EditProduct: React.FC<EditProductProps> = ({
                               return (
                                 <div className="edit-np-form-group">
                                   <label className="edit-np-label">
-                                    Product Icon <span className="if-optional">(Optional)</span>
+                                    Product Icon
                                   </label>
 
                                   <div className="prod-np-icon-field-wrapper">
@@ -958,22 +967,22 @@ const EditProduct: React.FC<EditProductProps> = ({
                           />
 
                           <div className="edit-np-form-group">
-                            <label className="edit-np-label">SKU Code</label>
                             <InputField
+                              label="SKU Code"
                               value={formData.skuCode}
                               onChange={(val: string) => handleInputChange('skuCode', val)}
                               placeholder="SKU-96"
                               error={errors.skuCode}
+                              required
                             />
                           </div>
 
                           <div className="edit-np-form-group">
-                            <label className="edit-np-label">Description</label>
                             <TextareaField
+                              label="Description"
                               value={formData.description}
                               onChange={(val: string) => handleInputChange('description', val)}
-                              placeholder="Enter product description"
-                              error={errors.description}
+                              placeholder="eg. API for mapping applications."
                             />
                           </div>
                         </div>

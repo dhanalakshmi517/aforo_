@@ -83,7 +83,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label}{optional && <span className="if-optional">(Optional)</span>}
+            {label}{required && <span className="if-required">*</span>}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
         <input
@@ -191,7 +191,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label}{optional && <span className="if-optional">(Optional)</span>}
+            {label}{required && <span className="if-required">*</span>}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
 
@@ -489,7 +489,7 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
       <div className={`if-field ${className ?? ""}`}>
         {label && (
           <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
-            {label}{optional && <span className="if-optional">(Optional)</span>}
+            {label}{required && <span className="if-required">*</span>}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
         <textarea

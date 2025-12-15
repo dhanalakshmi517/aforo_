@@ -387,7 +387,8 @@ export default function CreateSubscription({
   const renderStep0 = () => (
     <div className="pur-np-grid-2">
       <SelectField
-        label="Customer"
+        label="Customer Name"
+        required
         value={selectedCustomerId?.toString() || ""}
         onChange={(val) => {
           const id = Number(val);
@@ -406,6 +407,7 @@ export default function CreateSubscription({
 
       <SelectField
         label="Product"
+        required
         value={selectedProductId?.toString() || ""}
         onChange={(val) => {
           const id = Number(val);
@@ -426,6 +428,8 @@ export default function CreateSubscription({
 
       <SelectField
         label="Rate Plan"
+                required
+
         value={selectedRatePlanId?.toString() || ""}
         onChange={(val) => {
           const id = Number(val);
@@ -452,6 +456,8 @@ export default function CreateSubscription({
 
       <SelectField
         label="Payment Type"
+                required
+
         value={paymentType}
         onChange={(val) => {
           if (val === "PREPAID" || val === "POSTPAID" || val === "") {
@@ -473,7 +479,6 @@ export default function CreateSubscription({
           placeholder="Enter admin notes"
           value={planDescription}
           onChange={setPlanDescription}
-          optional
         />
       </div>
     </div>
@@ -713,6 +718,8 @@ export default function CreateSubscription({
       <ConfirmDeleteModal
         isOpen={showDeleteConfirm}
         productName="subscription draft"
+           discardLabel="Keep editing"
+          confirmLabel="Discard"
         onConfirm={deleteAndClose}
         onCancel={() => setShowDeleteConfirm(false)}
       />

@@ -1,17 +1,17 @@
 @import "../Variables/Variables.css";
-.rate-plan-header {
+.pr-plan-header {
   display: flex;
   width: 100%;
   padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 20px);
   justify-content: space-between;
   align-items: center;
-  background: var(--surface-layer-4, #FFF);
+  background: #FBFDFF;
   position: relative;
   z-index: 2;
   box-sizing: border-box;
 }
 
-.rate-plan-header h2 {
+.pr-plan-header h2 {
   margin: 0;
   padding: 0;
   color: var(--text-text-darkest, #1A2126);
@@ -23,10 +23,12 @@
   font-weight: 700;
   line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
   flex: 0 0 auto;
+  margin-left: -10px;
 }
 
+
 /* Renamed to avoid conflicts with RatePlan.css */
-.ph-header-actions {
+.pr-header-actions {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -35,7 +37,7 @@
 }
 
 /* ===================== Search control ===================== */
-.rp-header-search {
+.pr-header-search {
   display: inline-flex;
   align-items: center;
   padding: 8px 12px 8px 8px;
@@ -44,27 +46,86 @@
   height: 36px;
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-neutral-300);
-  background: var(--color-neutral-white);
+  background: var(--color-neutral-50);
   box-sizing: border-box;
   transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
-.rp-header-search:hover { background: var(--color-neutral-100); border-color: var(--color-neutral-300); }
-.rp-header-search.is-active,
-.rp-header-search:focus-within,
-.rp-header-search:active { background:#FFF; border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; }
-.rp-header-search.has-value { width:180px; height:36px; background:#FFF; border-color:#D5D4DF; }
-.rp-header-search.has-value:hover { background:#FFF; border-color:#D5D4DF; }
-.rp-header-search.is-disabled { width:180px; height:36px; background:var(--color-neutral-250); border-color:#D5D4DF; cursor:not-allowed; box-shadow:none; }
-.rp-header-search.is-disabled:hover,
-.rp-header-search.is-disabled.is-active,
-.rp-header-search.is-disabled:focus-within { background:var(--color-neutral-250); border-color:#D5D4DF; box-shadow:none; }
-.rp-header-search.is-disabled, .rp-header-search.is-disabled * { pointer-events:none !important; }
-.rp-header-search.is-disabled{color:var(--color-neutral-400)}
+.pr-header-search:hover { 
+  background: var(--color-neutral-100);
+   border-color: var(--color-neutral-300); 
+  }
+.pr-header-search.is-active,
+.pr-header-search:focus-within,
+.pr-header-search:active { 
+  background:#FFF;
+   border-color:#0B80C2; 
+   box-shadow:0 0 0 1px #0B80C2 inset; 
+  }
+.pr-header-search.has-value { 
+  width:180px;
+   height:36px;
+    background:#FFF;
+     border-color:#D5D4DF;
+     }
+.rp-header-search.has-value:hover { 
+  background:#FFF;
+   border-color:#D5D4DF;
+   }
+.pr-header-search.is-disabled { 
+  width:180px;
+   height:36px; 
+   background:var(--color-neutral-250);
+    border-color:#D5D4DF;
+     cursor:not-allowed; 
+     box-shadow:none;
+     }
+.pr-header-search.is-disabled:hover,
+.pr-header-search.is-disabled.is-active,
+.pr-header-search.is-disabled:focus-within 
+{
+   background:var(--color-neutral-250);
+    border-color:#D5D4DF;
+     box-shadow:none;
+     }
+.pr-header-search.is-disabled, .pr-header-search.is-disabled * { 
+  pointer-events:none !important;
+ }
+.pr-header-search.is-disabled{
+  color:var(--color-neutral-150)
+}
 
-.rp-search-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; flex-shrink:0; }
-.rp-header-search.is-disabled .rp-search-icon { color: var(--color-neutral-400); }
+.pr-search-icon {
+   display:inline-flex; 
+   align-items:center; 
+   justify-content:center;
+    width:20px;
+     height:20px; 
+     flex-shrink:0;
+     }
+.pr-header-search.is-disabled .pr-search-icon { 
+  color: var(--color-neutral-400);
+  }
 
-.rp-search-input {
+/* Search icon stroke colors for different states */
+.pr-search-icon svg path {
+  stroke: var(--color-neutral-600); /* default */
+}
+
+.pr-header-search:hover .pr-search-icon svg path {
+  stroke: var(--color-neutral-300); /* hover */
+}
+
+.pr-header-search.is-active .pr-search-icon svg path,
+.pr-header-search:focus-within .pr-search-icon svg path,
+.pr-header-search:active .pr-search-icon svg path {
+  stroke: var(--color-neutral-1000); /* hover */
+}
+
+.pr-header-search.is-disabled .pr-search-icon svg path {
+  stroke: var(--color-neutral-300); /* disabled */
+}
+
+.pr-search-input {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
@@ -84,18 +145,20 @@
   padding: 0;
   background: transparent;
 }
-.rp-search-input:focus {
+.pr-search-input:focus {
   outline: none;
   box-shadow: none;
 }
-.rp-header-search.has-value .rp-search-input { width: auto; flex: 1 0 0;   border: none;
+.pr-header-search.has-value .pr-search-input { 
+  width: auto; 
+  flex: 1 0 0;   border: none;
 }
-.rp-search-input::placeholder { color: var(--text-placeholder, #C3C2D0); }
-.rp-header-search.is-disabled .rp-search-input,
-.rp-header-search.is-disabled .rp-search-input::placeholder { color: var(--color-neutral-400); }
+.pr-search-input::placeholder { color: var(--color-neutral-600); }
+.pr-header-search.is-disabled .pr-search-input,
+.pr-header-search.is-disabled .pr-search-input::placeholder { color: var(--color-neutral-300); }
 
 /* Clear (X) */
-.rp-clear-btn {
+.pr-clear-btn {
   position: relative;
   width: 20px;
   height: 20px;
@@ -113,18 +176,18 @@
   z-index: 2;
 }
 
-.rp-clear-btn:hover {
+.pr-clear-btn:hover {
   color: var(--text-text-darkest, #1A2126);
 }
 
 /* Ensure the search input has enough padding on the right for the clear button */
-.rp-header-search {
+.pr-header-search {
   position: relative;
   padding-right: 32px; /* Make room for the clear button */
 }
 
 /* Position the clear button absolutely within the search container */
-.rp-header-search .rp-clear-btn {
+.pr-header-search .pr-clear-btn {
   position: absolute;
   right: 8px;
   top: 50%;
@@ -133,14 +196,14 @@
 }
 
 /* Adjust input padding when there's a value to prevent text overlap */
-.rp-header-search.has-value .rp-search-input {
+.pr-header-search.has-value .rp-search-input {
   padding-right: 24px;
     border: none;
 
 }
 
 /* ================= Filter button ================= */
-.rp-filter-btn {
+.pr-filter-btn {
   display: flex;
   width: 36px;
   height: 36px;
@@ -157,15 +220,15 @@
   cursor: pointer;
   box-shadow:var(--shadow-5);
 }
-.rp-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent;   box-shadow:var(--shadow-6);
+.pr-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent;   box-shadow:var(--shadow-6);
  }
-.rp-filter-btn.is-selected { border: 1px solid #004B80; background:var(--color-neutral-50); color:var(--color-primary-700);   box-shadow:var(--shadow-5);
+.pr-filter-btn.is-selected { border: 1px solid #004B80; background:var(--color-neutral-50); color:var(--color-primary-700);   box-shadow:var(--shadow-5);
  }
-.rp-filter-btn.is-disabled,
-.rp-filter-btn:disabled { background:var(--color-neutral-150); border:1px solid transparent; color:var(--color-neutral-300); cursor:not-allowed; box-shadow:none; pointer-events:none; }
+.pr-filter-btn.is-disabled,
+.pr-filter-btn:disabled { background:var(--color-neutral-150); border:1px solid transparent; color:var(--color-neutral-300); cursor:not-allowed; box-shadow:none; pointer-events:none; }
 
 /* ================= Header Divider ================= */
-.header-divider {
+.pr-header-divider {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,12 +236,12 @@
   height: 33px;
   flex-shrink: 0;
 }
-.header-divider svg { width: 2px; height: 34px; stroke-width: 1px; stroke: var(--border-border-1, #E9E9EE); }
+.pr-header-divider svg { width: 2px; height: 34px; stroke-width: 1px; stroke: var(--border-border-1, #E9E9EE); }
 
 /* ================= Settings / Notifications ================= */
-.rp-settings-btn,
-.rp-integrations-btn,
-.rp-notification-btn {
+.pr-settings-btn,
+.pr-integrations-btn,
+.pr-notification-btn {
   display: flex;
   width: 36px;
   height: 36px;
@@ -194,7 +257,7 @@
   background-clip: padding-box;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
-.rp-kong-btn {
+.pr-kong-btn {
   display: flex;
   width: 36px;
   height: 36px;
@@ -212,13 +275,13 @@
   margin-right: 8px;
   cursor: pointer;
 }
-.rp
-.rp-settings-icon,
-.rp-integrations-btn svg,
-.rp-notification-btn svg { width: 16px; height: 16px; }
+.pr
+.pr-settings-icon,
+.pr-integrations-btn svg,
+.pr-notification-btn svg { width: 16px; height: 16px; }
 
 /* ================= Primary CTA ===================== */
-.new-rate-button {
+.pr-rate-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -240,18 +303,18 @@
 
 
 
-.new-rate-btn:hover:not(:disabled) {
+.pr-rate-btn:hover:not(:disabled) {
      background: var(--color-primary-700);
   }
-  .new-rate-btn:active:not(:disabled) {
+  .pr-rate-btn:active:not(:disabled) {
     background: var(--color-primary-900);
   }
-  .new-rate-btn:focus-visible {
+  .pr-rate-btn:focus-visible {
     outline: none;
     border:2px solid var(--color-primary-600);
     background: var(--color-primary-750);
   }
-  .new-rate-btn:disabled {
+  .pr-rate-btn:disabled {
     background: var(--color-neutral-200);
     color: var(--color-neutral-500);
     cursor: not-allowed;

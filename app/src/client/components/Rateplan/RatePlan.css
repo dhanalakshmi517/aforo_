@@ -45,7 +45,7 @@
   max-width: none;
   box-sizing: border-box;
   margin-left: 0;
-  background: #FFFFFF; /* Page background */
+  background:#FBFDFF; /* Page background */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
 }

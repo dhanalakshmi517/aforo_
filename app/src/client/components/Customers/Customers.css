@@ -14,7 +14,7 @@
   max-width: none;
   box-sizing: border-box;
   margin-left:-5px;
-  background: #FFFFFF; /* Page background */
+  background: #FBFDFF; /* Page background */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
 }
@@ -65,13 +65,13 @@ width: calc(100% - 256px);
 
 .check-container {
   /* Outer gap: top 15px, left/right 10px, bottom 10px */
-  padding: 15px 13px 10px 13px;
+  padding: 15px 10px 7px 10px;
   width: 100%;
 
   max-width: none;
   box-sizing: border-box;
   margin-left: 0;
-  background: #FFFFFF; /* Page background */
+  background:#FBFDFF; /* Page background */
   box-shadow: none;
   min-height: 100vh; /* Ensure full height */
 }
@@ -180,9 +180,9 @@ width: calc(100% - 256px);
   background-color: white;
   border-radius: var(--border-radius-lg);
 
-  padding: 10px 8px 10px 12px; /* inner padding controls card gap from table */
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07),
-              0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+  padding: 10px 8px 10px 8px; /* inner padding controls card gap from table */
+  /* box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07),
+              0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00); */
               border:1px solid var(--color-neutral-300);
   position: relative;
 }
@@ -253,8 +253,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   background-color: white;
   border-radius: var(--border-radius-lg);
   /* Reduce bottom padding to shrink white gap below last row */
-  padding: 8px 8px 2px 2px;
-  box-shadow: 0 18px 54px rgba(0,0,0,0.07), 0 2.254px 43.336px rgba(0,0,0,0);
+  padding: 8px 8px 2px 8px;
+  /* box-shadow: 0 18px 54px rgba(0,0,0,0.07), 0 2.254px 43.336px rgba(0,0,0,0); */
   position: relative;
   scrollbar-width: none;
   scrollbar-gutter: stable;

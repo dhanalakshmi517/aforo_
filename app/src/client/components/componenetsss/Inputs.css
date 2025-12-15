@@ -44,6 +44,14 @@
   align-items: center;
 }
 
+/* Required indicator styling */
+.if-label .if-required {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--color-neutral-1700);
+}
+
 /* Optional text styling */
 .if-label .if-optional {
   color: var(--color-neutral-500);
@@ -69,7 +77,6 @@
   box-shadow: 0 0 0 0 rgba(0,0,0,0);
   line-height: var(--line-height-body-sm); /* Added line-height for better text alignment */
 }
-
 
 /* Select-specific sizing */
 .if-select {
