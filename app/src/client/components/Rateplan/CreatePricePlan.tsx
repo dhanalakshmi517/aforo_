@@ -12,8 +12,10 @@ import {
   updateRatePlan,
   confirmRatePlan,
   fetchProducts,
+  fetchRatePlans,
   fetchRatePlanWithDetails,
   Product,
+  RatePlan,
   RatePlanRequest,
   deleteRatePlan,
 } from "./api";
@@ -48,6 +50,7 @@ interface CreatePricePlanProps {
   registerSaveDraft?: (fn: () => Promise<boolean>) => void; // returns whether draft actually saved
   draftData?: any; // Draft data from backend for pre-filling
   onFieldChange?: () => void; // Called when any field changes to reset saved state
+  onHasInputChange?: (hasInput: boolean) => void; // Called when hasAnyRequiredInput changes
 }
 
 const steps = [
@@ -61,7 +64,7 @@ const steps = [
 const CreatePricePlan = React.forwardRef<
   { back: () => boolean; getRatePlanId: () => number | null; validateBeforeBack: () => boolean },
   CreatePricePlanProps
->(({ onClose, registerSaveDraft, draftData, onFieldChange }, ref) => {
+>(({ onClose, registerSaveDraft, draftData, onFieldChange, onHasInputChange }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
@@ -102,6 +105,7 @@ const CreatePricePlan = React.forwardRef<
   const [productError, setProductError] = useState("");
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [ratePlanId, setRatePlanId] = useState<number | null>(null);
+  const [existingRatePlans, setExistingRatePlans] = useState<RatePlan[]>([]);
 
   const [draftPricingData, setDraftPricingData] = useState<any>(null);
   const [draftExtrasData, setDraftExtrasData] = useState<any>(null);
@@ -112,6 +116,9 @@ const CreatePricePlan = React.forwardRef<
   const [isFreshCreation, setIsFreshCreation] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Track previous step to detect actual navigation
+  const prevStepRef = useRef<number>(currentStep);
 
   // ===== Back button (browser) – same behavior as NewProduct =====
   useEffect(() => {
@@ -152,6 +159,9 @@ const CreatePricePlan = React.forwardRef<
     (async () => {
       try {
         setProducts((await fetchProducts()) as Product[]);
+        // Fetch existing rate plans for duplicate name check
+        const plans = await fetchRatePlans();
+        setExistingRatePlans(plans);
       } catch {
         setProductError("Failed to load products");
       }
@@ -166,11 +176,16 @@ const CreatePricePlan = React.forwardRef<
   useEffect(() => {
     setRatePlanData("WIZARD_STEP", currentStep.toString());
     localStorage.setItem("ratePlanWizardStep", String(currentStep));
+    // Reset saved state only when actually navigating (not on mount)
+    if (prevStepRef.current !== currentStep) {
+      onFieldChange?.();
+      prevStepRef.current = currentStep;
+    }
     return () => {
       // NewProduct clears on unmount; we’ll follow same spirit
       localStorage.removeItem("ratePlanWizardStep");
     };
-  }, [currentStep]);
+  }, [currentStep, onFieldChange]);
 
   // ===== Hydrate from draft =====
   useEffect(() => {
@@ -370,6 +385,11 @@ const CreatePricePlan = React.forwardRef<
     return false;
   }, [planName, planDescription, billingFrequency, selectedProductName, paymentMethod, selectedMetricId]);
 
+  // Notify parent when hasAnyRequiredInput changes
+  useEffect(() => {
+    onHasInputChange?.(hasAnyRequiredInput);
+  }, [hasAnyRequiredInput, onHasInputChange]);
+
   // ===== Unsaved-changes logic (simple + honest) =====
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<any>(null);
 
@@ -407,7 +427,16 @@ const CreatePricePlan = React.forwardRef<
   // ===== Step validation =====
   const validateStep0 = (): boolean => {
     const e: Record<string, string> = {};
-    if (!planName.trim()) e.planName = "This is required field";
+    if (!planName.trim()) {
+      e.planName = "This is required field";
+    } else {
+      // Check for duplicate (case-insensitive, exclude current plan if editing)
+      const isDuplicate = existingRatePlans.some(
+        plan => plan.ratePlanName.toLowerCase() === planName.trim().toLowerCase()
+          && plan.ratePlanId !== ratePlanId
+      );
+      if (isDuplicate) e.planName = "Rate plan already exists";
+    }
     if (!billingFrequency) e.billingFrequency = "This is required field";
     if (!paymentMethod) e.paymentMethod = "This is required field";
     setErrors(e);
@@ -813,19 +842,31 @@ const CreatePricePlan = React.forwardRef<
             <InputField
               label="Rate Plan Name"
               placeholder="e.g., Individual Plan, Pro Plan"
-                      required
-
+              required
               value={planName}
               onChange={(v: string) => {
                 setPlanName(v);
-                clearErrorIfValid("planName", v.trim().length > 0);
+                // Check for duplicate and set/clear error
+                if (v.trim()) {
+                  const isDuplicate = existingRatePlans.some(
+                    plan => plan.ratePlanName.toLowerCase() === v.trim().toLowerCase()
+                      && plan.ratePlanId !== ratePlanId
+                  );
+                  if (isDuplicate) {
+                    setErrors(prev => ({ ...prev, planName: "Rate plan already exists" }));
+                  } else {
+                    clearErrorIfValid("planName", true);
+                  }
+                } else {
+                  clearErrorIfValid("planName", false);
+                }
                 onFieldChange?.();
               }}
               error={errors.planName}
             />
             <SelectField
               label="Billing Frequency"
-                      required
+              required
 
               value={billingFrequency}
               onChange={(v: string) => {
@@ -845,7 +886,7 @@ const CreatePricePlan = React.forwardRef<
             />
             <SelectField
               label="Payment type"
-                      required
+              required
 
               value={paymentMethod}
               onChange={(v: string) => {
@@ -878,7 +919,7 @@ const CreatePricePlan = React.forwardRef<
         return (
           <>
             <Billable
-            
+
               products={products}
               productError={productError}
               selectedProductName={selectedProductName}
@@ -1136,8 +1177,8 @@ const CreatePricePlan = React.forwardRef<
 
       {/* Delete confirmation modal */}
       <ConfirmDeleteModal
-         discardLabel="Keep editing"
-          confirmLabel="Discard"
+        discardLabel="Keep editing"
+        confirmLabel="Discard"
         isOpen={showDeleteConfirm}
         productName={planName || "this rate plan"}
         onConfirm={async () => {
