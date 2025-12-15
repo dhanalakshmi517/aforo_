@@ -1,6 +1,7 @@
 // Header.tsx
 import React, { useRef, useState } from 'react';
 import './Header.css';
+import NewProductButton from './NewProductButton';
 
 export interface HeaderProps {
   title: string;
@@ -130,19 +131,17 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* New primary action */}
         {showPrimary && (
-          <button className="pr-rate-button" onClick={onPrimaryClick}>
-            {/* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M3.33301 8.00004H12.6663M7.99967 3.33337V12.6667" stroke="#F8F7FA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg> */}
-            {primaryLabel}
-          </button>
+          <NewProductButton 
+            disabled={false}
+            onCreate={onPrimaryClick}
+          />
         )}
 
         {/* Divider AFTER the New button (right side) */}
         
 
        
-        {showIntegrations && (
+        {/* {showIntegrations && (
           <button className="pr-integrations-btn" aria-label="Integrations" onClick={onSettingsClick}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
               <g clipPath="url(#clip0_13285_2368)">
@@ -155,7 +154,7 @@ const Header: React.FC<HeaderProps> = ({
               </defs>
             </svg>
           </button>
-        )}
+        )} */}
           <div className="pr-header-divider" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
               <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
