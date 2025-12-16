@@ -75,7 +75,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   position: relative;
-  gap: 0;
+  gap: 20px;
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
 }
@@ -92,14 +92,13 @@ html, body, #root {
 .editmet-np-step {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 12px;
+  gap: 8px;
   background: transparent;
   border: 0;
   border-left: 3px solid transparent;
   width: 100%;
   cursor: pointer;
-  min-height: 35px; /* ensure all steps reserve same vertical space */
+  min-height: 56px; /* match MetricRow base height */
 }
 
 .editmet-np-step__title {
@@ -114,8 +113,6 @@ html, body, #root {
 .editmet-np-step.active {
   border-left-color: var(--color-primary-800);
   border-left-width: 3px;
-  /* keep same vertical size as other steps to avoid jumping */
-  height: 35px;
   margin-top: 0;
 }
 
@@ -156,7 +153,8 @@ html, body, #root {
   flex: 1;
   min-height: 0;
   gap: 2px;
-  overflow: hidden;           /* scroll only inside section */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Scrollbars: apply to scrolling section */
@@ -171,7 +169,8 @@ html, body, #root {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: 8px;
+  overflow-x: hidden;
+  padding-bottom: 15px;
 }
 
 .editmet-np-section-header {

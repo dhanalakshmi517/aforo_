@@ -11,6 +11,8 @@
 
   border: none;
   border-radius:var(--border-radius-sm);
+    clip-path: inset(0 round 8px);
+
 
   background: var(--color-primary-750); /* default */
   color:var(--color-neutral-white);

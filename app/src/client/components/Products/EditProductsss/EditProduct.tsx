@@ -19,6 +19,7 @@ import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import ProductIconPickerModal from '../ProductIconPickerModal';
 import { ProductIconData } from '../ProductIcon';
 import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
+import MetricRow from '../../componenetsss/MetricRow';
 import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration } from './EditProductApi';
 import { finalizeProduct, deleteProduct, updateProductIcon } from '../api';
@@ -784,9 +785,10 @@ const EditProduct: React.FC<EditProductProps> = ({
                   const isCompleted = index < currentStep;
 
                   return (
-                    <button
+                    <MetricRow
                       key={step.id}
-                      type="button"
+                      title={step.title}
+                      state={isActive ? 'active' : 'default'}
                       className={['editsub-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : '']
                         .join(' ')
                         .trim()}
@@ -799,11 +801,7 @@ const EditProduct: React.FC<EditProductProps> = ({
                         }
                         goToStep(index);
                       }}
-                    >
-                      <span className="edisub-np-step__text">
-                        <span className="editsub-np-step__title">{step.title}</span>
-                      </span>
-                    </button>
+                    />
                   );
                 })}
               </nav>

@@ -8,6 +8,7 @@ import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
+import MetricRow from '../../componenetsss/MetricRow';
 
 import { getProducts, Product, updateBillableMetric } from './api';
 import { getBillableMetricById } from './api';
@@ -27,7 +28,7 @@ interface EditMetricsProps {
 }
 
 const steps = [
-  { id: 1, title: 'Define Metric & Aggregation' },
+  { id: 1, title: 'Metric & Aggregation' },
   { id: 2, title: 'Usage Conditions' },
   { id: 3, title: 'Review & Confirm' },
 ];
@@ -395,15 +396,13 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                   const isActive = index === currentStep;
                   const isCompleted = index < currentStep;
                   return (
-                    <button
+                    <MetricRow
                       key={step.id}
-                      type="button"
-                      className={`editmet-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''
-                        }`.trim()}
+                      title={step.title}
+                      state={isActive ? 'active' : 'default'}
+                      className={`editmet-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`.trim()}
                       onClick={() => gotoStep(index)}
-                    >
-                      <span className="editmet-np-step__title">{step.title}</span>
-                    </button>
+                    />
                   );
                 })}
               </nav>

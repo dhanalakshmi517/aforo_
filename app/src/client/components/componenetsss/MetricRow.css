@@ -1,0 +1,125 @@
+@import "../Variables/Variables.css";
+
+/* Base */
+.mr{
+  width: 100%;
+  min-height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 16px 24px;
+  border-radius: var(--border-radius-sm);
+
+  border: none;
+  background: transparent;
+  box-sizing: border-box;
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.mr--click{ cursor: pointer; }
+
+.mr-title{
+  color: var(--color-neutral-600);
+
+/* heading/h6/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+}
+
+/* 1) Default text (no card) */
+.mr--default{
+  background: transparent;
+  padding-left: 16px;
+}
+
+/* 2) Hover state (same component, on hover) */
+.mr--default.mr--click:hover{
+  background: var(--color-neutral-150);
+  color: var(--color-neutral-1700);
+
+  font-size: var(--font-size-h6, 18px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+}
+
+/* Ensure title text also changes on default hover */
+.mr--default.mr--click:hover .mr-title{
+  color: var(--color-neutral-1700);
+   font-size: var(--font-size-h6, 18px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h6, 24px); 
+}
+
+/* 5) Active (left blue rail) */
+.mr--active{
+  background: transparent;
+  border-left: 4px solid var(--color-primary-700);
+  padding-left: 12px; /* compensate for border */
+  color: var(--color-neutral-1700);
+
+ 
+}
+
+/* Active state: title text */
+.mr--active .mr-title{
+  color: var(--color-neutral-1700);
+  font-weight: 700;
+  font-size: var(--font-size-h6, 18px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+}
+
+/* 7) Active hover (same component, on hover) */
+.mr--active.mr--click:hover{
+  background: var(--color-neutral-150);
+  color: var(--color-neutral-1700);
+
+  font-size: var(--font-size-h6, 18px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+}
+
+/* Active hover: title text */
+.mr--active.mr--click:hover .mr-title{
+  color: var(--color-neutral-1700);
+  font-weight: 500;
+}
+
+/* 4) Loading (spinner right) */
+.mr--loading{
+  background: transparent;
+  border-left: 4px solid transparent;
+  padding-left: 16px;
+  cursor: default;
+}
+
+/* Disabled (not requested, but safe) */
+.mr--disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.mr-spinner{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(25, 34, 45, 0.18);
+  border-top-color: rgba(25, 34, 45, 0.75);
+  animation: mrspin 0.9s linear infinite;
+}
+
+@keyframes mrspin{
+  to { transform: rotate(360deg); }
+}

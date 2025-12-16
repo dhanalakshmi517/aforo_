@@ -72,7 +72,7 @@ line-height: var(--line-height-body-md, 20px);}
   padding: 0;
   cursor: pointer;
   flex-shrink: 0;      /* don't collapse when space is tight */
-  margin-left: -12px;   /* keep the X icon slightly inside the pill */
+  margin-left: 4px;   /* small space between text and X, keep inside pill */
   z-index: 10;
   position: relative;
 }

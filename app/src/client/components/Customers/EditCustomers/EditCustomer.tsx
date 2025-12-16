@@ -13,6 +13,7 @@ import { AccountDetailsData } from './EditAccount';
 import EditAccount from './EditAccount';
 import { InputField, SelectField } from '../../componenetsss/Inputs';
 import TopBar from '../../TopBar/TopBar';
+import MetricRow from '../../componenetsss/MetricRow';
 import LogoUploader from '../LogoUploader';
 import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
@@ -566,9 +567,10 @@ const EditCustomer: React.FC = () => {
                   const isCompleted = index < currentStep;
 
                   return (
-                    <button
+                    <MetricRow
                       key={step.id}
-                      type="button"
+                      title={step.title}
+                      state={isActive ? 'active' : 'default'}
                       className={[
                         'editsub-np-step',
                         isActive ? 'active' : '',
@@ -577,11 +579,7 @@ const EditCustomer: React.FC = () => {
                         .join(' ')
                         .trim()}
                       onClick={() => goToStep(index)}
-                    >
-                      <span className="edisub-np-step__text">
-                        <span className="editsub-np-step__title">{step.title}</span>
-                      </span>
-                    </button>
+                    />
                   );
                 })}
               </nav>
