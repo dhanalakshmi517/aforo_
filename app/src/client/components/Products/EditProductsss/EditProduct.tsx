@@ -358,15 +358,22 @@ const EditProduct: React.FC<EditProductProps> = ({
   }, [activeTab]);
 
   const goToStep = (index: number) => {
-    setCurrentStep(index);
     const firstWord = steps[index].title.split(' ')[0].toLowerCase();
-    const tab = (firstWord === 'general'
+    const nextTab = (firstWord === 'general'
       ? 'general'
       : firstWord === 'configuration'
         ? 'configuration'
         : 'review') as ActiveTab;
 
-    if (tab === 'review') {
+    // When leaving General, enforce required-field validation (productName, skuCode)
+    if (activeTab === 'general' && nextTab !== 'general') {
+      const ok = validateForm();
+      if (!ok) return; // stay on General tab and show errors
+    }
+
+    setCurrentStep(index);
+
+    if (nextTab === 'review') {
       const latestConfigData = localStorage.getItem('editConfigFormData');
       if (latestConfigData) {
         try {
@@ -378,7 +385,7 @@ const EditProduct: React.FC<EditProductProps> = ({
       }
     }
 
-    setActiveTab(tab);
+    setActiveTab(nextTab);
   };
 
   // --------- CHANGE DETECTION (fixed) ----------

@@ -1,0 +1,42 @@
+@import "../Variables/Variables.css";
+.filter-btn{
+  display: flex;
+  width: 36px;
+  height: 36px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: var(--color-neutral-50);
+
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+
+}
+
+/* hover state */
+.filter-btn:hover{
+  background:var(--color-neutral-white);
+  box-shadow: 0 0 14.4px 0 rgba(2, 98, 161, 0.10) inset;
+}
+
+/* active state */
+.filter-btn.is-active{
+  background:var(--color-neutral-white);
+ border:0.4px var(--color-neutral-400)
+}
+
+/* disabled state */
+.filter-btn.is-disabled{
+  cursor: not-allowed;
+  background: var(--color-neutral-150);
+}
+
+/* icon colors */
+.filter-icon--default path{ stroke: var(--color-neutral-1400); }
+.filter-icon--active path{ stroke: var(--color-primary-700); }
+.filter-icon--disabled path{ stroke: var(--color-neutral-300); }

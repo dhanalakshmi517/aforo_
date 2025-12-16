@@ -10,7 +10,9 @@
     padding: 8px 20px;
     border-radius: var(--border-radius-sm);
   
-    background: var(--color-primary-750);
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-active, #025A94);
+
+
     color: var(--color-neutral-white);
     border: 1px solid transparent;
   
@@ -24,7 +26,6 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     white-space: nowrap;
-    transition: background-color .15s ease, box-shadow .15s ease, transform .02s ease;
   }
   
   /* Full width option */
@@ -47,16 +48,22 @@
   
   /* States */
   .af-primary-btn:hover:not(:disabled) {
-     background: var(--color-primary-700);
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-hover, #026BB0);
+
+
   }
   .af-primary-btn:active:not(:disabled) {
-    background: var(--color-primary-900);
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-pressed, #034A7D);
+
+
     transform: translateY(0.5px);
   }
   .af-primary-btn:focus-visible {
     outline: none;
     border:2px solid var(--color-primary-600);
-    background: var(--color-primary-750);
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-active, #025A94);
+
+
   }
   .af-primary-btn:disabled {
     background: var(--color-neutral-200);

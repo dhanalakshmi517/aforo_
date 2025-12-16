@@ -41,7 +41,7 @@
 /* BODY */
 .ip-body{
   display:flex;
-  gap:32px;
+  gap:20px;
   padding:22px 24px;
   box-sizing:border-box;
   align-items:stretch;
@@ -105,6 +105,7 @@
   font-weight:600;
   color:#111827;
   flex:1;
+  margin-left: -10px;
 }
 
 .ip-gateway-arrow{

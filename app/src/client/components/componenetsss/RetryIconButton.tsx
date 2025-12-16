@@ -1,5 +1,6 @@
 import React from "react";
 import "./RetryIconButton.css";
+import Tooltip from "./Tooltip";
 
 export type RetryIconButtonProps = {
   onClick?: () => void;
@@ -30,16 +31,17 @@ const RetryIconButton: React.FC<RetryIconButtonProps> = ({
   title = "Retry",
   className,
 }) => (
-  <button
-    type="button"
-    className={`af-retry-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
-    onClick={onClick}
-    disabled={disabled}
-    aria-label={title}
-    title={title}
-  >
-    <RetryIcon />
-  </button>
+  <Tooltip content="Edit" position="bottom">
+    <button
+      type="button"
+      className={`af-retry-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={title}
+    >
+      <RetryIcon />
+    </button>
+  </Tooltip>
 );
 
 export default RetryIconButton;
