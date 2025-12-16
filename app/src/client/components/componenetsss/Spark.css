@@ -1,0 +1,39 @@
+@import "../Variables/Variables.css";
+.spark-btn{
+ display: flex;
+  width: 36px;
+  height: 36px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: var(--color-neutral-50);
+
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;}
+
+/* hover state */
+.spark-btn:hover{
+ background:var(--color-neutral-white);
+  box-shadow: 0 0 14.4px 0 rgba(2, 98, 161, 0.10) inset;}
+
+/* active state */
+.spark-btn.is-active{
+  background:var(--color-neutral-white);
+ border:0.4px var(--color-neutral-400)
+}
+
+/* disabled state */
+.spark-btn.is-disabled{
+ cursor: not-allowed;
+  background: var(--color-neutral-150);
+}
+
+/* icon colors */
+.spark-icon--default path{ stroke: var(--color-neutral-1400); }
+.spark-icon--active path{ stroke:var(--color-neutral-700); }
+.spark-icon--disabled path{ stroke:var(--color-neutral-300); }

@@ -1,5 +1,6 @@
 import React from "react";
 import "./EditIconButton.css";
+import Tooltip from "./Tooltip";
 
 export type EditIconButtonProps = {
   onClick?: () => void;
@@ -30,16 +31,17 @@ const EditIconButton: React.FC<EditIconButtonProps> = ({
   title = "Edit",
   className
 }) => (
-  <button
-    type="button"
-    className={`af-edit-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
-    onClick={onClick}
-    disabled={disabled}
-    aria-label={title}
-    title={title}
-  >
-    <PenIcon />
-  </button>
+  <Tooltip content="Edit" position="bottom">
+    <button
+      type="button"
+      className={`af-edit-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label="Edit"
+    >
+      <PenIcon />
+    </button>
+  </Tooltip>
 );
 
 export default EditIconButton;

@@ -1,5 +1,4 @@
 import React from "react";
-import DeleteButton from "./DeleteButton";
 import PrimaryButton from "./PrimaryButton";
 import "./UnsavedChangesModal.css";
 
@@ -31,12 +30,12 @@ const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({
         </p>
 
         <div className="modal-actions">
-          <DeleteButton 
+          <button 
+            className="modal-discard-btn"
             onClick={onDiscard}
-            label="Discard Changes"
-            variant="soft"
-            customIcon={<></>}
-          />
+          >
+            Discard Changes
+          </button>
           <PrimaryButton 
             onClick={onKeepEditing}
           >

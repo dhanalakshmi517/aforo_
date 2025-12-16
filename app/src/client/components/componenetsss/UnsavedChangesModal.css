@@ -79,6 +79,30 @@ line-height: var(--line-height-body-md);
   gap: 12px;
 }
 
+/* Discard button */
+.modal-discard-btn {
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background:var(--red-lightest);
+  color: #E85D5D;
+  cursor: pointer;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modal-discard-btn:hover {
+  background-color: rgba(232, 93, 93, 0.08);
+  color: #D64545;
+}
+
+.modal-discard-btn:active {
+  background-color: rgba(232, 93, 93, 0.15);
+}
+
 /* Fade animation */
 @keyframes fadeIn {
   from {

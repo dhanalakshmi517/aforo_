@@ -15,22 +15,12 @@ const NewProductButton: React.FC<NewProductButtonProps> = ({
   onImport,
 }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const close = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, []);
 
   // Get the position of the button for the portal
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const buttonRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const updatePosition = useCallback(() => {
     if (buttonRef.current) {
@@ -55,6 +45,22 @@ const NewProductButton: React.FC<NewProductButtonProps> = ({
       };
     }
   }, [open, updatePosition]);
+
+  // Close dropdown when clicking outside the trigger and the menu
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (!open) return;
+      const target = e.target as Node;
+
+      if (buttonRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+
+      setOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [open]);
 
   const handleCreateClick = useCallback(() => {
     setOpen(false);
@@ -99,7 +105,7 @@ const NewProductButton: React.FC<NewProductButtonProps> = ({
 
         {/* RIGHT — DROPDOWN */}
         <button
-          className="npb-part npb-right"
+          className={`npb-part npb-right ${open ? "is-open" : ""}`}
           disabled={disabled}
           onClick={() => setOpen((v) => !v)}
           aria-label="Open menu"
@@ -115,6 +121,7 @@ const NewProductButton: React.FC<NewProductButtonProps> = ({
         <Portal>
           <div 
             className="npb-menu-portal" 
+            ref={menuRef}
             style={{
               position: 'absolute',
               top: `${position.top}px`,
@@ -125,7 +132,7 @@ const NewProductButton: React.FC<NewProductButtonProps> = ({
           >
             <div className="npb-menu">
               <button 
-                className="npb-item npb-item--primary" 
+                className="npb-item" 
                 onClick={handleCreateClick}
               >
                 Create

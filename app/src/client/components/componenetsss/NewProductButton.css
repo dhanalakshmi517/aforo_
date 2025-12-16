@@ -27,28 +27,45 @@
 
 /* Left / Right base colors */
 .npb-left {
-  background: var(--color-primary-750);
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 100%), var(--surface-primary-button-active, #025A94);
+
+
   width: 38px;
 }
 
 .npb-right {
-  background: var(--color-primary-750);
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 100%), var(--surface-primary-button-active, #025A94);
+
+
   width: 26px;
+}
+
+/* Right part: visually active when menu is open */
+.npb-right.is-open {
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 100%), var(--surface-primary-button-pressed, #034A7D);
+
+
 }
 
 /* Hover */
 .npb-left:hover:not(:disabled) {
-  background: var(--color-primary-700);
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 100%), var(--surface-primary-button-hover, #026BB0);
+
+
 }
 
 .npb-right:hover:not(:disabled) {
-  background: var(--color-primary-700);
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 100%), var(--surface-primary-button-active, #025A94);
+
+
 }
 
 /* Active */
 .npb-part:active:not(:disabled) {
   transform: scale(0.97);
-  background-color: var(--color-primary-800);
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 100%), var(--surface-primary-button-pressed, #034A7D);
+
+
 }
 
 /* Disabled */
@@ -123,19 +140,23 @@
 /* Items */
 .npb-item {
   width: 100%;
-  padding: 14px 16px;
+  height: 36px;
+  padding: 8px 16px;
   border-radius: 12px;
 
   border: none;
   background: transparent;
   text-align: left;
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral-1700);
 
-color: var(--color-neutral-1700);
-
-/* body/md/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
-font-style: normal;
+  /* body/md/reg */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
 font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
   cursor: pointer;

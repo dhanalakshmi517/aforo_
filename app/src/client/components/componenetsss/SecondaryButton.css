@@ -13,7 +13,9 @@
     padding: 8px 20px;
     border-radius: var(--border-radius-sm);
   
-    background: var(--color-primary-000);
+background: linear-gradient(82deg, rgba(193, 198, 203, 0.20) 3.76%, rgba(255, 255, 255, 0.00) 97.83%), var(--surface-secondary-button-active-2, #F2F9FD);
+
+
     color: var(--color-primary-800);
     border: 1px solid transparent;
   
@@ -42,14 +44,26 @@
     font-style: normal;
     font-weight: 500;
     line-height: var(--line-height-body-md); /* 142.857% */ }
+
+    .af-secondary-color-btn:hover {
+      background: linear-gradient(82deg, rgba(193, 198, 203, 0.20) 3.76%, rgba(255, 255, 255, 0.00) 97.83%), var(--surface-secondary-button-hover-2, #EDF8FD);
+
+
+
+    }
   .af-secondary-color-btn:active:not(:disabled) {
-    background: var(--color-primary-200);
     transform: translateY(0.5px);
+    background: linear-gradient(82deg, rgba(193, 198, 203, 0.20) 3.76%, rgba(255, 255, 255, 0.00) 97.83%), var(--surface-secondary-button-pressed-2, #E2F2F9);
+
+
+
   }
   .af-secondary-color-btn:focus-visible {
     outline: none;
     border:2px solid var(--color-primary-600);
-    background: var(--color-primary-100);
+background: linear-gradient(82deg, rgba(193, 198, 203, 0.20) 3.76%, rgba(255, 255, 255, 0.00) 97.83%), var(--surface-secondary-button-active-2, #F2F9FD);
+
+
   }
   
   .af-secondary-color-btn:disabled {

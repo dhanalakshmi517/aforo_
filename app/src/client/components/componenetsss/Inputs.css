@@ -342,7 +342,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .if-field select.if-select:focus-visible { 
   outline: none !important; 
   border-color: var(--color-primary-600) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 0 0 2px var(--color-primary-300) !important;
   background-color: var(--color-neutral-white) !important;
 }
 

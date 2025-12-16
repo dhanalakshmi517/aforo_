@@ -1,60 +1,103 @@
 @import "../Variables/Variables.css";
-.search-input-container {
+.si{
   width: 203px;
+  height: 40px;
+
   display: flex;
-  height:30px;
+  padding: 8px 12px;
   align-items: center;
   gap: 8px;
+  flex: 1 0 0;
+  align-self: stretch;
 
-  padding: 8px 12px;
-  background: var(--color-neutral-white);
-
+  border-radius: 10px;
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
+  background: var(--color-neutral-50);
 
+  box-sizing: border-box;
 }
 
-/* Hover */
-.search-input-container.hover {
-  border-color: var(--color-neutral-200);
-  background-color: var(--color-neutral-100);
-}
-
-/* Focus */
-.search-input-container.focused {
-  border-color: var(--color-primary-600);
-  background-color: var(--color-neutral-white);
-}
-
-/* Disabled */
-.search-input-container.disabled {
-  pointer-events: none;
-  background-color: var(--color-neutral-200);
-  border: 1px solid var(--color-neutral-400);
-}
-
-.search-icon {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.search-input {
+.si-input{
   flex: 1;
   border: none;
   outline: none;
   background: transparent;
-  min-width: 0;
+  overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
 
-  font-size: 14px;
-  color: var(--color-neutral-1700);
-  font-family: var(--font-family-primary);
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+
 }
 
-.search-input:focus {
-  color: var(--color-neutral-1700);
+.si-input::placeholder{
+color: var(--color-neutral-500);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px);}
+
+/* icons */
+.si-icon{
+  flex-shrink: 0; /* keep the icon visible when space is tight / when clear button shows */
+}
+.si-icon path{ stroke:var(--color-neutral-600); }
+.si-icon--dark path{ stroke: var(--color-neutral-1000); }
+.si-icon--disabled path{ stroke: var(--color-neutral-300); }
+
+.si-clear-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;      /* don't collapse when space is tight */
+  margin-left: -12px;   /* keep the X icon slightly inside the pill */
 }
 
-.search-input::placeholder {
+.si-clear path{ stroke: var(--color-neutral-1700); }
+.si-clear--disabled path{ stroke: #A6B9C9; }
+
+/* STATES */
+.si--default{
+  border-color: var(--color-neutral-300);
+  background: var(--color-neutral-50);
+}
+
+.si--hover{
+  border-color: var(--color-neutral-300);
+  background: var(--color-neutral-100);
+}
+
+.si--focus,
+.si--typing,
+.si--filled{
+  border-color:1px solid var(--color-primary-200);
+  box-shadow: 0 0 0 2px var(--color-primary-300);
+  background: var(--color-neutral-white);
+}
+
+.si--disabled{
+  background: var(--color-neutral-150);
+  border-color: var(--color-neutral-300);
+}
+
+.si--disabled .si-input{
   color: var(--color-neutral-500);
+  cursor: not-allowed;
+}
+
+.si--disabled .si-input::placeholder{
+  color: var(--color-neutral-300);
 }

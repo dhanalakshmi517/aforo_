@@ -1,3 +1,4 @@
+@import "../Variables/Variables.css";
 .tooltip-container {
   position: relative;
   display: inline-block;
@@ -6,18 +7,28 @@
 /* Tooltip Box */
 .tooltip-box {
   position: absolute;
-  background-color: #2d2d2d;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.4;
+  min-height: 32px;
+  background-color: var(--color-primary-800);
+  color: var(--color-neutral-white);
+  padding: 8px 10px;
+  border-radius: var(--border-radius-sm);
+ color: var(--color-neutral-white);
+
+/* body/xs/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
   white-space: normal;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 100;
-  max-width: 250px;
-  transition: opacity 0.2s ease;
   opacity: 1;
+  min-width:52px;
+  width:auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Tooltip positions */
@@ -61,7 +72,7 @@
   top: 100%;
   left: 50%;
   border-width: 6px 6px 0 6px;
-  border-color: #2d2d2d transparent transparent transparent;
+  border-color: #034A7D transparent transparent transparent;
   transform: translateX(-50%);
 }
 
@@ -69,7 +80,7 @@
   bottom: 100%;
   left: 50%;
   border-width: 0 6px 6px 6px;
-  border-color: transparent transparent #2d2d2d transparent;
+  border-color: transparent transparent #034A7D transparent;
   transform: translateX(-50%);
 }
 
@@ -77,7 +88,7 @@
   left: 100%;
   top: 50%;
   border-width: 6px 0 6px 6px;
-  border-color: transparent transparent transparent #2d2d2d;
+  border-color: transparent transparent transparent #034A7D;
   transform: translateY(-50%);
 }
 
@@ -85,6 +96,6 @@
   right: 100%;
   top: 50%;
   border-width: 6px 6px 6px 0;
-  border-color: transparent #2d2d2d transparent transparent;
+  border-color: transparent #034A7D transparent transparent;
   transform: translateY(-50%);
 }

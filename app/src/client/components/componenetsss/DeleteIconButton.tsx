@@ -1,5 +1,6 @@
 import React from "react";
 import "./DeleteIconButton.css";
+import Tooltip from "./Tooltip";
 
 export type DeleteIconButtonProps = {
   onClick?: () => void;
@@ -27,16 +28,17 @@ const DeleteIconButton: React.FC<DeleteIconButtonProps> = ({
   title = "Delete",
   className
 }) => (
-  <button
-    type="button"
-    className={`af-del-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
-    onClick={onClick}
-    disabled={disabled}
-    aria-label={title}
-    title={title}
-  >
-    <TrashIcon />
-  </button>
+  <Tooltip content="Delete" position="bottom">
+    <button
+      type="button"
+      className={`af-del-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label="Delete"
+    >
+      <TrashIcon />
+    </button>
+  </Tooltip>
 );
 
 export default DeleteIconButton;
