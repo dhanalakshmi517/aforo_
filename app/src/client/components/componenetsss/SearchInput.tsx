@@ -52,8 +52,6 @@ const SearchInput: React.FC<Props> = ({
   const derivedValue =
     value !== undefined ? value : state === "filled" ? "Raghal" : "";
 
-  const showClear = derivedValue.length > 0;
-
   const iconTone: "muted" | "dark" | "disabled" =
     isDisabled ? "disabled" : state === "default" ? "muted" : "dark";
 
@@ -75,22 +73,6 @@ const SearchInput: React.FC<Props> = ({
         disabled={isDisabled}
         onChange={(e) => onChange?.(e.target.value)}
       />
-
-      {showClear && (
-        <button
-          type="button"
-          className="si-clear-btn"
-          disabled={isDisabled}
-          aria-label="Clear search"
-          onClick={() => {
-            if (isDisabled) return;
-            onClear?.();
-            onChange?.("");
-          }}
-        >
-          <ClearIcon tone={isDisabled ? "disabled" : "dark"} />
-        </button>
-      )}
     </div>
   );
 };
