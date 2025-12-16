@@ -15,6 +15,8 @@
   background: var(--color-neutral-50);
 
   box-sizing: border-box;
+  overflow: visible;
+  position: relative;
 }
 
 .si-input{
@@ -71,6 +73,8 @@ line-height: var(--line-height-body-md, 20px);}
   cursor: pointer;
   flex-shrink: 0;      /* don't collapse when space is tight */
   margin-left: -12px;   /* keep the X icon slightly inside the pill */
+  z-index: 10;
+  position: relative;
 }
 
 .si-clear path{ stroke: var(--color-neutral-1700); }
