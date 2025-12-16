@@ -20,8 +20,8 @@
 .si-input{
   flex: 1;
   border: none;
-  outline: none;
-  box-shadow: none;
+  outline: none !important;
+  box-shadow: none !important;
   background: transparent;
   overflow: hidden;
 color: var(--color-neutral-1700);
@@ -34,6 +34,12 @@ font-style: normal;
 font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
+}
+
+.si-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none;
 }
 
 .si-input::placeholder{
