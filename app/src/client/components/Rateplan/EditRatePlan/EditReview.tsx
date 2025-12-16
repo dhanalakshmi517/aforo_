@@ -1,5 +1,5 @@
 // EditReview.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './EditReview.css';
 import RevenueEstimatorModal from '../RevenueEstimatorModal';
 import { getRatePlanData } from '../utils/sessionStorage';
@@ -7,8 +7,113 @@ import { getRatePlanData } from '../utils/sessionStorage';
 const EditReview: React.FC = () => {
   const [showRevenueEstimator, setShowRevenueEstimator] = useState(false);
 
-  // Fetch pricing model
-  const pricingModel = getRatePlanData('PRICING_MODEL') || '';
+  // State for all data - will refresh on mount
+  const [reviewData, setReviewData] = useState({
+    pricingModel: '',
+    planName: '',
+    planDescription: '',
+    billingFrequency: '',
+    productName: '',
+    billableName: '',
+    billableDesc: '',
+    billableUnit: '',
+    billableAgg: '',
+    flatFeeAmount: '',
+    flatFeeLimit: '',
+    flatFeeOverage: '',
+    flatFeeGrace: '',
+    tieredTiers: [] as any[],
+    tieredOverage: '',
+    tieredGrace: '',
+    usagePerUnit: '',
+    volumeTiers: [] as any[],
+    volumeOverage: '',
+    volumeGrace: '',
+    stairTiers: [] as any[],
+    stairOverage: '',
+    stairGrace: '',
+    setupFee: '',
+    discountPercent: '',
+    discountFlat: '',
+    freemiumUnits: '',
+    minimumUsage: '',
+    minimumCharge: '',
+  });
+
+  // Load/refresh data from session storage whenever component mounts or updates
+  useEffect(() => {
+    const pricingModel = getRatePlanData('PRICING_MODEL') || '';
+    const isFlat = pricingModel === 'Flat Fee';
+    const isStair = pricingModel === 'Stairstep';
+    const isVolume = pricingModel === 'Volume-Based';
+    const isTier = pricingModel === 'Tiered Pricing';
+    const isUsage = pricingModel === 'Usage-Based';
+
+    setReviewData({
+      pricingModel,
+      planName: getRatePlanData('PLAN_NAME') || '',
+      planDescription: getRatePlanData('PLAN_DESCRIPTION') || '',
+      billingFrequency: getRatePlanData('BILLING_FREQUENCY') || '',
+      productName: getRatePlanData('PRODUCT_NAME') || '',
+      billableName: getRatePlanData('BILLABLE_METRIC_NAME') || '',
+      billableDesc: getRatePlanData('BILLABLE_METRIC_DESCRIPTION') || '',
+      billableUnit: getRatePlanData('BILLABLE_METRIC_UNIT') || '',
+      billableAgg: getRatePlanData('BILLABLE_METRIC_AGGREGATION') || '',
+      flatFeeAmount: isFlat ? getRatePlanData('FLAT_FEE_AMOUNT') || '' : '',
+      flatFeeLimit: isFlat ? getRatePlanData('FLAT_FEE_API_CALLS') || '' : '',
+      flatFeeOverage: isFlat ? getRatePlanData('FLAT_FEE_OVERAGE') || '' : '',
+      flatFeeGrace: isFlat ? getRatePlanData('FLAT_FEE_GRACE') || '' : '',
+      tieredTiers: isTier ? JSON.parse(getRatePlanData('TIERED_TIERS') || '[]') : [],
+      tieredOverage: isTier ? getRatePlanData('TIERED_OVERAGE') || '' : '',
+      tieredGrace: isTier ? getRatePlanData('TIERED_GRACE') || '' : '',
+      usagePerUnit: isUsage ? getRatePlanData('USAGE_PER_UNIT_AMOUNT') || '' : '',
+      volumeTiers: isVolume ? JSON.parse(getRatePlanData('VOLUME_TIERS') || '[]') : [],
+      volumeOverage: isVolume ? getRatePlanData('VOLUME_OVERAGE') || '' : '',
+      volumeGrace: isVolume ? getRatePlanData('VOLUME_GRACE') || '' : '',
+      stairTiers: isStair ? JSON.parse(getRatePlanData('STAIR_TIERS') || '[]') : [],
+      stairOverage: isStair ? getRatePlanData('STAIR_OVERAGE') || '' : '',
+      stairGrace: isStair ? getRatePlanData('STAIR_GRACE') || '' : '',
+      setupFee: getRatePlanData('SETUP_FEE') || '',
+      discountPercent: getRatePlanData('DISCOUNT_PERCENT') || '',
+      discountFlat: getRatePlanData('DISCOUNT_FLAT') || '',
+      freemiumUnits: getRatePlanData('FREEMIUM_UNITS') || '',
+      minimumUsage: getRatePlanData('MINIMUM_USAGE') || '',
+      minimumCharge: getRatePlanData('MINIMUM_CHARGE') || '',
+    });
+  }, []); // Empty deps = run on every mount
+
+  // Destructure for easier access
+  const {
+    pricingModel,
+    planName,
+    planDescription,
+    billingFrequency,
+    productName,
+    billableName,
+    billableDesc,
+    billableUnit,
+    billableAgg,
+    flatFeeAmount,
+    flatFeeLimit,
+    flatFeeOverage,
+    flatFeeGrace,
+    tieredTiers,
+    tieredOverage,
+    tieredGrace,
+    usagePerUnit,
+    volumeTiers,
+    volumeOverage,
+    volumeGrace,
+    stairTiers,
+    stairOverage,
+    stairGrace,
+    setupFee,
+    discountPercent,
+    discountFlat,
+    freemiumUnits,
+    minimumUsage,
+    minimumCharge,
+  } = reviewData;
 
   // Determine pricing model type
   const isFlat = pricingModel === 'Flat Fee';
@@ -16,50 +121,6 @@ const EditReview: React.FC = () => {
   const isVolume = pricingModel === 'Volume-Based';
   const isTier = pricingModel === 'Tiered Pricing';
   const isUsage = pricingModel === 'Usage-Based';
-
-  // Fetch plan details
-  const planName = getRatePlanData('PLAN_NAME') || '';
-  const planDescription = getRatePlanData('PLAN_DESCRIPTION') || '';
-  const billingFrequency = getRatePlanData('BILLING_FREQUENCY') || '';
-  const productName = getRatePlanData('PRODUCT_NAME') || '';
-
-  // Fetch billable metric details
-  const billableName = getRatePlanData('BILLABLE_METRIC_NAME') || '';
-  const billableDesc = getRatePlanData('BILLABLE_METRIC_DESCRIPTION') || '';
-  const billableUnit = getRatePlanData('BILLABLE_METRIC_UNIT') || '';
-  const billableAgg = getRatePlanData('BILLABLE_METRIC_AGGREGATION') || '';
-
-  // Fetch Flat Fee details
-  const flatFeeAmount = isFlat ? getRatePlanData('FLAT_FEE_AMOUNT') || '' : '';
-  const flatFeeLimit = isFlat ? getRatePlanData('FLAT_FEE_API_CALLS') || '' : '';
-  const flatFeeOverage = isFlat ? getRatePlanData('FLAT_FEE_OVERAGE') || '' : '';
-  const flatFeeGrace = isFlat ? getRatePlanData('FLAT_FEE_GRACE') || '' : '';
-
-  // Fetch Tiered data
-  const tieredTiers = isTier ? JSON.parse(getRatePlanData('TIERED_TIERS') || '[]') as any[] : [];
-  const tieredOverage = isTier ? getRatePlanData('TIERED_OVERAGE') || '' : '';
-  const tieredGrace = isTier ? getRatePlanData('TIERED_GRACE') || '' : '';
-
-  // Fetch Usage-based data
-  const usagePerUnit = isUsage ? getRatePlanData('USAGE_PER_UNIT_AMOUNT') || '' : '';
-
-  // Fetch Volume data
-  const volumeTiers = isVolume ? JSON.parse(getRatePlanData('VOLUME_TIERS') || '[]') as any[] : [];
-  const volumeOverage = isVolume ? getRatePlanData('VOLUME_OVERAGE') || '' : '';
-  const volumeGrace = isVolume ? getRatePlanData('VOLUME_GRACE') || '' : '';
-
-  // Fetch Stair data
-  const stairTiers = isStair ? JSON.parse(getRatePlanData('STAIR_TIERS') || '[]') as any[] : [];
-  const stairOverage = isStair ? getRatePlanData('STAIR_OVERAGE') || '' : '';
-  const stairGrace = isStair ? getRatePlanData('STAIR_GRACE') || '' : '';
-
-  // Fetch extras
-  const setupFee = getRatePlanData('SETUP_FEE') || '';
-  const discountPercent = getRatePlanData('DISCOUNT_PERCENT') || '';
-  const discountFlat = getRatePlanData('DISCOUNT_FLAT') || '';
-  const freemiumUnits = getRatePlanData('FREEMIUM_UNITS') || '';
-  const minimumUsage = getRatePlanData('MINIMUM_USAGE') || '';
-  const minimumCharge = getRatePlanData('MINIMUM_CHARGE') || '';
 
   const canShowEstimator = isFlat || isUsage || isStair || isVolume || isTier;
 

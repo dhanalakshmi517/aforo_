@@ -51,6 +51,18 @@ interface CreatePricePlanProps {
   draftData?: any; // Draft data from backend for pre-filling
   onFieldChange?: () => void; // Called when any field changes to reset saved state
   onHasInputChange?: (hasInput: boolean) => void; // Called when hasAnyRequiredInput changes
+  topBarProps?: {
+    onBack: () => void;
+    cancel: { label: string; onClick: () => void; disabled: boolean };
+    save: {
+      label: string;
+      labelWhenSaved: string;
+      saved: boolean;
+      saving: boolean;
+      disabled: boolean;
+      onClick: () => void;
+    };
+  };
 }
 
 const steps = [
@@ -64,7 +76,7 @@ const steps = [
 const CreatePricePlan = React.forwardRef<
   { back: () => boolean; getRatePlanId: () => number | null; validateBeforeBack: () => boolean },
   CreatePricePlanProps
->(({ onClose, registerSaveDraft, draftData, onFieldChange, onHasInputChange }, ref) => {
+>(({ onClose, registerSaveDraft, draftData, onFieldChange, onHasInputChange, topBarProps }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
@@ -1025,6 +1037,14 @@ const CreatePricePlan = React.forwardRef<
 
   return (
     <>
+      {topBarProps && (
+        <TopBar
+          title="Create New Rate Plan"
+          onBack={topBarProps.onBack}
+          cancel={topBarProps.cancel}
+          save={topBarProps.save}
+        />
+      )}
       <div className="rate-np-viewport">
         <div className="rate-np-card">
           <div className="rate-np-grid">

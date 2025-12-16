@@ -316,6 +316,14 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     })();
   }, [ratePlanId]);
 
+  // Sync General Step inputs to session for Review display
+  useEffect(() => {
+    setRatePlanData('PLAN_NAME', ratePlanName);
+    setRatePlanData('PLAN_DESCRIPTION', description);
+    setRatePlanData('BILLING_FREQUENCY', billingFrequency);
+    setRatePlanData('PRODUCT_NAME', selectedProductName);
+  }, [ratePlanName, description, billingFrequency, selectedProductName]);
+
   const gotoStep = (index: number) => setCurrentStep(index);
 
   const validateStep = (index: number): boolean => {
@@ -618,8 +626,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
       <div className="editrate-np-form-row">
         <div className="editrate-np-form-group">
           <InputField
-          label='Rate Plan Name'
-          required
+            label='Rate Plan Name'
+            required
             value={ratePlanName}
             onChange={(v: string) => {
               setRatePlanName(v);
@@ -632,8 +640,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
         <div className="editrate-np-form-group">
           <SelectField
-          label='Billing Frequency'
-          required
+            label='Billing Frequency'
+            required
             value={billingFrequency}
             onChange={(v: string) => {
               setBillingFrequency(v);
@@ -655,8 +663,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
       <div className="editrate-np-form-row">
         <div className="editrate-np-form-group">
           <SelectField
-          label='Payment Type'
-                  required
+            label='Payment Type'
+            required
 
             value={paymentType}
             onChange={(v: string) => {
@@ -685,7 +693,14 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   );
 
   const renderContent = () => {
-    if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
+    if (loading) {
+      return (
+        <div className="rateplan-loading-state" style={{ padding: '60px 0' }}>
+          <div className="spinner"></div>
+          <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading...</p>
+        </div>
+      );
+    }
 
     if (activeTab === 'details') return renderDetailsTab();
 

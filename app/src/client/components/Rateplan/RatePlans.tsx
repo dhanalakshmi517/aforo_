@@ -153,6 +153,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [saveDraftFn, setSaveDraftFn] = useState<null | (() => Promise<boolean>)>(null);
   const [draftSaving, setDraftSaving] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [hasAnyInput, setHasAnyInput] = useState(false); // Track if form has any input
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [draftPlanData, setDraftPlanData] = useState<any>(null);
@@ -943,38 +944,6 @@ const RatePlans: React.FC<RatePlansProps> = ({
 
         {showCreatePlan ? (
           <div className="create-plan-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <TopBar
-              title="Create New Rate Plan"
-              onBack={() => {
-                const ok = createPlanRef.current?.validateBeforeBack?.() ?? true;
-                if (ok) {
-                  setShowSaveDraftModal(true);
-                } else {
-                  createPlanRef.current?.back?.() || setShowCreatePlan(false);
-                }
-              }}
-              cancel={{ label: 'Discard', onClick: () => setShowConfirmDelete(true) }}
-              save={{
-                label: 'Save as Draft',
-                labelWhenSaved: 'Saved as Draft',
-                saved: draftSaved,
-                saving: draftSaving,
-                disabled: !saveDraftFn,
-                onClick: async () => {
-                  if (!saveDraftFn) return;
-                  setDraftSaved(false); // Reset saved state during save
-                  setDraftSaving(true);
-                  const ok = await saveDraftFn(); // boolean
-                  setDraftSaving(false);
-                  if (!ok) {
-                    // validation failed; keep wizard open
-                    return;
-                  }
-                  setDraftSaved(true); // Mark as saved
-                  // Stay on the same page after saving - button state change is sufficient feedback
-                }
-              }}
-            />
             <div className="create-plan-body" style={{ flex: 1 }}>
               <CreatePricePlan
                 ref={createPlanRef}
@@ -983,11 +952,39 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 onFieldChange={() => {
                   if (draftSaved) setDraftSaved(false);
                 }}
+                onHasInputChange={(hasInput) => setHasAnyInput(hasInput)}
                 onClose={() => {
                   setDraftPlanData(null);
                   clearAllRatePlanData();
                   setShowCreatePlan(false);
                   loadRatePlans();
+                }}
+                topBarProps={{
+                  onBack: () => {
+                    const ok = createPlanRef.current?.validateBeforeBack?.() ?? true;
+                    if (ok) {
+                      setShowSaveDraftModal(true);
+                    } else {
+                      createPlanRef.current?.back?.() || setShowCreatePlan(false);
+                    }
+                  },
+                  cancel: { label: 'Discard', onClick: () => setShowConfirmDelete(true), disabled: !hasAnyInput },
+                  save: {
+                    label: 'Save as Draft',
+                    labelWhenSaved: 'Saved as Draft',
+                    saved: draftSaved,
+                    saving: draftSaving,
+                    disabled: !saveDraftFn || !hasAnyInput,
+                    onClick: async () => {
+                      if (!saveDraftFn) return;
+                      setDraftSaved(false);
+                      setDraftSaving(true);
+                      const ok = await saveDraftFn();
+                      setDraftSaving(false);
+                      if (!ok) return;
+                      setDraftSaved(true);
+                    }
+                  }
                 }}
               />
             </div>
