@@ -10,6 +10,7 @@ import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
+import MetricRow from '../../componenetsss/MetricRow';
 
 import EditBillable from './EditBillable';
 import EditPricing from './EditPricing';
@@ -794,15 +795,13 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
                   const isActive = index === currentStep;
                   const isCompleted = index < currentStep;
                   return (
-                    <button
+                    <MetricRow
                       key={step.id}
-                      type="button"
-                      className={`editrate-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''
-                        }`.trim()}
+                      title={step.title}
+                      state={isActive ? 'active' : 'default'}
+                      className={`editrate-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`.trim()}
                       onClick={() => handleSidebarStepClick(index)}
-                    >
-                      <span className="editrate-np-step__title">{step.title}</span>
-                    </button>
+                    />
                   );
                 })}
               </nav>

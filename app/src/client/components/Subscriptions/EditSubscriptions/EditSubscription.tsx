@@ -6,6 +6,7 @@ import { SelectField, TextareaField } from '../../componenetsss/Inputs';
 import { useToast } from '../../componenetsss/ToastProvider';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
+import MetricRow from '../../componenetsss/MetricRow';
 import EditReview from './EditReview';
 
 import './EditSubscription.css';
@@ -285,12 +286,12 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
                   const isCompleted = i < currentStep;
-                  const showConnector = i < steps.length - 1;
 
                   return (
-                    <button
+                    <MetricRow
                       key={step.id}
-                      type="button"
+                      title={step.title}
+                      state={isActive ? 'active' : 'default'}
                       className={[
                         'editsub-np-step',
                         isActive ? 'active' : '',
@@ -299,15 +300,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                         .join(' ')
                         .trim()}
                       onClick={() => goToStep(i)}
-                    >
-                      {/* Bullet + connector column */}
-
-
-                      {/* Text column */}
-                      <span className="edisub-np-step__text">
-                        <span className="editsub-np-step__title">{step.title}</span>
-                      </span>
-                    </button>
+                    />
                   );
                 })}
               </nav>
