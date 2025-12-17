@@ -9,9 +9,9 @@ import dashboardBlurBg from './sign in with dashboard blur.svg';
 import './SignIn.css';
 
 const PERSONAL_DOMAINS = new Set([
-  'gmail.com','googlemail.com','yahoo.com','yahoo.co.in','outlook.com','hotmail.com',
-  'live.com','msn.com','icloud.com','me.com','mac.com','proton.me','protonmail.com',
-  'pm.me','aol.com','gmx.com','mail.com','yandex.com','zoho.com','fastmail.com'
+  'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.in', 'outlook.com', 'hotmail.com',
+  'live.com', 'msn.com', 'icloud.com', 'me.com', 'mac.com', 'proton.me', 'protonmail.com',
+  'pm.me', 'aol.com', 'gmx.com', 'mail.com', 'yandex.com', 'zoho.com', 'fastmail.com'
 ]);
 
 const isValidEmailFormat = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -72,7 +72,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
         throw new Error((loginResponse as any).message || 'Login failed');
       }
       setAuthData(loginResponse, email.trim());
-      const redirectTo = '/get-started/products';
+      const redirectTo = '/get-started';
       navigate(redirectTo);
       onSuccess?.();
     } catch (err: any) {
@@ -80,7 +80,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
       if (err.message?.includes('NetworkError') || err.message?.includes('Failed to fetch')) {
         errorMessage = 'Unable to connect to the server. Please check your internet connection.';
       } else if (err.message?.includes('401') || err.message?.toLowerCase?.().includes('invalid credentials')) {
-        errorMessage = 'Invalid email or password. Please try again.';
+        errorMessage = 'Invalid credentials';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -91,28 +91,28 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="signin-page" style={{backgroundImage: `url(${dashboardBlurBg})`}}>
+    <div className="signin-page" style={{ backgroundImage: `url(${dashboardBlurBg})` }}>
       <div className="signin-card">
         <div className="signin-background-decoration">
-         <svg xmlns="http://www.w3.org/2000/svg" width="381" height="418" viewBox="0 0 381 418" fill="none">
-  <g opacity="0.4" filter="url(#filter0_f_12301_9099)">
-    <path d="M488.199 376.709C503.63 402.582 511.346 415.518 509.45 425.169C507.555 434.821 497.376 434.425 477.018 433.633L152.062 420.996C121.521 419.809 106.25 419.215 101.278 406.436C96.3046 393.658 106.138 380.281 125.805 353.526L301.044 115.136C309.1 104.176 313.128 98.6966 318.692 100.264C324.256 101.831 328.998 109.781 338.481 125.682L488.199 376.709Z" fill="url(#paint0_linear_12301_9099)"/>
-  </g>
-  <defs>
-    <filter id="filter0_f_12301_9099" x="0" y="0" width="609.734" height="534.002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-      <feGaussianBlur stdDeviation="30" result="effect1_foregroundBlur_12301_9099"/>
-    </filter>
-    <linearGradient id="paint0_linear_12301_9099" x1="262.252" y1="574.64" x2="524.1" y2="266.911" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#EDF8FD"/>
-      <stop offset="1" stop-color="#0092DF"/>
-    </linearGradient>
-  </defs>
-</svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="381" height="418" viewBox="0 0 381 418" fill="none">
+            <g opacity="0.4" filter="url(#filter0_f_12301_9099)">
+              <path d="M488.199 376.709C503.63 402.582 511.346 415.518 509.45 425.169C507.555 434.821 497.376 434.425 477.018 433.633L152.062 420.996C121.521 419.809 106.25 419.215 101.278 406.436C96.3046 393.658 106.138 380.281 125.805 353.526L301.044 115.136C309.1 104.176 313.128 98.6966 318.692 100.264C324.256 101.831 328.998 109.781 338.481 125.682L488.199 376.709Z" fill="url(#paint0_linear_12301_9099)" />
+            </g>
+            <defs>
+              <filter id="filter0_f_12301_9099" x="0" y="0" width="609.734" height="534.002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                <feGaussianBlur stdDeviation="30" result="effect1_foregroundBlur_12301_9099" />
+              </filter>
+              <linearGradient id="paint0_linear_12301_9099" x1="262.252" y1="574.64" x2="524.1" y2="266.911" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#EDF8FD" />
+                <stop offset="1" stop-color="#0092DF" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
         <div className="signin-header">
-        <img src={aforoLogo} alt="aforo.ai" className="signin-logo" />
+          <img src={aforoLogo} alt="aforo.ai" className="signin-logo" />
         </div>
 
         <h2 className="signin-title">Sign in to your aforo account</h2>
@@ -155,22 +155,22 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
               ) : (
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-closed-icon lucide-eye-closed"><path d="m15 18-.722-3.25"/><path d="M2 8a10.645 10.645 0 0 0 20 0"/><path d="m20 15-1.726-2.05"/><path d="m4 15 1.726-2.05"/><path d="m9 18 .722-3.25"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-closed-icon lucide-eye-closed"><path d="m15 18-.722-3.25" /><path d="M2 8a10.645 10.645 0 0 0 20 0" /><path d="m20 15-1.726-2.05" /><path d="m4 15 1.726-2.05" /><path d="m9 18 .722-3.25" /></svg>
               )}
             </button>
             {passwordError && <p id="password-error" className="field-error" role="alert">{passwordError}</p>}
           </div>
 
-          <PrimaryButton 
-            type="submit" 
+          <PrimaryButton
+            type="submit"
             disabled={isSubmitting}
             fullWidth={true}
             onClick={handleSubmit}
             className="primary-btn"
           >
-      <div className="primary-btn-text">Sign In</div>
+            <div className="primary-btn-text">Sign In</div>
           </PrimaryButton>
           {error && <p className="error-msg" role="alert">{error}</p>}
         </form>
