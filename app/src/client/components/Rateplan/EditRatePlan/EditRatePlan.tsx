@@ -591,14 +591,24 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const handleSidebarStepClick = async (targetIndex: number) => {
     if (targetIndex === currentStep) return;
 
-    // same behavior as Metrics: validate/save current step before jump
+    // Validate current step before allowing navigation
     try {
       if (activeTab === 'details') {
         if (!validateStep(0)) {
           setCurrentStep(0);
           return;
         }
+      } else if (activeTab === 'billable') {
+        if (!validateStep(1)) {
+          setCurrentStep(1);
+          return;
+        }
       } else if (activeTab === 'pricing') {
+        // Validate pricing step before allowing navigation
+        if (!validateStep(2)) {
+          setCurrentStep(2);
+          return;
+        }
         if (savePricingFn) {
           setLoading(true);
           await savePricingFn();

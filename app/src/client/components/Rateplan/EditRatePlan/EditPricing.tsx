@@ -61,6 +61,89 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
     setTiers(updated);
   };
 
+  // Register validation function with parent
+  const validatePricingModel = useCallback((setErrors: (e: Record<string, string>) => void): boolean => {
+    const e: Record<string, string> = {};
+
+    if (!selected) {
+      e.pricingModel = "Please select a pricing model";
+      setErrors(e);
+      return false;
+    }
+
+    if (selected === "Flat Fee") {
+      const flatFeeAmount = getRatePlanData("FLAT_FEE_AMOUNT") || localStorage.getItem('flatFeeAmount');
+      const apiCalls = getRatePlanData("FLAT_FEE_API_CALLS") || localStorage.getItem('flatFeeApiCalls');
+      const overageRate = getRatePlanData("FLAT_FEE_OVERAGE") || localStorage.getItem('flatFeeOverage');
+      if (!flatFeeAmount || Number(flatFeeAmount) <= 0) e.flatFeeAmount = "Flat fee amount is required";
+      if (!apiCalls || Number(apiCalls) <= 0) e.apiCalls = "Number of API calls is required";
+      if (!overageRate || Number(overageRate) <= 0) e.overageRate = "Overage unit rate is required";
+    } else if (selected === "Usage-Based") {
+      const perUnitAmount = getRatePlanData("USAGE_PER_UNIT_AMOUNT") || localStorage.getItem('usagePerUnit');
+      if (!perUnitAmount || Number(perUnitAmount) <= 0) e.perUnitAmount = "Per unit amount is required";
+    } else if (selected === "Tiered Pricing") {
+      const savedTiers = JSON.parse(localStorage.getItem('tieredTiers') || '[]');
+      if (savedTiers.length === 0) e.tieredTiers = "At least one tier is required";
+      const hasInvalidTier = savedTiers.some(
+        (tier: any) =>
+          !tier.from?.toString().trim() ||
+          !tier.price?.toString().trim() ||
+          (!tier.isUnlimited && !tier.to?.toString().trim())
+      );
+      if (hasInvalidTier) e.tieredTiers = "All tier fields are required";
+      const hasUnlimited = savedTiers.some((t: any) => t.isUnlimited);
+      if (!hasUnlimited) {
+        const overage = localStorage.getItem('tieredOverage');
+        if (!overage || Number(overage) <= 0) {
+          e.tieredOverage = "Overage charge is required when no unlimited tier";
+        }
+      }
+    } else if (selected === "Volume-Based") {
+      const savedTiers = JSON.parse(localStorage.getItem('volumeTiers') || '[]');
+      if (savedTiers.length === 0) e.volumeTiers = "At least one volume tier is required";
+      const hasInvalidTier = savedTiers.some(
+        (tier: any) =>
+          !tier.from?.toString().trim() ||
+          !tier.price?.toString().trim() ||
+          (!tier.isUnlimited && !tier.to?.toString().trim())
+      );
+      if (hasInvalidTier) e.volumeTiers = "All tier fields are required";
+      const hasUnlimited = savedTiers.some((t: any) => t.isUnlimited);
+      if (!hasUnlimited) {
+        const overage = localStorage.getItem('volumeOverage');
+        if (!overage || Number(overage) <= 0) {
+          e.volumeOverage = "Overage charge is required when no unlimited tier";
+        }
+      }
+    } else if (selected === "Stairstep") {
+      const savedTiers = JSON.parse(localStorage.getItem('stairTiers') || '[]');
+      if (savedTiers.length === 0) e.stairTiers = "At least one tier is required";
+      const hasInvalidTier = savedTiers.some(
+        (tier: any) =>
+          !tier.from?.toString().trim() ||
+          !tier.cost?.toString().trim() ||
+          (!tier.isUnlimited && !tier.to?.toString().trim())
+      );
+      if (hasInvalidTier) e.stairTiers = "All tier fields are required";
+      const hasUnlimited = savedTiers.some((t: any) => t.isUnlimited);
+      if (!hasUnlimited) {
+        const overage = localStorage.getItem('stairOverage');
+        if (!overage || Number(overage) <= 0) {
+          e.stairOverage = "Overage charge is required when no unlimited tier";
+        }
+      }
+    }
+
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }, [selected]);
+
+  useEffect(() => {
+    if (registerValidatePricing) {
+      registerValidatePricing(validatePricingModel);
+    }
+  }, [registerValidatePricing, validatePricingModel]);
+
   // Initialize from backend data
   useEffect(() => {
     console.log('EditPricing - draftData changed:', draftData);
@@ -332,115 +415,6 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
     }
   }, [registerSavePricing, handleSave]);
 
-  // Register validation function
-  const validatePricing = useCallback((setParentErrors: (e: Record<string, string>) => void): boolean => {
-    const e: Record<string, string> = {};
-
-    if (selected === 'Flat Fee') {
-      const flatFeeAmount = getRatePlanData('FLAT_FEE_AMOUNT') ?? localStorage.getItem('flatFeeAmount');
-      const numberOfApiCalls = getRatePlanData('FLAT_FEE_API_CALLS') ?? localStorage.getItem('flatFeeApiCalls');
-      const overageRate = getRatePlanData('FLAT_FEE_OVERAGE') ?? localStorage.getItem('flatFeeOverage');
-
-      if (!flatFeeAmount || !flatFeeAmount.trim() || Number(flatFeeAmount) <= 0) {
-        e.flatFeeAmount = 'Flat fee amount is required';
-      }
-      if (!numberOfApiCalls || !numberOfApiCalls.trim() || Number(numberOfApiCalls) <= 0) {
-        e.apiCalls = 'Number of API calls is required';
-      }
-      if (!overageRate || !overageRate.trim() || Number(overageRate) < 0) {
-        e.overageRate = 'Overage unit rate is required';
-      }
-    } else if (selected === 'Usage-Based') {
-      const perUnit = getRatePlanData('USAGE_PER_UNIT_AMOUNT') ?? localStorage.getItem('usagePerUnit');
-      if (!perUnit || !perUnit.trim() || Number(perUnit) <= 0) {
-        e.perUnitAmount = 'Per unit amount is required';
-      }
-    } else if (selected === 'Tiered Pricing') {
-      const saved = JSON.parse(localStorage.getItem('tieredTiers') || '[]');
-      if (!saved || saved.length === 0) {
-        e.tieredTiers = 'At least one tier is required';
-      } else {
-        // Validate each tier
-        saved.forEach((tier: any, idx: number) => {
-          if (!tier.from || tier.from === '') {
-            e[`tier${idx}_from`] = 'From value is required';
-          }
-          if (!tier.isUnlimited && (!tier.to || tier.to === '')) {
-            e[`tier${idx}_to`] = 'To value is required';
-          }
-          if (!tier.price || tier.price === '') {
-            e[`tier${idx}_price`] = 'Price is required';
-          }
-        });
-
-        // Check for overage if not unlimited
-        const lastTier = saved[saved.length - 1];
-        if (!lastTier?.isUnlimited) {
-          const overage = localStorage.getItem('tieredOverage');
-          if (!overage || !overage.trim() || Number(overage) < 0) {
-            e.tieredOverage = 'Overage charge is required when there is an upper limit';
-          }
-        }
-      }
-    } else if (selected === 'Volume-Based') {
-      const saved = JSON.parse(localStorage.getItem('volumeTiers') || '[]');
-      if (!saved || saved.length === 0) {
-        e.volumeTiers = 'At least one tier is required';
-      } else {
-        // Validate each tier
-        saved.forEach((tier: any, idx: number) => {
-          if (!tier.from || tier.from === '') {
-            e[`tier${idx}_from`] = 'From value is required';
-          }
-          if (!tier.isUnlimited && (!tier.to || tier.to === '')) {
-            e[`tier${idx}_to`] = 'To value is required';
-          }
-          if (!tier.price || tier.price === '') {
-            e[`tier${idx}_price`] = 'Price is required';
-          }
-        });
-
-        // Check for overage if not unlimited
-        const lastTier = saved[saved.length - 1];
-        if (!lastTier?.isUnlimited) {
-          const overage = localStorage.getItem('volumeOverage');
-          if (!overage || !overage.trim() || Number(overage) < 0) {
-            e.volumeOverage = 'Overage charge is required when there is an upper limit';
-          }
-        }
-      }
-    } else if (selected === 'Stairstep') {
-      const saved = JSON.parse(localStorage.getItem('stairTiers') || '[]');
-      if (!saved || saved.length === 0) {
-        e.stairTiers = 'At least one stair is required';
-      } else {
-        // Validate each stair
-        saved.forEach((stair: any, idx: number) => {
-          if (!stair.from || stair.from === '') {
-            e[`stair${idx}_from`] = 'From value is required';
-          }
-          if (!stair.isUnlimited && (!stair.to || stair.to === '')) {
-            e[`stair${idx}_to`] = 'To value is required';
-          }
-          if (!stair.cost || stair.cost === '') {
-            e[`stair${idx}_cost`] = 'Cost is required';
-          }
-        });
-      }
-    } else if (!selected) {
-      e.pricingModel = 'Please select a pricing model';
-    }
-
-    // Set errors in parent state so they flow down to child components
-    setParentErrors(e);
-    return Object.keys(e).length === 0;
-  }, [selected]);
-
-  useEffect(() => {
-    if (registerValidatePricing) {
-      registerValidatePricing(validatePricing);
-    }
-  }, [registerValidatePricing, validatePricing]);
 
   return (
     <div className="edit-pricing-container">
@@ -451,8 +425,17 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
           value={selected}
           onChange={(e) => {
             const v = e.target.value;
-            setSelected(v);
-            localStorage.setItem('pricingModel', v);
+            const handleModelChange = (model: string) => {
+              setSelected(model);
+              setRatePlanData('PRICING_MODEL', model);
+              localStorage.setItem('pricingModel', model);
+              
+              // Clear pricing model validation error when user selects a model
+              if (onClearError) {
+                onClearError('pricingModel');
+              }
+            };
+            handleModelChange(v);
             if (v === 'Tiered Pricing' && tiers.length === 0) {
               setTiers([{ from: null, to: null, price: null }]);
             }
@@ -465,6 +448,14 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
           <option value="Usage-Based">Usage-Based</option>
           <option value="Stairstep">Stairstep</option>
         </select>
+        {validationErrors?.pricingModel && (
+          <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '5px' }}>
+              <path d="M4.545 4.5C4.66255 4.16583 4.89458 3.88405 5.19998 3.70457C5.50538 3.52508 5.86445 3.45947 6.21359 3.51936C6.56273 3.57924 6.87941 3.76076 7.10754 4.03176C7.33567 4.30277 7.46053 4.64576 7.46 5C7.46 6 5.96 6.5 5.96 6.5M6 8.5H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#ED5142" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {validationErrors.pricingModel}
+          </div>
+        )}
 
         {selected === 'Flat Fee' && (
           <div className="edit-pricing-container">
