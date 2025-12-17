@@ -19,6 +19,8 @@ import { getAuthHeaders } from '../../utils/auth';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import Tooltip from '../componenetsss/Tooltip';
 import PrimaryButton from '../componenetsss/PrimaryButton';
+import Checkbox from '../componenetsss/Checkbox';
+import FilterChip from '../componenetsss/FilterChip';
 import RatePlansEmptyImg from './rateplans.svg';
 
 /* ---------------- Types ---------------- */
@@ -253,36 +255,112 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, []);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const filteredPlans = (ratePlansState ?? []).filter((p) => {
-    const q = searchTerm.toLowerCase();
-    if (!q) return true;
-
-    const name = (p.ratePlanName ?? '').toLowerCase();
-    const productName = (p.productName ?? p.product?.productName ?? '').toLowerCase();
-    const description = (p.description ?? '').toLowerCase();
-    const status = (p.status ?? '').toLowerCase();
-    const paymentType = (p.paymentType ?? '').toLowerCase();
-    const ratePlanType = (p.ratePlanType ?? '').toLowerCase();
-    const billingFrequency = (p.billingFrequency ?? '').toLowerCase();
-
-    return (
-      name.includes(q) ||
-      productName.includes(q) ||
-      description.includes(q) ||
-      status.includes(q) ||
-      paymentType.includes(q) ||
-      ratePlanType.includes(q) ||
-      billingFrequency.includes(q)
-    );
-  });
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+  const statusFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [selectedPaymentTypes, setSelectedPaymentTypes] = useState<string[]>([]);
+  const [isPaymentTypeFilterOpen, setIsPaymentTypeFilterOpen] = useState(false);
+  const paymentTypeFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [selectedBillingFrequencies, setSelectedBillingFrequencies] = useState<string[]>([]);
+  const [isBillingFrequencyFilterOpen, setIsBillingFrequencyFilterOpen] = useState(false);
+  const billingFrequencyFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [selectedPricingModels, setSelectedPricingModels] = useState<string[]>([]);
+  const [isPricingModelFilterOpen, setIsPricingModelFilterOpen] = useState(false);
+  const pricingModelFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
+  const createdSortRef = React.useRef<HTMLDivElement | null>(null);
 
   /* ---------- details cache ---------- */
   const [detailsById, setDetailsById] = useState<Record<number, RatePlanDetails | 'loading' | 'error'>>({});
 
+  const handleResetRatePlanFilters = () => {
+    setSelectedStatuses([]);
+    setSelectedPaymentTypes([]);
+    setSelectedBillingFrequencies([]);
+    setSelectedPricingModels([]);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (statusFilterRef.current && !statusFilterRef.current.contains(event.target as Node)) {
+        setIsStatusFilterOpen(false);
+      }
+      if (paymentTypeFilterRef.current && !paymentTypeFilterRef.current.contains(event.target as Node)) {
+        setIsPaymentTypeFilterOpen(false);
+      }
+      if (billingFrequencyFilterRef.current && !billingFrequencyFilterRef.current.contains(event.target as Node)) {
+        setIsBillingFrequencyFilterOpen(false);
+      }
+      if (pricingModelFilterRef.current && !pricingModelFilterRef.current.contains(event.target as Node)) {
+        setIsPricingModelFilterOpen(false);
+      }
+      if (createdSortRef.current && !createdSortRef.current.contains(event.target as Node)) {
+        setIsCreatedSortOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isStatusFilterOpen, isPaymentTypeFilterOpen, isBillingFrequencyFilterOpen, isPricingModelFilterOpen, isCreatedSortOpen]);
+
+  const filteredPlans = (ratePlansState ?? [])
+    .filter((p) => {
+      const q = searchTerm.toLowerCase();
+      if (!q) return true;
+
+      const name = (p.ratePlanName ?? '').toLowerCase();
+      const productName = (p.productName ?? p.product?.productName ?? '').toLowerCase();
+      const description = (p.description ?? '').toLowerCase();
+      const status = (p.status ?? '').toLowerCase();
+      const paymentType = (p.paymentType ?? '').toLowerCase();
+      const ratePlanType = (p.ratePlanType ?? '').toLowerCase();
+      const billingFrequency = (p.billingFrequency ?? '').toLowerCase();
+
+      return (
+        name.includes(q) ||
+        productName.includes(q) ||
+        description.includes(q) ||
+        status.includes(q) ||
+        paymentType.includes(q) ||
+        ratePlanType.includes(q) ||
+        billingFrequency.includes(q)
+      );
+    })
+    .filter((p) => {
+      if (selectedStatuses.length === 0) return true;
+      const statusKey = (p.status ?? '').toLowerCase();
+      return selectedStatuses.includes(statusKey);
+    })
+    .filter((p) => {
+      if (selectedPaymentTypes.length === 0) return true;
+      const paymentTypeKey = (p.paymentType ?? '').toLowerCase();
+      return selectedPaymentTypes.includes(paymentTypeKey);
+    })
+    .filter((p) => {
+      if (selectedBillingFrequencies.length === 0) return true;
+      const billingFreqKey = (p.billingFrequency ?? '').toLowerCase();
+      return selectedBillingFrequencies.includes(billingFreqKey);
+    })
+    .filter((p) => {
+      if (selectedPricingModels.length === 0) return true;
+      const details = detailsById[p.ratePlanId];
+      if (details === 'loading' || details === 'error' || !details) return false;
+      const pricingModelKey = (details.pricingModelName ?? '').toLowerCase();
+      return selectedPricingModels.includes(pricingModelKey);
+    })
+    .sort((a, b) => {
+      const aDate = new Date(a.createdOn || 0).getTime();
+      const bDate = new Date(b.createdOn || 0).getTime();
+      return createdSortOrder === 'newest' ? bDate - aDate : aDate - bDate;
+    });
+
   useEffect(() => {
     const toFetch = filteredPlans
       .map(p => p.ratePlanId)
-      .filter(id => detailsById[id] === undefined);
+      .filter(id => !detailsById[id]);
     if (toFetch.length === 0) return;
 
     toFetch.forEach(async (id) => {
@@ -1075,6 +1153,64 @@ const RatePlans: React.FC<RatePlansProps> = ({
               filterDisabled={!hasRows}
               showPrimary={hasRows}
               showIntegrations={filteredPlans.length > 0} />
+
+            {(selectedStatuses.length > 0 ||
+              selectedPaymentTypes.length > 0 ||
+              selectedBillingFrequencies.length > 0 ||
+              selectedPricingModels.length > 0) && (
+              <div className="products-active-filters-row">
+                <div className="products-active-filters-chips">
+                  {selectedStatuses.map((s) => (
+                    <FilterChip
+                      key={s}
+                      label={s.charAt(0).toUpperCase() + s.slice(1)}
+                      onRemove={() =>
+                        setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                      }
+                    />
+                  ))}
+
+                  {selectedPaymentTypes.map((pt) => (
+                    <FilterChip
+                      key={pt}
+                      label={pt.charAt(0).toUpperCase() + pt.slice(1)}
+                      onRemove={() =>
+                        setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
+                      }
+                    />
+                  ))}
+
+                  {selectedBillingFrequencies.map((bf) => (
+                    <FilterChip
+                      key={bf}
+                      label={bf.charAt(0).toUpperCase() + bf.slice(1)}
+                      onRemove={() =>
+                        setSelectedBillingFrequencies((prev) => prev.filter((x) => x !== bf))
+                      }
+                    />
+                  ))}
+
+                  {selectedPricingModels.map((pm) => (
+                    <FilterChip
+                      key={pm}
+                      label={pm.charAt(0).toUpperCase() + pm.slice(1)}
+                      onRemove={() =>
+                        setSelectedPricingModels((prev) => prev.filter((x) => x !== pm))
+                      }
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="products-filters-reset"
+                  onClick={handleResetRatePlanFilters}
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            )}
+
             <div className="customers-table-wrapper">
               <table className="customers-table">
                 <colgroup>
@@ -1088,10 +1224,91 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 <thead>
                   <tr>
                     <th>Rate Plan</th>
-                    <th>Pricing model</th>
-                    <th>Payment Type</th>
-                    <th>Created on</th>
-                    <th>Status</th>
+                    <th className="products-th-with-filter">
+                      <div ref={pricingModelFilterRef} className="products-th-label-with-filter" onMouseEnter={() => setIsPricingModelFilterOpen(true)}>
+                        <span>Pricing model</span>
+                        <button type="button" className={`products-column-filter-trigger ${isPricingModelFilterOpen ? 'is-open' : ''}`} aria-label="Filter by pricing model">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none">
+                            <path d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001" stroke="#19222D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                        {isPricingModelFilterOpen && (
+                          <div className="products-column-filter-popover" onClick={(e) => e.stopPropagation()}>
+                            <div className="products-column-filter-list">
+                              {['flat fee', 'usage-based', 'tiered', 'volume', 'stair-step'].map((pmKey) => (
+                                <div key={pmKey} className="products-column-filter-list-item">
+                                  <Checkbox checked={selectedPricingModels.includes(pmKey)} onChange={(checked) => { setSelectedPricingModels((prev) => { if (checked) { if (prev.includes(pmKey)) return prev; return [...prev, pmKey]; } return prev.filter((x) => x !== pmKey); }); }} label={pmKey.charAt(0).toUpperCase() + pmKey.slice(1)} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </th>
+                    <th className="products-th-with-filter">
+                      <div ref={paymentTypeFilterRef} className="products-th-label-with-filter" onMouseEnter={() => setIsPaymentTypeFilterOpen(true)}>
+                        <span>Payment Type</span>
+                        <button type="button" className={`products-column-filter-trigger ${isPaymentTypeFilterOpen ? 'is-open' : ''}`} aria-label="Filter by payment type">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none">
+                            <path d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001" stroke="#19222D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                        {isPaymentTypeFilterOpen && (
+                          <div className="products-column-filter-popover" onClick={(e) => e.stopPropagation()}>
+                            <div className="products-column-filter-list">
+                              {['prepaid', 'postpaid'].map((ptKey) => (
+                                <div key={ptKey} className="products-column-filter-list-item">
+                                  <Checkbox checked={selectedPaymentTypes.includes(ptKey)} onChange={(checked) => { setSelectedPaymentTypes((prev) => { if (checked) { if (prev.includes(ptKey)) return prev; return [...prev, ptKey]; } return prev.filter((x) => x !== ptKey); }); }} label={ptKey.charAt(0).toUpperCase() + ptKey.slice(1)} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </th>
+                    <th className="products-th-with-filter">
+                      <div ref={createdSortRef} className="products-th-label-with-filter" onMouseEnter={() => setIsCreatedSortOpen(true)}>
+                        <span>Created on</span>
+                        <button type="button" className={`products-column-filter-trigger ${isCreatedSortOpen ? 'is-open' : ''}`} aria-label="Sort by created date">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10" stroke="#25303D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                        {isCreatedSortOpen && (
+                          <div className="products-column-filter-popover products-createdon-popover" onClick={(e) => e.stopPropagation()}>
+                            <button type="button" className={`products-sort-option ${createdSortOrder === 'newest' ? 'is-active' : ''}`} onClick={() => { setCreatedSortOrder('newest'); setIsCreatedSortOpen(false); }}>
+                              <span className="products-sort-option-icon"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663" stroke="#25303D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                              <span className="products-sort-option-label">Newest first</span>
+                            </button>
+                            <button type="button" className={`products-sort-option ${createdSortOrder === 'oldest' ? 'is-active' : ''}`} onClick={() => { setCreatedSortOrder('oldest'); setIsCreatedSortOpen(false); }}>
+                              <span className="products-sort-option-icon"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M0.600098 6.43294L6.43343 12.2663M6.43343 12.2663L12.2668 6.43294M6.43343 12.2663V0.599609" stroke="#25303D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                              <span className="products-sort-option-label">Oldest first</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </th>
+                    <th className="products-th-with-filter">
+                      <div ref={statusFilterRef} className="products-th-label-with-filter" onMouseEnter={() => setIsStatusFilterOpen(true)}>
+                        <span>Status</span>
+                        <button type="button" className={`products-column-filter-trigger ${isStatusFilterOpen ? 'is-open' : ''}`} aria-label="Filter by status">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none">
+                            <path d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001" stroke="#19222D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                        {isStatusFilterOpen && (
+                          <div className="products-column-filter-popover" onClick={(e) => e.stopPropagation()}>
+                            <div className="products-column-filter-list">
+                              {['active', 'draft', 'live'].map((statusKey) => (
+                                <div key={statusKey} className="products-column-filter-list-item">
+                                  <Checkbox checked={selectedStatuses.includes(statusKey)} onChange={(checked) => { setSelectedStatuses((prev) => { if (checked) { if (prev.includes(statusKey)) return prev; return [...prev, statusKey]; } return prev.filter((x) => x !== statusKey); }); }} label={statusKey.charAt(0).toUpperCase() + statusKey.slice(1)} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </th>
                     <th className="actions-cell">Actions</th>
                   </tr>
                 </thead>

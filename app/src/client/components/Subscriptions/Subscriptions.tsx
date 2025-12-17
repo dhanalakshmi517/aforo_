@@ -346,350 +346,371 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
 
   return (
     <div className="check-container">
-      <PageHeader
+      {editingSub ? (
+        <EditSubscription
+          initial={editingSub}
+          onClose={() => {
+            setEditingSub(null);
+            fetchSubs();
+          }}
+        />
+      ) : draftSub ? (
+        <CreateSubscription
+          onClose={() => {
+            setDraftSub(null);
+            fetchSubs();
+          }}
+          onCreateSuccess={() => {
+            setDraftSub(null);
+            fetchSubs();
+          }}
+        />
+      ) : (
+        <>
+          <PageHeader
+            title="Purchases"
+            searchTerm={searchQuery}
+            onSearchTermChange={setSearchQuery}
+            primaryLabel="+ New Purchase"
+            onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
+            onFilterClick={() => { }}
+            searchDisabled={searchDisabled}
+            filterDisabled={isEmpty}
+            showPrimary={!isEmpty}
+            showIntegrations={subscriptions.length > 0}
+          />
 
-        title="Purchases"
-        searchTerm={searchQuery}
-        onSearchTermChange={setSearchQuery}
-        primaryLabel="+ New Purchase"
-        onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
-        onFilterClick={() => { }}
-        searchDisabled={searchDisabled}
-        filterDisabled={isEmpty}
-        showPrimary={!isEmpty}
-        showIntegrations={subscriptions.length > 0} // Add this line
+          {selectedStatuses.length > 0 && (
+            <div className="products-active-filters-row">
+              <div className="products-active-filters-chips">
+                {selectedStatuses.map((s) => (
+                  <FilterChip
+                    key={s}
+                    label={s.charAt(0).toUpperCase() + s.slice(1)}
+                    onRemove={() =>
+                      setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                    }
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                className="products-filters-reset"
+                onClick={() => {
+                  setSelectedStatuses([]);
+                }}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
 
-      />
-
-      {selectedStatuses.length > 0 && (
-        <div className="products-active-filters-row">
-          <div className="products-active-filters-chips">
-            {selectedStatuses.map((s) => (
-              <FilterChip
-                key={s}
-                label={s.charAt(0).toUpperCase() + s.slice(1)}
-                onRemove={() =>
-                  setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                }
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="products-filters-reset"
-            onClick={() => {
-              setSelectedStatuses([]);
-            }}
-          >
-            Clear all
-          </button>
-        </div>
-      )}
-
-      <div className="customers-table-wrapper">
-        <table className="customers-table">
-          <thead>
-            <tr>
-              <th>Customer Name</th>
-              <th>Rate Plan</th>
-              <th>Payment Type</th>
-              <th className="products-th-with-filter">
-                <div
-                  ref={purchasedSortRef}
-                  className="products-th-label-with-filter"
-                  onMouseEnter={() => setIsPurchasedSortOpen(true)}
-                >
-                  <span>Purchased On</span>
-                  <button
-                    type="button"
-                    className={`products-column-filter-trigger ${
-                      isPurchasedSortOpen ? 'is-open' : ''
-                    }`}
-                    aria-label="Sort by purchased date"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                    >
-                      <path
-                        d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
-                        stroke="#25303D"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {isPurchasedSortOpen && (
+          <div className="customers-table-wrapper">
+            <table className="customers-table">
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Rate Plan</th>
+                  <th>Payment Type</th>
+                  <th className="products-th-with-filter">
                     <div
-                      className="products-column-filter-popover products-createdon-popover"
-                      onClick={(e) => e.stopPropagation()}
+                      ref={purchasedSortRef}
+                      className="products-th-label-with-filter"
+                      onMouseEnter={() => setIsPurchasedSortOpen(true)}
                     >
+                      <span>Purchased On</span>
                       <button
                         type="button"
-                        className={`products-sort-option ${
-                          purchasedSortOrder === 'newest' ? 'is-active' : ''
+                        className={`products-column-filter-trigger ${
+                          isPurchasedSortOpen ? 'is-open' : ''
                         }`}
-                        onClick={() => {
-                          setPurchasedSortOrder('newest');
-                          setIsPurchasedSortOpen(false);
-                        }}
+                        aria-label="Sort by purchased date"
                       >
-                        <span className="products-sort-option-icon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="13"
-                            height="13"
-                            viewBox="0 0 13 13"
-                            fill="none"
-                          >
-                            <path
-                              d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
-                              stroke="#25303D"
-                              strokeWidth="1.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                        <span className="products-sort-option-label">Newest first</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="12"
+                          height="12"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                        >
+                          <path
+                            d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
+                            stroke="#25303D"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
                       </button>
 
-                      <button
-                        type="button"
-                        className={`products-sort-option ${
-                          purchasedSortOrder === 'oldest' ? 'is-active' : ''
-                        }`}
-                        onClick={() => {
-                          setPurchasedSortOrder('oldest');
-                          setIsPurchasedSortOpen(false);
-                        }}
-                      >
-                        <span className="products-sort-option-icon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <path
-                              d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
-                              stroke="#25303D"
-                              strokeWidth="1.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                        <span className="products-sort-option-label">Oldest first</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th className="products-th-with-filter">
-                <div
-                  ref={statusFilterRef}
-                  className="products-th-label-with-filter"
-                  onMouseEnter={() => setIsStatusFilterOpen(true)}
-                >
-                  <span>Status</span>
-                  <button
-                    type="button"
-                    className={`products-column-filter-trigger ${
-                      isStatusFilterOpen ? 'is-open' : ''
-                    }`}
-                    aria-label="Filter by status"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="11"
-                      height="8"
-                      viewBox="0 0 11 8"
-                      fill="none"
-                    >
-                      <path
-                        d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
-                        stroke="#19222D"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {isStatusFilterOpen && (
-                    <div
-                      className="products-column-filter-popover"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="products-column-filter-list">
-                        {['active', 'draft'].map((statusKey) => (
-                          <div
-                            key={statusKey}
-                            className="products-column-filter-list-item"
-                          >
-                            <Checkbox
-                              checked={selectedStatuses.includes(statusKey)}
-                              onChange={(checked) => {
-                                setSelectedStatuses((prev) => {
-                                  if (checked) {
-                                    if (prev.includes(statusKey)) return prev;
-                                    return [...prev, statusKey];
-                                  }
-                                  return prev.filter((x) => x !== statusKey);
-                                });
-                              }}
-                              label={
-                                statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th className="actions-cell">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {isLoading && subscriptions.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                  <div className="subscriptions-loading-state">
-                    <div className="spinner"></div>
-                    <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading purchases...</p>
-                  </div>
-                </td>
-              </tr>
-            ) : subscriptions.length > 0 ? (
-              filtered.map(sub => {
-                const cust = customerMap.get(sub.customerId);
-                const rp = ratePlanMap.get(sub.ratePlanId);
-
-                // Backend already returns formatted date string, so use it directly
-                const purchased = (sub as any).createdOn ||
-                  formatIST((sub as any).createdAt) ||
-                  formatIST((sub as any).startDate) ||
-                  '—';
-                const logo = cust?.__resolvedLogoSrc || null;
-
-                return (
-                  <tr key={sub.subscriptionId}>
-                    {/* Customer: logo + name + email */}
-                    <td className="sub-customer-cell">
-                      <div className="cell-flex">
+                      {isPurchasedSortOpen && (
                         <div
-                          className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
-                          aria-label={`${cust?.customerName || 'Customer'} logo`}
-                          role="img"
-                          style={logo ? {
-                            backgroundImage: `url(${logo})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            backgroundRepeat: 'no-repeat'
-                          } : undefined}
+                          className="products-column-filter-popover products-createdon-popover"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
+                          <button
+                            type="button"
+                            className={`products-sort-option ${
+                              purchasedSortOrder === 'newest' ? 'is-active' : ''
+                            }`}
+                            onClick={() => {
+                              setPurchasedSortOrder('newest');
+                              setIsPurchasedSortOpen(false);
+                            }}
+                          >
+                            <span className="products-sort-option-icon">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="13"
+                                height="13"
+                                viewBox="0 0 13 13"
+                                fill="none"
+                              >
+                                <path
+                                  d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
+                                  stroke="#25303D"
+                                  strokeWidth="1.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </span>
+                            <span className="products-sort-option-label">Newest first</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`products-sort-option ${
+                              purchasedSortOrder === 'oldest' ? 'is-active' : ''
+                            }`}
+                            onClick={() => {
+                              setPurchasedSortOrder('oldest');
+                              setIsPurchasedSortOpen(false);
+                            }}
+                          >
+                            <span className="products-sort-option-icon">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <path
+                                  d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
+                                  stroke="#25303D"
+                                  strokeWidth="1.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </span>
+                            <span className="products-sort-option-label">Oldest first</span>
+                          </button>
                         </div>
-                        <div className="cust-block">
-                          <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
-                          <div className="cust-email">{cust?.primaryEmail || '—'}</div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Rate Plan chip */}
-                    <td><RatePlanChip name={rp?.ratePlanName || `Plan ${sub.ratePlanId}`} /></td>
-
-                    {/* Payment Type pill */}
-                    <td><PaymentPill value={sub.paymentType} /></td>
-
-                    {/* Purchased On */}
-                    <td>{purchased}</td>
-
-                    {/* Status */}
-                    <td>
-                      <StatusBadge
-                        label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
-                        variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
-                        size="sm"
-                      />
-                    </td>
-
-                    {/* Actions (Download, Edit/Resume, Delete) */}
-                    <td className="actions-cell">
-                      <div className="product-action-buttons">
-                        {/* Download */}
-                        <button
-                          className="download-button"
-                          onClick={() => handleDownload(sub)}
-                          title="Download"
-                          aria-label="Download"
+                      )}
+                    </div>
+                  </th>
+                  <th className="products-th-with-filter">
+                    <div
+                      ref={statusFilterRef}
+                      className="products-th-label-with-filter"
+                      onMouseEnter={() => setIsStatusFilterOpen(true)}
+                    >
+                      <span>Status</span>
+                      <button
+                        type="button"
+                        className={`products-column-filter-trigger ${
+                          isStatusFilterOpen ? 'is-open' : ''
+                        }`}
+                        aria-label="Filter by status"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="11"
+                          height="8"
+                          viewBox="0 0 11 8"
+                          fill="none"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
-                            <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
-                              stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </button>
-
-                        {sub.status?.toLowerCase() === 'draft' ? (
-                          <RetryIconButton
-                            onClick={() => setDraftSub(sub)}
-                            title="Continue editing draft"
+                          <path
+                            d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                            stroke="#19222D"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                           />
-                        ) : (
-                          <EditIconButton
-                            onClick={() => setEditingSub(sub)}
-                            title="Edit subscription"
-                          />
-                        )}
+                        </svg>
+                      </button>
 
-                        {/* Delete */}
-                        <DeleteIconButton
-                          onClick={() => handleDelete(sub)}
-                          title="Delete subscription"
-                        />
+                      {isStatusFilterOpen && (
+                        <div
+                          className="products-column-filter-popover"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="products-column-filter-list">
+                            {['active', 'draft'].map((statusKey) => (
+                              <div
+                                key={statusKey}
+                                className="products-column-filter-list-item"
+                              >
+                                <Checkbox
+                                  checked={selectedStatuses.includes(statusKey)}
+                                  onChange={(checked) => {
+                                    setSelectedStatuses((prev) => {
+                                      if (checked) {
+                                        if (prev.includes(statusKey)) return prev;
+                                        return [...prev, statusKey];
+                                      }
+                                      return prev.filter((x) => x !== statusKey);
+                                    });
+                                  }}
+                                  label={
+                                    statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
+                                  }
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                  <th className="actions-cell">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {isLoading && subscriptions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                      <div className="subscriptions-loading-state">
+                        <div className="spinner"></div>
+                        <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading purchases...</p>
                       </div>
                     </td>
                   </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                  <div className="subscriptions-empty-state">
-                    <img src={purchaseSvg} alt="" className="empty-state-icon" width={190} height={190} />
-                    <p className="customers-empty-state-text">
-                      No Purchases yet. Click 'New Purchase' to create your First Purchase.
-                    </p>
-                    <PrimaryButton
-                      onClick={() => navigate('/get-started/subscriptions/new')}
-                    >
-                      + New Purchase
-                    </PrimaryButton>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                ) : subscriptions.length > 0 ? (
+                  filtered.map(sub => {
+                    const cust = customerMap.get(sub.customerId);
+                    const rp = ratePlanMap.get(sub.ratePlanId);
 
-      <ConfirmDeleteModal
-        isOpen={!!subscriptionToDelete}
-        productName={subscriptionToDelete ? `Subscription ${subscriptionToDelete.subscriptionId}` : ''}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-      />
+                    // Backend already returns formatted date string, so use it directly
+                    const purchased = (sub as any).createdOn ||
+                      formatIST((sub as any).createdAt) ||
+                      formatIST((sub as any).startDate) ||
+                      '—';
+                    const logo = cust?.__resolvedLogoSrc || null;
+
+                    return (
+                      <tr key={sub.subscriptionId}>
+                        {/* Customer: logo + name + email */}
+                        <td className="sub-customer-cell">
+                          <div className="cell-flex">
+                            <div
+                              className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
+                              aria-label={`${cust?.customerName || 'Customer'} logo`}
+                              role="img"
+                              style={logo ? {
+                                backgroundImage: `url(${logo})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat'
+                              } : undefined}
+                            >
+                              {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
+                            </div>
+                            <div className="cust-block">
+                              <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
+                              <div className="cust-email">{cust?.primaryEmail || '—'}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Rate Plan chip */}
+                        <td><RatePlanChip name={rp?.ratePlanName || `Plan ${sub.ratePlanId}`} /></td>
+
+                        {/* Payment Type pill */}
+                        <td><PaymentPill value={sub.paymentType} /></td>
+
+                        {/* Purchased On */}
+                        <td>{purchased}</td>
+
+                        {/* Status */}
+                        <td>
+                          <StatusBadge
+                            label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
+                            variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
+                            size="sm"
+                          />
+                        </td>
+
+                        {/* Actions (Download, Edit/Resume, Delete) */}
+                        <td className="actions-cell">
+                          <div className="product-action-buttons">
+                            {/* Download */}
+                            <button
+                              className="download-button"
+                              onClick={() => handleDownload(sub)}
+                              title="Download"
+                              aria-label="Download"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
+                                <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
+                                  stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+
+                            {sub.status?.toLowerCase() === 'draft' ? (
+                              <RetryIconButton
+                                onClick={() => setDraftSub(sub)}
+                                title="Continue editing draft"
+                              />
+                            ) : (
+                              <EditIconButton
+                                onClick={() => setEditingSub(sub)}
+                                title="Edit subscription"
+                              />
+                            )}
+
+                            {/* Delete */}
+                            <DeleteIconButton
+                              onClick={() => handleDelete(sub)}
+                              title="Delete subscription"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                      <div className="subscriptions-empty-state">
+                        <img src={purchaseSvg} alt="" className="empty-state-icon" width={190} height={190} />
+                        <p className="customers-empty-state-text">
+                          No Purchases yet. Click 'New Purchase' to create your First Purchase.
+                        </p>
+                        <PrimaryButton
+                          onClick={() => navigate('/get-started/subscriptions/new')}
+                        >
+                          + New Purchase
+                        </PrimaryButton>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <ConfirmDeleteModal
+            isOpen={!!subscriptionToDelete}
+            productName={subscriptionToDelete ? `Subscription ${subscriptionToDelete.subscriptionId}` : ''}
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
+          />
+        </>
+      )}
     </div>
   );
 };

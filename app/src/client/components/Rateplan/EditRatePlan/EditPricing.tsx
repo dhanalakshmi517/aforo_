@@ -91,6 +91,21 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
           (!tier.isUnlimited && !tier.to?.toString().trim())
       );
       if (hasInvalidTier) e.tieredTiers = "All tier fields are required";
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < savedTiers.length; i++) {
+        const tier = savedTiers[i];
+        if (!tier.isUnlimited && tier.from && tier.to && Number(tier.to) <= Number(tier.from)) {
+          e.tieredTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && savedTiers[i - 1].to) {
+          const expectedFrom = Number(savedTiers[i - 1].to) + 1;
+          if (Number(tier.from) !== expectedFrom) {
+            e.tieredTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
       const hasUnlimited = savedTiers.some((t: any) => t.isUnlimited);
       if (!hasUnlimited) {
         const overage = localStorage.getItem('tieredOverage');
@@ -108,6 +123,21 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
           (!tier.isUnlimited && !tier.to?.toString().trim())
       );
       if (hasInvalidTier) e.volumeTiers = "All tier fields are required";
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < savedTiers.length; i++) {
+        const tier = savedTiers[i];
+        if (!tier.isUnlimited && tier.from && tier.to && Number(tier.to) <= Number(tier.from)) {
+          e.volumeTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && savedTiers[i - 1].to) {
+          const expectedFrom = Number(savedTiers[i - 1].to) + 1;
+          if (Number(tier.from) !== expectedFrom) {
+            e.volumeTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
       const hasUnlimited = savedTiers.some((t: any) => t.isUnlimited);
       if (!hasUnlimited) {
         const overage = localStorage.getItem('volumeOverage');
@@ -125,6 +155,21 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
           (!tier.isUnlimited && !tier.to?.toString().trim())
       );
       if (hasInvalidTier) e.stairTiers = "All tier fields are required";
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < savedTiers.length; i++) {
+        const stair = savedTiers[i];
+        if (!stair.isUnlimited && stair.from && stair.to && Number(stair.to) <= Number(stair.from)) {
+          e.stairTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && savedTiers[i - 1].to) {
+          const expectedFrom = Number(savedTiers[i - 1].to) + 1;
+          if (Number(stair.from) !== expectedFrom) {
+            e.stairTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
       const hasUnlimited = savedTiers.some((t: any) => t.isUnlimited);
       if (!hasUnlimited) {
         const overage = localStorage.getItem('stairOverage');

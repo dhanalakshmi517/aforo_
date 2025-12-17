@@ -68,6 +68,58 @@ export default function EditExtras({
   const [minimumUsage, setMinimumUsage] = useState('');
   const [minimumCharge, setMinimumCharge] = useState('');
 
+  // Validation errors
+  const [validationErrors, setValidationErrors] = useState({
+    discountPercentage: '',
+    discountStartDate: '',
+    discountEndDate: '',
+    freemiumStartDate: '',
+    freemiumEndDate: '',
+    freemiumDateRange: '',
+  });
+
+  // Validation helper functions
+  const validatePercentage = (value: string): string => {
+    const num = Number(value);
+    if (value && (isNaN(num) || num < 0)) {
+      return 'Percentage must be a positive number';
+    }
+    if (num > 100) {
+      return 'Percentage cannot exceed 100';
+    }
+    return '';
+  };
+
+  const validateDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const selectedDate = new Date(dateStr);
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setFullYear(today.getFullYear() + 50);
+
+    if (selectedDate > maxDate) {
+      return 'Date cannot be more than 50 years in the future';
+    }
+    return '';
+  };
+
+  const validateFreemiumDateRange = (startDate: string, endDate: string, trialDuration: number): string => {
+    if (!startDate || !endDate || !trialDuration) return '';
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Calculate difference in days
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays !== trialDuration) {
+      return `Date range must be exactly ${trialDuration} days (currently ${diffDays} days)`;
+    }
+    
+    return '';
+  };
+
   // Initialize from backend data (prefill)
   useEffect(() => {
     console.log('EditExtras - draftData changed:', draftData);
@@ -153,6 +205,66 @@ export default function EditExtras({
   // === saver exposed to parent ===
   const handleSaveExtras = async () => {
     if (!ratePlanId) return;
+
+    // Validate before saving
+    let hasErrors = false;
+
+    // Validate discount percentage
+    if (discountType === 'PERCENTAGE' && percentageDiscount) {
+      const percentError = validatePercentage(percentageDiscount);
+      if (percentError) {
+        setValidationErrors(prev => ({ ...prev, discountPercentage: percentError }));
+        hasErrors = true;
+      }
+    }
+
+    // Validate discount dates
+    if (discountStart) {
+      const startError = validateDate(discountStart);
+      if (startError) {
+        setValidationErrors(prev => ({ ...prev, discountStartDate: startError }));
+        hasErrors = true;
+      }
+    }
+    if (discountEnd) {
+      const endError = validateDate(discountEnd);
+      if (endError) {
+        setValidationErrors(prev => ({ ...prev, discountEndDate: endError }));
+        hasErrors = true;
+      }
+    }
+
+    // Validate freemium dates
+    if (freeStart) {
+      const startError = validateDate(freeStart);
+      if (startError) {
+        setValidationErrors(prev => ({ ...prev, freemiumStartDate: startError }));
+        hasErrors = true;
+      }
+    }
+    if (freeEnd) {
+      const endError = validateDate(freeEnd);
+      if (endError) {
+        setValidationErrors(prev => ({ ...prev, freemiumEndDate: endError }));
+        hasErrors = true;
+      }
+    }
+
+    // Validate freemium date range matches trial duration
+    if ((freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && 
+        freeTrialDuration && Number(freeTrialDuration) > 0 && 
+        freeStart && freeEnd) {
+      const rangeError = validateFreemiumDateRange(freeStart, freeEnd, Number(freeTrialDuration));
+      if (rangeError) {
+        setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+        hasErrors = true;
+      }
+    }
+
+    if (hasErrors) {
+      throw new Error('Validation errors present. Please fix them before saving.');
+    }
+
     try {
       // Setup Fee
       if (setupFee) {
@@ -425,8 +537,15 @@ export default function EditExtras({
                     setPercentageDiscount(e.target.value);
                     setRatePlanData('DISCOUNT_PERCENT', e.target.value);
                     setRatePlanData('PERCENTAGE_DISCOUNT', e.target.value);
+                    const error = validatePercentage(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, discountPercentage: error }));
                   }}
                 />
+                {validationErrors.discountPercentage && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.discountPercentage}
+                  </span>
+                )}
               </>
             )}
 
@@ -467,8 +586,15 @@ export default function EditExtras({
                   onChange={e => {
                     setDiscountStart(e.target.value);
                     setRatePlanData('DISCOUNT_START', e.target.value);
+                    const error = validateDate(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, discountStartDate: error }));
                   }}
                 />
+                {validationErrors.discountStartDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.discountStartDate}
+                  </span>
+                )}
               </div>
               <div className="date-input">
                 <label>End Date</label>
@@ -478,8 +604,15 @@ export default function EditExtras({
                   onChange={e => {
                     setDiscountEnd(e.target.value);
                     setRatePlanData('DISCOUNT_END', e.target.value);
+                    const error = validateDate(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, discountEndDate: error }));
                   }}
                 />
+                {validationErrors.discountEndDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.discountEndDate}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -535,7 +668,7 @@ export default function EditExtras({
 
             {(freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
-                <label>Select Free Trial Duration</label>
+                <label>Select Free Trial Duration (in days)</label>
                 <input
                   type="number"
                   placeholder="e.g., 14 (days)"
@@ -543,6 +676,11 @@ export default function EditExtras({
                   onChange={e => {
                     setFreeTrialDuration(e.target.value);
                     setRatePlanData('FREE_TRIAL_DURATION', e.target.value);
+                    // Revalidate date range when duration changes
+                    if (freeStart && freeEnd && e.target.value && Number(e.target.value) > 0) {
+                      const rangeError = validateFreemiumDateRange(freeStart, freeEnd, Number(e.target.value));
+                      setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+                    }
                   }}
                 />
               </>
@@ -557,8 +695,20 @@ export default function EditExtras({
                   onChange={e => {
                     setFreeStart(e.target.value);
                     setRatePlanData('FREEMIUM_START', e.target.value);
+                    const error = validateDate(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, freemiumStartDate: error }));
+                    // Validate date range if trial duration is set
+                    if (e.target.value && freeEnd && freeTrialDuration && Number(freeTrialDuration) > 0) {
+                      const rangeError = validateFreemiumDateRange(e.target.value, freeEnd, Number(freeTrialDuration));
+                      setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+                    }
                   }}
                 />
+                {validationErrors.freemiumStartDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.freemiumStartDate}
+                  </span>
+                )}
               </div>
               <div className="date-input">
                 <label>End Date</label>
@@ -568,10 +718,27 @@ export default function EditExtras({
                   onChange={e => {
                     setFreeEnd(e.target.value);
                     setRatePlanData('FREEMIUM_END', e.target.value);
+                    const error = validateDate(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, freemiumEndDate: error }));
+                    // Validate date range if trial duration is set
+                    if (freeStart && e.target.value && freeTrialDuration && Number(freeTrialDuration) > 0) {
+                      const rangeError = validateFreemiumDateRange(freeStart, e.target.value, Number(freeTrialDuration));
+                      setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+                    }
                   }}
                 />
+                {validationErrors.freemiumEndDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.freemiumEndDate}
+                  </span>
+                )}
               </div>
             </div>
+            {validationErrors.freemiumDateRange && (
+              <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                {validationErrors.freemiumDateRange}
+              </span>
+            )}
           </div>
         )}
       </div>

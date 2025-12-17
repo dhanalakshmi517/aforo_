@@ -45,8 +45,26 @@
 
 .edit-tiered-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 40px;
+  word-wrap: break-word;
+}
+
+.field-col.small-field {
+  width: 71px;
+  flex-shrink: 0;
+}
+
+.field-col.large-field {
+  width: 145px;
+  flex-shrink: 0;
 }
 
 .edit-tiered-input-small {

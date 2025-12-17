@@ -39,6 +39,12 @@ const EditTiered: React.FC<EditTieredProps> = ({
   const [graceBuffer, setGraceBuffer] = useState(externalGrace || '');
   const isInternalChange = useRef(false);
 
+  // Local validation state
+  type TierError = { from?: string; to?: string; price?: string };
+  type TierTouched = { from: boolean; to: boolean; price: boolean };
+  const [tierTouched, setTierTouched] = useState<TierTouched[]>([{ from: false, to: false, price: false }]);
+  const [tierErrors, setTierErrors] = useState<TierError[]>([{}]);
+
   // Sync with external props (only when not from internal change)
   useEffect(() => {
     if (externalTiers && !isInternalChange.current) {
@@ -74,8 +80,84 @@ const EditTiered: React.FC<EditTieredProps> = ({
     localStorage.setItem('tieredGrace', graceBuffer);
   }, [graceBuffer]);
 
+  // Validation helpers
+  const isNonNegInt = (s: string) => /^\d+$/.test(s);
+  const isPositiveNum = (s: string) => { const n = Number(s); return !Number.isNaN(n) && n > 0; };
+
+  const validateTier = (tier: Tier, index: number): TierError => {
+    const error: TierError = {};
+
+    if (tier.from.trim() === '') {
+      error.from = 'This is a required field';
+    } else if (Number.isNaN(Number(tier.from)) || Number(tier.from) < 0) {
+      error.from = 'Enter a valid value';
+    } else if (index > 0 && tiers[index - 1] && tiers[index - 1].to) {
+      const expectedFrom = Number(tiers[index - 1].to) + 1;
+      if (Number(tier.from) !== expectedFrom) {
+        error.from = `Must be ${expectedFrom} (previous tier end + 1)`;
+      }
+    }
+
+    if (!tier.isUnlimited) {
+      if (tier.to.trim() === '') {
+        error.to = 'This is a required field';
+      } else if (Number.isNaN(Number(tier.to)) || Number(tier.to) < 0) {
+        error.to = 'Enter a valid value';
+      } else if (!error.from && Number(tier.to) <= Number(tier.from)) {
+        error.to = 'Must be > From';
+      }
+    }
+
+    if (tier.price.trim() === '') {
+      error.price = 'This is a required field';
+    } else if (Number.isNaN(Number(tier.price)) || Number(tier.price) <= 0) {
+      error.price = 'Enter a valid value';
+    }
+
+    return error;
+  };
+
+  const ensureArrays = (length: number) => {
+    setTierTouched(prev => {
+      const newTouched = [...prev];
+      while (newTouched.length < length) {
+        newTouched.push({ from: false, to: false, price: false });
+      }
+      return newTouched.slice(0, length);
+    });
+    setTierErrors(prev => {
+      const newErrors = [...prev];
+      while (newErrors.length < length) {
+        newErrors.push({});
+      }
+      return newErrors.slice(0, length);
+    });
+  };
+
+  const markTouched = (index: number, field: keyof TierTouched) => {
+    setTierTouched(prev => {
+      const newTouched = [...prev];
+      if (!newTouched[index]) newTouched[index] = { from: false, to: false, price: false };
+      newTouched[index][field] = true;
+      return newTouched;
+    });
+  };
+
+  // Run validation on tiers change
+  useEffect(() => {
+    ensureArrays(tiers.length);
+    setTierErrors(tiers.map((tier, index) => validateTier(tier, index)));
+  }, [tiers]);
+
   const handleAddTier = () => {
-    setTiers(prev => [...prev, { from: '', to: '', price: '', isUnlimited: false }]);
+    setTiers(prev => {
+      // Auto-populate 'from' field based on previous tier's 'to' value + 1
+      let newFrom = '';
+      if (prev.length > 0 && prev[prev.length - 1].to) {
+        newFrom = String(Number(prev[prev.length - 1].to) + 1);
+      }
+      return [...prev, { from: newFrom, to: '', price: '', isUnlimited: false }];
+    });
   };
 
   const handleDeleteTier = (index: number) => {
@@ -84,9 +166,25 @@ const EditTiered: React.FC<EditTieredProps> = ({
 
   const handleChange = (index: number, field: keyof Tier, value: string) => {
     // Update state only; persistence handled by useEffect([tiers])
-    setTiers(prev =>
-      prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[]
-    );
+    setTiers(prev => {
+      const updated = prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[];
+      
+      // If 'to' field changed, update next tier's 'from' field
+      if (field === 'to' && value && !isNaN(Number(value)) && index < updated.length - 1) {
+        updated[index + 1] = { ...updated[index + 1], from: String(Number(value) + 1) };
+      }
+      
+      return updated;
+    });
+
+    // Clear local touched state on change
+    if (field !== 'isUnlimited') {
+      setTierTouched(prev => {
+        const newTouched = [...prev];
+        if (newTouched[index]) newTouched[index][field as keyof TierTouched] = false;
+        return newTouched;
+      });
+    }
 
     // Clear validation error for this tier field
     if (value.trim() && onClearError) {
@@ -119,26 +217,44 @@ const EditTiered: React.FC<EditTieredProps> = ({
 
         {tiers.map((tier, index) => (
           <div className="edit-tiered-row" key={index}>
-            <input
-              className="edit-tiered-input-small"
-              value={tier.from}
-              onChange={(e) => handleChange(index, 'from', e.target.value)}
-              placeholder="From"
-            />
+            <div className="field-col small-field">
+              <input
+                className={`edit-tiered-input-small ${tierTouched[index]?.from && tierErrors[index]?.from ? 'error-input' : ''}`}
+                value={tier.from}
+                onChange={(e) => handleChange(index, 'from', e.target.value)}
+                onBlur={() => markTouched(index, 'from')}
+                placeholder="From"
+              />
+              {tierTouched[index]?.from && tierErrors[index]?.from && (
+                <span className="error-text">{tierErrors[index].from}</span>
+              )}
+            </div>
             <span>-</span>
-            <input
-              className="edit-tiered-input-small"
-              value={tier.isUnlimited ? 'Unlimited' : tier.to}
-              placeholder="To"
-              disabled={tier.isUnlimited}
-              onChange={(e) => handleChange(index, 'to', e.target.value)}
-            />
-            <input
-              className="edit-tiered-input-large"
-              value={tier.price}
-              onChange={(e) => handleChange(index, 'price', e.target.value)}
-              placeholder="Price"
-            />
+            <div className="field-col small-field">
+              <input
+                className={`edit-tiered-input-small ${!tier.isUnlimited && tierTouched[index]?.to && tierErrors[index]?.to ? 'error-input' : ''}`}
+                value={tier.isUnlimited ? 'Unlimited' : tier.to}
+                placeholder="To"
+                disabled={tier.isUnlimited}
+                onChange={(e) => handleChange(index, 'to', e.target.value)}
+                onBlur={() => markTouched(index, 'to')}
+              />
+              {!tier.isUnlimited && tierTouched[index]?.to && tierErrors[index]?.to && (
+                <span className="error-text">{tierErrors[index].to}</span>
+              )}
+            </div>
+            <div className="field-col large-field">
+              <input
+                className={`edit-tiered-input-large ${tierTouched[index]?.price && tierErrors[index]?.price ? 'error-input' : ''}`}
+                value={tier.price}
+                onChange={(e) => handleChange(index, 'price', e.target.value)}
+                onBlur={() => markTouched(index, 'price')}
+                placeholder="Price"
+              />
+              {tierTouched[index]?.price && tierErrors[index]?.price && (
+                <span className="error-text">{tierErrors[index].price}</span>
+              )}
+            </div>
             <button className="edit-tiered-delete-btn" onClick={() => handleDeleteTier(index)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 4.00016H14M12.6667 4.00016V13.3335C12.6667 14.0002 12 14.6668 11.3333 14.6668H4.66667C4 14.6668 3.33333 14.0002 3.33333 13.3335V4.00016M5.33333 4.00016V2.66683C5.33333 2.00016 6 1.3335 6.66667 1.3335H9.33333C10 1.3335 10.6667 2.00016 10.6667 2.66683V4.00016M6.66667 7.3335V11.3335M9.33333 7.3335V11.3335" stroke="#E34935" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -178,9 +294,7 @@ const EditTiered: React.FC<EditTieredProps> = ({
                 onChange={(e) => {
                   setOverageCharge(e.target.value);
                   onOverageChange?.(e.target.value);
-                  if (e.target.value.trim() && onClearError) {
-                    onClearError('tieredOverage');
-                  }
+                  if (onClearError) onClearError('tieredOverage');
                 }}
                 placeholder="Enter overage charge"
               />

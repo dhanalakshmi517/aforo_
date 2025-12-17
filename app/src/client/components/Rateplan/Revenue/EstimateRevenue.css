@@ -123,7 +123,6 @@ h2 {
 
 
 .estimate-table thead {
-    margin-left: -60px;
     background-color: var(--color-neutral-300);
     color: var(--color-neutral-800);
     border-radius: var(--border-radius-sm);
@@ -136,8 +135,29 @@ h2 {
     border-bottom: 1px solid var(--color-neutral-200);
 }
 
-.total-row {
-    font-weight: bold;
+.estimate-table th {
+    padding: 12px;
+    text-align: left;
+}
+
+.total-row td:first-child {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    flex: 1 0 0;
+    overflow: hidden;
+    color: var(--text-text-darker, #25303D);
+    text-overflow: ellipsis;
+    font-family: var(--type-font-family-primary, var(--font-family-primary));
+    font-size: var(--fontsize-heading-h6, 18px);
+    font-style: normal;
+    font-weight: 700;
+    line-height: var(--line-height-heading-h6, 24px);
+}
+
+.total-row td {
+    font-weight: 700;
 }
 
 .loader {
