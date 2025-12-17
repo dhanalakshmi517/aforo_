@@ -322,7 +322,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
         disabled={locked}
         className="add-btn"
       >
-        + Add Filter
+        + Add Usage
       </SecondaryButton>
     </div>
   );

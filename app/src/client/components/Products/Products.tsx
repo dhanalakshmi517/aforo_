@@ -1344,8 +1344,18 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       </tr>
                     ) : !isLoading && filteredProducts.length === 0 ? (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', borderBottom: 'none', color: '#4B5563', fontSize: '14px' }}>
-                          No products found.
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="products-empty-state">
+                            <img src={EmptyBox} alt="No products" style={{ width: 200, height: 200 }} />
+                            <p className="products-empty-state-text" style={{ marginTop: 8 }}>
+                              No products available. Click "Create Product" to <br /> create your first product.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                              <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
+                                + Create Product
+                              </PrimaryButton>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     ) : (

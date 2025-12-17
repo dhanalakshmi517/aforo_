@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 import EditIconButton from '../componenetsss/EditIconButton';
@@ -14,6 +15,8 @@ import PageHeader from '../PageHeader/PageHeader';
 import { getAuthHeaders } from '../../utils/auth';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import { Checkbox } from '../componenetsss/Checkbox';
+import FilterChip from '../componenetsss/FilterChip';
 
 // Empty cart SVG icon (file URL)
 import purchaseSvg from './purchase.svg';
@@ -127,7 +130,10 @@ interface SubscriptionsProps {
 const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, setShowNewSubscriptionForm }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [purchasedSortOrder, setPurchasedSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [editingSub, setEditingSub] = useState<SubscriptionType | null>(null);
+
   const [draftSub, setDraftSub] = useState<SubscriptionType | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -137,6 +143,11 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   // lookups for names/emails/logos
   const [customers, setCustomers] = useState<CustomerLite[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlanLite[]>([]);
+
+  const statusFilterRef = useRef<HTMLDivElement | null>(null);
+  const purchasedSortRef = useRef<HTMLDivElement | null>(null);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+  const [isPurchasedSortOpen, setIsPurchasedSortOpen] = useState(false);
 
   const customerMap = useMemo(() => {
     const m = new Map<number, CustomerLite>();
@@ -151,6 +162,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   }, [ratePlans]);
 
   const fetchSubs = () => {
+
     setIsLoading(true);
     Api.getSubscriptions()
       .then(data => {
@@ -219,6 +231,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   };
 
   useEffect(() => {
+
     fetchSubs();
     fetchLookups();
     return () => {
@@ -238,43 +251,28 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingSub, draftSub]);
 
-  // create & edit wizards
-  if (editingSub) {
-    return <EditSubscription onClose={() => setEditingSub(null)} initial={editingSub} onRefresh={fetchSubs} />;
-  }
+  // Close popovers when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
 
-  if (showNewSubscriptionForm && !draftSub) {
-    return (
-      <CreateSubscription
-        onClose={() => setShowNewSubscriptionForm(false)}
-        onCreateSuccess={(sub) => {
-          setSubscriptions(prev => [sub, ...prev]);
-          setShowNewSubscriptionForm(false);
-        }}
-        onRefresh={fetchSubs}
-      />
-    );
-  }
+      if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
+        setIsStatusFilterOpen(false);
+      }
 
-  if (draftSub) {
-    return (
-      <CreateSubscription
-        onClose={() => {
-          setDraftSub(null);
-          setShowNewSubscriptionForm(false);
-        }}
-        onCreateSuccess={(sub) => {
-          setSubscriptions(prev => prev.map(s => s.subscriptionId === sub.subscriptionId ? sub : s));
-          setDraftSub(null);
-          setShowNewSubscriptionForm(false);
-        }}
-        onRefresh={fetchSubs}
-        draftData={draftSub}
-      />
-    );
-  }
+      if (purchasedSortRef.current && target && !purchasedSortRef.current.contains(target)) {
+        setIsPurchasedSortOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const filtered = subscriptions.filter(sub => {
+
     const q = (searchQuery || '').trim().toLowerCase();
     if (!q) return true;
 
@@ -295,17 +293,39 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       paymentType.includes(q) ||
       status.includes(q)
     );
-  }).sort((a, b) => {
-    // Priority 1: Draft status subscriptions appear first
-    const aIsDraft = a.status?.toLowerCase() === 'draft';
-    const bIsDraft = b.status?.toLowerCase() === 'draft';
+  })
+  // Status filter
+  .filter((sub) => {
+    if (selectedStatuses.length === 0) return true;
+    const statusKey = (sub.status || '').toLowerCase();
+    return selectedStatuses.includes(statusKey);
+  })
+  // Sort: drafts first, then by purchased/created date according to purchasedSortOrder
+  .sort((a, b) => {
+    const aStatus = (a.status || '').toLowerCase();
+    const bStatus = (b.status || '').toLowerCase();
 
-    if (aIsDraft && !bIsDraft) return -1;
-    if (!aIsDraft && bIsDraft) return 1;
+    const aDraft = aStatus === 'draft';
+    const bDraft = bStatus === 'draft';
+    if (aDraft && !bDraft) return -1;
+    if (!aDraft && bDraft) return 1;
 
-    // Priority 2: Sort by subscriptionId (LIFO - higher IDs = newer = first)
-    // This is more reliable than parsing date strings
-    return b.subscriptionId - a.subscriptionId;
+    const parseDate = (sub: SubscriptionType) => {
+      const raw: any = sub as any;
+      const iso = raw.createdOn || raw.createdAt || raw.startDate;
+      if (!iso) return 0;
+      const t = Date.parse(iso);
+      return Number.isNaN(t) ? 0 : t;
+    };
+
+    const aDate = parseDate(a);
+    const bDate = parseDate(b);
+
+    if (aDate === bDate) return 0;
+    if (purchasedSortOrder === 'oldest') {
+      return aDate - bDate;
+    }
+    return bDate - aDate;
   });
 
   const isEmpty = subscriptions.length === 0;
@@ -327,6 +347,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   return (
     <div className="check-container">
       <PageHeader
+
         title="Purchases"
         searchTerm={searchQuery}
         onSearchTermChange={setSearchQuery}
@@ -340,6 +361,31 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
 
       />
 
+      {selectedStatuses.length > 0 && (
+        <div className="products-active-filters-row">
+          <div className="products-active-filters-chips">
+            {selectedStatuses.map((s) => (
+              <FilterChip
+                key={s}
+                label={s.charAt(0).toUpperCase() + s.slice(1)}
+                onRemove={() =>
+                  setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                }
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="products-filters-reset"
+            onClick={() => {
+              setSelectedStatuses([]);
+            }}
+          >
+            Clear all
+          </button>
+        </div>
+      )}
+
       <div className="customers-table-wrapper">
         <table className="customers-table">
           <thead>
@@ -347,8 +393,169 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
               <th>Customer Name</th>
               <th>Rate Plan</th>
               <th>Payment Type</th>
-              <th>Purchased On</th>
-              <th>Status</th>
+              <th className="products-th-with-filter">
+                <div
+                  ref={purchasedSortRef}
+                  className="products-th-label-with-filter"
+                  onMouseEnter={() => setIsPurchasedSortOpen(true)}
+                >
+                  <span>Purchased On</span>
+                  <button
+                    type="button"
+                    className={`products-column-filter-trigger ${
+                      isPurchasedSortOpen ? 'is-open' : ''
+                    }`}
+                    aria-label="Sort by purchased date"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                    >
+                      <path
+                        d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
+                        stroke="#25303D"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isPurchasedSortOpen && (
+                    <div
+                      className="products-column-filter-popover products-createdon-popover"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        className={`products-sort-option ${
+                          purchasedSortOrder === 'newest' ? 'is-active' : ''
+                        }`}
+                        onClick={() => {
+                          setPurchasedSortOrder('newest');
+                          setIsPurchasedSortOpen(false);
+                        }}
+                      >
+                        <span className="products-sort-option-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="13"
+                            height="13"
+                            viewBox="0 0 13 13"
+                            fill="none"
+                          >
+                            <path
+                              d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
+                              stroke="#25303D"
+                              strokeWidth="1.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span className="products-sort-option-label">Newest first</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`products-sort-option ${
+                          purchasedSortOrder === 'oldest' ? 'is-active' : ''
+                        }`}
+                        onClick={() => {
+                          setPurchasedSortOrder('oldest');
+                          setIsPurchasedSortOpen(false);
+                        }}
+                      >
+                        <span className="products-sort-option-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
+                              stroke="#25303D"
+                              strokeWidth="1.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span className="products-sort-option-label">Oldest first</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </th>
+              <th className="products-th-with-filter">
+                <div
+                  ref={statusFilterRef}
+                  className="products-th-label-with-filter"
+                  onMouseEnter={() => setIsStatusFilterOpen(true)}
+                >
+                  <span>Status</span>
+                  <button
+                    type="button"
+                    className={`products-column-filter-trigger ${
+                      isStatusFilterOpen ? 'is-open' : ''
+                    }`}
+                    aria-label="Filter by status"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="11"
+                      height="8"
+                      viewBox="0 0 11 8"
+                      fill="none"
+                    >
+                      <path
+                        d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                        stroke="#19222D"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isStatusFilterOpen && (
+                    <div
+                      className="products-column-filter-popover"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="products-column-filter-list">
+                        {['active', 'draft'].map((statusKey) => (
+                          <div
+                            key={statusKey}
+                            className="products-column-filter-list-item"
+                          >
+                            <Checkbox
+                              checked={selectedStatuses.includes(statusKey)}
+                              onChange={(checked) => {
+                                setSelectedStatuses((prev) => {
+                                  if (checked) {
+                                    if (prev.includes(statusKey)) return prev;
+                                    return [...prev, statusKey];
+                                  }
+                                  return prev.filter((x) => x !== statusKey);
+                                });
+                              }}
+                              label={
+                                statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </th>
               <th className="actions-cell">Actions</th>
             </tr>
           </thead>

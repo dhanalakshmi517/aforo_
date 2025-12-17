@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateUsageMetric from "./CreateUsageMetric";
 import EditMetrics from "./EditMetering/EditMetrics";
@@ -17,6 +17,8 @@ import { logout } from "../../utils/auth";
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import Tooltip from '../componenetsss/Tooltip';
+import { Checkbox } from '../componenetsss/Checkbox';
+import FilterChip from '../componenetsss/FilterChip';
 
 // Props for Metering component
 interface MeteringProps {
@@ -80,6 +82,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const display = (v: any) => (v === undefined || v === null || String(v).trim() === '' ? '-' : v);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteMetricId, setDeleteMetricId] = useState<number | null>(null);
   const [deleteMetricName, setDeleteMetricName] = useState<string>('');
@@ -89,6 +93,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const { showToast } = useToast();
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [showEditMetricForm, setShowEditMetricForm] = useState(false);
+
+  // Column filter / sort popover state
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+  const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
+  const statusFilterRef = useRef<HTMLDivElement | null>(null);
+  const createdSortRef = useRef<HTMLDivElement | null>(null);
 
   // manage sidebar visibility
   useEffect(() => {
@@ -226,13 +236,57 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         status.includes(q)
       );
     })
+    // Status filter
+    .filter((m) => {
+      if (selectedStatuses.length === 0) return true;
+      const statusKey = (m.status || '').toLowerCase();
+      return selectedStatuses.includes(statusKey);
+    })
+    // Sort: drafts first, then by createdOn according to createdSortOrder
     .sort((a, b) => {
-      const aDraft = a.status?.toLowerCase() === 'draft';
-      const bDraft = b.status?.toLowerCase() === 'draft';
+      const aStatus = (a.status || '').toLowerCase();
+      const bStatus = (b.status || '').toLowerCase();
+
+      const aDraft = aStatus === 'draft';
+      const bDraft = bStatus === 'draft';
       if (aDraft && !bDraft) return -1;
       if (!aDraft && bDraft) return 1;
-      return 0;
+
+      const parseDate = (d?: string) => {
+        if (!d) return 0;
+        const t = Date.parse(d);
+        return Number.isNaN(t) ? 0 : t;
+      };
+
+      const aDate = parseDate(a.createdOn);
+      const bDate = parseDate(b.createdOn);
+
+      if (aDate === bDate) return 0;
+      if (createdSortOrder === 'oldest') {
+        return aDate - bDate;
+      }
+      return bDate - aDate;
     });
+
+  // Close popovers when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+
+      if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
+        setIsStatusFilterOpen(false);
+      }
+
+      if (createdSortRef.current && target && !createdSortRef.current.contains(target)) {
+        setIsCreatedSortOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="check-container">
@@ -248,6 +302,30 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         showPrimary={metrics.length > 0}
         showIntegrations={metrics.length > 0}
       />
+      {selectedStatuses.length > 0 && (
+        <div className="products-active-filters-row">
+          <div className="products-active-filters-chips">
+            {selectedStatuses.map((s) => (
+              <FilterChip
+                key={s}
+                label={s.charAt(0).toUpperCase() + s.slice(1)}
+                onRemove={() =>
+                  setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                }
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="products-filters-reset"
+            onClick={() => {
+              setSelectedStatuses([]);
+            }}
+          >
+            Clear all
+          </button>
+        </div>
+      )}
       <div className="customers-table-wrapper">
         <table className="customers-table">
           <thead>
@@ -255,8 +333,169 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               <th>Usage Metric</th>
               <th>Product Name</th>
               <th>Unit Of Measure</th>
-              <th>Status</th>
-              <th>Created On</th>
+              <th className="products-th-with-filter">
+                <div
+                  ref={statusFilterRef}
+                  className="products-th-label-with-filter"
+                  onMouseEnter={() => setIsStatusFilterOpen(true)}
+                >
+                  <span>Status</span>
+                  <button
+                    type="button"
+                    className={`products-column-filter-trigger ${
+                      isStatusFilterOpen ? 'is-open' : ''
+                    }`}
+                    aria-label="Filter by status"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="11"
+                      height="8"
+                      viewBox="0 0 11 8"
+                      fill="none"
+                    >
+                      <path
+                        d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                        stroke="#19222D"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isStatusFilterOpen && (
+                    <div
+                      className="products-column-filter-popover"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="products-column-filter-list">
+                        {['active', 'draft'].map((statusKey) => (
+                          <div
+                            key={statusKey}
+                            className="products-column-filter-list-item"
+                          >
+                            <Checkbox
+                              checked={selectedStatuses.includes(statusKey)}
+                              onChange={(checked) => {
+                                setSelectedStatuses((prev) => {
+                                  if (checked) {
+                                    if (prev.includes(statusKey)) return prev;
+                                    return [...prev, statusKey];
+                                  }
+                                  return prev.filter((x) => x !== statusKey);
+                                });
+                              }}
+                              label={
+                                statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </th>
+              <th className="products-th-with-filter">
+                <div
+                  ref={createdSortRef}
+                  className="products-th-label-with-filter"
+                  onMouseEnter={() => setIsCreatedSortOpen(true)}
+                >
+                  <span>Created On</span>
+                  <button
+                    type="button"
+                    className={`products-column-filter-trigger ${
+                      isCreatedSortOpen ? 'is-open' : ''
+                    }`}
+                    aria-label="Sort by created date"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                    >
+                      <path
+                        d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
+                        stroke="#25303D"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isCreatedSortOpen && (
+                    <div
+                      className="products-column-filter-popover products-createdon-popover"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        className={`products-sort-option ${
+                          createdSortOrder === 'newest' ? 'is-active' : ''
+                        }`}
+                        onClick={() => {
+                          setCreatedSortOrder('newest');
+                          setIsCreatedSortOpen(false);
+                        }}
+                      >
+                        <span className="products-sort-option-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="13"
+                            height="13"
+                            viewBox="0 0 13 13"
+                            fill="none"
+                          >
+                            <path
+                              d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
+                              stroke="#25303D"
+                              strokeWidth="1.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span className="products-sort-option-label">Newest first</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`products-sort-option ${
+                          createdSortOrder === 'oldest' ? 'is-active' : ''
+                        }`}
+                        onClick={() => {
+                          setCreatedSortOrder('oldest');
+                          setIsCreatedSortOpen(false);
+                        }}
+                      >
+                        <span className="products-sort-option-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
+                              stroke="#25303D"
+                              strokeWidth="1.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span className="products-sort-option-label">Oldest first</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </th>
               <th className="actions-cell">Actions</th>
 
             </tr>
