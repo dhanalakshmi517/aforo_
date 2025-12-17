@@ -120,14 +120,20 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
     const isNonNegInt = (s: string) => /^\d+$/.test(s);
     const isPositiveNum = (s: string) => { const n = Number(s); return !Number.isNaN(n) && n > 0; };
 
-    const validateRow = (r: Stair): RowError => {
+    const validateRow = (r: Stair, index: number): RowError => {
       const e: RowError = {};
       if ((r.from ?? '').trim() === '') e.from = 'This is a required field';
       else if (!isNonNegInt(r.from!)) e.from = 'Enter a valid value';
+      else if (index > 0 && stairs[index - 1] && stairs[index - 1].to) {
+        const expectedFrom = Number(stairs[index - 1].to) + 1;
+        if (Number(r.from) !== expectedFrom) {
+          e.from = `Must be ${expectedFrom} (previous tier end + 1)`;
+        }
+      }
       if (!r.isUnlimited) {
         if ((r.to ?? '').trim() === '') e.to = 'This is a required field';
         else if (!isNonNegInt(r.to!)) e.to = 'Enter a valid value';
-        if (!e.from && !e.to && Number(r.to) < Number(r.from)) e.to = 'Must be ≥ From';
+        if (!e.from && !e.to && Number(r.to) <= Number(r.from)) e.to = 'Must be > From';
       }
       if ((r.cost ?? '').trim() === '') e.cost = 'This is a required field';
       else if (!isPositiveNum(r.cost!)) e.cost = 'Enter a valid value';
@@ -142,7 +148,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
 
     useEffect(() => {
       ensureArrays(stairs.length);
-      setRowErrors(stairs.map(validateRow));
+      setRowErrors(stairs.map((stair, index) => validateRow(stair, index)));
       setMustHaveOneError(stairs.length === 0 ? 'At least one stair is required' : null);
 
       if (!unlimited) {
@@ -173,8 +179,14 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
         updated[updated.length - 1].isUnlimited = false;
       }
 
+      // Auto-populate 'from' field based on previous tier's 'to' value + 1
+      let newFrom = '';
+      if (updated.length > 0 && updated[updated.length - 1].to) {
+        newFrom = String(Number(updated[updated.length - 1].to) + 1);
+      }
+
       // Add new stair with unlimited = false
-      const next = [...updated, { from: '', to: '', cost: '', isUnlimited: false }];
+      const next = [...updated, { from: newFrom, to: '', cost: '', isUnlimited: false }];
       setStairs(next);
       pushChangeUp(next);
     };
@@ -192,7 +204,14 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
 
     const change = (i: number, field: keyof Stair, val: string) => {
       if (field === 'to' && stairs[i].isUnlimited) return;
-      const n = [...stairs]; (n[i] as any)[field] = val; setStairs(n);
+      const n = [...stairs]; (n[i] as any)[field] = val;
+      
+      // If 'to' field changed, update next tier's 'from' field
+      if (field === 'to' && val && isNonNegInt(val) && i < n.length - 1) {
+        n[i + 1].from = String(Number(val) + 1);
+      }
+      
+      setStairs(n);
       pushChangeUp(n);
 
       // Clear parent validation errors when user types
@@ -248,7 +267,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
             const t = touched[i] || { from: false, to: false, cost: false };
             return (
               <div className="stair-row" key={i}>
-                <div className="field-col">
+                <div className="field-col small-field">
                   <input
                     className={`input-small ${t.from && e.from ? 'error-input' : ''}`}
                     value={row.from}
@@ -262,7 +281,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
 
                 <span className="dash">-</span>
 
-                <div className="field-col">
+                <div className="field-col small-field">
                   <input
                     className={`input-small ${t.to && e.to ? 'error-input' : ''}`}
                     value={row.isUnlimited ? 'Unlimited' : row.to}
@@ -274,7 +293,7 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                   {!row.isUnlimited && t.to && e.to && <span className="error-text">{e.to}</span>}
                 </div>
 
-                <div className="field-col">
+                <div className="field-col large-field">
                   <input
                     className={`input-large ${t.cost && e.cost ? 'error-input' : ''}`}
                     value={row.cost}
@@ -317,7 +336,12 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                   type="text"
                   className={`input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                   value={overageCharge}
-                  onChange={(e) => { setOverageCharge(e.target.value); pushOverageUp(e.target.value); }}
+                  onChange={(e) => { 
+                    setOverageCharge(e.target.value); 
+                    pushOverageUp(e.target.value);
+                    if (overageTouched) setOverageTouched(false);
+                    if (onClearError) onClearError('stairOverage');
+                  }}
                   onBlur={() => setOverageTouched(true)}
                   placeholder="Enter overage charge"
                   disabled={locked}

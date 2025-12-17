@@ -472,6 +472,58 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
     endDate: '',
   });
 
+  /** Validation errors */
+  const [validationErrors, setValidationErrors] = useState({
+    discountPercentage: '',
+    discountStartDate: '',
+    discountEndDate: '',
+    freemiumStartDate: '',
+    freemiumEndDate: '',
+    freemiumDateRange: '',
+  });
+
+  /** Validation helper functions */
+  const validatePercentage = (value: string): string => {
+    const num = Number(value);
+    if (value && (isNaN(num) || num < 0)) {
+      return 'Percentage must be a positive number';
+    }
+    if (num > 100) {
+      return 'Percentage cannot exceed 100';
+    }
+    return '';
+  };
+
+  const validateDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const selectedDate = new Date(dateStr);
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setFullYear(today.getFullYear() + 50);
+
+    if (selectedDate > maxDate) {
+      return 'Date cannot be more than 50 years in the future';
+    }
+    return '';
+  };
+
+  const validateFreemiumDateRange = (startDate: string, endDate: string, trialDuration: number): string => {
+    if (!startDate || !endDate || !trialDuration) return '';
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Calculate difference in days
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays !== trialDuration) {
+      return `Date range must be exactly ${trialDuration} days (currently ${diffDays} days)`;
+    }
+    
+    return '';
+  };
+
   /** Freemium */
   const [freemiumType, setFreemiumType] = useState<UIFreemiumType>('' as any); // Start with no selection
 
@@ -883,10 +935,19 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                 <InputField
                   type="number"
                   value={discountForm.percentageDiscountStr}
-                  onChange={(val) => setDiscountForm({ ...discountForm, percentageDiscountStr: val })}
+                  onChange={(val) => {
+                    setDiscountForm({ ...discountForm, percentageDiscountStr: val });
+                    const error = validatePercentage(val);
+                    setValidationErrors(prev => ({ ...prev, discountPercentage: error }));
+                  }}
                   placeholder="e.g., 10"
                   disabled={locked}
                 />
+                {validationErrors.discountPercentage && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.discountPercentage}
+                  </span>
+                )}
               </>
             )}
 
@@ -910,18 +971,36 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                 <InputField
                   type="date"
                   value={discountForm.startDate}
-                  onChange={(val) => setDiscountForm({ ...discountForm, startDate: val })}
+                  onChange={(val) => {
+                    setDiscountForm({ ...discountForm, startDate: val });
+                    const error = validateDate(val);
+                    setValidationErrors(prev => ({ ...prev, discountStartDate: error }));
+                  }}
                   disabled={locked}
                 />
+                {validationErrors.discountStartDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.discountStartDate}
+                  </span>
+                )}
               </div>
               <div className="date-input">
                 <label>End Date</label>
                 <InputField
                   type="date"
                   value={discountForm.endDate}
-                  onChange={(val) => setDiscountForm({ ...discountForm, endDate: val })}
+                  onChange={(val) => {
+                    setDiscountForm({ ...discountForm, endDate: val });
+                    const error = validateDate(val);
+                    setValidationErrors(prev => ({ ...prev, discountEndDate: error }));
+                  }}
                   disabled={locked}
                 />
+                {validationErrors.discountEndDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.discountEndDate}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -931,6 +1010,22 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
               disabled={locked || !ratePlanId || saveState.discounts === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
+
+                // Validate before saving
+                if (discountForm.discountType === 'PERCENTAGE') {
+                  const percentError = validatePercentage(discountForm.percentageDiscountStr);
+                  if (percentError) {
+                    setValidationErrors(prev => ({ ...prev, discountPercentage: percentError }));
+                    return;
+                  }
+                }
+                const startDateError = validateDate(discountForm.startDate);
+                const endDateError = validateDate(discountForm.endDate);
+                if (startDateError || endDateError) {
+                  setValidationErrors(prev => ({ ...prev, discountStartDate: startDateError, discountEndDate: endDateError }));
+                  return;
+                }
+
                 setSaveState(s => ({ ...s, discounts: 'saving' }));
 
                 const percentVal = Number(discountForm.percentageDiscountStr || 0);
@@ -1039,17 +1134,23 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
 
             {(freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && (
               <>
-                <label>Select Free Trial Duration</label>
+                <label>Select Free Trial Duration (in days)</label>
                 <InputField
                   type="number"
                   value={freemiumPayload.freeTrialDuration === 0 ? '' : String(freemiumPayload.freeTrialDuration)}
                   onChange={(val) => {
+                    const duration = val.trim() === '' ? 0 : Number(val);
                     setFreemiumPayload({
                       ...freemiumPayload,
-                      freeTrialDuration: val.trim() === '' ? 0 : Number(val),
+                      freeTrialDuration: duration,
                     });
+                    // Revalidate date range when duration changes
+                    if (freemiumPayload.startDate && freemiumPayload.endDate && duration > 0) {
+                      const rangeError = validateFreemiumDateRange(freemiumPayload.startDate, freemiumPayload.endDate, duration);
+                      setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+                    }
                   }}
-                  placeholder="Enter Trial Duration"
+                  placeholder="Enter Trial Duration (days)"
                   disabled={locked}
                 />
               </>
@@ -1061,20 +1162,53 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                 <InputField
                   type="date"
                   value={freemiumPayload.startDate}
-                  onChange={(val) => setFreemiumPayload({ ...freemiumPayload, startDate: val })}
+                  onChange={(val) => {
+                    setFreemiumPayload({ ...freemiumPayload, startDate: val });
+                    const error = validateDate(val);
+                    setValidationErrors(prev => ({ ...prev, freemiumStartDate: error }));
+                    // Validate date range if trial duration is set
+                    if (val && freemiumPayload.endDate && freemiumPayload.freeTrialDuration > 0) {
+                      const rangeError = validateFreemiumDateRange(val, freemiumPayload.endDate, freemiumPayload.freeTrialDuration);
+                      setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+                    }
+                  }}
                   disabled={locked}
                 />
+                {validationErrors.freemiumStartDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.freemiumStartDate}
+                  </span>
+                )}
               </div>
               <div className="date-input">
                 <label>End Date</label>
                 <InputField
                   type="date"
                   value={freemiumPayload.endDate}
-                  onChange={(val) => setFreemiumPayload({ ...freemiumPayload, endDate: val })}
+                  onChange={(val) => {
+                    setFreemiumPayload({ ...freemiumPayload, endDate: val });
+                    const error = validateDate(val);
+                    setValidationErrors(prev => ({ ...prev, freemiumEndDate: error }));
+                    // Validate date range if trial duration is set
+                    if (freemiumPayload.startDate && val && freemiumPayload.freeTrialDuration > 0) {
+                      const rangeError = validateFreemiumDateRange(freemiumPayload.startDate, val, freemiumPayload.freeTrialDuration);
+                      setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
+                    }
+                  }}
                   disabled={locked}
                 />
+                {validationErrors.freemiumEndDate && (
+                  <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    {validationErrors.freemiumEndDate}
+                  </span>
+                )}
               </div>
             </div>
+            {validationErrors.freemiumDateRange && (
+              <span style={{ color: '#E34935', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                {validationErrors.freemiumDateRange}
+              </span>
+            )}
 
             <button
               type="button"
@@ -1082,6 +1216,34 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
               disabled={locked || !ratePlanId || saveState.freemium === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
+
+                // Validate dates before saving
+                const startDateError = validateDate(freemiumPayload.startDate);
+                const endDateError = validateDate(freemiumPayload.endDate);
+                let dateRangeError = '';
+                
+                // Validate date range matches trial duration for FREE_TRIAL_DURATION types
+                if ((freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && 
+                    freemiumPayload.freeTrialDuration > 0 && 
+                    freemiumPayload.startDate && 
+                    freemiumPayload.endDate) {
+                  dateRangeError = validateFreemiumDateRange(
+                    freemiumPayload.startDate, 
+                    freemiumPayload.endDate, 
+                    freemiumPayload.freeTrialDuration
+                  );
+                }
+                
+                if (startDateError || endDateError || dateRangeError) {
+                  setValidationErrors(prev => ({ 
+                    ...prev, 
+                    freemiumStartDate: startDateError, 
+                    freemiumEndDate: endDateError,
+                    freemiumDateRange: dateRangeError
+                  }));
+                  return;
+                }
+
                 setSaveState(s => ({ ...s, freemium: 'saving' }));
 
                 // UPDATED: always send canonical API token

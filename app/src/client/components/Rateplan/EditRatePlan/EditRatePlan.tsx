@@ -9,6 +9,7 @@ import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
+import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
 import MetricRow from '../../componenetsss/MetricRow';
 
@@ -90,6 +91,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
 
   // form state
   const [loading, setLoading] = useState(false);
@@ -327,6 +329,26 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
   const gotoStep = (index: number) => setCurrentStep(index);
 
+  const hasEmptyRequiredFields = (): boolean => {
+    // Check step 0 (details) required fields
+    if (!ratePlanName.trim()) return true;
+    if (!billingFrequency) return true;
+    if (!paymentType) return true;
+
+    // Check step 1 (billable) required fields
+    if (!selectedProductName) return true;
+    if (selectedMetricId === null) return true;
+
+    // Check step 2 (pricing) validation
+    if (validatePricingFn) {
+      const mockSetErrors = () => {};
+      const isValid = validatePricingFn(mockSetErrors);
+      if (!isValid) return true;
+    }
+
+    return false;
+  };
+
   const validateStep = (index: number): boolean => {
     const e: Record<string, string> = {};
 
@@ -531,6 +553,10 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   };
 
   const handleBack = () => {
+    if (hasEmptyRequiredFields()) {
+      setShowUnsavedChangesModal(true);
+      return;
+    }
     if (hasChanges()) setShowEditPopup(true);
     else exitToList();
   };
@@ -928,6 +954,17 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             setShowEditPopup(false);
           }}
         />
+
+        {showUnsavedChangesModal && (
+          <UnsavedChangesModal
+            onDiscard={() => {
+              setShowUnsavedChangesModal(false);
+              exitToList();
+            }}
+            onKeepEditing={() => setShowUnsavedChangesModal(false)}
+            onClose={() => setShowUnsavedChangesModal(false)}
+          />
+        )}
       </div>
     </>
   );

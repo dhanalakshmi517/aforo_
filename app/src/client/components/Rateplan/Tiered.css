@@ -40,7 +40,7 @@
 
 .tiered-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
 
@@ -154,14 +154,29 @@
   line-height: 16px;
   margin-top: 4px;
   display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
 }
 
 .field-col {
   display: flex;
   flex-direction: column;
   position: relative;
+  min-height: 40px;
+  word-wrap: break-word;
 }
 
+.field-col.small-field {
+  width: 71px;
+  flex-shrink: 0;
+}
+
+.field-col.large-field {
+  width: 130px;
+  flex-shrink: 0;
+}
 
 .tiered-add-btn {
   width: 186px;
@@ -177,7 +192,6 @@
   font-style: normal;
   font-weight: 400;
   line-height: var(--line-height-body-lg);
-
 
   cursor: pointer;
 }

@@ -106,13 +106,18 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     setRatePlanData('TIERED_NO_UPPER_LIMIT', unlimited ? 'true' : 'false');
   }, [unlimited]);
 
-  const validateTier = (tier: Tier): TierError => {
+  const validateTier = (tier: Tier, index: number): TierError => {
     const error: TierError = {};
 
     if (tier.from.trim() === '') {
       error.from = 'This is a required field';
     } else if (Number.isNaN(Number(tier.from)) || Number(tier.from) < 0) {
       error.from = 'Enter a valid value';
+    } else if (index > 0 && tiers[index - 1] && tiers[index - 1].to) {
+      const expectedFrom = Number(tiers[index - 1].to) + 1;
+      if (Number(tier.from) !== expectedFrom) {
+        error.from = `Must be ${expectedFrom} (previous tier end + 1)`;
+      }
     }
 
     if (!tier.isUnlimited) {
@@ -120,8 +125,8 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
         error.to = 'This is a required field';
       } else if (Number.isNaN(Number(tier.to)) || Number(tier.to) < 0) {
         error.to = 'Enter a valid value';
-      } else if (!error.from && Number(tier.to) < Number(tier.from)) {
-        error.to = 'Must be ≥ From';
+      } else if (!error.from && Number(tier.to) <= Number(tier.from)) {
+        error.to = 'Must be > From';
       }
     }
 
@@ -159,7 +164,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
 
   useEffect(() => {
     ensureArrays(tiers.length);
-    setTierErrors(tiers.map(validateTier));
+    setTierErrors(tiers.map((tier, index) => validateTier(tier, index)));
 
     // Overage required only when NOT unlimited
     if (!unlimited) {
@@ -181,20 +186,18 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
   };
 
   const handleAddTier = () => {
-    // When adding a new tier, uncheck unlimited since user wants more tiers
-    setUnlimited(false);
-    setRatePlanData('TIERED_NO_UPPER_LIMIT', 'false');
-
-    // Clear unlimited from current last tier if it was unlimited
-    const updated = [...tiers];
-    if (updated.length > 0 && updated[updated.length - 1].isUnlimited) {
-      updated[updated.length - 1].isUnlimited = false;
+    // Auto-populate 'from' field based on previous tier's 'to' value + 1
+    let newFrom = '';
+    if (tiers.length > 0 && tiers[tiers.length - 1].to) {
+      newFrom = String(Number(tiers[tiers.length - 1].to) + 1);
     }
-
-    // Add new tier with unlimited = false
-    const next = [...updated, { from: '', to: '', price: '', isUnlimited: false }];
-    setTiers(next);
-    onAddTier?.();
+    
+    const newTier: Tier = { from: newFrom, to: '', price: '' };
+    const updatedTiers = [...tiers, newTier];
+    setTiers(updatedTiers);
+    setUnlimited(false);
+    if (setNoUpperLimit) setNoUpperLimit(false);
+    if (onAddTier) onAddTier();
   };
 
   const handleDeleteTier = (index: number) => {
@@ -204,11 +207,19 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     setTierTouched(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleChange = (index: number, field: keyof Tier, value: string) => {
-    setTiers(prev => prev.map((tier, i) => (
-      i === index ? { ...tier, [field]: value } : tier
-    )) as Tier[]);
-    onChange?.(index, field, value);
+  const handleChangeTier = (index: number, field: keyof Tier, value: string) => {
+    if (field === 'to' && tiers[index].isUnlimited) return;
+
+    const updatedTiers = [...tiers];
+    (updatedTiers[index] as any)[field] = value;
+    
+    // If 'to' field changed, update next tier's 'from' field
+    if (field === 'to' && value && !Number.isNaN(Number(value)) && index < updatedTiers.length - 1) {
+      updatedTiers[index + 1].from = String(Number(value) + 1);
+    }
+    
+    setTiers(updatedTiers);
+    if (onChange) onChange(index, field, value);
 
     // Clear parent validation errors when user types
     if (value.trim() && onClearError) {
@@ -262,11 +273,11 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
 
           return (
             <div className="tiered-row" key={index}>
-              <div className="field-col">
+              <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${touched.from && error.from ? 'error-input' : ''}`}
                   value={tier.from}
-                  onChange={(e) => handleChange(index, 'from', e.target.value)}
+                  onChange={(e) => handleChangeTier(index, 'from', e.target.value)}
                   onBlur={() => markTouched(index, 'from')}
                   placeholder="From"
                   disabled={locked}
@@ -276,23 +287,23 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
 
               <span>-</span>
 
-              <div className="field-col">
+              <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${(!tier.isUnlimited && touched.to && error.to) ? 'error-input' : ''}`}
                   value={tier.isUnlimited ? 'Unlimited' : tier.to}
                   placeholder="To"
                   disabled={!!tier.isUnlimited || locked}
-                  onChange={(e) => handleChange(index, 'to', e.target.value)}
+                  onChange={(e) => handleChangeTier(index, 'to', e.target.value)}
                   onBlur={() => markTouched(index, 'to')}
                 />
                 {!tier.isUnlimited && touched.to && error.to && <span className="error-text">{error.to}</span>}
               </div>
 
-              <div className="field-col">
+              <div className="field-col large-field">
                 <input
                   className={`tiered-input-large ${touched.price && error.price ? 'error-input' : ''}`}
                   value={tier.price}
-                  onChange={(e) => handleChange(index, 'price', e.target.value)}
+                  onChange={(e) => handleChangeTier(index, 'price', e.target.value)}
                   onBlur={() => markTouched(index, 'price')}
                   placeholder="Price"
                   disabled={locked}
@@ -331,7 +342,11 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
                 type="text"
                 className={`tiered-input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                 value={overageCharge}
-                onChange={(e) => setOverageCharge(e.target.value)}
+                onChange={(e) => {
+                  setOverageCharge(e.target.value);
+                  if (overageTouched) setOverageTouched(false);
+                  if (onClearError) onClearError('tieredOverage');
+                }}
                 onBlur={() => setOverageTouched(true)}
                 placeholder="Enter overage charge"
                 disabled={locked}

@@ -53,7 +53,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
   const [overageTouched, setOverageTouched] = useState(false);
 
   /** basic field validation (caller decides whether a row is unlimited) */
-  const validateTier = (tier: Tier & { _derivedUnlimited?: boolean }): TierError => {
+  const validateTier = (tier: Tier & { _derivedUnlimited?: boolean }, index: number): TierError => {
     const error: TierError = {};
     const isUnlimited = !!(tier.isUnlimited || tier._derivedUnlimited);
 
@@ -61,6 +61,11 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
       error.from = 'This is a required field';
     } else if (tier.from < 0) {
       error.from = 'Enter a valid value';
+    } else if (index > 0 && tiers[index - 1] && tiers[index - 1].to) {
+      const expectedFrom = Number(tiers[index - 1].to) + 1;
+      if (Number(tier.from) !== expectedFrom) {
+        error.from = `Must be ${expectedFrom} (previous tier end + 1)`;
+      }
     }
 
     if (!isUnlimited) {
@@ -68,8 +73,8 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
         error.to = 'This is a required field';
       } else if (tier.to < 0) {
         error.to = 'Enter a valid value';
-      } else if (!error.from && tier.to < tier.from) {
-        error.to = 'Must be ≥ From';
+      } else if (!error.from && tier.to <= tier.from) {
+        error.to = 'Must be > From';
       }
     }
 
@@ -113,7 +118,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
       ...t,
       _derivedUnlimited: noUpperLimit && i === lastIndex
     }));
-    setTierErrors(derived.map(validateTier));
+    setTierErrors(derived.map((tier, index) => validateTier(tier, index)));
 
     // Overage is only applicable when NOT unlimited
     if (!noUpperLimit) {
@@ -194,7 +199,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
 
           return (
             <div className="tiered-row" key={index}>
-              <div className="field-col">
+              <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${touched.from && error.from ? 'error-input' : ''}`}
                   type="number"
@@ -209,7 +214,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
 
               <span>-</span>
 
-              <div className="field-col">
+              <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${touched.to && error.to ? 'error-input' : ''}`}
                   value={unlimitedForRow ? 'Unlimited' : (Number.isNaN(tier.to) ? '' : tier.to)}
@@ -221,7 +226,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 {!unlimitedForRow && touched.to && error.to && <span className="error-text">{error.to}</span>}
               </div>
 
-              <div className="field-col">
+              <div className="field-col large-field">
                 <input
                   className={`tiered-input-large ${touched.price && error.price ? 'error-input' : ''}`}
                   type="number"
@@ -295,7 +300,11 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 className={`volume-input-extra ${!noUpperLimit && overageTouched && overageError ? 'error-input' : ''}`}
                 placeholder="Enter overage charge"
                 value={overageUnitRate}
-                onChange={(e) => setOverageUnitRate(parseFloat(e.target.value) || 0)}
+                onChange={(e) => {
+                  setOverageUnitRate(parseFloat(e.target.value) || 0);
+                  if (overageTouched) setOverageTouched(false);
+                  if (onClearError) onClearError('volumeOverage');
+                }}
                 onBlur={() => setOverageTouched(true)}
                 disabled={locked}
               />

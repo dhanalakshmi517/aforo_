@@ -485,6 +485,21 @@ const CreatePricePlan = React.forwardRef<
           (!tier.isUnlimited && !tier.to?.toString().trim())
       );
       if (hasInvalidTier) e.tieredTiers = "All tier fields are required";
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < tieredTiers.length; i++) {
+        const tier = tieredTiers[i];
+        if (!tier.isUnlimited && tier.from && tier.to && Number(tier.to) <= Number(tier.from)) {
+          e.tieredTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && tieredTiers[i - 1].to) {
+          const expectedFrom = Number(tieredTiers[i - 1].to) + 1;
+          if (Number(tier.from) !== expectedFrom) {
+            e.tieredTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
       const hasUnlimited = tieredTiers.some((t: any) => t.isUnlimited);
       if (!hasUnlimited && (!overage || Number(overage) <= 0)) {
         e.tieredOverage = "Overage charge is required when no unlimited tier";
@@ -502,6 +517,21 @@ const CreatePricePlan = React.forwardRef<
           (!tier.isUnlimited && (tier.to === null || tier.to === undefined || tier.to === ''))
       );
       if (hasInvalidTier) e.volumeTiers = "All tier fields are required";
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < volumeTiers.length; i++) {
+        const tier = volumeTiers[i];
+        if (!tier.isUnlimited && tier.from != null && tier.to != null && Number(tier.to) <= Number(tier.from)) {
+          e.volumeTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && volumeTiers[i - 1].to != null) {
+          const expectedFrom = Number(volumeTiers[i - 1].to) + 1;
+          if (Number(tier.from) !== expectedFrom) {
+            e.volumeTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
       if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
         e.volumeOverage = "Overage unit rate is required when no unlimited tier";
       }
@@ -518,6 +548,21 @@ const CreatePricePlan = React.forwardRef<
           (!stair.isUnlimited && !stair.to?.toString().trim())
       );
       if (hasInvalidStair) e.stairTiers = "All stair fields are required";
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < stairTiers.length; i++) {
+        const stair = stairTiers[i];
+        if (!stair.isUnlimited && stair.from && stair.to && Number(stair.to) <= Number(stair.from)) {
+          e.stairTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && stairTiers[i - 1].to) {
+          const expectedFrom = Number(stairTiers[i - 1].to) + 1;
+          if (Number(stair.from) !== expectedFrom) {
+            e.stairTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
       if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
         e.stairOverage = "Overage charge is required when no unlimited tier";
       }
@@ -581,6 +626,16 @@ const CreatePricePlan = React.forwardRef<
 
     const ok = await canNavigateTo(index);
     if (!ok) return;
+
+    // Validate current step before allowing navigation
+    if (currentStep === 2) {
+      const v = validatePricingStep();
+      if (!v.isValid) {
+        setErrors(v.errors);
+        console.warn("⚠️ Cannot navigate away from pricing step - validation errors exist");
+        return;
+      }
+    }
 
     // best-effort persist current step
     try {
@@ -1037,14 +1092,22 @@ const CreatePricePlan = React.forwardRef<
 
   return (
     <>
-      {topBarProps && (
-        <TopBar
-          title="Create New Rate Plan"
-          onBack={topBarProps.onBack}
-          cancel={topBarProps.cancel}
-          save={topBarProps.save}
-        />
-      )}
+      <TopBar
+        title="Create New Rate Plan"
+        onBack={() => hasAnyRequiredInput ? setShowSavePrompt(true) : onClose()}
+        cancel={{
+          onClick: () => setShowDeleteConfirm(true),
+          disabled: !hasAnyRequiredInput
+        }}
+        save={{
+          onClick: saveDraft,
+          label: isDraftSaved ? "Saved!" : "Save as Draft",
+          saved: isDraftSaved,
+          saving: isDraftSaving,
+          labelWhenSaved: "Saved as Draft",
+          disabled: !hasAnyRequiredInput
+        }}
+      />
       <div className="rate-np-viewport">
         <div className="rate-np-card">
           <div className="rate-np-grid">

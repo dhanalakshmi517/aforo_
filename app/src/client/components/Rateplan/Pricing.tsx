@@ -625,6 +625,9 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
               if (value === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }
+              if (value === 'Volume-Based' && tiers.length === 0) {
+                setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
+              }
             }}
             options={[
               { label: 'Flat Fee', value: 'Flat Fee' },
