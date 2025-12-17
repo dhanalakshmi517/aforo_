@@ -24,6 +24,11 @@ import EditIconButton from '../componenetsss/EditIconButton';
 import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import RetryIconButton from '../componenetsss/RetryIconButton';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import Tooltip from '../componenetsss/Tooltip';
+import SearchInput from '../componenetsss/SearchInput';
+import Checkbox from '../componenetsss/Checkbox';
+import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
+import FilterChip from '../componenetsss/FilterChip';
 
 const getRandomBackgroundColor = (index: number) => {
   const colors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
@@ -50,6 +55,8 @@ interface Product {
   billable?: boolean;
   status: string;
   category: string;
+  source?: string;
+  internalSkuCode?: string;
   createdOn?: string;
   icon?: string;              // raw backend path
   productIcon?: any;          // can be stringified JSON OR already an object (important!)
@@ -69,13 +76,6 @@ interface ProductsProps {
 }
 
 export default function Products({ showNewProductForm, setShowNewProductForm }: ProductsProps) {
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
   const location = useLocation();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
@@ -83,6 +83,25 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [refreshKey, setRefreshKey] = useState(0);
   const [updatedIcons, setUpdatedIcons] = useState<Record<string, string>>({});
   const [preserveLocalIcons, setPreserveLocalIcons] = useState(false);
+  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
+  const [isProductTypeFilterOpen, setIsProductTypeFilterOpen] = useState(false);
+  const productTypeFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [isSourceFilterOpen, setIsSourceFilterOpen] = useState(false);
+  const sourceFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+  const statusFilterRef = React.useRef<HTMLDivElement | null>(null);
+  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
+  const createdSortRef = React.useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   // Function to handle icon updates from EditProduct
   const handleIconUpdate = (productId: string, iconData: ProductIconData | null) => {
@@ -384,15 +403,107 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [productQuery, setProductQuery] = useState<string>('');
 
   const filteredProducts = products
-    .filter((p) => p.productName?.toLowerCase().includes(productQuery.toLowerCase()))
+    // Global text search across key fields, not just product name
+    .filter((p) => {
+      const q = productQuery.trim().toLowerCase();
+      if (!q) return true;
+
+      const name = (p.productName || '').toLowerCase();
+      const type = (p.productType || '').toLowerCase();
+      const status = (p.status || '').toLowerCase();
+      const metricsText = (p.metrics || [])
+        .map(m => `${m.metricName || ''} ${m.unitOfMeasure || ''}`)
+        .join(' ') // join all metric texts
+        .toLowerCase();
+
+      return (
+        name.includes(q) ||
+        type.includes(q) ||
+        status.includes(q) ||
+        metricsText.includes(q)
+      );
+    })
+    .filter((p) => {
+      if (selectedProductTypes.length === 0) return true;
+      const typeKey = (p.productType || '').toLowerCase();
+      return selectedProductTypes.includes(typeKey);
+    })
+    .filter((p) => {
+      if (selectedSources.length === 0) return true;
+      const srcKey = (p.source || 'MANUAL').toLowerCase();
+      return selectedSources.includes(srcKey);
+    })
+    .filter((p) => {
+      if (selectedStatuses.length === 0) return true;
+      const statusKey = (p.status || '').toLowerCase();
+      return selectedStatuses.includes(statusKey);
+    })
     .sort((a, b) => {
-      if (a.status.toLowerCase() === 'draft' && b.status.toLowerCase() !== 'draft') return -1;
-      if (a.status.toLowerCase() !== 'draft' && b.status.toLowerCase() === 'draft') return 1;
-      return 0;
+      const aStatus = (a.status || '').toLowerCase();
+      const bStatus = (b.status || '').toLowerCase();
+
+      // Always keep drafts first
+      if (aStatus === 'draft' && bStatus !== 'draft') return -1;
+      if (aStatus !== 'draft' && bStatus === 'draft') return 1;
+
+      // Within the same status group, sort by createdOn
+      const parseDate = (d?: string) => {
+        if (!d) return 0;
+        const t = Date.parse(d);
+        return Number.isNaN(t) ? 0 : t;
+      };
+
+      const aDate = parseDate(a.createdOn);
+      const bDate = parseDate(b.createdOn);
+
+      if (aDate === bDate) return 0;
+      if (createdSortOrder === 'oldest') {
+        return aDate - bDate; // oldest first
+      }
+      // default: newest first
+      return bDate - aDate;
     });
 
   const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
   const { showToast } = useToast();
+
+  const handleResetProductFilters = () => {
+    setSelectedProductTypes([]);
+    setSelectedSources([]);
+    setSelectedStatuses([]);
+  };
+
+  // Close filters when clicking outside their header/filter areas
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (
+        productTypeFilterRef.current &&
+        target &&
+        !productTypeFilterRef.current.contains(target)
+      ) {
+        setIsProductTypeFilterOpen(false);
+      }
+
+      if (sourceFilterRef.current && target && !sourceFilterRef.current.contains(target)) {
+        setIsSourceFilterOpen(false);
+      }
+
+      if (createdSortRef.current && target && !createdSortRef.current.contains(target)) {
+        setIsCreatedSortOpen(false);
+      }
+
+      if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
+        setIsStatusFilterOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProductTypeFilterOpen, isSourceFilterOpen, isStatusFilterOpen, isCreatedSortOpen]);
 
   const handleCreateProductCancel = React.useCallback(() => {
     setShowCreateProduct(false);
@@ -479,25 +590,38 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     [ProductType.LLMTOKEN]: 'LLM Token'
   };
 
-  const getProductTypeName = (type: string): string => {
-    const normalizedType = type.toLowerCase();
-    return (productTypeNames as any)[normalizedType] || type;
+
+  // Helper to derive a soft translucent background from icon color
+  const getSoftTileBg = (iconData?: ProductIconData | null, opacity: number = 0.15) => {
+    // Prefer explicit tileColor; fall back to first gradient stop from outerBg; finally use a neutral
+    const base = iconData?.tileColor || (iconData?.outerBg && iconData.outerBg[0]) || '#E3ADEB';
+
+    // 1) If it's a standard hex color (#RRGGBB), convert to rgba with provided opacity
+    if (/^#([0-9a-fA-F]{6})$/.test(base)) {
+      const r = parseInt(base.slice(1, 3), 16);
+      const g = parseInt(base.slice(3, 5), 16);
+      const b = parseInt(base.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+
+    // 2) If it's rgb/rgba, parse the components and reapply our own alpha
+    const rgbMatch = base
+      .replace(/\s+/g, '')
+      .match(/^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(?:,(\d*(?:\.\d+)?))?\)$/i);
+    if (rgbMatch) {
+      const r = Number(rgbMatch[1]);
+      const g = Number(rgbMatch[2]);
+      const b = Number(rgbMatch[3]);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+
+    // 3) Any other format: fall back to a neutral soft tint
+    return `rgba(227, 173, 235, ${opacity})`;
   };
 
   // Mini ProductIcon renderer for the table
   const TableProductIcon: React.FC<{ iconData: ProductIconData }> = ({ iconData }) => {
     const tile = iconData.tileColor ?? '#CC9434';
-
-    const hexToRgba = (hex: string, opacity: number) => {
-      const cleanHex = hex.startsWith('#') ? hex : `#${hex}`;
-      if (cleanHex.length !== 7) {
-        return `rgba(204, 148, 52, ${opacity})`;
-      }
-      const r = parseInt(cleanHex.slice(1, 3), 16);
-      const g = parseInt(cleanHex.slice(3, 5), 16);
-      const b = parseInt(cleanHex.slice(5, 7), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    };
 
     return (
       <div
@@ -512,7 +636,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         <div
           style={{
             position: 'absolute',
-            left: 6,
+            left: 4,
             top: 4,
             width: 34,
             borderRadius: '9px',
@@ -526,7 +650,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         <div
           style={{
             position: 'absolute',
-            left: '50%',
+            left: '40%',
             top: '50%',
             transform: 'translate(-50%, -50%) translate(9px, 6px)',
             width: 34,
@@ -536,8 +660,8 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             borderRadius: '9px',
             alignItems: 'center',
             border: '0.6px solid #FFF',
-            backgroundColor: hexToRgba(tile, 0.10),
-            background: hexToRgba(tile, 0.10),
+            backgroundColor: getSoftTileBg(iconData, 0.10),
+            background: getSoftTileBg(iconData, 0.10),
             backdropFilter: 'blur(3.875000238418579px)',
             boxShadow: '0 2px 6px rgba(0,0,0,0.15)', // optional: adds soft depth
           }}
@@ -854,17 +978,357 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
               />
 
+              {(selectedProductTypes.length > 0 ||
+                selectedSources.length > 0 ||
+                selectedStatuses.length > 0) && (
+                <div className="products-active-filters-row">
+                  <div className="products-active-filters-chips">
+                    {selectedProductTypes.map((t) => (
+                      <FilterChip
+                        key={t}
+                        label={productTypeNames[t as keyof typeof productTypeNames] || t}
+                        onRemove={() =>
+                          setSelectedProductTypes((prev) => prev.filter((x) => x !== t))
+                        }
+                      />
+                    ))}
+
+                    {selectedSources.map((s) => (
+                      <FilterChip
+                        key={s}
+                        label={s.charAt(0).toUpperCase() + s.slice(1)}
+                        onRemove={() =>
+                          setSelectedSources((prev) => prev.filter((x) => x !== s))
+                        }
+                      />
+                    ))}
+
+                    {selectedStatuses.map((s) => (
+                      <FilterChip
+                        key={s}
+                        label={s.charAt(0).toUpperCase() + s.slice(1)}
+                        onRemove={() =>
+                          setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                        }
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="products-filters-reset"
+                    onClick={handleResetProductFilters}
+                  >
+                    Clear all
+                  </button>
+                </div>
+              )}
+
               <div className="customers-table-wrapper">
                 <table className="customers-table">
                   <thead>
                     <tr>
-                      <th>Product Name </th>
-                      <th>Product Type </th>
-                      <th>
-                        Billable Metrics <InfoIcon />
+                      <th>Product Name</th>
+                      <th className="products-th-with-filter">
+                        <div
+                          ref={productTypeFilterRef}
+                          className="products-th-label-with-filter"
+                          onMouseEnter={() => setIsProductTypeFilterOpen(true)}
+                        >
+                          <span>Product Type</span>
+                          <button
+                            type="button"
+                            className={`products-column-filter-trigger ${
+                              isProductTypeFilterOpen ? 'is-open' : ''
+                            }`}
+                            aria-label="Filter by product type"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="11"
+                              height="8"
+                              viewBox="0 0 11 8"
+                              fill="none"
+                            >
+                              <path
+                                d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                                stroke="#19222D"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+
+                          {isProductTypeFilterOpen && (
+                            <div
+                              className="products-column-filter-popover"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="products-column-filter-list">
+                                {[
+                                  ProductType.API,
+                                  ProductType.FLATFILE,
+                                  ProductType.SQLRESULT,
+                                  ProductType.LLMTOKEN,
+                                ].map((typeConst) => {
+                                  const typeKey = typeConst.toLowerCase();
+                                  const label =
+                                    productTypeNames[typeConst as keyof typeof productTypeNames] ||
+                                    typeConst;
+                                  return (
+                                    <div
+                                      key={typeConst}
+                                      className="products-column-filter-list-item"
+                                    >
+                                      <Checkbox
+                                        checked={selectedProductTypes.includes(typeKey)}
+                                        onChange={(checked) => {
+                                          setSelectedProductTypes((prev) => {
+                                            if (checked) {
+                                              if (prev.includes(typeKey)) return prev;
+                                              return [...prev, typeKey];
+                                            }
+                                            return prev.filter((x) => x !== typeKey);
+                                          });
+                                        }}
+                                        label={label}
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </th>
-                      <th>Status</th>
-                      <th>Created On </th>
+                      <th className="products-th-with-filter">
+                        <div
+                          ref={sourceFilterRef}
+                          className="products-th-label-with-filter"
+                          onMouseEnter={() => setIsSourceFilterOpen(true)}
+                        >
+                          <span>Source</span>
+                          <button
+                            type="button"
+                            className={`products-column-filter-trigger ${
+                              isSourceFilterOpen ? 'is-open' : ''
+                            }`}
+                            aria-label="Filter by source"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="11"
+                              height="8"
+                              viewBox="0 0 11 8"
+                              fill="none"
+                            >
+                              <path
+                                d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                                stroke="#19222D"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+
+                          {isSourceFilterOpen && (
+                            <div
+                              className="products-column-filter-popover"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="products-column-filter-list">
+                                {['manual', 'apigee', 'kong'].map((srcKey) => (
+                                  <div
+                                    key={srcKey}
+                                    className="products-column-filter-list-item"
+                                  >
+                                    <Checkbox
+                                      checked={selectedSources.includes(srcKey)}
+                                      onChange={(checked) => {
+                                        setSelectedSources((prev) => {
+                                          if (checked) {
+                                            if (prev.includes(srcKey)) return prev;
+                                            return [...prev, srcKey];
+                                          }
+                                          return prev.filter((x) => x !== srcKey);
+                                        });
+                                      }}
+                                      label={srcKey.charAt(0).toUpperCase() + srcKey.slice(1)}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </th>
+                      <th className="products-th-with-filter">
+                        <div
+                          ref={statusFilterRef}
+                          className="products-th-label-with-filter"
+                          onMouseEnter={() => setIsStatusFilterOpen(true)}
+                        >
+                          <span>Status</span>
+                          <button
+                            type="button"
+                            className={`products-column-filter-trigger ${
+                              isStatusFilterOpen ? 'is-open' : ''
+                            }`}
+                            aria-label="Filter by status"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="11"
+                              height="8"
+                              viewBox="0 0 11 8"
+                              fill="none"
+                            >
+                              <path
+                                d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                                stroke="#19222D"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+
+                          {isStatusFilterOpen && (
+                            <div
+                              className="products-column-filter-popover"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="products-column-filter-list">
+                                {['active', 'draft'].map((statusKey) => (
+                                  <div
+                                    key={statusKey}
+                                    className="products-column-filter-list-item"
+                                  >
+                                    <Checkbox
+                                      checked={selectedStatuses.includes(statusKey)}
+                                      onChange={(checked) => {
+                                        setSelectedStatuses((prev) => {
+                                          if (checked) {
+                                            if (prev.includes(statusKey)) return prev;
+                                            return [...prev, statusKey];
+                                          }
+                                          return prev.filter((x) => x !== statusKey);
+                                        });
+                                      }}
+                                      label={
+                                        statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
+                                      }
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </th>
+                      <th className="products-th-with-filter">
+                        <div
+                          ref={createdSortRef}
+                          className="products-th-label-with-filter"
+                          onMouseEnter={() => setIsCreatedSortOpen(true)}
+                        >
+                          <span>Created On</span>
+                          <button
+                            type="button"
+                            className={`products-column-filter-trigger ${
+                              isCreatedSortOpen ? 'is-open' : ''
+                            }`}
+                            aria-label="Sort by created date"
+                          >
+                            {/* up/down multi-arrow icon provided */}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                            >
+                              <path
+                                d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
+                                stroke="#25303D"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+
+                          {isCreatedSortOpen && (
+                            <div
+                              className="products-column-filter-popover products-createdon-popover"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                type="button"
+                                className={`products-sort-option ${
+                                  createdSortOrder === 'newest' ? 'is-active' : ''
+                                }`}
+                                onClick={() => {
+                                  setCreatedSortOrder('newest');
+                                  setIsCreatedSortOpen(false);
+                                }}
+                              >
+                                <span className="products-sort-option-icon">
+                                  {/* down arrow icon (newest first) */}
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 13 13"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
+                                      stroke="#25303D"
+                                      strokeWidth="1.2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                </span>
+                                <span className="products-sort-option-label">Newest first</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={`products-sort-option ${
+                                  createdSortOrder === 'oldest' ? 'is-active' : ''
+                                }`}
+                                onClick={() => {
+                                  setCreatedSortOrder('oldest');
+                                  setIsCreatedSortOpen(false);
+                                }}
+                              >
+                                <span className="products-sort-option-icon">
+                                  {/* up arrow icon (oldest first) */}
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
+                                      stroke="#25303D"
+                                      strokeWidth="1.2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                </span>
+                                <span className="products-sort-option-label">Oldest first</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </th>
                       <th className="actions-cell">Actions</th>
                     </tr>
                   </thead>
@@ -878,12 +1342,24 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           </div>
                         </td>
                       </tr>
+                    ) : !isLoading && filteredProducts.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', borderBottom: 'none', color: '#4B5563', fontSize: '14px' }}>
+                          No products found.
+                        </td>
+                      </tr>
                     ) : (
                       filteredProducts.map((product) => (
                         <tr key={`${product.productId}-${refreshKey}`}>
                         <td className="product-name-td">
                           <div className="product-name-cell">
-                            <div className="product-name-cell__icon">
+                            <div
+                              className="product-name-cell__icon"
+                              style={{
+                                background: '#FFFFFF',
+                                borderColor: '#D4D4D8',
+                              }}
+                            >
                               {product.iconData ? (
                                 <TableProductIcon iconData={product.iconData} />
                               ) : product.iconUrl ? (
@@ -935,8 +1411,19 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                             </div>
 
                             <div className="product-name-cell__content">
-                              <div className="product-name" title={product.productName}>
-                                {product.productName}
+                              <div className="product-name-text-group">
+                                <div className="product-name" title={product.productName}>
+                                  {(() => {
+                                    const name = product.productName || '';
+                                    if (name.length <= 14) return name;
+                                    return name.slice(0, 14) + '…';
+                                  })()}
+                                </div>
+                                {product.internalSkuCode && (
+                                  <div className="product-sku" title={product.internalSkuCode}>
+                                    {product.internalSkuCode}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -960,115 +1447,33 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           </span>
                         </td>
 
-                        <td className="metrics-cell">
-                          <div className="products-metrics-wrapper">
-                            {product.metrics && product.metrics.length > 0 ? (
-                              product.metrics.map((metric, index) => {
-                                const truncatedName =
-                                  metric.metricName.length > 3
-                                    ? metric.metricName.substring(0, 3) + '...'
-                                    : metric.metricName;
-                                const truncatedUOM = metric.unitOfMeasure
-                                  ? metric.unitOfMeasure.substring(0, 2).toUpperCase()
-                                  : '';
-
-                                // Use product icon color if available, otherwise use random color
-                                const metricTileColor = product.iconData?.tileColor || '#0F6DDA';
-
-                                // Convert hex to RGB for light background
-                                const hexToRgb = (hex: string) => {
-                                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                                  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
-                                };
-                                const rgbColor = hexToRgb(metricTileColor);
-
-                                return (
-                                  <div
-                                    key={index}
-                                    className="product-metric-item"
-                                    style={{
-                                      '--metric-tile-color': metricTileColor,
-                                      '--metric-tile-color-rgb': rgbColor,
-                                      backgroundColor: `rgba(${rgbColor}, 0.15)`,
-                                      borderRadius: '8px',
-                                      width: '44px',
-                                      height: '36px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      flexShrink: 0,
-                                      padding: '2px',
-                                      border: '1px solid #F6F6F6'
-                                    } as React.CSSProperties}
-                                  >
-                                    <div className="metric-content" style={{
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      width: '100%',
-                                      height: '100%',
-                                      gap: '0px'
-                                    }}>
-                                      <div
-                                        className="metric-uom"
-                                        title={metric.unitOfMeasure}
-                                        style={{
-                                          color: metricTileColor,
-                                          opacity: 1,
-                                          textAlign: 'center',
-                                          width: '100%',
-                                          margin: '0',
-                                          padding: '0',
-                                          fontFamily: '"Aeonik Mono VF"',
-                                          fontSize: '14px',
-                                          fontStyle: 'normal',
-                                          fontWeight: 700,
-                                          lineHeight: '20.996px',
-                                          letterSpacing: '-1px'
-                                        } as React.CSSProperties}
-                                      >
-                                        {truncatedUOM}
-                                      </div>
-                                      <div
-                                        className="metric-name"
-                                        title={metric.metricName}
-                                        style={{
-                                          color: metricTileColor,
-                                          opacity: 0.9,
-                                          textAlign: 'center',
-                                          width: '100%',
-                                          margin: '0',
-                                          padding: '0',
-                                          textOverflow: 'ellipsis',
-                                          textShadow: 'rgba(45, 43, 3, 0.10) 0 0 2px',
-                                          fontFamily: '"DM Sans"',
-                                          fontSize: '10px',
-                                          fontStyle: 'normal',
-                                          fontWeight: 300,
-                                          lineHeight: '10px',
-                                          letterSpacing: '-0.2px',
-                                          marginTop: '-2px'
-                                        } as React.CSSProperties}
-                                      >
-                                        {truncatedName}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <span className="no-metrics">-</span>
-                            )}
+                        <td className="source-cell">
+                          <div className="source-badge">
+                            {(() => {
+                              const raw = product.source || 'MANUAL';
+                              const lower = raw.toLowerCase();
+                              return lower.charAt(0).toUpperCase() + lower.slice(1);
+                            })()}
                           </div>
                         </td>
 
                         <td>
-                          <StatusBadge
-                            label={product.status.charAt(0) + product.status.slice(1).toLowerCase()}
-                            variant={product.status.toLowerCase() as Variant}
-                            size="sm"
-                          />
+                          <Tooltip
+                            position="right"
+                            content={
+                              product.status.toLowerCase() === 'live'
+                                ? 'Product is live and available for sale.'
+                                : product.status.toLowerCase() === 'draft'
+                                  ? 'Product is in draft. Continue setting it up.'
+                                  : product.status.charAt(0) + product.status.slice(1).toLowerCase()
+                            }
+                          >
+                            <StatusBadge
+                              label={product.status.charAt(0) + product.status.slice(1).toLowerCase()}
+                              variant={product.status.toLowerCase() as Variant}
+                              size="sm"
+                            />
+                          </Tooltip>
                         </td>
 
                         <td>{product.createdOn ?? 'N/A'}</td>
@@ -1101,28 +1506,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
                         </tr>
                       ))
-                    )}
-                    {filteredProducts.length === 0 && !isLoading && (
-                      <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                          <div className="products-empty-state">
-                            <img src={EmptyBox} alt="No products" style={{ width: '190px', height: '190px' }} />
-                            <p className="customers-empty-state-text">
-                              No products are available. Click ‘New Product’ to add your first <br /> product manually, or import products from Kong.                            </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                              <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
-                                + Create Product
-                              </PrimaryButton>
-                              <TertiaryButton onClick={() => navigate('/get-started/integrations')}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }}>
-                                  <path d="M5.83333 13.8333V3.83333C5.83333 3.65652 5.7631 3.48695 5.63807 3.36193C5.51305 3.2369 5.34348 3.16667 5.16667 3.16667H1.83333C1.47971 3.16667 1.14057 3.30714 0.890524 3.55719C0.640476 3.80724 0.5 4.14638 0.5 4.5V12.5C0.5 12.8536 0.640476 13.1928 0.890524 13.4428C1.14057 13.6929 1.47971 13.8333 1.83333 13.8333H9.83333C10.187 13.8333 10.5261 13.6929 10.7761 13.4428C11.0262 13.1928 11.1667 12.8536 11.1667 12.5V9.16667C11.1667 8.98986 11.0964 8.82029 10.9714 8.69526C10.8464 8.57024 10.6768 8.5 10.5 8.5H0.5M9.16667 0.5H13.1667C13.5349 0.5 13.8333 0.798477 13.8333 1.16667V5.16667C13.8333 5.53486 13.5349 5.83333 13.1667 5.83333H9.16667C8.79848 5.83333 8.5 5.53486 8.5 5.16667V1.16667C8.5 0.798477 8.79848 0.5 9.16667 0.5Z" stroke="#2A455E" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                Import Products
-                              </TertiaryButton>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
                     )}
                   </tbody>
                 </table>

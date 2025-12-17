@@ -25,9 +25,19 @@ const Tooltip: React.FC<TooltipProps> = ({
     let left = rect.left + rect.width / 2;
 
     if (position === "bottom") {
+      // Below, horizontally centered relative to trigger
       top = rect.bottom + 8; // 8px offset below trigger
     } else if (position === "top") {
-      top = rect.top - 8; // we'll adjust with CSS transform
+      // Above, horizontally centered relative to trigger
+      top = rect.top - 8; // 8px offset above trigger
+    } else if (position === "right") {
+      // To the right, vertically centered with a small horizontal gap
+      top = rect.top + rect.height / 2;
+      left = rect.right + 8;
+    } else if (position === "left") {
+      // To the left, vertically centered with a small horizontal gap
+      top = rect.top + rect.height / 2;
+      left = rect.left - 8;
     }
 
     setCoords({ top, left });

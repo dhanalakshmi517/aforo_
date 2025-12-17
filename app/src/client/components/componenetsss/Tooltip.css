@@ -23,12 +23,13 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   white-space: normal;
   z-index: 100;
   opacity: 1;
-  min-width:52px;
-  width:auto;
-  display: flex;
+  min-width: 120px;              /* give room so words don't stack vertically */
+  max-width: 320px;              /* prevent it from becoming too wide */
+  width: auto;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-start;   /* text starts near arrow side */
+  text-align: left;              /* normal sentence layout */
 }
 
 /* Tooltip positions */
@@ -54,10 +55,7 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 .tooltip-box.right {
-  left: 125%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 8px;
+  transform: translateY(-50%);   /* vertical centering; horizontal handled in JS */
 }
 
 /* Arrow styles */

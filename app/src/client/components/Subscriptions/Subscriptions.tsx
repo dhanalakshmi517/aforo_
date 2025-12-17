@@ -275,18 +275,25 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   }
 
   const filtered = subscriptions.filter(sub => {
-    const q = (searchQuery || '').toLowerCase();
+    const q = (searchQuery || '').trim().toLowerCase();
+    if (!q) return true;
+
     const cust = customerMap.get(sub.customerId);
     const rp = ratePlanMap.get(sub.ratePlanId);
+
+    const name = (cust?.customerName || '').toLowerCase();
+    const email = (cust?.primaryEmail || '').toLowerCase();
+    const plan = (rp?.ratePlanName || '').toLowerCase();
+    const paymentType = (sub.paymentType || '').toLowerCase();
+    const status = (sub.status || '').toLowerCase();
+
+    // Intentionally do NOT search purchasedOn/date field
     return (
-      sub.status?.toLowerCase().includes(q) ||
-      String(sub.subscriptionId).toLowerCase().includes(q) ||
-      String(sub.customerId).toLowerCase().includes(q) ||
-      (cust?.customerName || '').toLowerCase().includes(q) ||
-      (cust?.primaryEmail || '').toLowerCase().includes(q) ||
-      (rp?.ratePlanName || '').toLowerCase().includes(q) ||
-      String(sub.ratePlanId).toLowerCase().includes(q) ||
-      String(sub.paymentType || '').toLowerCase().includes(q)
+      name.includes(q) ||
+      email.includes(q) ||
+      plan.includes(q) ||
+      paymentType.includes(q) ||
+      status.includes(q)
     );
   }).sort((a, b) => {
     // Priority 1: Draft status subscriptions appear first

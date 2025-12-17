@@ -283,13 +283,35 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   };
 
   const filteredCustomers = customers.filter(c => {
-    const term = searchTerm.toLowerCase();
+    const q = searchTerm.toLowerCase();
+    if (!q) return true;
+
+    const companyName = (c.companyName || '').toLowerCase();
+    const customerName = (c.customerName || '').toLowerCase();
+    const primaryEmail = (c.primaryEmail || '').toLowerCase();
+    const companyType = (c.companyType || '').toLowerCase();
+    const status = (c.status || '').toLowerCase();
+    const phoneNumber = (c.phoneNumber || '').toLowerCase();
+    const customerCity = (c.customerCity || '').toLowerCase();
+    const customerState = (c.customerState || '').toLowerCase();
+    const customerCountry = (c.customerCountry || '').toLowerCase();
+    const billingCity = (c.billingCity || '').toLowerCase();
+    const billingState = (c.billingState || '').toLowerCase();
+    const billingCountry = (c.billingCountry || '').toLowerCase();
+
     return (
-      (c.companyName || "").toLowerCase().includes(term) ||
-      (c.customerName || "").toLowerCase().includes(term) ||
-      (c.primaryEmail || "").toLowerCase().includes(term) ||
-      (c.companyType || "").toLowerCase().includes(term) ||
-      (c.status || "").toLowerCase().includes(term)
+      companyName.includes(q) ||
+      customerName.includes(q) ||
+      primaryEmail.includes(q) ||
+      companyType.includes(q) ||
+      status.includes(q) ||
+      phoneNumber.includes(q) ||
+      customerCity.includes(q) ||
+      customerState.includes(q) ||
+      customerCountry.includes(q) ||
+      billingCity.includes(q) ||
+      billingState.includes(q) ||
+      billingCountry.includes(q)
     );
   });
 
