@@ -65,7 +65,7 @@ width: calc(100% - 256px);
 
 .check-container {
   /* Outer gap: top 15px, left/right 10px, bottom 10px */
-  padding: 15px 10px 7px 10px;
+  padding: 8px 9px 2px 9px;
   width: 100%;
 
   max-width: none;
@@ -250,11 +250,11 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 /* WRAPPER */
 .customers-table-wrapper {
   max-height: calc(100vh - 180px);
-  margin-top: -10px;
+  margin-top: 4px;
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
-  margin: 15px 0 5px 0;     /* vertical gaps only; horizontal handled by padding */
+  margin: 4px 0 5px 0;     /* vertical gaps only; horizontal handled by padding */
   background-color: white;
   border-radius: var(--border-radius-lg);
   /* Reduce bottom padding to shrink white gap below last row */
@@ -338,7 +338,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   width: 16.66%;
   word-wrap: break-word;
   position: sticky !important;
-  background-color: var(--color-neutral-150) !important;
+  background-color: var(--color-neutral-100) !important;
   height: auto;
   padding: 4px 16px;
   border-radius: 0;

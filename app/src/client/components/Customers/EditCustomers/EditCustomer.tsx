@@ -19,6 +19,7 @@ import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
+import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 
 import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
 
@@ -95,6 +96,7 @@ const EditCustomer: React.FC = () => {
   // Leave popup
   const [showLeavePopup, setShowLeavePopup] = useState(false);
   const [savingLeave, setSavingLeave] = useState(false);
+  const [showUnsavedRequiredModal, setShowUnsavedRequiredModal] = useState(false);
 
   // Track original data for change detection
   const [originalData, setOriginalData] = useState<{
@@ -273,6 +275,38 @@ const EditCustomer: React.FC = () => {
     return Object.keys(newAccErrs).length === 0;
   };
 
+  const hasEmptyRequiredFields = () => {
+    // Step 0 required fields
+    if (!companyName.trim() || !customerName.trim() || !companyType.trim()) return true;
+
+    // Step 1 required fields
+    const a = accountDetails ?? ({} as AccountDetailsData);
+    if (!a.phoneNumber?.trim()) return true;
+    if (!a.primaryEmail?.trim()) return true;
+
+    const requiredKeys: (keyof AccountDetailsData)[] = [
+      'billingAddressLine1',
+      'billingAddressLine2',
+      'billingCity',
+      'billingState',
+      'billingPostalCode',
+      'billingCountry',
+      'customerAddressLine1',
+      'customerAddressLine2',
+      'customerCity',
+      'customerState',
+      'customerPostalCode',
+      'customerCountry',
+    ];
+
+    for (const k of requiredKeys) {
+      const v = (a as any)[k];
+      if (!v || (typeof v === 'string' && !v.trim())) return true;
+    }
+
+    return false;
+  };
+
   const savePatch = async () => {
     if (!id) return false;
 
@@ -355,6 +389,11 @@ const EditCustomer: React.FC = () => {
   };
 
   const openLeavePopup = () => {
+    if (hasEmptyRequiredFields()) {
+      setShowUnsavedRequiredModal(true);
+      return;
+    }
+
     if (hasChanges()) {
       setShowLeavePopup(true);
     } else {
@@ -642,6 +681,16 @@ const EditCustomer: React.FC = () => {
           await handlePopupSave();
         }}
       />
+      {showUnsavedRequiredModal && (
+        <UnsavedChangesModal
+          onDiscard={() => {
+            setShowUnsavedRequiredModal(false);
+            navigate(-1);
+          }}
+          onKeepEditing={() => setShowUnsavedRequiredModal(false)}
+          onClose={() => setShowUnsavedRequiredModal(false)}
+        />
+      )}
     </>
   );
 };

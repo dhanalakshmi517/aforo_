@@ -9,6 +9,7 @@ import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
 import MetricRow from '../../componenetsss/MetricRow';
+import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 
 import { getProducts, Product, updateBillableMetric } from './api';
 import { getBillableMetricById } from './api';
@@ -46,6 +47,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
   // edit popup state
   const [showEditPopup, setShowEditPopup] = useState(false);
+  const [showUnsavedRequiredModal, setShowUnsavedRequiredModal] = useState(false);
 
   // form state
   const [metricName, setMetricName] = useState('');
@@ -252,6 +254,20 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
   };
 
   const handleBack = () => {
+    // If any required fields are empty, show UnsavedChangesModal instead of closing immediately
+    const hasEmptyRequiredFields =
+      !metricName.trim() ||
+      !selectedProductId ||
+      !version.trim() ||
+      !unitOfMeasure ||
+      !billingCriteria;
+
+    if (hasEmptyRequiredFields) {
+      setShowUnsavedRequiredModal(true);
+      return;
+    }
+
+    // Otherwise fall back to existing unsaved-changes detection
     if (hasChanges()) {
       setShowEditPopup(true);
     } else {
@@ -540,6 +556,17 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
             onClose();
           }}
         />
+
+        {showUnsavedRequiredModal && (
+          <UnsavedChangesModal
+            onDiscard={() => {
+              setShowUnsavedRequiredModal(false);
+              onClose();
+            }}
+            onKeepEditing={() => setShowUnsavedRequiredModal(false)}
+            onClose={() => setShowUnsavedRequiredModal(false)}
+          />
+        )}
       </div>
     </>
   );

@@ -81,7 +81,6 @@ const EditProduct: React.FC<EditProductProps> = ({
   const [formData, setFormData] = useState({
     productName: '',
     version: '',
-    skuCode: '',
     description: '',
   });
 
@@ -153,22 +152,6 @@ const EditProduct: React.FC<EditProductProps> = ({
       }
     }
 
-    if (field === 'skuCode') {
-      const duplicate = existingProducts.some(p => {
-        if (
-          (p.productName || '').toLowerCase() === originalValues.productName.toLowerCase() &&
-          (p.skuCode || '').toLowerCase() === originalValues.skuCode.toLowerCase()
-        )
-          return false;
-        return (p.skuCode || '').toLowerCase() === trimmed.toLowerCase();
-      });
-      if (duplicate) setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
-      else if (errors.skuCode === 'Must be unique') {
-        const { skuCode, ...rest } = errors;
-        setErrors(rest);
-      }
-    }
-
     if (errors[field] && errors[field] !== 'Must be unique') {
       setErrors(prev => {
         const { [field]: _, ...rest } = prev;
@@ -182,7 +165,6 @@ const EditProduct: React.FC<EditProductProps> = ({
     const lower = (s: string) => s.trim().toLowerCase();
 
     if (!formData.productName.trim()) newErrors.productName = 'Product name is required';
-    if (!formData.skuCode.trim()) newErrors.skuCode = 'SKU code is required';
 
     if (formData.productName && modifiedFields.has('productName')) {
       const isDuplicate = existingProducts.some(p => {
@@ -194,18 +176,6 @@ const EditProduct: React.FC<EditProductProps> = ({
         return lower(p.productName || '') === lower(formData.productName);
       });
       if (isDuplicate) newErrors.productName = 'Must be unique';
-    }
-
-    if (formData.skuCode && modifiedFields.has('skuCode')) {
-      const isDuplicate = existingProducts.some(p => {
-        if (
-          lower(p.productName || '') === lower(originalValues.productName) &&
-          lower(p.skuCode || '') === lower(originalValues.skuCode)
-        )
-          return false;
-        return lower(p.skuCode || '') === lower(formData.skuCode);
-      });
-      if (isDuplicate) newErrors.skuCode = 'Must be unique';
     }
 
     setErrors(newErrors);
@@ -226,7 +196,7 @@ const EditProduct: React.FC<EditProductProps> = ({
 
   const hasEmptyRequiredFields = () => {
     if (activeTab === 'general') {
-      return !formData.productName.trim() || !formData.skuCode.trim();
+      return !formData.productName.trim();
     }
 
     if (activeTab === 'configuration') {
@@ -273,7 +243,6 @@ const EditProduct: React.FC<EditProductProps> = ({
       const draftPayload = {
         productName: formData.productName,
         version: formData.version,
-        internalSkuCode: formData.skuCode,
         productDescription: formData.description,
         status: 'DRAFT' as const,
       };
@@ -366,7 +335,7 @@ const EditProduct: React.FC<EditProductProps> = ({
         ? 'configuration'
         : 'review') as ActiveTab;
 
-    // When leaving General, enforce required-field validation (productName, skuCode)
+    // When leaving General, enforce required-field validation (productName)
     if (activeTab === 'general' && nextTab !== 'general') {
       const ok = validateForm();
       if (!ok) return; // stay on General tab and show errors
@@ -439,7 +408,6 @@ const EditProduct: React.FC<EditProductProps> = ({
         const generalDetailsPayload = {
           productName: formData.productName?.trim() || '',
           version: formData.version?.trim() || '',
-          internalSkuCode: formData.skuCode?.trim() || '',
           productDescription: formData.description?.trim() || '',
           status: isDraft ? 'DRAFT' : 'ACTIVE',
           productType: configuration.productType || productType || '',
@@ -553,12 +521,9 @@ const EditProduct: React.FC<EditProductProps> = ({
         const data = await fetchGeneralDetails(productId);
 
         const originalProductName = data.productName ?? '';
-        const originalSkuCode = data.internalSkuCode ?? '';
-
         const nextForm = {
           productName: originalProductName,
           version: data.version ?? '',
-          skuCode: originalSkuCode,
           description: data.productDescription ?? '',
         };
         setFormData(nextForm);
@@ -746,7 +711,7 @@ const EditProduct: React.FC<EditProductProps> = ({
 
         originalConfigRef.current = Object.keys(fetchedConfig).length ? fetchedConfig : currentConfig;
 
-        setOriginalValues({ productName: originalProductName, skuCode: originalSkuCode });
+        setOriginalValues({ productName: originalProductName, skuCode: data.internalSkuCode ?? '' });
         setIsDraft((data.status ?? '').toUpperCase() === 'DRAFT');
       } catch (err) {
         console.error(err);
@@ -793,13 +758,41 @@ const EditProduct: React.FC<EditProductProps> = ({
                         .join(' ')
                         .trim()}
                       onClick={async () => {
-                        // If user is on Configuration and clicks Review & Confirm, validate config first
-                        const isReviewStep = step.id === 3;
-                        if (isReviewStep && activeTab === 'configuration') {
+                        // If clicking the current step, do nothing
+                        if (index === currentStep) return;
+
+                        // Navigating back to earlier steps
+                        if (index < currentStep) {
+                          // Special case: from Configuration back to General should also validate config
+                          if (activeTab === 'configuration' && index === 0) {
+                            const ok = await configRef.current?.submit();
+                            if (!ok) return; // stay on Configuration if product type / fields invalid
+                          }
+
+                          goToStep(index);
+                          return;
+                        }
+
+                        // Prevent jumping multiple steps ahead; move only one step at a time
+                        const nextIndex = currentStep + 1;
+
+                        // When moving forward from General, run general validation (same as Save & Next)
+                        if (activeTab === 'general') {
+                          const ok = validateForm();
+                          if (!ok) return;
+                          goToStep(nextIndex);
+                          return;
+                        }
+
+                        // When moving forward from Configuration, validate configuration via submit()
+                        if (activeTab === 'configuration') {
                           const ok = await configRef.current?.submit();
                           if (!ok) return;
+                          goToStep(nextIndex);
+                          return;
                         }
-                        goToStep(index);
+
+                        // From Review we don't move further right via sidebar
                       }}
                     />
                   );
@@ -971,16 +964,6 @@ const EditProduct: React.FC<EditProductProps> = ({
                             maxCombosPerIcon={24}
                           />
 
-                          <div className="edit-np-form-group">
-                            <InputField
-                              label="SKU Code"
-                              value={formData.skuCode}
-                              onChange={(val: string) => handleInputChange('skuCode', val)}
-                              placeholder="SKU-96"
-                              error={errors.skuCode}
-                              required
-                            />
-                          </div>
 
                           <div className="edit-np-form-group">
                             <TextareaField
@@ -998,11 +981,11 @@ const EditProduct: React.FC<EditProductProps> = ({
                         <div className="edit-np-section">
                           <div className="edit-np-configuration-tab">
                             <ConfigurationTab
-                              initialProductType={productType}
                               onConfigChange={handleConfigChange}
                               onProductTypeChange={handleProductTypeChange}
                               ref={configRef}
-                              productId={productId ?? formData.skuCode}
+                              productId={productId}
+                              initialProductType={configuration.productType || productType}
                             />
                           </div>
                         </div>

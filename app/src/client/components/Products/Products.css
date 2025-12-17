@@ -62,7 +62,7 @@ html, body, #root, .app, .main-content {
   position: sticky !important;
   top: 0 !important;
   z-index: 100 !important;                   /* Higher z-index to override any conflicts */
-  background: var(--color-neutral-150) !important;  /* Solid background to cover rows under it */
+  background: var(--color-neutral-100) !important;  /* Solid background to cover rows under it */
 }
 
 
@@ -448,6 +448,153 @@ line-height: var(--line-height-body-lg);
     width: calc(100% - 40px); /* keep 20px side gap */
     margin-right: 0;
   }}
+
+/* =============================
+   Column filter: Product Name
+   ============================= */
+
+.products-th-with-filter {
+  position: relative;
+}
+
+.products-th-label-with-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.products-column-filter-trigger {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.products-column-filter-trigger svg {
+  display: inline-block;
+  vertical-align: middle;
+  transform: translateY(0); /* cancel header SVG offset so icon aligns with text */
+}
+
+.products-column-filter-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;        /* start at the left edge of the header label+icon */
+  right: auto;    /* let the card extend to the right side */
+  z-index: 120;
+  width: 240px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 54px rgba(0, 0, 0, 0.07),
+    0 2px 20px rgba(0, 0, 0, 0.04);
+}
+
+.products-column-filter-search {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.products-column-filter-list-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-height: 180px;
+}
+
+.products-column-filter-list {
+  flex: 1 1 auto;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.products-column-filter-list::-webkit-scrollbar {
+  width: 0;
+}
+
+.products-column-filter-list-item {
+  padding: 4px 0;
+}
+
+.products-column-filter-scrollbar {
+  flex: 0 0 auto;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Active product-name filter chips row */
+
+.products-active-filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 16px 0 16px; /* slightly more breathing room around chips */
+  margin-bottom: 4px;       /* clear gap between chips row and table card */
+}
+
+.products-active-filters-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.products-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-neutral-200);
+  background: #ffffff;
+  cursor: pointer;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  color: var(--color-neutral-1700);
+}
+
+.products-filter-chip-x {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.products-filters-reset {
+  border: none;
+  background: transparent;
+  color: var(--color-primary-700);
+  cursor: pointer;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.products-table-wrapper {
+  flex: 1 1 auto;
+  min-height: calc(100vh - 110px);
+  /* max-height removed to let wrapper size to content */
+  overflow-y: auto; /* enable scroll inside wrapper */
+  scrollbar-width: none; /* Firefox hide scrollbar */
+  width: 100%;
+  margin-right: 0;
+  margin-bottom: 10px; /* constant viewport gap */
+  background-color:white;
+  border-radius: var(--border-radius-lg);
+  /* extra right padding so content doesn't touch the edge */
+  padding: 12px 20px 10px 12px;
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
+  position: relative; /* Create positioning context for sticky headers */
+}
+
 /* ensure inner table stretches full wrapper */
 
 .products-table-wrapper:hover {
@@ -513,6 +660,26 @@ line-height: var(--line-height-body-lg);
     gap: 12px;
   }
 
+  .product-name-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0; /* allow text truncation */
+    max-width: 150px; /* fixed visual width for name + SKU */
+  }
+
+  .product-name-text-group .product-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-name-text-group .product-sku {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .product-icon {
     width: 32px;
     height: 32px;
@@ -531,7 +698,7 @@ line-height: var(--line-height-body-lg);
     overflow: hidden;
     color: var(--color-neutral-1700);
     text-overflow: ellipsis;
-    
+    white-space: nowrap;
     /* body/md/med */
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
@@ -540,12 +707,46 @@ line-height: var(--line-height-body-lg);
     line-height: var(--line-height-body-md); /* 142.857% */    flex: 1;
   }
 
+  .product-sku {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-neutral-500);
+    font-family: var(--font-family-primary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
   /* Billable Metrics Card */
   .billable-metrics {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     max-width: 200px;
+  }
+
+  /* Source pill in Products table */
+  .source-cell {
+    white-space: nowrap;
+  }
+
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid #D4D4D8;              /* stronger, visible border */
+    background-color: #F9FAFB;              /* light gray so pill stands out on white row */
+    color: #111827;
+
+    /* body/sm/med */
+    font-family: var(--font-family-primary, "IBM Plex Sans");
+    font-size: var(--font-size-sm, 12px);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-body-sm, 18px);
   }
 
   .metrics-wrapper{display:flex;flex-direction:column;gap:8px;justify-content:flex-start;align-items:flex-start;}
@@ -865,7 +1066,7 @@ line-height: var(--line-height-body-sm);
 
 .products-table th {
   position: sticky !important;
-  background-color: var(--color-neutral-150) !important;
+  background-color: var(--color-neutral-100) !important;
   height: auto;
   padding: 4px 16px;
   text-align: left;
@@ -919,6 +1120,40 @@ line-height: var(--line-height-body-md);
 .products-table th svg {
   vertical-align: middle;
   transform: translateY(-1px); /* tweak as needed */
+}
+
+/* Created On sort popover */
+.products-createdon-popover {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  gap: 4px;
+}
+
+.products-sort-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  color: #19222D;
+  text-align: left;
+}
+
+
+.products-sort-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.products-sort-option-label {
+  white-space: nowrap;
 }
 
 /* Center the whole cell */
@@ -1264,10 +1499,11 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
 .product-name-cell {
   display: flex;
   align-items: center;
-  gap: 0;                                   /* figma says -1; negative gap isn't supported */
+  gap: 8px;                                  /* add space between icon and text */
   align-self: center;
   padding: 12px 16px;                        /* figma */
   height: 100%;                              /* fill the entire cell height */
+  min-width: 0;                              /* allow inner content to shrink for ellipsis */
 }
 
 /* Left “icon pill” container */
@@ -1279,10 +1515,8 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   align-items: center;
   align-self: center;
   height: auto;                              /* auto height to fit content */
-  border-radius: 12px 0 0 12px;
+  border-radius: 12px;                        /* round all corners */
   border: 0.6px solid var(--border-border-2, #D5D4DF);
-  background: var(--multi-colors-Products-Fuchsia-opac-2, rgba(220, 182, 226, 0.15));
-  border-radius: 12px 0 0 12px;
 }
 
 /* The actual avatar inside the icon pill */
@@ -1313,18 +1547,16 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
 .product-name-cell__content {
   display: flex;
   align-items: center;
-  gap: 8px;                                  /* figma */
-  flex: 1 0 0;
+  gap: 8px;
+  flex: 0 0 180px;             /* fixed width block for name + SKU */
   align-self: center;
-  height: auto;
-  padding: 8px 12px;                         /* figma */
-  border-radius: 0 12px 12px 0;
-  border-top: 0.4px solid var(--border-border-2, #D5D4DF);
-  border-right: 0.4px solid var(--border-border-2, #D5D4DF);
-  border-bottom: 0.4px solid var(--border-border-2, #D5D4DF);
-  background: var(--color-neutral-50);
-    height :57px;
-
+  padding: 0;                  /* remove inner chip padding */
+  border-radius: 0;            /* remove chip rounding */
+  border-top: none;
+  border-right: none;
+  border-bottom: none;         /* no borders around text */
+  background: transparent;
+  min-width: 0;                /* allow truncation in flex layouts */
 }
 
 /* Name text inside the right chip */
@@ -1337,15 +1569,14 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   font-size: var(--font-size-md);
   font-weight: 500;
   line-height: var(--line-height-body-md);
-  height :58px;
-  text-align: center;
-  margin-top: 10px;
+  text-align: left;
+  margin: 0;
 }
 
 /* Optional: make the whole first column denser by slightly tightening the default table row padding elsewhere */
 .products-table td:not(.product-name-td) {
   padding: 16px;
-    height :58px;
+  height :58px;
  /* keep your style, but first column owns its own spacing */
 }
 

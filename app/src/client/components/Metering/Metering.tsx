@@ -16,6 +16,7 @@ import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import Tooltip from '../componenetsss/Tooltip';
 
 // Props for Metering component
 interface MeteringProps {
@@ -208,10 +209,23 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const getMetricColor = (idx: number) => metricColorPalette[idx % metricColorPalette.length];
 
   const filteredMetrics = metrics
-    .filter((m) =>
-      m.usageMetric?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.productName?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    // Global text search across key fields (metric, product, unit, status), excluding date
+    .filter((m) => {
+      const q = searchQuery.trim().toLowerCase();
+      if (!q) return true;
+
+      const metricName = (m.usageMetric || '').toLowerCase();
+      const productName = (m.productName || '').toLowerCase();
+      const unit = (m.unit || '').toLowerCase();
+      const status = (m.status || '').toLowerCase();
+
+      return (
+        metricName.includes(q) ||
+        productName.includes(q) ||
+        unit.includes(q) ||
+        status.includes(q)
+      );
+    })
     .sort((a, b) => {
       const aDraft = a.status?.toLowerCase() === 'draft';
       const bDraft = b.status?.toLowerCase() === 'draft';
@@ -306,11 +320,22 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                   <td>{display(metric.productName)}</td>
                   <td>{display(metric.unit)}</td>
                   <td>
-                    <StatusBadge
-                      label={formatStatus(metric.status)}
-                      variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
-                      size="sm"
-                    />
+                    <Tooltip
+                      position="right"
+                      content={
+                        metric.status?.toLowerCase() === 'active'
+                          ? 'Metric is active and in use.'
+                          : metric.status?.toLowerCase() === 'draft'
+                            ? 'Metric is in draft. Continue setting it up.'
+                            : formatStatus(metric.status)
+                      }
+                    >
+                      <StatusBadge
+                        label={formatStatus(metric.status)}
+                        variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
+                        size="sm"
+                      />
+                    </Tooltip>
                   </td>
                   <td>{display(metric.createdOn)}</td>
 

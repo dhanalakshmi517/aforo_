@@ -33,8 +33,7 @@ export interface DraftProduct {
   productId?: string;
   productName?: string;
   version?: string;
-  internalSkuCode?: string;
-  skuCode?: string;
+  internalSkuCode?: string; // kept for backwards compatibility; not edited in this flow
   productDescription?: string;
   status?: string;
   productType?: string;
@@ -103,7 +102,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const [formData, setFormData] = useState({
     productName: activeDraft?.productName || "",
     version: activeDraft?.version || "",
-    skuCode: (activeDraft?.internalSkuCode ?? activeDraft?.skuCode) || "",
     description: activeDraft?.productDescription || "",
   });
   const [selectedIcon, setSelectedIcon] = useState<ProductIconData | null>(null);
@@ -235,14 +233,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     return Boolean(
       formData.productName.trim() ||
       formData.version.trim() ||
-      formData.skuCode.trim() ||
       formData.description.trim() ||
       selectedIcon
     );
   }, [
     formData.productName,
     formData.version,
-    formData.skuCode,
     formData.description,
     selectedIcon
   ]);
@@ -273,7 +269,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const handleFieldChange = (field: keyof typeof formData) => (v: string) => {
     const trimmed = v.trim();
     setFormData({ ...formData, [field]: v });
-    // uniqueness check for productName and skuCode
+    // uniqueness check for productName
     if (field === 'productName') {
       // Exclude current draft product from uniqueness check
       const duplicate = existingProducts.some(p =>
@@ -290,19 +286,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         setErrors(prev => ({ ...prev, productName: 'Must be unique' }));
       } else if (errors.productName === 'Must be unique') {
         const { productName, ...rest } = errors;
-        setErrors(rest);
-      }
-    }
-    if (field === 'skuCode') {
-      // Exclude current draft product from uniqueness check
-      const duplicate = existingProducts.some(p =>
-        (p.skuCode || '').toLowerCase() === trimmed.toLowerCase() &&
-        p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
-      );
-      if (duplicate) {
-        setErrors(prev => ({ ...prev, skuCode: 'Must be unique' }));
-      } else if (errors.skuCode === 'Must be unique') {
-        const { skuCode, ...rest } = errors;
         setErrors(rest);
       }
     }
@@ -355,21 +338,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     // Basic guard: prevent invalid index
     if (index < 0 || index >= steps.length) return;
 
-    // Block moving away from General when required fields are empty but at least one field is filled
+    // Block moving away from General when product name is empty but user has started filling the form
     if (currentStep === 0 && index > 0) {
       const productNameEmpty = !formData.productName.trim();
-      const skuCodeEmpty = !formData.skuCode.trim();
 
-      // If user has entered something in any field, enforce required-field validation
-      if (hasAnyRequiredInput && (productNameEmpty || skuCodeEmpty)) {
-        const newErrors: Record<string, string> = {};
-        if (productNameEmpty) {
-          newErrors.productName = 'This field is required';
-        }
-        if (skuCodeEmpty) {
-          newErrors.skuCode = 'This field is required';
-        }
-
+      if (hasAnyRequiredInput && productNameEmpty) {
+        const newErrors: Record<string, string> = { productName: 'This field is required' };
         setErrors(prev => ({ ...prev, ...newErrors }));
         return;
       }
@@ -420,7 +394,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     const formDataChanged =
       lastSavedData.productName !== formData.productName ||
       lastSavedData.version !== formData.version ||
-      lastSavedData.skuCode !== formData.skuCode ||
       lastSavedData.description !== formData.description;
 
     const iconChanged =
@@ -459,19 +432,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         console.log('❌ Frontend uniqueness check failed for productName:', formData.productName);
         newErrors.productName = 'Must be unique';
       }
-      if (formData.skuCode && existingProducts.some(p =>
-        lower(p.skuCode || '') === lower(formData.skuCode) &&
-        p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
-      )) {
-        console.log('❌ Frontend uniqueness check failed for skuCode:', formData.skuCode);
-        newErrors.skuCode = 'Must be unique';
-      }
       if (activeTab === 'general') {
         if (!formData.productName.trim()) {
           newErrors.productName = 'This field is required';
-        }
-        if (!formData.skuCode.trim()) {
-          newErrors.skuCode = 'This field is required';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -485,9 +448,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       setIsSaving(true);
 
       // Create base payload with current form data
+      // Note: internalSkuCode is required by ProductPayload but we no longer capture SKU in this flow,
+      // so we send an empty string to satisfy the type and backend contract.
       const basePayload: ProductPayload = {
         productName: formData.productName || '',
-        internalSkuCode: formData.skuCode || '',
+        internalSkuCode: '',
         productDescription: formData.description || '',
         version: formData.version || ''
       };
@@ -755,9 +720,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       if (!formData.productName.trim()) {
         newErrors.productName = 'This field is required';
       }
-      if (!formData.skuCode.trim()) {
-        newErrors.skuCode = 'This field is required';
-      }
 
       // Check uniqueness - exclude current draft product
       const lower = (s: string) => s.trim().toLowerCase();
@@ -767,13 +729,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       )) {
         console.log('❌ Frontend uniqueness check failed for productName:', formData.productName);
         newErrors.productName = 'Must be unique';
-      }
-      if (formData.skuCode && existingProducts.some(p =>
-        lower(p.skuCode || '') === lower(formData.skuCode) &&
-        p.skuCode !== (activeDraft?.internalSkuCode ?? activeDraft?.skuCode)
-      )) {
-        console.log('❌ Frontend uniqueness check failed for skuCode:', formData.skuCode);
-        newErrors.skuCode = 'Must be unique';
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -1064,14 +1019,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                   );
                                 })()}
 
-                                <InputField
-                                  label="SKU Code"
-                                  value={formData.skuCode}
-                                  onChange={handleFieldChange('skuCode')}
-                                  placeholder="eg. API-WTHR-STD-001"
-                                  error={errors.skuCode}
-                                  required
-                                />
+                            
                                 <TextareaField
                                   label="Description"
                                   value={formData.description}
@@ -1335,7 +1283,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                 onSave={async () => {
                   const ok = await handleSaveDraft();
                   // Check if user has filled any details
-                  const hasData = formData.productName || formData.version || formData.skuCode || formData.description;
+                  const hasData = formData.productName || formData.version || formData.description;
 
                   // Show success toast if save was successful and there's data
                   if (ok && hasData) {

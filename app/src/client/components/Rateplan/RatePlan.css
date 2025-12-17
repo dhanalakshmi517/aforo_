@@ -18,7 +18,7 @@
 /* =========================================================
    Roots
    ========================================================= */
-.main-container{ width:100%; padding:0 16px 16px 16px; box-sizing:border-box; }
+.main-container{ width:100%; padding:0 8px 8px 8px; box-sizing:border-box; }
 
 /* =========================================================
    Create Plan shell
@@ -144,7 +144,6 @@
   top: 0;
   z-index: 1;                    /* stay above rows               */
   background: var(--color-neutral-100);  /* covers rows under it   */
-  background:#F7F8FA; 
   color:var(--text-dark); 
   font-weight:400;
   padding:8px 16px; 

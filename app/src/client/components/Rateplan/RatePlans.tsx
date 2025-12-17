@@ -17,6 +17,7 @@ import { ProductIconData } from '../Products/ProductIcon';
 import axios from 'axios';
 import { getAuthHeaders } from '../../utils/auth';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
+import Tooltip from '../componenetsss/Tooltip';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import RatePlansEmptyImg from './rateplans.svg';
 
@@ -253,9 +254,26 @@ const RatePlans: React.FC<RatePlansProps> = ({
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const filteredPlans = (ratePlansState ?? []).filter((p) => {
+    const q = searchTerm.toLowerCase();
+    if (!q) return true;
+
     const name = (p.ratePlanName ?? '').toLowerCase();
-    const prod = (p.productName ?? p.product?.productName ?? '').toLowerCase();
-    return name.includes(searchTerm.toLowerCase()) || prod.includes(searchTerm.toLowerCase());
+    const productName = (p.productName ?? p.product?.productName ?? '').toLowerCase();
+    const description = (p.description ?? '').toLowerCase();
+    const status = (p.status ?? '').toLowerCase();
+    const paymentType = (p.paymentType ?? '').toLowerCase();
+    const ratePlanType = (p.ratePlanType ?? '').toLowerCase();
+    const billingFrequency = (p.billingFrequency ?? '').toLowerCase();
+
+    return (
+      name.includes(q) ||
+      productName.includes(q) ||
+      description.includes(q) ||
+      status.includes(q) ||
+      paymentType.includes(q) ||
+      ratePlanType.includes(q) ||
+      billingFrequency.includes(q)
+    );
   });
 
   /* ---------- details cache ---------- */
@@ -1098,12 +1116,26 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         <td>{renderPaymentType(plan)}</td>
                         <td>{renderCreatedOn(plan)}</td>
                         <td>
-                          <StatusBadge
-                            label={formatStatus(plan.status)}
-                            variant={String(plan.status || '').toLowerCase() as Variant}
-                            size="sm"
-                          />
+                          <Tooltip
+                            position="right"
+                            content={
+                              String(plan.status || '').toLowerCase() === 'live'
+                                ? 'Rate plan is live and available for sale.'
+                                : String(plan.status || '').toLowerCase() === 'active'
+                                  ? 'Rate plan is active and available for sale.'
+                                  : String(plan.status || '').toLowerCase() === 'draft'
+                                    ? 'Rate plan is in draft. Continue setting it up.'
+                                    : formatStatus(plan.status)
+                            }
+                          >
+                            <StatusBadge
+                              label={formatStatus(plan.status)}
+                              variant={String(plan.status || '').toLowerCase() as Variant}
+                              size="sm"
+                            />
+                          </Tooltip>
                         </td>
+
                         <td className="actions-cell">
                           <div className="product-action-buttons">
                             {plan.status?.toLowerCase() === 'draft' ? (

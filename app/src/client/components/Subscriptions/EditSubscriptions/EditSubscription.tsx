@@ -7,6 +7,7 @@ import { useToast } from '../../componenetsss/ToastProvider';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import MetricRow from '../../componenetsss/MetricRow';
+import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import EditReview from './EditReview';
 
 import './EditSubscription.css';
@@ -64,6 +65,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
   const [activeTab, setActiveTab] = useState<ActiveTab>('details');
 
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showUnsavedRequiredModal, setShowUnsavedRequiredModal] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<
     'idle' | 'saving' | 'success' | 'error'
@@ -244,12 +246,24 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
   };
 
   const handleHeaderBack = useCallback(() => {
+    // Treat main purchase fields as required for back navigation
+    const hasEmptyRequiredFields =
+      !selectedCustomerId ||
+      !selectedProductId ||
+      !selectedRatePlanId ||
+      !paymentType;
+
+    if (hasEmptyRequiredFields) {
+      setShowUnsavedRequiredModal(true);
+      return;
+    }
+
     if (hasChanges) {
       setShowExitModal(true);
     } else {
       onClose();
     }
-  }, [hasChanges, onClose]);
+  }, [hasChanges, onClose, selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType]);
 
   const handleSaveDraft = async (): Promise<boolean> => {
     const saved = await saveDraft({ skipToast: true });
@@ -508,6 +522,17 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
           }
         }}
       />
+
+      {showUnsavedRequiredModal && (
+        <UnsavedChangesModal
+          onDiscard={() => {
+            setShowUnsavedRequiredModal(false);
+            onClose();
+          }}
+          onKeepEditing={() => setShowUnsavedRequiredModal(false)}
+          onClose={() => setShowUnsavedRequiredModal(false)}
+        />
+      )}
     </>
   );
 };

@@ -1,0 +1,61 @@
+.filterchip {
+  height: 28px;                 /* H Hug 28px */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                     /* matches your figma spacing vibe */
+  padding: 4px 8px 4px 12px;    /* comfy pill */
+  border-radius:24px;
+  border: 1px solid #E3E7EE;
+  background:var(--color-neutral-150);
+  box-sizing: border-box;
+  max-width: 165px;             /* W Hug ~165px in your shot */
+}
+
+.filterchip__label {
+  color: var(--color-neutral-1700);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filterchip__close {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filterchip__close:hover {
+  background: #F2F4F8;
+}
+
+.filterchip__close:active {
+  background: #E9EDF5;
+}
+
+.filterchip__close:focus-visible {
+  outline: 2px solid #7C3AED;
+  outline-offset: 2px;
+}
+
+.filterchip.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.filterchip.is-disabled .filterchip__close {
+  cursor: not-allowed;
+}
