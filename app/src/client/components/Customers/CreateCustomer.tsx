@@ -503,10 +503,11 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                               placeholder="eg., ABC Company"
                               onChange={(v) => setCompanyName(v)}
                               error={errors.companyName}
+                              required
                             />
 
                             <div className="cust-np-field">
-                              <label className="customer-visually-hidden">Company Logo (Optional)</label>
+                              <label className="customer-visually-hidden">Company Logo</label>
                               <LogoUploader
                                 logo={companyLogo}
                                 logoUrl={initialLogoUrl}
@@ -522,6 +523,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                               placeholder="eg., John Doe"
                               onChange={(v) => setCustomerName(v)}
                               error={errors.customerName}
+                              required
                             />
 
                             <SelectField
@@ -529,9 +531,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                               value={companyType}
                               onChange={setCompanyType}
                               error={errors.companyType}
-                              optional
+                              required
                               options={[
-                                { value: '', label: 'Select Company Type' },
                                 { value: 'INDIVIDUAL', label: 'Individual' },
                                 { value: 'BUSINESS', label: 'Business' }
                               ]}
