@@ -984,6 +984,18 @@ font-style: normal;
 font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
+
+/* Show column filter icons only on hover (Metering table) */
+.products-th-label-with-filter .products-column-filter-trigger {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease-out;
+}
+
+.products-th-label-with-filter:hover .products-column-filter-trigger {
+  opacity: 1;
+  pointer-events: auto;
+}
   
   
 

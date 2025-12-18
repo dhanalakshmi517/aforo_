@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Customers.css";
 import "../Rateplan/RatePlan.css";
@@ -13,10 +13,14 @@ import RetryIconButton from '../componenetsss/RetryIconButton';
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
-import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
 import CustomersPlat from './customers-plat.svg';
 import { Checkbox } from '../componenetsss/Checkbox';
 import FilterChip from '../componenetsss/FilterChip';
+import FilterDropdown from '../componenetsss/FilterDropdown';
+import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
+import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
+import DateSortDropdown from '../componenetsss/DateSortDropdown';
+import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -164,9 +168,21 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const statusFilterRef = useRef<HTMLDivElement | null>(null);
   const createdSortRef = useRef<HTMLDivElement | null>(null);
+  const companyFilterRef = useRef<HTMLDivElement | null>(null);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
+  const [isCompanyFilterOpen, setIsCompanyFilterOpen] = useState(false);
+  const [companyFilterPosition, setCompanyFilterPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [statusFilterPosition, setStatusFilterPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [createdSortPosition, setCreatedSortPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
+  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('companyName');
+  const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
+  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
+  const [selectedCompanyIds, setSelectedCompanyIds] = useState<Array<number | string>>([]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -190,12 +206,28 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node | null;
 
+      // If click is inside the portal root (company name FilterDropdown),
+      // do not treat it as an outside click for closing popovers.
+      const portalRoot = document.getElementById('portal-root');
+      if (portalRoot && target && portalRoot.contains(target)) {
+        return;
+      }
+
       if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
         setIsStatusFilterOpen(false);
       }
 
       if (createdSortRef.current && target && !createdSortRef.current.contains(target)) {
         setIsCreatedSortOpen(false);
+      }
+
+      if (filterButtonRef.current && !filterButtonRef.current.contains(target)) {
+        setIsMainFilterMenuOpen(false);
+        setIsMainFilterPanelOpen(false);
+      }
+
+      if (companyFilterRef.current && target && !companyFilterRef.current.contains(target)) {
+        setIsCompanyFilterOpen(false);
       }
     };
 
@@ -310,6 +342,20 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     setShowNewCustomerForm(true);
   };
 
+  const companyOptions = useMemo(() => {
+    return Array.from(
+      new Map(
+        customers.map((c) => {
+          const id = c.customerId ?? c.id ?? 0;
+          return [id, {
+            id,
+            label: c.companyName || `Customer ${id}`,
+          }];
+        })
+      ).values()
+    );
+  }, [customers]);
+
   const filteredCustomers = customers.filter(c => {
     const q = searchTerm.toLowerCase();
     if (!q) return true;
@@ -347,6 +393,12 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     if (selectedStatuses.length === 0) return true;
     const statusKey = (c.status || '').toLowerCase();
     return selectedStatuses.includes(statusKey);
+  })
+  // Company Name filter
+  .filter((c) => {
+    if (selectedCompanyIds.length === 0) return true;
+    const id = (c.customerId ?? c.id ?? 0);
+    return selectedCompanyIds.some((x) => String(x) === String(id));
   })
   // Sort: drafts first, then by createdOn according to createdSortOrder
   .sort((a, b) => {
@@ -386,15 +438,124 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             onSearchTermChange={setSearchTerm}
             primaryLabel={customers.length > 0 ? " + New Customer" : ""}
             onPrimaryClick={handleNewCustomer}
-            onFilterClick={() => { }}
+            onFilterClick={() => {
+              setIsCompanyFilterOpen(false);
+              setIsCreatedSortOpen(false);
+              setIsStatusFilterOpen(false);
+
+              if (filterButtonRef.current) {
+                const rect = filterButtonRef.current.getBoundingClientRect();
+                const menuWidth = 240;
+                const panelWidth = 264;
+                const gap = 12;
+                const margin = 8;
+
+                let left = rect.left;
+                const minLeft = panelWidth + gap + margin;
+                if (left < minLeft) {
+                  left = minLeft;
+                }
+
+                if (left + menuWidth + margin > window.innerWidth) {
+                  left = Math.max(margin, window.innerWidth - menuWidth - margin);
+                  if (left < minLeft) {
+                    left = minLeft;
+                  }
+                }
+
+                setMainFilterMenuPosition({
+                  top: rect.bottom + 8,
+                  left,
+                });
+              }
+
+              const nextOpen = !isMainFilterMenuOpen;
+              setIsMainFilterMenuOpen(nextOpen);
+              if (!nextOpen) {
+                setIsMainFilterPanelOpen(false);
+              }
+            }}
+            filterButtonRef={filterButtonRef}
             searchDisabled={searchDisabled}
             filterDisabled={customers.length === 0}
             showPrimary={customers.length > 0}
             showIntegrations={customers.length > 0} // Add this line
-
           />
 
-          {selectedStatuses.length > 0 && (
+          {isMainFilterMenuOpen && (
+            <MainFilterMenu
+              items={[
+                { key: 'companyName', label: 'Company Name' },
+                { key: 'status', label: 'Status' },
+                { key: 'date', label: 'Date' },
+              ]}
+              activeKey={activeFilterKey}
+              onSelect={(key) => {
+                setActiveFilterKey(key);
+              }}
+              onSelectWithRect={(key, rect) => {
+                setActiveFilterKey(key);
+                const panelWidth = key === 'companyName' ? 320 : 264;
+                const gap = 12;
+                const margin = 8;
+
+                let left = rect.left - gap - panelWidth;
+                if (left < margin) {
+                  const tryRight = rect.right + gap;
+                  if (tryRight + panelWidth + margin <= window.innerWidth) {
+                    left = tryRight;
+                  } else {
+                    left = Math.max(margin, window.innerWidth - panelWidth - margin);
+                  }
+                }
+
+                setMainFilterPanelPosition({
+                  top: rect.top,
+                  left,
+                });
+                setIsMainFilterPanelOpen(true);
+              }}
+              anchorTop={mainFilterMenuPosition.top}
+              anchorLeft={mainFilterMenuPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'companyName' && (
+            <FilterDropdown
+              options={companyOptions}
+              value={selectedCompanyIds}
+              onChange={(next) => setSelectedCompanyIds(next)}
+              placeholder="Search Companies"
+              widthPx={320}
+              heightPx={300}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'status' && (
+            <SimpleFilterDropdown
+              options={['active', 'draft'].map((statusKey) => ({
+                id: statusKey,
+                label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+              }))}
+              value={selectedStatuses}
+              onChange={(next) => setSelectedStatuses(next.map((x) => String(x).toLowerCase()))}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'date' && (
+            <DateSortDropdown
+              value={createdSortOrder}
+              onChange={(next) => setCreatedSortOrder(next)}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {(selectedStatuses.length > 0 || selectedCompanyIds.length > 0) && (
             <div className="products-active-filters-row">
               <div className="products-active-filters-chips">
                 {selectedStatuses.map((s) => (
@@ -406,15 +567,29 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                     }
                   />
                 ))}
+                {selectedCompanyIds.map((id) => {
+                  const cust = customers.find((c) => String(c.customerId ?? c.id) === String(id));
+                  const label = cust?.companyName || `Customer ${id}`;
+                  return (
+                    <FilterChip
+                      key={id}
+                      label={label}
+                      onRemove={() =>
+                        setSelectedCompanyIds((prev) => prev.filter((x) => x !== id))
+                      }
+                    />
+                  );
+                })}
               </div>
               <button
                 type="button"
                 className="products-filters-reset"
                 onClick={() => {
                   setSelectedStatuses([]);
+                  setSelectedCompanyIds([]);
                 }}
               >
-                Clear all
+                Reset
               </button>
             </div>
           )}
@@ -425,13 +600,92 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                 <table className="customers-table">
                   <thead>
                     <tr>
-                      <th>Company Name </th>
+                      <th className="products-th-with-filter">
+                        <div
+                          ref={companyFilterRef}
+                          className="products-th-label-with-filter"
+                          onMouseEnter={() => {
+                            // close others
+                            setIsCreatedSortOpen(false);
+                            setIsStatusFilterOpen(false);
+
+                            if (companyFilterRef.current) {
+                              const rect = companyFilterRef.current.getBoundingClientRect();
+                              setCompanyFilterPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsCompanyFilterOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsCompanyFilterOpen(false);
+                          }}
+                        >
+                          <span>Company Name </span>
+                          <button
+                            type="button"
+                            className={`products-column-filter-trigger ${
+                              isCompanyFilterOpen ? 'is-open' : ''
+                            }`}
+                            aria-label="Filter by company name"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="11"
+                              height="8"
+                              viewBox="0 0 11 8"
+                              fill="none"
+                            >
+                              <path
+                                d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                                stroke="#19222D"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+
+                          {isCompanyFilterOpen && (
+                            <div
+                              className="products-column-filter-popover products-column-filter-popover--wide"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <FilterDropdown
+                                options={companyOptions}
+                                value={selectedCompanyIds}
+                                onChange={(next) => setSelectedCompanyIds(next)}
+                                placeholder="Search Companies"
+                                anchorTop={companyFilterPosition.top}
+                                anchorLeft={companyFilterPosition.left}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </th>
                       <th>Customer </th>
                       <th className="products-th-with-filter">
                         <div
                           ref={createdSortRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => setIsCreatedSortOpen(true)}
+                          onMouseEnter={() => {
+                            // close others
+                            setIsCompanyFilterOpen(false);
+                            setIsStatusFilterOpen(false);
+
+                            if (createdSortRef.current) {
+                              const rect = createdSortRef.current.getBoundingClientRect();
+                              setCreatedSortPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsCreatedSortOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsCreatedSortOpen(false);
+                          }}
                         >
                           <span>Created On </span>
                           <button
@@ -463,65 +717,15 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                               className="products-column-filter-popover products-createdon-popover"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <button
-                                type="button"
-                                className={`products-sort-option ${
-                                  createdSortOrder === 'newest' ? 'is-active' : ''
-                                }`}
-                                onClick={() => {
-                                  setCreatedSortOrder('newest');
+                              <DateSortDropdown
+                                value={createdSortOrder}
+                                onChange={(next) => {
+                                  setCreatedSortOrder(next);
                                   setIsCreatedSortOpen(false);
                                 }}
-                              >
-                                <span className="products-sort-option-icon">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="13"
-                                    height="13"
-                                    viewBox="0 0 13 13"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
-                                      stroke="#25303D"
-                                      strokeWidth="1.2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </span>
-                                <span className="products-sort-option-label">Newest first</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={`products-sort-option ${
-                                  createdSortOrder === 'oldest' ? 'is-active' : ''
-                                }`}
-                                onClick={() => {
-                                  setCreatedSortOrder('oldest');
-                                  setIsCreatedSortOpen(false);
-                                }}
-                              >
-                                <span className="products-sort-option-icon">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
-                                      stroke="#25303D"
-                                      strokeWidth="1.2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </span>
-                                <span className="products-sort-option-label">Oldest first</span>
-                              </button>
+                                anchorTop={createdSortPosition.top}
+                                anchorLeft={createdSortPosition.left}
+                              />
                             </div>
                           )}
                         </div>
@@ -530,7 +734,23 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                         <div
                           ref={statusFilterRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => setIsStatusFilterOpen(true)}
+                          onMouseEnter={() => {
+                            // close others
+                            setIsCompanyFilterOpen(false);
+                            setIsCreatedSortOpen(false);
+
+                            if (statusFilterRef.current) {
+                              const rect = statusFilterRef.current.getBoundingClientRect();
+                              setStatusFilterPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsStatusFilterOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsStatusFilterOpen(false);
+                          }}
                         >
                           <span>Status </span>
                           <button
@@ -562,30 +782,19 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                               className="products-column-filter-popover"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div className="products-column-filter-list">
-                                {['active', 'draft'].map((statusKey) => (
-                                  <div
-                                    key={statusKey}
-                                    className="products-column-filter-list-item"
-                                  >
-                                    <Checkbox
-                                      checked={selectedStatuses.includes(statusKey)}
-                                      onChange={(checked) => {
-                                        setSelectedStatuses((prev) => {
-                                          if (checked) {
-                                            if (prev.includes(statusKey)) return prev;
-                                            return [...prev, statusKey];
-                                          }
-                                          return prev.filter((x) => x !== statusKey);
-                                        });
-                                      }}
-                                      label={
-                                        statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
-                                      }
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                              <SimpleFilterDropdown
+                                options={['active', 'draft'].map((statusKey) => ({
+                                  id: statusKey,
+                                  label:
+                                    statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                                }))}
+                                value={selectedStatuses}
+                                onChange={(next) =>
+                                  setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                                }
+                                anchorTop={statusFilterPosition.top}
+                                anchorLeft={statusFilterPosition.left}
+                              />
                             </div>
                           )}
                         </div>
@@ -622,9 +831,15 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                           </div>
                         </td>
                       </tr>
+                    ) : (!loading && customers.length > 0 && filteredCustomers.length === 0) ? (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
+                          No results found. Try adjusting your search or filters.
+                        </td>
+                      </tr>
                     ) : null}
 
-                    {filteredCustomers.map((customer) => {
+                    {filteredCustomers.length > 0 && filteredCustomers.map((customer) => {
                       const id = customer.customerId ?? customer.id;
                       const companyTitle = customer.companyName || "-";
                       const personTitle = customer.customerName || "-";

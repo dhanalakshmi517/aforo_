@@ -22,6 +22,7 @@ export interface PageHeaderProps {
   showIntegrations?: boolean;
   showSearch?: boolean;
   showDivider?: boolean;
+  filterButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -39,7 +40,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   filterDisabled = false,
   showIntegrations = true,
   showSearch = true,
-  showDivider = true
+  showDivider = true,
+  filterButtonRef
 }) => {
   const [isFilterSelected, setIsFilterSelected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -89,6 +91,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             state={filterDisabled ? 'disabled' : isFilterSelected ? 'active' : 'default'}
             onClick={handleFilterClick}
             ariaLabel="Open filters"
+            buttonRef={filterButtonRef}
           />
         )}
 

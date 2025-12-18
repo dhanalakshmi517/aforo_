@@ -23,6 +23,7 @@ export interface HeaderProps {
   searchDisabled?: boolean;
   filterDisabled?: boolean;
   showIntegrations?: boolean;
+  filterButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -40,7 +41,8 @@ const Header: React.FC<HeaderProps> = ({
   showSearch = true,
   searchDisabled = false,
   filterDisabled = false,
-  showIntegrations = true
+  showIntegrations = true,
+  filterButtonRef
 }) => {
   const [isFilterSelected, setIsFilterSelected] = useState(false);
   
@@ -84,6 +86,7 @@ const Header: React.FC<HeaderProps> = ({
             state={filterDisabled ? 'disabled' : isFilterSelected ? 'active' : 'default'}
             onClick={handleFilterClick}
             ariaLabel="Open filters"
+            buttonRef={filterButtonRef}
           />
         )}
 
