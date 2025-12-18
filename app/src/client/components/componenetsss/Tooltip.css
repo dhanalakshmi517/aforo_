@@ -8,13 +8,12 @@
 .tooltip-box {
   position: absolute;
   min-height: 32px;
-  background-color: var(--color-primary-800);
+  background-color: var(--color-primary-1000);
   color: var(--color-neutral-white);
   padding: 8px 10px;
   border-radius: var(--border-radius-sm);
  color: var(--color-neutral-white);
 
-/* body/xs/reg */
 font-family: var(--font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-xs, 10px);
 font-style: normal;
@@ -28,8 +27,8 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   width: auto;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-start;   /* text starts near arrow side */
-  text-align: left;              /* normal sentence layout */
+  justify-content: center;
+  text-align: center;              /* normal sentence layout */
 }
 
 /* Tooltip positions */

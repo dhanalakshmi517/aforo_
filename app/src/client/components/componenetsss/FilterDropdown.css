@@ -1,0 +1,159 @@
+@import "../Variables/Variables.css";
+.fd-root{
+  border-radius: var(--border-radius-lg);
+  background:var(--color-neutral-white);
+  box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6), 0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8), 0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+  border: none;
+  box-sizing: border-box;
+  overflow: hidden; /* keeps sticky header clean */
+}
+
+/* padding 16 like your figma */
+.fd-searchWrap{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #FFFFFF;
+  padding: 16px 16px 8px 16px;
+}
+
+.fd-search{
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #E3E7EE;
+  background: var(--color-neutral-50);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.fd-search:hover{
+  border: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-100);
+}
+
+.fd-search:active{
+  border: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-white);
+}
+
+.fd-searchInput{
+  border: 0;
+  outline: none;
+  width: 100%;
+  overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  background: transparent;
+}
+
+.fd-searchInput::placeholder{
+overflow: hidden;
+color: var(--color-neutral-500);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */}
+
+.fd-list{
+  /* total height fixed by root; list consumes rest and scrolls */
+  height: calc(100% - 60px); /* search block area */
+  padding: 0 16px 16px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* simple clean scrollbar (works even if you don’t use your svg one) */
+.fd-list::-webkit-scrollbar { width: 8px; }
+.fd-list::-webkit-scrollbar-track { background: transparent; }
+.fd-list::-webkit-scrollbar-thumb {
+  background: #D9DFE8;
+  border-radius: 999px;
+  height: 10px;
+}
+.fd-list::-webkit-scrollbar-thumb:hover { background: #C9D1DD; }
+
+.fd-row{
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* HOVER state (what you asked) */
+.fd-row:hover{
+  background: var(--color-neutral-150);
+}
+
+/* CLICKED / SELECTED state */
+.fd-row.is-checked{
+  background: var(--color-neutral-150);
+}
+
+/* keep hover on checked too */
+.fd-row.is-checked:hover{
+  background: #E7F0FF;
+}
+
+.fd-row.is-disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fd-checkbox{
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #4F46E5;
+}
+
+.fd-rowText{
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fd-label{
+overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px; /* matches your truncation vibe */
+}
+
+.fd-subLabel{
+  font-size: 11px;
+  line-height: 14px;
+  color: #7B8794;
+}
+
+.fd-empty{
+  padding: 12px 8px;
+  font-size: 13px;
+  color: #7B8794;
+}

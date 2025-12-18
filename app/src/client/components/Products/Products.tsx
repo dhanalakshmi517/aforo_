@@ -29,6 +29,9 @@ import SearchInput from '../componenetsss/SearchInput';
 import Checkbox from '../componenetsss/Checkbox';
 import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
 import FilterChip from '../componenetsss/FilterChip';
+import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
+import DateSortDropdown from '../componenetsss/DateSortDropdown';
+import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 
 const getRandomBackgroundColor = (index: number) => {
   const colors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
@@ -95,6 +98,16 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
   const createdSortRef = React.useRef<HTMLDivElement | null>(null);
+  const [productTypeFilterPosition, setProductTypeFilterPosition] = useState({ top: 0, left: 0 });
+  const [sourceFilterPosition, setSourceFilterPosition] = useState({ top: 0, left: 0 });
+  const [statusFilterPosition, setStatusFilterPosition] = useState({ top: 0, left: 0 });
+  const [createdSortPosition, setCreatedSortPosition] = useState({ top: 0, left: 0 });
+  const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
+  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('productType');
+  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
+  const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
+  const filterButtonRef = React.useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -473,28 +486,38 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setSelectedStatuses([]);
   };
 
-  // Close filters when clicking outside their header/filter areas
+  // Close filters when clicking outside their header/filter areas (ignore portal-root)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node | null;
+      if (!target) return;
+
+      // Ignore clicks inside the shared portal root
+      const portalRoot = document.getElementById('portal-root');
+      if (portalRoot && portalRoot.contains(target)) return;
+
       if (
         productTypeFilterRef.current &&
-        target &&
         !productTypeFilterRef.current.contains(target)
       ) {
         setIsProductTypeFilterOpen(false);
       }
 
-      if (sourceFilterRef.current && target && !sourceFilterRef.current.contains(target)) {
+      if (sourceFilterRef.current && !sourceFilterRef.current.contains(target)) {
         setIsSourceFilterOpen(false);
       }
 
-      if (createdSortRef.current && target && !createdSortRef.current.contains(target)) {
+      if (createdSortRef.current && !createdSortRef.current.contains(target)) {
         setIsCreatedSortOpen(false);
       }
 
-      if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
+      if (statusFilterRef.current && !statusFilterRef.current.contains(target)) {
         setIsStatusFilterOpen(false);
+      }
+
+      if (filterButtonRef.current && !filterButtonRef.current.contains(target)) {
+        setIsMainFilterMenuOpen(false);
+        setIsMainFilterPanelOpen(false);
       }
     };
 
@@ -503,7 +526,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isProductTypeFilterOpen, isSourceFilterOpen, isStatusFilterOpen, isCreatedSortOpen]);
+  }, []);
 
   const handleCreateProductCancel = React.useCallback(() => {
     setShowCreateProduct(false);
@@ -972,11 +995,138 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 showKongButton={products.length > 0}
                 primaryLabel="+ Create Product"
                 onPrimaryClick={() => navigate('/get-started/products/new')}
-                onFilterClick={() => { }}
+                onFilterClick={() => {
+                  if (filterButtonRef.current) {
+                    const rect = filterButtonRef.current.getBoundingClientRect();
+                    const menuWidth = 240;
+                    const panelWidth = 264;
+                    const gap = 12;
+                    const margin = 8;
+
+                    let left = rect.left;
+                    const minLeft = panelWidth + gap + margin;
+                    if (left < minLeft) {
+                      left = minLeft;
+                    }
+
+                    if (left + menuWidth + margin > window.innerWidth) {
+                      left = Math.max(margin, window.innerWidth - menuWidth - margin);
+                      if (left < minLeft) {
+                        left = minLeft;
+                      }
+                    }
+
+                    setMainFilterMenuPosition({
+                      top: rect.bottom + 8,
+                      left,
+                    });
+                  }
+                  const nextOpen = !isMainFilterMenuOpen;
+                  setIsMainFilterMenuOpen(nextOpen);
+                  if (!nextOpen) {
+                    setIsMainFilterPanelOpen(false);
+                  }
+                }}
+                filterButtonRef={filterButtonRef}
                 onSettingsClick={() => setShowKongIntegration(true)}
                 onNotificationsClick={() => { }}
 
               />
+
+              {/* Main Filter Menu */}
+              {isMainFilterMenuOpen && (
+                <MainFilterMenu
+                  items={[
+                    { key: 'productType', label: 'Product Type' },
+                    { key: 'source', label: 'Source' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'date', label: 'Date' },
+                  ]}
+                  activeKey={activeFilterKey}
+                  onSelect={(key) => {
+                    setActiveFilterKey(key);
+                  }}
+                  onSelectWithRect={(key, rect) => {
+                    setActiveFilterKey(key);
+                    const panelWidth = 264;
+                    const gap = 12;
+                    const margin = 8;
+
+                    let left = rect.left - gap - panelWidth;
+                    if (left < margin) {
+                      const tryRight = rect.right + gap;
+                      if (tryRight + panelWidth + margin <= window.innerWidth) {
+                        left = tryRight;
+                      } else {
+                        left = Math.max(margin, window.innerWidth - panelWidth - margin);
+                      }
+                    }
+
+                    setMainFilterPanelPosition({
+                      top: rect.top,
+                      left,
+                    });
+                    setIsMainFilterPanelOpen(true);
+                  }}
+                  anchorTop={mainFilterMenuPosition.top}
+                  anchorLeft={mainFilterMenuPosition.left}
+                />
+              )}
+
+              {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'productType' && (
+                <SimpleFilterDropdown
+                  options={[
+                    ProductType.API,
+                    ProductType.FLATFILE,
+                    ProductType.SQLRESULT,
+                    ProductType.LLMTOKEN,
+                  ].map((typeConst) => ({
+                    id: typeConst.toLowerCase(),
+                    label:
+                      productTypeNames[typeConst as keyof typeof productTypeNames] ||
+                      typeConst,
+                  }))}
+                  value={selectedProductTypes}
+                  onChange={(next) => setSelectedProductTypes(next.map((x) => String(x).toLowerCase()))}
+                  anchorTop={mainFilterPanelPosition.top}
+                  anchorLeft={mainFilterPanelPosition.left}
+                />
+              )}
+
+              {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'source' && (
+                <SimpleFilterDropdown
+                  options={['manual', 'apigee', 'kong'].map((srcKey) => ({
+                    id: srcKey,
+                    label: srcKey.charAt(0).toUpperCase() + srcKey.slice(1),
+                  }))}
+                  value={selectedSources}
+                  onChange={(next) => setSelectedSources(next.map((x) => String(x).toLowerCase()))}
+                  anchorTop={mainFilterPanelPosition.top}
+                  anchorLeft={mainFilterPanelPosition.left}
+                />
+              )}
+
+              {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'status' && (
+                <SimpleFilterDropdown
+                  options={['active', 'draft'].map((statusKey) => ({
+                    id: statusKey,
+                    label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                  }))}
+                  value={selectedStatuses}
+                  onChange={(next) => setSelectedStatuses(next.map((x) => String(x).toLowerCase()))}
+                  anchorTop={mainFilterPanelPosition.top}
+                  anchorLeft={mainFilterPanelPosition.left}
+                />
+              )}
+
+              {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'date' && (
+                <DateSortDropdown
+                  value={createdSortOrder}
+                  onChange={(next) => setCreatedSortOrder(next)}
+                  anchorTop={mainFilterPanelPosition.top}
+                  anchorLeft={mainFilterPanelPosition.left}
+                />
+              )}
 
               {(selectedProductTypes.length > 0 ||
                 selectedSources.length > 0 ||
@@ -1018,7 +1168,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                     className="products-filters-reset"
                     onClick={handleResetProductFilters}
                   >
-                    Clear all
+                    Reset
                   </button>
                 </div>
               )}
@@ -1032,7 +1182,24 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <div
                           ref={productTypeFilterRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => setIsProductTypeFilterOpen(true)}
+                          onMouseEnter={() => {
+                            // close others
+                            setIsSourceFilterOpen(false);
+                            setIsStatusFilterOpen(false);
+                            setIsCreatedSortOpen(false);
+
+                            if (productTypeFilterRef.current) {
+                              const rect = productTypeFilterRef.current.getBoundingClientRect();
+                              setProductTypeFilterPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsProductTypeFilterOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsProductTypeFilterOpen(false);
+                          }}
                         >
                           <span>Product Type</span>
                           <button
@@ -1064,39 +1231,25 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               className="products-column-filter-popover"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div className="products-column-filter-list">
-                                {[
+                              <SimpleFilterDropdown
+                                options={[
                                   ProductType.API,
                                   ProductType.FLATFILE,
                                   ProductType.SQLRESULT,
                                   ProductType.LLMTOKEN,
-                                ].map((typeConst) => {
-                                  const typeKey = typeConst.toLowerCase();
-                                  const label =
+                                ].map((typeConst) => ({
+                                  id: typeConst.toLowerCase(),
+                                  label:
                                     productTypeNames[typeConst as keyof typeof productTypeNames] ||
-                                    typeConst;
-                                  return (
-                                    <div
-                                      key={typeConst}
-                                      className="products-column-filter-list-item"
-                                    >
-                                      <Checkbox
-                                        checked={selectedProductTypes.includes(typeKey)}
-                                        onChange={(checked) => {
-                                          setSelectedProductTypes((prev) => {
-                                            if (checked) {
-                                              if (prev.includes(typeKey)) return prev;
-                                              return [...prev, typeKey];
-                                            }
-                                            return prev.filter((x) => x !== typeKey);
-                                          });
-                                        }}
-                                        label={label}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                                    typeConst,
+                                }))}
+                                value={selectedProductTypes}
+                                onChange={(next) =>
+                                  setSelectedProductTypes(next.map((x) => String(x).toLowerCase()))
+                                }
+                                anchorTop={productTypeFilterPosition.top}
+                                anchorLeft={productTypeFilterPosition.left}
+                              />
                             </div>
                           )}
                         </div>
@@ -1105,7 +1258,24 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <div
                           ref={sourceFilterRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => setIsSourceFilterOpen(true)}
+                          onMouseEnter={() => {
+                            // close others
+                            setIsProductTypeFilterOpen(false);
+                            setIsStatusFilterOpen(false);
+                            setIsCreatedSortOpen(false);
+
+                            if (sourceFilterRef.current) {
+                              const rect = sourceFilterRef.current.getBoundingClientRect();
+                              setSourceFilterPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsSourceFilterOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsSourceFilterOpen(false);
+                          }}
                         >
                           <span>Source</span>
                           <button
@@ -1137,28 +1307,18 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               className="products-column-filter-popover"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div className="products-column-filter-list">
-                                {['manual', 'apigee', 'kong'].map((srcKey) => (
-                                  <div
-                                    key={srcKey}
-                                    className="products-column-filter-list-item"
-                                  >
-                                    <Checkbox
-                                      checked={selectedSources.includes(srcKey)}
-                                      onChange={(checked) => {
-                                        setSelectedSources((prev) => {
-                                          if (checked) {
-                                            if (prev.includes(srcKey)) return prev;
-                                            return [...prev, srcKey];
-                                          }
-                                          return prev.filter((x) => x !== srcKey);
-                                        });
-                                      }}
-                                      label={srcKey.charAt(0).toUpperCase() + srcKey.slice(1)}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                              <SimpleFilterDropdown
+                                options={['manual', 'apigee', 'kong'].map((srcKey) => ({
+                                  id: srcKey,
+                                  label: srcKey.charAt(0).toUpperCase() + srcKey.slice(1),
+                                }))}
+                                value={selectedSources}
+                                onChange={(next) =>
+                                  setSelectedSources(next.map((x) => String(x).toLowerCase()))
+                                }
+                                anchorTop={sourceFilterPosition.top}
+                                anchorLeft={sourceFilterPosition.left}
+                              />
                             </div>
                           )}
                         </div>
@@ -1167,7 +1327,24 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <div
                           ref={statusFilterRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => setIsStatusFilterOpen(true)}
+                          onMouseEnter={() => {
+                            // close others
+                            setIsProductTypeFilterOpen(false);
+                            setIsSourceFilterOpen(false);
+                            setIsCreatedSortOpen(false);
+
+                            if (statusFilterRef.current) {
+                              const rect = statusFilterRef.current.getBoundingClientRect();
+                              setStatusFilterPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsStatusFilterOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsStatusFilterOpen(false);
+                          }}
                         >
                           <span>Status</span>
                           <button
@@ -1199,30 +1376,19 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               className="products-column-filter-popover"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div className="products-column-filter-list">
-                                {['active', 'draft'].map((statusKey) => (
-                                  <div
-                                    key={statusKey}
-                                    className="products-column-filter-list-item"
-                                  >
-                                    <Checkbox
-                                      checked={selectedStatuses.includes(statusKey)}
-                                      onChange={(checked) => {
-                                        setSelectedStatuses((prev) => {
-                                          if (checked) {
-                                            if (prev.includes(statusKey)) return prev;
-                                            return [...prev, statusKey];
-                                          }
-                                          return prev.filter((x) => x !== statusKey);
-                                        });
-                                      }}
-                                      label={
-                                        statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
-                                      }
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                              <SimpleFilterDropdown
+                                options={['active', 'draft'].map((statusKey) => ({
+                                  id: statusKey,
+                                  label:
+                                    statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                                }))}
+                                value={selectedStatuses}
+                                onChange={(next) =>
+                                  setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                                }
+                                anchorTop={statusFilterPosition.top}
+                                anchorLeft={statusFilterPosition.left}
+                              />
                             </div>
                           )}
                         </div>
@@ -1231,7 +1397,24 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <div
                           ref={createdSortRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => setIsCreatedSortOpen(true)}
+                          onMouseEnter={() => {
+                            // close others
+                            setIsProductTypeFilterOpen(false);
+                            setIsSourceFilterOpen(false);
+                            setIsStatusFilterOpen(false);
+
+                            if (createdSortRef.current) {
+                              const rect = createdSortRef.current.getBoundingClientRect();
+                              setCreatedSortPosition({
+                                top: rect.bottom + 4,
+                                left: rect.left,
+                              });
+                            }
+                            setIsCreatedSortOpen(true);
+                          }}
+                          onMouseLeave={() => {
+                            setIsCreatedSortOpen(false);
+                          }}
                         >
                           <span>Created On</span>
                           <button
@@ -1264,67 +1447,15 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               className="products-column-filter-popover products-createdon-popover"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <button
-                                type="button"
-                                className={`products-sort-option ${
-                                  createdSortOrder === 'newest' ? 'is-active' : ''
-                                }`}
-                                onClick={() => {
-                                  setCreatedSortOrder('newest');
+                              <DateSortDropdown
+                                value={createdSortOrder}
+                                onChange={(next) => {
+                                  setCreatedSortOrder(next);
                                   setIsCreatedSortOpen(false);
                                 }}
-                              >
-                                <span className="products-sort-option-icon">
-                                  {/* down arrow icon (newest first) */}
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="13"
-                                    height="13"
-                                    viewBox="0 0 13 13"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
-                                      stroke="#25303D"
-                                      strokeWidth="1.2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </span>
-                                <span className="products-sort-option-label">Newest first</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={`products-sort-option ${
-                                  createdSortOrder === 'oldest' ? 'is-active' : ''
-                                }`}
-                                onClick={() => {
-                                  setCreatedSortOrder('oldest');
-                                  setIsCreatedSortOpen(false);
-                                }}
-                              >
-                                <span className="products-sort-option-icon">
-                                  {/* up arrow icon (oldest first) */}
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
-                                      stroke="#25303D"
-                                      strokeWidth="1.2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </span>
-                                <span className="products-sort-option-label">Oldest first</span>
-                              </button>
+                                anchorTop={createdSortPosition.top}
+                                anchorLeft={createdSortPosition.left}
+                              />
                             </div>
                           )}
                         </div>
@@ -1342,7 +1473,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           </div>
                         </td>
                       </tr>
-                    ) : !isLoading && filteredProducts.length === 0 ? (
+                    ) : !isLoading && products.length === 0 ? (
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                           <div className="products-empty-state">
@@ -1358,8 +1489,14 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           </div>
                         </td>
                       </tr>
+                    ) : (!isLoading && products.length > 0 && filteredProducts.length === 0) ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
+                          No results found. Try adjusting your search or filters.
+                        </td>
+                      </tr>
                     ) : (
-                      filteredProducts.map((product) => (
+                      filteredProducts.length > 0 && filteredProducts.map((product) => (
                         <tr key={`${product.productId}-${refreshKey}`}>
                         <td className="product-name-td">
                           <div className="product-name-cell">

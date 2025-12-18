@@ -1,0 +1,60 @@
+@import "../Variables/Variables.css";
+.ds-root{
+  width: 264px;
+  border-radius: var(--border-radius-lg);
+  background: var(--color-neutral-white);
+  box-shadow: 0px 10px 30px rgba(16, 24, 40, 0.10);
+  border: 1px solid #EEF2F6;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.ds-item{
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ds-item:hover{
+  background: var(--color-neutral-150);
+}
+
+.ds-item:active{
+  background: var(--color-neutral-150);
+}
+
+.ds-item.is-selected{
+  background: var(--color-neutral-200);
+  border: 1px solid #D6E4FF;
+}
+
+.ds-icon{
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px;
+}
+
+.ds-text{
+overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  white-space: nowrap;
+}

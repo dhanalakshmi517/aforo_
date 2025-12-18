@@ -19,6 +19,9 @@ import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import Tooltip from '../componenetsss/Tooltip';
 import { Checkbox } from '../componenetsss/Checkbox';
 import FilterChip from '../componenetsss/FilterChip';
+import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
+import DateSortDropdown from '../componenetsss/DateSortDropdown';
+import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 
 // Props for Metering component
 interface MeteringProps {
@@ -99,6 +102,16 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
   const statusFilterRef = useRef<HTMLDivElement | null>(null);
   const createdSortRef = useRef<HTMLDivElement | null>(null);
+  const [statusFilterPosition, setStatusFilterPosition] = useState({ top: 0, left: 0 });
+  const [createdSortPosition, setCreatedSortPosition] = useState({ top: 0, left: 0 });
+
+  // Header filter menu (two-panel)
+  const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
+  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('status');
+  const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
+  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // manage sidebar visibility
   useEffect(() => {
@@ -268,17 +281,27 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       return bDate - aDate;
     });
 
-  // Close popovers when clicking outside
+  // Close popovers when clicking outside (ignore portal-root)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node | null;
+      if (!target) return;
 
-      if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
+      // Ignore clicks inside portal-root
+      const portalRoot = document.getElementById('portal-root');
+      if (portalRoot && portalRoot.contains(target)) return;
+
+      if (statusFilterRef.current && !statusFilterRef.current.contains(target)) {
         setIsStatusFilterOpen(false);
       }
 
-      if (createdSortRef.current && target && !createdSortRef.current.contains(target)) {
+      if (createdSortRef.current && !createdSortRef.current.contains(target)) {
         setIsCreatedSortOpen(false);
+      }
+
+      if (filterButtonRef.current && !filterButtonRef.current.contains(target)) {
+        setIsMainFilterMenuOpen(false);
+        setIsMainFilterPanelOpen(false);
       }
     };
 
@@ -296,12 +319,109 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         onSearchTermChange={setSearchQuery}
         primaryLabel=""
         onPrimaryClick={() => navigate('/get-started/metering/new')}
-        onFilterClick={() => { }}
+        onFilterClick={() => {
+          // close table-header popovers so only one UI is active
+          setIsStatusFilterOpen(false);
+          setIsCreatedSortOpen(false);
+
+          if (filterButtonRef.current) {
+            const rect = filterButtonRef.current.getBoundingClientRect();
+            const menuWidth = 240;
+            const panelWidth = 264;
+            const gap = 12;
+            const margin = 8;
+
+            let left = rect.left;
+            const minLeft = panelWidth + gap + margin;
+            if (left < minLeft) {
+              left = minLeft;
+            }
+
+            if (left + menuWidth + margin > window.innerWidth) {
+              left = Math.max(margin, window.innerWidth - menuWidth - margin);
+              if (left < minLeft) {
+                left = minLeft;
+              }
+            }
+
+            setMainFilterMenuPosition({
+              top: rect.bottom + 8,
+              left,
+            });
+          }
+
+          const nextOpen = !isMainFilterMenuOpen;
+          setIsMainFilterMenuOpen(nextOpen);
+          if (!nextOpen) {
+            setIsMainFilterPanelOpen(false);
+          }
+        }}
+        filterButtonRef={filterButtonRef}
         searchDisabled={metrics.length === 0}
         filterDisabled={metrics.length === 0}
         showPrimary={metrics.length > 0}
         showIntegrations={metrics.length > 0}
       />
+
+      {isMainFilterMenuOpen && (
+        <MainFilterMenu
+          items={[
+            { key: 'status', label: 'Status' },
+            { key: 'date', label: 'Date' },
+          ]}
+          activeKey={activeFilterKey}
+          onSelect={(key) => {
+            setActiveFilterKey(key);
+          }}
+          onSelectWithRect={(key, rect) => {
+            setActiveFilterKey(key);
+            const panelWidth = 264;
+            const gap = 12;
+            const margin = 8;
+
+            // Prefer opening panel to the left of the clicked row
+            let left = rect.left - gap - panelWidth;
+            if (left < margin) {
+              const tryRight = rect.right + gap;
+              if (tryRight + panelWidth + margin <= window.innerWidth) {
+                left = tryRight;
+              } else {
+                left = Math.max(margin, window.innerWidth - panelWidth - margin);
+              }
+            }
+
+            setMainFilterPanelPosition({
+              top: rect.top,
+              left,
+            });
+            setIsMainFilterPanelOpen(true);
+          }}
+          anchorTop={mainFilterMenuPosition.top}
+          anchorLeft={mainFilterMenuPosition.left}
+        />
+      )}
+
+      {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'status' && (
+        <SimpleFilterDropdown
+          options={['active', 'draft'].map((statusKey) => ({
+            id: statusKey,
+            label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+          }))}
+          value={selectedStatuses}
+          onChange={(next) => setSelectedStatuses(next.map((x) => String(x).toLowerCase()))}
+          anchorTop={mainFilterPanelPosition.top}
+          anchorLeft={mainFilterPanelPosition.left}
+        />
+      )}
+
+      {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'date' && (
+        <DateSortDropdown
+          value={createdSortOrder}
+          onChange={(next) => setCreatedSortOrder(next)}
+          anchorTop={mainFilterPanelPosition.top}
+          anchorLeft={mainFilterPanelPosition.left}
+        />
+      )}
       {selectedStatuses.length > 0 && (
         <div className="products-active-filters-row">
           <div className="products-active-filters-chips">
@@ -322,7 +442,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               setSelectedStatuses([]);
             }}
           >
-            Clear all
+            Reset
           </button>
         </div>
       )}
@@ -337,9 +457,24 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 <div
                   ref={statusFilterRef}
                   className="products-th-label-with-filter"
-                  onMouseEnter={() => setIsStatusFilterOpen(true)}
+                  onMouseEnter={() => {
+                    // close others
+                    setIsCreatedSortOpen(false);
+
+                    if (statusFilterRef.current) {
+                      const rect = statusFilterRef.current.getBoundingClientRect();
+                      setStatusFilterPosition({
+                        top: rect.bottom + 4,
+                        left: rect.left,
+                      });
+                    }
+                    setIsStatusFilterOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    setIsStatusFilterOpen(false);
+                  }}
                 >
-                  <span>Status</span>
+                  <span>Status </span>
                   <button
                     type="button"
                     className={`products-column-filter-trigger ${
@@ -369,30 +504,19 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                       className="products-column-filter-popover"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="products-column-filter-list">
-                        {['active', 'draft'].map((statusKey) => (
-                          <div
-                            key={statusKey}
-                            className="products-column-filter-list-item"
-                          >
-                            <Checkbox
-                              checked={selectedStatuses.includes(statusKey)}
-                              onChange={(checked) => {
-                                setSelectedStatuses((prev) => {
-                                  if (checked) {
-                                    if (prev.includes(statusKey)) return prev;
-                                    return [...prev, statusKey];
-                                  }
-                                  return prev.filter((x) => x !== statusKey);
-                                });
-                              }}
-                              label={
-                                statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
+                      <SimpleFilterDropdown
+                        options={['active', 'draft'].map((statusKey) => ({
+                          id: statusKey,
+                          label:
+                            statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                        }))}
+                        value={selectedStatuses}
+                        onChange={(next) =>
+                          setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                        }
+                        anchorTop={statusFilterPosition.top}
+                        anchorLeft={statusFilterPosition.left}
+                      />
                     </div>
                   )}
                 </div>
@@ -401,9 +525,24 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 <div
                   ref={createdSortRef}
                   className="products-th-label-with-filter"
-                  onMouseEnter={() => setIsCreatedSortOpen(true)}
+                  onMouseEnter={() => {
+                    // close others
+                    setIsStatusFilterOpen(false);
+
+                    if (createdSortRef.current) {
+                      const rect = createdSortRef.current.getBoundingClientRect();
+                      setCreatedSortPosition({
+                        top: rect.bottom + 4,
+                        left: rect.left,
+                      });
+                    }
+                    setIsCreatedSortOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    setIsCreatedSortOpen(false);
+                  }}
                 >
-                  <span>Created On</span>
+                  <span>Created On </span>
                   <button
                     type="button"
                     className={`products-column-filter-trigger ${
@@ -433,65 +572,15 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                       className="products-column-filter-popover products-createdon-popover"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        type="button"
-                        className={`products-sort-option ${
-                          createdSortOrder === 'newest' ? 'is-active' : ''
-                        }`}
-                        onClick={() => {
-                          setCreatedSortOrder('newest');
+                      <DateSortDropdown
+                        value={createdSortOrder}
+                        onChange={(next) => {
+                          setCreatedSortOrder(next);
                           setIsCreatedSortOpen(false);
                         }}
-                      >
-                        <span className="products-sort-option-icon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="13"
-                            height="13"
-                            viewBox="0 0 13 13"
-                            fill="none"
-                          >
-                            <path
-                              d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
-                              stroke="#25303D"
-                              strokeWidth="1.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                        <span className="products-sort-option-label">Newest first</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className={`products-sort-option ${
-                          createdSortOrder === 'oldest' ? 'is-active' : ''
-                        }`}
-                        onClick={() => {
-                          setCreatedSortOrder('oldest');
-                          setIsCreatedSortOpen(false);
-                        }}
-                      >
-                        <span className="products-sort-option-icon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <path
-                              d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
-                              stroke="#25303D"
-                              strokeWidth="1.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                        <span className="products-sort-option-label">Oldest first</span>
-                      </button>
+                        anchorTop={createdSortPosition.top}
+                        anchorLeft={createdSortPosition.left}
+                      />
                     </div>
                   )}
                 </div>
@@ -510,7 +599,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                   </div>
                 </td>
               </tr>
-            ) : filteredMetrics.length === 0 ? (
+            ) : metrics.length === 0 ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                   <div className="metrics-empty-state">
@@ -524,6 +613,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                       </PrimaryButton>
                     </div>
                   </div>
+                </td>
+              </tr>
+            ) : filteredMetrics.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
+                  No results found. Try adjusting your search or filters.
                 </td>
               </tr>
             ) : (

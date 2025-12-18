@@ -49,6 +49,8 @@ const Tooltip: React.FC<TooltipProps> = ({
       className="tooltip-container"
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
+      onFocus={() => setVisible(true)}
+      onBlur={() => setVisible(false)}
     >
       {children}
       {visible && coords && (
