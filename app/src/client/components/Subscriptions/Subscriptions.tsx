@@ -349,6 +349,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       {editingSub ? (
         <EditSubscription
           initial={editingSub}
+
           onClose={() => {
             setEditingSub(null);
             fetchSubs();
@@ -356,11 +357,13 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
         />
       ) : draftSub ? (
         <CreateSubscription
+          draftData={draftSub}
           onClose={() => {
             setDraftSub(null);
             fetchSubs();
           }}
           onCreateSuccess={() => {
+
             setDraftSub(null);
             fetchSubs();
           }}

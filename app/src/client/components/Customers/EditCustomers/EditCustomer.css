@@ -86,7 +86,6 @@ html, body, #root{
   flex-direction: column;
   gap: 18px;
   padding: 8px 8px 8px 0;
-  background-color: #f8f9fb;
 }
 
 /* Steps container */
@@ -98,18 +97,15 @@ html, body, #root{
 
 /* Each step card */
 .editsub-np-step {
-  display: flex;
+ display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 12px;
+  gap: 8px;
   background: transparent;
   border: 0;
   border-left: 3px solid transparent;
   width: 100%;
-  text-align: left;
-  position: relative;
-  min-height: auto;
   cursor: pointer;
+  min-height: 56px; /* match MetricRow base height */
 }
 
 /* Bullet container */
