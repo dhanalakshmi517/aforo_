@@ -4,7 +4,25 @@ import './EditReview.css';
 import RevenueEstimatorModal from '../RevenueEstimatorModal';
 import { getRatePlanData } from '../utils/sessionStorage';
 
-const EditReview: React.FC = () => {
+interface EditReviewProps {
+  ratePlanName?: string;
+  description?: string;
+  billingFrequency?: string;
+  selectedProductName?: string;
+  draftData?: any;
+  billableMetricData?: any;
+  pricingModelType?: string;
+}
+
+const EditReview: React.FC<EditReviewProps> = ({
+  ratePlanName: propRatePlanName,
+  description: propDescription,
+  billingFrequency: propBillingFrequency,
+  selectedProductName: propProductName,
+  draftData,
+  billableMetricData: propBillableMetric,
+  pricingModelType: propPricingModel,
+}) => {
   const [showRevenueEstimator, setShowRevenueEstimator] = useState(false);
 
   // State for all data - will refresh on mount
@@ -40,25 +58,31 @@ const EditReview: React.FC = () => {
     minimumCharge: '',
   });
 
-  // Load/refresh data from session storage whenever component mounts or updates
+  // Load/refresh data from session storage or props whenever component mounts or updates
   useEffect(() => {
-    const pricingModel = getRatePlanData('PRICING_MODEL') || '';
+    const pricingModel = propPricingModel || getRatePlanData('PRICING_MODEL') || '';
     const isFlat = pricingModel === 'Flat Fee';
     const isStair = pricingModel === 'Stairstep';
     const isVolume = pricingModel === 'Volume-Based';
     const isTier = pricingModel === 'Tiered Pricing';
     const isUsage = pricingModel === 'Usage-Based';
 
+    // Extract billable metric data from props
+    const billableMetricName = propBillableMetric?.metricName || getRatePlanData('BILLABLE_METRIC_NAME') || '';
+    const billableMetricDesc = (propBillableMetric as any)?.description || getRatePlanData('BILLABLE_METRIC_DESCRIPTION') || '';
+    const billableMetricUnit = propBillableMetric?.unitOfMeasure || propBillableMetric?.uom || propBillableMetric?.uomShort || getRatePlanData('BILLABLE_METRIC_UNIT') || '';
+    const billableMetricAgg = (propBillableMetric as any)?.aggregationFunction || (propBillableMetric as any)?.aggregationType || getRatePlanData('BILLABLE_METRIC_AGGREGATION') || '';
+
     setReviewData({
       pricingModel,
-      planName: getRatePlanData('PLAN_NAME') || '',
-      planDescription: getRatePlanData('PLAN_DESCRIPTION') || '',
-      billingFrequency: getRatePlanData('BILLING_FREQUENCY') || '',
-      productName: getRatePlanData('PRODUCT_NAME') || '',
-      billableName: getRatePlanData('BILLABLE_METRIC_NAME') || '',
-      billableDesc: getRatePlanData('BILLABLE_METRIC_DESCRIPTION') || '',
-      billableUnit: getRatePlanData('BILLABLE_METRIC_UNIT') || '',
-      billableAgg: getRatePlanData('BILLABLE_METRIC_AGGREGATION') || '',
+      planName: propRatePlanName || getRatePlanData('PLAN_NAME') || '',
+      planDescription: propDescription || getRatePlanData('PLAN_DESCRIPTION') || '',
+      billingFrequency: propBillingFrequency || getRatePlanData('BILLING_FREQUENCY') || '',
+      productName: propProductName || getRatePlanData('PRODUCT_NAME') || '',
+      billableName: billableMetricName,
+      billableDesc: billableMetricDesc,
+      billableUnit: billableMetricUnit,
+      billableAgg: billableMetricAgg,
       flatFeeAmount: isFlat ? getRatePlanData('FLAT_FEE_AMOUNT') || '' : '',
       flatFeeLimit: isFlat ? getRatePlanData('FLAT_FEE_API_CALLS') || '' : '',
       flatFeeOverage: isFlat ? getRatePlanData('FLAT_FEE_OVERAGE') || '' : '',
@@ -80,7 +104,7 @@ const EditReview: React.FC = () => {
       minimumUsage: getRatePlanData('MINIMUM_USAGE') || '',
       minimumCharge: getRatePlanData('MINIMUM_CHARGE') || '',
     });
-  }, []); // Empty deps = run on every mount
+  }, [propRatePlanName, propDescription, propBillingFrequency, propProductName, draftData, propBillableMetric, propPricingModel]); // Re-run when props change
 
   // Destructure for easier access
   const {
@@ -276,7 +300,7 @@ const EditReview: React.FC = () => {
             {stairTiers.length > 0 && (
               <div className="row">
                 <label>Stairs</label>
-                <span>{stairTiers.map((s: any) => `${s.from}-${s.to || (s.isUnlimited ? '∞' : '')} cost $${s.cost}`).join('; ')}</span>
+                <span>{stairTiers.map((s: any) => `${s.from}-${s.to || (s.isUnlimited ? '∞' : '')} cost $${s.price}`).join('; ')}</span>
               </div>
             )}
             <div className="row">
