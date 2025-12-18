@@ -117,7 +117,6 @@ const FilterDropdown: React.FC<Props> = ({
       </div>
       <VerticalScrollbar
         className="fd-vscroll"
-        height={heightPx - 60}
       />
       </div>
     </Portal>
