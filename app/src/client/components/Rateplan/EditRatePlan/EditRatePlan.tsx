@@ -101,9 +101,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   const [billingFrequency, setBillingFrequency] = useState<string>(initial.billingFrequency);
   const [selectedProductName, setSelectedProductName] = useState<string>(initial.productName);
   const [paymentType, setPaymentType] = useState<string>(initial.paymentType);
-  const [selectedMetricId, setSelectedMetricId] = useState<number | null>(
-    initial.billableMetricId ? Number(initial.billableMetricId) : null,
-  );
+  const [selectedMetricId, setSelectedMetricId] = useState<number | null>(initial.billableMetricId);
+  const [billableMetricData, setBillableMetricData] = useState<any>(null);
+  const [pricingModelType, setPricingModelType] = useState<string>('');
 
   const [products, setProducts] = useState<Array<{ productId: number; productName: string }>>([]);
   const [productError, setProductError] = useState<string>('');
@@ -180,12 +180,16 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         if (original.billingFrequency) setRatePlanData('BILLING_FREQUENCY', original.billingFrequency);
         if (original.productName) setRatePlanData('PRODUCT_NAME', original.productName);
 
-        // billable metric details -> session storage
+        // billable metric details -> session storage AND state
         if (original.billableMetricId) {
           try {
             const { fetchBillableMetricById } = await import('../api');
             const fullMetric = await fetchBillableMetricById(original.billableMetricId);
             if (fullMetric) {
+              // Store in state for immediate access
+              setBillableMetricData(fullMetric);
+              
+              // Also store in session storage for step navigation
               setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName);
               if ((fullMetric as any).description) {
                 setRatePlanData('BILLABLE_METRIC_DESCRIPTION', (fullMetric as any).description);
@@ -209,68 +213,121 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         }
 
         // pricing model hints for EditPricing/EditExtras (keep your existing behavior)
-        if (plan.flatFeeAmount) localStorage.setItem('pricingModel', 'Flat Fee');
-        else if (plan.volumePricing) localStorage.setItem('pricingModel', 'Volume-Based');
-        else if (plan.tieredPricing) localStorage.setItem('pricingModel', 'Tiered Pricing');
-        else if (plan.stairStepPricing) localStorage.setItem('pricingModel', 'Stairstep');
-        else if (plan.perUnitAmount) localStorage.setItem('pricingModel', 'Usage-Based');
+        let detectedModel = '';
+        if (plan.flatFeeAmount) {
+          detectedModel = 'Flat Fee';
+          localStorage.setItem('pricingModel', 'Flat Fee');
+          setRatePlanData('PRICING_MODEL', 'Flat Fee');
+        } else if (plan.volumePricing) {
+          detectedModel = 'Volume-Based';
+          localStorage.setItem('pricingModel', 'Volume-Based');
+          setRatePlanData('PRICING_MODEL', 'Volume-Based');
+        } else if (plan.tieredPricing) {
+          detectedModel = 'Tiered Pricing';
+          localStorage.setItem('pricingModel', 'Tiered Pricing');
+          setRatePlanData('PRICING_MODEL', 'Tiered Pricing');
+        } else if (plan.stairStepPricing) {
+          detectedModel = 'Stairstep';
+          localStorage.setItem('pricingModel', 'Stairstep');
+          setRatePlanData('PRICING_MODEL', 'Stairstep');
+        } else if (plan.perUnitAmount) {
+          detectedModel = 'Usage-Based';
+          localStorage.setItem('pricingModel', 'Usage-Based');
+          setRatePlanData('PRICING_MODEL', 'Usage-Based');
+        }
+        setPricingModelType(detectedModel);
 
         if (plan.volumePricing?.tiers) {
-          localStorage.setItem(
-            'volumeTiers',
-            JSON.stringify(
-              plan.volumePricing.tiers.map((t: any) => ({
-                from: t.usageStart,
-                to: t.usageEnd,
-                price: t.unitPrice,
-              })),
-            ),
-          );
-          localStorage.setItem('volumeOverage', String(plan.volumePricing.overageUnitRate || ''));
-          localStorage.setItem('volumeGrace', String(plan.volumePricing.graceBuffer || ''));
+          const volumeTiersData = plan.volumePricing.tiers.map((t: any) => ({
+            from: t.usageStart,
+            to: t.usageEnd,
+            price: t.unitPrice,
+          }));
+          const volumeTiersJson = JSON.stringify(volumeTiersData);
+          localStorage.setItem('volumeTiers', volumeTiersJson);
+          setRatePlanData('VOLUME_TIERS', volumeTiersJson);
+          
+          const volumeOverage = String(plan.volumePricing.overageUnitRate || '');
+          localStorage.setItem('volumeOverage', volumeOverage);
+          setRatePlanData('VOLUME_OVERAGE', volumeOverage);
+          
+          const volumeGrace = String(plan.volumePricing.graceBuffer || '');
+          localStorage.setItem('volumeGrace', volumeGrace);
+          setRatePlanData('VOLUME_GRACE', volumeGrace);
         }
 
         if (plan.tieredPricing?.tiers) {
-          localStorage.setItem(
-            'tieredTiers',
-            JSON.stringify(
-              plan.tieredPricing.tiers.map((t: any) => ({
-                from: t.startRange,
-                to: t.endRange,
-                price: t.unitPrice,
-              })),
-            ),
-          );
-          localStorage.setItem('tieredOverage', String(plan.tieredPricing.overageUnitRate || ''));
-          localStorage.setItem('tieredGrace', String(plan.tieredPricing.graceBuffer || ''));
+          const tieredTiersData = plan.tieredPricing.tiers.map((t: any) => ({
+            from: t.startRange,
+            to: t.endRange,
+            price: t.unitPrice,
+          }));
+          const tieredTiersJson = JSON.stringify(tieredTiersData);
+          localStorage.setItem('tieredTiers', tieredTiersJson);
+          setRatePlanData('TIERED_TIERS', tieredTiersJson);
+          
+          const tieredOverage = String(plan.tieredPricing.overageUnitRate || '');
+          localStorage.setItem('tieredOverage', tieredOverage);
+          setRatePlanData('TIERED_OVERAGE', tieredOverage);
+          
+          const tieredGrace = String(plan.tieredPricing.graceBuffer || '');
+          localStorage.setItem('tieredGrace', tieredGrace);
+          setRatePlanData('TIERED_GRACE', tieredGrace);
         }
 
         if (plan.stairStepPricing?.tiers) {
-          localStorage.setItem(
-            'stairTiers',
-            JSON.stringify(
-              plan.stairStepPricing.tiers.map((t: any) => ({
-                from: t.usageStart,
-                to: t.usageEnd,
-                price: t.flatCost,
-              })),
-            ),
-          );
-          localStorage.setItem('stairOverage', String(plan.stairStepPricing.overageUnitRate || ''));
-          localStorage.setItem('stairGrace', String(plan.stairStepPricing.graceBuffer || ''));
+          const stairTiersData = plan.stairStepPricing.tiers.map((t: any) => ({
+            from: t.usageStart,
+            to: t.usageEnd,
+            price: t.flatCost,
+          }));
+          const stairTiersJson = JSON.stringify(stairTiersData);
+          localStorage.setItem('stairTiers', stairTiersJson);
+          setRatePlanData('STAIR_TIERS', stairTiersJson);
+          
+          const stairOverage = String(plan.stairStepPricing.overageUnitRate || '');
+          localStorage.setItem('stairOverage', stairOverage);
+          setRatePlanData('STAIR_OVERAGE', stairOverage);
+          
+          const stairGrace = String(plan.stairStepPricing.graceBuffer || '');
+          localStorage.setItem('stairGrace', stairGrace);
+          setRatePlanData('STAIR_GRACE', stairGrace);
         }
 
-        if (plan.perUnitAmount) localStorage.setItem('usagePerUnit', String(plan.perUnitAmount));
+        if (plan.perUnitAmount) {
+          const usagePerUnit = String(plan.perUnitAmount);
+          localStorage.setItem('usagePerUnit', usagePerUnit);
+          setRatePlanData('USAGE_PER_UNIT_AMOUNT', usagePerUnit);
+        }
+        
+        if (plan.flatFeeAmount) {
+          setRatePlanData('FLAT_FEE_AMOUNT', String(plan.flatFeeAmount));
+        }
+        if (plan.flatFeeApiCalls) {
+          setRatePlanData('FLAT_FEE_API_CALLS', String(plan.flatFeeApiCalls));
+        }
+        if (plan.flatFeeOverage) {
+          setRatePlanData('FLAT_FEE_OVERAGE', String(plan.flatFeeOverage));
+        }
+        if (plan.flatFeeGrace) {
+          setRatePlanData('FLAT_FEE_GRACE', String(plan.flatFeeGrace));
+        }
 
         if (plan.setupFee) {
-          localStorage.setItem('setupFee', String(plan.setupFee.setupFee));
+          const setupFeeAmount = String(plan.setupFee.setupFee);
+          localStorage.setItem('setupFee', setupFeeAmount);
+          setRatePlanData('SETUP_FEE', setupFeeAmount);
           localStorage.setItem('setupApplicationTiming', String(plan.setupFee.applicationTiming));
           localStorage.setItem('setupInvoiceDesc', plan.setupFee.invoiceDescription || '');
         }
 
         if (plan.minimumCommitment) {
-          localStorage.setItem('minUsage', String(plan.minimumCommitment.minimumUsage || ''));
-          localStorage.setItem('minCharge', String(plan.minimumCommitment.minimumCharge || ''));
+          const minUsage = String(plan.minimumCommitment.minimumUsage || '');
+          const minCharge = String(plan.minimumCommitment.minimumCharge || '');
+          localStorage.setItem('minUsage', minUsage);
+          localStorage.setItem('minCharge', minCharge);
+          setRatePlanData('MINIMUM_USAGE', minUsage);
+          setRatePlanData('MINIMUM_CHARGE', minCharge);
         }
 
         if (plan.discount) {
@@ -280,6 +337,9 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           localStorage.setItem('eligibility', plan.discount.eligibility || '');
           localStorage.setItem('discountStart', plan.discount.startDate || '');
           localStorage.setItem('discountEnd', plan.discount.endDate || '');
+          
+          setRatePlanData('DISCOUNT_PERCENT', String(plan.discount.percentageDiscount || ''));
+          setRatePlanData('DISCOUNT_FLAT', String(plan.discount.flatDiscountAmount || ''));
         }
 
         if (plan.freemium) {
@@ -288,6 +348,8 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           localStorage.setItem('freeTrialDuration', String(plan.freemium.freeTrialDuration || ''));
           localStorage.setItem('freeStart', plan.freemium.startDate || '');
           localStorage.setItem('freeEnd', plan.freemium.endDate || '');
+          
+          setRatePlanData('FREEMIUM_UNITS', String(plan.freemium.freeUnits || ''));
         }
       } catch (e) {
         console.error('Failed to fetch detailed plan', e);
@@ -808,7 +870,15 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     return (
       <div className="editrate-np-section">
         <div className="editrate-np-review-container">
-          <EditReview />
+          <EditReview 
+            ratePlanName={ratePlanName}
+            description={description}
+            billingFrequency={billingFrequency}
+            selectedProductName={selectedProductName}
+            draftData={draftData}
+            billableMetricData={billableMetricData}
+            pricingModelType={pricingModelType}
+          />
         </div>
       </div>
     );
