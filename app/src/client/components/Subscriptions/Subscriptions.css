@@ -442,3 +442,20 @@
   height: 400px;
   gap: 8px;
 }
+
+.subscriptions-empty-state .empty-state-icon {
+  display: block;
+  margin: 0 auto 16px auto;
+}
+
+/* Show column filter icons only on hover (Subscriptions table) */
+.products-th-label-with-filter .products-column-filter-trigger {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease-out;
+}
+
+.products-th-label-with-filter:hover .products-column-filter-trigger {
+  opacity: 1;
+  pointer-events: auto;
+}

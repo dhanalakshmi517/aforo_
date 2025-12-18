@@ -1516,7 +1516,7 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   align-self: center;
   height: auto;                              /* auto height to fit content */
   border-radius: 12px;                        /* round all corners */
-  border: 0.6px solid var(--border-border-2, #D5D4DF);
+  border: 0.6px solid var(--color-neutral-200);
 }
 
 /* The actual avatar inside the icon pill */

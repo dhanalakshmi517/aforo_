@@ -5,6 +5,7 @@ import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 import EditIconButton from '../componenetsss/EditIconButton';
 import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import RetryIconButton from '../componenetsss/RetryIconButton';
+
 import { Api, Subscription as SubscriptionType } from './api';
 import CreateSubscription from './CreateSubscription';
 import EditSubscription from './EditSubscriptions/EditSubscription';
@@ -17,6 +18,12 @@ import PrimaryButton from '../componenetsss/PrimaryButton';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import { Checkbox } from '../componenetsss/Checkbox';
 import FilterChip from '../componenetsss/FilterChip';
+import SearchInput from '../componenetsss/SearchInput';
+import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
+import FilterDropdown from '../componenetsss/FilterDropdown';
+import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
+import DateSortDropdown from '../componenetsss/DateSortDropdown';
+import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 
 // Empty cart SVG icon (file URL)
 import purchaseSvg from './purchase.svg';
@@ -146,8 +153,22 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
 
   const statusFilterRef = useRef<HTMLDivElement | null>(null);
   const purchasedSortRef = useRef<HTMLDivElement | null>(null);
+  const ratePlanFilterRef = useRef<HTMLDivElement | null>(null);
+  const paymentTypeFilterRef = useRef<HTMLDivElement | null>(null);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [isPurchasedSortOpen, setIsPurchasedSortOpen] = useState(false);
+  const [isPaymentTypeFilterOpen, setIsPaymentTypeFilterOpen] = useState(false);
+  const [isRatePlanFilterOpen, setIsRatePlanFilterOpen] = useState(false);
+  const [statusFilterPosition, setStatusFilterPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [paymentTypeFilterPosition, setPaymentTypeFilterPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [ratePlanFilterPosition, setRatePlanFilterPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [purchasedSortPosition, setPurchasedSortPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
+  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('ratePlan');
+  const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
+  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const customerMap = useMemo(() => {
     const m = new Map<number, CustomerLite>();
@@ -256,12 +277,31 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node | null;
 
+      // Ignore clicks inside portal-root (shared dropdowns rendered via Portal)
+      const portalRoot = document.getElementById('portal-root');
+      if (portalRoot && target && portalRoot.contains(target)) {
+        return;
+      }
+
       if (statusFilterRef.current && target && !statusFilterRef.current.contains(target)) {
         setIsStatusFilterOpen(false);
       }
 
       if (purchasedSortRef.current && target && !purchasedSortRef.current.contains(target)) {
         setIsPurchasedSortOpen(false);
+      }
+
+      if (paymentTypeFilterRef.current && target && !paymentTypeFilterRef.current.contains(target)) {
+        setIsPaymentTypeFilterOpen(false);
+      }
+
+      if (ratePlanFilterRef.current && target && !ratePlanFilterRef.current.contains(target)) {
+        setIsRatePlanFilterOpen(false);
+      }
+
+      if (filterButtonRef.current && !filterButtonRef.current.contains(target)) {
+        setIsMainFilterMenuOpen(false);
+        setIsMainFilterPanelOpen(false);
       }
     };
 
@@ -270,6 +310,10 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const [selectedPaymentTypes, setSelectedPaymentTypes] = useState<string[]>([]);
+  const [selectedRatePlanIds, setSelectedRatePlanIds] = useState<Array<number | string>>([]);
+  const [ratePlanSearch, setRatePlanSearch] = useState('');
 
   const filtered = subscriptions.filter(sub => {
 
@@ -300,6 +344,18 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     const statusKey = (sub.status || '').toLowerCase();
     return selectedStatuses.includes(statusKey);
   })
+  // Payment Type filter
+  .filter((sub) => {
+    if (selectedPaymentTypes.length === 0) return true;
+    const ptKey = (sub.paymentType || '').toLowerCase();
+    return selectedPaymentTypes.includes(ptKey);
+  })
+  // Rate Plan filter
+  .filter((sub) => {
+    if (selectedRatePlanIds.length === 0) return true;
+    return selectedRatePlanIds.some((x) => String(x) === String(sub.ratePlanId));
+  })
+
   // Sort: drafts first, then by purchased/created date according to purchasedSortOrder
   .sort((a, b) => {
     const aStatus = (a.status || '').toLowerCase();
@@ -376,16 +432,145 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
             onSearchTermChange={setSearchQuery}
             primaryLabel="+ New Purchase"
             onPrimaryClick={() => navigate('/get-started/subscriptions/new')}
-            onFilterClick={() => { }}
+            onFilterClick={() => {
+              setIsStatusFilterOpen(false);
+              setIsPaymentTypeFilterOpen(false);
+              setIsRatePlanFilterOpen(false);
+              setIsPurchasedSortOpen(false);
+
+              if (filterButtonRef.current) {
+                const rect = filterButtonRef.current.getBoundingClientRect();
+                const menuWidth = 240;
+                const panelWidth = 320;
+                const gap = 12;
+                const margin = 8;
+
+                let left = rect.left;
+                const minLeft = panelWidth + gap + margin;
+                if (left < minLeft) {
+                  left = minLeft;
+                }
+
+                if (left + menuWidth + margin > window.innerWidth) {
+                  left = Math.max(margin, window.innerWidth - menuWidth - margin);
+                  if (left < minLeft) {
+                    left = minLeft;
+                  }
+                }
+
+                setMainFilterMenuPosition({
+                  top: rect.bottom + 8,
+                  left,
+                });
+              }
+
+              const nextOpen = !isMainFilterMenuOpen;
+              setIsMainFilterMenuOpen(nextOpen);
+              if (!nextOpen) {
+                setIsMainFilterPanelOpen(false);
+              }
+            }}
+            filterButtonRef={filterButtonRef}
             searchDisabled={searchDisabled}
             filterDisabled={isEmpty}
             showPrimary={!isEmpty}
             showIntegrations={subscriptions.length > 0}
           />
 
-          {selectedStatuses.length > 0 && (
+          {isMainFilterMenuOpen && (
+            <MainFilterMenu
+              items={[
+                { key: 'ratePlan', label: 'Rate Plan' },
+                { key: 'paymentType', label: 'Payment Type' },
+                { key: 'status', label: 'Status' },
+                { key: 'date', label: 'Date' },
+              ]}
+              activeKey={activeFilterKey}
+              onSelect={(key) => {
+                setActiveFilterKey(key);
+              }}
+              onSelectWithRect={(key, rect) => {
+                setActiveFilterKey(key);
+                const panelWidth = key === 'ratePlan' ? 320 : 264;
+                const gap = 12;
+                const margin = 8;
+
+                let left = rect.left - gap - panelWidth;
+                if (left < margin) {
+                  const tryRight = rect.right + gap;
+                  if (tryRight + panelWidth + margin <= window.innerWidth) {
+                    left = tryRight;
+                  } else {
+                    left = Math.max(margin, window.innerWidth - panelWidth - margin);
+                  }
+                }
+
+                setMainFilterPanelPosition({
+                  top: rect.top,
+                  left,
+                });
+                setIsMainFilterPanelOpen(true);
+              }}
+              anchorTop={mainFilterMenuPosition.top}
+              anchorLeft={mainFilterMenuPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'ratePlan' && (
+            <FilterDropdown
+              options={ratePlans.map((rp) => ({
+                id: rp.ratePlanId,
+                label: rp.ratePlanName || `Plan ${rp.ratePlanId}`,
+              }))}
+              value={selectedRatePlanIds}
+              onChange={(next) => setSelectedRatePlanIds(next)}
+              placeholder="Search Rate Plans"
+              widthPx={320}
+              heightPx={300}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'paymentType' && (
+            <SimpleFilterDropdown
+              options={['prepaid', 'postpaid'].map((pt) => ({
+                id: pt,
+                label: pt.charAt(0).toUpperCase() + pt.slice(1),
+              }))}
+              value={selectedPaymentTypes}
+              onChange={(next) => setSelectedPaymentTypes(next.map((x) => String(x).toLowerCase()))}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'status' && (
+            <SimpleFilterDropdown
+              options={['active', 'draft', 'cancelled'].map((statusKey) => ({
+                id: statusKey,
+                label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+              }))}
+              value={selectedStatuses}
+              onChange={(next) => setSelectedStatuses(next.map((x) => String(x).toLowerCase()))}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'date' && (
+            <DateSortDropdown
+              value={purchasedSortOrder}
+              onChange={(next) => setPurchasedSortOrder(next)}
+              anchorTop={mainFilterPanelPosition.top}
+              anchorLeft={mainFilterPanelPosition.left}
+            />
+          )}
+
+          {(selectedStatuses.length > 0 || selectedPaymentTypes.length > 0 || selectedRatePlanIds.length > 0) && (
             <div className="products-active-filters-row">
               <div className="products-active-filters-chips">
+
                 {selectedStatuses.map((s) => (
                   <FilterChip
                     key={s}
@@ -395,15 +580,42 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                     }
                   />
                 ))}
+
+                {selectedPaymentTypes.map((pt) => (
+                  <FilterChip
+                    key={pt}
+                    label={pt.charAt(0).toUpperCase() + pt.slice(1)}
+                    onRemove={() =>
+                      setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
+                    }
+                  />
+                ))}
+
+                {selectedRatePlanIds.map((id) => {
+                  const numericId = Number(id);
+                  const rp = ratePlanMap.get(numericId);
+                  const label = rp?.ratePlanName || `Plan ${numericId}`;
+                  return (
+                    <FilterChip
+                      key={numericId}
+                      label={label}
+                      onRemove={() =>
+                        setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                      }
+                    />
+                  );
+                })}
               </div>
               <button
                 type="button"
                 className="products-filters-reset"
                 onClick={() => {
                   setSelectedStatuses([]);
+                  setSelectedPaymentTypes([]);
+                  setSelectedRatePlanIds([]);
                 }}
               >
-                Clear all
+                Reset
               </button>
             </div>
           )}
@@ -413,13 +625,172 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
               <thead>
                 <tr>
                   <th>Customer Name</th>
-                  <th>Rate Plan</th>
-                  <th>Payment Type</th>
+                  <th className="products-th-with-filter">
+                    <div
+                      ref={ratePlanFilterRef}
+                      className="products-th-label-with-filter"
+                      onMouseEnter={() => {
+                        // close others
+                        setIsPaymentTypeFilterOpen(false);
+                        setIsPurchasedSortOpen(false);
+                        setIsStatusFilterOpen(false);
+
+                        if (ratePlanFilterRef.current) {
+                          const rect = ratePlanFilterRef.current.getBoundingClientRect();
+                          setRatePlanFilterPosition({
+                            top: rect.bottom + 4,
+                            left: rect.left,
+                          });
+                        }
+                        setIsRatePlanFilterOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsRatePlanFilterOpen(false);
+                      }}
+                    >
+                      <span>Rate Plan</span>
+                      <button
+                        type="button"
+                        className={`products-column-filter-trigger ${
+                          isRatePlanFilterOpen ? 'is-open' : ''
+                        }`}
+                        aria-label="Filter by rate plan"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="11"
+                          height="8"
+                          viewBox="0 0 11 8"
+                          fill="none"
+                        >
+                          <path
+                            d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                            stroke="#19222D"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+
+                      {isRatePlanFilterOpen && (
+                        <div
+                          className="products-column-filter-popover products-column-filter-popover--wide"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <FilterDropdown
+                            options={Array.from(
+                              new Map(
+                                ratePlans.map((rp) => [
+                                  rp.ratePlanId,
+                                  {
+                                    id: rp.ratePlanId,
+                                    label: rp.ratePlanName || `Plan ${rp.ratePlanId}`,
+                                  },
+                                ])
+                              ).values()
+                            )}
+                            value={selectedRatePlanIds}
+                            onChange={(next) => setSelectedRatePlanIds(next)}
+                            placeholder="Search Rate Plans"
+                            anchorTop={ratePlanFilterPosition.top}
+                            anchorLeft={ratePlanFilterPosition.left}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                  <th className="products-th-with-filter">
+                    <div
+                      ref={paymentTypeFilterRef}
+                      className="products-th-label-with-filter"
+                      onMouseEnter={() => {
+                        // close others
+                        setIsRatePlanFilterOpen(false);
+                        setIsPurchasedSortOpen(false);
+                        setIsStatusFilterOpen(false);
+
+                        if (paymentTypeFilterRef.current) {
+                          const rect = paymentTypeFilterRef.current.getBoundingClientRect();
+                          setPaymentTypeFilterPosition({
+                            top: rect.bottom + 4,
+                            left: rect.left,
+                          });
+                        }
+                        setIsPaymentTypeFilterOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsPaymentTypeFilterOpen(false);
+                      }}
+                    >
+                      <span>Payment Type</span>
+                      <button
+                        type="button"
+                        className={`products-column-filter-trigger ${
+                          isPaymentTypeFilterOpen ? 'is-open' : ''
+                        }`}
+                        aria-label="Filter by payment type"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="11"
+                          height="8"
+                          viewBox="0 0 11 8"
+                          fill="none"
+                        >
+                          <path
+                            d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                            stroke="#19222D"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+
+                      {isPaymentTypeFilterOpen && (
+                        <div
+                          className="products-column-filter-popover"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <SimpleFilterDropdown
+                            options={['prepaid', 'postpaid'].map((ptKey) => ({
+                              id: ptKey,
+                              label: ptKey.charAt(0).toUpperCase() + ptKey.slice(1),
+                            }))}
+                            value={selectedPaymentTypes}
+                            onChange={(next) =>
+                              setSelectedPaymentTypes(next.map((x) => String(x).toLowerCase()))
+                            }
+                            anchorTop={paymentTypeFilterPosition.top}
+                            anchorLeft={paymentTypeFilterPosition.left}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </th>
                   <th className="products-th-with-filter">
                     <div
                       ref={purchasedSortRef}
                       className="products-th-label-with-filter"
-                      onMouseEnter={() => setIsPurchasedSortOpen(true)}
+                      onMouseEnter={() => {
+                        // close others
+                        setIsRatePlanFilterOpen(false);
+                        setIsPaymentTypeFilterOpen(false);
+                        setIsStatusFilterOpen(false);
+
+                        if (purchasedSortRef.current) {
+                          const rect = purchasedSortRef.current.getBoundingClientRect();
+                          setPurchasedSortPosition({
+                            top: rect.bottom + 4,
+                            left: rect.left,
+                          });
+                        }
+                        setIsPurchasedSortOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsPurchasedSortOpen(false);
+                      }}
                     >
                       <span>Purchased On</span>
                       <button
@@ -451,65 +822,15 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                           className="products-column-filter-popover products-createdon-popover"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <button
-                            type="button"
-                            className={`products-sort-option ${
-                              purchasedSortOrder === 'newest' ? 'is-active' : ''
-                            }`}
-                            onClick={() => {
-                              setPurchasedSortOrder('newest');
+                          <DateSortDropdown
+                            value={purchasedSortOrder}
+                            onChange={(next) => {
+                              setPurchasedSortOrder(next);
                               setIsPurchasedSortOpen(false);
                             }}
-                          >
-                            <span className="products-sort-option-icon">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="13"
-                                height="13"
-                                viewBox="0 0 13 13"
-                                fill="none"
-                              >
-                                <path
-                                  d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663"
-                                  stroke="#25303D"
-                                  strokeWidth="1.2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </span>
-                            <span className="products-sort-option-label">Newest first</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            className={`products-sort-option ${
-                              purchasedSortOrder === 'oldest' ? 'is-active' : ''
-                            }`}
-                            onClick={() => {
-                              setPurchasedSortOrder('oldest');
-                              setIsPurchasedSortOpen(false);
-                            }}
-                          >
-                            <span className="products-sort-option-icon">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                              >
-                                <path
-                                  d="M11.8333 6V17.6667M11.8333 17.6667L17.6667 11.8333M11.8333 17.6667L6 11.8333"
-                                  stroke="#25303D"
-                                  strokeWidth="1.2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </span>
-                            <span className="products-sort-option-label">Oldest first</span>
-                          </button>
+                            anchorTop={purchasedSortPosition.top}
+                            anchorLeft={purchasedSortPosition.left}
+                          />
                         </div>
                       )}
                     </div>
@@ -518,7 +839,24 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                     <div
                       ref={statusFilterRef}
                       className="products-th-label-with-filter"
-                      onMouseEnter={() => setIsStatusFilterOpen(true)}
+                      onMouseEnter={() => {
+                        // close others
+                        setIsRatePlanFilterOpen(false);
+                        setIsPaymentTypeFilterOpen(false);
+                        setIsPurchasedSortOpen(false);
+
+                        if (statusFilterRef.current) {
+                          const rect = statusFilterRef.current.getBoundingClientRect();
+                          setStatusFilterPosition({
+                            top: rect.bottom + 4,
+                            left: rect.left,
+                          });
+                        }
+                        setIsStatusFilterOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsStatusFilterOpen(false);
+                      }}
                     >
                       <span>Status</span>
                       <button
@@ -550,30 +888,19 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                           className="products-column-filter-popover"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="products-column-filter-list">
-                            {['active', 'draft'].map((statusKey) => (
-                              <div
-                                key={statusKey}
-                                className="products-column-filter-list-item"
-                              >
-                                <Checkbox
-                                  checked={selectedStatuses.includes(statusKey)}
-                                  onChange={(checked) => {
-                                    setSelectedStatuses((prev) => {
-                                      if (checked) {
-                                        if (prev.includes(statusKey)) return prev;
-                                        return [...prev, statusKey];
-                                      }
-                                      return prev.filter((x) => x !== statusKey);
-                                    });
-                                  }}
-                                  label={
-                                    statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
-                                  }
-                                />
-                              </div>
-                            ))}
-                          </div>
+                          <SimpleFilterDropdown
+                            options={['active', 'draft'].map((statusKey) => ({
+                              id: statusKey,
+                              label:
+                                statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                            }))}
+                            value={selectedStatuses}
+                            onChange={(next) =>
+                              setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                            }
+                            anchorTop={statusFilterPosition.top}
+                            anchorLeft={statusFilterPosition.left}
+                          />
                         </div>
                       )}
                     </div>
@@ -593,98 +920,106 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                     </td>
                   </tr>
                 ) : subscriptions.length > 0 ? (
-                  filtered.map(sub => {
-                    const cust = customerMap.get(sub.customerId);
-                    const rp = ratePlanMap.get(sub.ratePlanId);
+                  filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
+                        No results found. Try adjusting your search or filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filtered.map(sub => {
+                      const cust = customerMap.get(sub.customerId);
+                      const rp = ratePlanMap.get(sub.ratePlanId);
 
-                    // Backend already returns formatted date string, so use it directly
-                    const purchased = (sub as any).createdOn ||
-                      formatIST((sub as any).createdAt) ||
-                      formatIST((sub as any).startDate) ||
-                      '—';
-                    const logo = cust?.__resolvedLogoSrc || null;
+                      // Backend already returns formatted date string, so use it directly
+                      const purchased = (sub as any).createdOn ||
+                        formatIST((sub as any).createdAt) ||
+                        formatIST((sub as any).startDate) ||
+                        '—';
+                      const logo = cust?.__resolvedLogoSrc || null;
 
-                    return (
-                      <tr key={sub.subscriptionId}>
-                        {/* Customer: logo + name + email */}
-                        <td className="sub-customer-cell">
-                          <div className="cell-flex">
-                            <div
-                              className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
-                              aria-label={`${cust?.customerName || 'Customer'} logo`}
-                              role="img"
-                              style={logo ? {
-                                backgroundImage: `url(${logo})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat'
-                              } : undefined}
-                            >
-                              {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
+                      return (
+                        <tr key={sub.subscriptionId}>
+                          {/* Customer: logo + name + email */}
+                          <td className="sub-customer-cell">
+                            <div className="cell-flex">
+                              <div
+                                className={`customer-logo${logo ? ' has-image' : ' no-image'}`}
+                                aria-label={`${cust?.customerName || 'Customer'} logo`}
+                                role="img"
+                                style={logo ? {
+                                  backgroundImage: `url(${logo})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  backgroundRepeat: 'no-repeat'
+                                } : undefined}
+                              >
+                                {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
+                              </div>
+                              <div className="cust-block">
+                                <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
+                                <div className="cust-email">{cust?.primaryEmail || '—'}</div>
+                              </div>
                             </div>
-                            <div className="cust-block">
-                              <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
-                              <div className="cust-email">{cust?.primaryEmail || '—'}</div>
-                            </div>
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* Rate Plan chip */}
-                        <td><RatePlanChip name={rp?.ratePlanName || `Plan ${sub.ratePlanId}`} /></td>
+                          {/* Rate Plan chip */}
+                          <td><RatePlanChip name={rp?.ratePlanName || `Plan ${sub.ratePlanId}`} /></td>
 
-                        {/* Payment Type pill */}
-                        <td><PaymentPill value={sub.paymentType} /></td>
+                          {/* Payment Type pill */}
+                          <td><PaymentPill value={sub.paymentType} /></td>
 
-                        {/* Purchased On */}
-                        <td>{purchased}</td>
+                          {/* Purchased On */}
+                          <td>{purchased}</td>
 
-                        {/* Status */}
-                        <td>
-                          <StatusBadge
-                            label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
-                            variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
-                            size="sm"
-                          />
-                        </td>
-
-                        {/* Actions (Download, Edit/Resume, Delete) */}
-                        <td className="actions-cell">
-                          <div className="product-action-buttons">
-                            {/* Download */}
-                            <button
-                              className="download-button"
-                              onClick={() => handleDownload(sub)}
-                              title="Download"
-                              aria-label="Download"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
-                                <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
-                                  stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            </button>
-
-                            {sub.status?.toLowerCase() === 'draft' ? (
-                              <RetryIconButton
-                                onClick={() => setDraftSub(sub)}
-                                title="Continue editing draft"
-                              />
-                            ) : (
-                              <EditIconButton
-                                onClick={() => setEditingSub(sub)}
-                                title="Edit subscription"
-                              />
-                            )}
-
-                            {/* Delete */}
-                            <DeleteIconButton
-                              onClick={() => handleDelete(sub)}
-                              title="Delete subscription"
+                          {/* Status */}
+                          <td>
+                            <StatusBadge
+                              label={sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1).toLowerCase() : 'N/A'}
+                              variant={sub.status?.toLowerCase().includes('active') ? 'active' : sub.status?.toLowerCase().includes('draft') ? 'draft' : 'archived' as Variant}
+                              size="sm"
                             />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
+                          </td>
+
+                          {/* Actions (Download, Edit/Resume, Delete) */}
+                          <td className="actions-cell">
+                            <div className="product-action-buttons">
+                              {/* Download */}
+                              <button
+                                className="download-button"
+                                onClick={() => handleDownload(sub)}
+                                title="Download"
+                                aria-label="Download"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
+                                  <path d="M7 9V1M7 9L3.66667 5.66667M7 9L10.3333 5.66667M13 9V11.6667C13 12.0203 12.8595 12.3594 12.6095 12.6095C12.3594 12.8595 12.0203 13 11.6667 13H2.33333C1.97971 13 1.64057 12.8595 1.39052 12.6095C1.14048 12.3594 1 12.0203 1 11.6667V9"
+                                    stroke="#373B40" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              </button>
+
+                              {sub.status?.toLowerCase() === 'draft' ? (
+                                <RetryIconButton
+                                  onClick={() => setDraftSub(sub)}
+                                  title="Continue editing draft"
+                                />
+                              ) : (
+                                <EditIconButton
+                                  onClick={() => setEditingSub(sub)}
+                                  title="Edit subscription"
+                                />
+                              )}
+
+                              {/* Delete */}
+                              <DeleteIconButton
+                                onClick={() => handleDelete(sub)}
+                                title="Delete subscription"
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )
                 ) : (
                   <tr>
                     <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>

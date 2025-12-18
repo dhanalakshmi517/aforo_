@@ -1,0 +1,59 @@
+@import "../Variables/Variables.css";
+.sfd-root{
+  width: 264px;
+  border-radius: var(--border-radius-lg);
+  background: var(--color-neutral-white);
+box-shadow: 0px 6px 16px rgba(16, 24, 40, 0.08);
+  border: none;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.sfd-row{
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sfd-row:hover{
+  background: var(--color-neutral-150);
+}
+
+.sfd-row.is-checked{
+  background: var(--color-neutral-200);
+}
+
+.sfd-row.is-checked:hover{
+  background: var(--color-neutral-150);
+}
+
+.sfd-row.is-disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sfd-checkbox{
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #4F46E5;
+}
+
+.sfd-label{
+overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  white-space: nowrap;
+}

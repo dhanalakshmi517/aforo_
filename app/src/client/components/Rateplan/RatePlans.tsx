@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+
 import { fetchRatePlans, deleteRatePlan, fetchRatePlanWithDetails, fetchBillableMetricById, checkApiHealth } from './api';
 import './RatePlan.css';
 import PageHeader from '../PageHeader/PageHeader';
@@ -21,6 +22,10 @@ import Tooltip from '../componenetsss/Tooltip';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import Checkbox from '../componenetsss/Checkbox';
 import FilterChip from '../componenetsss/FilterChip';
+import FilterDropdown from '../componenetsss/FilterDropdown';
+import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
+import DateSortDropdown from '../componenetsss/DateSortDropdown';
+import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 import RatePlansEmptyImg from './rateplans.svg';
 
 /* ---------------- Types ---------------- */
@@ -255,12 +260,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, []);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedRatePlanIds, setSelectedRatePlanIds] = useState<Array<number | string>>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const statusFilterRef = React.useRef<HTMLDivElement | null>(null);
   const [selectedPaymentTypes, setSelectedPaymentTypes] = useState<string[]>([]);
   const [isPaymentTypeFilterOpen, setIsPaymentTypeFilterOpen] = useState(false);
   const paymentTypeFilterRef = React.useRef<HTMLDivElement | null>(null);
+
   const [selectedBillingFrequencies, setSelectedBillingFrequencies] = useState<string[]>([]);
   const [isBillingFrequencyFilterOpen, setIsBillingFrequencyFilterOpen] = useState(false);
   const billingFrequencyFilterRef = React.useRef<HTMLDivElement | null>(null);
@@ -270,33 +277,58 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
   const createdSortRef = React.useRef<HTMLDivElement | null>(null);
+  const [statusFilterPosition, setStatusFilterPosition] = useState({ top: 0, left: 0 });
+  const [paymentTypeFilterPosition, setPaymentTypeFilterPosition] = useState({ top: 0, left: 0 });
+  const [pricingModelFilterPosition, setPricingModelFilterPosition] = useState({ top: 0, left: 0 });
+  const [createdSortPosition, setCreatedSortPosition] = useState({ top: 0, left: 0 });
+  const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
+  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('ratePlan');
+  const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
+  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
 
   /* ---------- details cache ---------- */
   const [detailsById, setDetailsById] = useState<Record<number, RatePlanDetails | 'loading' | 'error'>>({});
 
   const handleResetRatePlanFilters = () => {
+    setSelectedRatePlanIds([]);
     setSelectedStatuses([]);
     setSelectedPaymentTypes([]);
     setSelectedBillingFrequencies([]);
     setSelectedPricingModels([]);
+    setIsMainFilterMenuOpen(false);
+    setIsMainFilterPanelOpen(false);
+    setDetailsById({}); // Clear company-specific data
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (statusFilterRef.current && !statusFilterRef.current.contains(event.target as Node)) {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      // Ignore clicks inside the shared portal root
+      const portalRoot = document.getElementById('portal-root');
+      if (portalRoot && portalRoot.contains(target)) return;
+
+      if (statusFilterRef.current && !statusFilterRef.current.contains(target)) {
         setIsStatusFilterOpen(false);
       }
-      if (paymentTypeFilterRef.current && !paymentTypeFilterRef.current.contains(event.target as Node)) {
+      if (paymentTypeFilterRef.current && !paymentTypeFilterRef.current.contains(target)) {
         setIsPaymentTypeFilterOpen(false);
       }
-      if (billingFrequencyFilterRef.current && !billingFrequencyFilterRef.current.contains(event.target as Node)) {
+      if (billingFrequencyFilterRef.current && !billingFrequencyFilterRef.current.contains(target)) {
         setIsBillingFrequencyFilterOpen(false);
       }
-      if (pricingModelFilterRef.current && !pricingModelFilterRef.current.contains(event.target as Node)) {
+      if (pricingModelFilterRef.current && !pricingModelFilterRef.current.contains(target)) {
         setIsPricingModelFilterOpen(false);
       }
-      if (createdSortRef.current && !createdSortRef.current.contains(event.target as Node)) {
+      if (createdSortRef.current && !createdSortRef.current.contains(target)) {
         setIsCreatedSortOpen(false);
+      }
+      if (filterButtonRef.current && !filterButtonRef.current.contains(target)) {
+        setIsMainFilterMenuOpen(false);
+        setIsMainFilterPanelOpen(false);
       }
     };
 
@@ -304,7 +336,21 @@ const RatePlans: React.FC<RatePlansProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isStatusFilterOpen, isPaymentTypeFilterOpen, isBillingFrequencyFilterOpen, isPricingModelFilterOpen, isCreatedSortOpen]);
+  }, []);
+
+  const ratePlanOptions = useMemo(() => {
+    return Array.from(
+      new Map(
+        (ratePlansState ?? []).map((plan) => [
+          plan.ratePlanId,
+          {
+            id: plan.ratePlanId,
+            label: plan.ratePlanName || `Rate Plan ${plan.ratePlanId}`,
+          },
+        ])
+      ).values()
+    );
+  }, [ratePlansState]);
 
   const filteredPlans = (ratePlansState ?? [])
     .filter((p) => {
@@ -328,6 +374,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
         ratePlanType.includes(q) ||
         billingFrequency.includes(q)
       );
+    })
+    .filter((p) => {
+      if (selectedRatePlanIds.length === 0) return true;
+      return selectedRatePlanIds.some((x) => String(x) === String(p.ratePlanId));
     })
     .filter((p) => {
       if (selectedStatuses.length === 0) return true;
@@ -1148,18 +1198,162 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 setShowCreatePlan(true);
                 navigate('/get-started/rate-plans');
               }}
-              onFilterClick={() => { }}
+              onFilterClick={() => {
+                setIsStatusFilterOpen(false);
+                setIsPaymentTypeFilterOpen(false);
+                setIsBillingFrequencyFilterOpen(false);
+                setIsPricingModelFilterOpen(false);
+                setIsCreatedSortOpen(false);
+
+                if (filterButtonRef.current) {
+                  const rect = filterButtonRef.current.getBoundingClientRect();
+                  const menuWidth = 240;
+                  const panelWidth = 320;
+                  const gap = 12;
+                  const margin = 8;
+
+                  let left = rect.left;
+                  const minLeft = panelWidth + gap + margin;
+                  if (left < minLeft) {
+                    left = minLeft;
+                  }
+
+                  if (left + menuWidth + margin > window.innerWidth) {
+                    left = Math.max(margin, window.innerWidth - menuWidth - margin);
+                    if (left < minLeft) {
+                      left = minLeft;
+                    }
+                  }
+
+                  setMainFilterMenuPosition({
+                    top: rect.bottom + 8,
+                    left,
+                  });
+                }
+
+                const nextOpen = !isMainFilterMenuOpen;
+                setIsMainFilterMenuOpen(nextOpen);
+                if (!nextOpen) {
+                  setIsMainFilterPanelOpen(false);
+                }
+              }}
+              filterButtonRef={filterButtonRef}
               searchDisabled={!hasRows}
               filterDisabled={!hasRows}
               showPrimary={hasRows}
               showIntegrations={filteredPlans.length > 0} />
 
-            {(selectedStatuses.length > 0 ||
+            {isMainFilterMenuOpen && (
+              <MainFilterMenu
+                items={[
+                  { key: 'ratePlan', label: 'Rate Plan' },
+                  { key: 'paymentType', label: 'Payment Type' },
+                  { key: 'status', label: 'Status' },
+                  { key: 'date', label: 'Date' },
+                ]}
+                activeKey={activeFilterKey}
+                onSelect={(key) => {
+                  setActiveFilterKey(key);
+                }}
+                onSelectWithRect={(key, rect) => {
+                  setActiveFilterKey(key);
+                  const panelWidth = key === 'ratePlan' ? 320 : 264;
+                  const gap = 12;
+                  const margin = 8;
+
+                  let left = rect.left - gap - panelWidth;
+                  if (left < margin) {
+                    const tryRight = rect.right + gap;
+                    if (tryRight + panelWidth + margin <= window.innerWidth) {
+                      left = tryRight;
+                    } else {
+                      left = Math.max(margin, window.innerWidth - panelWidth - margin);
+                    }
+                  }
+
+                  setMainFilterPanelPosition({
+                    top: rect.top,
+                    left,
+                  });
+                  setIsMainFilterPanelOpen(true);
+                }}
+                anchorTop={mainFilterMenuPosition.top}
+                anchorLeft={mainFilterMenuPosition.left}
+              />
+            )}
+
+            {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'ratePlan' && (
+              <FilterDropdown
+                options={ratePlanOptions}
+                value={selectedRatePlanIds}
+                onChange={(next) => setSelectedRatePlanIds(next)}
+                placeholder="Search Rate Plans"
+                widthPx={320}
+                heightPx={300}
+                anchorTop={mainFilterPanelPosition.top}
+                anchorLeft={mainFilterPanelPosition.left}
+              />
+            )}
+
+            {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'paymentType' && (
+              <SimpleFilterDropdown
+                options={['prepaid', 'postpaid'].map((pt) => ({
+                  id: pt,
+                  label: pt.charAt(0).toUpperCase() + pt.slice(1),
+                }))}
+                value={selectedPaymentTypes}
+                onChange={(next) =>
+                  setSelectedPaymentTypes(next.map((x) => String(x).toLowerCase()))
+                }
+                anchorTop={mainFilterPanelPosition.top}
+                anchorLeft={mainFilterPanelPosition.left}
+              />
+            )}
+
+            {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'status' && (
+              <SimpleFilterDropdown
+                options={['active', 'draft', 'live'].map((statusKey) => ({
+                  id: statusKey,
+                  label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                }))}
+                value={selectedStatuses}
+                onChange={(next) =>
+                  setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                }
+                anchorTop={mainFilterPanelPosition.top}
+                anchorLeft={mainFilterPanelPosition.left}
+              />
+            )}
+
+            {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'date' && (
+              <DateSortDropdown
+                value={createdSortOrder}
+                onChange={(next) => setCreatedSortOrder(next)}
+                anchorTop={mainFilterPanelPosition.top}
+                anchorLeft={mainFilterPanelPosition.left}
+              />
+            )}
+
+            {(selectedRatePlanIds.length > 0 ||
+              selectedStatuses.length > 0 ||
               selectedPaymentTypes.length > 0 ||
               selectedBillingFrequencies.length > 0 ||
               selectedPricingModels.length > 0) && (
               <div className="products-active-filters-row">
                 <div className="products-active-filters-chips">
+                  {selectedRatePlanIds.map((id) => {
+                    const plan = ratePlansState.find((p) => String(p.ratePlanId) === String(id));
+                    const label = plan?.ratePlanName || `Rate Plan ${id}`;
+                    return (
+                      <FilterChip
+                        key={`rate-plan-chip-${id}`}
+                        label={label}
+                        onRemove={() =>
+                          setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                        }
+                      />
+                    );
+                  })}
                   {selectedStatuses.map((s) => (
                     <FilterChip
                       key={s}
@@ -1206,7 +1400,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   className="products-filters-reset"
                   onClick={handleResetRatePlanFilters}
                 >
-                  Clear All Filters
+                Reset
                 </button>
               </div>
             )}
@@ -1225,7 +1419,28 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   <tr>
                     <th>Rate Plan</th>
                     <th className="products-th-with-filter">
-                      <div ref={pricingModelFilterRef} className="products-th-label-with-filter" onMouseEnter={() => setIsPricingModelFilterOpen(true)}>
+                      <div
+                        ref={pricingModelFilterRef}
+                        className="products-th-label-with-filter"
+                        onMouseEnter={() => {
+                          // close others
+                          setIsPaymentTypeFilterOpen(false);
+                          setIsCreatedSortOpen(false);
+                          setIsStatusFilterOpen(false);
+
+                          if (pricingModelFilterRef.current) {
+                            const rect = pricingModelFilterRef.current.getBoundingClientRect();
+                            setPricingModelFilterPosition({
+                              top: rect.bottom + 4,
+                              left: rect.left,
+                            });
+                          }
+                          setIsPricingModelFilterOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setIsPricingModelFilterOpen(false);
+                        }}
+                      >
                         <span>Pricing model</span>
                         <button type="button" className={`products-column-filter-trigger ${isPricingModelFilterOpen ? 'is-open' : ''}`} aria-label="Filter by pricing model">
                           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none">
@@ -1234,19 +1449,44 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         </button>
                         {isPricingModelFilterOpen && (
                           <div className="products-column-filter-popover" onClick={(e) => e.stopPropagation()}>
-                            <div className="products-column-filter-list">
-                              {['flat fee', 'usage-based', 'tiered', 'volume', 'stair-step'].map((pmKey) => (
-                                <div key={pmKey} className="products-column-filter-list-item">
-                                  <Checkbox checked={selectedPricingModels.includes(pmKey)} onChange={(checked) => { setSelectedPricingModels((prev) => { if (checked) { if (prev.includes(pmKey)) return prev; return [...prev, pmKey]; } return prev.filter((x) => x !== pmKey); }); }} label={pmKey.charAt(0).toUpperCase() + pmKey.slice(1)} />
-                                </div>
-                              ))}
-                            </div>
+                            <SimpleFilterDropdown
+                              options={['flat fee', 'usage-based', 'tiered', 'volume', 'stair-step'].map((pmKey) => ({
+                                id: pmKey,
+                                label: pmKey.charAt(0).toUpperCase() + pmKey.slice(1),
+                              }))}
+                              value={selectedPricingModels}
+                              onChange={(next) =>
+                                setSelectedPricingModels(next.map((x) => String(x).toLowerCase()))
+                              }
+                              anchorTop={pricingModelFilterPosition.top}
+                              anchorLeft={pricingModelFilterPosition.left}
+                            />
                           </div>
                         )}
                       </div>
                     </th>
                     <th className="products-th-with-filter">
-                      <div ref={paymentTypeFilterRef} className="products-th-label-with-filter" onMouseEnter={() => setIsPaymentTypeFilterOpen(true)}>
+                      <div
+                        ref={paymentTypeFilterRef}
+                        className="products-th-label-with-filter"
+                        onMouseEnter={() => {
+                          setIsPricingModelFilterOpen(false);
+                          setIsCreatedSortOpen(false);
+                          setIsStatusFilterOpen(false);
+
+                          if (paymentTypeFilterRef.current) {
+                            const rect = paymentTypeFilterRef.current.getBoundingClientRect();
+                            setPaymentTypeFilterPosition({
+                              top: rect.bottom + 4,
+                              left: rect.left,
+                            });
+                          }
+                          setIsPaymentTypeFilterOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setIsPaymentTypeFilterOpen(false);
+                        }}
+                      >
                         <span>Payment Type</span>
                         <button type="button" className={`products-column-filter-trigger ${isPaymentTypeFilterOpen ? 'is-open' : ''}`} aria-label="Filter by payment type">
                           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none">
@@ -1255,19 +1495,45 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         </button>
                         {isPaymentTypeFilterOpen && (
                           <div className="products-column-filter-popover" onClick={(e) => e.stopPropagation()}>
-                            <div className="products-column-filter-list">
-                              {['prepaid', 'postpaid'].map((ptKey) => (
-                                <div key={ptKey} className="products-column-filter-list-item">
-                                  <Checkbox checked={selectedPaymentTypes.includes(ptKey)} onChange={(checked) => { setSelectedPaymentTypes((prev) => { if (checked) { if (prev.includes(ptKey)) return prev; return [...prev, ptKey]; } return prev.filter((x) => x !== ptKey); }); }} label={ptKey.charAt(0).toUpperCase() + ptKey.slice(1)} />
-                                </div>
-                              ))}
-                            </div>
+                            <SimpleFilterDropdown
+                              options={['prepaid', 'postpaid'].map((ptKey) => ({
+                                id: ptKey,
+                                label: ptKey.charAt(0).toUpperCase() + ptKey.slice(1),
+                              }))}
+                              value={selectedPaymentTypes}
+                              onChange={(next) =>
+                                setSelectedPaymentTypes(next.map((x) => String(x).toLowerCase()))
+                              }
+                              anchorTop={paymentTypeFilterPosition.top}
+                              anchorLeft={paymentTypeFilterPosition.left}
+                            />
                           </div>
                         )}
                       </div>
                     </th>
                     <th className="products-th-with-filter">
-                      <div ref={createdSortRef} className="products-th-label-with-filter" onMouseEnter={() => setIsCreatedSortOpen(true)}>
+                      <div
+                        ref={createdSortRef}
+                        className="products-th-label-with-filter"
+                        onMouseEnter={() => {
+                          // close others
+                          setIsPricingModelFilterOpen(false);
+                          setIsPaymentTypeFilterOpen(false);
+                          setIsStatusFilterOpen(false);
+
+                          if (createdSortRef.current) {
+                            const rect = createdSortRef.current.getBoundingClientRect();
+                            setCreatedSortPosition({
+                              top: rect.bottom + 4,
+                              left: rect.left,
+                            });
+                          }
+                          setIsCreatedSortOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setIsCreatedSortOpen(false);
+                        }}
+                      >
                         <span>Created on</span>
                         <button type="button" className={`products-column-filter-trigger ${isCreatedSortOpen ? 'is-open' : ''}`} aria-label="Sort by created date">
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -1276,20 +1542,41 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         </button>
                         {isCreatedSortOpen && (
                           <div className="products-column-filter-popover products-createdon-popover" onClick={(e) => e.stopPropagation()}>
-                            <button type="button" className={`products-sort-option ${createdSortOrder === 'newest' ? 'is-active' : ''}`} onClick={() => { setCreatedSortOrder('newest'); setIsCreatedSortOpen(false); }}>
-                              <span className="products-sort-option-icon"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M0.600098 6.43294L6.43343 0.599609M6.43343 0.599609L12.2668 6.43294M6.43343 0.599609V12.2663" stroke="#25303D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
-                              <span className="products-sort-option-label">Newest first</span>
-                            </button>
-                            <button type="button" className={`products-sort-option ${createdSortOrder === 'oldest' ? 'is-active' : ''}`} onClick={() => { setCreatedSortOrder('oldest'); setIsCreatedSortOpen(false); }}>
-                              <span className="products-sort-option-icon"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M0.600098 6.43294L6.43343 12.2663M6.43343 12.2663L12.2668 6.43294M6.43343 12.2663V0.599609" stroke="#25303D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
-                              <span className="products-sort-option-label">Oldest first</span>
-                            </button>
+                            <DateSortDropdown
+                              value={createdSortOrder}
+                              onChange={(next) => {
+                                setCreatedSortOrder(next);
+                                setIsCreatedSortOpen(false);
+                              }}
+                              anchorTop={createdSortPosition.top}
+                              anchorLeft={createdSortPosition.left}
+                            />
                           </div>
                         )}
                       </div>
                     </th>
                     <th className="products-th-with-filter">
-                      <div ref={statusFilterRef} className="products-th-label-with-filter" onMouseEnter={() => setIsStatusFilterOpen(true)}>
+                      <div
+                        ref={statusFilterRef}
+                        className="products-th-label-with-filter"
+                        onMouseEnter={() => {
+                          setIsPricingModelFilterOpen(false);
+                          setIsPaymentTypeFilterOpen(false);
+                          setIsCreatedSortOpen(false);
+
+                          if (statusFilterRef.current) {
+                            const rect = statusFilterRef.current.getBoundingClientRect();
+                            setStatusFilterPosition({
+                              top: rect.bottom + 4,
+                              left: rect.left,
+                            });
+                          }
+                          setIsStatusFilterOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setIsStatusFilterOpen(false);
+                        }}
+                      >
                         <span>Status</span>
                         <button type="button" className={`products-column-filter-trigger ${isStatusFilterOpen ? 'is-open' : ''}`} aria-label="Filter by status">
                           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" viewBox="0 0 11 8" fill="none">
@@ -1298,13 +1585,18 @@ const RatePlans: React.FC<RatePlansProps> = ({
                         </button>
                         {isStatusFilterOpen && (
                           <div className="products-column-filter-popover" onClick={(e) => e.stopPropagation()}>
-                            <div className="products-column-filter-list">
-                              {['active', 'draft', 'live'].map((statusKey) => (
-                                <div key={statusKey} className="products-column-filter-list-item">
-                                  <Checkbox checked={selectedStatuses.includes(statusKey)} onChange={(checked) => { setSelectedStatuses((prev) => { if (checked) { if (prev.includes(statusKey)) return prev; return [...prev, statusKey]; } return prev.filter((x) => x !== statusKey); }); }} label={statusKey.charAt(0).toUpperCase() + statusKey.slice(1)} />
-                                </div>
-                              ))}
-                            </div>
+                            <SimpleFilterDropdown
+                              options={['active', 'draft', 'live'].map((statusKey) => ({
+                                id: statusKey,
+                                label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                              }))}
+                              value={selectedStatuses}
+                              onChange={(next) =>
+                                setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                              }
+                              anchorTop={statusFilterPosition.top}
+                              anchorLeft={statusFilterPosition.left}
+                            />
                           </div>
                         )}
                       </div>
@@ -1326,54 +1618,62 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   </tbody>
                 ) : hasRows ? (
                   <tbody>
-                    {filteredPlans.map((plan) => (
-                      <tr key={plan.ratePlanId}>
-                        <td>{renderNameChip(plan)}</td>
-                        <td>{renderPricingModel(plan)}</td>
-                        <td>{renderPaymentType(plan)}</td>
-                        <td>{renderCreatedOn(plan)}</td>
-                        <td>
-                          <Tooltip
-                            position="right"
-                            content={
-                              String(plan.status || '').toLowerCase() === 'live'
-                                ? 'Rate plan is live and available for sale.'
-                                : String(plan.status || '').toLowerCase() === 'active'
-                                  ? 'Rate plan is active and available for sale.'
-                                  : String(plan.status || '').toLowerCase() === 'draft'
-                                    ? 'Rate plan is in draft. Continue setting it up.'
-                                    : formatStatus(plan.status)
-                            }
-                          >
-                            <StatusBadge
-                              label={formatStatus(plan.status)}
-                              variant={String(plan.status || '').toLowerCase() as Variant}
-                              size="sm"
-                            />
-                          </Tooltip>
-                        </td>
-
-                        <td className="actions-cell">
-                          <div className="product-action-buttons">
-                            {plan.status?.toLowerCase() === 'draft' ? (
-                              <RetryIconButton
-                                onClick={() => handleDraft(plan.ratePlanId)}
-                                title="Continue editing draft"
-                              />
-                            ) : (
-                              <EditIconButton
-                                onClick={() => handleEdit(plan.ratePlanId)}
-                                title="Edit rate plan"
-                              />
-                            )}
-                            <DeleteIconButton
-                              onClick={() => handleDeleteClick(plan.ratePlanId)}
-                              title="Delete rate plan"
-                            />
-                          </div>
+                    {filteredPlans.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
+                          No results found. Try adjusting your search or filters.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      filteredPlans.map((plan) => (
+                        <tr key={plan.ratePlanId}>
+                          <td>{renderNameChip(plan)}</td>
+                          <td>{renderPricingModel(plan)}</td>
+                          <td>{renderPaymentType(plan)}</td>
+                          <td>{renderCreatedOn(plan)}</td>
+                          <td>
+                            <Tooltip
+                              position="right"
+                              content={
+                                String(plan.status || '').toLowerCase() === 'live'
+                                  ? 'Rate plan is live and available for sale.'
+                                  : String(plan.status || '').toLowerCase() === 'active'
+                                    ? 'Rate plan is active and available for sale.'
+                                    : String(plan.status || '').toLowerCase() === 'draft'
+                                      ? 'Rate plan is in draft. Continue setting it up.'
+                                      : formatStatus(plan.status)
+                              }
+                            >
+                              <StatusBadge
+                                label={formatStatus(plan.status)}
+                                variant={String(plan.status || '').toLowerCase() as Variant}
+                                size="sm"
+                              />
+                            </Tooltip>
+                          </td>
+
+                          <td className="actions-cell">
+                            <div className="product-action-buttons">
+                              {plan.status?.toLowerCase() === 'draft' ? (
+                                <RetryIconButton
+                                  onClick={() => handleDraft(plan.ratePlanId)}
+                                  title="Continue editing draft"
+                                />
+                              ) : (
+                                <EditIconButton
+                                  onClick={() => handleEdit(plan.ratePlanId)}
+                                  title="Edit rate plan"
+                                />
+                              )}
+                              <DeleteIconButton
+                                onClick={() => handleDeleteClick(plan.ratePlanId)}
+                                title="Delete rate plan"
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 ) : (
                   <tbody>

@@ -27,7 +27,11 @@ const Portal: React.FC<PortalProps> = ({ children, containerId = 'portal-root' }
     setContainer(portalRoot);
     
     return () => {
-      if (portalRoot && portalRoot.childNodes.length === 0) {
+      if (
+        portalRoot &&
+        portalRoot.childNodes.length === 0 &&
+        document.body.contains(portalRoot)
+      ) {
         document.body.removeChild(portalRoot);
       }
     };
