@@ -9,7 +9,7 @@
   position: relative;
   z-index: 2;
   box-sizing: border-box;
-  margin-top: -15px;
+  margin-top: -10px;
 }
 
 .rate-plan-header h2 {
@@ -149,7 +149,7 @@
   flex-shrink: 0;
   border: none;
   border-radius: var(--border-radius-sm, 8px);
-  background: var(--surface-layer-4, #FFF);
+  background: var(--color-neutral-50);
   color: #373B40;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);

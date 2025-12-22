@@ -73,15 +73,61 @@ html, body, #root, .app, .main-content {
 
 /* Duplicate block updated as well */
 .check-product-container {
-  padding: 0;
-  width:100%;
+  padding: 0 15px 16px 14px;
+  width: 100%;
   max-width: none;
   box-sizing: border-box;
   /* Match overall app background so there is no hard white band above the card */
   background: #FBFDFF;
   box-shadow: none;
+  min-height:calc(100%-16px);
+  margin: 0;
+}
+
+
+.final-product-container {
+  /* Outer gap: top 15px, left/right 10px, bottom 10px */
+  padding: 15px 10px 10px 10px;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  background: #FBFDFF; /* Page background */
+  box-shadow: none;
+  min-height: 100vh; /* Ensure full height */
+}
+
+@media (max-width: 991px) { 
+  .final-product-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}
+
+@media (max-width: 768px) {
+  .final-product-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
+}
+
+/* Duplicate block updated as well */
+.final-product-container {
+  padding: 0;
+  width: calc(100% - 256px);
+  max-width: none;
+  box-sizing: border-box;
+  margin-left: 16px;
+  padding-right: 16px;
+  background: white !important;
+  box-shadow: none;
   min-height: 100vh;
-  margin-right: 10px;
+}
+
+@media (max-width: 991px) { 
+  .final-product-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
 }
 
 /* Duplicate block updated as well */
@@ -90,11 +136,11 @@ html, body, #root, .app, .main-content {
 width: calc(100% - 256px);
   max-width: none;
   box-sizing: border-box;
-  margin-left: 10px;
-  padding-right: 10px;
+  margin-left: 16px;
+  padding-right: 16px;
   background: #FBFDFF;
   box-shadow: none;
-  min-height: 100vh;
+  max-height: calc(100% - 50px);
 }
 
 @media (max-width: 991px) { 
@@ -366,7 +412,7 @@ width: calc(100% - 256px);
   color: var(--color-neutral-500);
   margin-right: 20px;
 }
-.products-empty-state-text {
+.products-empty-text {
   color: var(--color-neutral-1000);
 text-align: center;
 
@@ -538,8 +584,9 @@ line-height: var(--line-height-body-lg);
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 4px 16px 0 16px; /* slightly more breathing room around chips */
-  margin-bottom: 4px;       /* clear gap between chips row and table card */
+  padding: 16px 16px 20px 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-neutral-200);
 }
 
 .products-active-filters-chips {
@@ -707,15 +754,20 @@ line-height: var(--line-height-body-lg);
     line-height: var(--line-height-body-md); /* 142.857% */    flex: 1;
   }
 
-  .product-sku {
+  .product-new-sku {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: var(--color-neutral-500);
-    font-family: var(--font-family-primary);
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.3;
+   overflow: hidden;
+color: var(--color-neutral-1000);
+text-overflow: ellipsis;
+
+/* body/xs/thin */
+font-family: "IBM Plex Sans";
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
   }
 
   /* Billable Metrics Card */
@@ -731,15 +783,16 @@ line-height: var(--line-height-body-lg);
     white-space: nowrap;
   }
 
-  .source-badge {
+  .pro-source-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 10px;
-    border-radius: 999px;
-    border: 1px solid #D4D4D8;              /* stronger, visible border */
-    background-color: #F9FAFB;              /* light gray so pill stands out on white row */
-    color: #111827;
+    padding: 4px 12px;
+    border-radius: 24px;
+    border: none;
+    background-color: var(--color-neutral-white);
+    color: var(--color-neutral-1000);
+    border: 1px solid var(--color-neutral-200);
 
     /* body/sm/med */
     font-family: var(--font-family-primary, "IBM Plex Sans");
@@ -867,6 +920,23 @@ line-height: var(--line-height-body-lg);
   width: 100%;
   margin: 0;
   table-layout: auto; /* allow columns to size based on content */
+}
+
+/* Source badge - global styles */
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-sm, 12px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-sm, 18px);
 }
 
 .products-table tr {
@@ -1120,6 +1190,15 @@ line-height: var(--line-height-body-md);
 .products-table th svg {
   vertical-align: middle;
   transform: translateY(-1px); /* tweak as needed */
+}
+
+/* Created On cell - single line with ellipsis */
+.products-createdon {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Created On sort popover */

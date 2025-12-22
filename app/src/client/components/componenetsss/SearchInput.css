@@ -95,7 +95,7 @@ line-height: var(--line-height-body-md, 20px);}
 .si--typing,
 .si--filled{
   border-color: var(--color-primary-200);
-  box-shadow: 0 0 0 2px var(--color-primary-300);
+  box-shadow: 0 0 0 1px var(--color-primary-300);
   background: var(--color-neutral-white);
 }
 

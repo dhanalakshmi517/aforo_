@@ -27,6 +27,7 @@ import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 import RatePlansEmptyImg from './rateplans.svg';
+import NoFileSvg from '../componenetsss/nofile.svg';
 
 /* ---------------- Types ---------------- */
 export interface RatePlan {
@@ -260,6 +261,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   }, []);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedRatePlanIds, setSelectedRatePlanIds] = useState<Array<number | string>>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
@@ -1186,7 +1188,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             />
           </div>
         ) : (
-          <div className="rateplan-check-container">
+          <div className="check-container">
             <PageHeader
               title="Rate Plans"
               searchTerm={searchTerm}
@@ -1334,78 +1336,77 @@ const RatePlans: React.FC<RatePlansProps> = ({
               />
             )}
 
-            {(selectedRatePlanIds.length > 0 ||
-              selectedStatuses.length > 0 ||
-              selectedPaymentTypes.length > 0 ||
-              selectedBillingFrequencies.length > 0 ||
-              selectedPricingModels.length > 0) && (
-              <div className="products-active-filters-row">
-                <div className="products-active-filters-chips">
-                  {selectedRatePlanIds.map((id) => {
-                    const plan = ratePlansState.find((p) => String(p.ratePlanId) === String(id));
-                    const label = plan?.ratePlanName || `Rate Plan ${id}`;
-                    return (
+            <div className="customers-table-wrapper">
+              {(selectedRatePlanIds.length > 0 ||
+                selectedStatuses.length > 0 ||
+                selectedPaymentTypes.length > 0 ||
+                selectedBillingFrequencies.length > 0 ||
+                selectedPricingModels.length > 0) && (
+                <div className="products-active-filters-row">
+                  <div className="products-active-filters-chips">
+                    {selectedRatePlanIds.map((id) => {
+                      const plan = ratePlansState.find((p) => String(p.ratePlanId) === String(id));
+                      const label = plan?.ratePlanName || `Rate Plan ${id}`;
+                      return (
+                        <FilterChip
+                          key={`rate-plan-chip-${id}`}
+                          label={label}
+                          onRemove={() =>
+                            setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                          }
+                        />
+                      );
+                    })}
+                    {selectedStatuses.map((s) => (
                       <FilterChip
-                        key={`rate-plan-chip-${id}`}
-                        label={label}
+                        key={s}
+                        label={s.charAt(0).toUpperCase() + s.slice(1)}
                         onRemove={() =>
-                          setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                          setSelectedStatuses((prev) => prev.filter((x) => x !== s))
                         }
                       />
-                    );
-                  })}
-                  {selectedStatuses.map((s) => (
-                    <FilterChip
-                      key={s}
-                      label={s.charAt(0).toUpperCase() + s.slice(1)}
-                      onRemove={() =>
-                        setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                      }
-                    />
-                  ))}
+                    ))}
 
-                  {selectedPaymentTypes.map((pt) => (
-                    <FilterChip
-                      key={pt}
-                      label={pt.charAt(0).toUpperCase() + pt.slice(1)}
-                      onRemove={() =>
-                        setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
-                      }
-                    />
-                  ))}
+                    {selectedPaymentTypes.map((pt) => (
+                      <FilterChip
+                        key={pt}
+                        label={pt.charAt(0).toUpperCase() + pt.slice(1)}
+                        onRemove={() =>
+                          setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
+                        }
+                      />
+                    ))}
 
-                  {selectedBillingFrequencies.map((bf) => (
-                    <FilterChip
-                      key={bf}
-                      label={bf.charAt(0).toUpperCase() + bf.slice(1)}
-                      onRemove={() =>
-                        setSelectedBillingFrequencies((prev) => prev.filter((x) => x !== bf))
-                      }
-                    />
-                  ))}
+                    {selectedBillingFrequencies.map((bf) => (
+                      <FilterChip
+                        key={bf}
+                        label={bf.charAt(0).toUpperCase() + bf.slice(1)}
+                        onRemove={() =>
+                          setSelectedBillingFrequencies((prev) => prev.filter((x) => x !== bf))
+                        }
+                      />
+                    ))}
 
-                  {selectedPricingModels.map((pm) => (
-                    <FilterChip
-                      key={pm}
-                      label={pm.charAt(0).toUpperCase() + pm.slice(1)}
-                      onRemove={() =>
-                        setSelectedPricingModels((prev) => prev.filter((x) => x !== pm))
-                      }
-                    />
-                  ))}
+                    {selectedPricingModels.map((pm) => (
+                      <FilterChip
+                        key={pm}
+                        label={pm.charAt(0).toUpperCase() + pm.slice(1)}
+                        onRemove={() =>
+                          setSelectedPricingModels((prev) => prev.filter((x) => x !== pm))
+                        }
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="products-filters-reset"
+                    onClick={handleResetRatePlanFilters}
+                  >
+                  Reset
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  className="products-filters-reset"
-                  onClick={handleResetRatePlanFilters}
-                >
-                Reset
-                </button>
-              </div>
-            )}
-
-            <div className="customers-table-wrapper">
+              )}
               <table className="customers-table">
                 <colgroup>
                   <col className="col-rateplan-name" />
@@ -1620,8 +1621,25 @@ const RatePlans: React.FC<RatePlansProps> = ({
                   <tbody>
                     {filteredPlans.length === 0 ? (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
-                          No results found. Try adjusting your search or filters.
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="products-empty-state">
+                            <img src={NoFileSvg} alt="No results" style={{ width: 170, height: 170 }} />
+                            <p className="products-empty-text" style={{ marginTop: 16 }}>
+                              {searchQuery.trim() ? (
+                                <>
+                                  We couldn't find any results for "{searchQuery}"
+                                  <br />
+                                  Nothing wrong, just adjust your search a bit.
+                                </>
+                              ) : (
+                                <>
+                                  Oops! No matches found with these filters.
+                                  <br />
+                                  Nothing wrong here, just adjust your filters a bit.
+                                </>
+                              )}
+                            </p>
+                          </div>
                         </td>
                       </tr>
                     ) : (

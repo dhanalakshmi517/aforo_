@@ -18,7 +18,7 @@
 /* =========================================================
    Roots
    ========================================================= */
-.main-container{ width:100%; padding:0 8px 8px 8px; box-sizing:border-box; }
+.main-container{ width:100%; padding:0 0px 0px 0px; box-sizing:border-box; }
 
 /* =========================================================
    Create Plan shell
@@ -41,7 +41,7 @@
 
 .rateplan-check-container {
   margin-top: 15px;
-  margin-left: -10px;
+  margin-left: -5px;
   /* Outer gap: top 15px, left/right 10px, bottom 10px (match Customers/Data Ingestion) */
   width: 100%;
   max-width: none;
@@ -49,7 +49,7 @@
   margin-left: 0;
   background:#FBFDFF; /* Page background */
   box-shadow: none;
-  min-height: 100vh; /* Ensure full height */
+  min-height: calc(100%-50px);
 }
 
 @media (max-width: 991px) { 

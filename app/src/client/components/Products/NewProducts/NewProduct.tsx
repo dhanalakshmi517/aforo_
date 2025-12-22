@@ -384,7 +384,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   };
 
   // Track the last saved form data to detect changes
-  const [lastSavedData, setLastSavedData] = useState<typeof formData | null>(null);
+  const [lastSavedData, setLastSavedData] = useState<typeof formData | null>(() => {
+    if (activeDraft) {
+      return {
+        productName: activeDraft.productName || "",
+        version: activeDraft.version || "",
+        description: activeDraft.productDescription || "",
+      };
+    }
+    return null;
+  });
   const [lastSavedIcon, setLastSavedIcon] = useState<ProductIconData | null>(null);
 
   // Check if there are unsaved changes
@@ -404,6 +413,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
     return formDataChanged || iconChanged;
   }, [formData, selectedIcon, lastSavedData, lastSavedIcon, hasAnyRequiredInput]);
+
+  useEffect(() => {
+    if (activeDraft && !lastSavedIcon && selectedIcon) {
+      setLastSavedIcon(selectedIcon);
+    }
+  }, [activeDraft, lastSavedIcon, selectedIcon]);
 
   const saveProduct = async (isDraft: boolean = false) => {
     console.log('Saving product...', { isDraft, formData, selectedIcon, createdProductId });
@@ -789,7 +804,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           {console.log('📝 Rendering normal product form')}
           <TopBar
             title="Create New Product"
-            onBack={() => hasAnyRequiredInput ? setShowSavePrompt(true) : onClose()}
+            onBack={() => hasUnsavedChanges ? setShowSavePrompt(true) : onClose()}
             cancel={{
               onClick: () => setShowDeleteConfirm(true),
               disabled: !hasAnyRequiredInput

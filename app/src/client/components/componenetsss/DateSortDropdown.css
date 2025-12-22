@@ -3,7 +3,11 @@
   width: 264px;
   border-radius: var(--border-radius-lg);
   background: var(--color-neutral-white);
-  box-shadow: 0px 10px 30px rgba(16, 24, 40, 0.10);
+box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6), 0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8), 0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+
+
+
+
   border: 1px solid #EEF2F6;
   padding: 10px;
   box-sizing: border-box;

@@ -64,7 +64,7 @@ const resolveLogoSrc = async (uploadPath?: string): Promise<string | null> => {
 
 const steps = [
   { id: 1, title: 'Customer Details' },
-  { id: 2, title: 'Billing & Plan' },
+  { id: 2, title: 'Account Details' },
   { id: 3, title: 'Review & Confirm' },
 ];
 
@@ -209,6 +209,9 @@ const EditCustomer: React.FC = () => {
     clear('customerState', 'customerState');
     clear('customerPostalCode', 'customerPostalCode');
     clear('customerCountry', 'customerCountry');
+    if (accountDetails.billingSameAsCustomer && n.billingSameAsCustomer) {
+      delete n.billingSameAsCustomer;
+    }
     if (JSON.stringify(n) !== JSON.stringify(accountErrors)) setAccountErrors(n);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountDetails]);
@@ -217,13 +220,26 @@ const EditCustomer: React.FC = () => {
   // ------- step helpers (match EditProduct / EditSubscription UX) -------
   const goToStep = (index: number) => {
     setCurrentStep(index);
-    const first = steps[index].title.split(' ')[0].toLowerCase();
-    const tab = (first === 'customer'
-      ? 'details'
-      : first === 'billing'
-        ? 'account'
-        : 'review') as ActiveTab;
-    setActiveTab(tab);
+    setActiveTab(['details', 'account', 'review'][index] as ActiveTab);
+  };
+
+  const handleStepClick = (index: number) => {
+    if (index === currentStep) return;
+
+    if (index < currentStep) {
+      goToStep(index);
+      return;
+    }
+
+    const validators = [validateStep0, validateStep1];
+    for (let i = 0; i < index; i += 1) {
+      const check = validators[i];
+      if (check && !check()) {
+        return;
+      }
+    }
+
+    goToStep(index);
   };
 
   const handlePreviousStep = () => {
@@ -246,6 +262,9 @@ const EditCustomer: React.FC = () => {
     const a = accountDetails ?? ({} as AccountDetailsData);
     const newAccErrs: Record<string, string> = {};
 
+    if (!a.billingSameAsCustomer) {
+      newAccErrs.billingSameAsCustomer = 'Select this checkbox to continue';
+    }
     if (!a.phoneNumber?.trim()) newAccErrs.phoneNumber = 'Phone Number is required';
     if (!a.primaryEmail?.trim()) {
       newAccErrs.primaryEmail = 'Primary Email is required';
@@ -271,7 +290,7 @@ const EditCustomer: React.FC = () => {
       if (!a[k]?.trim()) newAccErrs[k] = `${k.replace(/([A-Z])/g, ' $1')} is required`;
     });
 
-    setAccountErrors(prev => ({ ...prev, ...newAccErrs }));
+    setAccountErrors(newAccErrs);
     return Object.keys(newAccErrs).length === 0;
   };
 
@@ -281,6 +300,7 @@ const EditCustomer: React.FC = () => {
 
     // Step 1 required fields
     const a = accountDetails ?? ({} as AccountDetailsData);
+    if (!a.billingSameAsCustomer) return true;
     if (!a.phoneNumber?.trim()) return true;
     if (!a.primaryEmail?.trim()) return true;
 
@@ -617,7 +637,7 @@ const EditCustomer: React.FC = () => {
                       ]
                         .join(' ')
                         .trim()}
-                      onClick={() => goToStep(index)}
+                      onClick={() => handleStepClick(index)}
                     />
                   );
                 })}

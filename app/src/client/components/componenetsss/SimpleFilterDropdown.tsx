@@ -52,6 +52,11 @@ const SimpleFilterDropdown: React.FC<Props> = ({
             <div
               key={String(opt.id)}
               className={`sfd-row ${checked ? "is-checked" : ""} ${disabled ? "is-disabled" : ""}`.trim()}
+              onClick={() => {
+                if (disabled) return;
+                onChange(toggle(value, opt.id));
+              }}
+              style={{ cursor: disabled ? "not-allowed" : "pointer" }}
             >
               <Checkbox
                 checked={checked}

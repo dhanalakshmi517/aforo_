@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateUsageMetric from "./CreateUsageMetric";
 import EditMetrics from "./EditMetering/EditMetrics";
@@ -12,6 +12,7 @@ import EditIconButton from '../componenetsss/EditIconButton';
 import DeleteIconButton from '../componenetsss/DeleteIconButton';
 import RetryIconButton from '../componenetsss/RetryIconButton';
 import UsageEmptyImg from "./usage.svg";
+import NoFileSvg from "./nofile.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
 import PrimaryButton from '../componenetsss/PrimaryButton';
@@ -22,6 +23,7 @@ import FilterChip from '../componenetsss/FilterChip';
 import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
+import TableHeaderRow, { HeaderColumn } from '../componenetsss/TableHeaderRow';
 
 // Props for Metering component
 interface MeteringProps {
@@ -112,6 +114,56 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
   const filterButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const updateStatusFilterPosition = useCallback(() => {
+    if (statusFilterRef.current) {
+      const rect = statusFilterRef.current.getBoundingClientRect();
+      setStatusFilterPosition({ top: rect.bottom + 4, left: rect.left });
+    }
+  }, []);
+
+  const updateCreatedSortPosition = useCallback(() => {
+    if (createdSortRef.current) {
+      const rect = createdSortRef.current.getBoundingClientRect();
+      setCreatedSortPosition({ top: rect.bottom + 4, left: rect.left });
+    }
+  }, []);
+
+  const openStatusFilter = useCallback(() => {
+    setIsCreatedSortOpen(false);
+    updateStatusFilterPosition();
+    setIsStatusFilterOpen(true);
+  }, [updateStatusFilterPosition]);
+
+  const closeStatusFilter = useCallback(() => {
+    setIsStatusFilterOpen(false);
+  }, []);
+
+  const toggleStatusFilter = useCallback(() => {
+    if (isStatusFilterOpen) {
+      closeStatusFilter();
+    } else {
+      openStatusFilter();
+    }
+  }, [isStatusFilterOpen, openStatusFilter, closeStatusFilter]);
+
+  const openCreatedSort = useCallback(() => {
+    setIsStatusFilterOpen(false);
+    updateCreatedSortPosition();
+    setIsCreatedSortOpen(true);
+  }, [updateCreatedSortPosition]);
+
+  const closeCreatedSort = useCallback(() => {
+    setIsCreatedSortOpen(false);
+  }, []);
+
+  const toggleCreatedSort = useCallback(() => {
+    if (isCreatedSortOpen) {
+      closeCreatedSort();
+    } else {
+      openCreatedSort();
+    }
+  }, [isCreatedSortOpen, openCreatedSort, closeCreatedSort]);
 
   // manage sidebar visibility
   useEffect(() => {
@@ -230,6 +282,117 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
 
   // Helper function to get metric color by index
   const getMetricColor = (idx: number) => metricColorPalette[idx % metricColorPalette.length];
+
+  const tableColumns = useMemo<HeaderColumn[]>(() => [
+    {
+      key: 'usageMetric',
+      label: 'Usage Metric',
+    },
+    {
+      key: 'productName',
+      label: 'Product Name',
+    },
+    {
+      key: 'unit',
+      label: 'Unit Of Measure',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'products-th-with-filter',
+      innerClassName: 'products-th-label-with-filter',
+      innerRef: statusFilterRef,
+      showFilterIcon: true,
+      filterButtonClassName: 'products-column-filter-trigger',
+      buttonAriaLabel: 'Filter by status',
+      isFilterActive: isStatusFilterOpen || selectedStatuses.length > 0,
+      onInnerMouseEnter: openStatusFilter,
+      onInnerMouseLeave: closeStatusFilter,
+      onFilterClick: () => {
+        updateStatusFilterPosition();
+        toggleStatusFilter();
+      },
+      renderPopover: () => (
+        isStatusFilterOpen ? (
+          <div
+            className="products-column-filter-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SimpleFilterDropdown
+              options={['active', 'draft'].map((statusKey) => ({
+                id: statusKey,
+                label:
+                  statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+              }))}
+              value={selectedStatuses}
+              onChange={(next) =>
+                setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+              }
+              anchorTop={statusFilterPosition.top}
+              anchorLeft={statusFilterPosition.left}
+            />
+          </div>
+        ) : null
+      ),
+    },
+    {
+      key: 'createdOn',
+      label: 'Created On',
+      className: 'products-th-with-filter',
+      innerClassName: 'products-th-label-with-filter',
+      innerRef: createdSortRef,
+      showFilterIcon: true,
+      filterButtonClassName: 'products-column-filter-trigger',
+      buttonAriaLabel: 'Sort by created date',
+      isFilterActive: isCreatedSortOpen || createdSortOrder !== 'newest',
+      onInnerMouseEnter: openCreatedSort,
+      onInnerMouseLeave: closeCreatedSort,
+      onFilterClick: () => {
+        updateCreatedSortPosition();
+        toggleCreatedSort();
+      },
+      renderPopover: () => (
+        isCreatedSortOpen ? (
+          <div
+            className="products-column-filter-popover products-createdon-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DateSortDropdown
+              value={createdSortOrder}
+              onChange={(next) => {
+                setCreatedSortOrder(next);
+                closeCreatedSort();
+              }}
+              anchorTop={createdSortPosition.top}
+              anchorLeft={createdSortPosition.left}
+            />
+          </div>
+        ) : null
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      className: 'actions-cell',
+    },
+  ], [
+    isStatusFilterOpen,
+    selectedStatuses,
+    openStatusFilter,
+    closeStatusFilter,
+    toggleStatusFilter,
+    statusFilterPosition.top,
+    statusFilterPosition.left,
+    updateStatusFilterPosition,
+    isCreatedSortOpen,
+    createdSortOrder,
+    openCreatedSort,
+    closeCreatedSort,
+    toggleCreatedSort,
+    createdSortPosition.top,
+    createdSortPosition.left,
+    updateCreatedSortPosition,
+  ]);
 
   const filteredMetrics = metrics
     // Global text search across key fields (metric, product, unit, status), excluding date
@@ -422,172 +585,34 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
           anchorLeft={mainFilterPanelPosition.left}
         />
       )}
-      {selectedStatuses.length > 0 && (
-        <div className="products-active-filters-row">
-          <div className="products-active-filters-chips">
-            {selectedStatuses.map((s) => (
-              <FilterChip
-                key={s}
-                label={s.charAt(0).toUpperCase() + s.slice(1)}
-                onRemove={() =>
-                  setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                }
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="products-filters-reset"
-            onClick={() => {
-              setSelectedStatuses([]);
-            }}
-          >
-            Reset
-          </button>
-        </div>
-      )}
       <div className="customers-table-wrapper">
+        {selectedStatuses.length > 0 && (
+          <div className="products-active-filters-row">
+            <div className="products-active-filters-chips">
+              {selectedStatuses.map((s) => (
+                <FilterChip
+                  key={s}
+                  label={s.charAt(0).toUpperCase() + s.slice(1)}
+                  onRemove={() =>
+                    setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                  }
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="products-filters-reset"
+              onClick={() => {
+                setSelectedStatuses([]);
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        )}
         <table className="customers-table">
           <thead>
-            <tr>
-              <th>Usage Metric</th>
-              <th>Product Name</th>
-              <th>Unit Of Measure</th>
-              <th className="products-th-with-filter">
-                <div
-                  ref={statusFilterRef}
-                  className="products-th-label-with-filter"
-                  onMouseEnter={() => {
-                    // close others
-                    setIsCreatedSortOpen(false);
-
-                    if (statusFilterRef.current) {
-                      const rect = statusFilterRef.current.getBoundingClientRect();
-                      setStatusFilterPosition({
-                        top: rect.bottom + 4,
-                        left: rect.left,
-                      });
-                    }
-                    setIsStatusFilterOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    setIsStatusFilterOpen(false);
-                  }}
-                >
-                  <span>Status </span>
-                  <button
-                    type="button"
-                    className={`products-column-filter-trigger ${
-                      isStatusFilterOpen ? 'is-open' : ''
-                    }`}
-                    aria-label="Filter by status"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="11"
-                      height="8"
-                      viewBox="0 0 11 8"
-                      fill="none"
-                    >
-                      <path
-                        d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
-                        stroke="#19222D"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {isStatusFilterOpen && (
-                    <div
-                      className="products-column-filter-popover"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <SimpleFilterDropdown
-                        options={['active', 'draft'].map((statusKey) => ({
-                          id: statusKey,
-                          label:
-                            statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
-                        }))}
-                        value={selectedStatuses}
-                        onChange={(next) =>
-                          setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
-                        }
-                        anchorTop={statusFilterPosition.top}
-                        anchorLeft={statusFilterPosition.left}
-                      />
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th className="products-th-with-filter">
-                <div
-                  ref={createdSortRef}
-                  className="products-th-label-with-filter"
-                  onMouseEnter={() => {
-                    // close others
-                    setIsStatusFilterOpen(false);
-
-                    if (createdSortRef.current) {
-                      const rect = createdSortRef.current.getBoundingClientRect();
-                      setCreatedSortPosition({
-                        top: rect.bottom + 4,
-                        left: rect.left,
-                      });
-                    }
-                    setIsCreatedSortOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    setIsCreatedSortOpen(false);
-                  }}
-                >
-                  <span>Created On </span>
-                  <button
-                    type="button"
-                    className={`products-column-filter-trigger ${
-                      isCreatedSortOpen ? 'is-open' : ''
-                    }`}
-                    aria-label="Sort by created date"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                    >
-                      <path
-                        d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
-                        stroke="#25303D"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {isCreatedSortOpen && (
-                    <div
-                      className="products-column-filter-popover products-createdon-popover"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <DateSortDropdown
-                        value={createdSortOrder}
-                        onChange={(next) => {
-                          setCreatedSortOrder(next);
-                          setIsCreatedSortOpen(false);
-                        }}
-                        anchorTop={createdSortPosition.top}
-                        anchorLeft={createdSortPosition.left}
-                      />
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th className="actions-cell">Actions</th>
-
-            </tr>
+            <TableHeaderRow columns={tableColumns} />
           </thead>
           <tbody>
             {isLoading && metrics.length === 0 ? (
@@ -617,8 +642,25 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
               </tr>
             ) : filteredMetrics.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
-                  No results found. Try adjusting your search or filters.
+                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                  <div className="products-empty-state">
+                    <img src={NoFileSvg} alt="No results" style={{ width: 170, height: 170 }} />
+                    <p className="products-empty-text" style={{ marginTop: 16 }}>
+                      {searchQuery.trim() ? (
+                        <>
+                          We couldn't find any results for "{searchQuery}"
+                          <br />
+                          Nothing wrong, just adjust your search a bit.
+                        </>
+                      ) : (
+                        <>
+                          Oops! No matches found with these filters.
+                          <br />
+                          Nothing wrong here, just adjust your filters a bit.
+                        </>
+                      )}
+                    </p>
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -697,17 +739,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         </table>
       </div>
 
-      {/* Delete confirmation modal */}
       {showDeleteModal && (
         <ConfirmDeleteModal
           isOpen={showDeleteModal}
           productName={deleteMetricName}
           onConfirm={confirmDelete}
-          onCancel={() => { setShowDeleteModal(false); setDeleteMetricId(null); }}
+          onCancel={() => setShowDeleteModal(false)}
         />
       )}
-
-
     </div>
   );
 };

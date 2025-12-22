@@ -27,6 +27,7 @@ import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 
 // Empty cart SVG icon (file URL)
 import purchaseSvg from './purchase.svg';
+import NoFileSvg from '../componenetsss/nofile.svg';
 
 // ---- helpers (mirror Customers.tsx / RatePlans.tsx) ----
 const initialsFrom = (name?: string) =>
@@ -567,60 +568,59 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
             />
           )}
 
-          {(selectedStatuses.length > 0 || selectedPaymentTypes.length > 0 || selectedRatePlanIds.length > 0) && (
-            <div className="products-active-filters-row">
-              <div className="products-active-filters-chips">
+          <div className="customers-table-wrapper">
+            {(selectedStatuses.length > 0 || selectedPaymentTypes.length > 0 || selectedRatePlanIds.length > 0) && (
+              <div className="products-active-filters-row">
+                <div className="products-active-filters-chips">
 
-                {selectedStatuses.map((s) => (
-                  <FilterChip
-                    key={s}
-                    label={s.charAt(0).toUpperCase() + s.slice(1)}
-                    onRemove={() =>
-                      setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                    }
-                  />
-                ))}
-
-                {selectedPaymentTypes.map((pt) => (
-                  <FilterChip
-                    key={pt}
-                    label={pt.charAt(0).toUpperCase() + pt.slice(1)}
-                    onRemove={() =>
-                      setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
-                    }
-                  />
-                ))}
-
-                {selectedRatePlanIds.map((id) => {
-                  const numericId = Number(id);
-                  const rp = ratePlanMap.get(numericId);
-                  const label = rp?.ratePlanName || `Plan ${numericId}`;
-                  return (
+                  {selectedStatuses.map((s) => (
                     <FilterChip
-                      key={numericId}
-                      label={label}
+                      key={s}
+                      label={s.charAt(0).toUpperCase() + s.slice(1)}
                       onRemove={() =>
-                        setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                        setSelectedStatuses((prev) => prev.filter((x) => x !== s))
                       }
                     />
-                  );
-                })}
-              </div>
-              <button
-                type="button"
-                className="products-filters-reset"
-                onClick={() => {
-                  setSelectedStatuses([]);
-                  setSelectedPaymentTypes([]);
-                  setSelectedRatePlanIds([]);
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          )}
+                  ))}
 
-          <div className="customers-table-wrapper">
+                  {selectedPaymentTypes.map((pt) => (
+                    <FilterChip
+                      key={pt}
+                      label={pt.charAt(0).toUpperCase() + pt.slice(1)}
+                      onRemove={() =>
+                        setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
+                      }
+                    />
+                  ))}
+
+                  {selectedRatePlanIds.map((id) => {
+                    const numericId = Number(id);
+                    const rp = ratePlanMap.get(numericId);
+                    const label = rp?.ratePlanName || `Plan ${numericId}`;
+                    return (
+                      <FilterChip
+                        key={numericId}
+                        label={label}
+                        onRemove={() =>
+                          setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                        }
+                      />
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  className="products-filters-reset"
+                  onClick={() => {
+                    setSelectedStatuses([]);
+                    setSelectedPaymentTypes([]);
+                    setSelectedRatePlanIds([]);
+                  }}
+                >
+                  Reset
+                </button>
+              </div>
+            )}
             <table className="customers-table">
               <thead>
                 <tr>
@@ -922,8 +922,25 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                 ) : subscriptions.length > 0 ? (
                   filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
-                        No results found. Try adjusting your search or filters.
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                        <div className="products-empty-state">
+                          <img src={NoFileSvg} alt="No results" style={{ width: 170, height: 170 }} />
+                          <p className="products-empty-text" style={{ marginTop: 16 }}>
+                            {searchQuery.trim() ? (
+                              <>
+                                We couldn't find any results for "{searchQuery}"
+                                <br />
+                                Nothing wrong, just adjust your search a bit.
+                              </>
+                            ) : (
+                              <>
+                                Oops! No matches found with these filters.
+                                <br />
+                                Nothing wrong here, just adjust your filters a bit.
+                              </>
+                            )}
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   ) : (

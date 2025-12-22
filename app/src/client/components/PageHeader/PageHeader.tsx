@@ -98,9 +98,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {/* Divider AFTER Filter (left side) */}
         {showDivider && onFilterClick && showPrimary && (
           <div className="header-divider" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
-              <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
-            </svg>
+           <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
+  <path d="M0.5 0.5V12.5" stroke="#D9DFE8" stroke-linecap="round"/>
+</svg>
           </div>
         )}
 
@@ -130,9 +130,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {/* Divider AFTER the New button (right side) */}
         {showDivider && (
           <div className="header-divider" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="34" viewBox="0 0 2 34" fill="none">
-              <path d="M1 0.5V33.5" stroke="#E9E9EE" strokeLinecap="round"/>
-            </svg>
+           <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
+  <path d="M0.5 0.5V12.5" stroke="#D9DFE8" stroke-linecap="round"/>
+</svg>
           </div>
         )}
 
