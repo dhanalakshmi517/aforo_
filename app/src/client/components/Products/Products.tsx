@@ -32,6 +32,8 @@ import FilterChip from '../componenetsss/FilterChip';
 import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
+import Header from '../componenetsss/Header';
+import ResetButton from '../componenetsss/ResetButton';
 
 const getRandomBackgroundColor = (index: number) => {
   const colors = ['#F0F9FF', '#F0FDF4', '#F5F3FF', '#FFFBEB', '#FEF2F2'];
@@ -43,8 +45,8 @@ const getRandomBorderColor = (index: number) => {
   return colors[index % colors.length];
 };
 
-import Header from '../componenetsss/Header';
 import EmptyBox from './Componenets/empty.svg';
+import NoFileSvg from '../componenetsss/nofile.svg';
 import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import TertiaryButton from '../componenetsss/TertiaryButton';
@@ -675,7 +677,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             position: 'absolute',
             left: '40%',
             top: '50%',
-            transform: 'translate(-50%, -50%) translate(9px, 6px)',
+            transform: 'translate(-49%, -50%) translate(9px, 6px)',
             width: 34,
             height: 34,
             display: 'flex',
@@ -699,92 +701,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
             <path d={iconData.svgPath} fill="#FFFFFF" />
           </svg>
         </div>
-      </div>
-    );
-  };
-
-  const InfoIcon = () => {
-    const [showTooltip, setShowTooltip] = useState(false);
-    const tooltipRef = React.useRef<HTMLDivElement>(null);
-
-    // Close tooltip when clicking outside
-    React.useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
-          setShowTooltip(false);
-        }
-      };
-
-      if (showTooltip) {
-        document.addEventListener('mousedown', handleClickOutside);
-      }
-
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, [showTooltip]);
-
-    return (
-      <div style={{ position: 'relative', display: 'inline-block', marginLeft: 4 }} ref={tooltipRef}>
-        <span
-          className="info-icon-tooltip"
-          onClick={() => setShowTooltip(!showTooltip)}
-          style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <g clipPath="url(#clip0_6157_14454)">
-              <path
-                d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z"
-                stroke="#98959A"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_6157_14454">
-                <rect width="12" height="12" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-        </span>
-
-        {showTooltip && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              marginTop: 8,
-              padding: '8px 12px',
-              backgroundColor: '#333',
-              color: 'white',
-              borderRadius: 6,
-              fontSize: 12,
-              whiteSpace: 'nowrap',
-              zIndex: 1000,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              lineHeight: 1.4,
-              minWidth: 'max-content'
-            }}
-          >
-            The unit of usage your customers are billed on, e.g., users, storage, or API calls.
-            <div
-              style={{
-                position: 'absolute',
-                top: -4,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: 0,
-                height: 0,
-                borderLeft: '4px solid transparent',
-                borderRight: '4px solid transparent',
-                borderBottom: '4px solid #333'
-              }}
-            />
-          </div>
-        )}
       </div>
     );
   };
@@ -856,11 +772,10 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
   if (error) {
     console.warn('Products API error:', error);
-    // Show empty state instead of error to allow UI to function
     return (
       <ToastProvider>
         <div>
-          <div className="customers-container">
+          <div className="check-container">
             <Header
               title="Products"
               searchTerm=""
@@ -868,7 +783,6 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               searchDisabled={true}
               filterDisabled={true}
               showPrimary={true}
-              showKongButton={false}
               primaryLabel="+ New Product"
               onPrimaryClick={() => navigate('/get-started/products/new')}
               onFilterClick={() => { }}
@@ -926,65 +840,30 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
           )}
 
           {/* Create & Edit panes */}
-          {/* ... unchanged code omitted for brevity in this region of the UI ... */}
+          {showCreateProduct && (
+            <CreateProduct onClose={handleCreateProductCancel} />
+          )}
 
-          {/* EDIT PANE */}
-          {/* Keep your existing edit pane; only the onClose handler remains the same */}
-          {/* (not removing here to keep "full file" as requested) */}
-          {isEditFormOpen && (
-            <div className="products-form-container">
-              <EditProduct
-                productId={editingProduct?.productId.toString() || ''}
-                onIconUpdate={handleIconUpdate}
-                onClose={() => {
-                  setIsEditFormOpen(false);
-                  setEditingProduct(null);
-                  setRefreshKey(prev => prev + 1);
+          {isEditFormOpen && editingProduct && (
+            <EditProduct
+              productId={editingProduct.productId}
+              onClose={() => {
+                setIsEditFormOpen(false);
+                setEditingProduct(null);
+                fetchProducts();
+              }}
+              onIconUpdate={handleIconUpdate}
+            />
+          )}
 
-                  // Always refresh products list after edit to ensure latest data
-                  console.log('🔄 EditProduct closed, refreshing products list...');
-
-                  // Small delay to allow backend to process any pending updates
-                  setTimeout(async () => {
-                    try {
-                      // First try to get updated individual product data
-                      if (editingProduct?.productId) {
-                        console.log(`🔍 Fetching updated data for product ${editingProduct.productId}...`);
-                        const updatedProduct = await getProductById(editingProduct.productId);
-
-                        if (updatedProduct?.productIcon) {
-                          console.log(`✅ Found updated productIcon for ${editingProduct.productId}, updating local state`);
-                          setProducts(prev =>
-                            prev.map(p =>
-                              p.productId === editingProduct.productId!.toString()
-                                ? {
-                                  ...p,
-                                  productIcon: updatedProduct.productIcon,
-                                  icon: updatedProduct.icon // Also update icon URL if available
-                                }
-                                : p
-                            )
-                          );
-                        } else {
-                          console.log(`🚫 No productIcon found for ${editingProduct.productId} in individual fetch`);
-                        }
-                      }
-                    } catch (error) {
-                      console.error('Failed to fetch individual product after edit:', error);
-                    }
-
-                    // Always do a full refresh to ensure consistency
-                    console.log('🔄 Doing full products list refresh...');
-                    await fetchProducts();
-                  }, 500); // Reduced delay for better UX
-                }}
-              />
-            </div>
+          {/* Kong Integration Modal */}
+          {showKongIntegration && (
+            <KongIntegration onClose={() => setShowKongIntegration(false)} />
           )}
 
           {/* LIST TABLE (hidden when Kong integration is open) */}
           {!showCreateProduct && !isEditFormOpen && !showKongIntegration && (
-            <div className="check-product-container">
+            <div className="check-container">
               <Header
                 title="Products"
                 searchTerm={productQuery}
@@ -992,12 +871,12 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 searchDisabled={products.length === 0}
                 filterDisabled={products.length === 0}
                 showPrimary={filteredProducts.length > 0}
-                showKongButton={products.length > 0}
                 primaryLabel="+ Create Product"
                 onPrimaryClick={() => navigate('/get-started/products/new')}
                 onFilterClick={() => {
                   if (filterButtonRef.current) {
                     const rect = filterButtonRef.current.getBoundingClientRect();
+
                     const menuWidth = 240;
                     const panelWidth = 264;
                     const gap = 12;
@@ -1128,52 +1007,48 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                 />
               )}
 
-              {(selectedProductTypes.length > 0 ||
-                selectedSources.length > 0 ||
-                selectedStatuses.length > 0) && (
-                <div className="products-active-filters-row">
-                  <div className="products-active-filters-chips">
-                    {selectedProductTypes.map((t) => (
-                      <FilterChip
-                        key={t}
-                        label={productTypeNames[t as keyof typeof productTypeNames] || t}
-                        onRemove={() =>
-                          setSelectedProductTypes((prev) => prev.filter((x) => x !== t))
-                        }
-                      />
-                    ))}
-
-                    {selectedSources.map((s) => (
-                      <FilterChip
-                        key={s}
-                        label={s.charAt(0).toUpperCase() + s.slice(1)}
-                        onRemove={() =>
-                          setSelectedSources((prev) => prev.filter((x) => x !== s))
-                        }
-                      />
-                    ))}
-
-                    {selectedStatuses.map((s) => (
-                      <FilterChip
-                        key={s}
-                        label={s.charAt(0).toUpperCase() + s.slice(1)}
-                        onRemove={() =>
-                          setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                        }
-                      />
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="products-filters-reset"
-                    onClick={handleResetProductFilters}
-                  >
-                    Reset
-                  </button>
-                </div>
-              )}
-
               <div className="customers-table-wrapper">
+                {(selectedProductTypes.length > 0 ||
+                  selectedSources.length > 0 ||
+                  selectedStatuses.length > 0) && (
+                  <div className="products-active-filters-row">
+                    <div className="products-active-filters-chips">
+                      {selectedProductTypes.map((t) => (
+                        <FilterChip
+                          key={t}
+                          label={productTypeNames[t as keyof typeof productTypeNames] || t}
+                          onRemove={() =>
+                            setSelectedProductTypes((prev) => prev.filter((x) => x !== t))
+                          }
+                        />
+                      ))}
+
+                      {selectedSources.map((s) => (
+                        <FilterChip
+                          key={s}
+                          label={s.charAt(0).toUpperCase() + s.slice(1)}
+                          onRemove={() =>
+                            setSelectedSources((prev) => prev.filter((x) => x !== s))
+                          }
+                        />
+                      ))}
+
+                      {selectedStatuses.map((s) => (
+                        <FilterChip
+                          key={s}
+                          label={s.charAt(0).toUpperCase() + s.slice(1)}
+                          onRemove={() =>
+                            setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                          }
+                        />
+                      ))}
+                    </div>
+                    <ResetButton
+                      label="Reset"
+                      onClick={handleResetProductFilters}
+                    />
+                  </div>
+                )}
                 <table className="customers-table">
                   <thead>
                     <tr>
@@ -1491,8 +1366,25 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                       </tr>
                     ) : (!isLoading && products.length > 0 && filteredProducts.length === 0) ? (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
-                          No results found. Try adjusting your search or filters.
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="products-empty-state">
+                            <img src={NoFileSvg} alt="No results" style={{ width: 170, height: 170 }} />
+                            <p className="products-empty-text" style={{ marginTop: 16 }}>
+                              {productQuery.trim() ? (
+                                <>
+                                  We couldn't find any results for "{productQuery}"
+                                  <br />
+                                  Nothing wrong, just adjust your search a bit.
+                                </>
+                              ) : (
+                                <>
+                                  Oops! No matches found with these filters.
+                                  <br />
+                                  Nothing wrong here, just adjust your filters a bit.
+                                </>
+                              )}
+                            </p>
+                          </div>
                         </td>
                       </tr>
                     ) : (
@@ -1567,7 +1459,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   })()}
                                 </div>
                                 {product.internalSkuCode && (
-                                  <div className="product-sku" title={product.internalSkuCode}>
+                                  <div className="product-new-sku" title={product.internalSkuCode}>
                                     {product.internalSkuCode}
                                   </div>
                                 )}
@@ -1595,7 +1487,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
 
                         <td className="source-cell">
-                          <div className="source-badge">
+                          <div className="pro-source-badge">
                             {(() => {
                               const raw = product.source || 'MANUAL';
                               const lower = raw.toLowerCase();
@@ -1623,7 +1515,11 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                           </Tooltip>
                         </td>
 
-                        <td>{product.createdOn ?? 'N/A'}</td>
+                        <td>
+                          <span className="products-createdon" title={product.createdOn ?? 'N/A'}>
+                            {product.createdOn ?? 'N/A'}
+                          </span>
+                        </td>
 
                         <td className="actions-cell">
                           <div className="product-action-buttons">

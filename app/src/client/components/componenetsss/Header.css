@@ -1,5 +1,5 @@
 @import "../Variables/Variables.css";
-.pr-plan-header {
+.rate-plan-header {
   display: flex;
   width: 100%;
   padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 20px);
@@ -9,9 +9,10 @@
   position: relative;
   z-index: 2;
   box-sizing: border-box;
+  margin-top: -10px;
 }
 
-.pr-plan-header h2 {
+.rate-plan-header h2 {
   margin: 0;
   padding: 0;
   color: var(--text-text-darkest, #1A2126);
@@ -26,18 +27,16 @@
   margin-left: -10px;
 }
 
-
 /* Renamed to avoid conflicts with RatePlan.css */
-.pr-header-actions {
+.ph-header-actions {
   display: inline-flex;
   align-items: center;
   gap: 12px;
   flex: 0 0 auto;
-  margin-left: 8px;   /* slight nudge left so the right divider has room */
 }
 
 /* ===================== Search control ===================== */
-.pr-header-search {
+.rp-header-search {
   display: inline-flex;
   align-items: center;
   padding: 8px 12px 8px 8px;
@@ -48,84 +47,23 @@
   border: 1px solid var(--color-neutral-300);
   background: var(--color-neutral-50);
   box-sizing: border-box;
-  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
-.pr-header-search:hover { 
-  background: var(--color-neutral-100);
-   border-color: var(--color-neutral-300); 
-  }
-.pr-header-search.is-active,
-.pr-header-search:focus-within,
-.pr-header-search:active { 
-  background:#FFF;
-   border-color:#0B80C2; 
-   box-shadow:0 0 0 1px #0B80C2 inset; 
-  }
-.pr-header-search.has-value { 
-  width:180px;
-   height:36px;
-    background:#FFF;
-     border-color:#D5D4DF;
-     }
-.rp-header-search.has-value:hover { 
-  background:#FFF;
-   border-color:#D5D4DF;
-   }
-.pr-header-search.is-disabled { 
-  width:180px;
-   height:36px; 
-   background:var(--color-neutral-250);
-    border-color:#D5D4DF;
-     cursor:not-allowed; 
-     box-shadow:none;
-     }
-.pr-header-search.is-disabled:hover,
-.pr-header-search.is-disabled.is-active,
-.pr-header-search.is-disabled:focus-within 
-{
-   background:var(--color-neutral-250);
-    border-color:#D5D4DF;
-     box-shadow:none;
-     }
-.pr-header-search.is-disabled, .pr-header-search.is-disabled * { 
-  pointer-events:none !important;
- }
-.pr-header-search.is-disabled{
-  color:var(--color-neutral-150)
-}
+.rp-header-search:hover { background: var(--color-neutral-100); border-color: var(--color-neutral-300); }
+.rp-header-search.is-active,
+.rp-header-search:focus-within,
+.rp-header-search:active { background:#FFF; border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; }
+.rp-header-search.has-value { width:180px; height:36px; background:#FFF; border-color:#D5D4DF; }
+.rp-header-search.has-value:hover { background:#FFF; border-color:#D5D4DF; }
+.rp-header-search.is-disabled { width:180px; height:36px; background:var(--color-neutral-250); border-color:#D5D4DF; cursor:not-allowed; box-shadow:none; }
+.rp-header-search.is-disabled:hover,
+.rp-header-search.is-disabled.is-active,
+.rp-header-search.is-disabled:focus-within { background:var(--color-neutral-250); border-color:#D5D4DF; box-shadow:none; }
+.rp-header-search.is-disabled, .rp-header-search.is-disabled * { pointer-events:none !important; }
 
-.pr-search-icon {
-   display:inline-flex; 
-   align-items:center; 
-   justify-content:center;
-    width:20px;
-     height:20px; 
-     flex-shrink:0;
-     }
-.pr-header-search.is-disabled .pr-search-icon { 
-  color: var(--color-neutral-400);
-  }
+.rp-search-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; flex-shrink:0; }
+.rp-header-search.is-disabled .rp-search-icon { color: var(--color-neutral-400); }
 
-/* Search icon stroke colors for different states */
-.pr-search-icon svg path {
-  stroke: var(--color-neutral-600); /* default */
-}
-
-.pr-header-search:hover .pr-search-icon svg path {
-  stroke: var(--color-neutral-300); /* hover */
-}
-
-.pr-header-search.is-active .pr-search-icon svg path,
-.pr-header-search:focus-within .pr-search-icon svg path,
-.pr-header-search:active .pr-search-icon svg path {
-  stroke: var(--color-neutral-1000); /* hover */
-}
-
-.pr-header-search.is-disabled .pr-search-icon svg path {
-  stroke: var(--color-neutral-300); /* disabled */
-}
-
-.pr-search-input {
+.rp-search-input {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
@@ -145,20 +83,18 @@
   padding: 0;
   background: transparent;
 }
-.pr-search-input:focus {
+.rp-search-input:focus {
   outline: none;
   box-shadow: none;
 }
-.pr-header-search.has-value .pr-search-input { 
-  width: auto; 
-  flex: 1 0 0;   border: none;
+.rp-header-search.has-value .rp-search-input { width: auto; flex: 1 0 0;   border: none;
 }
-.pr-search-input::placeholder { color: var(--color-neutral-600); }
-.pr-header-search.is-disabled .pr-search-input,
-.pr-header-search.is-disabled .pr-search-input::placeholder { color: var(--color-neutral-300); }
+.rp-search-input::placeholder { color: var(--text-placeholder, #C3C2D0); }
+.rp-header-search.is-disabled .rp-search-input,
+.rp-header-search.is-disabled .rp-search-input::placeholder { color: var(--color-neutral-400); }
 
 /* Clear (X) */
-.pr-clear-btn {
+.rp-clear-btn {
   position: relative;
   width: 20px;
   height: 20px;
@@ -170,24 +106,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color:white;
+  color: var(--text-disabled-1, #B8BCC6);
   cursor: pointer;
   transition: color 0.2s ease;
   z-index: 2;
 }
 
-.pr-clear-btn:hover {
+.rp-clear-btn:hover {
   color: var(--text-text-darkest, #1A2126);
 }
 
 /* Ensure the search input has enough padding on the right for the clear button */
-.pr-header-search {
+.rp-header-search {
   position: relative;
   padding-right: 32px; /* Make room for the clear button */
 }
 
 /* Position the clear button absolutely within the search container */
-.pr-header-search .pr-clear-btn {
+.rp-header-search .rp-clear-btn {
   position: absolute;
   right: 8px;
   top: 50%;
@@ -196,14 +132,13 @@
 }
 
 /* Adjust input padding when there's a value to prevent text overlap */
-.pr-header-search.has-value .rp-search-input {
+.rp-header-search.has-value .rp-search-input {
   padding-right: 24px;
-    border: none;
-
+  border: none;
 }
 
 /* ================= Filter button ================= */
-.pr-filter-btn {
+.rp-filter-btn {
   display: flex;
   width: 36px;
   height: 36px;
@@ -215,20 +150,17 @@
   border: none;
   border-radius: var(--border-radius-sm, 8px);
   background: var(--surface-layer-4, #FFF);
-  border: 1px solid var(--color-neutral-400);
   color: #373B40;
   cursor: pointer;
-  box-shadow:var(--shadow-5);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
 }
-.pr-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent;   box-shadow:var(--shadow-6);
- }
-.pr-filter-btn.is-selected { border: 1px solid #004B80; background:var(--color-neutral-50); color:var(--color-primary-700);   box-shadow:var(--shadow-5);
- }
-.pr-filter-btn.is-disabled,
-.pr-filter-btn:disabled { background:var(--color-neutral-150); border:1px solid transparent; color:var(--color-neutral-300); cursor:not-allowed; box-shadow:none; pointer-events:none; }
+.rp-filter-btn:not(.is-selected):not(.is-disabled):hover { background: transparent; box-shadow: none; }
+.rp-filter-btn.is-selected { border: 1px solid #004B80; background: #E1F4FB; color: #004B80; box-shadow: none; }
+.rp-filter-btn.is-disabled,
+.rp-filter-btn:disabled { background:var(--color-neutral-250); border:1px solid transparent; color:var(--color-neutral-400); cursor:not-allowed; box-shadow:none; pointer-events:none; }
 
 /* ================= Header Divider ================= */
-.pr-header-divider {
+.header-divider {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,12 +168,12 @@
   height: 33px;
   flex-shrink: 0;
 }
-.pr-header-divider svg { width: 2px; height: 34px; stroke-width: 1px; stroke: var(--border-border-1, #E9E9EE); }
+.header-divider svg { width: 2px; height: 34px; stroke-width: 1px; stroke: var(--border-border-1, #E9E9EE); }
 
 /* ================= Settings / Notifications ================= */
-.pr-settings-btn,
-.pr-integrations-btn,
-.pr-notification-btn {
+.rp-settings-btn,
+.rp-notification-btn,
+.rp-integrations-btn {
   display: flex;
   width: 36px;
   height: 36px;
@@ -257,40 +189,37 @@
   background-clip: padding-box;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
-.pr-kong-btn {
-  display: flex;
-  width: 36px;
-  height: 36px;
-  padding: 10px;
-  justify-content: center;
+.rp-settings-icon,
+.rp-integrations-btn svg,
+.rp-notification-btn svg { width: 16px; height: 16px; }
+
+/* Primary action wrapper for NewButton */
+.ph-primary-action {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  border: none;
-  border-radius: var(--border-radius-sm, 8px);
-  background: var(--surface-layer-4, #FFF);
-  color: #373B40;
-  background-clip: padding-box;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
-  margin-right: 8px;
-  cursor: pointer;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
 }
-.pr
-.pr-settings-icon,
-.pr-integrations-btn svg,
-.pr-notification-btn svg { width: 16px; height: 16px; }
+
+/* Ensure the NewButton aligns properly */
+.ph-primary-action .newbtn {
+  margin: 0;
+  vertical-align: middle;
+}
 
 /* ================= Primary CTA ===================== */
-.pr-rate-button {
+.new-rate-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  width: 147px;
+  width: 164px;
   height: 40px;
   padding: 8px 20px;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-sm, 8px);
   border: none;
   background: var(--color-primary-750);
   color: var(--color-neutral-white);
@@ -300,23 +229,14 @@
   line-height: var(--line-height-body-md);
   cursor: pointer;
 }
+.new-rate-button:hover { filter: brightness(0.97); }
+.new-rate-button:active { 
+  background: var(--color-primary-700);
+}
+.new-rate-button svg { width: 16px; height: 16px; }
 
-
-
-.pr-rate-btn:hover:not(:disabled) {
-     background: var(--color-primary-700);
-  }
-  .pr-rate-btn:active:not(:disabled) {
-    background: var(--color-primary-900);
-  }
-  .pr-rate-btn:focus-visible {
-    outline: none;
-    border:2px solid var(--color-primary-600);
-    background: var(--color-primary-750);
-  }
-  .pr-rate-btn:disabled {
-    background: var(--color-neutral-200);
-    color: var(--color-neutral-500);
-    cursor: not-allowed;
-    box-shadow: none;
-  }
+/* Enhanced active state for PrimaryButton in PageHeader */
+.ph-header-actions .af-primary-btn:active:not(:disabled) {
+  background: var(--color-primary-900) !important;
+  
+}

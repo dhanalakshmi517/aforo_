@@ -685,8 +685,8 @@ export default function App() {
                         hidden={!showSidebar}
                       />
                       <main
-                        className="flex-1 py-6  pr-10"
-                        style={{ marginLeft: showSidebar ? '15.5rem' : '0',backgroundColor: "#FBFDFF", }}
+                        className="flex-1 py-6"
+                        style={{ marginLeft: showSidebar ? '15rem' : '0',backgroundColor: "#FBFDFF", }}
                       >
                         <Products
                           showNewProductForm={showNewProductForm}

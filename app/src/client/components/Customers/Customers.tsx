@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Customers.css";
 import "../Rateplan/RatePlan.css";
@@ -14,6 +14,7 @@ import PrimaryButton from "../componenetsss/PrimaryButton";
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import CustomersPlat from './customers-plat.svg';
+import NoFileSvg from '../componenetsss/nofile.svg';
 import { Checkbox } from '../componenetsss/Checkbox';
 import FilterChip from '../componenetsss/FilterChip';
 import FilterDropdown from '../componenetsss/FilterDropdown';
@@ -21,6 +22,7 @@ import VerticalScrollbar from '../componenetsss/VerticalScrollbar';
 import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
+import TableHeaderRow, { HeaderColumn } from '../componenetsss/TableHeaderRow';
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -149,6 +151,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -183,6 +186,84 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const filterButtonRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
   const [selectedCompanyIds, setSelectedCompanyIds] = useState<Array<number | string>>([]);
+
+  const updateCompanyFilterPosition = useCallback(() => {
+    if (companyFilterRef.current) {
+      const rect = companyFilterRef.current.getBoundingClientRect();
+      setCompanyFilterPosition({ top: rect.bottom + 4, left: rect.left });
+    }
+  }, []);
+
+  const updateCreatedSortPosition = useCallback(() => {
+    if (createdSortRef.current) {
+      const rect = createdSortRef.current.getBoundingClientRect();
+      setCreatedSortPosition({ top: rect.bottom + 4, left: rect.left });
+    }
+  }, []);
+
+  const updateStatusFilterPosition = useCallback(() => {
+    if (statusFilterRef.current) {
+      const rect = statusFilterRef.current.getBoundingClientRect();
+      setStatusFilterPosition({ top: rect.bottom + 4, left: rect.left });
+    }
+  }, []);
+
+  const openCompanyFilter = useCallback(() => {
+    setIsCreatedSortOpen(false);
+    setIsStatusFilterOpen(false);
+    updateCompanyFilterPosition();
+    setIsCompanyFilterOpen(true);
+  }, [updateCompanyFilterPosition]);
+
+  const closeCompanyFilter = useCallback(() => {
+    setIsCompanyFilterOpen(false);
+  }, []);
+
+  const toggleCompanyFilter = useCallback(() => {
+    if (isCompanyFilterOpen) {
+      closeCompanyFilter();
+    } else {
+      openCompanyFilter();
+    }
+  }, [isCompanyFilterOpen, openCompanyFilter, closeCompanyFilter]);
+
+  const openCreatedSort = useCallback(() => {
+    setIsCompanyFilterOpen(false);
+    setIsStatusFilterOpen(false);
+    updateCreatedSortPosition();
+    setIsCreatedSortOpen(true);
+  }, [updateCreatedSortPosition]);
+
+  const closeCreatedSort = useCallback(() => {
+    setIsCreatedSortOpen(false);
+  }, []);
+
+  const toggleCreatedSort = useCallback(() => {
+    if (isCreatedSortOpen) {
+      closeCreatedSort();
+    } else {
+      openCreatedSort();
+    }
+  }, [isCreatedSortOpen, openCreatedSort, closeCreatedSort]);
+
+  const openStatusFilter = useCallback(() => {
+    setIsCompanyFilterOpen(false);
+    setIsCreatedSortOpen(false);
+    updateStatusFilterPosition();
+    setIsStatusFilterOpen(true);
+  }, [updateStatusFilterPosition]);
+
+  const closeStatusFilter = useCallback(() => {
+    setIsStatusFilterOpen(false);
+  }, []);
+
+  const toggleStatusFilter = useCallback(() => {
+    if (isStatusFilterOpen) {
+      closeStatusFilter();
+    } else {
+      openStatusFilter();
+    }
+  }, [isStatusFilterOpen, openStatusFilter, closeStatusFilter]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -358,8 +439,6 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
 
   const filteredCustomers = customers.filter(c => {
     const q = searchTerm.toLowerCase();
-    if (!q) return true;
-
     const companyName = (c.companyName || '').toLowerCase();
     const customerName = (c.customerName || '').toLowerCase();
     const primaryEmail = (c.primaryEmail || '').toLowerCase();
@@ -425,6 +504,151 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     }
     return bDate - aDate;
   });
+
+  const tableColumns = useMemo<HeaderColumn[]>(() => [
+    {
+      key: 'company',
+      label: 'Company Name',
+      className: 'products-th-with-filter',
+      innerClassName: 'products-th-label-with-filter',
+      innerRef: companyFilterRef,
+      showFilterIcon: true,
+      filterButtonClassName: 'products-column-filter-trigger',
+      buttonAriaLabel: 'Filter by company name',
+      isFilterActive: isCompanyFilterOpen || selectedCompanyIds.length > 0,
+      onInnerMouseEnter: openCompanyFilter,
+      onInnerMouseLeave: closeCompanyFilter,
+      onFilterClick: () => {
+        updateCompanyFilterPosition();
+        toggleCompanyFilter();
+      },
+      renderPopover: () => (
+        isCompanyFilterOpen ? (
+          <div
+            className="products-column-filter-popover products-column-filter-popover--wide"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FilterDropdown
+              options={companyOptions}
+              value={selectedCompanyIds}
+              onChange={(next) => setSelectedCompanyIds(next)}
+              placeholder="Search Companies"
+              anchorTop={companyFilterPosition.top}
+              anchorLeft={companyFilterPosition.left}
+            />
+          </div>
+        ) : null
+      ),
+    },
+    {
+      key: 'customer',
+      label: 'Customer',
+    },
+    {
+      key: 'createdOn',
+      label: 'Created On',
+      className: 'products-th-with-filter',
+      innerClassName: 'products-th-label-with-filter',
+      innerRef: createdSortRef,
+      showFilterIcon: true,
+      filterButtonClassName: 'products-column-filter-trigger',
+      buttonAriaLabel: 'Sort by created date',
+      isFilterActive: isCreatedSortOpen || createdSortOrder !== 'newest',
+      onInnerMouseEnter: openCreatedSort,
+      onInnerMouseLeave: closeCreatedSort,
+      onFilterClick: () => {
+        updateCreatedSortPosition();
+        toggleCreatedSort();
+      },
+      renderPopover: () => (
+        isCreatedSortOpen ? (
+          <div
+            className="products-column-filter-popover products-createdon-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DateSortDropdown
+              value={createdSortOrder}
+              onChange={(next) => {
+                setCreatedSortOrder(next);
+                closeCreatedSort();
+              }}
+              anchorTop={createdSortPosition.top}
+              anchorLeft={createdSortPosition.left}
+            />
+          </div>
+        ) : null
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'products-th-with-filter',
+      innerClassName: 'products-th-label-with-filter',
+      innerRef: statusFilterRef,
+      showFilterIcon: true,
+      filterButtonClassName: 'products-column-filter-trigger',
+      buttonAriaLabel: 'Filter by status',
+      isFilterActive: isStatusFilterOpen || selectedStatuses.length > 0,
+      onInnerMouseEnter: openStatusFilter,
+      onInnerMouseLeave: closeStatusFilter,
+      onFilterClick: () => {
+        updateStatusFilterPosition();
+        toggleStatusFilter();
+      },
+      renderPopover: () => (
+        isStatusFilterOpen ? (
+          <div
+            className="products-column-filter-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SimpleFilterDropdown
+              options={['active', 'draft'].map((statusKey) => ({
+                id: statusKey,
+                label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+              }))}
+              value={selectedStatuses}
+              onChange={(next) =>
+                setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+              }
+              anchorTop={statusFilterPosition.top}
+              anchorLeft={statusFilterPosition.left}
+            />
+          </div>
+        ) : null
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      className: 'actions-cell',
+    },
+  ], [
+    isCompanyFilterOpen,
+    selectedCompanyIds,
+    openCompanyFilter,
+    closeCompanyFilter,
+    toggleCompanyFilter,
+    companyOptions,
+    companyFilterPosition.top,
+    companyFilterPosition.left,
+    updateCompanyFilterPosition,
+    isCreatedSortOpen,
+    createdSortOrder,
+    openCreatedSort,
+    closeCreatedSort,
+    toggleCreatedSort,
+    createdSortPosition.top,
+    createdSortPosition.left,
+    updateCreatedSortPosition,
+    isStatusFilterOpen,
+    selectedStatuses,
+    openStatusFilter,
+    closeStatusFilter,
+    toggleStatusFilter,
+    statusFilterPosition.top,
+    statusFilterPosition.left,
+    updateStatusFilterPosition,
+  ]);
 
   const searchDisabled = customers.length === 0 && !loading && !errorMsg;
 
@@ -555,253 +779,51 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
             />
           )}
 
-          {(selectedStatuses.length > 0 || selectedCompanyIds.length > 0) && (
-            <div className="products-active-filters-row">
-              <div className="products-active-filters-chips">
-                {selectedStatuses.map((s) => (
-                  <FilterChip
-                    key={s}
-                    label={s.charAt(0).toUpperCase() + s.slice(1)}
-                    onRemove={() =>
-                      setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                    }
-                  />
-                ))}
-                {selectedCompanyIds.map((id) => {
-                  const cust = customers.find((c) => String(c.customerId ?? c.id) === String(id));
-                  const label = cust?.companyName || `Customer ${id}`;
-                  return (
+          <div className="customers-table-wrapper" ref={tableWrapperRef}>
+            {(selectedStatuses.length > 0 || selectedCompanyIds.length > 0) && (
+              <div className="products-active-filters-row">
+                <div className="products-active-filters-chips">
+                  {selectedStatuses.map((s) => (
                     <FilterChip
-                      key={id}
-                      label={label}
+                      key={s}
+                      label={s.charAt(0).toUpperCase() + s.slice(1)}
                       onRemove={() =>
-                        setSelectedCompanyIds((prev) => prev.filter((x) => x !== id))
+                        setSelectedStatuses((prev) => prev.filter((x) => x !== s))
                       }
                     />
-                  );
-                })}
+                  ))}
+                  {selectedCompanyIds.map((id) => {
+                    const cust = customers.find((c) => String(c.customerId ?? c.id) === String(id));
+                    const label = cust?.companyName || `Customer ${id}`;
+                    return (
+                      <FilterChip
+                        key={id}
+                        label={label}
+                        onRemove={() =>
+                          setSelectedCompanyIds((prev) => prev.filter((x) => x !== id))
+                        }
+                      />
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  className="products-filters-reset"
+                  onClick={() => {
+                    setSelectedStatuses([]);
+                    setSelectedCompanyIds([]);
+                  }}
+                >
+                  Reset
+                </button>
               </div>
-              <button
-                type="button"
-                className="products-filters-reset"
-                onClick={() => {
-                  setSelectedStatuses([]);
-                  setSelectedCompanyIds([]);
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          )}
-
-          <div className="customers-table-wrapper" ref={tableWrapperRef}>
+            )}
             <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
               <div style={{ flex: 1, overflow: 'hidden' }}>
-                <table className="customers-table">
-                  <thead>
-                    <tr>
-                      <th className="products-th-with-filter">
-                        <div
-                          ref={companyFilterRef}
-                          className="products-th-label-with-filter"
-                          onMouseEnter={() => {
-                            // close others
-                            setIsCreatedSortOpen(false);
-                            setIsStatusFilterOpen(false);
-
-                            if (companyFilterRef.current) {
-                              const rect = companyFilterRef.current.getBoundingClientRect();
-                              setCompanyFilterPosition({
-                                top: rect.bottom + 4,
-                                left: rect.left,
-                              });
-                            }
-                            setIsCompanyFilterOpen(true);
-                          }}
-                          onMouseLeave={() => {
-                            setIsCompanyFilterOpen(false);
-                          }}
-                        >
-                          <span>Company Name </span>
-                          <button
-                            type="button"
-                            className={`products-column-filter-trigger ${
-                              isCompanyFilterOpen ? 'is-open' : ''
-                            }`}
-                            aria-label="Filter by company name"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="11"
-                              height="8"
-                              viewBox="0 0 11 8"
-                              fill="none"
-                            >
-                              <path
-                                d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
-                                stroke="#19222D"
-                                strokeWidth="1.2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </button>
-
-                          {isCompanyFilterOpen && (
-                            <div
-                              className="products-column-filter-popover products-column-filter-popover--wide"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <FilterDropdown
-                                options={companyOptions}
-                                value={selectedCompanyIds}
-                                onChange={(next) => setSelectedCompanyIds(next)}
-                                placeholder="Search Companies"
-                                anchorTop={companyFilterPosition.top}
-                                anchorLeft={companyFilterPosition.left}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </th>
-                      <th>Customer </th>
-                      <th className="products-th-with-filter">
-                        <div
-                          ref={createdSortRef}
-                          className="products-th-label-with-filter"
-                          onMouseEnter={() => {
-                            // close others
-                            setIsCompanyFilterOpen(false);
-                            setIsStatusFilterOpen(false);
-
-                            if (createdSortRef.current) {
-                              const rect = createdSortRef.current.getBoundingClientRect();
-                              setCreatedSortPosition({
-                                top: rect.bottom + 4,
-                                left: rect.left,
-                              });
-                            }
-                            setIsCreatedSortOpen(true);
-                          }}
-                          onMouseLeave={() => {
-                            setIsCreatedSortOpen(false);
-                          }}
-                        >
-                          <span>Created On </span>
-                          <button
-                            type="button"
-                            className={`products-column-filter-trigger ${
-                              isCreatedSortOpen ? 'is-open' : ''
-                            }`}
-                            aria-label="Sort by created date"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="12"
-                              height="12"
-                              viewBox="0 0 12 12"
-                              fill="none"
-                            >
-                              <path
-                                d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
-                                stroke="#25303D"
-                                strokeWidth="1.2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </button>
-
-                          {isCreatedSortOpen && (
-                            <div
-                              className="products-column-filter-popover products-createdon-popover"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <DateSortDropdown
-                                value={createdSortOrder}
-                                onChange={(next) => {
-                                  setCreatedSortOrder(next);
-                                  setIsCreatedSortOpen(false);
-                                }}
-                                anchorTop={createdSortPosition.top}
-                                anchorLeft={createdSortPosition.left}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </th>
-                      <th className="products-th-with-filter">
-                        <div
-                          ref={statusFilterRef}
-                          className="products-th-label-with-filter"
-                          onMouseEnter={() => {
-                            // close others
-                            setIsCompanyFilterOpen(false);
-                            setIsCreatedSortOpen(false);
-
-                            if (statusFilterRef.current) {
-                              const rect = statusFilterRef.current.getBoundingClientRect();
-                              setStatusFilterPosition({
-                                top: rect.bottom + 4,
-                                left: rect.left,
-                              });
-                            }
-                            setIsStatusFilterOpen(true);
-                          }}
-                          onMouseLeave={() => {
-                            setIsStatusFilterOpen(false);
-                          }}
-                        >
-                          <span>Status </span>
-                          <button
-                            type="button"
-                            className={`products-column-filter-trigger ${
-                              isStatusFilterOpen ? 'is-open' : ''
-                            }`}
-                            aria-label="Filter by status"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="11"
-                              height="8"
-                              viewBox="0 0 11 8"
-                              fill="none"
-                            >
-                              <path
-                                d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
-                                stroke="#19222D"
-                                strokeWidth="1.2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </button>
-
-                          {isStatusFilterOpen && (
-                            <div
-                              className="products-column-filter-popover"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <SimpleFilterDropdown
-                                options={['active', 'draft'].map((statusKey) => ({
-                                  id: statusKey,
-                                  label:
-                                    statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
-                                }))}
-                                value={selectedStatuses}
-                                onChange={(next) =>
-                                  setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
-                                }
-                                anchorTop={statusFilterPosition.top}
-                                anchorLeft={statusFilterPosition.left}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </th>
-                      <th className="actions-cell">Actions </th>
-                    </tr>
-                  </thead>
+              <table className="customers-table">
+                <thead>
+                  <TableHeaderRow columns={tableColumns} />
+                </thead>
 
                   <tbody>
                     {loading && customers.length === 0 ? (
@@ -833,8 +855,25 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                       </tr>
                     ) : (!loading && customers.length > 0 && filteredCustomers.length === 0) ? (
                       <tr>
-                        <td colSpan={5} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
-                          No results found. Try adjusting your search or filters.
+                        <td colSpan={5} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
+                          <div className="products-empty-state">
+                            <img src={NoFileSvg} alt="No results" style={{ width: 170, height: 170 }} />
+                            <p className="products-empty-text" style={{ marginTop: 16 }}>
+                              {searchQuery.trim() ? (
+                                <>
+                                  We couldn't find any results for "{searchQuery}"
+                                  <br />
+                                  Nothing wrong, just adjust your search a bit.
+                                </>
+                              ) : (
+                                <>
+                                  Oops! No matches found with these filters.
+                                  <br />
+                                  Nothing wrong here, just adjust your filters a bit.
+                                </>
+                              )}
+                            </p>
+                          </div>
                         </td>
                       </tr>
                     ) : null}
