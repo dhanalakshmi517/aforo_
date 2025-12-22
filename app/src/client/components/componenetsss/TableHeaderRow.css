@@ -1,0 +1,109 @@
+@import "../Variables/Variables.css";
+.thr-root{
+  background: var(--color-neutral-150);
+}
+
+.thr-col{
+  padding: 0;
+  position: relative;
+  text-align: left;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.thr-inner{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px;
+  box-sizing: border-box;
+  min-width: 120px;
+  width: 100%;
+  background: transparent;
+  position: relative;
+  isolation: isolate;
+  z-index: 0;
+}
+
+.thr-inner::before{
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(
+    898.65% 89.57% at 0% 50%,
+    var(--surface-layer-100, #F9FBFD) 0%,
+    var(--surface-layer-250, #E6EAEF) 39.11%,
+    var(--surface-layer-100, #F9FBFD) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: -1;
+}
+
+.thr-inner:hover::before,
+.thr-inner:focus-within::before,
+.thr-col.is-active .thr-inner::before{
+  opacity: 1;
+}
+
+.thr-root .thr-col:first-child .thr-inner{
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.thr-root .thr-col:last-child .thr-inner{
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.thr-label{
+color: var(--color-neutral-800);
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md); /* 142.857% */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* filter button hidden by default, shows on hover of that column */
+.thr-filterBtn{
+  width: 24px;
+  height: 24px;
+  border: 0;
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* when hover column -> show icon */
+.thr-inner:hover .thr-filterBtn,
+.thr-col.is-active .thr-filterBtn{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* hover state of the filter area (dark gradient like you asked) */
+.thr-inner:hover .thr-filterBtn:hover,
+.thr-col.is-active .thr-filterBtn:hover{
+  background: radial-gradient(
+    898.65% 89.57% at 0% 50%,
+    var(--surface-layer-100, #F9FBFD) 0%,
+    var(--surface-layer-250, #E6EAEF) 39.11%,
+    var(--surface-layer-100, #F9FBFD) 100%
+  );
+}
+
+
+

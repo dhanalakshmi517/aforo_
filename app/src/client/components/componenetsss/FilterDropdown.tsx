@@ -88,6 +88,11 @@ const FilterDropdown: React.FC<Props> = ({
               className={`fd-row ${checked ? "is-checked" : ""} ${
                 disabled ? "is-disabled" : ""
               }`.trim()}
+              onClick={() => {
+                if (disabled) return;
+                onChange(toggleId(value, opt.id));
+              }}
+              style={{ cursor: disabled ? "not-allowed" : "pointer" }}
             >
               <Checkbox
                 checked={checked}

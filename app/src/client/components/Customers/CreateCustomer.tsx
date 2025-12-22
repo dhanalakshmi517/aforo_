@@ -214,6 +214,25 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
 
   const gotoStep = (index: number) => setCurrentStep(index);
 
+  const handleStepClick = async (index: number) => {
+    if (index === currentStep) return;
+
+    if (index < currentStep) {
+      gotoStep(index);
+      return;
+    }
+
+    for (let i = 0; i < index; i += 1) {
+      const ok = await validateStep(i);
+      if (!ok) {
+        gotoStep(i);
+        return;
+      }
+    }
+
+    gotoStep(index);
+  };
+
   const validateStep = async (s: number): Promise<boolean> => {
     if (s === 0) {
       const n: Record<string, string> = {};
@@ -453,7 +472,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({ onClose, draftCustomer,
                         isActive ? "active" : "",
                         isCompleted ? "completed" : "",
                       ].join(" ").trim()}
-                      onClick={() => gotoStep(i)}
+                      onClick={() => { void handleStepClick(i); }}
                     >
                       <span className="cust-np-step__bullet" aria-hidden="true">
                         <span className="cust-np-step__icon">

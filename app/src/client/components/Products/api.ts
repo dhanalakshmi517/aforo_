@@ -178,7 +178,7 @@ export const createProduct = async (
     // Build clean request payload
     const requestPayload: Record<string, string> = {};
 
-    if (payload.productName?.trim()) requestPayload.productName = payload.productName.trim();
+    if (payload.productName !== undefined) requestPayload.productName = payload.productName.trim();
     if (payload.version?.trim()) requestPayload.version = payload.version.trim();
     if (payload.internalSkuCode?.trim())
       requestPayload.internalSkuCode = payload.internalSkuCode.trim();
@@ -308,9 +308,20 @@ export const updateProduct = async (
 
   const cleanPayload: Record<string, any> = {};
   Object.entries(payload).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') {
-      cleanPayload[key] = typeof value === 'string' ? value.trim() : value;
+    if (value === undefined) {
+      return;
     }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed === '' && key !== 'productName') {
+        return;
+      }
+      cleanPayload[key] = trimmed;
+      return;
+    }
+
+    cleanPayload[key] = value;
   });
 
   console.log('🔄 updateProduct payload:', payload);
