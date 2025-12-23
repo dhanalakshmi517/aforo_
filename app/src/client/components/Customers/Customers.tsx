@@ -23,6 +23,7 @@ import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 import TableHeaderRow, { HeaderColumn } from '../componenetsss/TableHeaderRow';
+import ResetButton from '../componenetsss/ResetButton';
 
 interface NotificationState { type: "success" | "error"; message: string; }
 
@@ -806,16 +807,13 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                     );
                   })}
                 </div>
-                <button
-                  type="button"
-                  className="products-filters-reset"
+                <ResetButton
+                  label="Reset"
                   onClick={() => {
                     setSelectedStatuses([]);
                     setSelectedCompanyIds([]);
                   }}
-                >
-                  Reset
-                </button>
+                />
               </div>
             )}
             <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>

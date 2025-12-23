@@ -55,7 +55,7 @@ line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
   color: var(--color-neutral-1700);
    font-size: var(--font-size-h6, 18px);
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: var(--line-height-heading-h6, 24px); 
 }
 

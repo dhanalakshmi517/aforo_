@@ -24,6 +24,7 @@ import FilterDropdown from '../componenetsss/FilterDropdown';
 import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
+import ResetButton from '../componenetsss/ResetButton';
 
 // Empty cart SVG icon (file URL)
 import purchaseSvg from './purchase.svg';
@@ -608,17 +609,14 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                     );
                   })}
                 </div>
-                <button
-                  type="button"
-                  className="products-filters-reset"
+                <ResetButton
+                  label="Reset"
                   onClick={() => {
                     setSelectedStatuses([]);
                     setSelectedPaymentTypes([]);
                     setSelectedRatePlanIds([]);
                   }}
-                >
-                  Reset
-                </button>
+                />
               </div>
             )}
             <table className="customers-table">

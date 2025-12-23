@@ -28,6 +28,7 @@ import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 import RatePlansEmptyImg from './rateplans.svg';
 import NoFileSvg from '../componenetsss/nofile.svg';
+import ResetButton from '../componenetsss/ResetButton';
 
 /* ---------------- Types ---------------- */
 export interface RatePlan {
@@ -1398,13 +1399,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
                     ))}
                   </div>
 
-                  <button
-                    type="button"
-                    className="products-filters-reset"
+                  <ResetButton
+                    label="Reset"
                     onClick={handleResetRatePlanFilters}
-                  >
-                  Reset
-                  </button>
+                  />
                 </div>
               )}
               <table className="customers-table">
