@@ -25,6 +25,8 @@ import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
 import TableHeaderRow, { HeaderColumn } from '../componenetsss/TableHeaderRow';
 
+import ResetButton from '../componenetsss/ResetButton';
+
 // Props for Metering component
 interface MeteringProps {
   showNewUsageMetricForm: boolean;
@@ -599,15 +601,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 />
               ))}
             </div>
-            <button
-              type="button"
-              className="products-filters-reset"
+            <ResetButton
+              label="Reset"
               onClick={() => {
                 setSelectedStatuses([]);
               }}
-            >
-              Reset
-            </button>
+            />
           </div>
         )}
         <table className="customers-table">
