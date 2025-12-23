@@ -512,7 +512,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   justify-content: space-between;
   gap: 12px;
   padding: 4px 16px 0 16px;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 }
 
 .products-active-filters-chips {
