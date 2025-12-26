@@ -53,7 +53,7 @@ const defaultItems: MainFilterItem[] = [
 
 const MainFilterMenu: React.FC<Props> = ({
   items = defaultItems,
-  activeKey = "productName",
+  activeKey = null,
   onSelect,
   onSelectWithRect,
   className = "",

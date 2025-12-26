@@ -24,7 +24,7 @@ import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration } from './EditProductApi';
 import { finalizeProduct, deleteProduct, updateProductIcon } from '../api';
 import { listAllProducts, getProducts } from '../api';
-import '../../componenetsss/SkeletonForm.css';
+import '../../componenetsss/EditSkeletonForm.css';
 
 interface Product {
   productId: string;
@@ -1024,8 +1024,6 @@ const EditProduct: React.FC<EditProductProps> = ({
                         </div>
                       )}
 
-                    <div className="af-skel-rule af-skel-rule--bottom" />
-
                     {/* Footer (EditSubscription classnames) */}
                     <div className="editsub-np-form-footer">
                       <div className="editsub-np-btn-group editsub-np-btn-group--back">
@@ -1043,14 +1041,20 @@ const EditProduct: React.FC<EditProductProps> = ({
                       </div>
                     </div>
                   </form>
-                </div>
-              </div>
 
-              <div className="af-skel-rule af-skel-rule--bottom" />
+                </div>
+
+              </div>
+              <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
+
             </main>
+
+
           </div>
+
         </div>
       </div>
+
 
       {/* Save draft popup */}
       <EditPopup

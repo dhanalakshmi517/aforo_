@@ -5,10 +5,10 @@
 } */
 
 .product-review-grid {
+  margin-top: 20px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px; /* Increased gap for better separation */
-  padding: 16px 0; /* Add some padding around the grid */
 }
 
 @media (min-width: 700px) {
@@ -23,7 +23,6 @@
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
-  margin: 0 0 16px 0; /* Add bottom margin for extra spacing */
 }
 
 .pr-card__header {

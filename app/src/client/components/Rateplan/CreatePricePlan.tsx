@@ -6,6 +6,7 @@ import TopBar from "../componenetsss/TopBar";
 import { useToast } from "../componenetsss/ToastProvider";
 import SaveDraft from "../componenetsss/SaveDraft";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
+import SectionHeader from "../componenetsss/SectionHeader";
 
 import {
   createRatePlan,
@@ -1165,13 +1166,13 @@ const CreatePricePlan = React.forwardRef<
 
               <div className="rate-np-main__inner">
                 <div className="rate-np-body">
+                  <div className="rate-np-section-header-fixed" style={{ display: "flex", alignItems: "center" }}>
+                    <SectionHeader title={sectionHeading.toUpperCase()} />
+                    {isLockedHere && <LockBadge />}
+                  </div>
                   <form className="rate-np-form" onSubmit={(e) => e.preventDefault()}>
                     <div className="rate-np-form-section">
                       <section>
-                        <div className="rate-np-section-header" style={{ display: "flex", alignItems: "center" }}>
-                          <h3 className="rate-np-section-title">{sectionHeading.toUpperCase()}</h3>
-                          {isLockedHere && <LockBadge />}
-                        </div>
 
                         {renderStepContent()}
                       </section>

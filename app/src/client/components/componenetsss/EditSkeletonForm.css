@@ -23,7 +23,7 @@
   }
   
   /* ---------------- Outer viewport (applies gaps) ---------------- */
-  .af-skel-viewport {
+  .edit-af-skel-viewport {
     padding: var(--af-gap-top) var(--af-gap-right) var(--af-gap-bottom)
       var(--af-gap-left);
     box-sizing: border-box;
@@ -31,7 +31,7 @@
   }
   
   /* ---------------- Card ---------------- */
-  .af-skel-card {
+  .edit-af-skel-card {
     background: var(--af-card-bg);
     border: 1px solid var(--af-card-border);
     border-radius: var(--af-radius);
@@ -43,7 +43,7 @@
   }
   
   /* Grid MUST fill card height so rail reaches bottom */
-  .af-skel-grid {
+  .edit-af-skel-grid {
     display: grid;
     grid-template-columns: var(--af-rail-w) 1fr;
     min-height: inherit;   /* inherit from .af-skel-card */
@@ -51,41 +51,41 @@
   }
   
   /* Left rail */
-  .af-skel-rail {
+  .edit-af-skel-rail {
     background: var(--af-rail-bg);
     height: 100%;
     align-self: stretch;
   }
   
   /* Main white area */
-  .af-skel-main {
+  .edit-af-skel-main {
     position: relative;
     background: #fff;
     height: 100%;
   }
   
   /* Content wrappers (sit above faint rules) */
-  .af-skel-rail__content {
+  .edit-af-skel-rail__content {
     padding: 24px 16px;
   }
   
-  .af-skel-main__content {
+  .edit-af-skel-main__content {
     position: relative;
     z-index: 1;
     padding: 24px;
   }
   
   /* Sidebar inside skeleton */
-  .af-skel-main .product-sidebar {
+  .edit-af-skel-main .product-sidebar {
     border-right: 1px solid var(--af-rule);
   }
   /* Header inside skeleton or standalone */
-  .af-skel-main .product-header {
+  .edit-af-skel-main .product-header {
     border-bottom: 1px solid var(--af-rule);
     margin-bottom: 24px;
   }
   /* Stand-alone product header */
-  .product-header {
+  .edit-product-header {
     border-bottom: 1px solid var(--af-rule);
   }
   /* Stand-alone product sidebar */
@@ -95,7 +95,7 @@
   }
 
   /* Form container inside main pane */
-  .af-skel-main .product-form-container {
+  .edit-af-skel-main .product-form-container {
     background: #fff;
     border: 1px solid rgba(0,0,0,0.08);
     border-radius: 8px;
@@ -103,17 +103,17 @@
     padding: 32px;
   }
   /* Faint horizontal rules */
-  .af-skel-rule {
+  .edit-af-skel-rule {
     position: absolute;
     left: 0;
     right: 0;
     height: 1px;
     background: var(--af-rule);
-    z-index: 0;
+    z-index: 10;
     pointer-events: none;
   }
-  .af-skel-rule--top { top: var(--af-rule-offset); color: var(--color-neutral-200); }
-  .af-skel-rule--bottom { bottom: 0; color: var(--color-neutral-200); }
+  .edit-af-skel-rule--top { top: var(--af-rule-offset); color: var(--color-neutral-200); }
+  .edit-af-skel-rule--bottom { bottom: 0; color: var(--color-neutral-200); left: 0; right: 0; }
   
   /* ---------------- Responsiveness ---------------- */
   @media (max-width: 1200px) {

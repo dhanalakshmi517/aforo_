@@ -1,0 +1,48 @@
+.af-bottom-actionbar {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: var(--af-bar-py, 16px) var(--af-bar-px, 24px);
+
+  background: #ffffff;
+
+  /* subtle “card edge” feeling like your screenshot */
+  z-index: 50;
+  margin-top: -20px;
+
+}
+
+.af-bottom-actionbar--sticky {
+  position: sticky;
+  bottom: 0;
+}
+
+.af-bottom-actionbar--fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.af-bottom-actionbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  /* keeps the bar height similar to screenshot */
+  min-height: 56px;
+    margin-top: -20px;
+
+}
+
+.af-bottom-actionbar__left,
+.af-bottom-actionbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.af-bottom-actionbar__right {
+  justify-content: flex-end;
+}

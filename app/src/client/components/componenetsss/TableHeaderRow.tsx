@@ -28,7 +28,7 @@ const FilterIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
     <path
       d="M1.5 3H10.5M3.5 6H8.5M5 9H7"
-      stroke="#19222D"
+      stroke="#000"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"

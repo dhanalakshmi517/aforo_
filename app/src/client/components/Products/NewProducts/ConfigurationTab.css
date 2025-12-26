@@ -27,7 +27,8 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 2px; /* Reduced from 8px to 2px */
+  margin-bottom: 0px; 
+  margin-top: 2px;/* Reduced from 2px to 0px */
   color: var(--color-neutral-1700);
 
   /* body/md/reg */

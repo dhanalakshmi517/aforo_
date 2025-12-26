@@ -378,6 +378,30 @@ margin-top: -2px
   padding-bottom: 10px;
 }
 
+/* Fixed section header at top (outside scrollable container) */
+.met-np-section-header-fixed {
+  position: relative;
+  background: transparent;
+  z-index: 10;
+  margin: 0 -24px 10px -24px;
+  padding: 0 24px;
+  width: calc(100% + 48px);
+  box-sizing: border-box;
+  left: -24px;
+  margin-top: -15px;
+}
+
+/* Override SectionHeader styles when used in Metering */
+.met-np-section-header-fixed .sh-root {
+  border: none;
+  border-radius: 0;
+  padding: 12px 0;
+  background: transparent;
+  width: 100%;
+  margin: 0;
+  position: static;
+}
+
 /* Section title above a full-bleed faint line */
 .met-np-section-header{
   position:sticky;

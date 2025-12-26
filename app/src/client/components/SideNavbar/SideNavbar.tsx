@@ -58,33 +58,33 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
   }, []);
 
   const tabs: Tab[] = [
-    {
-      name: 'Get Started',
-      icon: (
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="20" 
-          height="20" 
-          viewBox="0 0 20 20" 
-          fill="none"
-        >
-          <g clipPath="url(#clip0_2020_2762)">
-            <path
-              d="M6.6665 10H13.3332M13.3332 10L9.99984 13.3334M13.3332 10L9.99984 6.66669M18.3332 10C18.3332 14.6024 14.6022 18.3334 9.99984 18.3334C5.39746 18.3334 1.6665 14.6024 1.6665 10C1.6665 5.39765 5.39746 1.66669 9.99984 1.66669C14.6022 1.66669 18.3332 5.39765 18.3332 10Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_2020_2762">
-              <rect width="20" height="20" fill="white" />
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-    },
+    // {
+    //   name: 'Get Started',
+    //   icon: (
+    //     <svg 
+    //       xmlns="http://www.w3.org/2000/svg" 
+    //       width="20" 
+    //       height="20" 
+    //       viewBox="0 0 20 20" 
+    //       fill="none"
+    //     >
+    //       <g clipPath="url(#clip0_2020_2762)">
+    //         <path
+    //           d="M6.6665 10H13.3332M13.3332 10L9.99984 13.3334M13.3332 10L9.99984 6.66669M18.3332 10C18.3332 14.6024 14.6022 18.3334 9.99984 18.3334C5.39746 18.3334 1.6665 14.6024 1.6665 10C1.6665 5.39765 5.39746 1.66669 9.99984 1.66669C14.6022 1.66669 18.3332 5.39765 18.3332 10Z"
+    //           stroke="currentColor"
+    //           strokeWidth="1.5"
+    //           strokeLinecap="round"
+    //           strokeLinejoin="round"
+    //         />
+    //       </g>
+    //       <defs>
+    //         <clipPath id="clip0_2020_2762">
+    //           <rect width="20" height="20" fill="white" />
+    //         </clipPath>
+    //       </defs>
+    //     </svg>
+    //   ),
+    // },
     {
       name: 'Dashboards',
       icon: (
@@ -210,21 +210,21 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
       ),
     },
     
-    {
-      name: 'Invoices',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
-          <g clipPath="url(#clip0_2599_1489)">
-            <path d="M10.5 6.97681H6M12 9.97681H6M9.75 12.9768H6M3 2.47681V17.4768L4.5 16.7268L6 17.4768L7.5 16.7268L9 17.4768L10.5 16.7268L12 17.4768L13.5 16.7268L15 17.4768V2.47681L13.5 3.22681L12 2.47681L10.5 3.22681L9 2.47681L7.5 3.22681L6 2.47681L4.5 3.22681L3 2.47681Z" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_2599_1489">
-              <rect width="18" height="18" fill="white" transform="translate(0 0.976807)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-    },
+    // {
+    //   name: 'Invoices',
+    //   icon: (
+    //     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
+    //       <g clipPath="url(#clip0_2599_1489)">
+    //         <path d="M10.5 6.97681H6M12 9.97681H6M9.75 12.9768H6M3 2.47681V17.4768L4.5 16.7268L6 17.4768L7.5 16.7268L9 17.4768L10.5 16.7268L12 17.4768L13.5 16.7268L15 17.4768V2.47681L13.5 3.22681L12 2.47681L10.5 3.22681L9 2.47681L7.5 3.22681L6 2.47681L4.5 3.22681L3 2.47681Z" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
+    //       </g>
+    //       <defs>
+    //         <clipPath id="clip0_2599_1489">
+    //           <rect width="18" height="18" fill="white" transform="translate(0 0.976807)"/>
+    //         </clipPath>
+    //       </defs>
+    //     </svg>
+    //   ),
+    // },
     
     {
       name: 'Integrations',
@@ -242,33 +242,33 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
       ),
     },
     
-    {
-      name: 'Sales Site Builder',
-      icon: (
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="18" 
-          height="19" 
-          viewBox="0 0 18 19" 
-          fill="none"
-        >
-          <g clipPath="url(#clip0_2996_1570)">
-            <path 
-              d="M7.875 16.7266H3.75C3.35218 16.7266 2.97064 16.5685 2.68934 16.2872C2.40804 16.0059 2.25 15.6244 2.25 15.2266V4.72656C2.25 4.32874 2.40804 3.94721 2.68934 3.6659C2.97064 3.3846 3.35218 3.22656 3.75 3.22656H14.25C14.6478 3.22656 15.0294 3.3846 15.3107 3.6659C15.592 3.94721 15.75 4.32874 15.75 4.72656V8.85156M10.725 15.6766L11.475 15.3766M11.25 3.22656V8.85156M11.4 13.6516L10.725 13.4266M12.45 17.2516L12.675 16.5766M12.6 12.4516L12.3 11.7016M14.325 12.3766L14.55 11.7016M14.7 17.2516L14.4 16.5016M15.525 13.5766L16.275 13.2766M16.275 15.5266L15.6 15.3016M6.75 3.22656V16.7266M15.75 14.4766C15.75 15.7192 14.7426 16.7266 13.5 16.7266C12.2574 16.7266 11.25 15.7192 11.25 14.4766C11.25 13.2339 12.2574 12.2266 13.5 12.2266C14.7426 12.2266 15.75 13.2339 15.75 14.4766Z" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_2996_1570">
-              <rect width="18" height="19" fill="white" transform="translate(0 0.226562)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-    },
+    // {
+    //   name: 'Sales Site Builder',
+    //   icon: (
+    //     <svg 
+    //       xmlns="http://www.w3.org/2000/svg" 
+    //       width="18" 
+    //       height="19" 
+    //       viewBox="0 0 18 19" 
+    //       fill="none"
+    //     >
+    //       <g clipPath="url(#clip0_2996_1570)">
+    //         <path 
+    //           d="M7.875 16.7266H3.75C3.35218 16.7266 2.97064 16.5685 2.68934 16.2872C2.40804 16.0059 2.25 15.6244 2.25 15.2266V4.72656C2.25 4.32874 2.40804 3.94721 2.68934 3.6659C2.97064 3.3846 3.35218 3.22656 3.75 3.22656H14.25C14.6478 3.22656 15.0294 3.3846 15.3107 3.6659C15.592 3.94721 15.75 4.32874 15.75 4.72656V8.85156M10.725 15.6766L11.475 15.3766M11.25 3.22656V8.85156M11.4 13.6516L10.725 13.4266M12.45 17.2516L12.675 16.5766M12.6 12.4516L12.3 11.7016M14.325 12.3766L14.55 11.7016M14.7 17.2516L14.4 16.5016M15.525 13.5766L16.275 13.2766M16.275 15.5266L15.6 15.3016M6.75 3.22656V16.7266M15.75 14.4766C15.75 15.7192 14.7426 16.7266 13.5 16.7266C12.2574 16.7266 11.25 15.7192 11.25 14.4766C11.25 13.2339 12.2574 12.2266 13.5 12.2266C14.7426 12.2266 15.75 13.2339 15.75 14.4766Z" 
+    //           stroke="currentColor" 
+    //           strokeWidth="1.5" 
+    //           strokeLinecap="round" 
+    //           strokeLinejoin="round"
+    //         />
+    //       </g>
+    //       <defs>
+    //         <clipPath id="clip0_2996_1570">
+    //           <rect width="18" height="19" fill="white" transform="translate(0 0.226562)"/>
+    //         </clipPath>
+    //       </defs>
+    //     </svg>
+    //   ),
+    // },
     
     {
       name: 'Settings',

@@ -8,6 +8,7 @@ import { useToast } from "../componenetsss/ToastProvider";
 import SaveDraft from "../componenetsss/SaveDraft";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
+import SectionHeader from "../componenetsss/SectionHeader";
 
 import "../componenetsss/SkeletonForm.css";
 import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
@@ -504,7 +505,6 @@ export default function CreateSubscription({
     return (
       <section>
         <div className="pur-np-section-header">
-          <h3 className="pur-np-section-title">REVIEW & CONFIRM</h3>
         </div>
         <ReviewComponent title="PURCHASE DETAILS" rows={reviewRows} />
       </section>
@@ -623,6 +623,12 @@ export default function CreateSubscription({
               <div className="af-skel-rule af-skel-rule--top" />
               <div className="pur-np-main__inner">
                 <div className="pur-np-body">
+                  {activeTab === "details" && (
+                    <SectionHeader title="PURCHASE DETAILS" className="pur-np-section-header-fixed" />
+                  )}
+                  {activeTab === "review" && (
+                    <SectionHeader title="REVIEW & CONFIRM" className="pur-np-section-header-fixed" />
+                  )}
                   <form
                     className="pur-np-form"
                     onSubmit={(e) => e.preventDefault()}
@@ -630,11 +636,6 @@ export default function CreateSubscription({
                     <div className="pur-np-form-section">
                       {activeTab === "details" && (
                         <section>
-                          <div className="pur-np-section-header">
-                            <h3 className="pur-np-section-title">
-                              PURCHASE DETAILS
-                            </h3>
-                          </div>
                           {renderStep0()}
                         </section>
                       )}

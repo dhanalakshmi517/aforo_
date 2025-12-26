@@ -1,4 +1,3 @@
-editreview-create 
 
 /* 
 .pr-wrapper {
@@ -11,6 +10,8 @@ editreview-create
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
+    margin-top: -10px;
+    margin-left: -5px;
   }
   
   @media (min-width: 700px) {

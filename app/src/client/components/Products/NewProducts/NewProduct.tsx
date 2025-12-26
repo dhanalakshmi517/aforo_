@@ -13,10 +13,12 @@ import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SecondaryButton from "../../componenetsss/SecondaryButton";
 import EditButton from "../../componenetsss/EditButton";
 import DeleteButton from "../../componenetsss/DeleteButton";
+import SectionHeader from "../../componenetsss/SectionHeader";
 import { createProduct, updateProduct, updateProductIcon, finalizeProduct, deleteProduct, ProductPayload, listAllProducts, getProducts } from "../api";
 import ProductIconPickerModal from "../ProductIconPickerModal";
 import { ProductIconData } from "../ProductIcon";
 import ProductCreatedSuccess from "../../componenetsss/ProductCreatedSuccess";
+import BottomActionBar from "../../componenetsss/BottomActionBar";
 
 import "./NewProduct.css";
 import "../../componenetsss/SkeletonForm.css";
@@ -879,16 +881,27 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                 {/* MAIN area */}
                 <main className="prod-np-main">
                   {/* faint separators behind content */}
-                  <div className="af-skel-rule af-skel-rule--top" />
+                                    <div className="af-skel-rule af-skel-rule--top" />
+
+
                   <div className="prod-np-main__inner">
                     <div className="prod-np-body">
+                      {activeTab === "general" && (
+                        <SectionHeader title="GENERAL DETAILS" className="prod-np-section-header-fixed" />
+                      )}
+                      {activeTab === "configuration" && (
+                        <div className="prod-np-section-header-fixed" style={{ display: 'flex', alignItems: 'center' }}>
+                          <SectionHeader title="CONFIGURATION" />
+                          {isConfigurationLocked && <LockBadge />}
+                        </div>
+                      )}
+                      {activeTab === "review" && createdProductId && configuration.productType && (
+                        <SectionHeader title="REVIEW & CONFIRM" className="prod-np-section-header-fixed" />
+                      )}
                       <form className="prod-np-form" onSubmit={(e) => e.preventDefault()}>
                         <div className="prod-np-form-section">
                           {activeTab === "general" && (
                             <section>
-                              <div className="prod-np-section-header">
-                                <h3 className="prod-np-section-title">GENERAL DETAILS</h3>
-                              </div>
 
                               <div className="prod-np-grid ">
                                 <InputField
@@ -1059,14 +1072,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                           {activeTab === "configuration" && (
                             <section>
-                              <div className="prod-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
-                                <h3 className="prod-np-section-title">CONFIGURATION</h3>
-                                {isConfigurationLocked && <LockBadge />}
-                                {createdProductId && (
-                                  <div className="text-sm text-gray-500 mt-1">
-                                  </div>
-                                )}
-                              </div>
                               <ConfigurationTab
                                 onConfigChange={(c) => setConfiguration((prev) => ({ ...prev, ...c }))}
                                 onProductTypeChange={(t) => setConfiguration({ productType: t })}
@@ -1092,9 +1097,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                           {activeTab === "review" && createdProductId && configuration.productType ? (
                             <section>
-                              <div className="prod-np-section-header">
-                                <h3 className="prod-np-section-title">REVIEW & CONFIRM</h3>
-                              </div>
                               <ProductReview generalDetails={formData} configuration={configuration} />
                               {/* Hidden ConfigurationTab to keep ref alive */}
                               <div style={{ display: 'none' }}>
@@ -1125,7 +1127,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                         </div>
 
                         {/* Footer actions on a line */}
-                        <div className="prod-np-form-footer" style={{ position: 'relative' }}>
+                        <div className="prod-np-form-footer" style={{ position: 'relative',marginTop:"-40px" }}>
                           {activeTab === "general" && (
                             <>
                               {errors.form && (

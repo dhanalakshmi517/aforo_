@@ -2,7 +2,6 @@
 @import "../Variables/Variables.css";
 .review-container {
   width: 600px;
-  margin: 20px auto;
   font-family: 'Segoe UI', sans-serif;
   color: #333;
   background-color: var(--color-neutral-white);

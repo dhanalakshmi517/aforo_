@@ -97,7 +97,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const statusFilterRef = React.useRef<HTMLDivElement | null>(null);
-  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest' | null>(null);
   const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
   const createdSortRef = React.useRef<HTMLDivElement | null>(null);
   const [productTypeFilterPosition, setProductTypeFilterPosition] = useState({ top: 0, left: 0 });
@@ -106,7 +106,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [createdSortPosition, setCreatedSortPosition] = useState({ top: 0, left: 0 });
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
   const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
-  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('productType');
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(null);
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
   const filterButtonRef = React.useRef<HTMLButtonElement | null>(null);
@@ -475,13 +475,17 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
       if (createdSortOrder === 'oldest') {
         return aDate - bDate; // oldest first
       }
-      // default: newest first
-      return bDate - aDate;
+      if (createdSortOrder === 'newest') {
+        return bDate - aDate; // newest first
+      }
+      // default: no sorting when null
+      return 0;
     });
 
   const [showCreateProduct, setShowCreateProduct] = useState(showNewProductForm);
   const { showToast } = useToast();
 
+// ...
   const handleResetProductFilters = () => {
     setSelectedProductTypes([]);
     setSelectedSources([]);
@@ -1360,6 +1364,14 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               <PrimaryButton onClick={() => navigate('/get-started/products/new')}>
                                 + Create Product
                               </PrimaryButton>
+                              <TertiaryButton onClick={() => navigate('/get-started/products/import')}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                                    <path d="M5.83333 13.8333V3.83333C5.83333 3.65652 5.7631 3.48695 5.63807 3.36193C5.51305 3.2369 5.34348 3.16667 5.16667 3.16667H1.83333C1.47971 3.16667 1.14057 3.30714 0.890524 3.55719C0.640476 3.80724 0.5 4.14638 0.5 4.5V12.5C0.5 12.8536 0.640476 13.1928 0.890524 13.4428C1.14057 13.6929 1.47971 13.8333 1.83333 13.8333H9.83333C10.187 13.8333 10.5261 13.6929 10.7761 13.4428C11.0262 13.1928 11.1667 12.8536 11.1667 12.5V9.16667C11.1667 8.98986 11.0964 8.82029 10.9714 8.69526C10.8464 8.57024 10.6768 8.5 10.5 8.5H0.5M9.16667 0.5H13.1667C13.5349 0.5 13.8333 0.798477 13.8333 1.16667V5.16667C13.8333 5.53486 13.5349 5.83333 13.1667 5.83333H9.16667C8.79848 5.83333 8.5 5.53486 8.5 5.16667V1.16667C8.5 0.798477 8.79848 0.5 9.16667 0.5Z" stroke="#034A7D" stroke-linecap="round" stroke-linejoin="round"/>
+                                  </svg>
+                                  Import Products
+                                </span>
+                              </TertiaryButton>
                             </div>
                           </div>
                         </td>
@@ -1487,13 +1499,20 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         </td>
 
                         <td className="source-cell">
-                          <div className="pro-source-badge">
-                            {(() => {
-                              const raw = product.source || 'MANUAL';
-                              const lower = raw.toLowerCase();
-                              return lower.charAt(0).toUpperCase() + lower.slice(1);
-                            })()}
-                          </div>
+                          {(() => {
+                            const raw = product.source || 'MANUAL';
+                            const lower = raw.toLowerCase();
+                            const isManual = lower === 'manual';
+                            const displayText = lower.charAt(0).toUpperCase() + lower.slice(1);
+                            
+                            return (
+                              <div 
+                                className={`pro-source-badge ${isManual ? 'pro-source-badge--manual' : `pro-source-badge--${lower}`}`}
+                              >
+                                {displayText}
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         <td>

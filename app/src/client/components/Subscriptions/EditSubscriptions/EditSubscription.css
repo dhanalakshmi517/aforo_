@@ -21,6 +21,7 @@ html, body, #root{
   min-height: 100vh; 
   background: #f7f8fb;
   /* padding-bottom: 40px;  */
+  overflow-y: hidden;
 }
 
 /* Viewport fills screen */
@@ -274,7 +275,6 @@ html, body, #root{
 .editsub-np-main__inner {
   position: relative;
   z-index: 1;
-  padding: 24px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -395,7 +395,6 @@ text-transform: uppercase;
 /* Footer actions on a full-bleed line */
 .editsub-np-form-footer {
   position: relative;
-  margin: 0 -24px;
   padding: 16px 24px;
   display: flex;
   justify-content: space-between; /* Space between back and next buttons */

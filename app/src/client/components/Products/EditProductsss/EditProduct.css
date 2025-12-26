@@ -17,6 +17,7 @@ html, body, #root {
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
+  overflow: hidden;
 }
 
 /* Viewport */
@@ -78,6 +79,7 @@ html, body, #root {
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
 }
+
 
 /* Step */
 .editprod-np-step {
@@ -160,7 +162,6 @@ color: var(--color-primary-800);
 }
 
 .editprod-np-main__inner {
-  padding: 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -179,7 +180,12 @@ color: var(--color-primary-800);
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: hidden;          /* let inner section scroll instead */
+  overflow: hidden;  
+}
+hr {
+  border: none;
+  height: 1px;
+  background: #d81010;
 }
 
 /* Scrollbars */
@@ -193,7 +199,9 @@ color: var(--color-primary-800);
   overflow-y: auto;          /* only this area scrolls */
   padding-bottom: 0;
   padding-right: 12px;       /* space for custom scrollbar */
-  scrollbar-width: none;     /* Firefox */
+  scrollbar-width: none;   
+    padding:20px;        /* let inner section scroll instead */
+  /* Firefox */
 }
 .editprod-np-form-section::-webkit-scrollbar { width: 0px; }
 .editprod-np-form-section::-webkit-scrollbar-track { background: transparent; }

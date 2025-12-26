@@ -19,7 +19,7 @@
 
 .fd-search{
   height: 36px;
-  border-radius: 10px;
+  border-radius:var(--border-radius-sm);
   border: 1px solid #E3E7EE;
   background: var(--color-neutral-50);
   display: flex;
@@ -121,6 +121,9 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */}
   height: 16px;
   margin: 0;
   accent-color: #4F46E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fd-rowText{

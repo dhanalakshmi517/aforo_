@@ -11,6 +11,7 @@ import { useToast } from '../componenetsss/ToastProvider';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import SecondaryButton from '../componenetsss/SecondaryButton';
 import ProductCreatedSuccess from '../componenetsss/ProductCreatedSuccess';
+import SectionHeader from '../componenetsss/SectionHeader';
 
 import {
   getProducts,
@@ -648,14 +649,26 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                   <div className="af-skel-rule af-skel-rule--top" />
                   <div className="met-np-main__inner">
                     <div className="met-np-body">
+                      {activeTab === 'metric' && (
+                        <SectionHeader title="DEFINE METRIC & AGGREGATION" className="met-np-section-header-fixed" />
+                      )}
+                      {activeTab === 'conditions' && (
+                        <div className="met-np-section-header-fixed" style={{ display: 'flex', alignItems: 'center' }}>
+                          <SectionHeader title="USAGE CONDITIONS" />
+                          {isConditionsLocked && <LockBadge />}
+                        </div>
+                      )}
+                      {activeTab === 'review' && (
+                        <div className="met-np-section-header-fixed" style={{ display: 'flex', alignItems: 'center' }}>
+                          <SectionHeader title="REVIEW & CONFIRM" />
+                          {isReviewLocked && <LockBadge />}
+                        </div>
+                      )}
                       <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
                         <div className="met-np-form-section">
                           {/* STEP 1 */}
                           {activeTab === 'metric' && (
                             <section>
-                              <div className="met-np-section-header">
-                                <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
-                              </div>
 
                               <div className="met-np-grid-2">
                                 {/* fields ... (unchanged) */}
@@ -779,10 +792,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                           {/* STEP 2: CONDITIONS */}
                           {activeTab === 'conditions' && (
                             <section>
-                              <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
-                                <h3 className="met-np-section-title">USAGE CONDITIONS</h3>
-                                {isConditionsLocked && <LockBadge />}
-                              </div>
 
                               <UsageConditionForm
                                 locked={isConditionsLocked}
@@ -802,10 +811,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                           {/* STEP 3: REVIEW */}
                           {activeTab === 'review' && (
                             <section>
-                              <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
-                                <h3 className="met-np-section-title">REVIEW & CONFIRM</h3>
-                                {isReviewLocked && <LockBadge />}
-                              </div>
                               <Review
                                 metricName={metricName}
                                 productName={selectedProductName}

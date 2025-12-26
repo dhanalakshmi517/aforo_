@@ -202,6 +202,7 @@ color: var(--color-neutral-1700);
   border-spacing: 0;
   table-layout: auto; /* flexible columns */
   border: none;
+  background-color: white;
 }
 
 /* Column specific widths */

@@ -18,7 +18,9 @@ html, body, #root{
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
+  
   /* padding-bottom: 40px;  */
+  overflow: hidden;
 }
 
 /* Viewport fills screen */
@@ -337,7 +339,7 @@ margin-bottom: 2px;
   overflow-x: hidden;
   width: 100%;
   max-width: 100%;
-  padding-bottom: 15px;
+  padding-bottom: 80px;
 }
 /* custom scrollbar */
 .prod-np-form-section::-webkit-scrollbar      { width: 6px; }
@@ -354,15 +356,51 @@ margin-bottom: 2px;
 .prod-np-form-section::-webkit-scrollbar-thumb:active{ background-color:transparent; }
 .prod-np-form-section{ scrollbar-width: thin; scrollbar-color:transparent transparent; }
 
-/* Section title above a full-bleed faint line */
+/* Fixed section header at top (outside scrollable container) */
+.prod-np-section-header-fixed {
+  position: relative;
+  background: transparent;
+  z-index: 10;
+  margin: 0 -24px 10px -24px;
+  padding: 0 24px;
+  width: calc(100% + 48px);
+  box-sizing: border-box;
+  left: -24px;
+  margin-top: -15px;
+}
+
+/* Override SectionHeader styles when used in NewProduct */
+.prod-np-section-header-fixed .sh-root {
+  border: none;
+  border-radius: 0;
+  padding: 12px 0;
+  background: transparent;
+  width: 100%;
+  margin: 0;
+  position: static;
+}
+
+/* Old sticky section header (kept for backwards compatibility) */
 .prod-np-section-header{
-  position:sticky;
-  top:0;
-  background:#fff;
-  z-index:5;
-  margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
-  padding:0 24px;   
- 
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  margin: 0 -24px 18px -24px;
+  padding: 0 24px;
+  width: calc(100% + 48px);
+  box-sizing: border-box;
+  left: -24px;
+}
+
+.prod-np-section-header .sh-root {
+  border: none;
+  border-radius: 0;
+  padding: 12px 0;
+  background: transparent;
+  width: 100%;
+  margin: 0;
+  position: static;
 }
 .prod-np-section-title{
   color: var(--color-neutral-800);
@@ -376,7 +414,9 @@ text-transform: uppercase;
 .prod-np-section-header::after{
   content:"";
   position:absolute;
-  left:0; right:0; bottom:-5px;
+  left:0;
+   right:0;
+    bottom:-5px;
   height:1px;
 }
 
@@ -401,13 +441,15 @@ text-transform: uppercase;
   display: flex;
   justify-content: space-between; /* Space between back and next buttons */
   align-items: center;
- margin-top: auto;
   margin-bottom: 24px;
+  margin-top: -40px;
+
 }
 
 .prod-np-btn-group { 
   display: flex;
   gap: 12px;
+  margin-top: -10px;
 }
 
 /* Back button group - align to left */
@@ -418,11 +460,13 @@ text-transform: uppercase;
 /* Next button group - align to right */
 .prod-np-btn-group--next {
   margin-left: auto;
+  margin-top: -10px;
 }
 
 /* Ensure the next button is on the right */
 .prod-np-form-footer > .prod-np-btn-group:last-child {
   margin-left: auto;
+  margin-top: -10px;
 }
 /* Base Button Styles */
 /* Base button styles with no flash */
@@ -566,6 +610,10 @@ text-transform: uppercase;
   margin-bottom: 16px;
 }
 
+
+.prod-np-action-bar {
+  margin-top: -20px;
+}
 .prod-np-form-label {
   color: var(--color-neutral-1700);
 font-family: var(--font-family-primary);

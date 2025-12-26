@@ -15,7 +15,7 @@ html, body, #root, .app, .main-content {
 .products-container {
   /* Use full available width; add side padding for consistent spacing */
   /* top | right | bottom | left */
-  padding: 0 16px 16px 16px;
+  padding: 0 10px 16px 16px;
   width: 100%;
   min-height: 100vh;
   box-sizing: border-box;
@@ -56,13 +56,18 @@ html, body, #root, .app, .main-content {
 /* FREEZE HEADER */
 .products-table thead {
   display: table-header-group; /* Ensure proper table header display */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--color-neutral-100);
 }
 
 .products-table th {
   position: sticky !important;
   top: 0 !important;
-  z-index: 100 !important;                   /* Higher z-index to override any conflicts */
+  z-index: 101 !important;                   /* Higher z-index to override any conflicts */
   background: var(--color-neutral-100) !important;  /* Solid background to cover rows under it */
+  border-bottom: 1px solid var(--color-neutral-300) !important;
 }
 
 
@@ -117,7 +122,7 @@ html, body, #root, .app, .main-content {
   max-width: none;
   box-sizing: border-box;
   margin-left: 16px;
-  padding-right: 16px;
+  padding-right: 10px;
   background: white !important;
   box-shadow: none;
   min-height: 100vh;
@@ -477,16 +482,15 @@ line-height: var(--line-height-body-lg);
   scrollbar-width: none; /* Firefox hide scrollbar */
   width: 100%;
   margin-right: 0;
+  margin-top: -1px;
   margin-bottom: 10px; /* constant viewport gap */
   background-color:white;
   border-radius: var(--border-radius-lg);
   /* extra right padding so content doesn't touch the edge */
-  padding: 12px 20px 10px 12px;
+  padding: 12px 16px 10px 12px;
   box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
   position: relative; /* Create positioning context for sticky headers */
 }
-
-
 
 @media (max-width: 991px) {
   .products-table-wrapper {
@@ -625,25 +629,6 @@ line-height: var(--line-height-body-lg);
   font-weight: 500;
 }
 
-.products-table-wrapper {
-  flex: 1 1 auto;
-  min-height: calc(100vh - 110px);
-  /* max-height removed to let wrapper size to content */
-  overflow-y: auto; /* enable scroll inside wrapper */
-  scrollbar-width: none; /* Firefox hide scrollbar */
-  width: 100%;
-  margin-right: 0;
-  margin-bottom: 10px; /* constant viewport gap */
-  background-color:white;
-  border-radius: var(--border-radius-lg);
-  /* extra right padding so content doesn't touch the edge */
-  padding: 12px 20px 10px 12px;
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.07), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.00);
-  position: relative; /* Create positioning context for sticky headers */
-}
-
-/* ensure inner table stretches full wrapper */
-
 .products-table-wrapper:hover {
   /* show scrollbar */
   scrollbar-width: thin;
@@ -710,7 +695,7 @@ line-height: var(--line-height-body-lg);
   .product-name-text-group {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     min-width: 0; /* allow text truncation */
     max-width: 150px; /* fixed visual width for name + SKU */
   }
@@ -725,6 +710,9 @@ line-height: var(--line-height-body-lg);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+        font-size: var(--font-size-xs, 10px);
+        margin-top: -2px;
+
   }
 
   .product-icon {
@@ -751,170 +739,22 @@ line-height: var(--line-height-body-lg);
     font-size: var(--font-size-md);
     font-style: normal;
     font-weight: 500;
+    margin-top: 3px;
     line-height: var(--line-height-body-md); /* 142.857% */    flex: 1;
   }
 
-  .product-new-sku {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-   overflow: hidden;
-color: var(--color-neutral-1000);
-text-overflow: ellipsis;
-
-/* body/xs/thin */
-font-family: "IBM Plex Sans";
-font-size: var(--font-size-xs, 10px);
-font-style: normal;
-font-weight: 300;
-line-height: var(--line-height-body-xs, 16px); /* 160% */
-  }
-
-  /* Billable Metrics Card */
-  .billable-metrics {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-width: 200px;
-  }
+ 
 
   /* Source pill in Products table */
   .source-cell {
     white-space: nowrap;
   }
 
-  .pro-source-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 12px;
-    border-radius: 24px;
-    border: none;
-    background-color: var(--color-neutral-white);
-    color: var(--color-neutral-1000);
-    border: 1px solid var(--color-neutral-200);
 
-    /* body/sm/med */
-    font-family: var(--font-family-primary, "IBM Plex Sans");
-    font-size: var(--font-size-sm, 12px);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-sm, 18px);
-  }
 
-  .metrics-wrapper{display:flex;flex-direction:column;gap:8px;justify-content:flex-start;align-items:flex-start;}
-  .metric-item {
-    width:44px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 4px 12px 8px;
-    text-align: center;
-    box-sizing: border-box;
-  }
+
   
-  .metric-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    box-sizing: border-box;
-    overflow: visible;
-}
 
-.metric-name {
-    white-space: normal;
-    font-weight: 600; /* Bold weight for metric name (bottom) */
-    font-size: 10px;
-    line-height: 1.2;
-    text-align: center;
-    word-break: break-word;
-  }
-  
-  .metric-uom {
-    font-weight: 700; /* Bold weight for unit of measure (top) */
-    font-size: 11px;
-    line-height: 1;
-    white-space: nowrap;
-    text-align: center;
-    margin-bottom: 0px; /* Removed gap between lines */
-    max-width: 100%;
-    flex-shrink: 0;
-  }
-  
-  .metric-aggregation {
-    font-size: 8px;
-    color: #4B5563;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    text-transform: lowercase;
-    flex-shrink: 0;
-  }
-
-  .metric-uom {
-    position: relative;
-    top: -1px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 20px;
-    white-space: nowrap;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  /* Color variations for UOM badges */
-  .bg-blue {
-    color: #1E40AF;
-    background-color: #DBEAFE;
-  }
-  
-  .bg-green {
-    color: #065F46;
-    background-color: #D1FAE5;
-  }
-  
-  .bg-purple {
-    color: #5B21B6;
-    background-color: #EDE9FE;
-  }
-  
-  .bg-orange {
-    color: #9A3412;
-    background-color: #FFEDD5;
-  }
-  
-  .bg-pink {
-    color: #9D174D;
-    background-color: #FCE7F3;
-  }
-
-  .metric-separator {
-    color: #9CA3AF;
-    font-weight: 500;
-  }
-
-  .metric-aggregation {
-    color: #4B5563;
-    white-space: nowrap;
-    font-size: 12px;
-  }
-
-  .no-metrics {
-    color: var(--color-neutral-400);
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 36px;
-  }
   box-sizing: border-box;
   padding: 12px;
   width: 100%;
@@ -922,25 +762,92 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   table-layout: auto; /* allow columns to size based on content */
 }
 
-/* Source badge - global styles */
-.source-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: none;
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-1000);
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: var(--font-size-sm, 12px);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-sm, 18px);
+/* SKU Code Styling */
+.product-new-sku {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: var(--color-neutral-1000) !important;
+  font-family: "IBM Plex Sans" !important;
+  font-size: var(--font-size-xs, 10px) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-xs, 12px) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+/* Source Badge Styling */
+.pro-source-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 12px !important;
+  border-radius: 24px !important;
+  border: 0.7px solid var(--color-neutral-300) !important;
+  background-color: var(--color-neutral-white) !important;
+  color: var(--color-neutral-1700) !important;
+  font-family: var(--font-family-primary, "IBM Plex Sans") !important;
+  font-size: var(--font-size-sm, 12px) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+}
+
+/* Manual source - default styling */
+.pro-source-badge--manual {
+  background-color: var(--color-neutral-white) !important;
+  color: var(--color-neutral-1700) !important;
+  border: 0.7px solid var(--color-neutral-300) !important;
+}
+
+/* Kong source - gradient background */
+.pro-source-badge--kong {
+  border-image: linear-gradient(180deg, #119F6B 0%, #14997A 50%, #1F80BC 100%) !important;
+  color:var(--color-neutral-1700) !important;
+  border: none !important;
+    background: var(--color-neutral-white) !important;
+
+}
+/* Apigee source - gradient border */
+.pro-source-badge--apigee {
+  background: var(--color-neutral-white) !important;
+  color: var(--color-neutral-1700) !important;
+  border: 1px solid !important;
+  border-image: linear-gradient(180deg, #E94436 0%, #FABC06 50%, #36A854 75%, #4285F3 100%) 1 !important;
+}
+
+/* Main container for Products page */
+.check-container {
+  padding: 8px 16px 16px 16px !important;
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  background: #FBFDFF !important;
+  box-shadow: none !important;
+  min-height: calc(100% - 50px) !important;
+}
+
+@media (max-width: 991px) {
+  .check-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .check-container {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
 }
 
 .products-table tr {
   background-color: #FFFFFF;
+  position: relative;
+  z-index: 1;
 }
 
 /* Apply bottom border radius */
@@ -1060,78 +967,54 @@ line-height: var(--line-height-body-sm);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: var(--line-height-body-lg);
 }
 
 .product-type-badge--api {
-  background-color: var(--color-neutral-white);
-  border-radius: 20px;
-  padding: 4px 12px;
-  height: 24px;
-  border: 0.4px solid var(--color-neutral-500);
-  color: var(--color-neutral-1700);
+ 
+  color: var(--color-neutral-1400);
   font-family: "IBM Plex Sans";
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: 400;
   line-height: var(--line-height-body-sm);
 }
 
  
 
 .product-type-badge--sqlresult {
-  background-color: var(--color-neutral-white);
-  border-radius: 20px;
-  padding: 4px 12px;
-  height: 24px;
-  border: 0.4px solid var(--color-neutral-500);
-  color: var(--color-neutral-1700);
-  font-family: "IBM Plex Sans";
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: 400;
   line-height: var(--line-height-body-sm);
 }
 
 /* FlatFile badge */
 .product-type-badge--flatfile {
-  background-color: var(--color-neutral-white);
-  border-radius: 20px;
-  padding: 4px 12px;
-  height: 24px;
-  border: 0.4px solid var(--color-neutral-500);
-  color: var(--color-neutral-1700);
-  font-family: "IBM Plex Sans";
+ color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: 400;
   line-height: var(--line-height-body-sm);
 }
 
 /* LLM Token badge */
 .product-type-badge--llmtoken {
-  background-color: var(--color-neutral-white);
-  border-radius: 20px;
-  padding: 4px 12px;
-  height: 24px;
-  border: 0.4px solid var(--color-neutral-500);
-  color: var(--color-neutral-1700);
-  font-family: "IBM Plex Sans";
+ color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: 400;
   line-height: var(--line-height-body-sm);
 }
 
 .product-type-badge--sqlresult {
-  background-color: var(--color-neutral-white);
-  border-radius: 20px;
-  padding: 4px 12px;
-  height: 24px;
-  border: 0.4px solid var(--color-neutral-500);
-  color: var(--color-neutral-1700);
-  font-family: "IBM Plex Sans";
+
+ color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
-  font-weight: 700;
-  line-height: var(--line-height-body-sm);
-}
+  font-weight: 400;
+  line-height: var(--line-height-body-sm);}
 
 
 .products-table th {
@@ -1142,10 +1025,10 @@ line-height: var(--line-height-body-sm);
   text-align: left;
   border-radius: 0; /* remove rounded corners for seamless look */
   top: 0 !important;
-  z-index: 100 !important; /* Higher z-index for proper layering */
+  z-index: 101 !important; /* Higher z-index for proper layering */
   color: var(--color-neutral-1000);
   border: none; /* remove all borders */
-  border-bottom: none !important; /* explicitly remove bottom border */
+  border-bottom: 1px solid var(--color-neutral-300) !important;
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -1589,7 +1472,7 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
 .product-name-cell__icon {
   display: flex;
   padding: 8px;    
-  margin-left: -3px;                          /* figma */
+  margin-left: 0;                          /* removed negative margin */
   justify-content: center;
   align-items: center;
   align-self: center;
@@ -1645,7 +1528,7 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   white-space: nowrap;
   color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   font-weight: 500;
   line-height: var(--line-height-body-md);
   text-align: left;
@@ -1671,8 +1554,8 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 1.5px solid var(--color-primary-800);
+  border: 4px solid transparent;
+  border-top: 2px solid var(--color-primary-600);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
