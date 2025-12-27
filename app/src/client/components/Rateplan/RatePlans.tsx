@@ -289,7 +289,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('ratePlan');
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
-  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
 
   /* ---------- details cache ---------- */
   const [detailsById, setDetailsById] = useState<Record<number, RatePlanDetails | 'loading' | 'error'>>({});
