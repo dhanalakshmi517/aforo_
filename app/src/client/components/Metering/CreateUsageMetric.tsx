@@ -40,7 +40,7 @@ const steps = [
 
 interface CreateUsageMetricProps { onClose: () => void; draftMetricId?: number; }
 
-export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsageMetricProps): JSX.Element {
+export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsageMetricProps): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();

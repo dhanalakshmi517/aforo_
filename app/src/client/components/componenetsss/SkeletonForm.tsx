@@ -14,7 +14,7 @@ export default function SkeletonForm({
   rail,
   children,
   className = "",
-}: SkeletonFormProps): JSX.Element {
+}: SkeletonFormProps): React.JSX.Element {
   return (
     <div className="af-skel-viewport">
       <div className={["af-skel-card", className].join(" ").trim()}>

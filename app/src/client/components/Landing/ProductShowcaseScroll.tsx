@@ -355,7 +355,7 @@ export default function ProductShowcaseScroll() {
           {SLIDES.map((s, idx) => (
             <div
               key={idx}
-              ref={(el) => (slideRefs.current[idx] = el)}
+              ref={(el) => { slideRefs.current[idx] = el; }}
               data-index={idx}
               className={`ph__slide ph__slide--${idx} ${active === idx ? "is-active" : ""}`}
             >
