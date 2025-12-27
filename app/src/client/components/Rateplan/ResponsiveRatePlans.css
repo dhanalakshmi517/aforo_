@@ -1,0 +1,718 @@
+/* =========================================================
+   COMPREHENSIVE RESPONSIVE STYLES FOR ALL RATE PLANS SCREENS
+   Mobile: 320px - 640px
+   Tablet: 641px - 1024px  
+   Desktop: 1025px+
+   ========================================================= */
+
+/* =========================================================
+   MOBILE - TABLE RESPONSIVENESS (< 768px)
+   ========================================================= */
+@media (max-width: 767px) {
+  /* Make table scrollable horizontally */
+  .products-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+
+  .products-table {
+    min-width: 900px; /* Ensure table doesn't collapse */
+  }
+
+  /* Adjust column widths for mobile scroll */
+  .col-rateplan-name { width: 200px; }
+  .col-product { width: 220px; }
+  .col-payment { width: 180px; }
+  .col-created { width: 180px; }
+  .col-status { width: 80px; }
+  .col-actions { width: 80px; }
+
+  /* Smaller rate plan name chip */
+  .rp-name-chip {
+    min-width: 160px;
+    padding: 6px 20px 6px 6px;
+    height: 54px;
+  }
+
+  .rp-name-icon {
+    width: 56px;
+    height: 40px;
+  }
+
+  .rp-name-title {
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .rp-name-subtitle {
+    font-size: 9px;
+    line-height: 14px;
+  }
+
+  /* Smaller table text */
+  .products-table thead th {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .products-table tbody td {
+    font-size: 12px;
+    padding: 6px 12px;
+    height: 68px;
+  }
+
+  /* Smaller badges */
+  .bm-badge {
+    min-width: 80px;
+    height: 42px;
+    padding: 6px 8px;
+  }
+
+  .bm-badge-uom {
+    font-size: 11px;
+    line-height: 14px;
+  }
+
+  .bm-badge-sub {
+    font-size: 8px;
+    line-height: 9px;
+  }
+
+  .status-badge {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .pill {
+    height: 20px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+
+  /* Action buttons */
+  .action-buttons {
+    gap: 6px;
+  }
+
+  .action-buttons button {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* =========================================================
+   MOBILE - WIZARD RESPONSIVENESS (< 640px)
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Collapse side rail into horizontal stepper */
+  .rate-np-grid,
+  .editrate-np-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto 1fr !important;
+  }
+
+  .rate-np-rail,
+  .editrate-np-rail {
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-neutral-300) !important;
+    padding: 12px 16px !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* Horizontal stepper on mobile */
+  .rate-np-steps,
+  .editrate-np-steps {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 12px !important;
+    padding: 8px 0 !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .rate-np-steps::-webkit-scrollbar,
+  .editrate-np-steps::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rate-np-step,
+  .editrate-np-step {
+    flex-direction: column !important;
+    min-width: 80px !important;
+    max-width: 100px !important;
+    gap: 6px !important;
+    padding: 8px 6px !important;
+    min-height: auto !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .rate-np-step.active,
+  .editrate-np-step.active {
+    border-bottom-color: var(--color-primary-800) !important;
+    border-left: none !important;
+  }
+
+  .rate-np-step__connector {
+    display: none !important;
+  }
+
+  .rate-np-step__bullet,
+  .rate-np-step__icon {
+    margin: 0 !important;
+  }
+
+  .rate-np-step__text {
+    margin: 0 !important;
+    align-items: center !important;
+  }
+
+  .rate-np-step__title,
+  .editrate-np-step__title {
+    font-size: 11px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+  }
+
+  .rate-np-step__desc {
+    display: none !important;
+  }
+
+  /* Main content area - ensure scrolling works with sticky footer */
+  .rate-np-main,
+  .editrate-np-main {
+    padding-bottom: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .rate-np-main__inner,
+  .editrate-np-main__inner {
+    padding: 16px !important;
+  }
+
+  /* Form sections - add padding bottom to account for sticky footer */
+  .rate-np-form-section,
+  .editrate-np-form-section {
+    padding: 0 16px 120px !important; /* Extra padding for sticky footer */
+    margin: 0 -16px !important;
+  }
+
+  .rate-np-section-header,
+  .editrate-np-section-header {
+    margin: 4px -16px 12px -16px !important;
+    padding: 0 16px 8px !important;
+  }
+
+  .rate-np-section-title,
+  .editrate-np-section-title {
+    font-size: 12px !important;
+    line-height: 16px !important;
+  }
+
+  /* Footer buttons - STICKY AT BOTTOM */
+  .rate-np-form-footer,
+  .editrate-np-form-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding: 12px 16px !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    background: #fff !important;
+    border-top: 1px solid var(--color-neutral-300) !important;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08) !important;
+    z-index: 100 !important;
+  }
+
+  .rate-np-btn-group,
+  .editrate-np-btn-group {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .rate-np-btn-group--back,
+  .editrate-np-btn-group--back {
+    margin-right: 0 !important;
+  }
+
+  .rate-np-btn-group--next,
+  .editrate-np-btn-group--next {
+    margin-left: 0 !important;
+  }
+
+  .rate-np-btn,
+  .editrate-np-btn {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+
+  /* Card adjustments */
+  .rate-np-card,
+  .editrate-np-card {
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    height: 100vh !important;
+  }
+
+  .rate-np-viewport,
+  .editrate-np-viewport {
+    padding: 0 !important;
+    height: 100vh !important;
+  }
+}
+
+/* =========================================================
+   MOBILE - FORM INPUTS (< 640px)
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Full width inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+  }
+
+  /* Form groups */
+  .np-form-group,
+  .rate-np-form-group,
+  .editrate-np-form-group {
+    width: 100% !important;
+  }
+
+  /* Grid layouts become single column */
+  .rate-np-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Review cards */
+  .edit-review-card,
+  .review-card {
+    margin: 0 -16px 16px !important;
+    border-radius: 0 !important;
+    padding: 16px !important;
+  }
+
+  .edit-review-card h3,
+  .review-card h3 {
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .edit-review-card .row,
+  .review-card .row {
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 10px 0 !important;
+  }
+
+  .edit-review-card .row label,
+  .review-card .row label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+
+  .edit-review-card .row span,
+  .review-card .row span {
+    font-size: 13px !important;
+  }
+}
+
+/* =========================================================
+   TABLET - ADJUSTMENTS (641px - 1024px)
+   ========================================================= */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Table columns */
+  .col-rateplan-name { width: 220px; }
+  .col-product { width: 240px; }
+  .col-payment { width: 200px; }
+  .col-created { width: 200px; }
+
+  /* Wizard rail narrower */
+  .rate-np-grid,
+  .editrate-np-grid {
+    grid-template-columns: 240px 1fr !important;
+  }
+
+  .rate-np-step__title,
+  .editrate-np-step__title {
+    font-size: 13px;
+  }
+
+  .rate-np-step__desc {
+    font-size: 11px;
+  }
+
+  /* Main content padding */
+  .rate-np-main__inner,
+  .editrate-np-main__inner {
+    padding: 20px;
+  }
+
+  .rate-np-section-header,
+  .editrate-np-section-header {
+    margin: 4px -20px 16px -20px;
+    padding: 0 20px 8px;
+  }
+
+  .rate-np-form-footer,
+  .editrate-np-form-footer {
+    margin: 0 -20px;
+    padding: 14px 20px;
+  }
+}
+
+/* =========================================================
+   MOBILE - PRICING COMPONENTS (< 640px)
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Two-column layouts */
+  .flat-container,
+  .usage-container,
+  .tiered-container,
+  .volume-container,
+  .stair-container,
+  .edit-flat-container,
+  .edit-usage-container,
+  .edit-tiered-container,
+  .edit-volume-container,
+  .edit-stair-container {
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 0 !important;
+  }
+
+  /* Input sections full width */
+  .flat-input-section,
+  .usage-input-section,
+  .tiered-input-section,
+  .volume-input-section,
+  .stair-input-section,
+  .edit-flat-input-section,
+  .edit-usage-input-section,
+  .edit-tiered-input-section,
+  .edit-volume-input-section,
+  .edit-stair-input-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+    padding: 16px !important;
+  }
+
+  /* Example sections full width or hide */
+  .flat-example-section,
+  .usage-example-section,
+  .tiered-example-section,
+  .volume-example-section,
+  .stair-example-section,
+  .edit-flat-example-section,
+  .edit-usage-example-section,
+  .edit-tiered-example-section,
+  .edit-volume-example-section,
+  .edit-stair-example-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+    padding: 16px !important;
+    display: none !important; /* Hide examples on mobile to save space */
+  }
+
+  /* Tier rows */
+  .tiered-row,
+  .volume-row,
+  .stair-row,
+  .edit-tiered-row,
+  .edit-volume-row,
+  .edit-stair-row,
+  .edit-volume-stair-row,
+  .edit-stair-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    max-width: 100% !important;
+  }
+
+  /* Tier inputs */
+  .tiered-row input,
+  .volume-row input,
+  .stair-row input,
+  .edit-tiered-row input,
+  .edit-volume-row input,
+  .edit-stair-row input,
+  .edit-volume-stair-row input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Delete buttons */
+  .tiered-delete-btn,
+  .volume-delete-btn,
+  .stair-delete-btn,
+  .delete-btn {
+    align-self: flex-end !important;
+    margin-left: 0 !important;
+  }
+
+  /* Add tier buttons */
+  .add-tier-btn,
+  .tiered-add-btn,
+  .volume-add-btn,
+  .stair-add-btn {
+    width: 100% !important;
+    margin-top: 12px !important;
+  }
+}
+
+/* =========================================================
+   MOBILE - EXTRAS COMPONENT (< 640px)
+   ========================================================= */
+@media (max-width: 640px) {
+  .extras-container {
+    padding: 0 !important;
+  }
+
+  .extras-section {
+    margin-bottom: 16px !important;
+    border-radius: 8px !important;
+  }
+
+  .extras-section-header {
+    padding: 12px 16px !important;
+  }
+
+  .extras-section-title {
+    font-size: 14px !important;
+  }
+
+  .extras-section-body {
+    padding: 16px !important;
+  }
+
+  .extras-toggle {
+    gap: 8px !important;
+  }
+
+  .extras-form-group {
+    margin-bottom: 16px !important;
+  }
+
+  .extras-form-group label {
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .extras-form-group input,
+  .extras-form-group select,
+  .extras-form-group textarea {
+    width: 100% !important;
+    font-size: 14px !important;
+    padding: 10px !important;
+  }
+}
+
+/* =========================================================
+   MOBILE - PAGE HEADER (< 768px)
+   ========================================================= */
+@media (max-width: 767px) {
+  .page-header {
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+
+  .page-header-left,
+  .page-header-right {
+    width: 100% !important;
+  }
+
+  .page-header h1 {
+    font-size: 20px !important;
+    line-height: 28px !important;
+  }
+
+  .page-header-search {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .page-header-button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* =========================================================
+   TABLET - PRICING COMPONENTS (641px - 1024px)
+   ========================================================= */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Keep two-column but adjust widths */
+  .flat-input-section,
+  .usage-input-section,
+  .tiered-input-section,
+  .volume-input-section,
+  .stair-input-section,
+  .edit-flat-input-section,
+  .edit-usage-input-section,
+  .edit-tiered-input-section,
+  .edit-volume-input-section,
+  .edit-stair-input-section {
+    min-width: 320px !important;
+    max-width: 400px !important;
+  }
+
+  .flat-example-section,
+  .usage-example-section,
+  .tiered-example-section,
+  .volume-example-section,
+  .stair-example-section,
+  .edit-flat-example-section,
+  .edit-usage-example-section,
+  .edit-tiered-example-section,
+  .edit-volume-example-section,
+  .edit-stair-example-section {
+    min-width: 280px !important;
+    max-width: 360px !important;
+  }
+}
+
+/* =========================================================
+   LANDSCAPE MOBILE (< 640px height)
+   ========================================================= */
+@media (max-height: 640px) {
+  .rate-np-card,
+  .editrate-np-card {
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  .rate-np-viewport,
+  .editrate-np-viewport {
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE (< 375px)
+   ========================================================= */
+@media (max-width: 374px) {
+  .rp-name-chip {
+    min-width: 140px;
+    padding: 4px 16px 4px 4px;
+  }
+
+  .rp-name-title {
+    font-size: 12px;
+  }
+
+  .rp-name-subtitle {
+    font-size: 8px;
+  }
+
+  .products-table thead th,
+  .products-table tbody td {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .rate-np-btn,
+  .editrate-np-btn {
+    font-size: 13px !important;
+    padding: 6px 16px !important;
+    height: 36px !important;
+  }
+}
+
+/* =========================================================
+   iOS SPECIFIC FIXES
+   ========================================================= */
+@supports (-webkit-touch-callout: none) {
+  /* iOS safe area insets */
+  .rate-np-viewport,
+  .editrate-np-viewport {
+    padding-left: max(var(--np-gap-left), env(safe-area-inset-left)) !important;
+    padding-right: max(var(--np-gap-right), env(safe-area-inset-right)) !important;
+    padding-bottom: max(30px, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* iOS input zoom fix */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+
+  /* iOS smooth scrolling */
+  .rate-np-form-section,
+  .editrate-np-form-section,
+  .rate-np-steps,
+  .editrate-np-steps,
+  .products-table-wrapper {
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* =========================================================
+   ANDROID SPECIFIC FIXES
+   ========================================================= */
+@media (pointer: coarse) {
+  /* Larger touch targets on mobile */
+  button,
+  .rate-np-btn,
+  .editrate-np-btn,
+  .rate-np-step,
+  .editrate-np-step {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Better tap highlighting */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: rgba(0, 123, 255, 0.1);
+  }
+}
+
+/* =========================================================
+   PRINT STYLES (Optional but useful)
+   ========================================================= */
+@media print {
+  .rate-np-rail,
+  .editrate-np-rail,
+  .rate-np-form-footer,
+  .editrate-np-form-footer,
+  .action-buttons,
+  .page-header-button {
+    display: none !important;
+  }
+
+  .rate-np-grid,
+  .editrate-np-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .products-table {
+    page-break-inside: avoid;
+  }
+}
