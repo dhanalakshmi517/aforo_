@@ -184,7 +184,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('companyName');
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
-  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
   const navigate = useNavigate();
   const [selectedCompanyIds, setSelectedCompanyIds] = useState<Array<number | string>>([]);
 
