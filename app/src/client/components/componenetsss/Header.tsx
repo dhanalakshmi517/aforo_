@@ -22,7 +22,7 @@ export interface HeaderProps {
   showIntegrations?: boolean;
   showSearch?: boolean;
   showDivider?: boolean;
-  filterButtonRef?: React.RefObject<HTMLButtonElement>;
+  filterButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 const Header: React.FC<HeaderProps> = ({

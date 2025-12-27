@@ -216,7 +216,7 @@ export default function InsightCards() {
           <article
             className={`ic__card ${active === idx ? "is-active" : ""}`}
             key={idx}
-            ref={(el) => (cardRefs.current[idx] = el)}
+            ref={(el) => { cardRefs.current[idx] = el; }}
             data-index={idx}
             style={{ 
               ["--i" as any]: idx,

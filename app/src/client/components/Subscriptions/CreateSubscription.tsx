@@ -53,7 +53,7 @@ export default function CreateSubscription({
   onCreateSuccess,
   onRefresh,
   draftData,
-}: CreateSubscriptionProps): JSX.Element {
+}: CreateSubscriptionProps): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast, dismissToast } = useToast();

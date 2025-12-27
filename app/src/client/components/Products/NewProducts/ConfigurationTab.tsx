@@ -581,7 +581,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     }, [productType, formData, setFormData]);
 
     // Only call onConfigChange when formData actually changes
-    const prevFormDataRef = useRef<Record<string, any>>();
+    const prevFormDataRef = useRef<Record<string, any> | undefined>(undefined);
     
     useEffect(() => {
       // Skip initial render and only update if formData has actually changed

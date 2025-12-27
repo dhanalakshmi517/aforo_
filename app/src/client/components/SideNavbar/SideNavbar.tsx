@@ -14,10 +14,10 @@ interface SidebarProps {
 
 interface Tab {
   name: string;
-  icon: JSX.Element; 
+  icon: React.JSX.Element; 
 }
 
-function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: SidebarProps): JSX.Element {
+function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: SidebarProps): React.JSX.Element {
   const [hasOverflow, setHasOverflow] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [scrollbarHeight, setScrollbarHeight] = useState(0);

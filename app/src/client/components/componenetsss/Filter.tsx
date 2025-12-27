@@ -9,7 +9,7 @@ type Props = {
   onClick?: () => void;
   ariaLabel?: string;
   className?: string;
-  buttonRef?: React.RefObject<HTMLButtonElement>;
+  buttonRef?: React.RefObject<HTMLButtonElement | null>;
 };
 
 const Filter: React.FC<Props> = ({
@@ -25,7 +25,7 @@ const Filter: React.FC<Props> = ({
   return (
     <Tooltip content="Filters" position="bottom">
       <button
-        ref={buttonRef}
+        ref={buttonRef as React.LegacyRef<HTMLButtonElement>}
         type="button"
         className={`filter-btn ${isActive ? "is-active" : ""} ${
           isDisabled ? "is-disabled" : ""

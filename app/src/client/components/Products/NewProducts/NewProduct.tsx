@@ -46,7 +46,7 @@ interface NewProductProps {
   draftProduct?: DraftProduct;
 }
 
-export default function NewProduct({ onClose, draftProduct }: NewProductProps): JSX.Element {
+export default function NewProduct({ onClose, draftProduct }: NewProductProps): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
