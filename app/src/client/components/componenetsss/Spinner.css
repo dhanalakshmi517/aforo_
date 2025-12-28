@@ -1,0 +1,24 @@
+.af-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #25303d; /* matches your SVG stroke */
+}
+
+.af-spinner__svg {
+  display: block;
+  transform-origin: 50% 50%;
+  animation: af-spin-360 0.9s linear infinite;
+}
+
+@keyframes af-spin-360 {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* respects users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  .af-spinner__svg {
+    animation: none;
+  }
+}

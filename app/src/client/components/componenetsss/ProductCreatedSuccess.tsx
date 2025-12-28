@@ -56,15 +56,9 @@ const ProductCreatedSuccess: React.FC<Props> = ({
   const effectiveTitle =
     titleOverride ?? `“${productName}” Product Created ${"Successfully"}`;
 
-  const effectiveSubtitle =
-    subtitleOverride ?? "To start selling, please complete the next steps:";
+  const effectiveSubtitle = subtitleOverride ?? "";
 
-  const effectiveSteps =
-    stepsOverride ?? [
-      "• Add billable metrics to track usage.",
-      "• Create rate plans for those metrics.",
-      "• Market & sell to move the product live.",
-    ];
+  const effectiveSteps = stepsOverride ?? [];
 
   const effectivePrimaryLabel = primaryLabelOverride ?? "Go to All Products";
 
@@ -114,16 +108,19 @@ const ProductCreatedSuccess: React.FC<Props> = ({
 
         <h2 className="pcs-title">{effectiveTitle}</h2>
 
-        <p className="pcs-sub">{effectiveSubtitle}</p>
-        <ul className="pcs-steps">
-          {effectiveSteps.map((line, idx) => (
-            <li key={idx}>{line}</li>
-          ))}
-        </ul>
+        {effectiveSubtitle && <p className="pcs-sub">{effectiveSubtitle}</p>}
+        {effectiveSteps.length > 0 && (
+          <ul className="pcs-steps">
+            {effectiveSteps.map((line, idx) => (
+              <li key={idx}>{line}</li>
+            ))}
+          </ul>
+        )}
 
         <PrimaryButton
           onClick={handlePrimary}
           aria-label={effectivePrimaryLabel}
+          className="pcss-btn"
         >
           {effectivePrimaryLabel}
         </PrimaryButton>

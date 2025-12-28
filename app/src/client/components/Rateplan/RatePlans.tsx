@@ -277,7 +277,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
   const [selectedPricingModels, setSelectedPricingModels] = useState<string[]>([]);
   const [isPricingModelFilterOpen, setIsPricingModelFilterOpen] = useState(false);
   const pricingModelFilterRef = React.useRef<HTMLDivElement | null>(null);
-  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest' | null>(null);
   const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
   const createdSortRef = React.useRef<HTMLDivElement | null>(null);
   const [statusFilterPosition, setStatusFilterPosition] = useState({ top: 0, left: 0 });
@@ -407,7 +407,14 @@ const RatePlans: React.FC<RatePlansProps> = ({
     .sort((a, b) => {
       const aDate = new Date(a.createdOn || 0).getTime();
       const bDate = new Date(b.createdOn || 0).getTime();
-      return createdSortOrder === 'newest' ? bDate - aDate : aDate - bDate;
+      if (createdSortOrder === 'newest') {
+        return bDate - aDate;
+      }
+      if (createdSortOrder === 'oldest') {
+        return aDate - bDate;
+      }
+      // default: no sorting when null
+      return 0;
     });
 
   useEffect(() => {

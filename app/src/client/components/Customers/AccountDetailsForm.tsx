@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { InputField, SelectField } from '../Components/InputFields';
+import { InputField, SelectField } from '../componenetsss/Inputs';
 import { checkEmailExists } from './api';
 import { getAuthHeaders } from '../../utils/auth';
 import './AccountDetailsForm.css';
@@ -317,7 +317,6 @@ const AccountDetailsForm: React.FC<Props> = ({
           }}
           type="tel"
           inputMode="tel"
-          pattern="[+0-9]*"
         />
         {errors.phoneNumber && <span className="field-error">{errors.phoneNumber}</span>}
       </div>
@@ -328,7 +327,6 @@ const AccountDetailsForm: React.FC<Props> = ({
           value={primaryEmail}
           placeholder="e.g., johndoe@example.com"
           type="email"
-          pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
           onChange={locked ? () => {} : handlePrimaryEmailChange} // Prevent changes when locked
           onBlur={locked ? () => {} : handlePrimaryEmailBlur}
           onFocus={locked ? () => {} : handlePrimaryEmailFocus}
@@ -344,7 +342,6 @@ const AccountDetailsForm: React.FC<Props> = ({
               type="email"
               placeholder="e.g., johndoe@example.com"
               value={email}
-              pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
               onChange={locked ? () => {} : (val) => updateAdditionalEmail(idx, val)} // Prevent changes when locked
             />
           </div>
@@ -362,81 +359,60 @@ const AccountDetailsForm: React.FC<Props> = ({
       {/* Billing Address */}
       <div className="address-section">
         <h4>Billing Address</h4>
-        <div className="acc-form-group">
-          <label>Billing Address Line 1</label>
-          <input
-            type="text"
-            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
-            value={billingAddress.line1}
-            onChange={locked ? () => {} : (e) => handleBillingChange('line1', e.target.value)} // Prevent changes when locked
-            required
-            disabled={locked}
-          />
-          {errors.billingAddressLine1 && <span className="field-error">{errors.billingAddressLine1}</span>}
-        </div>
-        <div className="acc-form-group">
-          <label>Billing Address Line 2</label>
-          <input
-            type="text"
-            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
-            value={billingAddress.line2}
-            onChange={locked ? () => {} : (e) => handleBillingChange('line2', e.target.value)}
-            required
-            disabled={locked}
-          />
-          {errors.billingAddressLine2 && <span className="field-error">{errors.billingAddressLine2}</span>}
-        </div>
-        <div className="acc-form-row">
-          <div className="acc-form-group">
-            <label>City</label>
-            <input
-              type="text"
-              value={billingAddress.city}
-              onChange={locked ? () => {} : (e) => handleBillingChange('city', e.target.value)}
-              placeholder="City"
-              required
-              disabled={locked}
-            />
-            {errors.billingCity && <span className="field-error">{errors.billingCity}</span>}
-          </div>
-          <div className="acc-form-group">
-            <label>State/Province/Region</label>
-            <input
-              type="text"
-              value={billingAddress.state}
-              onChange={locked ? () => {} : (e) => handleBillingChange('state', e.target.value)}
-              placeholder="State/Province/Region"
-              required
-              disabled={locked}
-            />
-            {errors.billingState && <span className="field-error">{errors.billingState}</span>}
-          </div>
-        </div>
-        <div className="acc-form-row">
-          <div className="acc-form-group">
-            <label>ZIP/Postal Code</label>
-            <input
-              type="text"
-              value={billingAddress.zip}
-              onChange={locked ? () => {} : (e) => handleBillingChange('zip', e.target.value)}
-              placeholder="ZIP/Postal Code"
-              required
-              disabled={locked}
-            />
-            {errors.billingPostalCode && <span className="field-error">{errors.billingPostalCode}</span>}
-          </div>
-          <div className="acc-form-group acc-country">
-            <label>Country</label>
-            <SelectField
-              value={billingAddress.country}
-              required
-              placeholder="Select Country"
-              onChange={locked ? () => {} : (val) => handleBillingChange('country', val)}
-              options={countryOptions}
-            />
-            {errors.billingCountry && <span className="field-error">{errors.billingCountry}</span>}
-          </div>
-        </div>
+        <InputField
+          label="Billing Address Line 1"
+          value={billingAddress.line1}
+          placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+          onChange={locked ? () => {} : (val) => handleBillingChange('line1', val)}
+          required
+          disabled={locked}
+          error={errors.billingAddressLine1}
+        />
+        <InputField
+          label="Billing Address Line 2"
+          value={billingAddress.line2}
+          placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+          onChange={locked ? () => {} : (val) => handleBillingChange('line2', val)}
+          disabled={locked}
+          error={errors.billingAddressLine2}
+        />
+        <InputField
+          label="City"
+          value={billingAddress.city}
+          placeholder="City"
+          onChange={locked ? () => {} : (val) => handleBillingChange('city', val)}
+          required
+          disabled={locked}
+          error={errors.billingCity}
+        />
+        <InputField
+          label="State/Province/Region"
+          value={billingAddress.state}
+          placeholder="State/Province/Region"
+          onChange={locked ? () => {} : (val) => handleBillingChange('state', val)}
+          required
+          disabled={locked}
+          error={errors.billingState}
+        />
+        <InputField
+          label="ZIP/Postal Code"
+          value={billingAddress.zip}
+          placeholder="ZIP/Postal Code"
+          onChange={locked ? () => {} : (val) => handleBillingChange('zip', val)}
+          required
+          disabled={locked}
+          error={errors.billingPostalCode}
+        />
+        <SelectField
+          label="Country"
+          value={billingAddress.country}
+          placeholder="Select Country"
+          onChange={locked ? () => {} : (val) => handleBillingChange('country', val)}
+          options={countryOptions}
+          required
+          disabled={locked}
+          error={errors.billingCountry}
+        />
       </div>
 
       {/* Same as Billing Checkbox */}
@@ -450,82 +426,60 @@ const AccountDetailsForm: React.FC<Props> = ({
       {/* Customer Address */}
       <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
         <h4>Customer Address</h4>
-        <div className="acc-form-group">
-          <label>Customer Address Line 1</label>
-          <input
-            type="text"
-            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
-            value={customerAddress.line1}
-            onChange={locked ? () => {} : (e) => handleCustomerChange('line1', e.target.value)}
-            disabled={sameAsBilling || locked}
-            required
-          />
-          {errors.customerAddressLine1 && <span className="field-error">{errors.customerAddressLine1}</span>}
-        </div>
-        <div className="acc-form-group">
-          <label>Customer Address Line 2</label>
-          <input
-            type="text"
-            placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
-            value={customerAddress.line2}
-            onChange={locked ? () => {} : (e) => handleCustomerChange('line2', e.target.value)}
-            disabled={sameAsBilling || locked}
-            required
-          />
-          {errors.customerAddressLine2 && <span className="field-error">{errors.customerAddressLine2}</span>}
-        </div>
-        <div className="acc-form-row">
-          <div className="acc-form-group">
-            <label>City</label>
-            <input
-              type="text"
-              value={customerAddress.city}
-              onChange={locked ? () => {} : (e) => handleCustomerChange('city', e.target.value)}
-              placeholder="City"
-              required
-              disabled={sameAsBilling || locked}
-            />
-            {errors.customerCity && <span className="field-error">{errors.customerCity}</span>}
-          </div>
-          <div className="acc-form-group">
-            <label>State/Province/Region</label>
-            <input
-              type="text"
-              value={customerAddress.state}
-              onChange={locked ? () => {} : (e) => handleCustomerChange('state', e.target.value)}
-              placeholder="State/Province/Region"
-              required
-              disabled={sameAsBilling || locked}
-            />
-            {errors.customerState && <span className="field-error">{errors.customerState}</span>}
-          </div>
-        </div>
-        <div className="acc-form-row">
-          <div className="acc-form-group">
-            <label>ZIP/Postal Code</label>
-            <input
-              type="text"
-              value={customerAddress.zip}
-              onChange={locked ? () => {} : (e) => handleCustomerChange('zip', e.target.value)}
-              placeholder="ZIP/Postal Code"
-              required
-              disabled={sameAsBilling || locked}
-            />
-            {errors.customerPostalCode && <span className="field-error">{errors.customerPostalCode}</span>}
-          </div>
-          <div className="acc-form-group acc-country">
-            <label>Country</label>
-            <SelectField
-              value={customerAddress.country}
-              required
-              placeholder="Select Country"
-              onChange={locked ? () => {} : (val) => handleCustomerChange('country', val)}
-              options={countryOptions}
-              disabled={sameAsBilling || locked}
-            />
-            {errors.customerCountry && <span className="field-error">{errors.customerCountry}</span>}
-          </div>
-        </div>
+        <InputField
+          label="Customer Address Line 1"
+          value={customerAddress.line1}
+          placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+          onChange={locked ? () => {} : (val) => handleCustomerChange('line1', val)}
+          required
+          disabled={sameAsBilling || locked}
+          error={errors.customerAddressLine1}
+        />
+        <InputField
+          label=" Line 2"
+          value={customerAddress.line2}
+          placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
+          onChange={locked ? () => {} : (val) => handleCustomerChange('line2', val)}
+          disabled={sameAsBilling || locked}
+          error={errors.customerAddressLine2}
+        />
+        <InputField
+          label="City"
+          value={customerAddress.city}
+          placeholder="City"
+          onChange={locked ? () => {} : (val) => handleCustomerChange('city', val)}
+          required
+          disabled={sameAsBilling || locked}
+          error={errors.customerCity}
+        />
+        <InputField
+          label="State/Province/Region"
+          value={customerAddress.state}
+          placeholder="State/Province/Region"
+          onChange={locked ? () => {} : (val) => handleCustomerChange('state', val)}
+          required
+          disabled={sameAsBilling || locked}
+          error={errors.customerState}
+        />
+        <InputField
+          label="ZIP/Postal Code"
+          value={customerAddress.zip}
+          placeholder="ZIP/Postal Code"
+          onChange={locked ? () => {} : (val) => handleCustomerChange('zip', val)}
+          required
+          disabled={sameAsBilling || locked}
+          error={errors.customerPostalCode}
+        />
+        <SelectField
+          label="Country"
+          value={customerAddress.country}
+          placeholder="Select Country"
+          onChange={locked ? () => {} : (val) => handleCustomerChange('country', val)}
+          options={countryOptions}
+          required
+          disabled={sameAsBilling || locked}
+          error={errors.customerCountry}
+        />
       </div>
     </div>
   );

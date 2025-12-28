@@ -21,14 +21,14 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({
   className = "",
 }) => {
   return (
-    <section className={`review-card ${className}`}>
-      <div className="review-header">{title}</div>
+    <section className={`com-review-card ${className}`}>
+      <div className="com-review-header">{title}</div>
 
-      <dl className="review-table">
+      <dl className="com-review-table">
         {rows.map((row) => (
-          <div className="review-row" key={row.label}>
-            <dt className="review-label">{row.label}</dt>
-            <dd className="review-value">{row.value}</dd>
+          <div className="com-review-row" key={row.label}>
+            <dt className="com-review-label">{row.label}</dt>
+            <dd className="com-review-value">{row.value}</dd>
           </div>
         ))}
       </dl>

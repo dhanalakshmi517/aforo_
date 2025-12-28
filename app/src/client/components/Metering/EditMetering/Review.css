@@ -1,5 +1,4 @@
 .review-wrapper {
-    padding: 30px;
     
   }
   
@@ -8,6 +7,16 @@
     padding: 20px 0;
   }
   
+
+  .edit-met-review-container {
+  width: 600px;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+  background-color: var(--color-neutral-white);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
   .section {
     border-top: 1.5px solid var(--color-neutral-200);
     background-color:var(--color-neutral-100);

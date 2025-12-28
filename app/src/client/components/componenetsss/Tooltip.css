@@ -8,7 +8,7 @@
 .tooltip-box {
   position: absolute;
   min-height: 32px;
-  background-color: var(--color-primary-1000);
+  background-color: var(--color-neutral-1000);
   color: var(--color-neutral-white);
   padding: 8px 10px;
   border-radius: var(--border-radius-sm);
@@ -69,7 +69,7 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   top: 100%;
   left: 50%;
   border-width: 6px 6px 0 6px;
-  border-color: #034A7D transparent transparent transparent;
+  border-color:#44576F transparent transparent transparent;
   transform: translateX(-50%);
 }
 
@@ -77,7 +77,7 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   bottom: 100%;
   left: 50%;
   border-width: 0 6px 6px 6px;
-  border-color: transparent transparent #034A7D transparent;
+  border-color: transparent transparen t#44576F transparent;
   transform: translateX(-50%);
 }
 
@@ -85,7 +85,7 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   left: 100%;
   top: 50%;
   border-width: 6px 0 6px 6px;
-  border-color: transparent transparent transparent #034A7D;
+  border-color: transparent transparent transparent #44576F;
   transform: translateY(-50%);
 }
 
@@ -93,6 +93,6 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   right: 100%;
   top: 50%;
   border-width: 6px 6px 6px 0;
-  border-color: transparent #034A7D transparent transparent;
+  border-color: transparent #44576F transparent transparent;
   transform: translateY(-50%);
 }

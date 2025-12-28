@@ -11,6 +11,7 @@
   overflow: visible;
 }
 
+
 .thr-inner{
   display: flex;
   align-items: center;
@@ -22,29 +23,7 @@
   background: transparent;
   position: relative;
   isolation: isolate;
-  z-index: 0;
-}
-
-.thr-inner::before{
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: inherit;
-  background: radial-gradient(
-    898.65% 89.57% at 0% 50%,
-    var(--surface-layer-100, #F9FBFD) 0%,
-    var(--surface-layer-250, #E6EAEF) 39.11%,
-    var(--surface-layer-100, #F9FBFD) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: -1;
-}
-
-.thr-inner:hover::before,
-.thr-inner:focus-within::before,
-.thr-col.is-active .thr-inner::before{
-  opacity: 1;
+  z-index: 1;
 }
 
 .thr-root .thr-col:first-child .thr-inner{
@@ -87,23 +66,15 @@ line-height: var(--line-height-body-md); /* 142.857% */
   pointer-events: none;
 }
 
-/* when hover column -> show icon */
-.thr-inner:hover .thr-filterBtn,
-.thr-col.is-active .thr-filterBtn{
-  opacity: 1;
-  pointer-events: auto;
+.thr-filterBtn svg path {
+  stroke: black !important;
 }
 
-/* hover state of the filter area (dark gradient like you asked) */
-.thr-inner:hover .thr-filterBtn:hover,
-.thr-col.is-active .thr-filterBtn:hover{
-  background: radial-gradient(
-    898.65% 89.57% at 0% 50%,
-    var(--surface-layer-100, #F9FBFD) 0%,
-    var(--surface-layer-250, #E6EAEF) 39.11%,
-    var(--surface-layer-100, #F9FBFD) 100%
-  );
+.thr-filterBtn:hover svg path {
+  stroke: black !important;
 }
+
+
 
 
 

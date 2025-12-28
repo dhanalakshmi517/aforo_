@@ -140,7 +140,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [purchasedSortOrder, setPurchasedSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [purchasedSortOrder, setPurchasedSortOrder] = useState<'newest' | 'oldest' | null>(null);
   const [editingSub, setEditingSub] = useState<SubscriptionType | null>(null);
 
   const [draftSub, setDraftSub] = useState<SubscriptionType | null>(null);
@@ -383,11 +383,12 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     if (purchasedSortOrder === 'oldest') {
       return aDate - bDate;
     }
-    return bDate - aDate;
+    if (purchasedSortOrder === 'newest') {
+      return bDate - aDate;
+    }
+    // default: no sorting when null
+    return 0;
   });
-
-  const isEmpty = subscriptions.length === 0;
-  const searchDisabled = isEmpty;
 
   const handleDownload = (sub: SubscriptionType) => {
     // Simple JSON export of the purchase
@@ -401,6 +402,9 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
     a.remove();
     URL.revokeObjectURL(url);
   };
+
+  const isEmpty = subscriptions.length === 0;
+  const searchDisabled = isEmpty;
 
   return (
     <div className="check-container">

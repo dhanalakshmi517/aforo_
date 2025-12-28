@@ -9,6 +9,7 @@ interface AggregationWindowSelectProps {
   onChange: (val: string) => void;
   error?: string;
   optional?: boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -22,7 +23,8 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
   value,
   onChange,
   error,
-  optional
+  optional,
+  disabled
 }) => {
   // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
@@ -130,6 +132,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
         options={options.map(opt => ({ label: opt, value: opt }))}
         error={error}
         optional={optional}
+        disabled={disabled}
       />
     );
   }
@@ -142,6 +145,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
       placeholder="Aggregation Window"
       error={error}
       optional={optional}
+      disabled={disabled}
     />
   );
 };

@@ -17,8 +17,21 @@ html, body, #root {
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
+  overflow: hidden;
 }
 
+.edit-np-label {
+     color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+  user-select: none;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: -4px;
+}
 /* Viewport */
 .editprod-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
@@ -78,6 +91,7 @@ html, body, #root {
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
 }
+
 
 /* Step */
 .editprod-np-step {
@@ -160,7 +174,6 @@ color: var(--color-primary-800);
 }
 
 .editprod-np-main__inner {
-  padding: 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -179,7 +192,12 @@ color: var(--color-primary-800);
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: hidden;          /* let inner section scroll instead */
+  overflow: hidden;  
+}
+hr {
+  border: none;
+  height: 1px;
+  background: #d81010;
 }
 
 /* Scrollbars */
@@ -193,7 +211,9 @@ color: var(--color-primary-800);
   overflow-y: auto;          /* only this area scrolls */
   padding-bottom: 0;
   padding-right: 12px;       /* space for custom scrollbar */
-  scrollbar-width: none;     /* Firefox */
+  scrollbar-width: none;   
+    padding:20px;        /* let inner section scroll instead */
+  /* Firefox */
 }
 .editprod-np-form-section::-webkit-scrollbar { width: 0px; }
 .editprod-np-form-section::-webkit-scrollbar-track { background: transparent; }
@@ -278,10 +298,11 @@ color: var(--color-primary-800);
 }
 
 .np-icon-field-wrapper {
+  margin-top:-10px;
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid var(--color-neutral-300);
+  border: 1px solid var(--color-neutral-200);
   width: 456px;
   border-radius: 6px;
   padding: 12px;

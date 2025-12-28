@@ -360,7 +360,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       switch (field.type) {
         case 'select':
           return (
-            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
               <SelectField
                 label={labelText}
                 value={fieldValue}
@@ -377,7 +377,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           );
         case 'checkbox':
           return (
-            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
               <InputField
                 type="checkbox"
                 label={labelText}
@@ -393,7 +393,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           );
         case 'textarea':
           return (
-            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
               <TextareaField
                 label={labelText}
                 value={fieldValue}
@@ -407,7 +407,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           );
         case 'number':
           return (
-            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
               <InputField
                 type="number"
                 label={labelText}
@@ -426,7 +426,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           );
         case 'password':
           return (
-            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
               <InputField
                 type="password"
                 label={labelText}
@@ -441,7 +441,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           );
         default:
           return (
-            <div key={index !== undefined ? `field-${index}` : field.label} className="form-group">
+            <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
               <InputField
                 type={field.type || 'text'}
                 label={labelText}
@@ -458,8 +458,8 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     };
 
     return (
-      <div className="configuration-tab">
-        <div className="form-group">
+      <div className="edit-con-configuration-tab">
+        <div className="edit-con-form-group">
           <SelectField
             label="Product Type"
             value={productType}

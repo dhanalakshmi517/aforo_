@@ -11,7 +11,7 @@ import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import EditReview from './EditReview';
 
 import './EditSubscription.css';
-import '../../componenetsss/SkeletonForm.css';
+import '../../componenetsss/EditSkeletonForm.css';
 
 import {
   Api,
@@ -472,7 +472,7 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                         </section>
                       )}
                     </div>
-                    <div className="af-skel-rule af-skel-rule--bottom" />
+                    <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
 
 
                     {/* FOOTER actions – same alignment as NewProduct */}
@@ -504,11 +504,13 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                   </form>
                 </div>
               </div>
-              <div className="af-skel-rule af-skel-rule--bottom" />
             </main>
           </div>
+
         </div>
       </div>
+                    <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
+
 
       {/* Exit confirmation popup */}
       <EditPopUp

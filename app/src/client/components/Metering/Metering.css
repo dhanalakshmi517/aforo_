@@ -754,8 +754,8 @@ line-height: var(--line-height-body-sm);
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 1.5px solid var(--color-primary-800);
+  border: 4px solid transparent;
+  border-top: 2px solid var(--color-primary-600);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -998,4 +998,3 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
   
   
-

@@ -94,19 +94,25 @@ const FilterDropdown: React.FC<Props> = ({
               }}
               style={{ cursor: disabled ? "not-allowed" : "pointer" }}
             >
-              <Checkbox
-                checked={checked}
-                disabled={disabled}
-                onChange={(next) => {
-                  if (disabled) return;
-                  if (next) {
-                    onChange([...value, opt.id]);
-                  } else {
-                    onChange(value.filter((x) => String(x) !== String(opt.id)));
-                  }
+              <div
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
                 }}
-                className="fd-checkbox"
-              />
+              >
+                <Checkbox
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={(next) => {
+                    if (disabled) return;
+                    if (next) {
+                      onChange([...value, opt.id]);
+                    } else {
+                      onChange(value.filter((x) => String(x) !== String(opt.id)));
+                    }
+                  }}
+                  className="fd-checkbox"
+                />
+              </div>
 
               <span className="fd-rowText">
                 <span className="fd-label">{opt.label}</span>

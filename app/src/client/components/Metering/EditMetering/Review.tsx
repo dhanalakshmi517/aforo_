@@ -54,14 +54,14 @@ const EditReview: React.FC<EditReviewProps> = ({
       ]);
 
   return (
-    <div className="review-container">
+    <div className="edit-met-review-container">
       <ReviewComponent title="METRIC IDENTITY" rows={metricIdentityRows} />
       <ReviewComponent title="BILLING CRITERIA" rows={billingCriteriaRows} />
       <ReviewComponent title="METRIC PROPERTIES" rows={metricPropertiesRows} />
 
-      <p className="review-footer">
+      {/* <p className="review-footer">
         You're about to edit a Usage Metric. Please review your entries before proceeding.
-      </p>
+      </p> */}
     </div>
   );
 };

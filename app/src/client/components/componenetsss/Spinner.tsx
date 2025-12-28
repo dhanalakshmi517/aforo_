@@ -1,0 +1,42 @@
+import * as React from "react";
+import "./Spinner.css";
+
+type Props = {
+  size?: number;        // px
+  className?: string;
+  ariaLabel?: string;
+};
+
+const Spinner: React.FC<Props> = ({
+  size = 20,
+  className = "",
+  ariaLabel = "Loading",
+}) => {
+  return (
+    <span
+      className={`af-spinner ${className}`.trim()}
+      role="status"
+      aria-label={ariaLabel}
+      style={{ width: size, height: size }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 20 20"
+        fill="none"
+        className="af-spinner__svg"
+      >
+        <path
+          d="M17.5 9.99988C17.4999 11.5837 16.9984 13.1268 16.0674 14.4081C15.1364 15.6895 13.8237 16.6431 12.3174 17.1325C10.8111 17.6219 9.1885 17.6218 7.6822 17.1324C6.17591 16.6429 4.86323 15.6892 3.9323 14.4078C3.00138 13.1265 2.49999 11.5833 2.5 9.99946C2.50001 8.41563 3.00142 6.87247 3.93237 5.59113C4.86331 4.30979 6.176 3.35605 7.6823 2.86661C9.1886 2.37717 10.8112 2.37715 12.3175 2.86655"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+};
+
+export default Spinner;

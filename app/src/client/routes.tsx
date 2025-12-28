@@ -7,6 +7,7 @@ import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
 import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
+import ImportProducts from './components/componenetsss/ImportProducts';
 
 export default function RoutesComponent() {
   return (
@@ -18,6 +19,7 @@ export default function RoutesComponent() {
       <Route path="/apigee-failure" element={<ApigeeFailure />} />
       <Route path="/get-started/integrations/apigee/import" element={<ApigeeImport />} />
       <Route path="/get-started/integrations/apigee/imported-products" element={<ApigeeImportedProducts />} />
+      <Route path="/get-started/products/import" element={<ImportProducts />} />
     </Routes>
   );
 }

@@ -9,6 +9,7 @@ interface AggregationFunctionSelectProps {
   onChange: (val: string) => void;
   error?: string;
   optional?: boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -26,7 +27,8 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({
   value,
   onChange,
   error,
-  optional
+  optional,
+  disabled
 }) => {
   // If either field is not yet selected, show a disabled placeholder dropdown so the layout remains consistent
   if (!productType || !unitOfMeasure) {
@@ -96,6 +98,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({
         placeholderOption="--select--"
         error={error}
         optional={optional}
+        disabled={disabled}
       />
     );
   }
@@ -108,6 +111,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({
       placeholder="Aggregation Function"
       error={error}
       optional={optional}
+      disabled={disabled}
     />
   );
 };

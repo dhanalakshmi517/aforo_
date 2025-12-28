@@ -661,7 +661,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       switch (field.type) {
         case 'select':
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <SelectField
                 {...commonProps}
                 options={field.options || getSelectOptions(field.label) || []}
@@ -673,7 +673,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         case 'checkbox':
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <InputField
                 type="checkbox"
                 {...commonProps}
@@ -690,7 +690,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         case 'textarea':
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <TextareaField
                 {...commonProps}
                 disabled={readOnly || locked} // Disable textareas when locked
@@ -701,7 +701,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         case 'number':
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <InputField
                 type="number"
                 {...commonProps}
@@ -716,7 +716,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         case 'password':
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <InputField
                 type="password"
                 {...commonProps}
@@ -727,7 +727,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         case 'email':
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <InputField
                 type="email"
                 {...commonProps}
@@ -740,7 +740,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
         default:
           return (
-            <div className="form-group">
+            <div className="config-form-group">
               <InputField
                 {...commonProps}
                 disabled={readOnly || locked} // Disable default text inputs when locked
@@ -753,7 +753,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     return (
       <div
-        className={`configuration-tab ${locked ? 'is-locked' : ''}`}
+        className={`con-configuration-tab ${locked ? 'is-locked' : ''}`}
         style={{ position: 'relative', opacity: locked ? 0.8 : 1 }}
         aria-disabled={locked}
       >
@@ -769,7 +769,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             }}
           />
         )}
-        <div className="form-group">
+        <div className="config-form-group">
           {/* Product type dropdown with inline error */}
           <SelectField
             label="Type of Product"

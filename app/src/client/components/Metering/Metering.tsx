@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateUsageMetric from "./CreateUsageMetric";
 import EditMetrics from "./EditMetering/EditMetrics";
@@ -16,6 +16,10 @@ import NoFileSvg from "./nofile.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
 import PrimaryButton from '../componenetsss/PrimaryButton';
+import { getProducts as getProductsApi, BASE_URL as API_BASE_URL } from '../Products/api';
+import { ProductIconData } from '../Products/ProductIcon';
+import axios from 'axios';
+import { getAuthHeaders } from '../../utils/auth';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import Tooltip from '../componenetsss/Tooltip';
 import { Checkbox } from '../componenetsss/Checkbox';
@@ -23,8 +27,6 @@ import FilterChip from '../componenetsss/FilterChip';
 import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
 import DateSortDropdown from '../componenetsss/DateSortDropdown';
 import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
-import TableHeaderRow, { HeaderColumn } from '../componenetsss/TableHeaderRow';
-
 import ResetButton from '../componenetsss/ResetButton';
 
 // Props for Metering component
@@ -100,6 +102,10 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const { showToast } = useToast();
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [showEditMetricForm, setShowEditMetricForm] = useState(false);
+  
+  // Product icons state
+  const [productIcons, setProductIcons] = useState<Record<number, { iconData: ProductIconData | null; iconUrl: string | null }>>({});
+  const [loadingProductIcons, setLoadingProductIcons] = useState<Set<number>>(new Set());
 
   // Column filter / sort popover state
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
@@ -112,60 +118,10 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   // Header filter menu (two-panel)
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
   const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
-  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('status');
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(null);
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
   const filterButtonRef = useRef<HTMLButtonElement>(null!);
-
-  const updateStatusFilterPosition = useCallback(() => {
-    if (statusFilterRef.current) {
-      const rect = statusFilterRef.current.getBoundingClientRect();
-      setStatusFilterPosition({ top: rect.bottom + 4, left: rect.left });
-    }
-  }, []);
-
-  const updateCreatedSortPosition = useCallback(() => {
-    if (createdSortRef.current) {
-      const rect = createdSortRef.current.getBoundingClientRect();
-      setCreatedSortPosition({ top: rect.bottom + 4, left: rect.left });
-    }
-  }, []);
-
-  const openStatusFilter = useCallback(() => {
-    setIsCreatedSortOpen(false);
-    updateStatusFilterPosition();
-    setIsStatusFilterOpen(true);
-  }, [updateStatusFilterPosition]);
-
-  const closeStatusFilter = useCallback(() => {
-    setIsStatusFilterOpen(false);
-  }, []);
-
-  const toggleStatusFilter = useCallback(() => {
-    if (isStatusFilterOpen) {
-      closeStatusFilter();
-    } else {
-      openStatusFilter();
-    }
-  }, [isStatusFilterOpen, openStatusFilter, closeStatusFilter]);
-
-  const openCreatedSort = useCallback(() => {
-    setIsStatusFilterOpen(false);
-    updateCreatedSortPosition();
-    setIsCreatedSortOpen(true);
-  }, [updateCreatedSortPosition]);
-
-  const closeCreatedSort = useCallback(() => {
-    setIsCreatedSortOpen(false);
-  }, []);
-
-  const toggleCreatedSort = useCallback(() => {
-    if (isCreatedSortOpen) {
-      closeCreatedSort();
-    } else {
-      openCreatedSort();
-    }
-  }, [isCreatedSortOpen, openCreatedSort, closeCreatedSort]);
 
   // manage sidebar visibility
   useEffect(() => {
@@ -212,7 +168,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     }
   };
 
-  const fetchMetrics = React.useCallback(async () => {
+  const fetchMetrics = async () => {
     setIsLoading(true);
     try {
       const data: UsageMetricDTO[] = await getUsageMetrics();
@@ -229,9 +185,9 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         }
         return {
           id: (m as any).metricId ?? (m as any).billableMetricId,
-          usageMetric: m.metricName,
-          productName: m.productName,
-          unit: m.unitOfMeasure,
+          usageMetric: m.metricName ?? (m as any).usageMetric ?? "-",
+          productName: m.productName ?? "-",
+          unit: m.unitOfMeasure ?? "-",
           status: (m as any).status ?? (m as any).metricStatus ?? "Active",
           createdOn: (m as any).createdOn,
           productId: m.productId,
@@ -239,18 +195,152 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         };
       });
       setMetrics(mapped);
-    } catch (err) {
-      console.error(err);
-      if (String(err).includes("401")) logout();
+
+      // Fetch product icons for all unique product IDs
+      const uniqueProductIds = [...new Set(mapped.map(m => m.productId).filter(id => id !== undefined))] as number[];
+      uniqueProductIds.forEach(productId => {
+        if (!productIcons[productId] && !loadingProductIcons.has(productId)) {
+          loadProductIcon(productId);
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching metrics:", error);
+      if (error?.response?.status === 401) {
+        logout();
+        navigate("/login");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
+
+  // Helper functions for parsing product icons (same as RatePlans.tsx)
+  const parseProductIconField = (field: any): any => {
+    if (!field) return null;
+    if (typeof field === 'object') return field;
+    if (typeof field === 'string') {
+      try { return JSON.parse(field); } catch { return null; }
+    }
+    return null;
+  };
+
+  const extractIconData = (parsed: any, fallbackLabel: string): ProductIconData | null => {
+    if (!parsed) return null;
+    if (parsed.iconData && typeof parsed.iconData === 'object') {
+      return parsed.iconData as ProductIconData;
+    }
+    if (parsed.id && parsed.svgPath) {
+      return parsed as ProductIconData;
+    }
+    if (parsed.svgPath || parsed.svgContent) {
+      return {
+        id: parsed.id || `icon-${Date.now()}`,
+        label: parsed.label || fallbackLabel,
+        svgPath: parsed.svgPath || parsed.svgContent,
+        viewBox: parsed.viewBox || '0 0 24 24',
+        tileColor: parsed.tileColor,
+        outerBg: parsed.outerBg
+      };
+    }
+    return null;
+  };
+
+  const loadProductIcon = async (productId: number) => {
+    if (loadingProductIcons.has(productId)) return;
+
+    setLoadingProductIcons(prev => new Set(prev).add(productId));
+
+    try {
+      const products = await getProductsApi();
+      const product = products.find((p: any) => Number(p.productId) === productId);
+
+      if (!product) {
+        setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
+        return;
+      }
+
+      let iconData: ProductIconData | null = null;
+      let iconUrl: string | null = null;
+
+      // Try localStorage cache first
+      try {
+        const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+        let cachedIconJson = iconCache[product.productId] || iconCache[String(productId)] || iconCache[productId];
+
+        if (cachedIconJson) {
+          const parsedCache = parseProductIconField(cachedIconJson);
+          iconData = extractIconData(parsedCache, product.productName || 'Product');
+        }
+      } catch (e) {
+        console.error('Error reading icon cache:', e);
+      }
+
+      // Try productIcon field from API
+      if (!iconData && product.productIcon && product.productIcon !== 'null' && product.productIcon !== '') {
+        try {
+          const parsed = parseProductIconField(product.productIcon);
+          iconData = extractIconData(parsed, product.productName || 'Product');
+        } catch (e) {
+          console.error('Error parsing productIcon:', e);
+        }
+      }
+
+      // Try individual product fetch
+      if (!iconData) {
+        try {
+          const { getProductById } = await import('../Products/api');
+          const individualProduct = await getProductById(String(productId));
+          if (individualProduct?.productIcon) {
+            const parsed = parseProductIconField(individualProduct.productIcon);
+            iconData = extractIconData(parsed, product.productName || 'Product');
+
+            if (iconData) {
+              try {
+                const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+                iconCache[product.productId] = JSON.stringify({ iconData });
+                localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+              } catch (e) {
+                console.warn('Failed to cache icon data:', e);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error fetching individual product:', e);
+        }
+      }
+
+      // Create fallback if no icon data found
+      if (!iconData && !iconUrl) {
+        const colors = ['#0F6DDA', '#23A36D', '#CC9434', '#E3ADEB', '#FF6B6B', '#4ECDC4', '#95E77E', '#FFD93D'];
+        const colorIndex = productId % colors.length;
+
+        iconData = {
+          id: `product-fallback-${productId}`,
+          label: product.productName || 'Product',
+          svgPath: 'M12 2L2 7V12L12 17L22 12V7L12 2ZM12 12L4.53 8.19L12 4.36L19.47 8.19L12 12Z',
+          viewBox: '0 0 24 24',
+          tileColor: colors[colorIndex]
+        };
+      }
+
+      setProductIcons(prev => ({ ...prev, [productId]: { iconData, iconUrl } }));
+    } catch (e) {
+      console.error('Error loading product icon:', e);
+      setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
+    } finally {
+      setLoadingProductIcons(prev => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     fetchMetrics();
   }, [fetchMetrics]);
 
+  // ... rest of the code remains the same ...
   if (showNewUsageMetricForm) {
     return <CreateUsageMetric draftMetricId={selectedMetricId ?? undefined} onClose={() => { setShowNewUsageMetricForm(false); fetchMetrics(); }} />;
   }
@@ -284,117 +374,6 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
 
   // Helper function to get metric color by index
   const getMetricColor = (idx: number) => metricColorPalette[idx % metricColorPalette.length];
-
-  const tableColumns = useMemo<HeaderColumn[]>(() => [
-    {
-      key: 'usageMetric',
-      label: 'Usage Metric',
-    },
-    {
-      key: 'productName',
-      label: 'Product Name',
-    },
-    {
-      key: 'unit',
-      label: 'Unit Of Measure',
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      className: 'products-th-with-filter',
-      innerClassName: 'products-th-label-with-filter',
-      innerRef: statusFilterRef,
-      showFilterIcon: true,
-      filterButtonClassName: 'products-column-filter-trigger',
-      buttonAriaLabel: 'Filter by status',
-      isFilterActive: isStatusFilterOpen || selectedStatuses.length > 0,
-      onInnerMouseEnter: openStatusFilter,
-      onInnerMouseLeave: closeStatusFilter,
-      onFilterClick: () => {
-        updateStatusFilterPosition();
-        toggleStatusFilter();
-      },
-      renderPopover: () => (
-        isStatusFilterOpen ? (
-          <div
-            className="products-column-filter-popover"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <SimpleFilterDropdown
-              options={['active', 'draft'].map((statusKey) => ({
-                id: statusKey,
-                label:
-                  statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
-              }))}
-              value={selectedStatuses}
-              onChange={(next) =>
-                setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
-              }
-              anchorTop={statusFilterPosition.top}
-              anchorLeft={statusFilterPosition.left}
-            />
-          </div>
-        ) : null
-      ),
-    },
-    {
-      key: 'createdOn',
-      label: 'Created On',
-      className: 'products-th-with-filter',
-      innerClassName: 'products-th-label-with-filter',
-      innerRef: createdSortRef,
-      showFilterIcon: true,
-      filterButtonClassName: 'products-column-filter-trigger',
-      buttonAriaLabel: 'Sort by created date',
-      isFilterActive: isCreatedSortOpen || createdSortOrder !== 'newest',
-      onInnerMouseEnter: openCreatedSort,
-      onInnerMouseLeave: closeCreatedSort,
-      onFilterClick: () => {
-        updateCreatedSortPosition();
-        toggleCreatedSort();
-      },
-      renderPopover: () => (
-        isCreatedSortOpen ? (
-          <div
-            className="products-column-filter-popover products-createdon-popover"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <DateSortDropdown
-              value={createdSortOrder}
-              onChange={(next) => {
-                setCreatedSortOrder(next);
-                closeCreatedSort();
-              }}
-              anchorTop={createdSortPosition.top}
-              anchorLeft={createdSortPosition.left}
-            />
-          </div>
-        ) : null
-      ),
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      className: 'actions-cell',
-    },
-  ], [
-    isStatusFilterOpen,
-    selectedStatuses,
-    openStatusFilter,
-    closeStatusFilter,
-    toggleStatusFilter,
-    statusFilterPosition.top,
-    statusFilterPosition.left,
-    updateStatusFilterPosition,
-    isCreatedSortOpen,
-    createdSortOrder,
-    openCreatedSort,
-    closeCreatedSort,
-    toggleCreatedSort,
-    createdSortPosition.top,
-    createdSortPosition.left,
-    updateCreatedSortPosition,
-  ]);
 
   const filteredMetrics = metrics
     // Global text search across key fields (metric, product, unit, status), excluding date
@@ -611,7 +590,145 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         )}
         <table className="customers-table">
           <thead>
-            <TableHeaderRow columns={tableColumns} />
+            <tr>
+              <th>Usage Metric</th>
+              <th>Product Name</th>
+              <th>Unit Of Measure</th>
+              <th className="products-th-with-filter">
+                <div
+                  ref={statusFilterRef}
+                  className="products-th-label-with-filter"
+                  onMouseEnter={() => {
+                    // close others
+                    setIsCreatedSortOpen(false);
+
+                    if (statusFilterRef.current) {
+                      const rect = statusFilterRef.current.getBoundingClientRect();
+                      setStatusFilterPosition({
+                        top: rect.bottom + 4,
+                        left: rect.left,
+                      });
+                    }
+                    setIsStatusFilterOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    setIsStatusFilterOpen(false);
+                  }}
+                >
+                  <span>Status </span>
+                  <button
+                    type="button"
+                    className={`products-column-filter-trigger ${
+                      isStatusFilterOpen ? 'is-open' : ''
+                    }`}
+                    aria-label="Filter by status"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="11"
+                      height="8"
+                      viewBox="0 0 11 8"
+                      fill="none"
+                    >
+                      <path
+                        d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
+                        stroke="#19222D"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isStatusFilterOpen && (
+                    <div
+                      className="products-column-filter-popover"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <SimpleFilterDropdown
+                        options={['active', 'draft'].map((statusKey) => ({
+                          id: statusKey,
+                          label:
+                            statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
+                        }))}
+                        value={selectedStatuses}
+                        onChange={(next) =>
+                          setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
+                        }
+                        anchorTop={statusFilterPosition.top}
+                        anchorLeft={statusFilterPosition.left}
+                      />
+                    </div>
+                  )}
+                </div>
+              </th>
+              <th className="products-th-with-filter">
+                <div
+                  ref={createdSortRef}
+                  className="products-th-label-with-filter"
+                  onMouseEnter={() => {
+                    // close others
+                    setIsStatusFilterOpen(false);
+
+                    if (createdSortRef.current) {
+                      const rect = createdSortRef.current.getBoundingClientRect();
+                      setCreatedSortPosition({
+                        top: rect.bottom + 4,
+                        left: rect.left,
+                      });
+                    }
+                    setIsCreatedSortOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    setIsCreatedSortOpen(false);
+                  }}
+                >
+                  <span>Created On </span>
+                  <button
+                    type="button"
+                    className={`products-column-filter-trigger ${
+                      isCreatedSortOpen ? 'is-open' : ''
+                    }`}
+                    aria-label="Sort by created date"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                    >
+                      <path
+                        d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
+                        stroke="#25303D"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  {isCreatedSortOpen && (
+                    <div
+                      className="products-column-filter-popover products-createdon-popover"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DateSortDropdown
+                        value={createdSortOrder}
+                        onChange={(next) => {
+                          setCreatedSortOrder(next);
+                          setIsCreatedSortOpen(false);
+                        }}
+                        anchorTop={createdSortPosition.top}
+                        anchorLeft={createdSortPosition.left}
+                      />
+                    </div>
+                  )}
+                </div>
+              </th>
+              <th className="actions-cell">Actions</th>
+
+            </tr>
           </thead>
           <tbody>
             {isLoading && metrics.length === 0 ? (
@@ -667,28 +784,44 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 <tr key={metric.id}>
                   <td className="metrics-cell">
                     <div className="metrics-wrapper">
-                      <div 
-                        className="metric-item" 
-                        style={{ 
-                          backgroundColor: getMetricColor(idx).bg, 
-                          color: getMetricColor(idx).text 
-                        }}
-                      >
-                        <div className="metric-content">
-                          <div className="metric-uom" title={metric.unit}>
-                            {display(metric.unit && metric.unit.length > 3
-                              ? metric.unit.substring(0, 3)   // only first 3 letters, no dots
-                              : metric.unit
-                            )}
+                      {(() => {
+                        const productIcon = metric.productId ? productIcons[metric.productId] : null;
+                        const iconData = productIcon?.iconData;
+                        const tileColor = iconData?.tileColor || getMetricColor(idx).bg;
+                        
+                        // Convert hex to rgba for background
+                        const hexToRgba = (hex: string, opacity: number) => {
+                          const r = parseInt(hex.slice(1, 3), 16);
+                          const g = parseInt(hex.slice(3, 5), 16);
+                          const b = parseInt(hex.slice(5, 7), 16);
+                          return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                        };
+                        
+                        return (
+                          <div 
+                            className="metric-item" 
+                            style={{ 
+                              backgroundColor: hexToRgba(tileColor, 0.30), 
+                              color: getMetricColor(idx).text 
+                            }}
+                          >
+                            <div className="metric-content">
+                              <div className="metric-uom" title={metric.unit}>
+                                {display(metric.unit && metric.unit.length > 3
+                                  ? metric.unit.substring(0, 3)
+                                  : metric.unit
+                                )}
+                              </div>
+                              <div className="metric-name" title={metric.usageMetric}>
+                                {display(metric.usageMetric && metric.usageMetric.length > 3
+                                  ? `${metric.usageMetric.substring(0, 3)}...`
+                                  : metric.usageMetric
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div className="metric-name" title={metric.usageMetric}>
-                            {display(metric.usageMetric && metric.usageMetric.length > 3
-                              ? `${metric.usageMetric.substring(0, 3)}...`  // first 3 letters + dots
-                              : metric.usageMetric
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                        );
+                      })()}
                       <span className="metric-label">{display(metric.usageMetric)}</span>
                     </div>
                   </td>
@@ -738,19 +871,21 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         </table>
       </div>
 
+      {/* Delete confirmation modal */}
       {showDeleteModal && (
         <ConfirmDeleteModal
           isOpen={showDeleteModal}
           productName={deleteMetricName}
           onConfirm={confirmDelete}
-          onCancel={() => setShowDeleteModal(false)}
+          onCancel={() => { setShowDeleteModal(false); setDeleteMetricId(null); }}
         />
       )}
+
+
     </div>
   );
 };
 
 export default Metering;
-
 
 

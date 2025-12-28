@@ -1,3 +1,4 @@
+@import "../Variables/Variables.css";
 :root{
   --pcs-bg: #0b0c0f;
   --pcs-card: #ffffff;
@@ -12,23 +13,24 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  background: radial-gradient(60% 60% at 50% 40%, #f6f7fb 0%, #eef1f6 100%);
+  background:var(--color-neutral-50);
   padding: 24px;
 }
 
 .pcs-card{
   width: min(580px, 92vw);
-  background: var(--pcs-card);
+  background: var(--color-neutral-white);
   border-radius: 18px;
-  box-shadow: var(--pcs-shadow);
-  padding: 40px 44px 36px;
+box-shadow: 0 5px 20px 0 var(--shadow-shadow-1, #EEF1F6);
+padding: 64px 72px 91px 72px;
   text-align: center;
+  border: 1px solid var(--color-neutral-200);
 }
 
 .pcs-hero{
   display: grid;
   place-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 32px;
 }
 
 /* Green circle */
@@ -100,6 +102,7 @@
   color: var(--pcs-text);
   font-size: clamp(18px, 2.2vw, 22px);
   line-height: 1.35;
+  margin-top: 26px;
 }
 
 .pcs-sub{
@@ -119,7 +122,7 @@
 }
 
 .pcs-btn{
-  margin-top: 8px;
+  margin-top: 20px;
   background: #0b5cab;
   color: #fff;
   border: 0;
@@ -129,6 +132,10 @@
   cursor: pointer;
   box-shadow: 0 6px 16px rgba(11, 92, 171, .25);
   transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.pcss-btn {
+  margin-top: 20px;
 }
 
 .pcs-btn:hover{ box-shadow: 0 8px 22px rgba(11, 92, 171, .33); }

@@ -4,15 +4,16 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../componenetsss/TopBar";
-import { useToast } from "../componenetsss/ToastProvider";
-import SaveDraft from "../componenetsss/SaveDraft";
+import { TextareaField, SelectField } from "../componenetsss/Inputs";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
-import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
-
-import "../componenetsss/SkeletonForm.css";
-import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
+import SaveDraft from "../componenetsss/SaveDraft";
+import { useToast } from "../componenetsss/ToastProvider";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
+import ProductCreatedSuccess from "../componenetsss/ProductCreatedSuccess";
+import SectionHeader from "../componenetsss/SectionHeader";
+import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
+
 import {
   Api,
   Product,
@@ -20,15 +21,14 @@ import {
   Customer,
   Subscription as SubscriptionType,
 } from "./api";
-import '../componenetsss/SkeletonForm.css';
 
-import "./CreateSubscription.css"; // you can copy met-np-* styles here (or reuse Usagemetric.css)
+import "../componenetsss/SkeletonForm.css";
+import "./CreateSubscription.css";
 
-type StepId = 1 | 2;
-type PaymentKind = "PREPAID" | "POSTPAID";
 type ActiveTab = "details" | "review";
+type PaymentKind = "PREPAID" | "POSTPAID";
 
-const steps: Array<{ id: StepId; title: string; desc: string }> = [
+const steps = [
   {
     id: 1,
     title: "Purchase Details",
@@ -45,6 +45,11 @@ interface CreateSubscriptionProps {
   onClose: () => void;
   onCreateSuccess: (sub: SubscriptionType) => void;
   onRefresh?: () => void;
+
+  /** optional - same idea as metric: open an existing draft */
+  draftSubscriptionId?: number;
+
+  /** optional - parent can pass draft object */
   draftData?: SubscriptionType;
 }
 
@@ -52,47 +57,52 @@ export default function CreateSubscription({
   onClose,
   onCreateSuccess,
   onRefresh,
+  draftSubscriptionId,
   draftData,
 }: CreateSubscriptionProps): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast, dismissToast } = useToast();
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [hasOverflow, setHasOverflow] = useState(false);
-  const formSectionRef = React.useRef<HTMLDivElement>(null);
 
-  // data sources
+  const draftFromState = (location.state as any)?.draftSubscriptionId;
+  const activeSubscriptionId = draftFromState || draftSubscriptionId;
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("details");
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // lists
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
 
   // form fields
+  const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
+
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [selectedCustomerName, setSelectedCustomerName] = useState("");
+
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedProductName, setSelectedProductName] = useState("");
+
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
   const [selectedRatePlanName, setSelectedRatePlanName] = useState("");
+
   const [paymentType, setPaymentType] = useState<PaymentKind | "">("");
-  const [planDescription, setPlanDescription] = useState("");
-
-  const [currentStep, setCurrentStep] = useState(0);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("details");
-
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const [isDraftSaving, setIsDraftSaving] = useState(false);
-  const [isDraftSaved, setIsDraftSaved] = useState(false);
-  const [savingDraft, setSavingDraft] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "success" | "error">("idle");
-  const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const currentStepMeta = steps[currentStep];
-
-  // ---------- page + back-button handling ----------
+  // ─────────────────────────────────────────────────────────────
+  // Page + back button handling (same as CreateUsageMetric)
+  // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     document.body.classList.add("create-product-page");
 
@@ -110,7 +120,9 @@ export default function CreateSubscription({
     };
   }, [navigate]);
 
-  // ---------- hydrate selectable lists ----------
+  // ─────────────────────────────────────────────────────────────
+  // Load lists
+  // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       try {
@@ -123,7 +135,7 @@ export default function CreateSubscription({
         setRatePlans(ratePlansData ?? []);
         setCustomers(customersData ?? []);
       } catch (e) {
-        console.error("Failed to load subscription dependencies.", e);
+        console.error("Failed to load purchase dependencies.", e);
         showToast({
           kind: "error",
           title: "Loading Failed",
@@ -133,232 +145,262 @@ export default function CreateSubscription({
     })();
   }, [showToast]);
 
-  // ---------- apply draftData on mount ----------
+  // ─────────────────────────────────────────────────────────────
+  // Hydrate draft by ID (optional), without breaking builds if api method missing
+  // ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (draftData) {
-      if (draftData.customerId) {
-        setSelectedCustomerId(draftData.customerId);
-        const customer = customers.find((c) => c.customerId === draftData.customerId);
-        if (customer) setSelectedCustomerName(customer.customerName || "");
-      }
+    if (!activeSubscriptionId) return;
+    if (draftData) return; // prefer provided object
 
-      if (draftData.productId) {
-        setSelectedProductId(draftData.productId);
-        const product = products.find((p) => p.productId === draftData.productId);
-        if (product) setSelectedProductName(product.productName || "");
-      }
+    (async () => {
+      try {
+        const fn =
+          (Api as any).getSubscription ||
+          (Api as any).getSubscriptionById ||
+          (Api as any).getDraftSubscription;
 
-      if (draftData.ratePlanId) {
-        setSelectedRatePlanId(draftData.ratePlanId);
-        const ratePlan = ratePlans.find((rp) => rp.ratePlanId === draftData.ratePlanId);
-        if (ratePlan) setSelectedRatePlanName(ratePlan.ratePlanName || "");
-      }
+        if (!fn) return;
 
-      if (draftData.paymentType) {
-        const pt =
-          draftData.paymentType === "PREPAID" || draftData.paymentType === "POSTPAID"
-            ? (draftData.paymentType as PaymentKind)
-            : undefined;
-        if (pt) setPaymentType(pt);
-      }
+        const data = await fn(activeSubscriptionId);
 
-      if (draftData.adminNotes) setPlanDescription(draftData.adminNotes);
-      if (draftData.subscriptionId) setSubscriptionId(draftData.subscriptionId);
+        if (data) {
+          setSubscriptionId((data as any).subscriptionId ?? null);
+          if ((data as any).customerId != null) setSelectedCustomerId((data as any).customerId);
+          if ((data as any).productId != null) setSelectedProductId((data as any).productId);
+          if ((data as any).ratePlanId != null) setSelectedRatePlanId((data as any).ratePlanId);
+
+          const pt = (data as any).paymentType;
+          if (pt === "PREPAID" || pt === "POSTPAID") setPaymentType(pt);
+
+          if ((data as any).adminNotes) setAdminNotes((data as any).adminNotes);
+        }
+      } catch (e) {
+        console.error("Failed to hydrate subscription draft", e);
+      }
+    })();
+  }, [activeSubscriptionId, draftData]);
+
+  // ─────────────────────────────────────────────────────────────
+  // Apply draftData object (same style as metric hydrate)
+  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!draftData) return;
+
+    setSubscriptionId((draftData as any).subscriptionId ?? null);
+
+    if ((draftData as any).customerId != null) setSelectedCustomerId((draftData as any).customerId);
+    if ((draftData as any).productId != null) setSelectedProductId((draftData as any).productId);
+    if ((draftData as any).ratePlanId != null) setSelectedRatePlanId((draftData as any).ratePlanId);
+
+    const pt = (draftData as any).paymentType;
+    if (pt === "PREPAID" || pt === "POSTPAID") setPaymentType(pt);
+
+    if ((draftData as any).adminNotes) setAdminNotes((draftData as any).adminNotes);
+  }, [draftData]);
+
+  // ─────────────────────────────────────────────────────────────
+  // Set selected names from selected IDs once lists are ready
+  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (selectedCustomerId && customers.length) {
+      const c = customers.find((x) => x.customerId === selectedCustomerId);
+      if (c) setSelectedCustomerName(c.customerName || "");
     }
-  }, [draftData, customers, products, ratePlans]);
+  }, [customers, selectedCustomerId]);
 
-  // ---------- hasAnyRequiredInput (for Save/Cancel lock like metric form) ----------
-  const hasAnyRequiredInput = useMemo(
-    () =>
-      Boolean(
-        selectedCustomerId ||
+  useEffect(() => {
+    if (selectedProductId && products.length) {
+      const p = products.find((x) => x.productId === selectedProductId);
+      if (p) setSelectedProductName(p.productName || "");
+    }
+  }, [products, selectedProductId]);
+
+  useEffect(() => {
+    if (selectedRatePlanId && ratePlans.length) {
+      const rp = ratePlans.find((x) => x.ratePlanId === selectedRatePlanId);
+      if (rp) setSelectedRatePlanName(rp.ratePlanName || "");
+    }
+  }, [ratePlans, selectedRatePlanId]);
+
+  // Reset "Saved!" state on any edit (same as metric)
+  useEffect(() => {
+    if (isDraftSaved) setIsDraftSaved(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, adminNotes]);
+
+  // ─────────────────────────────────────────────────────────────
+  // typed or started?
+  // ─────────────────────────────────────────────────────────────
+  const hasAnyRequiredInput = useMemo(() => {
+    return Boolean(
+      selectedCustomerId ||
         selectedProductId ||
         selectedRatePlanId ||
         paymentType ||
-        planDescription.trim()
-      ),
-    [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, planDescription]
-  );
+        adminNotes.trim()
+    );
+  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, adminNotes]);
 
   const topActionsDisabled = !hasAnyRequiredInput && !subscriptionId;
 
-  // Validation for step navigation and Save & Next button
-  const canSaveNext =
-    !!selectedCustomerId &&
-    !!selectedProductId &&
-    !!selectedRatePlanId &&
-    (paymentType === "PREPAID" || paymentType === "POSTPAID");
+  const canGoReview = useMemo(() => {
+    return Boolean(
+      selectedCustomerId &&
+        selectedProductId &&
+        selectedRatePlanId &&
+        (paymentType === "PREPAID" || paymentType === "POSTPAID")
+    );
+  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType]);
 
-  // ---------- errors ----------
-  const clearError = (field: string) => {
+  // ─────────────────────────────────────────────────────────────
+  // Validation (same pattern as metric validateCurrentStep)
+  // ─────────────────────────────────────────────────────────────
+  const validateCurrentStep = (step: number): boolean => {
+    const step0Errors: Record<string, string> = {};
+
+    if (step === 0) {
+      if (!selectedCustomerId) step0Errors.customerId = "Customer is required";
+      if (!selectedProductId) step0Errors.productId = "Product is required";
+      if (!selectedRatePlanId) step0Errors.ratePlanId = "Rate Plan is required";
+      if (!(paymentType === "PREPAID" || paymentType === "POSTPAID"))
+        step0Errors.paymentType = "Payment Type is required";
+
+      setErrors(step0Errors);
+      return Object.keys(step0Errors).length === 0;
+    }
+
+    return true;
+  };
+
+  const clearError = (key: string) => {
     setErrors((prev) => {
-      const { [field]: _gone, ...rest } = prev;
-      return rest;
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
     });
   };
 
-  const validateStep0 = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!selectedCustomerId) e.customerId = "This field is required";
-    if (!selectedProductId) e.productId = "This field is required";
-    if (!selectedRatePlanId) e.ratePlanId = "This field is required";
-    if (!paymentType || (paymentType !== "PREPAID" && paymentType !== "POSTPAID")) {
-      e.paymentType = "This field is required";
-    }
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  // ---------- draft save ----------
-  const saveDraft = async (showSavedState = false): Promise<SubscriptionType | undefined> => {
-    if (savingDraft) return;
-    setSavingDraft(true);
-
-    try {
-      const payload: any = { status: "DRAFT" };
-
-      if (selectedCustomerId) payload.customerId = selectedCustomerId;
-      if (selectedProductId) payload.productId = selectedProductId;
-      if (selectedRatePlanId) payload.ratePlanId = selectedRatePlanId;
-      if (paymentType === "PREPAID" || paymentType === "POSTPAID") {
-        payload.paymentType = paymentType;
-      }
-      if (planDescription) payload.adminNotes = planDescription;
-
-      let resp: SubscriptionType;
-
-      if (subscriptionId) {
-        resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
-      } else {
-        resp = await Api.createSubscriptionDraft(payload);
-        setSubscriptionId(resp.subscriptionId);
-      }
-
-      setSubmissionStatus("success");
-
-      // Only show "Saved!" state when explicitly requested (from TopBar button)
-      if (showSavedState) {
-        setIsDraftSaved(true);
-        setTimeout(() => setIsDraftSaved(false), 2500);
-      }
-
-      return resp;
-    } catch (e) {
-      const err = e as Error;
-      console.error("Failed to save draft:", err);
-      showToast({
-        kind: "error",
-        title: "Save Failed",
-        message: err.message || "Failed to save draft. Please try again.",
-      });
-      setSubmissionStatus("error");
-      throw err;
-    } finally {
-      setSavingDraft(false);
-    }
-  };
-
-  // ---------- flow actions ----------
+  // ─────────────────────────────────────────────────────────────
+  // navigation (same philosophy as metric gotoStep)
+  // ─────────────────────────────────────────────────────────────
   const gotoStep = (index: number) => {
+    if (index < 0 || index > 1) return;
+
+    if (index > currentStep) {
+      if (currentStep === 0 && index === 1) {
+        const ok = validateCurrentStep(0);
+        if (!ok) return;
+        if (!canGoReview) return;
+      }
+    }
+
     setCurrentStep(index);
     const map: ActiveTab[] = ["details", "review"];
     setActiveTab(map[index] || "details");
   };
 
   const handleTopbarBack = () => {
-    if (hasAnyRequiredInput || subscriptionId) {
-      setShowSavePrompt(true);
-    } else {
-      navigate("/get-started/subscriptions");
-    }
+    if (hasAnyRequiredInput || subscriptionId) setShowSavePrompt(true);
+    else navigate("/get-started/subscriptions");
   };
 
-  const handleSaveDraftTop = async () => {
+  // ─────────────────────────────────────────────────────────────
+  // draft save (same UX as metric: TopBar shows Saved!)
+  // ─────────────────────────────────────────────────────────────
+  const buildDraftPayload = () => {
+    const payload: any = { status: "DRAFT" };
+    if (selectedCustomerId) payload.customerId = selectedCustomerId;
+    if (selectedProductId) payload.productId = selectedProductId;
+    if (selectedRatePlanId) payload.ratePlanId = selectedRatePlanId;
+    if (paymentType === "PREPAID" || paymentType === "POSTPAID") payload.paymentType = paymentType;
+    if (adminNotes?.trim()) payload.adminNotes = adminNotes.trim();
+    return payload;
+  };
+
+  const handleSaveDraft = async () => {
     if (isDraftSaving) return false;
+
     try {
       setIsDraftSaving(true);
-      const result = await saveDraft(true); // Show "Saved!" state
-      return !!result;
-    } catch {
+      setIsDraftSaved(false);
+
+      const payload = buildDraftPayload();
+
+      let resp: SubscriptionType;
+      if (subscriptionId) {
+        resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
+      } else {
+        resp = await Api.createSubscriptionDraft(payload);
+        setSubscriptionId((resp as any).subscriptionId);
+      }
+
+      setIsDraftSaved(true);
+      return !!resp;
+    } catch (e) {
+      console.error("Error saving draft:", e);
       return false;
     } finally {
       setIsDraftSaving(false);
     }
   };
 
-  const deleteAndClose = async () => {
-    if (!subscriptionId) {
-      onClose();
-      return;
-    }
+  const saveBeforeNext = async () => {
+    if (!validateCurrentStep(currentStep)) return false;
 
+    setSaving(true);
     try {
-      await Api.deleteSubscription(subscriptionId);
-      showToast({
-        kind: "success",
-        title: "Subscription deleted",
-        message: "The subscription has been successfully deleted.",
-      });
-    } catch (error) {
-      console.error("Error deleting draft:", error);
-      showToast({
-        kind: "error",
-        title: "Error",
-        message: "Failed to delete draft. Please try again.",
-      });
-    } finally {
-      onClose();
-    }
-  };
+      const payload = buildDraftPayload();
 
-  const handleSaveAndNext = async () => {
-    if (!validateStep0()) return;
-
-    try {
-      const draftSubscription = await saveDraft();
-      if (draftSubscription) {
-        gotoStep(1);
+      let resp: SubscriptionType;
+      if (subscriptionId) {
+        resp = await Api.updateSubscriptionDraft(subscriptionId, payload);
+      } else {
+        resp = await Api.createSubscriptionDraft(payload);
+        setSubscriptionId((resp as any).subscriptionId);
       }
+
+      return !!resp;
     } catch (e) {
-      console.error("Failed to save draft", e);
-      setSubmissionStatus("error");
-      showToast({
-        kind: "error",
-        title: "Error",
-        message: "Failed to save subscription draft. Please try again.",
-      });
+      console.error("Failed to save purchase draft:", e);
+      setErrors((prev) => ({
+        ...prev,
+        form: "Failed to save purchase draft. Please try again.",
+      }));
+      return false;
+    } finally {
+      setSaving(false);
     }
   };
 
+  // discard behavior (match metric: preserve drafts, just close)
+  const deleteAndClose = async () => {
+    onClose();
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // final submit
+  // ─────────────────────────────────────────────────────────────
   const handleFinalSubmit = async () => {
     if (!subscriptionId) {
-      showToast({
-        kind: "error",
-        title: "Error",
-        message: "No subscription ID found. Please go back and try again.",
-      });
+      setErrors((prev) => ({ ...prev, form: "No subscription ID found. Please go back and try again." }));
       return;
     }
 
-    // Show processing toast
     const processingToastId = showToast({
       kind: "info",
       title: "Processing",
       message: "Creating purchase...",
-      autoDismiss: false, // Don't auto-dismiss, we'll dismiss it manually
+      autoDismiss: false,
     });
 
+    setSaving(true);
     try {
-      // Call confirm API with the saved subscription ID
       const resp = await Api.confirmSubscription(subscriptionId);
 
-      // Dismiss processing toast
       dismissToast(processingToastId);
 
-      // Wait a tiny bit for smooth transition
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      setSubmissionStatus("success");
+      setShowSuccess(true);
       showToast({
         kind: "success",
         title: "Purchase Created",
@@ -367,25 +409,49 @@ export default function CreateSubscription({
 
       onCreateSuccess(resp);
       onRefresh?.();
-      onClose();
     } catch (e) {
-      console.error("Failed to create subscription", e);
-
-      // Dismiss processing toast
+      console.error("Failed to create purchase", e);
       dismissToast(processingToastId);
 
-      setSubmissionStatus("error");
+      setErrors((prev) => ({ ...prev, form: "Failed to create purchase. Please try again." }));
       showToast({
         kind: "error",
         title: "Creation Failed",
         message: "Failed to create purchase. Please try again.",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
-  // ---------- renderers ----------
+  const handleSaveAndNext = async () => {
+    if (activeTab === "details") {
+      const ok = await saveBeforeNext();
+      if (!ok) return;
+      gotoStep(1);
+      return;
+    }
+
+    if (activeTab === "review") {
+      await handleFinalSubmit();
+    }
+  };
+
+  const handleGoAllPurchases = () => {
+    showToast({
+      kind: "success",
+      title: "Purchase Created Successfully",
+      message: "Your purchase has been created successfully.",
+    });
+    navigate("/get-started/subscriptions");
+    onClose();
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // Render blocks
+  // ─────────────────────────────────────────────────────────────
   const renderStep0 = () => (
-    <div className="pur-np-grid-2">
+    <div className="met-np-grid-2">
       <SelectField
         label="Customer Name"
         required
@@ -413,8 +479,10 @@ export default function CreateSubscription({
           const id = Number(val);
           setSelectedProductId(id);
           clearError("productId");
+
           const prod = products.find((p) => p.productId === id);
           setSelectedProductName(prod?.productName || "");
+
           setSelectedRatePlanId(null);
           setSelectedRatePlanName("");
         }}
@@ -428,24 +496,20 @@ export default function CreateSubscription({
 
       <SelectField
         label="Rate Plan"
-                required
-
+        required
         value={selectedRatePlanId?.toString() || ""}
         onChange={(val) => {
           const id = Number(val);
           setSelectedRatePlanId(id);
           clearError("ratePlanId");
+
           const rp = ratePlans.find((r) => r.ratePlanId === id);
           setSelectedRatePlanName(rp?.ratePlanName || "");
         }}
         error={errors.ratePlanId}
         placeholderOption="Select Rate Plan"
         options={ratePlans
-          .filter((rp) =>
-            selectedProductId
-              ? rp.productId === selectedProductId
-              : true
-          )
+          .filter((rp) => (selectedProductId ? rp.productId === selectedProductId : true))
           .map((rp) => ({
             label: rp.ratePlanName,
             value: rp.ratePlanId.toString(),
@@ -456,8 +520,7 @@ export default function CreateSubscription({
 
       <SelectField
         label="Payment Type"
-                required
-
+        required
         value={paymentType}
         onChange={(val) => {
           if (val === "PREPAID" || val === "POSTPAID" || val === "") {
@@ -473,12 +536,12 @@ export default function CreateSubscription({
         ]}
       />
 
-      <div className="pur-np-field">
+      <div className="met-np-field">
         <TextareaField
           label="Admin Notes"
           placeholder="Enter admin notes"
-          value={planDescription}
-          onChange={setPlanDescription}
+          value={adminNotes}
+          onChange={setAdminNotes}
         />
       </div>
     </div>
@@ -498,231 +561,201 @@ export default function CreateSubscription({
               ? "Post-Paid"
               : "—",
       },
-      { label: "Admin Notes", value: planDescription || "—" },
+      { label: "Admin Notes", value: adminNotes || "—" },
     ];
 
     return (
       <section>
-        <div className="pur-np-section-header">
-          <h3 className="pur-np-section-title">REVIEW & CONFIRM</h3>
-        </div>
         <ReviewComponent title="PURCHASE DETAILS" rows={reviewRows} />
       </section>
     );
   };
 
-  const LockBadge = () => null; // not needed here, but kept for parity if you ever add locked steps
-
+  // ─────────────────────────────────────────────────────────────
+  // UI (same as CreateUsageMetric structure + met-np classnames)
+  // ─────────────────────────────────────────────────────────────
   return (
     <>
-      <TopBar
-        title="Create New Purchase"
-        onBack={handleTopbarBack}
-        cancel={{
-          onClick: () => setShowDeleteConfirm(true),
-          disabled: topActionsDisabled,
-        }}
-        save={{
-          onClick: handleSaveDraftTop,
-          label: isDraftSaved ? "Saved!" : "Save as Draft",
-          saved: isDraftSaved,
-          saving: isDraftSaving,
-          labelWhenSaved: "Saved as Draft",
-          disabled: topActionsDisabled,
-        }}
-      />
-
-      <div className="pur-np-viewport">
-        <div className="pur-np-card">
-          <div className="pur-np-grid">
-            {/* LEFT rail (steps) */}
-            <aside className="pur-np-rail">
-              <nav className="pur-np-steps">
-                {steps.map((step, i) => {
-                  const isActive = i === currentStep;
-                  const isCompleted = i < currentStep;
-                  const showConnector = i < steps.length - 1;
-
-                  // Step 1 (index 0): Always enabled
-                  // Step 2 (index 1): Only enabled if all required fields are filled
-                  const isDisabled = i === 1 && !canSaveNext;
-
-                  return (
-                    <button
-                      key={step.id}
-                      type="button"
-                      className={[
-                        "pur-np-step",
-                        isActive ? "active" : "",
-                        isCompleted ? "completed" : "",
-                        isDisabled ? "disabled" : ""
-                      ].join(" ").trim()}
-                      onClick={() => !isDisabled && gotoStep(i)}
-                      disabled={isDisabled}
-                      title={isDisabled ? "Please fill all required fields in Purchase Details first" : ""}
-                    >
-                      <span className="pur-np-step__bullet" aria-hidden="true">
-                        <span className="pur-np-step__icon">
-                          {isCompleted ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                cx="12"
-                                cy="12"
-                                r="11.5"
-                                fill="var(--color-primary-800)"
-                                stroke="var(--color-primary-800)"
-                              />
-                              <path
-                                d="M7 12l3 3 6-6"
-                                stroke="#FFFFFF"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                cx="12"
-                                cy="12"
-                                r="11"
-                                stroke="#C3C2D0"
-                                strokeWidth="2"
-                              />
-                              <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
-                            </svg>
-                          )}
-                        </span>
-                        {showConnector && <span className="pur-np-step__connector" />}
-                      </span>
-
-                      <span className="pur-np-step__text">
-                        <span className="pur-np-step__title">{step.title}</span>
-                        <span className="pur-np-step__desc">{step.desc}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </aside>
-
-            {/* MAIN area */}
-            <main className="pur-np-main">
-              <div className="af-skel-rule af-skel-rule--top" />
-              <div className="pur-np-main__inner">
-                <div className="pur-np-body">
-                  <form
-                    className="pur-np-form"
-                    onSubmit={(e) => e.preventDefault()}
-                  >
-                    <div className="pur-np-form-section">
-                      {activeTab === "details" && (
-                        <section>
-                          <div className="pur-np-section-header">
-                            <h3 className="pur-np-section-title">
-                              PURCHASE DETAILS
-                            </h3>
-                          </div>
-                          {renderStep0()}
-                        </section>
-                      )}
-
-                      {activeTab === "review" && renderStep1()}
-                    </div>
-
-                    {/* FOOTER */}
-                    <div className="pur-np-form-footer" style={{ position: "relative" }}>
-                      {errors.form && (
-                        <div className="pur-pur-np-error-message">
-                          {errors.form}
-                        </div>
-                      )}
-
-                      {activeTab === "details" && (
-                        <div className="pur-np-btn-group pur-np-btn-group--next">
-                          <PrimaryButton type="button" onClick={handleSaveAndNext}>
-                            Save & Next
-                          </PrimaryButton>
-                        </div>
-                      )}
-
-                      {activeTab === "review" && (
-                        <>
-                          <div className="pur-np-btn-group pur-np-btn-group--back">
-                            <SecondaryButton
-                              type="button"
-                              onClick={() => gotoStep(0)}
-                            >
-                              Back
-                            </SecondaryButton>
-                          </div>
-                          <div className="pur-np-btn-group pur-np-btn-group--next">
-                            <PrimaryButton
-                              type="button"
-                              onClick={handleFinalSubmit}
-                            >
-                              Create Purchase
-                            </PrimaryButton>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </main>
-          </div>
-
-          <div className="af-skel-rule af-skel-rule--bottom" />
-
-          {/* Save Draft modal – same pattern as metric screen */}
-          <SaveDraft
-            isOpen={showSavePrompt}
-            onClose={async () => {
-              setShowSavePrompt(false);
-              await deleteAndClose();
+      {showSuccess ? (
+        <ProductCreatedSuccess
+          productName={selectedCustomerName || "Purchase"}
+          titleOverride={`“${selectedCustomerName || "Purchase"}” Purchase Created Successfully`}
+          primaryLabelOverride="Go to All Purchases"
+          onPrimaryClick={handleGoAllPurchases}
+        />
+      ) : (
+        <>
+          <TopBar
+            title="Create New Purchase"
+            onBack={handleTopbarBack}
+            cancel={{
+              onClick: () => setShowDeleteConfirm(true),
+              disabled: topActionsDisabled,
             }}
-            onSave={async () => {
-              try {
-                const result = await saveDraft();
-                if (result) {
+            save={{
+              onClick: handleSaveDraft,
+              label: isDraftSaved ? "Saved!" : "Save as Draft",
+              saved: isDraftSaved,
+              saving: isDraftSaving,
+              labelWhenSaved: "Saved as Draft",
+              disabled: topActionsDisabled,
+            }}
+          />
+
+          <div className="met-np-viewport">
+            <div className="met-np-card">
+              <div className="met-np-grid">
+                <aside className="met-np-rail">
+                  <nav className="met-np-steps">
+                    {steps.map((step, i) => {
+                      const isActive = i === currentStep;
+                      const isCompleted = i < currentStep;
+                      const showConnector = i < steps.length - 1;
+
+                      return (
+                        <button
+                          key={step.id}
+                          type="button"
+                          className={[
+                            "met-np-step",
+                            isActive ? "active" : "",
+                            isCompleted ? "completed" : "",
+                          ]
+                            .join(" ")
+                            .trim()}
+                          onClick={() => gotoStep(i)}
+                        >
+                          <span className="met-np-step__bullet" aria-hidden="true">
+                            <span className="met-np-step__icon">
+                              {isCompleted ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
+                                  <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                                  <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                                </svg>
+                              )}
+                            </span>
+                            {showConnector && <span className="met-np-step__connector" />}
+                          </span>
+
+                          <span className="met-np-step__text">
+                            <span className="met-np-step__title">{step.title}</span>
+                            <span className="met-np-step__desc">{step.desc}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </aside>
+
+                <main className="met-np-main">
+                  <div className="af-skel-rule af-skel-rule--top" />
+                  <div className="met-np-main__inner">
+                    <div className="met-np-body">
+                      {activeTab === "details" && (
+                        <SectionHeader title="PURCHASE DETAILS" className="met-np-section-header-fixed" />
+                      )}
+                      {activeTab === "review" && (
+                        <SectionHeader title="REVIEW & CONFIRM" className="met-np-section-header-fixed" />
+                      )}
+
+                      <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
+                        <div className="met-np-form-section">
+                          {activeTab === "details" && <section>{renderStep0()}</section>}
+                          {activeTab === "review" && <section>{renderStep1()}</section>}
+                        </div>
+
+                        <div className="met-np-form-footer" style={{ position: "relative" }}>
+                          {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
+
+                          {activeTab === "details" && (
+                            <div className="met-np-btn-group met-np-btn-group--next">
+                              <PrimaryButton onClick={handleSaveAndNext} disabled={saving}>
+                                {saving ? "Saving..." : "Save & Next"}
+                              </PrimaryButton>
+                            </div>
+                          )}
+
+                          {activeTab === "review" && (
+                            <>
+                              {!canGoReview ? (
+                                <div
+                                  className="met-np-footer-hint"
+                                  style={{
+                                    position: "absolute",
+                                    left: "50%",
+                                    bottom: "20px",
+                                    transform: "translateX(-50%)",
+                                    color: "#8C8F96",
+                                    fontSize: 14,
+                                    pointerEvents: "none",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  Complete the previous step to unlock this step
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="met-np-btn-group met-np-btn-group--back">
+                                    <SecondaryButton onClick={() => gotoStep(0)} disabled={saving}>
+                                      Back
+                                    </SecondaryButton>
+                                  </div>
+                                  <div className="met-np-btn-group met-np-btn-group--next">
+                                    <PrimaryButton onClick={handleFinalSubmit} disabled={saving}>
+                                      {saving ? "Submitting..." : "Create Purchase"}
+                                    </PrimaryButton>
+                                  </div>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </main>
+              </div>
+
+              <div className="af-skel-rule af-skel-rule--bottom" />
+
+              <SaveDraft
+                isOpen={showSavePrompt}
+                onClose={async () => {
+                  setShowSavePrompt(false);
+                  await deleteAndClose();
+                }}
+                onSave={async () => {
+                  const ok = await handleSaveDraft();
                   showToast({
-                    kind: "success",
-                    title: "Draft Saved",
-                    message: "Your changes have been saved as a draft.",
+                    kind: ok ? "success" : "error",
+                    title: ok ? "Draft Saved" : "Failed to Save Draft",
+                    message: ok ? "Purchase draft saved successfully." : "Unable to save draft. Please try again.",
                   });
                   onClose();
-                }
-              } catch (error) {
-                console.error("Error saving draft from back button:", error);
-              }
-            }}
-            onDismiss={() => setShowSavePrompt(false)}
-          />
-        </div>
-      </div>
+                }}
+                onDismiss={() => setShowSavePrompt(false)}
+              />
+            </div>
+          </div>
 
-      {/* Delete / Cancel confirmation */}
-      <ConfirmDeleteModal
-        isOpen={showDeleteConfirm}
-        productName="subscription draft"
-           discardLabel="Keep editing"
-          confirmLabel="Discard"
-        onConfirm={deleteAndClose}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
+          <ConfirmDeleteModal
+            isOpen={showDeleteConfirm}
+            productName={selectedCustomerName || "this purchase"}
+            discardLabel="Keep editing"
+            confirmLabel="Discard"
+            onConfirm={async () => {
+              setShowDeleteConfirm(false);
+              await deleteAndClose();
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+          />
+        </>
+      )}
     </>
   );
 }

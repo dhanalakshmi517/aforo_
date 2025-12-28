@@ -73,6 +73,17 @@ const SearchInput: React.FC<Props> = ({
         disabled={isDisabled}
         onChange={(e) => onChange?.(e.target.value)}
       />
+
+      {derivedValue && !isDisabled && (
+        <button
+          className="si-clear-btn"
+          onClick={onClear}
+          aria-label="Clear search"
+          type="button"
+        >
+          <ClearIcon tone={isDisabled ? "disabled" : "dark"} />
+        </button>
+      )}
     </div>
   );
 };

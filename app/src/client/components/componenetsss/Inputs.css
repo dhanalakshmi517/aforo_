@@ -258,7 +258,7 @@ select.if-select:focus-visible,
 .if-select option:first-child,
 .if-select option[value=""] {
 overflow: hidden;
-color: #A6B4C1;
+color:var(--color-neutral-200);
 text-overflow: ellipsis;
 
 /* body/md/reg */
@@ -271,7 +271,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* Styling for selected placeholder */
 .if-select:invalid {
-  color: #A6B4C1;
+  color: var(--color-neutral-200);
 }
 
  

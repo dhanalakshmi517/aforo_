@@ -5,7 +5,7 @@ import Portal from "./Portal";
 export type DateSortValue = "newest" | "oldest";
 
 type Props = {
-  value: DateSortValue;
+  value: DateSortValue | null;
   onChange: (v: DateSortValue) => void;
   className?: string;
 };

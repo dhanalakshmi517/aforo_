@@ -11,6 +11,7 @@ import { useToast } from '../componenetsss/ToastProvider';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import SecondaryButton from '../componenetsss/SecondaryButton';
 import ProductCreatedSuccess from '../componenetsss/ProductCreatedSuccess';
+import SectionHeader from '../componenetsss/SectionHeader';
 
 import {
   getProducts,
@@ -254,6 +255,35 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   };
 
   const gotoStep = (index: number) => {
+    if (index < 0 || index > 2) return;
+
+    // forward navigation guards - only validate when user has filled at least one field
+    if (index > currentStep) {
+      // going to conditions step - validate metric step only if user has filled at least one field
+      if (currentStep === 0 && index === 1) {
+        // Check if any metric fields are filled
+        const hasMetricInput = Boolean(
+          metricName.trim() ||
+          selectedProductId ||
+          version.trim() ||
+          description.trim() ||
+          unitOfMeasure ||
+          aggregationFunction ||
+          aggregationWindow
+        );
+        
+        if (hasMetricInput) {
+          const isValid = validateCurrentStep(0);
+          if (!isValid) return;
+        }
+      }
+      
+      // going to review step - validate conditions step
+      if (currentStep === 1 && index === 2) {
+        if (isReviewLocked) return;
+      }
+    }
+
     setCurrentStep(index);
     const map: ActiveTab[] = ['metric', 'conditions', 'review'];
     setActiveTab(map[index] || 'metric');
@@ -575,11 +605,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         <ProductCreatedSuccess
           productName={metricName}
           titleOverride={`“${metricName || 'Usage Metric'}” Usage Metric Created Successfully`}
-          subtitleOverride="To start billing with this metric, please complete the next steps:"
-          stepsOverride={[
-            '•Attach this metric to your products or plans.',
-            '•Configure rate plans using this metric.',
-          ]}
+         
           primaryLabelOverride="Go to All Usage Metrics"
           onPrimaryClick={handleGoAllMetrics}
         />
@@ -648,42 +674,52 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                   <div className="af-skel-rule af-skel-rule--top" />
                   <div className="met-np-main__inner">
                     <div className="met-np-body">
+                      {activeTab === 'metric' && (
+                        <SectionHeader title="DEFINE METRIC & AGGREGATION" className="met-np-section-header-fixed" />
+                      )}
+                      {activeTab === 'conditions' && (
+                        <div className="met-np-section-header-fixed" style={{ display: 'flex', alignItems: 'center' }}>
+                          <SectionHeader title="USAGE CONDITIONS" />
+                          {isConditionsLocked && <LockBadge />}
+                        </div>
+                      )}
+                      {activeTab === 'review' && (
+                        <div className="met-np-section-header-fixed" style={{ display: 'flex', alignItems: 'center' }}>
+                          <SectionHeader title="REVIEW & CONFIRM" />
+                          {isReviewLocked && <LockBadge />}
+                        </div>
+                      )}
                       <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
                         <div className="met-np-form-section">
                           {/* STEP 1 */}
                           {activeTab === 'metric' && (
                             <section>
-                              <div className="met-np-section-header">
-                                <h3 className="met-np-section-title">DEFINE METRIC & AGGREGATION</h3>
-                              </div>
 
                               <div className="met-np-grid-2">
                                 {/* fields ... (unchanged) */}
                                 <InputField label="Metric Name" value={metricName} onChange={setMetricName}
                                 required
                                  placeholder="eg. API Calls" error={errors.metricName} />
-                                <div className="form-group">
-                                  <SelectField
-                                    label="Product"
-                                    value={selectedProductId}
-                                    required
+                                <SelectField
+                                  label="Product"
+                                  value={selectedProductId}
+                                  required
 
-                                    onChange={(v: string) => {
-                                      setSelectedProductId(v);
-                                      const prod = products.find(p => String(p.productId) === v);
-                                      setSelectedProductName(prod ? prod.productName : '');
-                                      setSelectedProductType(prod ? prod.productType : '');
-                                      setUnitOfMeasure('');
-                                      if (errors.product) {
-                                        const { product, ...rest } = errors;
-                                        setErrors(rest);
-                                      }
-                                    }}
-                                    options={productOptions}
-                                    error={errors.product}
-                                    className="select-product"
-                                  />
-                                </div>
+                                  onChange={(v: string) => {
+                                    setSelectedProductId(v);
+                                    const prod = products.find(p => String(p.productId) === v);
+                                    setSelectedProductName(prod ? prod.productName : '');
+                                    setSelectedProductType(prod ? prod.productType : '');
+                                    setUnitOfMeasure('');
+                                    if (errors.product) {
+                                      const { product, ...rest } = errors;
+                                      setErrors(rest);
+                                    }
+                                  }}
+                                  options={productOptions}
+                                  error={errors.product}
+                                  className="select-product"
+                                />
                                 <InputField label="Version" value={version}  required onChange={setVersion} placeholder="eg. v2.0" />
                                 <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" />
 
@@ -753,6 +789,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       }
                                     }}
                                     error={errors.aggregationFunction}
+                                    disabled={!unitOfMeasure}
                                   />
                                 </div>
 
@@ -770,6 +807,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       }
                                     }}
                                     error={errors.aggregationWindow}
+                                    disabled={!aggregationFunction}
                                   />
                                 </div>
                               </div>
@@ -779,10 +817,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                           {/* STEP 2: CONDITIONS */}
                           {activeTab === 'conditions' && (
                             <section>
-                              <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
-                                <h3 className="met-np-section-title">USAGE CONDITIONS</h3>
-                                {isConditionsLocked && <LockBadge />}
-                              </div>
 
                               <UsageConditionForm
                                 locked={isConditionsLocked}
@@ -802,10 +836,6 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                           {/* STEP 3: REVIEW */}
                           {activeTab === 'review' && (
                             <section>
-                              <div className="met-np-section-header" style={{ display: 'flex', alignItems: 'center' }}>
-                                <h3 className="met-np-section-title">REVIEW & CONFIRM</h3>
-                                {isReviewLocked && <LockBadge />}
-                              </div>
                               <Review
                                 metricName={metricName}
                                 productName={selectedProductName}

@@ -2,17 +2,13 @@
 
 
 
-.usage-form-container {
-  padding: 10px;
-}
-
 .filter-box {
   position: relative;
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-200);
   border-radius:var(--border-radius-sm);
   padding: 12px 16px;           /* slightly tighter padding */
-  margin-bottom: 0px;           /* smaller gap between filter rows */
+  margin-bottom: 12px;          /* gap between filter rows */
   width: 100%;
   max-width: 350px;
   box-sizing: border-box;

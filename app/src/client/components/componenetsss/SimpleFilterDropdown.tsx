@@ -58,15 +58,21 @@ const SimpleFilterDropdown: React.FC<Props> = ({
               }}
               style={{ cursor: disabled ? "not-allowed" : "pointer" }}
             >
-              <Checkbox
-                checked={checked}
-                disabled={disabled}
-                onChange={(next) => {
-                  if (disabled) return;
-                  onChange(toggle(value, opt.id));
+              <div
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
                 }}
-                className="sfd-checkbox"
-              />
+              >
+                <Checkbox
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={(next) => {
+                    if (disabled) return;
+                    onChange(toggle(value, opt.id));
+                  }}
+                  className="sfd-checkbox"
+                />
+              </div>
 
               <span className="sfd-label">{opt.label}</span>
             </div>

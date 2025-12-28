@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from 'react';
+// EditMetrics.tsx (NOW USING EditSubscription SHELL + CLASSNAMES — SAME AS EditProduct)
+
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import TopBar from '../../componenetsss/TopBar';
 import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
@@ -6,20 +11,19 @@ import { useToast } from '../../componenetsss/ToastProvider';
 import PrimaryButton from '../../componenetsss/PrimaryButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
-import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
 import MetricRow from '../../componenetsss/MetricRow';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 
-import { getProducts, Product, updateBillableMetric } from './api';
-import { getBillableMetricById } from './api';
+import { getProducts, Product, updateBillableMetric, getBillableMetricById } from './api';
 
 import EditUsage from './EditUsage';
 import EditAggregationFunction from './EditAggregationFunction';
 import EditAggregationWindow from './EditAggregationWindow';
 import EditReview from './Review';
 
-import './EditMetrics.css'; // uses editmet-np-* classes like EditProduct
+import '../../componenetsss/EditSkeletonForm.css';
+// NOTE: your old EditMetrics.css (editmet-np-*) won’t match anymore. Keep it only if it has shared styles.
 
 type ActiveTab = 'metric' | 'conditions' | 'review';
 
@@ -29,25 +33,26 @@ interface EditMetricsProps {
 }
 
 const steps = [
-  { id: 1, title: 'Metric & Aggregation' },
-  { id: 2, title: 'Usage Conditions' },
-  { id: 3, title: 'Review & Confirm' },
+  { id: 1, title: 'Metric & Aggregation', desc: 'Name, product, UOM and aggregation.' },
+  { id: 2, title: 'Usage Conditions', desc: 'Filters and billing criteria.' },
+  { id: 3, title: 'Review & Confirm', desc: 'Validate all details before saving.' },
 ];
 
-const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => {
+const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetricId = '' }) => {
   const { showToast } = useToast();
+  const { id: urlMetricId } = useParams<{ id: string }>();
+
+  // Use URL param if available, otherwise use prop
+  const metricId = (urlMetricId || propMetricId) as string | number;
 
   // rails / tabs
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>('metric');
 
-  // TopBar draft state
-  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  // popup / modals
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSaveDraftModal, setShowSaveDraftModal] = useState(false);
-  // edit popup state
-  const [showEditPopup, setShowEditPopup] = useState(false);
-  const [showUnsavedRequiredModal, setShowUnsavedRequiredModal] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
 
   // form state
   const [metricName, setMetricName] = useState('');
@@ -57,9 +62,9 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
   const [aggregationFunction, setAggregationFunction] = useState('');
   const [aggregationWindow, setAggregationWindow] = useState('');
   const [billingCriteria, setBillingCriteria] = useState('');
-  const [usageConditions, setUsageConditions] = useState<
-    { dimension: string; operator: string; value: string }[]
-  >([]);
+  const [usageConditions, setUsageConditions] = useState<{ dimension: string; operator: string; value: string }[]>(
+    [],
+  );
 
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
@@ -70,7 +75,26 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // originals for diff-only updates
-  const [originalValues, setOriginalValues] = React.useState<any>({});
+  const originalValuesRef = useRef<any>(null);
+
+  // scroll + custom scrollbar (same as EditProduct)
+  const formSectionRef = useRef<HTMLDivElement>(null);
+  const [scrollHeight, setScrollHeight] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!formSectionRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = formSectionRef.current;
+      const pct = (scrollTop / Math.max(1, scrollHeight - clientHeight)) * 100;
+      setScrollHeight(pct);
+    };
+
+    const el = formSectionRef.current;
+    if (!el) return;
+
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // fetch products
   useEffect(() => {
@@ -82,9 +106,11 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
   // prefill metric details
   useEffect(() => {
     if (!metricId) return;
+
     (async () => {
       try {
         setLoading(true);
+
         const data = await getBillableMetricById(metricId);
         if (!data) return;
 
@@ -95,13 +121,13 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
           description: data.description ?? '',
           aggregationFunction: data.aggregationFunction ?? '',
           aggregationWindow: data.aggregationWindow ?? '',
-          usageConditions: Array.isArray(data.usageConditions)
-            ? data.usageConditions
-            : [],
+          usageConditions: Array.isArray(data.usageConditions) ? data.usageConditions : [],
           billingCriteria: data.billingCriteria ?? '',
           productId: data.productId ? String(data.productId) : '',
+          productName: data.productName ?? '',
         };
-        setOriginalValues(original);
+
+        originalValuesRef.current = original;
 
         setMetricName(original.metricName);
         setVersion(original.version);
@@ -113,7 +139,9 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
         setBillingCriteria(original.billingCriteria);
 
         if (original.productId) setSelectedProductId(original.productId);
-        if (data.productName) setSelectedProductName(data.productName);
+        if (original.productName) setSelectedProductName(original.productName);
+      } catch (e) {
+        console.error('Failed to prefill metric:', e);
       } finally {
         setLoading(false);
       }
@@ -131,38 +159,47 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     }
   }, [products, selectedProductId]);
 
-  const gotoStep = (index: number) => {
+  const goToStep = (index: number) => {
     setCurrentStep(index);
     setActiveTab(index === 0 ? 'metric' : index === 1 ? 'conditions' : 'review');
   };
 
   const validateStep = (index: number): boolean => {
     const e: Record<string, string> = {};
+
     if (index === 0) {
       if (!metricName.trim()) e.metricName = 'Metric name is required';
       if (!selectedProductId) e.product = 'Product is required';
+      if (!version.trim()) e.version = 'Version is required';
       if (!unitOfMeasure) e.unitOfMeasure = 'Unit of Measure is required';
-      // Note: Aggregation Function and Aggregation Window are optional
     }
+
+    if (index === 1) {
+      if (!billingCriteria) e.billingCriteria = 'Billing criteria is required';
+      // (Optional) if user typed partial condition row, block next:
+      const hasPartial = usageConditions.some(c => !!(c.dimension || c.operator || c.value) && !(c.dimension && c.operator && c.value));
+      if (hasPartial) e.usageConditions = 'Complete or clear incomplete conditions';
+    }
+
     if (index === 2) {
-      if (!metricName.trim() || !selectedProductId || !unitOfMeasure) {
+      if (!metricName.trim() || !selectedProductId || !version.trim() || !unitOfMeasure || !billingCriteria) {
         e.form = 'Please fill all required fields';
       }
     }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const buildChangedPayload = () => {
+    const original = originalValuesRef.current || {};
     const payload: any = { metricId: Number(metricId) };
+
     const pushIfChanged = (key: string, value: any) => {
-      if (value !== originalValues[key]) payload[key] = value;
+      if (value !== original[key]) payload[key] = value;
     };
 
     pushIfChanged('metricName', metricName);
-    if (selectedProductId && selectedProductId !== originalValues.productId) {
-      payload.productId = Number(selectedProductId);
-    }
     pushIfChanged('version', version);
     pushIfChanged('unitOfMeasure', unitOfMeasure);
     pushIfChanged('description', description);
@@ -170,8 +207,12 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     pushIfChanged('aggregationWindow', aggregationWindow);
     pushIfChanged('billingCriteria', billingCriteria);
 
+    if (selectedProductId && selectedProductId !== original.productId) {
+      payload.productId = Number(selectedProductId);
+    }
+
     const currentConditions = JSON.stringify(usageConditions);
-    const originalConditions = JSON.stringify(originalValues.usageConditions || []);
+    const originalConditions = JSON.stringify(original.usageConditions || []);
     if (currentConditions !== originalConditions) {
       const valid = usageConditions.filter(c => c.dimension && c.operator && c.value);
       payload.usageConditions = valid.length ? valid : [];
@@ -180,99 +221,95 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
     return payload;
   };
 
-  const handleSubmitFinal = async () => {
-    if (!metricId) {
-      onClose();
-      return;
+  const hasPendingChanges = () => {
+    const payload = buildChangedPayload();
+    return Object.keys(payload).length > 1;
+  };
+
+  const hasEmptyRequiredFields = () => {
+    if (activeTab === 'metric') {
+      return !metricName.trim() || !selectedProductId || !version.trim() || !unitOfMeasure;
     }
-    if (!validateStep(2)) return;
+    if (activeTab === 'conditions') {
+      return !billingCriteria;
+    }
+    return false;
+  };
+
+  const saveAllChanges = async (): Promise<boolean> => {
+    if (!metricId) return false;
 
     try {
       setLoading(true);
+
       const payload = buildChangedPayload();
-      if (Object.keys(payload).length <= 1) {
-        onClose();
-        return;
-      }
+      if (Object.keys(payload).length <= 1) return true; // nothing to save
+
       const ok = await updateBillableMetric(Number(metricId), payload);
       if (!ok) throw new Error('Failed to update metric');
-      showToast({
-        kind: 'success',
-        title: 'Changes Saved',
-        message: 'Metric updated successfully.',
-      });
-      onClose();
+
+      // reset original snapshot
+      originalValuesRef.current = {
+        ...(originalValuesRef.current || {}),
+        metricName,
+        version,
+        unitOfMeasure,
+        description,
+        aggregationFunction,
+        aggregationWindow,
+        billingCriteria,
+        usageConditions,
+        productId: selectedProductId,
+        productName: selectedProductName,
+      };
+
+      return true;
     } catch (err) {
-      console.error('Error updating metric:', err);
-      showToast({
-        kind: 'error',
-        title: 'Failed to Save Changes',
-        message: 'Could not update metric. Please try again.',
-      });
+      console.error('Error saving metric:', err);
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveDraft = async () => {
-    if (!metricId || draftStatus === 'saving') return;
-
-    try {
-      setDraftStatus('saving');
-      const payload = buildChangedPayload();
-      if (Object.keys(payload).length <= 1) {
-        setDraftStatus('idle');
-        onClose();
-        return;
-      }
-      const ok = await updateBillableMetric(Number(metricId), payload);
-      if (!ok) throw new Error('Failed to save draft');
-      setDraftStatus('saved');
-      showToast({
-        kind: 'success',
-        title: 'Draft Saved',
-        message: 'Metric draft saved successfully.',
-      });
-      setTimeout(() => setDraftStatus('idle'), 3500);
-      onClose();
-    } catch (err) {
-      console.error('Save draft failed:', err);
-      showToast({
-        kind: 'error',
-        title: 'Failed to Save Draft',
-        message: 'Unable to save draft. Please try again.',
-      });
-      setDraftStatus('idle');
-    }
-  };
-
-  const handleCancel = () => setShowDeleteConfirm(true);
-
-  const hasChanges = () => {
-    const payload = buildChangedPayload();
-    return Object.keys(payload).length > 1;
-  };
-
-  const handleBack = () => {
-    // If any required fields are empty, show UnsavedChangesModal instead of closing immediately
-    const hasEmptyRequiredFields =
-      !metricName.trim() ||
-      !selectedProductId ||
-      !version.trim() ||
-      !unitOfMeasure ||
-      !billingCriteria;
-
-    if (hasEmptyRequiredFields) {
-      setShowUnsavedRequiredModal(true);
+  const handleNextStep = async () => {
+    if (activeTab === 'metric') {
+      if (!validateStep(0)) return;
+      goToStep(1);
       return;
     }
 
-    // Otherwise fall back to existing unsaved-changes detection
-    if (hasChanges()) {
-      setShowEditPopup(true);
-    } else {
-      onClose();
+    if (activeTab === 'conditions') {
+      if (!validateStep(1)) return;
+      goToStep(2);
+      return;
     }
+
+    if (activeTab === 'review') {
+      const changesExist = hasPendingChanges();
+      if (!changesExist) {
+        onClose();
+        return;
+      }
+
+      if (!validateStep(2)) return;
+
+      const success = await saveAllChanges();
+      if (success) {
+        showToast({ kind: 'success', title: 'Changes Saved', message: 'Metric updated successfully.' });
+        onClose();
+      } else {
+        showToast({
+          kind: 'error',
+          title: 'Failed to Save Changes',
+          message: 'Could not update metric. Please try again.',
+        });
+      }
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 0) goToStep(currentStep - 1);
   };
 
   const renderMetricTab = () => {
@@ -282,30 +319,34 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
       SQLRESULT: ['CELL', 'MB', 'ROW', 'QUERY_EXECUTION'],
       LLMTOKEN: ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'],
     };
+
     const key = (selectedProductType || '').toUpperCase();
-    const uomOptions = (uomOptionsMap[key] || ['UNIT']).map(o => ({
-      label: o,
-      value: o,
-    }));
+    const uomOptions = (uomOptionsMap[key] || ['UNIT']).map(o => ({ label: o, value: o }));
 
     return (
-      <div className="editmet-np-section">
-        <div className="editmet-np-form-row">
-          <div className="editmet-np-form-group">
+      <div className="edit-np-section">
+        <div className="edit-np-form-row">
+          <div className="edit-np-form-group">
             <InputField
-              label='Metric Name'
+              label="Metric Name"
               required
               value={metricName}
-              onChange={setMetricName}
+              onChange={(v: string) => {
+                setMetricName(v);
+                if (errors.metricName) {
+                  const { metricName, ...rest } = errors;
+                  setErrors(rest);
+                }
+              }}
               placeholder="eg. API Calls"
               error={errors.metricName}
             />
           </div>
 
-          <div className="editmet-np-form-group">
+          <div className="edit-np-form-group">
             <SelectField
-            label='Product'
-            required
+              label="Product"
+              required
               placeholder="Select Product"
               value={selectedProductId}
               onChange={(val: string) => {
@@ -313,14 +354,17 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                 const prod = products.find(p => String(p.productId) === val);
                 setSelectedProductName(prod ? prod.productName : '');
                 setSelectedProductType(prod ? prod.productType : '');
+
                 // reset dependent fields
                 setAggregationFunction('');
                 setAggregationWindow('');
                 setUnitOfMeasure('');
-                if (errors.product) {
-                  const { product, ...rest } = errors;
-                  setErrors(rest);
-                }
+
+                setErrors(prev => {
+                  const next = { ...prev };
+                  delete next.product;
+                  return next;
+                });
               }}
               options={products.map(p => ({
                 label: p.productName,
@@ -331,66 +375,78 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
           </div>
         </div>
 
-        <div className="editmet-np-form-row">
-          <div className="editmet-np-form-group">
+        <div className="edit-np-form-row">
+          <div className="edit-np-form-group">
             <InputField
-            label='Version'
-            required
-             value={version} onChange={setVersion} placeholder="eg. v1.0" />
+              label="Version"
+              required
+              value={version}
+              onChange={(v: string) => {
+                setVersion(v);
+                if (errors.version) {
+                  const { version, ...rest } = errors;
+                  setErrors(rest);
+                }
+              }}
+              placeholder="eg. v1.0"
+              error={errors.version}
+            />
           </div>
 
-          <div className="editmet-np-form-group">
+          <div className="edit-np-form-group">
             <TextareaField
-            label='Description'
+              label="Description"
               value={description}
-              onChange={setDescription}
+              onChange={(v: string) => setDescription(v)}
               placeholder="Describe what this metric measures..."
             />
           </div>
         </div>
 
-        <div className="editmet-np-form-row">
-          <div className="editmet-np-form-group">
+        <div className="edit-np-form-row">
+          <div className="edit-np-form-group">
             <SelectField
-            label='UOM'
-              placeholder="Select Unit"
+              label="UOM"
               required
+              placeholder="Select Unit"
               value={unitOfMeasure}
               onChange={(v: string) => {
                 setUnitOfMeasure(v);
-                if (errors.unitOfMeasure) {
-                  const { unitOfMeasure, ...rest } = errors;
-                  setErrors(rest);
-                }
+                setErrors(prev => {
+                  const next = { ...prev };
+                  delete next.unitOfMeasure;
+                  return next;
+                });
               }}
               options={uomOptions}
               error={errors.unitOfMeasure}
             />
           </div>
 
-          <div className="editmet-np-form-group">
+          <div className="edit-np-form-group">
             <EditAggregationFunction
-            label='Aggregatio Fuction'
+              label="Aggregation Function"
               productType={selectedProductType}
               unitOfMeasure={unitOfMeasure}
               value={aggregationFunction}
               onChange={(v: string) => {
                 setAggregationFunction(v);
-                if (errors.aggregationFunction) {
-                  const { aggregationFunction, ...rest } = errors;
-                  setErrors(rest);
-                }
+                setErrors(prev => {
+                  const next = { ...prev };
+                  delete next.aggregationFunction;
+                  return next;
+                });
               }}
             />
           </div>
 
-          <div className="editmet-np-form-group">
+          <div className="edit-np-form-group">
             <EditAggregationWindow
-            label='Aggregationwindow'
+              label="Aggregation Window"
               productType={selectedProductType}
               unitOfMeasure={unitOfMeasure}
               value={aggregationWindow}
-              onChange={setAggregationWindow}
+              onChange={(v: string) => setAggregationWindow(v)}
             />
           </div>
         </div>
@@ -400,62 +456,119 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
 
   return (
     <>
-      <TopBar title="Edit Usage Metric" onBack={handleBack} />
+      <TopBar
+        title={metricName ? `Edit ${metricName}` : 'Edit Usage Metric'}
+        onBack={() => {
+          if (hasEmptyRequiredFields()) {
+            setShowUnsavedChangesModal(true);
+            return;
+          }
 
-      <div className="editmet-np-viewport">
-        <div className="editmet-np-card">
-          <div className="editmet-np-grid">
-            {/* Left rail */}
-            <aside className="editmet-np-rail">
-              <nav className="editmet-np-steps">
+          const hasChanges = hasPendingChanges();
+          if (hasChanges) setShowSaveDraftModal(true);
+          else onClose();
+        }}
+      />
+
+      {/* === SHELL: EXACTLY LIKE EditProduct / EditSubscription (editsub-np-*) === */}
+      <div className="editsub-np-viewport">
+        <div className="editsub-np-card">
+          <div className="editsub-np-grid">
+            {/* Sidebar / rail */}
+            <aside className="editsub-np-rail">
+              <nav className="editsub-np-steps">
                 {steps.map((step, index) => {
                   const isActive = index === currentStep;
                   const isCompleted = index < currentStep;
+
                   return (
                     <MetricRow
                       key={step.id}
                       title={step.title}
                       state={isActive ? 'active' : 'default'}
-                      className={`editmet-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`.trim()}
-                      onClick={() => gotoStep(index)}
+                      className={['editsub-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : '']
+                        .join(' ')
+                        .trim()}
+                      onClick={async () => {
+                        if (index === currentStep) return;
+
+                        // go back freely
+                        if (index < currentStep) {
+                          goToStep(index);
+                          return;
+                        }
+
+                        // forward: one step only + validate current step
+                        const nextIndex = currentStep + 1;
+
+                        if (activeTab === 'metric') {
+                          const ok = validateStep(0);
+                          if (!ok) return;
+                          goToStep(nextIndex);
+                          return;
+                        }
+
+                        if (activeTab === 'conditions') {
+                          const ok = validateStep(1);
+                          if (!ok) return;
+                          goToStep(nextIndex);
+                          return;
+                        }
+                      }}
                     />
                   );
                 })}
               </nav>
             </aside>
 
-            {/* MAIN area – aligned with EditRatePlan/EditSubscription skeleton */}
-            <main className="editmet-np-main">
-              <div className="editmet-np-main__inner">
-                <div className="editmet-np-body">
-                  <form
-                    className="editmet-np-form"
-                    onSubmit={e => {
-                      e.preventDefault();
-                    }}
-                  >
-                    <div className="editmet-np-form-section">
+            {/* Main content area */}
+            <main className="editsub-np-main">
+              <div className="editsub-np-main__inner">
+                <div className="editsub-np-body">
+                  <form className="editsub-np-form" onSubmit={e => e.preventDefault()}>
+                    <div className="editsub-np-form-section" ref={formSectionRef}>
                       {loading ? (
                         <div style={{ padding: 20 }}>Loading...</div>
                       ) : (
                         <>
+                          {/* METRIC */}
                           {activeTab === 'metric' && renderMetricTab()}
 
+                          {/* CONDITIONS */}
                           {activeTab === 'conditions' && (
-                            <div className="editmet-np-section">
+                            <div className="edit-np-section">
                               <EditUsage
                                 productType={selectedProductType}
                                 unitOfMeasure={unitOfMeasure}
                                 conditions={usageConditions}
                                 setConditions={setUsageConditions}
                                 billingCriteria={billingCriteria}
-                                onBillingCriteriaChange={setBillingCriteria}
+                                onBillingCriteriaChange={(v: string) => {
+                                  setBillingCriteria(v);
+                                  if (errors.billingCriteria) {
+                                    const { billingCriteria, ...rest } = errors;
+                                    setErrors(rest);
+                                  }
+                                }}
                               />
+
+                              {/* inline errors to match step validation */}
+                              {!!errors.usageConditions && (
+                                <div style={{ marginTop: 10, fontSize: 12, color: '#B42318' }}>
+                                  {errors.usageConditions}
+                                </div>
+                              )}
+                              {!!errors.billingCriteria && (
+                                <div style={{ marginTop: 10, fontSize: 12, color: '#B42318' }}>
+                                  {errors.billingCriteria}
+                                </div>
+                              )}
                             </div>
                           )}
 
+                          {/* REVIEW */}
                           {activeTab === 'review' && (
-                            <div className="prod-np-section">
+                            <div className="edit-np-section">
                               <EditReview
                                 metricName={metricName}
                                 description={description}
@@ -473,101 +586,106 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId = '' }) => 
                       )}
                     </div>
 
-                    <div className="af-skel-rule af-skel-rule--bottom" />
+                    {/* Custom Scrollbar (same logic as EditProduct) */}
+                    {formSectionRef.current &&
+                      formSectionRef.current.scrollHeight > formSectionRef.current.clientHeight && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: `${scrollHeight}%`,
+                            transition: 'top 0.1s ease-out',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          <VerticalScrollbar
+                            height={`${
+                              (formSectionRef.current.clientHeight / formSectionRef.current.scrollHeight) * 100
+                            }%`}
+                            color="#C3C2D0"
+                            thickness={4}
+                            className="editsub-scrollbar-custom"
+                          />
+                        </div>
+                      )}
 
-                    {/* FOOTER – same alignment pattern */}
-                    <div className="editmet-np-form-footer">
-                      <div className="editmet-np-btn-group editmet-np-btn-group--back">
+                    {/* Footer (EditSubscription classnames) */}
+                    <div className="editsub-np-form-footer">
+                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
                         {activeTab !== 'metric' && (
-                          <SecondaryButton
-                            type="button"
-                            onClick={() => gotoStep(currentStep - 1)}
-                            disabled={loading}
-                          >
+                          <SecondaryButton type="button" onClick={handlePreviousStep} disabled={loading}>
                             Back
                           </SecondaryButton>
                         )}
                       </div>
 
-                      <div className="editmet-np-btn-group editmet-np-btn-group--next">
-                        {activeTab !== 'review' ? (
-                          <PrimaryButton
-                            type="button"
-                            onClick={() => {
-                              if (!validateStep(currentStep)) return;
-                              gotoStep(currentStep + 1);
-                            }}
-                            disabled={loading}
-                          >
-                            {loading ? 'Saving...' : 'Next'}
-                          </PrimaryButton>
-                        ) : (
-                          <PrimaryButton
-                            type="button"
-                            onClick={handleSubmitFinal}
-                            disabled={loading}
-                          >
-                            {loading ? 'Saving...' : 'Save changes'}
-                          </PrimaryButton>
-                        )}
+                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
+                        <PrimaryButton type="button" onClick={handleNextStep} disabled={loading}>
+                          {loading ? '' : activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
+                        </PrimaryButton>
                       </div>
                     </div>
                   </form>
                 </div>
               </div>
-
             </main>
           </div>
+
+          {/* match your EditProduct bottom rule placement */}
+          <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
         </div>
-
-        <VerticalScrollbar height="100%" color="#D9DFE8" thickness={4} className="editmet-np-scrollbar" />
-
-        <SaveAsDraftModal
-          isOpen={showSaveDraftModal}
-          onSave={() => {
-            setShowSaveDraftModal(false);
-            onClose();
-          }}
-          onDelete={() => {
-            setShowSaveDraftModal(false);
-            onClose();
-          }}
-        />
-
-        <ConfirmDeleteModal
-          isOpen={showDeleteConfirm}
-          productName={metricName || 'this metric'}
-          onConfirm={() => {
-            setShowDeleteConfirm(false);
-            onClose();
-          }}
-          onCancel={() => setShowDeleteConfirm(false)}
-        />
-
-        <EditPopup
-          isOpen={showEditPopup}
-          onDismiss={() => setShowEditPopup(false)}
-          onClose={() => {
-            setShowEditPopup(false);
-            onClose();
-          }}
-          onSave={async () => {
-            await handleSaveDraft();
-            onClose();
-          }}
-        />
-
-        {showUnsavedRequiredModal && (
-          <UnsavedChangesModal
-            onDiscard={() => {
-              setShowUnsavedRequiredModal(false);
-              onClose();
-            }}
-            onKeepEditing={() => setShowUnsavedRequiredModal(false)}
-            onClose={() => setShowUnsavedRequiredModal(false)}
-          />
-        )}
       </div>
+
+      {/* Save draft popup (same pattern as EditProduct) */}
+      <EditPopup
+        isOpen={showSaveDraftModal}
+        onClose={() => {
+          setShowSaveDraftModal(false);
+          onClose();
+        }}
+        onDismiss={() => setShowSaveDraftModal(false)}
+        onSave={async () => {
+          setShowSaveDraftModal(false);
+
+          if (!hasPendingChanges()) {
+            onClose();
+            return;
+          }
+
+          const success = await saveAllChanges();
+          if (success) {
+            showToast({ kind: 'success', title: 'Changes Saved', message: 'Metric updated successfully.' });
+            onClose();
+          } else {
+            showToast({
+              kind: 'error',
+              title: 'Failed to Save Changes',
+              message: 'Could not update metric. Please try again.',
+            });
+          }
+        }}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        productName={metricName || 'this metric'}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          onClose();
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+
+      {showUnsavedChangesModal && (
+        <UnsavedChangesModal
+          onDiscard={() => {
+            setShowUnsavedChangesModal(false);
+            onClose();
+          }}
+          onKeepEditing={() => setShowUnsavedChangesModal(false)}
+          onClose={() => setShowUnsavedChangesModal(false)}
+        />
+      )}
     </>
   );
 };
