@@ -31,14 +31,6 @@ const SearchIcon = ({ tone }: { tone: "muted" | "dark" | "disabled" }) => (
   </svg>
 );
 
-const ClearIcon = ({ tone }: { tone: "dark" | "disabled" }) => (
- <svg xmlns="http://www.w3.org/2000/svg"
-     className={`si-clear si-clear--${tone}`}
- width="10" height="10" viewBox="0 0 10 10" fill="none">
-  <path d="M8.75 0.75L0.75 8.75M0.75 0.75L8.75 8.75" stroke="#19222D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-);
-
 const SearchInput: React.FC<Props> = ({
   state = "default",
   value,
@@ -49,8 +41,7 @@ const SearchInput: React.FC<Props> = ({
 }) => {
   const isDisabled = state === "disabled";
 
-  const derivedValue =
-    value !== undefined ? value : state === "filled" ? "Raghal" : "";
+  const derivedValue = value || "";
 
   const iconTone: "muted" | "dark" | "disabled" =
     isDisabled ? "disabled" : state === "default" ? "muted" : "dark";
@@ -74,16 +65,6 @@ const SearchInput: React.FC<Props> = ({
         onChange={(e) => onChange?.(e.target.value)}
       />
 
-      {derivedValue && !isDisabled && (
-        <button
-          className="si-clear-btn"
-          onClick={onClear}
-          aria-label="Clear search"
-          type="button"
-        >
-          <ClearIcon tone={isDisabled ? "disabled" : "dark"} />
-        </button>
-      )}
     </div>
   );
 };

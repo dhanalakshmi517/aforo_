@@ -15,7 +15,7 @@
   background: var(--color-neutral-50);
 
   box-sizing: border-box;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 
@@ -62,23 +62,6 @@ line-height: var(--line-height-body-md, 20px);}
 .si-icon path{ stroke:var(--color-neutral-600); }
 .si-icon--dark path{ stroke: var(--color-neutral-1000); }
 .si-icon--disabled path{ stroke: var(--color-neutral-300); }
-
-.si-clear-btn{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  flex-shrink: 0;      /* don't collapse when space is tight */
-  margin-left: -14px;   /* remove margin to keep inside container */
-  z-index: 10;
-  position: relative;
-}
-
-.si-clear path{ stroke: var(--color-neutral-1700); }
-.si-clear--disabled path{ stroke: #A6B9C9; }
 
 /* STATES */
 .si--default{
