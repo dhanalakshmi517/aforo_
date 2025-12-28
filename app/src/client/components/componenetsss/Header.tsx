@@ -91,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({
 
         {showDivider && onFilterClick && showPrimary && (
           <div className="header-divider" aria-hidden="true">
-            <svg width="1" height="13" viewBox="0 0 1 13">
+            <svg width="1" height="8" viewBox="0 0 1 8">
               <path d="M0.5 0.5V12.5" stroke="#D9DFE8" strokeLinecap="round" />
             </svg>
           </div>
@@ -108,7 +108,7 @@ const Header: React.FC<HeaderProps> = ({
 
         {showDivider && (
           <div className="header-divider" aria-hidden="true">
-            <svg width="1" height="13" viewBox="0 0 1 13">
+            <svg width="1" height="8" viewBox="0 0 1 8">
               <path d="M0.5 0.5V12.5" stroke="#D9DFE8" strokeLinecap="round" />
             </svg>
           </div>

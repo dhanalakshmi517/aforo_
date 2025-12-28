@@ -1493,7 +1493,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                 [ProductType.LLMTOKEN]: 'LLM Token'
                               };
                               const normalized = (product.productType || '').toLowerCase();
-                              return (map as any)[normalized] || product.productType || '';
+                              return (map as any)[normalized] || product.productType || '-';
                             })()}
                           </span>
                         </td>

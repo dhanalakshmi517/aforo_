@@ -1,4 +1,4 @@
-.form-group label {
+.edit-con-form-group label {
   color: var(--color-neutral-1700);
 
   /* body/md/reg */
@@ -7,16 +7,13 @@
   font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-body-md, 20px); /* 142.857% */
-}.configuration-tab {
-  padding: 20px;
-  max-width: 470px;
+}.edit-con-configuration-tab {
+  max-width: 450px;
   margin: 0 ;
   background-color: var(--color-neutral-white);
 }
 
 .configuration-fields {
-  margin-top: 8px; /* Reduced from 16px to 8px */
-  padding: 8px; /* Reduced from 12px to 8px */
   /* background: #f8f9fa; */
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -30,11 +27,11 @@
   font-weight: 600;
 }
 
-.form-group {
+.edit-con-form-group {
   margin-bottom: 0px; /* Reduced from 8px to 0px */
 }
 
-.form-group label {
+.edit-con-form-group label {
   display: block;
   margin-bottom: 2px; /* Reduced from 8px to 2px */
   color: var(--color-neutral-1700);
@@ -97,12 +94,12 @@ input[type='checkbox'] {
 
 
 
-.form-group {
+.edit-con-form-group {
   margin-bottom: 0px; /* Reduced from 2px to 0px */
 }
 
-.form-group label,
-.form-group .if-label {
+.edit-con-form-group label,
+.edit-con-form-group .if-label {
   color: var(--color-neutral-1700);
 
   /* body/md/reg */

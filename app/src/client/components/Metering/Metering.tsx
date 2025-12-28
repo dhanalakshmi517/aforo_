@@ -16,6 +16,10 @@ import NoFileSvg from "./nofile.svg";
 import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
 import { logout } from "../../utils/auth";
 import PrimaryButton from '../componenetsss/PrimaryButton';
+import { getProducts as getProductsApi, BASE_URL as API_BASE_URL } from '../Products/api';
+import { ProductIconData } from '../Products/ProductIcon';
+import axios from 'axios';
+import { getAuthHeaders } from '../../utils/auth';
 import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
 import Tooltip from '../componenetsss/Tooltip';
 import { Checkbox } from '../componenetsss/Checkbox';
@@ -98,6 +102,10 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const { showToast } = useToast();
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [showEditMetricForm, setShowEditMetricForm] = useState(false);
+  
+  // Product icons state
+  const [productIcons, setProductIcons] = useState<Record<number, { iconData: ProductIconData | null; iconUrl: string | null }>>({});
+  const [loadingProductIcons, setLoadingProductIcons] = useState<Set<number>>(new Set());
 
   // Column filter / sort popover state
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
@@ -160,7 +168,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     }
   };
 
-  const fetchMetrics = React.useCallback(async () => {
+  const fetchMetrics = async () => {
     setIsLoading(true);
     try {
       const data: UsageMetricDTO[] = await getUsageMetrics();
@@ -177,9 +185,9 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         }
         return {
           id: (m as any).metricId ?? (m as any).billableMetricId,
-          usageMetric: m.metricName,
-          productName: m.productName,
-          unit: m.unitOfMeasure,
+          usageMetric: m.metricName ?? (m as any).usageMetric ?? "-",
+          productName: m.productName ?? "-",
+          unit: m.unitOfMeasure ?? "-",
           status: (m as any).status ?? (m as any).metricStatus ?? "Active",
           createdOn: (m as any).createdOn,
           productId: m.productId,
@@ -187,18 +195,152 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         };
       });
       setMetrics(mapped);
-    } catch (err) {
-      console.error(err);
-      if (String(err).includes("401")) logout();
+
+      // Fetch product icons for all unique product IDs
+      const uniqueProductIds = [...new Set(mapped.map(m => m.productId).filter(id => id !== undefined))] as number[];
+      uniqueProductIds.forEach(productId => {
+        if (!productIcons[productId] && !loadingProductIcons.has(productId)) {
+          loadProductIcon(productId);
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching metrics:", error);
+      if (error?.response?.status === 401) {
+        logout();
+        navigate("/login");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
+
+  // Helper functions for parsing product icons (same as RatePlans.tsx)
+  const parseProductIconField = (field: any): any => {
+    if (!field) return null;
+    if (typeof field === 'object') return field;
+    if (typeof field === 'string') {
+      try { return JSON.parse(field); } catch { return null; }
+    }
+    return null;
+  };
+
+  const extractIconData = (parsed: any, fallbackLabel: string): ProductIconData | null => {
+    if (!parsed) return null;
+    if (parsed.iconData && typeof parsed.iconData === 'object') {
+      return parsed.iconData as ProductIconData;
+    }
+    if (parsed.id && parsed.svgPath) {
+      return parsed as ProductIconData;
+    }
+    if (parsed.svgPath || parsed.svgContent) {
+      return {
+        id: parsed.id || `icon-${Date.now()}`,
+        label: parsed.label || fallbackLabel,
+        svgPath: parsed.svgPath || parsed.svgContent,
+        viewBox: parsed.viewBox || '0 0 24 24',
+        tileColor: parsed.tileColor,
+        outerBg: parsed.outerBg
+      };
+    }
+    return null;
+  };
+
+  const loadProductIcon = async (productId: number) => {
+    if (loadingProductIcons.has(productId)) return;
+
+    setLoadingProductIcons(prev => new Set(prev).add(productId));
+
+    try {
+      const products = await getProductsApi();
+      const product = products.find((p: any) => Number(p.productId) === productId);
+
+      if (!product) {
+        setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
+        return;
+      }
+
+      let iconData: ProductIconData | null = null;
+      let iconUrl: string | null = null;
+
+      // Try localStorage cache first
+      try {
+        const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+        let cachedIconJson = iconCache[product.productId] || iconCache[String(productId)] || iconCache[productId];
+
+        if (cachedIconJson) {
+          const parsedCache = parseProductIconField(cachedIconJson);
+          iconData = extractIconData(parsedCache, product.productName || 'Product');
+        }
+      } catch (e) {
+        console.error('Error reading icon cache:', e);
+      }
+
+      // Try productIcon field from API
+      if (!iconData && product.productIcon && product.productIcon !== 'null' && product.productIcon !== '') {
+        try {
+          const parsed = parseProductIconField(product.productIcon);
+          iconData = extractIconData(parsed, product.productName || 'Product');
+        } catch (e) {
+          console.error('Error parsing productIcon:', e);
+        }
+      }
+
+      // Try individual product fetch
+      if (!iconData) {
+        try {
+          const { getProductById } = await import('../Products/api');
+          const individualProduct = await getProductById(String(productId));
+          if (individualProduct?.productIcon) {
+            const parsed = parseProductIconField(individualProduct.productIcon);
+            iconData = extractIconData(parsed, product.productName || 'Product');
+
+            if (iconData) {
+              try {
+                const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+                iconCache[product.productId] = JSON.stringify({ iconData });
+                localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+              } catch (e) {
+                console.warn('Failed to cache icon data:', e);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error fetching individual product:', e);
+        }
+      }
+
+      // Create fallback if no icon data found
+      if (!iconData && !iconUrl) {
+        const colors = ['#0F6DDA', '#23A36D', '#CC9434', '#E3ADEB', '#FF6B6B', '#4ECDC4', '#95E77E', '#FFD93D'];
+        const colorIndex = productId % colors.length;
+
+        iconData = {
+          id: `product-fallback-${productId}`,
+          label: product.productName || 'Product',
+          svgPath: 'M12 2L2 7V12L12 17L22 12V7L12 2ZM12 12L4.53 8.19L12 4.36L19.47 8.19L12 12Z',
+          viewBox: '0 0 24 24',
+          tileColor: colors[colorIndex]
+        };
+      }
+
+      setProductIcons(prev => ({ ...prev, [productId]: { iconData, iconUrl } }));
+    } catch (e) {
+      console.error('Error loading product icon:', e);
+      setProductIcons(prev => ({ ...prev, [productId]: { iconData: null, iconUrl: null } }));
+    } finally {
+      setLoadingProductIcons(prev => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     fetchMetrics();
   }, [fetchMetrics]);
 
+  // ... rest of the code remains the same ...
   if (showNewUsageMetricForm) {
     return <CreateUsageMetric draftMetricId={selectedMetricId ?? undefined} onClose={() => { setShowNewUsageMetricForm(false); fetchMetrics(); }} />;
   }
@@ -642,28 +784,44 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                 <tr key={metric.id}>
                   <td className="metrics-cell">
                     <div className="metrics-wrapper">
-                      <div 
-                        className="metric-item" 
-                        style={{ 
-                          backgroundColor: getMetricColor(idx).bg, 
-                          color: getMetricColor(idx).text 
-                        }}
-                      >
-                        <div className="metric-content">
-                          <div className="metric-uom" title={metric.unit}>
-                            {display(metric.unit && metric.unit.length > 3
-                              ? metric.unit.substring(0, 3)   // only first 3 letters, no dots
-                              : metric.unit
-                            )}
+                      {(() => {
+                        const productIcon = metric.productId ? productIcons[metric.productId] : null;
+                        const iconData = productIcon?.iconData;
+                        const tileColor = iconData?.tileColor || getMetricColor(idx).bg;
+                        
+                        // Convert hex to rgba for background
+                        const hexToRgba = (hex: string, opacity: number) => {
+                          const r = parseInt(hex.slice(1, 3), 16);
+                          const g = parseInt(hex.slice(3, 5), 16);
+                          const b = parseInt(hex.slice(5, 7), 16);
+                          return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                        };
+                        
+                        return (
+                          <div 
+                            className="metric-item" 
+                            style={{ 
+                              backgroundColor: hexToRgba(tileColor, 0.30), 
+                              color: getMetricColor(idx).text 
+                            }}
+                          >
+                            <div className="metric-content">
+                              <div className="metric-uom" title={metric.unit}>
+                                {display(metric.unit && metric.unit.length > 3
+                                  ? metric.unit.substring(0, 3)
+                                  : metric.unit
+                                )}
+                              </div>
+                              <div className="metric-name" title={metric.usageMetric}>
+                                {display(metric.usageMetric && metric.usageMetric.length > 3
+                                  ? `${metric.usageMetric.substring(0, 3)}...`
+                                  : metric.usageMetric
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div className="metric-name" title={metric.usageMetric}>
-                            {display(metric.usageMetric && metric.usageMetric.length > 3
-                              ? `${metric.usageMetric.substring(0, 3)}...`  // first 3 letters + dots
-                              : metric.usageMetric
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                        );
+                      })()}
                       <span className="metric-label">{display(metric.usageMetric)}</span>
                     </div>
                   </td>

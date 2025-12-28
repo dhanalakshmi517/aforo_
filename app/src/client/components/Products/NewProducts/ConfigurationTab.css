@@ -1,5 +1,5 @@
-.configuration-tab {
-  padding: 20px;
+@import "../../Variables/Variables.css";
+.con-configuration-tab {
   max-width: 470px;
   margin: 0 ;
   background-color: var(--color-neutral-white);
@@ -21,11 +21,11 @@
   font-weight: 600;
 }
 
-.form-group {
+.confg-form-group {
   margin-bottom: 0px; /* Reduced from 8px to 0px */
 }
 
-.form-group label {
+.config-form-group label {
   display: block;
   margin-bottom: 0px; 
   margin-top: 2px;/* Reduced from 2px to 0px */
@@ -89,12 +89,12 @@ input[type='checkbox'] {
 
 
 
-.form-group {
+.config-form-group {
   margin-bottom: 0px; /* Reduced from 2px to 0px */
 }
 
-.form-group label,
-.form-group .if-label {
+.config-form-group label,
+.config-form-group .if-label {
   color: var(--color-neutral-1700);
 
   /* body/md/reg */

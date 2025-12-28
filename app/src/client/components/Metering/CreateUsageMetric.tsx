@@ -255,6 +255,24 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   };
 
   const gotoStep = (index: number) => {
+    if (index < 0 || index > 2) return;
+
+    // forward navigation guards - only validate when clicking Save & Next button
+    // sidebar clicks should allow free navigation for backward movement
+    // but block forward movement to review if validation fails
+    if (index > currentStep) {
+      // going to conditions step - validate metric step
+      if (currentStep === 0 && index === 1) {
+        const isValid = validateCurrentStep(0);
+        if (!isValid) return;
+      }
+      
+      // going to review step - validate conditions step
+      if (currentStep === 1 && index === 2) {
+        if (isReviewLocked) return;
+      }
+    }
+
     setCurrentStep(index);
     const map: ActiveTab[] = ['metric', 'conditions', 'review'];
     setActiveTab(map[index] || 'metric');

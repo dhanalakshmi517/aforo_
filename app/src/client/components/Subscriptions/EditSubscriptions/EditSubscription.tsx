@@ -504,11 +504,13 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                   </form>
                 </div>
               </div>
-              <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
             </main>
           </div>
+
         </div>
       </div>
+                    <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
+
 
       {/* Exit confirmation popup */}
       <EditPopUp

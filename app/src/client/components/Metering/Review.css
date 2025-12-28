@@ -1,11 +1,13 @@
 
 @import "../Variables/Variables.css";
-.review-container {
+.met-review-container {
   width: 600px;
   font-family: 'Segoe UI', sans-serif;
   color: #333;
   background-color: var(--color-neutral-white);
-  margin-left:-40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .review-section {

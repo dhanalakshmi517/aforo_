@@ -175,7 +175,7 @@ width: calc(100% - 256px);
   flex: 1 1 auto;
     margin-top: -10px;
 
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 85px);
   overflow: hidden;
   width: 100%;              /* use full width inside check-container */
   margin: 0;                /* no extra outer side gap here */
@@ -249,7 +249,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* WRAPPER */
 .customers-table-wrapper {
-  max-height: calc(100vh - 180px);
+  max-height: calc(100vh - 165px);
   margin-top: 4px;
   overflow-y: auto;
   overflow-x: hidden;

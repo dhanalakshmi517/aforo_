@@ -20,6 +20,18 @@ html, body, #root {
   overflow: hidden;
 }
 
+.edit-np-label {
+     color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+  user-select: none;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: -4px;
+}
 /* Viewport */
 .editprod-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
@@ -286,10 +298,11 @@ hr {
 }
 
 .np-icon-field-wrapper {
+  margin-top:-10px;
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid var(--color-neutral-300);
+  border: 1px solid var(--color-neutral-200);
   width: 456px;
   border-radius: 6px;
   padding: 12px;

@@ -136,7 +136,6 @@ const EditReview: React.FC<EditReviewProps> = ({
             key={s.title}
             title={s.title}
             rows={s.rows}
-            className="edit-pr-card"
           />
         ))}
       </div>

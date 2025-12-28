@@ -5,7 +5,6 @@
 } */
 
 .product-review-grid {
-  margin-top: 20px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px; /* Increased gap for better separation */
@@ -14,13 +13,12 @@
 @media (min-width: 700px) {
   .product-review-grid {
     grid-template-columns: 1fr; /* always single column */
-    gap: 20px; /* Even more gap on larger screens */
+    gap: 16px; /* Even more gap on larger screens */
   }}
 /* Card */
 .product-review-card {
   width: 100%;
   max-width: 585px;
-  border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
 }
@@ -28,7 +26,6 @@
 .pr-card__header {
   padding: 8px 12px;
   background-color: var(--color-neutral-200);  
-  border-bottom: 0.6px solid var(--color-neutral-300);
 }
 
 .pr-card__title {
@@ -42,46 +39,3 @@
   line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
-/* Rows */
-.pr-card__body {
-  padding: 4px 0; /* Reduced vertical padding */
-}
-
-.pr-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr; /* Adjusted ratio to give more space to values */
-  align-items: center;
-  padding: 6px 12px; /* Reduced padding */
-  border-bottom: 1px dashed var(--color-neutral-300);
-}
-
-.pr-row:last-child {
-  border-bottom: none;
-}
-
-.pr-row__label {
-  color: var(--color-neutral-1400);
-
-  /* body/md/reg */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 400;
-  line-height: var(--line-height-body-md); /* 142.857% */  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pr-row__value {
-  justify-self: end;
-  margin-right: 30px; /* right column right-aligned */
-  color: var(--color-neutral-1400);
-
-  /* body/md/reg */
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-style: normal;
-  font-weight: 500;
-  line-height: var(--line-height-body-md); /* 142.857% */}
-
-/* Subtle rounding on the outer card only; rows are flush like the reference */

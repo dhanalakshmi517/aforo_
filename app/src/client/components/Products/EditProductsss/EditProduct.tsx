@@ -1045,12 +1045,13 @@ const EditProduct: React.FC<EditProductProps> = ({
                 </div>
 
               </div>
-              <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
 
             </main>
 
 
           </div>
+                        <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
+
 
         </div>
       </div>
