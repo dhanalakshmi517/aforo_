@@ -14,7 +14,7 @@ export default function EditSkeletonForm({
   rail,
   children,
   className = "",
-}: SkeletonFormProps): JSX.Element {
+}: SkeletonFormProps): React.JSX.Element {
   return (
     <div className="edit-af-skel-viewport">
       <div className={["edit-af-skel-card", className].join(" ").trim()}>
