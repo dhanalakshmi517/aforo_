@@ -1,6 +1,6 @@
 @import "./Variables.css";
 
-/* ===== Base ===== */
+/* ===== Base (Desktop stays as-is) ===== */
 .footer {
   background: linear-gradient(180deg, var(--color-primary-800) 0%, var(--color-primary-900) 100%);
   color: #fff;
@@ -9,31 +9,27 @@
 }
 
 .footer__inner {
-  max-width: 1910px; 
+  max-width: 1910px;
   margin: 0 auto;
   padding: 40px 80px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 120px;                       /* generous gap for ultra-wide */
+  gap: 120px;
 }
 
-/* Logo and company info */
+/* Company block */
 .company {
-  max-width: 420px;                   /* roomier text block at wide widths */
+  max-width: 420px;
   flex: 0 0 auto;
 }
+
 .footer-logo{
   margin-top: -56px;
-    margin-left: 50px;
+  margin-left: 50px;
 
-}
-.company .logo {
-  width: auto;
-  margin-bottom: 20px;
-  filter: brightness(0) invert(1);
-  margin-top: -50px;
-  margin-left: -20px;
+  /* ✅ protect from global img padding */
+  padding-top: 0 !important;
 }
 
 .company .description {
@@ -41,21 +37,39 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
-      margin-left: 50px;
-
+  margin-left: 50px;
   font-weight: 400;
   line-height: var(--line-height-body-lg, 24px);
-  width: 360px;                       /* wider measure on large screens */
+  width: 360px;
   margin-top: 20px;
 }
+
+/* Social icons */
+.social-icons {
+  display: flex;
+  gap: 24px;
+  margin-top: 25px;
+  margin-left: 50px;
+  margin-bottom: -50px;
+}
+
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: -70px;
+  transition: transform 0.2s ease;
+}
+
+.social-icons a:hover { transform: translateY(-2px); }
 
 /* Right-side columns wrapper */
 .footer-sections {
   display: flex;
   flex: 1 1 auto;
   justify-content: flex-end;
-  gap: 120px;                         /* match outer gap */
-  padding-right: 8px;                 /* subtle optical balance */
+  gap: 120px;
+  padding-right: 8px;
   flex-wrap: nowrap;
 }
 
@@ -87,7 +101,7 @@
   margin-bottom: 16px;
 }
 
-/* Footer link hover effects */
+/* Footer links */
 .footer-link {
   display: flex;
   align-items: center;
@@ -109,7 +123,7 @@
   transition: all 0.3s ease;
 }
 
-/* Underline effect */
+/* Underline effect (desktop hover) */
 .footer-link span::after {
   content: '';
   position: absolute;
@@ -121,7 +135,7 @@
   transition: width 0.3s ease;
 }
 
-/* Arrow icon */
+/* Arrow icon (desktop hover only) */
 .footer-link .arrow-icon {
   width: 16px;
   height: 16px;
@@ -131,59 +145,31 @@
   color: var(--color-neutral-white);
 }
 
-/* Hover effects */
-.footer-link:hover span::after {
-  width: 100%;
-}
-
-.footer-link:hover .arrow-icon {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.footer-section li:hover { opacity: 1; text-decoration: none; }
-
-/* Social icons */
-.social-icons {
-  display: flex;
-  gap: 24px;
-  margin-top: 25px;
-  margin-left: 50px;
-  margin-bottom: -50px;
-}
-.social-icons a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-    margin-bottom: -70px;
-
-}
-.social-icons a:hover { transform: translateY(-2px); }
+.footer-link:hover span::after { width: 100%; }
+.footer-link:hover .arrow-icon { opacity: 1; transform: translateX(0); }
 
 /* =========================================================
-   Breakpoints (down from 1910 → 1440 → 1280 → 1024 → 840 → 640)
+   Breakpoints (desktop unchanged, mobile redesigned)
    ========================================================= */
 
-/* ≤ 1440px: tighten spacing a touch */
+/* ≤ 1440px */
 @media (max-width: 1440px) {
   .footer__inner { padding: 0 40px; gap: 96px; }
   .footer-sections { gap: 96px; }
   .company { max-width: 380px; }
-  .company .logo { height: 120px; }
   .company .description { width: 320px; }
 }
 
-/* ≤ 1280px: standard desktop container feel */
+/* ≤ 1280px */
 @media (max-width: 1280px) {
   .footer__inner { padding: 0 32px; gap: 80px; }
   .footer-sections { gap: 80px; padding-right: 0; }
   .company { max-width: 340px; }
-  .company .logo { height: 110px; }
   .company .description { width: 300px; }
   .footer-section { min-width: 160px; }
 }
 
-/* ≤ 1024px: allow wrapping; company on its own row, columns below */
+/* ≤ 1024px */
 @media (max-width: 1024px) {
   .footer__inner {
     flex-wrap: wrap;
@@ -198,35 +184,116 @@
     flex: 1 1 100%;
     justify-content: space-between;
     gap: 40px;
-    flex-wrap: wrap;                  /* allow 2×2 grid if needed */
+    flex-wrap: wrap;
   }
   .footer-section {
-    flex: 1 1 240px;                  /* two columns on tablets */
+    flex: 1 1 240px;
     min-width: 220px;
   }
 }
 
-/* ≤ 840px: comfy tablet/large phone */
+/* ≤ 840px */
 @media (max-width: 840px) {
   .footer__inner { padding: 0 24px; }
-  .company .logo { height: 96px; margin-top: -16px; margin-left: 0; }
-  .footer-section { flex: 1 1 45%; }  /* two columns */
+  .footer-section { flex: 1 1 45%; }
 }
 
-/* ≤ 640px: single column list under company */
+/* ✅ MOBILE (≤ 640px) — match your screenshot */
 @media (max-width: 640px) {
+  .footer {
+    padding: 28px 0 32px;
+  }
+
   .footer__inner {
     padding: 0 20px;
-    gap: 28px;
+    gap: 24px;
+    flex-direction: column;
+    align-items: stretch;
   }
+
+  /* Reset the desktop hacks */
+  .footer-logo {
+    margin: 0;
+    padding-top: 0 !important;
+    width: 140px;
+    height: auto;
+  }
+
+  .company {
+    margin-bottom: 8px;
+  }
+
+  .company .description {
+    margin: 10px 0 0 0;
+    width: auto;
+    max-width: 320px;
+  }
+
+  /* 3 columns with proper spacing to prevent overlap */
   .footer-sections {
-    gap: 20px;
+    width: 100%;
+    padding-right: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(90px, 1fr));
+    column-gap: 16px;
+    row-gap: 20px;
+    justify-content: initial;
+    margin-bottom: 24px;
   }
+
   .footer-section {
-    flex: 1 1 100%;
     min-width: 0;
+    overflow: hidden;
   }
-  .footer-section h4 { margin-bottom: 12px; }
-  .footer-section li { margin-bottom: 12px; }
-  .company .logo { height: 84px; }
+
+  .footer-section h4 {
+    font-size: 16px;
+    margin: 0 0 12px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .footer-section li {
+    margin-bottom: 8px;
+  }
+
+  .footer-link {
+    padding: 2px 0;
+  }
+
+  .footer-link span {
+    font-size: 14px;
+    line-height: 20px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Mobile has no hover arrows in your design */
+  .footer-link span::after { display: none; }
+  .footer-link .arrow-icon { display: none; }
+
+  /* Social icons at bottom, evenly spaced */
+  .social-icons {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0;
+    order: 3;
+  }
+
+  .social-icons a {
+    margin: 0;
+    transform: none !important;
+    flex: 0 0 auto;
+  }
+
+  .social-icons a svg {
+    width: 24px;
+    height: 24px;
+  }
 }

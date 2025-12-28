@@ -61,8 +61,9 @@
 }
 
 .sec__art {
+  flex: 0 0 auto;
   width: 50%;
-  min-width: 500px; /* Ensures minimum width */
+  min-width: 500px;
 }
 
 /* ============ RIGHT: Content ============ */
@@ -177,39 +178,132 @@ line-height: 20.214px; /* 133.333% */  cursor: pointer;
 /* ============ Responsive ============ */
 @media (max-width: 1100px) {
   .sec__inner { gap: 48px; }
-  .sec__artCard { transform: scale(.93); transform-origin: left top; }
+  .sec__art { min-width: 400px; }
 }
 
 @media (max-width: 960px) {
   .sec__inner {
-    grid-template-columns: 1fr;
-    display: grid;
-    gap: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
   }
-  .sec__art { order: 1; }
-  .sec__content { order: 2; }
+  
+  .sec__art {
+    order: 1;
+    width: 100%;
+    min-width: unset;
+    max-width: 500px;
+  }
+  
+  .sec__content {
+    order: 2;
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+  }
+  
   .sec__artCard {
     width: 100%;
-    max-width: 648px;
-    height: 480px;
-    margin-inline: auto;
-    padding: 36px 64px;
+    height: 350px;
+    min-height: unset;
+    padding: 20px;
   }
 }
 
-@media (max-width: 640px) {
-  .sec { padding: 64px 0; }
-  .sec__inner { padding: 0 20px; gap: 24px; }
-  .sec__title { font-size: 22px; }
+@media (max-width: 768px) {
+  .sec {
+    padding: 60px 0;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  .sec__inner {
+    padding: 0 24px;
+    gap: 32px;
+    max-width: 100%;
+  }
+  
+  .sec__art {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
   .sec__artCard {
-    height: 400px;
-    padding: 28px;
-    border-radius: 28px;
+    height: 300px;
+    padding: 16px;
   }
+  
+  .sec__title {
+    font-size: 28px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+  
+  .sec__list {
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .sec__listItem {
+    gap: 12px;
+  }
+  
   .sec__tickBox {
-    width: 44px; height: 44px; padding: 10px;
-    border-radius: 7px;
+    width: 48px;
+    height: 48px;
+    padding: 12px;
+    border-radius: 8px;
   }
-  .sec__itemTitle { font-size: 15px; }
-  .sec__itemNote  { font-size: 13px; }
+  
+  .sec__itemTitle {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  
+  .sec__itemNote {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .sec__cta {
+    padding: 12px 24px;
+    font-size: 16px;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sec {
+    padding: 48px 0;
+  }
+  
+  .sec__inner {
+    padding: 0 20px;
+    gap: 24px;
+  }
+  
+  .sec__title {
+    font-size: 24px;
+  }
+  
+  .sec__artCard {
+    height: 250px;
+    padding: 12px;
+  }
+  
+  .sec__tickBox {
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+  }
+  
+  .sec__itemTitle {
+    font-size: 15px;
+  }
+  
+  .sec__itemNote {
+    font-size: 13px;
+  }
 }

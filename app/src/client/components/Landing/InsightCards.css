@@ -1,26 +1,31 @@
 @import "./Variables.css";
+
 :root{
-  /* tune as needed */
   --ic-max: 1200px;
-  --ic-title: #0b2a3a;
-  --ic-text: #4b5b68;
   --ic-border: var(--border-border-2, #D5D4DF);
+
+  /* desktop viewport height */
+  --ic-viewport-h: 800px;
+
+  /* mobile viewport height */
+  --ic-viewport-h-mobile: min(78vh, 680px);
 }
 
-/* page block wrapper */
-.ic { 
+/* wrapper */
+.ic {
   position: relative;
   padding: 80px 80px;
-  max-width: calc(100% - 160px);
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
   background: #fff;
 }
 
-/* Internal viewport - hidden scrollbar with wheel/touch pagination */
+/* scroll viewport (used on ALL sizes) */
 .ic__container {
   max-width: var(--ic-max);
   margin: 0 auto;
-  height: 800px;
+  height: var(--ic-viewport-h);
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -28,16 +33,17 @@
   touch-action: pan-y;
   background-color: white;
 
-  /* smooth for programmatic scrollTo */
   scroll-behavior: smooth;
 
-  /* Hide scrollbar */
   scrollbar-width: none;
   -ms-overflow-style: none;
+
+  /* makes layering more predictable */
+  isolation: isolate;
 }
 .ic__container::-webkit-scrollbar { display: none; }
 
-/* Each card with sticky positioning for stacking */
+/* card (desktop sticky story) */
 .ic__card{
   min-height: 740px;
   display: flex;
@@ -48,31 +54,52 @@
 
   border-radius: var(--scale-900, 36px);
   border: 1px solid var(--ic-border);
-  /* background: rgba(255, 255, 255, 0.60); */
-  /* backdrop-filter: blur(51.45000076293945px); */
+
+  /* ✅ critical: card must not be see-through while stacking */
+  background: rgba(255, 255, 255, 0.96);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
 
   position: sticky;
   top: 0;
 
-  transition: opacity .45s ease, transform .45s ease, box-shadow .45s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  transition: transform .45s ease, box-shadow .45s ease;
   pointer-events: auto;
 }
 
-/* Stacking with top offset - z-index handled dynamically in component */
+/* Stacking offsets */
 .ic__card:nth-child(1) { top: 0px; }
 .ic__card:nth-child(2) { top: 20px; }
 .ic__card:nth-child(3) { top: 50px; }
 .ic__card:nth-child(4) { top: 80px; }
 
-/* Non-active cards slightly dimmed */
-.ic__card:not(.is-active){ opacity: 0.75; }
+/* ✅ remove opacity on the whole card (this caused the text overlap) */
+.ic__card:not(.is-active){
+  transform: translateY(6px) scale(0.997);
+  box-shadow: none;
+}
+
+/* Dim ONLY the inner content so background stays solid */
+.ic__card:not(.is-active) .ic__left,
+.ic__card:not(.is-active) .ic__right{
+  opacity: 0.65;
+  transition: opacity .45s ease;
+}
 
 .ic__card.is-active{
-  opacity: 1;
+  transform: translateY(0) scale(1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-/* left / right columns */
+.ic__card.is-active .ic__left,
+.ic__card.is-active .ic__right{
+  opacity: 1;
+}
+
+/* columns */
 .ic__left{
   flex: 1 1 52%;
   min-width: 280px;
@@ -93,71 +120,102 @@
   max-height: 580px;
   width: clamp(400px, 48vw, 720px);
   object-fit: contain;
-  transition: transform 0.3s ease;
 }
 
 /* typography */
 .ic__title{
   margin: 0 0 12px;
- 
-/* heading/h3/bold */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h3);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-heading-h3);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-h3);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h3);
 
-background: linear-gradient(217deg, var(--color-primary-700, #025A94) -39.04%, var(--color-primary-1000, #00365A) 42.7%);
-background-clip: text;
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    217deg,
+    var(--color-primary-700, #025A94) -39.04%,
+    var(--color-primary-1000, #00365A) 42.7%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .ic__body{
   margin: 0 0 20px;
   max-width: 520px;
- color: var(--color-neutral-1400);
-
-/* body/lg/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg);
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
 }
 
-/* CTA */
-.ic__cta{
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #d8e5ee;
-  background: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-.ic__cta:hover .ic__ctaArrow{ transform: translateX(2px); }
-.ic__ctaArrow{ transition: transform .15s ease; }
-
-/* spacer so last sticky card can release */
 .ic__endSpacer{
   height: 120px;
   flex: 0 0 auto;
 }
 
-/* responsive stack for small screens */
+/* ✅ MOBILE: single-card viewport with snap (one card at a time) */
 @media (max-width: 900px){
+  .ic{
+    padding: 40px 16px;
+  }
+
+  .ic__container{
+    height: var(--ic-viewport-h-mobile);
+    scroll-snap-type: y mandatory;
+    scroll-padding: 0px;
+  }
+
+  /* Kill sticky stacking on mobile, make it a clean "slide" */
   .ic__card{
-    height: auto;
-    padding: 32px 20px;
+    position: relative;
+    top: auto !important;
+    min-height: 0;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    padding: 26px 18px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    justify-content: flex-start;
+    gap: 16px;
   }
+
+  .ic__left{
+    min-width: 0;
+    padding-right: 0;
+    width: 100%;
+  }
+
+  .ic__title{
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .ic__body{
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 100%;
+    margin-bottom: 0;
+  }
+
+  .ic__right{
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: auto;
+  }
+
   .ic__right img{
-    max-height: 260px;
-    width: min(100%, 520px);
+    width: 100%;
+    max-width: 520px;
+    max-height: 240px;
+  }
+
+  .ic__endSpacer{
+    height: 12px;
   }
 }

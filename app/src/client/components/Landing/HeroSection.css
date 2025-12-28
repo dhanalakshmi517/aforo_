@@ -2,15 +2,11 @@
   --hero-bg: #fff;
   --hero-title: #0b2430;
   --hero-sub: #516271;
-  --hero-accent: #0b80c2;
 
-  /* Base (laptop-ish) */
-  --hero-maxw: 1200px;
-  --hero-gutter: 80px;       /* ← left/right padding */
+  --hero-gutter: 80px;
   --hero-gap: 24px;
 }
 
-/* SECTION does width cap + grid */
 .land-hero {
   background: var(--hero-bg);
   max-width: 1910px;
@@ -23,34 +19,36 @@
   gap: var(--hero-gap);
   box-sizing: border-box;
   margin-top: -50px;
-
 }
 
-/* COPY */
+.land-hero__copy { max-width: 64ch; }
+
 .land-hero__title {
   margin: 0 0 14px 0;
-  color: var(--hero-title);
   background: linear-gradient(254deg, #025A94 26.47%, #00365A 76.37%);
-  -webkit-background-clip: text; background-clip: text;
+  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+
   font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
   font-weight: 700;
   font-size: clamp(34px, 4.2vw, 54px);
   line-height: 1.18;
   letter-spacing: -0.03em;
+
   margin-top: 70px;
 }
+
+/* Desktop helper (kept, but mobile overrides it) */
 .land-hero__title-line { white-space: nowrap; }
 
 .land-hero__subtitle {
   margin: 0 0 22px;
   color: var(--color-neutral-1300);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
   max-width: 54ch;
 }
 
@@ -59,12 +57,11 @@ line-height: var(--line-height-body-lg);
 .land-hero__cta {
   appearance: none;
   background: linear-gradient(254deg, var(--color-primary-700, #025A94) 26.47%, var(--color-primary-1000, #00365A) 76.37%);
-  color:var(--color-neutral-white);
+  color: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
   padding: 12px 24px;
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
-  font-style: normal;
   font-weight: 500;
   line-height: var(--line-height-heading-h6);
   border:none;
@@ -73,12 +70,9 @@ line-height: var(--line-height-body-lg);
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(2, 90, 148, 0.25);
   transition: transform .3s ease, box-shadow .3s ease, filter .3s ease;
-  
-  /* Pulsing glow animation */
   animation: buttonPulse 2.5s ease-in-out infinite;
 }
 
-/* Shimmer effect overlay */
 .land-hero__cta::before {
   content: '';
   position: absolute;
@@ -90,276 +84,114 @@ line-height: var(--line-height-body-lg);
   transition: left 0.5s ease;
 }
 
-.land-hero__cta:hover::before {
-  left: 100%;
-}
+.land-hero__cta:hover::before { left: 100%; }
 
-.land-hero__cta:hover { 
-  transform: translateY(-2px) scale(1.02); 
+.land-hero__cta:hover {
+  transform: translateY(-2px) scale(1.02);
   filter: brightness(1.08);
   box-shadow: 0 8px 24px rgba(2, 90, 148, 0.35);
-  animation: none; /* Stop pulse on hover */
+  animation: none;
 }
 
-.land-hero__cta:active { 
-  transform: translateY(0) scale(0.98); 
-  box-shadow: 0 3px 12px rgba(11,128,194,0.18); 
+.land-hero__cta:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 3px 12px rgba(11,128,194,0.18);
 }
 
-/* Pulse animation keyframes */
 @keyframes buttonPulse {
-  0%, 100% {
-    box-shadow: 0 4px 14px rgba(2, 90, 148, 0.25);
-  }
-  50% {
-    box-shadow: 0 4px 20px rgba(2, 90, 148, 0.45), 0 0 0 4px rgba(2, 90, 148, 0.1);
-  }
+  0%, 100% { box-shadow: 0 4px 14px rgba(2, 90, 148, 0.25); }
+  50% { box-shadow: 0 4px 20px rgba(2, 90, 148, 0.45), 0 0 0 4px rgba(2, 90, 148, 0.1); }
 }
 
-/* IMAGE */
 .land-hero__img {
-  width: 100%;
+  width: min(50vw, 1100px);
   height: auto;
   display: block;
-  justify-self: start;
+  justify-self: end;
   align-self: flex-end;
 }
 
-/* ————— Breakpoints ————— */
+/* ✅ MOBILE: text-only hero, exact breaks come from JSX title */
+@media (max-width: 768px) {
+  :root { --hero-gutter: 18px; }
 
-/* Small mobile (≤ 360px) — super compact */
+  .land-hero{
+    grid-template-columns: 1fr;
+    padding: 28px var(--hero-gutter);
+    gap: 0;
+    margin-top: 0;
+  }
+
+  .land-hero__copy{
+    max-width: 100%;
+    text-align: left;
+    margin: 0;
+  }
+
+  .land-hero__title{
+    margin-top: 18px;
+    font-size: clamp(34px, 9.5vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+
+  /* ✅ don’t let any nowrap influence mobile */
+  .land-hero__title-line{ white-space: normal; }
+
+  .land-hero__subtitle{ max-width: 100%; }
+
+  .land-hero__img{ display: none !important; }
+
+  .land-hero__actions{ justify-content: flex-start; }
+
+  .land-hero__cta{
+    width: auto;
+    padding: 12px 20px;
+  }
+}
+
 @media (max-width: 360px) {
-  :root { --hero-gutter: 12px; }
-  .land-hero {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .land-hero__title { font-size: clamp(28px, 8vw, 34px); }
-  .land-hero__title-line { white-space: normal; } /* allow wrap */
-  .land-hero__subtitle { max-width: 100%; }
-  .land-hero__img { justify-self: center; max-width: 100%; }
-  .land-hero__cta { width: 100%; padding: 12px 16px; }
+  :root { --hero-gutter: 14px; }
+  .land-hero__title { font-size: clamp(30px, 9.5vw, 38px); }
 }
 
-/* Mobile (≤ 480px) */
-@media (max-width: 480px) {
-  :root { --hero-gutter: 16px; }
-  .land-hero {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .land-hero__img { justify-self: center; max-width: 100%; }
-  .land-hero__cta { width: 100%; }
-  .land-hero__copy {
-    text-align: center;
-    margin-top: 40px;
-  }
-}
-
-/* Phablet / Small tablet (481–768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-  :root { --hero-gutter: 24px; }
-  .land-hero {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .land-hero__img {
-    justify-self: center;
-    max-width: 92%;
-  }
-  .land-hero__title-line {
-    white-space: normal; /* allow wrap */
-  }
-  .land-hero__copy {
-    text-align: center;
-    margin-top: 40px;
-  }
-}
-
-/* Tablet landscape (769–1024px) */
+/* Tablet landscape */
 @media (min-width: 769px) and (max-width: 1024px) {
   :root { --hero-gutter: 40px; }
   .land-hero {
-    grid-template-columns: 1.1fr 0.9fr; /* give copy a bit more room */
+    grid-template-columns: 1.1fr 0.9fr;
     gap: 28px;
+    padding: 40px var(--hero-gutter);
   }
-  .land-hero__img { max-width: 920px;
-  margin-left: -20px; }
+  .land-hero__img {
+    width: min(46vw, 920px);
+    margin-left: -20px;
+  }
 }
 
-/* Desktop (1025–1439px) — base already fits; slight bumps */
+/* Desktop */
 @media (min-width: 1025px) and (max-width: 1439px) {
   :root { --hero-gutter: 64px; }
-  .land-hero__img { max-width: 1060px;
+  .land-hero__img {
+    width: min(48vw, 1060px);
     margin-left: -20px;
-   }
+  }
 }
 
-/* Large desktop (≥ 1440px) */
+/* Large desktop */
 @media (min-width: 1440px) {
-  :root {
-    --hero-maxw: 1280px;  /* widen content cap */
-    --hero-gutter: 96px;  /* more side air */
-    --hero-gap: 32px;
+  :root { --hero-gutter: 96px; --hero-gap: 32px; }
+  .land-hero {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--hero-gap);
   }
-  .land-hero__img { max-width: 940px;
-    margin-left: -20px; }
   .land-hero__title { font-size: clamp(40px, 3.3vw, 62px); }
+  .land-hero__img { width: min(45vw, 940px); margin-left: -20px; }
 }
 
-/* Ultra-wide (≥ 1920px) */
+/* Ultra-wide */
 @media (min-width: 1920px) {
-  :root {
-    --hero-maxw: 1440px;  /* keep lines readable */
-    --hero-gutter: 120px; /* roomy edges */
-    --hero-gap: 36px;
-  }
-  .land-hero__img { max-width: 720px; }
+  :root { --hero-gutter: 120px; --hero-gap: 36px; }
+  .land-hero__img { width: min(40vw, 720px); }
   .land-hero__title { letter-spacing: -0.02em; }
-}
-
-
-/* 1) Let the whole section scale smartly with viewport */
-:root {
-  /* instead of a fixed 1200px, use a fluid cap */
-  --hero-maxw: clamp(1120px, 82vw, 1680px);
-}
-
-/* 2) Make the image scale with viewport, but keep a sensible ceiling */
-.land-hero__img {
-  /* scales up on big screens, but never beyond the max px you allow */
-  width: min(50vw, 1100px);
-  max-width: none;         /* we control via width above */
-  justify-self: end;
-}
-
-/* 3) Slightly limit copy width so text remains readable while section widens */
-.land-hero__copy { max-width: 64ch; }
-
-/* 4) Large desktop (≥1440px): increase gutters and title/image size a bit */
-@media (min-width: 1440px) {
-  :root {
-    --hero-gutter: 96px;     /* more side air */
-  }
-  .land-hero {
-    grid-template-columns: 1.1fr 0.9fr; /* give copy a bit more space */
-    gap: 32px;
-  }
-  .land-hero__title {
-    font-size: clamp(40px, 3.2vw, 64px);
-  }
-  .land-hero__img {
-    width: min(48vw, 2000px); /* allow a bit larger visual */
-  }
-}
-
-/* 5) Ultra-wide (≥1920px): widen cap further and scale image */
-@media (min-width: 1920px) {
-  :root {
-    --hero-maxw: clamp(1280px, 78vw, 1840px);
-    --hero-gutter: 120px;
-  }
-  .land-hero__title { letter-spacing: -0.02em; }
-  .land-hero__img { width: min(45vw, 2000px); }
-}
-
-/* 6) Super-wide (≥2560px): keep things centered and proportional */
-@media (min-width: 2560px) {
-  :root {
-    --hero-maxw: clamp(1400px, 70vw, 2000px);
-    --hero-gutter: 140px;
-  }
-  .land-hero__img { width: min(42vw, 1600px); }
-}
-
-
-
-/* ---------- Small Screens (≤768px) ---------- */
-@media (max-width: 768px) {
-  .land-hero {
-    grid-template-columns: 1fr;     /* stack image & text */
-    text-align: center;             /* center text */
-    padding: 40px 20px;
-    gap: 28px;
-    margin-top: 10px;
-  }
-
-  .land-hero__copy {
-    max-width: 100%;
-    margin: 0 auto;
-    margin-top: 10px;
-  }
-
-  .land-hero__title {
-    font-size: clamp(28px, 7vw, 36px);
-  }
-
-  .land-hero__subtitle {
-    font-size: clamp(14px, 4vw, 16px);
-    line-height: 1.5;
-    max-width: 90%;
-    margin: 0 auto;
-  }
-
-  .land-hero__img {
-    width: 90%;
-    max-width: 420px;
-    height: auto;
-    justify-self: center;
-    margin: 0 auto;
-    display: block;
-  }
-
-  .land-hero__actions {
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .land-hero__cta {
-    width: 100%;
-    padding: 12px 18px;
-  }
-}
-
-
-/* Fix overlap on 769–1024px (tablet landscape) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .land-hero {
-    grid-template-columns: 1fr 1fr;
-    padding: 40px 32px;
-    gap: 14px;
-  }
-
-  .land-hero__copy {
-    margin-top: 20px;
-  }
-
-  .land-hero__title {
-    font-size: clamp(28px, 3vw, 44px);
-  }
-
-  .land-hero__img {
-    width: 100%;
-    max-width: 800px;    /* keeps image inside grid */
-    justify-self: center;
-    margin: 0 auto;
-  }
-}
-
-
-
-/* Fix overlap on small desktop (1025px–1280px) */
-@media (min-width: 1025px) and (max-width: 1280px) {
-  .land-hero {
-    grid-template-columns: 1fr 1fr;
-    padding: 60px 48px;
-    gap: 32px;
-  }
-
-  .land-hero__img {
-    width: 90%;          /* shrink a bit from 50vw */
-    max-width: 600px;    /* prevents overflow */
-    justify-self: center;
-  }
 }
