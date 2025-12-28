@@ -422,9 +422,20 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     // prevent interactions while icon picker open
     if (isIconPickerOpen) return;
 
-    // forward navigation guards - only validate when clicking Save & Next button
-    // sidebar clicks should allow free navigation
+    // forward navigation guards - validate when moving to next step
     if (index > currentStep) {
+      // leaving general -> if going to configuration, validate general step
+      if (currentStep === 0 && index === 1) {
+        // Only validate if user has filled at least one field
+        if (hasAnyRequiredInput) {
+          // Product Name is required to proceed
+          if (!formData.productName.trim()) {
+            setErrors((prev) => ({ ...prev, productName: "This field is required" }));
+            return;
+          }
+        }
+      }
+
       // leaving config -> if going to review, validate config only (no API)
       if (currentStep === 1 && index === 2) {
         if (!createdProductId || !configuration.productType) return;

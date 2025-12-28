@@ -11,16 +11,6 @@
   gap: 4px;
 }
 
-.acc-form-group label {
-color: var(--color-neutral-1700);
-
-/* body/md/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
-}
 
 /* Match component class names so inputs & selects look identical */
 .acc-form-group input,
@@ -132,8 +122,12 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 .address-section h4 {
   margin: 0 0 10px;
-  font-size: 15px;
-  color: #333;
+color: var(--color-neutral-1700);
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 24px; /* 150% */
 }
 
 .checkbox-row {

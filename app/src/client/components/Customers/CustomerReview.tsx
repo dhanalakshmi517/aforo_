@@ -1,6 +1,7 @@
-import React from 'react';
-import { AccountDetailsData } from './AccountDetailsForm';
-import ReviewComponent, { ReviewRow } from '../componenetsss/ReviewComponent';
+import React from "react";
+import "./CustomerReview.css"; // reuse the same Review.css (Usage Metric review)
+import { AccountDetailsData } from "./AccountDetailsForm";
+import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
 
 interface CustomerReviewProps {
   customerName: string;
@@ -9,48 +10,92 @@ interface CustomerReviewProps {
   accountDetails: AccountDetailsData | null;
 }
 
-const getSections = (props: CustomerReviewProps): { title: string; rows: ReviewRow[] }[] => {
+const formatValue = (value: string | undefined | null): string => {
+  return value && value.trim() !== "" ? value : "-";
+};
+
+const CustomerReview: React.FC<CustomerReviewProps> = ({
+  customerName,
+  companyName,
+  companyType,
+  accountDetails,
+}) => {
   const customerRows: ReviewRow[] = [
-    { label: 'Customer Name', value: props.customerName || '—' },
-    { label: 'Company Name', value: props.companyName || '—' },
-    { label: 'Company Type', value: props.companyType || '—' },
+    { label: "Customer Name", value: formatValue(customerName) },
+    { label: "Company Name", value: formatValue(companyName) },
+    { label: "Company Type", value: formatValue(companyType) },
   ];
 
   const accountRows: ReviewRow[] = [
-    // Contact Details
-    { label: 'Phone Number', value: props.accountDetails?.phoneNumber || '—' },
-    { label: 'Primary Email', value: props.accountDetails?.primaryEmail || '—' },
-    { label: 'Additional Email Recipients', value: props.accountDetails?.additionalEmailRecipients?.join(', ') || '—' },
-    // Customer Address
-    { label: 'Customer Address Line 1', value: props.accountDetails?.customerAddressLine1 || '—' },
-    { label: 'Customer Address Line 2', value: props.accountDetails?.customerAddressLine2 || '—' },
-    { label: 'Customer City', value: props.accountDetails?.customerCity || '—' },
-    { label: 'Customer State/Province', value: props.accountDetails?.customerState || '—' },
-    { label: 'Customer Postal Code', value: props.accountDetails?.customerPostalCode || '—' },
-    { label: 'Customer Country', value: props.accountDetails?.customerCountry || '—' },
-    // Billing Address
-    { label: 'Billing Same As Customer', value: props.accountDetails?.billingSameAsCustomer ? 'Yes' : 'No' },
-    { label: 'Billing Address Line 1', value: props.accountDetails?.billingAddressLine1 || '—' },
-    { label: 'Billing Address Line 2', value: props.accountDetails?.billingAddressLine2 || '—' },
-    { label: 'Billing City', value: props.accountDetails?.billingCity || '—' },
-    { label: 'Billing State/Province', value: props.accountDetails?.billingState || '—' },
-    { label: 'Billing Postal Code', value: props.accountDetails?.billingPostalCode || '—' },
-    { label: 'Billing Country', value: props.accountDetails?.billingCountry || '—' },
+    { label: "Phone Number", value: formatValue(accountDetails?.phoneNumber) },
+    { label: "Primary Email", value: formatValue(accountDetails?.primaryEmail) },
+    {
+      label: "Additional Email Recipients",
+      value:
+        accountDetails?.additionalEmailRecipients?.length
+          ? accountDetails.additionalEmailRecipients.join(", ")
+          : "-",
+    },
   ];
 
-  return [
-    { title: 'Customer Details', rows: customerRows },
-    { title: 'Account Details', rows: accountRows },
+  const customerAddressRows: ReviewRow[] = [
+    {
+      label: "Customer Address Line 1",
+      value: formatValue(accountDetails?.customerAddressLine1),
+    },
+    {
+      label: "Customer Address Line 2",
+      value: formatValue(accountDetails?.customerAddressLine2),
+    },
+    { label: "Customer City", value: formatValue(accountDetails?.customerCity) },
+    {
+      label: "Customer State/Province",
+      value: formatValue(accountDetails?.customerState),
+    },
+    {
+      label: "Customer Postal Code",
+      value: formatValue(accountDetails?.customerPostalCode),
+    },
+    {
+      label: "Customer Country",
+      value: formatValue(accountDetails?.customerCountry),
+    },
   ];
-};
 
-const CustomerReview: React.FC<CustomerReviewProps> = (props) => {
-  const sections = getSections(props);
+  const billingRows: ReviewRow[] = [
+    {
+      label: "Billing Same As Customer",
+      value: accountDetails?.billingSameAsCustomer ? "Yes" : "No",
+    },
+    {
+      label: "Billing Address Line 1",
+      value: formatValue(accountDetails?.billingAddressLine1),
+    },
+    {
+      label: "Billing Address Line 2",
+      value: formatValue(accountDetails?.billingAddressLine2),
+    },
+    { label: "Billing City", value: formatValue(accountDetails?.billingCity) },
+    {
+      label: "Billing State/Province",
+      value: formatValue(accountDetails?.billingState),
+    },
+    {
+      label: "Billing Postal Code",
+      value: formatValue(accountDetails?.billingPostalCode),
+    },
+    {
+      label: "Billing Country",
+      value: formatValue(accountDetails?.billingCountry),
+    },
+  ];
+
   return (
-    <div className="review-wrapper">
-      {sections.map((section, idx) => (
-        <ReviewComponent key={idx} title={section.title} rows={section.rows} />
-      ))}
+    <div className="met-review-container">
+      <ReviewComponent title="CUSTOMER DETAILS" rows={customerRows} />
+      <ReviewComponent title="ACCOUNT DETAILS" rows={accountRows} />
+      <ReviewComponent title="CUSTOMER ADDRESS" rows={customerAddressRows} />
+      <ReviewComponent title="BILLING ADDRESS" rows={billingRows} />
     </div>
   );
 };

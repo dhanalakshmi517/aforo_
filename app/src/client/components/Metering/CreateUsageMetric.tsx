@@ -257,14 +257,25 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const gotoStep = (index: number) => {
     if (index < 0 || index > 2) return;
 
-    // forward navigation guards - only validate when clicking Save & Next button
-    // sidebar clicks should allow free navigation for backward movement
-    // but block forward movement to review if validation fails
+    // forward navigation guards - only validate when user has filled at least one field
     if (index > currentStep) {
-      // going to conditions step - validate metric step
+      // going to conditions step - validate metric step only if user has filled at least one field
       if (currentStep === 0 && index === 1) {
-        const isValid = validateCurrentStep(0);
-        if (!isValid) return;
+        // Check if any metric fields are filled
+        const hasMetricInput = Boolean(
+          metricName.trim() ||
+          selectedProductId ||
+          version.trim() ||
+          description.trim() ||
+          unitOfMeasure ||
+          aggregationFunction ||
+          aggregationWindow
+        );
+        
+        if (hasMetricInput) {
+          const isValid = validateCurrentStep(0);
+          if (!isValid) return;
+        }
       }
       
       // going to review step - validate conditions step
@@ -594,11 +605,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
         <ProductCreatedSuccess
           productName={metricName}
           titleOverride={`“${metricName || 'Usage Metric'}” Usage Metric Created Successfully`}
-          subtitleOverride="To start billing with this metric, please complete the next steps:"
-          stepsOverride={[
-            '•Attach this metric to your products or plans.',
-            '•Configure rate plans using this metric.',
-          ]}
+         
           primaryLabelOverride="Go to All Usage Metrics"
           onPrimaryClick={handleGoAllMetrics}
         />
@@ -693,28 +700,26 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 <InputField label="Metric Name" value={metricName} onChange={setMetricName}
                                 required
                                  placeholder="eg. API Calls" error={errors.metricName} />
-                                <div className="form-group">
-                                  <SelectField
-                                    label="Product"
-                                    value={selectedProductId}
-                                    required
+                                <SelectField
+                                  label="Product"
+                                  value={selectedProductId}
+                                  required
 
-                                    onChange={(v: string) => {
-                                      setSelectedProductId(v);
-                                      const prod = products.find(p => String(p.productId) === v);
-                                      setSelectedProductName(prod ? prod.productName : '');
-                                      setSelectedProductType(prod ? prod.productType : '');
-                                      setUnitOfMeasure('');
-                                      if (errors.product) {
-                                        const { product, ...rest } = errors;
-                                        setErrors(rest);
-                                      }
-                                    }}
-                                    options={productOptions}
-                                    error={errors.product}
-                                    className="select-product"
-                                  />
-                                </div>
+                                  onChange={(v: string) => {
+                                    setSelectedProductId(v);
+                                    const prod = products.find(p => String(p.productId) === v);
+                                    setSelectedProductName(prod ? prod.productName : '');
+                                    setSelectedProductType(prod ? prod.productType : '');
+                                    setUnitOfMeasure('');
+                                    if (errors.product) {
+                                      const { product, ...rest } = errors;
+                                      setErrors(rest);
+                                    }
+                                  }}
+                                  options={productOptions}
+                                  error={errors.product}
+                                  className="select-product"
+                                />
                                 <InputField label="Version" value={version}  required onChange={setVersion} placeholder="eg. v2.0" />
                                 <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" />
 
@@ -784,6 +789,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       }
                                     }}
                                     error={errors.aggregationFunction}
+                                    disabled={!unitOfMeasure}
                                   />
                                 </div>
 
@@ -801,6 +807,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                       }
                                     }}
                                     error={errors.aggregationWindow}
+                                    disabled={!aggregationFunction}
                                   />
                                 </div>
                               </div>
