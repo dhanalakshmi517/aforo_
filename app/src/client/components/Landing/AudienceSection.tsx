@@ -14,13 +14,10 @@ type Props = {
 };
 
 export default function AudienceSection({
-  title = "The SaaS Billing Platform for Every Team",
+  title = "The Adaptive Billing Platform",
   subtitle = (
     <>
-      Aforo is built for teams who are tired of forcing their unique business
-      models into rigid billing tools. Billing is not one-size-fits-all. Aforo
-      is for anyone who feels their current system slows them down instead of
-      powering growth.
+      Aforo works for every professional across product, engineering, finance, growth, and success.
     </>
   ),
   images = [

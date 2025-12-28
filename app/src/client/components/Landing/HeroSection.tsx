@@ -1,5 +1,5 @@
 // HeroSection.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HeroSection.css";
 import heroArt from "../LandingComponents/hero.svg";
@@ -12,7 +12,7 @@ type HeroSectionProps = {
   heroImageSrc?: string;
 };
 
-const defaultTitle = (
+const defaultTitleDesktop = (
   <>
     <span className="land-hero__title-line">Meter. Monetize. Multiply.</span>
     <br />
@@ -22,11 +22,33 @@ const defaultTitle = (
   </>
 );
 
+/**
+ * ✅ Mobile title MUST match your screenshot line-by-line:
+ * Meter. Monetise.
+ * Multiply.
+ * Built for APIs,
+ * LLMs, and modern
+ * Data Products.
+ */
+const defaultTitleMobile = (
+  <>
+    Meter. Monetise.
+    <br />
+    Multiply.
+    <br />
+    Built for APIs,
+    <br />
+    LLMs, and modern
+    <br />
+    Data Products.
+  </>
+);
+
 const defaultSubtitle =
   "Stop adapting your product to rigid billing platforms.\n Our system adapts to you — across APIs, LLMs, SQL, and file delivery.\nTrack every signal, apply dynamic pricing, and bill instantly.";
 
 export default function HeroSection({
-  title = defaultTitle,
+  title,
   subtitle = defaultSubtitle,
   ctaLabel = "Contact Sales",
   onCtaClick,
@@ -35,6 +57,27 @@ export default function HeroSection({
   const navigate = useNavigate();
   const imgSrc = heroImageSrc ?? heroArt;
 
+  // ✅ Mobile detection (<= 768px)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)").matches : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const onChange = () => setIsMobile(mq.matches);
+
+    onChange();
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else mq.addListener(onChange);
+
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+      else mq.removeListener(onChange);
+    };
+  }, []);
+
+  const effectiveTitle = title ?? (isMobile ? defaultTitleMobile : defaultTitleDesktop);
+
   const handleContactClick = () => {
     if (onCtaClick) onCtaClick();
     else navigate("/contact-sales");
@@ -42,9 +85,8 @@ export default function HeroSection({
 
   return (
     <section className="land-hero">
-      {/* single copy block */}
       <div className="land-hero__copy">
-        <h1 className="land-hero__title">{title}</h1>
+        <h1 className="land-hero__title">{effectiveTitle}</h1>
 
         <p className="land-hero__subtitle">
           {typeof subtitle === "string"
@@ -64,14 +106,16 @@ export default function HeroSection({
         </div>
       </div>
 
-      {/* single image element */}
-      <img
-        className="land-hero__img"
-        src={imgSrc}
-        alt="Usage-based pricing cards and product types"
-        loading="eager"
-        decoding="async"
-      />
+      {/* ✅ Desktop only image */}
+      {!isMobile && (
+        <img
+          className="land-hero__img"
+          src={imgSrc}
+          alt="Usage-based pricing cards and product types"
+          loading="eager"
+          decoding="async"
+        />
+      )}
     </section>
   );
 }

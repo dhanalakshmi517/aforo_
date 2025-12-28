@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./InsightCards.css";
 
-/* Replace these with your real assets (PNG/SVG) */
 import imgA from "../LandingComponents/insight-1.svg";
 import imgB from "../LandingComponents/insight-2.svg";
 import imgC from "../LandingComponents/insight-3.svg";
@@ -91,67 +90,81 @@ const items: CardItem[] = [
 
 export default function InsightCards() {
   const [active, setActive] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const isAnimating = useRef(false);
   const animTimer = useRef<number | null>(null);
 
-  // Utility: smooth scroll container to card's top
+  // Detect mobile breakpoint (CSS uses same 900px)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+
+    if (mq.addEventListener) mq.addEventListener("change", apply);
+    else mq.addListener(apply);
+
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", apply);
+      else mq.removeListener(apply);
+    };
+  }, []);
+
+  // Smooth scroll the container to a specific card
   const scrollToCard = (index: number) => {
     const root = viewportRef.current;
     const el = cardRefs.current[index];
     if (!root || !el) return;
 
-    // lock during animation
     isAnimating.current = true;
-    setActive(index); // reflect state immediately
+    setActive(index);
 
-    const top = el.offsetTop; // works well with sticky stacking
-    root.scrollTo({ top, behavior: "smooth" });
+    root.scrollTo({ top: el.offsetTop, behavior: "smooth" });
 
     if (animTimer.current) window.clearTimeout(animTimer.current);
     animTimer.current = window.setTimeout(() => {
       isAnimating.current = false;
-    }, 600);
+    }, 550);
   };
 
-  /* Observe which card is in view to set active state (kept, but tolerant) */
+  // Observe active card inside the container
   useEffect(() => {
     const root = viewportRef.current;
     if (!root) return;
 
     const obs = new IntersectionObserver(
       (entries) => {
-        // Ignore observer updates during our programmatic scroll to avoid jitter
         if (isAnimating.current) return;
 
-        entries.forEach((e) => {
+        for (const e of entries) {
           if (e.isIntersecting) {
             const idx = Number((e.target as HTMLElement).dataset.index);
-            setActive(idx);
+            if (!Number.isNaN(idx)) setActive(idx);
           }
-        });
+        }
       },
       {
         root,
-        threshold: 0.55,
-        rootMargin: "-10% 0px -35% 0px",
+        threshold: isMobile ? 0.6 : 0.55,
+        rootMargin: isMobile ? "0px 0px -40% 0px" : "-10% 0px -35% 0px",
       }
     );
 
     cardRefs.current.forEach((el) => el && obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+  }, [isMobile]);
 
-  // Wheel/touch step pagination (separate forward/backward handling)
+  // Desktop-only wheel pagination (mobile uses native scroll-snap)
   useEffect(() => {
+    if (isMobile) return;
+
     const root = viewportRef.current;
     if (!root) return;
 
-    let touchStartY = 0;
     let lastWheelAt = 0;
 
-    // Forward scrolling (1 → 2 → 3 → 4)
     const goForward = () => {
       if (isAnimating.current) return;
       const next = active + 1;
@@ -159,7 +172,6 @@ export default function InsightCards() {
       scrollToCard(next);
     };
 
-    // Backward scrolling (4 → 3 → 2 → 1)
     const goBackward = () => {
       if (isAnimating.current) return;
       const next = active - 1;
@@ -170,44 +182,21 @@ export default function InsightCards() {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const now = Date.now();
-      if (now - lastWheelAt < 200) return; // throttle
+      if (now - lastWheelAt < 200) return;
       lastWheelAt = now;
 
       if (Math.abs(e.deltaY) < 10) return;
-      
-      if (e.deltaY > 0) {
-        goForward(); // scroll down = next card
-      } else {
-        goBackward(); // scroll up = previous card
-      }
-    };
 
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      const dy = touchStartY - e.touches[0].clientY;
-      if (Math.abs(dy) < 24) return;
-      e.preventDefault();
-      
-      if (dy > 0) {
-        goForward(); // swipe up = next card
-      } else {
-        goBackward(); // swipe down = previous card
-      }
-      touchStartY = e.touches[0].clientY; // update so you can keep swiping
+      if (e.deltaY > 0) goForward();
+      else goBackward();
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
-    root.addEventListener("touchstart", onTouchStart, { passive: true });
-    root.addEventListener("touchmove", onTouchMove, { passive: false });
 
     return () => {
       root.removeEventListener("wheel", onWheel as any);
-      root.removeEventListener("touchstart", onTouchStart as any);
-      root.removeEventListener("touchmove", onTouchMove as any);
     };
-  }, [active]);
+  }, [active, isMobile]);
 
   return (
     <section className="ic">
@@ -216,29 +205,23 @@ export default function InsightCards() {
           <article
             className={`ic__card ${active === idx ? "is-active" : ""}`}
             key={idx}
-            ref={(el) => { cardRefs.current[idx] = el; }}
+            ref={(el) => {
+              cardRefs.current[idx] = el;
+            }}
             data-index={idx}
-            style={{ 
+            style={{
               ["--i" as any]: idx,
-              zIndex: active === idx ? items.length : (idx < active ? idx + 1 : 0)
+              // Fixed z-index logic for proper desktop stacking
+              zIndex: !isMobile
+                ? active === idx
+                  ? items.length + 1  // Active card gets highest z-index
+                  : items.length - idx // Cards get decreasing z-index (later cards on top)
+                : undefined,
             }}
           >
             <div className="ic__left">
               <h3 className="ic__title">{it.title}</h3>
               <p className="ic__body">{it.body}</p>
-
-              {/* {it.ctaLabel && (
-                <button
-                  className="ic__cta"
-                  type="button"
-                  onClick={it.onCtaClick}
-                >
-                  {it.ctaLabel}
-                  <span className="ic__ctaArrow" aria-hidden>
-                    →
-                  </span>
-                </button>
-              )} */}
             </div>
 
             <div className="ic__right">
@@ -246,7 +229,8 @@ export default function InsightCards() {
             </div>
           </article>
         ))}
-        {/* spacer so the last sticky card can unstick nicely */}
+
+        {/* Desktop-only spacer, harmless on mobile */}
         <div className="ic__endSpacer" />
       </div>
     </section>
