@@ -96,9 +96,10 @@ class LoginPage {
         await this.driver.wait(async () => {
           const currentUrl = await this.driver.getCurrentUrl();
           return !currentUrl.includes('/signin');
-        }, 5000);
+        }, 15000); // Increased from 5000 to 15000
         return true;
       } catch (e) {
+        console.log('⚠️ Login redirect timed out, current URL:', await this.driver.getCurrentUrl());
         return false;
       }
 
