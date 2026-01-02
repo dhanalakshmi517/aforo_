@@ -621,6 +621,14 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             onChange={v => {
               const value = v;
               console.log('🎯 Pricing: User selected pricing model:', value);
+              
+              // If locked, prevent selection and revert to empty state
+              if (locked) {
+                console.log('🔒 Pricing: Locked mode - reverting selection to empty');
+                setSelected('');
+                return;
+              }
+              
               setSelected(value);
               if (value === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
@@ -642,7 +650,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
 
           {errors.general && <div className="inline-error">{errors.general}</div>}
 
-          {selected === 'Flat Fee' && (
+          {selected === 'Flat Fee' && !locked && (
             <>
               <div className="pricing-container pricing-subform">
                 <FlatFeeForm
@@ -658,7 +666,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             </>
           )}
 
-          {selected === 'Tiered Pricing' && (
+          {selected === 'Tiered Pricing' && !locked && (
             <>
               <div className="pricing-container pricing-subform">
                 <Tiered
@@ -701,7 +709,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             </>
           )}
 
-          {selected === 'Volume-Based' && (
+          {selected === 'Volume-Based' && !locked && (
             <>
               <div className="pricing-container pricing-subform">
                 <Volume
@@ -757,7 +765,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             </>
           )}
 
-          {selected === 'Stairstep' && (
+          {selected === 'Stairstep' && !locked && (
             <>
               <div className="pricing-container pricing-subform">
                 <StairStep
@@ -798,7 +806,7 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             </>
           )}
 
-          {selected === 'Usage-Based' && (
+          {selected === 'Usage-Based' && !locked && (
             <>
               <div className="pricing-container pricing-subform">
                 <UsageBased

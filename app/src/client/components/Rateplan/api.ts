@@ -24,7 +24,7 @@ export interface Product {
  * ========================= */
 export const BASE_URL = 'http://3.208.93.68:8080/api';
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
-const BM_BASE = 'http://34.238.49.158:8081/api/billable-metrics';
+const BM_BASE = 'http://54.146.189.144:8081/api/billable-metrics';
 
 /* =========================
  * Helpers

@@ -59,7 +59,7 @@ export interface CreateMetricResult {
 import { getAuthHeaders } from '../../utils/auth';
 
 const METRICS_BASE_URL =
-  (import.meta as any).env?.VITE_METRICS_API_URL || 'http://34.238.49.158:8081/api';
+  (import.meta as any).env?.VITE_METRICS_API_URL || 'http://54.146.189.144:8081/api';
 
 const PRODUCTS_BASE_URL =
   (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://3.208.93.68:8080/api';
