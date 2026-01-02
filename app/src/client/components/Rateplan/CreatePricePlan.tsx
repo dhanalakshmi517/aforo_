@@ -628,15 +628,8 @@ const CreatePricePlan = React.forwardRef<
     const ok = await canNavigateTo(index);
     if (!ok) return;
 
-    // Validate current step before allowing navigation
-    if (currentStep === 2) {
-      const v = validatePricingStep();
-      if (!v.isValid) {
-        setErrors(v.errors);
-        console.warn("⚠️ Cannot navigate away from pricing step - validation errors exist");
-        return;
-      }
-    }
+    // Remove all pricing validation for navigation - allow free movement between steps
+    // Users can navigate freely and validation will only occur on final submission
 
     // best-effort persist current step
     try {

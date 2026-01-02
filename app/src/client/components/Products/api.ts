@@ -15,6 +15,8 @@ export type Product = {
 
 // Use the remote backend for all environments (dev + prod) to avoid localhost:3001
 export const BASE_URL = 'http://3.208.93.68:8080/api';
+// Billable metrics service runs on a different port
+export const BILLABLE_METRICS_BASE_URL = 'http://54.146.189.144:8081/api';
 // Useful if you ever need to build absolute URLs without doubling "/api"
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 
@@ -805,9 +807,15 @@ export const getProductById = async (productId: string): Promise<Product | null>
 
 export const getBillableMetrics = async (productId: string): Promise<BillableMetric[]> => {
   try {
-    const api = createApiClient();
-    const response = await api.get<BillableMetric[]>(
-      `/billable-metrics/by-product?productId=${productId}`
+    // Use billable metrics service directly instead of main API
+    const response = await axios.get<BillableMetric[]>(
+      `${BILLABLE_METRICS_BASE_URL}/billable-metrics/by-product?productId=${productId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${getAuthData()?.token}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
     return response.data;
   } catch (error) {
