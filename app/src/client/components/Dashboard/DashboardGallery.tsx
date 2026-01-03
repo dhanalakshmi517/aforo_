@@ -78,11 +78,6 @@ const DashboardGallery: React.FC<Props> = ({ cards = defaultCards, onCardClick }
   };
 
   const handleCardClick = (card: DashboardCard) => {
-    // Do nothing for Product Analysis card
-    if (card.id === "product") {
-      return;
-    }
-
     onCardClick?.(card);
 
     if (card.id === "cust") {

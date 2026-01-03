@@ -972,48 +972,48 @@ line-height: var(--line-height-body-sm);
 
 .product-type-badge--api {
  
-  color: var(--color-neutral-1400);
+  color: var(--color-neutral-1700);
   font-family: "IBM Plex Sans";
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 400;
-  line-height: var(--line-height-body-sm);
+  line-height: var(--line-height-body-md);
 }
 
  
 
 .product-type-badge--sqlresult {
-  color: var(--color-neutral-1400);
+  color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 400;
-  line-height: var(--line-height-body-sm);
+  line-height: var(--line-height-body-md);
 }
 
 /* FlatFile badge */
 .product-type-badge--flatfile {
- color: var(--color-neutral-1400);
+ color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 400;
-  line-height: var(--line-height-body-sm);
+  line-height: var(--line-height-body-md);
 }
 
 /* LLM Token badge */
 .product-type-badge--llmtoken {
  color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 400;
-  line-height: var(--line-height-body-sm);
+  line-height: var(--line-height-body-md);
 }
 
 .product-type-badge--sqlresult {
 
  color: var(--color-neutral-1400);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 400;
-  line-height: var(--line-height-body-sm);}
+  line-height: var(--line-height-body-md);}
 
 
 .products-table th {

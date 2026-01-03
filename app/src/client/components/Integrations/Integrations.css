@@ -1,24 +1,81 @@
+@import "../Variables/Variables.css";
 .integrations-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: var(--color-neutral-50);
   width:100% ;
 }
 
 .integrations-content {
-  padding: 24px 40px;
+  padding: 24px 24px;
   max-width: none;
   margin: 0;
+  margin-top: -10px;
+}
+
+.integrations-title-section {
+  margin-bottom: 20px;
+}
+
+.integrations-title {
+  margin: 0 0 8px 0;
+  color: var(--color-neutral-1700);
+  
+  /* heading/h3/bold */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-h3);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h3);
+}
+
+.integrations-subtitle {
+  margin: 0;
+color: #000;
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-h4);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4);
 }
 
 .integrations-grid {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px;
   align-self: stretch;
   margin-top: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   width: 100%;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 1200px) {
+  .integrations-grid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .integrations-grid {
+    gap: 12px;
+  }
+  
+  .integrations-content {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .integrations-grid {
+    gap: 8px;
+  }
+  
+  .integrations-content {
+    padding: 12px 16px;
+  }
 }
 
 /* Main card container - Layout specs from fourth image */

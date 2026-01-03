@@ -317,6 +317,7 @@ const AccountDetailsForm: React.FC<Props> = ({
           }}
           type="tel"
           inputMode="tel"
+          disabled={locked}
         />
         {errors.phoneNumber && <span className="field-error">{errors.phoneNumber}</span>}
       </div>
@@ -331,6 +332,7 @@ const AccountDetailsForm: React.FC<Props> = ({
           onBlur={locked ? () => {} : handlePrimaryEmailBlur}
           onFocus={locked ? () => {} : handlePrimaryEmailFocus}
           error={errors.primaryEmail || primaryEmailError}
+          disabled={locked}
         />
       </div>
 
@@ -343,6 +345,7 @@ const AccountDetailsForm: React.FC<Props> = ({
               placeholder="e.g., johndoe@example.com"
               value={email}
               onChange={locked ? () => {} : (val) => updateAdditionalEmail(idx, val)} // Prevent changes when locked
+              disabled={locked}
             />
           </div>
         ))}

@@ -1,0 +1,325 @@
+:root {
+  --bhr-radius: 28px;
+  --bhr-border: rgba(16, 24, 40, 0.06);
+
+  --bhr-title: #19222d;
+  --bhr-sub: #a7b3c2;
+
+  /* heatmap blues */
+  --bhr-lv0: #bed4ed;
+  --bhr-lv1: #7ea0e8;
+  --bhr-lv2: #4e64c0;
+
+  /* bar bands (green / blue / purple) */
+  --bhr-green: #59c79a;
+  --bhr-blue: #5b79d3;
+  --bhr-purple: #c05bd3;
+
+  --bhr-track: #e8f7ef;
+
+  /* tooltip colors */
+  --bhr-cell-low: #d9e8fb;
+  --bhr-cell-med: #86aef2;
+  --bhr-cell-high: #2f5fd2;
+}
+
+.bhr-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.bhr-card {
+  border-radius: var(--bhr-radius) !important;
+  padding: 28px !important;
+  background: #fff !important;
+  border: 1px solid var(--bhr-border) !important;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+}
+
+.bhr-head {
+  margin-bottom: 14px;
+}
+
+.bhr-title {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--bhr-title) !important;
+}
+
+.bhr-updated {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--bhr-sub) !important;
+}
+
+.bhr-head-left {
+  gap: 10px;
+}
+
+.bhr-badge {
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 4px 10px !important;
+}
+
+/* --- HEATMAP --- */
+.bhr-heatmap-wrap {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  align-items: start;
+  position: relative;
+  min-height: 200px;
+}
+
+.bhr-y {
+  display: grid;
+  grid-auto-rows: 18px;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.bhr-y-label {
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--bhr-sub);
+  white-space: nowrap;
+}
+
+.bhr-heatmap {
+  display: grid;
+  grid-auto-rows: 22px;
+  gap: 3px;
+  border-radius: 12px;
+  overflow: visible;
+  position: relative;
+}
+
+.bhr-cell {
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  background: var(--bhr-lv0);
+}
+.bhr-cell.lv-0 { background: var(--bhr-lv0); }
+.bhr-cell.lv-1 { background: var(--bhr-lv1); }
+.bhr-cell.lv-2 { background: var(--bhr-lv2); }
+
+.bhr-x {
+  margin-top: 10px;
+  display: grid;
+  align-items: center;
+}
+
+.bhr-x-tick {
+  font-size: 11px;
+  color: var(--bhr-sub);
+  justify-self: center;
+}
+
+.bhr-legend {
+  margin-top: 12px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bhr-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--bhr-sub);
+}
+
+.bhr-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.bhr-dot.dot-low  { background: var(--bhr-green); }
+.bhr-dot.dot-mid  { background: var(--bhr-purple); }
+.bhr-dot.dot-high { background: var(--bhr-blue); }
+
+/* --- REVENUE BARS --- */
+.bhr-bars {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.bhr-bar-row {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.bhr-bar-label {
+  font-size: 10px;
+  color: var(--bhr-sub);
+  white-space: nowrap;
+}
+
+.bhr-bar-track {
+  width: 100%;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--bhr-track);
+  overflow: hidden;
+}
+
+.bhr-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.bhr-bar-fill.is-low  { background: var(--bhr-green); }
+.bhr-bar-fill.is-mid  { background: var(--bhr-blue); }
+.bhr-bar-fill.is-high { background: var(--bhr-purple); }
+
+/* X axis labels under bars */
+.bhr-xaxis {
+  position: relative;
+  margin-top: 14px;
+  height: 16px;
+  padding-left: 90px; /* aligns with label column + gap */
+}
+
+.bhr-xaxis-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--bhr-sub);
+  white-space: nowrap;
+}
+
+/* Legend in right card: keep near bottom like screenshot */
+.bhr-legend-right {
+  margin-top: 16px;
+}
+
+/* Tooltip styles */
+.bhr-tooltip {
+  position: absolute;
+  transform: translate(-50%, -12px); /* centered above */
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14);
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  min-width: 200px;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+.bhr-tooltip-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #101828;
+}
+
+.bhr-tooltip-metric {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.bhr-tooltip-value {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7cff;
+  font-weight: 500;
+}
+.bhr-tooltip-value span {
+  font-weight: 900;
+}
+
+.bhr-bucket {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid rgba(16, 24, 40, 0.06);
+}
+
+.bhr-bucket.is-low {
+  background: rgba(217, 232, 251, 0.6);
+  color: #2f5fd2;
+}
+.bhr-bucket.is-medium {
+  background: rgba(134, 174, 242, 0.22);
+  color: #3557b8;
+}
+.bhr-bucket.is-high {
+  background: rgba(47, 95, 210, 0.14);
+  color: #2f5fd2;
+}
+
+/* Update heatmap cells to be interactive buttons */
+.bhr-cell {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  outline: none;
+  background: var(--bhr-lv0);
+}
+
+.bhr-cell.is-low { background: var(--bhr-cell-low); }
+.bhr-cell.is-medium { background: var(--bhr-cell-med); }
+.bhr-cell.is-high { background: var(--bhr-cell-high); }
+
+.bhr-cell:focus-visible {
+  box-shadow: 0 0 0 3px rgba(47, 95, 210, 0.2);
+}
+
+/* Recharts Revenue Chart Styles */
+.bhr-chart-container {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.bhr-revenue-tooltip {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+}
+
+.bhr-revenue-tooltip-title {
+  font-weight: 600;
+  color: #19222d;
+  margin-bottom: 4px;
+}
+
+.bhr-revenue-tooltip-value {
+  color: #64748b;
+}
+
+.bhr-revenue-tooltip-value span {
+  font-weight: 700;
+  color: #19222d;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .bhr-grid {
+    grid-template-columns: 1fr;
+  }
+}

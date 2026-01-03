@@ -1,0 +1,15 @@
+/* InfoBadgeIcon.css */
+
+.ibiWrap {
+  /* EXACT FIGMA DIMENSIONS */
+  width: 44px;
+  height: 44px;
+  padding: 12px; /* 12 12 12 12 */
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+  background: rgba(2, 107, 176, 0.06);
+}

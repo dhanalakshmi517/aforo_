@@ -424,15 +424,18 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
     // forward navigation guards - validate when moving to next step
     if (index > currentStep) {
-      // leaving general -> if going to configuration, validate general step
+      // leaving general -> if going to configuration, validate and save general step
       if (currentStep === 0 && index === 1) {
-        // Only validate if user has filled at least one field
+        // Only validate and save if user has filled at least one field
         if (hasAnyRequiredInput) {
           // Product Name is required to proceed
           if (!formData.productName.trim()) {
             setErrors((prev) => ({ ...prev, productName: "This field is required" }));
             return;
           }
+          // Save the product when navigating from General to Configuration
+          const ok = await saveProduct(true);
+          if (!ok) return;
         }
       }
 
@@ -551,7 +554,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
               <nav className="met-np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
-                  const isCompleted = i < currentStep;
+                  // Only mark as completed if user has moved past it AND all required fields are filled
+                  const isStep0Completed = formData.productName.trim();
+                  const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : true);
                   const showConnector = i < steps.length - 1;
 
                   const isReview = i === 2;

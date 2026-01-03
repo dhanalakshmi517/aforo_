@@ -6,7 +6,7 @@
   padding: var(--scale-400, 16px) var(--scale-500, 20px) var(--scale-400, 16px) var(--scale-700, 20px);
   justify-content: space-between;
   align-items: center;
-  background: var(--surface-layer-4, #FFF);
+  background: var(--color-neutral-50);
   position: relative;
   z-index: 2;
   box-sizing: border-box;
@@ -15,16 +15,15 @@
 .integration-rate-plan-header h2 {
   margin: 0;
   padding: 0;
-  color: var(--text-text-darkest, #1A2126);
-  
-  /* heading/h6/bold */
-  font-family: var(---font-family-primary);
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+ color: var(--color-neutral-1700);
+
+/* body/lg/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-lg); /* 150% *//* 133.333% */
   flex: 0 0 auto;
-  margin-left: 20px;
 
 }
 

@@ -1,897 +1,259 @@
-.kong-step--completed,
-.kong-step--inactive {
-  width: 100%;
+@import "../../Variables/Variables.css";
+
+/* KongIntegration.css */
+
+.kiPage {
+  min-height: 100vh; /* ✅ FIX: remove calc(100vh + 25px) */
+  background: var(--color-neutral-50);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #203246;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-* {
+
+/* TOP BAR */
+.kiBar {
+  flex-shrink: 0;
+}
+
+/* SHELL */
+.kongShell {
+  flex: 1;
+  display: flex;           /* ✅ so the card can stretch */
+  min-height: 0;
+  padding: 24px 80px;      /* same padding, but no extra hidden height now */
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
-/* Fullscreen layout just for the Kong integration page */
-.kong-page {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: #e3f0ff;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+@media (max-width: 980px) {
+  .kongShell {
+    padding: 16px 20px 20px 20px;
+  }
 }
 
-.kong-frame {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  border: none;
-  background: #f6f9ff;
-  display: flex;
-}
-
-/* SIDEBAR */
-
-.kong-sidebar {
-  width: 321px;
-  background: var(--color-neutral-100);
-  border-right: 1px solid var(--color-neutral-300);
-  padding: 28px 28px 40px 28px;
+/* CARD */
+.kiCard {
+  flex: 1; /* ✅ fill available vertical space */
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  position: relative;
-}
 
-.kong-sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.kong-back-button {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: 1px solid #d4e3ff;
-  background: #ffffff;
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.kong-brand-logo {
-  font-weight: 600;
-  font-size: 16px;
-  color: #1256b0;
-}
-
-.kong-stepper {
-  margin-top: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-}
-
-.kong-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: var(--border-radius-sm);
-}
-
-.kong-step-icon {
-  width: 27px;
-  height: 27px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kong-step-icon svg {
-  display: block;
-}
-
-.kong-step-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* align title horizontally with icon */
-}
-
-.kong-step-title {
-  color: var(--color-neutral-400);
-
-/* body/md/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
-}
-
-.kong-step-subtitle {
-color: var(--color-neutral-400);
-
-/* body/md/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-xs);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-xs, 16px); /* 142.857% */
-}
-
-/* Active step card */
-.kong-step--active {
-  background-color: var(--color-neutral-white);
-  box-shadow: 0 8px 24px rgba(14, 31, 53, 0.08);
-}
-
-.kong-step-icon--active {
-  position: relative;
-  background: linear-gradient(135deg,  #025A94 ,#0262A1);
-}
-
-/* Make sure the icon stays blue in assign step */
-.kong-step:nth-child(2) .kong-step-icon--active {
-  background: linear-gradient(135deg,  #025A94 ,#0262A1) !important;
-}
-
-.kong-step-icon--active::before {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 999px;
-  border: 2px solid #025A94;
-}
-
-.kong-step--active .kong-step-title {
-color: var(--color-primary-800);
-
-/* body/md/bold */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-body-md);}
-
-.kong-step--active .kong-step-subtitle {
-color:  #1D7AFC;
-
-/* body/xs/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-xs, 10px);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-xs, 16px); /* 160% */}
-/* Inactive step */
-.kong-step--inactive {
-  opacity: 0.85;
-  width: 100%;
-  background: transparent;
-}
-
-.kong-step-icon--inactive {
-  position: relative;
-  background: transparent;
-}
-
-.kong-step-icon--inactive::before {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 999px;
-  border: 2px solid var(--color-neutral-300); /* ring only, no fill */
-}
-
-.kong-step--inactive .kong-step-title {
-  color: var(--color-neutral-400);
-}
-
-.kong-step--inactive .kong-step-subtitle {
-  color: #b4bccd;
-}
-
-/* Completed first step (green) */
-.kong-step--completed .kong-step-icon {
-  border: 2px solid #16a34a;
-  background: transparent;
-}
-
-.kong-step-icon--completed svg path {
-  stroke: #16a34a;
-}
-
-.kong-step--completed .kong-step-title {
-  color: #2f8c16;
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  line-height: var(--line-height-body-md, 20px);
-}
-
-.kong-step--completed .kong-step-subtitle {
-  color: #137c26;
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-/* Substeps inside Import Apigee Products card */
-.kong-step-subflow {
-  margin-top: 20px;
-  position: relative;
-  min-height: 70px;
-
-}
-
-.kong-step-subflow::before {
-  content: "";
-  position: absolute;
-  left: -27px;
-  top: -24px;
-  width: 28px;
-  height: 50px;
-  border-left: 2px solid var(--color-primary-700);
-  border-bottom: 2px solid var(--color-primary-700);
-  border-bottom-left-radius: 12px;
-}
-
-/* When in assign step, keep the first connector blue */
-.kong-substep--completed + .kong-substep--active ~ .kong-step-subflow::before {
-  border-left: 2px solid var(--color-primary-700);
-  border-bottom: 2px solid var(--color-primary-700);
-}
-
-.kong-substep {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-size-sm);
-  margin-top: 18px;
-}
-
-.kong-substep + .kong-substep {
-  margin-top: 12px;
-  position: relative;
-}
-
-.kong-substep + .kong-substep::before {
-  content: "";
-  position: absolute;
-  left: -26.3px;
-  top: -30px;
-  width: 28px;
-  height: 40px;
-  border-left: 2px solid #d1d7e0;
-  border-bottom: 2px solid #d1d7e0;
-  border-bottom-left-radius: 12px;
-}
-
-/* Only the first connector (from active to disabled) should be blue */
-.kong-substep--active + .kong-substep--disabled::before {
-  border-left: 2px solid var(--color-primary-700);
-  border-bottom: 2px solid #d1d7e0;
-}
-
-/* When first step is completed and second is active */
-.kong-substep--completed + .kong-substep--active::before {
-  border-left: 2px solid var(--color-primary-700);
-  border-bottom: 2px solid var(--color-primary-700);
-}
-
-/* Fix for second connector line in assign step */
-.kong-substep--completed ~ .kong-substep--active::before {
-  border-left: 2px solid var(--color-primary-700);
-  border-bottom: 2px solid var(--color-primary-700);
-}
-
-.kong-substep-bullet {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #dfe3e9;
-}
-
-.kong-substep-bullet svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-.kong-substep--active .kong-substep-bullet {
-  color: var(--color-primary-800)!important;
-}
-
-.kong-substep--active .kong-substep-label {
-  color: var(--color-primary-700);
-  font-weight: 500;
-}
-
-.kong-substep--completed .kong-substep-label {
-  color: var(--color-primary-700);
-  font-weight: 500;
-}
-
-.kong-substep--disabled .kong-substep-label {
-color: var(--color-neutral-800);
-
-/* body/sm/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-sm);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-sm, 18px); /* 150% */}
-
-.kong-sidebar-footer {
-  margin-top: auto;
-  padding-bottom: 45px;
-  width: 100%;
-}
-
-.kong-import-history {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-border-radius: var(--border-radius-sm);
-border: 1px solid var(--color-neutral-500);
-background: var(--color-neutral-250);  cursor: not-allowed;
-color: var(--color-neutral-400);
-
-/* body/md/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
-}
-
-
-
-/* MAIN CONTENT */
-
-.kong-main {
-  flex: 1;
-  padding: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-    height: calc(100% - 40px);
-
-}
-
-.kong-connection-card {
-  width: 100%;
   background: var(--color-neutral-white);
   border-radius: var(--border-radius-md);
-  padding: 24px 28px 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: calc(100% - 30px);
-  box-shadow: 0 8px 32px rgba(9, 30, 66, 0.08);
+  border: 1px solid var(--color-neutral-200);
+  box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6),
+    0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8),
+    0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+  overflow: hidden;
+  margin-bottom: 0;
 }
 
-.kong-connected-body {
+.kiCardBody {
   flex: 1;
+  min-height: 0;
+  padding: 28px 28px 16px 28px;
+
+  display: flex;              /* ✅ NEW */
+  flex-direction: column;     /* ✅ NEW */
+}
+
+
+.kiGrid {
+  flex: 1;                    /* ✅ NEW: fill available body height */
+  min-height: 0;              /* ✅ NEW: allow children to shrink */
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 28px;
+  align-items: stretch;       /* ✅ FIX: was start */
+}
+
+
+.kong-button {
+  width: 300px;
+  height: 40px;
+  color:var(--color-neutral-500)
+}
+
+@media (max-width: 980px) {
+  .kiGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.kiLeft {
+  display: flex;              /* ✅ NEW */
+  flex-direction: column;     /* ✅ NEW */
+  min-height: 0;              /* ✅ NEW */
+}
+
+.kiLeftSpacer {
+  flex: 1;                    /* ✅ NEW: pushes footer naturally */
+}
+
+.kiRight {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 16px;
-  padding: 24px;
+  min-height: 0;
+  height: auto;               /* ✅ remove height:100% dependency */
 }
 
-.kong-connected-illustration {
-  width: 160px;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kong-connected-title {
-  margin: 0;
- text-align: center;
-
-/* heading/h4/bold */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h4);
-font-style: normal;
-font-weight: 700;
-background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #2A455E) 76.37%));
-background-clip: text;
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
-}
-
-.kong-connected-description {
-  margin: 0;
-  max-width: 420px;
- color: var(--color-neutral-1700);
-text-align: center;
-
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
-}
-
-.kong-connected-cta {
-  width: 240px;
-}
-
-.kong-connection-header h2 {
-  margin: 0;
-color: var(--color-neutral-1700);
-
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h4);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-heading-h4);
-}
-
-.kong-connection-body {
-  margin-top:12px;
-  display: flex;
-  gap: 60px;
-  align-items: flex-start;
-}
-
-/* FORM */
-
-.kong-form {
-  flex: 1.1;
-}
-
-.kong-form-group {
-  margin-bottom: 18px;
-
-}
-
-.kong-label {
-  display: block;
-  margin-bottom: 6px;
+.kongSectionTitle {
   color: var(--color-neutral-1700);
 
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 450;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  /* body/lg/bold */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-lg, 16px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-body-lg, 24px); /* 150% */
+  margin-bottom: 14px;
 }
 
-.kong-control {
-  width: 100%;
-  height: 40px;
-  padding: 8px 12px;
-  font-size: var(--font-size-md);
-  color: var(--color-neutral-1400);
-  background: var(--color-neutral-white) !important;
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  font-weight: 400;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+.kiField {
+  margin-top: 20px;
 }
 
-.kong-control::placeholder {
-  color: var(--color-neutral-300);
-}
-
-.kong-control:hover:not(:disabled) {
-  border-color: var(--color-neutral-300);
-  background: var(--color-neutral-50);
-}
-
-.kong-control:focus,
-.kong-control:focus-visible {
-  outline: none;
-  border-color: var(--color-primary-700);
-  box-shadow: 0 0 0 3px rgba(2, 98, 161, 0.15);
-  background: #fff;
-}
-
-.kong-control:focus::placeholder {
-  color: transparent;
-}
-
-.kong-control:active:not(:disabled) {
-  border: 1px solid var(--color-primary-700);
-  box-shadow: 0 0 0 2px rgba(2, 90, 148, 0.2);
-}
-
-.kong-control:disabled {
-  background: var(--color-neutral-200);
-  color: var(--color-neutral-500);
-  cursor: not-allowed;
-}
-
-.kong-select-wrapper {
-  position: relative;
-}
-
-.kong-select-wrapper::after {
-  content: "";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
-
-.kong-select {
-  appearance: none;
-  padding-right: 42px;
-  cursor: pointer;
-}
-
-/* Country Grid */
-
-.kong-country-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.kong-country-option {
+/* RIGHT SIDE */
+.kiRight {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-neutral-white);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.kong-country-option:hover {
-  border-color: var(--color-primary-700);
-  background: #f0f7ff;
-}
-
-.kong-country-option--selected {
-  border-color: var(--color-primary-700);
-  background: #e3f0ff;
-}
-
-.kong-country-flag {
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-}
-
-.kong-country-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-neutral-1400);
-}
-
-/* Region Grid */
-
-.kong-region-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.kong-region-option {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 12px;
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-neutral-white);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-}
-
-.kong-region-option:hover {
-  border-color: var(--color-primary-700);
-  background: #f0f7ff;
-}
-
-.kong-region-option--selected {
-  border-color: var(--color-primary-700);
-  background: #e3f0ff;
-}
-
-.kong-region-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-neutral-1400);
-}
-
-.kong-error-message {
-  padding: 12px 16px;
-  background-color: #fee2e2;
-  border: 1px solid #fecaca;
-  border-radius: var(--border-radius-sm);
-  color: #b91c1c;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.kong-primary-button {
-  margin-top: 40px;
-  border: none;
-  display: flex;
-}
-
-
-
-
-/* HOW-TO CARD */
-
-.kong-helper-card {
   flex: 1;
-border-radius: 16px;
-border: 1px solid var(--billable-metric-stroke---light, #F6F6F6);
-background: #F5F9FF; 
- padding: 16px 20px 20px 20px;
-
-  position: relative;
-  margin-top: -8px;
-}
-
-.kong-helper-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-
-.kong-helper-title {
- color: var(--color-primary-700);
-
-/* body/md/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
-}
-
-.kong-helper-body {
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-}
-
-/* fake screenshot */
-
-.kong-helper-image-placeholder {
-  flex-shrink: 0;
-  width: 100%;
-  position: relative;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
-  margin-top: -47px;
 }
 
-.kong-helper-browser-bar {
-  height: 14px;
-  background: #0b1220;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 6px;
-}
-
-.kong-helper-browser-bar span {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #64748b;
-}
-
-.kong-helper-dialog {
-  margin: 10px 14px;
-  border-radius: 8px;
-border-radius: 16px;
-border: 1px solid #F6F6F6;
-background:  #F5F9FF;padding: 16px 20px 20px 20px;
-}
-
-.kong-helper-dialog-header {
-  height: 10px;
-  border-radius: 4px;
-  margin-bottom: 6px;
-  color:  #0262A1;
-
-/* body/md/med */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md);
-}
-
-.kong-helper-dialog-lines {
-  height: 20px;
-  border-radius: 4px;
-  background: linear-gradient(
-    to bottom,
-    #e2e8f0 0,
-    #e2e8f0 50%,
-    #f1f5f9 50%,
-    #f1f5f9 100%
-  );
-}
-
-.kong-helper-dialog-button {
-  margin-top: 6px;
-  width: 60px;
-  height: 14px;
-  border-radius: 999px;
-  background: #1163d6;
-}
-
-.kong-helper-avatar {
-  position: absolute;
-  right: 8px;
-  bottom: -14px;
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 20%, #facc15, #f97316);
-  border: 4px solid #e5edff;
-}
-
-/* steps */
-
-.kong-helper-steps {
-  margin: 0;
-  padding-left: 18px;
-color: var(--color-neutral-1000);
-
-/* body/sm/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-sm);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-sm, 18px); /* 150% */
-}
-
-.kong-helper-steps li + li {
-  margin-top: 6px;
-}
-
-.kong-import-card {
-  width: 100%;
-  background: var(--color-neutral-white);
-  border-radius: var(--border-radius-md);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  height: calc(100% - 10px);
-}
-
-.kong-import-header {
+/* FOOTER */
+.kiFooter {
+  flex-shrink: 0; /* ✅ keep footer height stable */
+  border-top: 1px solid rgba(20, 40, 60, 0.06);
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 14px;
 }
 
-.kong-import-title h2 {
-  margin: 0;
-  color: var(--color-neutral-1700);
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-h4);
-  font-weight: 600;
-  line-height: var(--line-height-heading-h4);
-}
-
-.kong-import-title p {
-  margin: 6px 0 0;
-  color: var(--color-neutral-600);
-  font-size: var(--font-size-sm);
-}
-
-.kong-import-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.kong-import-search {
-  position: relative;
-  width: 220px;
-}
-
-.kong-import-search input {
-  width: 100%;
-  padding: 8px 12px 8px 34px;
-  border-radius: 8px;
-  border: 1px solid var(--color-neutral-300);
-  font-size: var(--font-size-sm);
-  background: var(--color-neutral-white);
-}
-
-.kong-import-search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  pointer-events: none;
-}
-
-.kong-import-selectors {
+.kiFooterLeft {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.kong-import-selectors button {
-  border: none;
-  background: transparent;
-  color: var(--color-primary-800);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: var(--font-size-sm);
+.kiFooterIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
 }
 
-.kong-import-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-  overflow-y: auto;
+.kiSectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  margin-bottom: 28px;
 }
 
-.kong-import-grid .selcard {
-  width: 100%;
-}
-
-.kong-import-empty {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: var(--color-neutral-600);
-  padding: 40px 0;
-}
-
-.kong-import-footer {
+/* SUCCESS STATE */
+.kiLeftSuccess {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  min-height: auto;
+}
+
+.kiLeftContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.kiDisconnectButton {
+  margin-top: 16px;
+}
+
+.kiRightSuccess {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.kiSuccessContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-neutral-200);
 }
 
-.kong-import-summary {
-  color: var(--color-neutral-600);
-  font-size: var(--font-size-sm);
+.kiSuccessTitle {
+text-align: center;
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
+  margin: 0;
+  padding: 0;
+  background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 }
 
-.kong-import-cta {
-  width: auto;
-  padding: 12px 28px;
+.kiSuccessDescription {
+ color: var(--color-neutral-1700);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  margin: 0;
+  padding: 0;
+}
+
+.kiSuccessDetails {
+  background: var(--color-neutral-50, #f5f9ff);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kiSuccessDetailsTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-neutral-700, #555);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.kiDetailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.kiDetailLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-neutral-600, #666);
+  flex: 0 0 auto;
+}
+
+.kiDetailValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral-900, #203246);
+  text-align: right;
+  flex: 1;
 }

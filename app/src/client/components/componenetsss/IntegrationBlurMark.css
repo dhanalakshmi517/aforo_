@@ -1,0 +1,49 @@
+/* IntegrationBlurMark.css */
+
+.ibm {
+  position: relative;
+
+  display: flex;
+  height: 326px;
+  padding: 27.943px 26.76px 28.196px 29.107px;
+
+  justify-content: center;
+  align-items: center;
+
+  aspect-ratio: 1 / 1;
+}
+
+/* blurred layer only */
+.ibmBlur {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* AS-IS */
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ibmSvg {
+  width: 311px;
+  height: 311px;
+  display: block;
+}
+
+/* tiles row (not blurred) */
+.ibmTiles {
+  position: absolute;
+  left: 50%;
+  bottom: 28.196px; /* matches your padding bottom */
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  z-index: 1;
+}

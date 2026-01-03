@@ -1,0 +1,114 @@
+:root {
+  /* “border-radius/lg” — set once, use everywhere */
+  --radius-lg: 12px;
+
+  --rtkpi-text: #19222d;
+  --rtkpi-sub: #7b97ae;
+
+  --rtkpi-up: #1f9d57;
+  --rtkpi-down: #e0565b;
+
+  --rtkpi-border: rgba(16, 24, 40, 0.06);
+}
+
+/* Row */
+.rtkpi-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  align-items: stretch;
+
+  /* On small screens: don’t crush, scroll */
+  overflow-x: auto;
+  padding: 6px 2px;
+  scrollbar-width: none;
+}
+.rtkpi-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card */
+.rtkpi-card {
+  flex: 1 1 0;
+  min-width: 170px;
+
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+
+
+}
+
+/* Background variants (soft pastel blocks like your screenshot) */
+.rtkpi-card.v-neutral { background: #EEF3F7; }
+.rtkpi-card.v-violet  { background: #F0EEF7; }
+.rtkpi-card.v-mint    { background: #EEF6F7; }
+.rtkpi-card.v-sky     { background: #EEF3F7; }
+
+/* Typography */
+.rtkpi-title {
+ color: var(--color-neutral-800);
+
+/* body/sm/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+.rtkpi-value {
+  margin-top: 8px;
+ color: var(--color-neutral-1700);
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h2, 28px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h2, 36px); /* 128.571% */
+}
+
+/* Trend row */
+.rtkpi-trend {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--rtkpi-sub);
+}
+
+.rtkpi-trend-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.rtkpi-trend-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.rtkpi-trend.is-up .rtkpi-trend-left {
+  color: #389315;
+}
+.rtkpi-trend.is-down .rtkpi-trend-left {
+  color: #ED5142;
+}
+
+.rtkpi-trend-meta {
+color: var(--color-neutral-800);
+
+/* body/xs/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
+}
+
+.rtkpi-trend.is-muted {
+  opacity: 0.6;
+}

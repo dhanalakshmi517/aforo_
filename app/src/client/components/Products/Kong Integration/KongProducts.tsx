@@ -1,182 +1,311 @@
-import React, { useMemo, useState, useRef } from "react";
+// KongProducts.tsx
+import * as React from "react";
 import "./KongProducts.css";
-import SelectableCard from "../../componenetsss/SelectableCard";
-import PrimaryButton from "../../componenetsss/PrimaryButton";
-import Checkbox from "../../componenetsss/Checkbox";
 
-type Product = {
+// ✅ use your existing top bar
+import ConnectionBar from "./ConnectionBar";
+import SearchInput from "../../componenetsss/SearchInput";
+import SelectCard from "../../componenetsss/SelectCard";
+import Checkbox from "../../componenetsss/Checkbox";
+import PrimaryButton from "../../componenetsss/PrimaryButton";
+import SecondaryButton from "../../componenetsss/SecondaryButton";
+import VerticalScrollbar from "../../componenetsss/VerticalScrollbar";
+
+export type KongProduct = {
   id: string;
   name: string;
+  code: string;
   description: string;
-  selected?: boolean;
+  imported?: boolean;
 };
 
-interface KongProductsProps {
-  products?: any[];
-  onImport?: (selectedIds: string[]) => void;
-}
+type Props = {
+  products: KongProduct[];
+  onBack: () => void;
+  onImport: (selectedIds: string[]) => void;
+  onViewHistory?: () => void;
+  onManageConnection?: () => void;
+};
 
-const KongProducts: React.FC<KongProductsProps> = ({ products: kongProducts = [], onImport }) => {
-  // Transform Kong API products to local Product format
-  const initialProducts: Product[] = kongProducts.length > 0 
-    ? kongProducts.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        description: p.description || "",
-        selected: false,
-      }))
-    : [];
+const demoProducts: KongProduct[] = [
+  {
+    id: "p1",
+    name: "Product Name",
+    code: "kong-prod-001",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  {
+    id: "p2",
+    name: "Product Name",
+    code: "kong-prod-002",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  {
+    id: "p3",
+    name: "Product Name",
+    code: "kong-prod-003",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  {
+    id: "p4",
+    name: "Product Name",
+    code: "kong-prod-004",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  { id: "p5", name: "Product Name", code: "kong-prod-005", description: "Description lorem lorem lorem lorem lorem lorem Description lorem l...", imported: true },
+  {
+    id: "p6",
+    name: "Product Name",
+    code: "kong-prod-006",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  {
+    id: "p7",
+    name: "Product Name",
+    code: "kong-prod-007",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  { id: "p8", name: "Product Name", code: "kong-prod-008", description: "Description lorem lorem lorem lorem lorem lorem Description lorem l...", imported: true },
+  {
+    id: "p9",
+    name: "Product Name",
+    code: "kong-prod-009",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  {
+    id: "p10",
+    name: "Product Name",
+    code: "kong-prod-010",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+  { id: "p11", name: "Product Name", code: "kong-prod-011", description: "Description lorem lorem lorem lorem lorem lorem Description lorem l...", imported: true },
+  {
+    id: "p12",
+    name: "Product Name",
+    code: "kong-prod-012",
+    description:
+      "Description lorem lorem lorem lorem lorem lorem Description lorem l...",
+  },
+];
 
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [search, setSearch] = useState("");
+export default function KongProducts({ products, onBack, onImport: onImportProp, onViewHistory, onManageConnection }: Props) {
+  const [query, setQuery] = React.useState("");
+  const [items] = React.useState<KongProduct[]>(products);
+  const [scrollPosition, setScrollPosition] = React.useState(0);
+  const [scrollHeight, setScrollHeight] = React.useState(0);
+  const [clientHeight, setClientHeight] = React.useState(0);
+  const gridContainerRef = React.useRef<HTMLDivElement>(null);
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
-  const filteredProducts = useMemo(
-    () =>
-      products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-      ),
-    [products, search]
-  );
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
 
-  const selectedCount = useMemo(
-    () => products.filter((p) => p.selected).length,
-    [products]
-  );
+    return items.filter((p) => {
+      const hay = `${p.name} ${p.code} ${p.description}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [items, query]);
 
-  const allSelected = useMemo(
-    () => products.length > 0 && products.every((p) => p.selected),
-    [products]
-  );
+  const selectableFilteredIds = React.useMemo(() => {
+    return filtered.filter((p) => !p.imported).map((p) => p.id);
+  }, [filtered]);
 
-  const toggleProduct = (id: string) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, selected: !p.selected } : p
-      )
-    );
+  const selectedCount = React.useMemo(() => selectedIds.size, [selectedIds]);
+
+  const allSelectedInFilter = React.useMemo(() => {
+    if (selectableFilteredIds.length === 0) return false;
+    return selectableFilteredIds.every((id) => selectedIds.has(id));
+  }, [selectableFilteredIds, selectedIds]);
+
+  const toggleOne = (p: KongProduct) => {
+    if (p.imported) return;
+
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(p.id)) next.delete(p.id);
+      else next.add(p.id);
+      return next;
+    });
   };
 
-  const handleSelectAll = () => {
-    setProducts((prev) => prev.map((p) => ({ ...p, selected: true })));
+  const selectAllFiltered = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      selectableFilteredIds.forEach((id) => next.add(id));
+      return next;
+    });
   };
 
-  const handleClearAll = () => {
-    setProducts((prev) => prev.map((p) => ({ ...p, selected: false })));
+  const clearAll = () => {
+    selectedIds.clear();
+    setSelectedIds(new Set());
   };
 
-  const handleImport = () => {
-    const selectedIds = products.filter((p) => p.selected).map((p) => p.id);
-    console.log("Importing products:", selectedIds);
-    if (onImport) {
-      onImport(selectedIds);
+  const handleScroll = React.useCallback(() => {
+    if (gridContainerRef.current) {
+      const element = gridContainerRef.current;
+      setScrollPosition(element.scrollTop);
+      setScrollHeight(element.scrollHeight);
+      setClientHeight(element.clientHeight);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const element = gridContainerRef.current;
+    if (element) {
+      element.addEventListener('scroll', handleScroll);
+      handleScroll(); // Initial call
+      return () => element.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll]);
+
+  // Calculate scrollbar thumb position and height
+  const scrollPercentage = scrollHeight > clientHeight ? scrollPosition / (scrollHeight - clientHeight) : 0;
+  const thumbHeight = scrollHeight > clientHeight ? (clientHeight / scrollHeight) * 100 : 0;
+  const thumbPosition = scrollPercentage * (100 - thumbHeight);
+  const showScrollbar = scrollHeight > clientHeight;
+
+  const onImport = async () => {
+    const selected = Array.from(selectedIds);
+    if (selected.length === 0) return;
+    
+    onImportProp(selected);
+    clearAll();
+  };
+
+  const handleViewHistory = () => {
+    if (onViewHistory) {
+      onViewHistory();
+    } else {
+      console.log("View History");
     }
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
-
-  const handleClear = () => {
-    setSearch('');
-    requestAnimationFrame(() => inputRef.current?.focus());
-  };
-
-  let searchCls = 'kong-search';
-  if (search) searchCls += ' has-value';
-  if (isFocused) searchCls += ' is-active';
-
   return (
-    <div className="kong-products-page">
-      <div className="kong-products-card">
-        {/* Top header row */}
-        <div className="kong-products-header">
-          <div className="kong-products-header-top">
-            <div className="kong-products-header-left">
-              <h1 className="kong-products-title">Import Kong Products</h1>
-              <p className="kong-products-selected-text">
-                {selectedCount} Products selected
-              </p>
+    <div className="kp-page">
+      <div className="kp-topbar">
+        <ConnectionBar
+          title="Import Kong Products"
+          onBack={onBack}
+          rightActionLabel="Manage Connection"
+          onRightAction={onManageConnection}
+        />
+      </div>
+
+      <div className="kp-content">
+        <div className="kp-card">
+          {/* header (does NOT scroll) */}
+          <div className="kp-cardHead">
+            <div className="kp-titleWrap">
+              <div className="kp-title">
+                Import Kong Products <span className="kp-titleCount">({selectedCount})</span>
+              </div>
+            </div>
+
+            <div className="kp-headRight">
+              <Checkbox
+                id="select-all"
+                checked={allSelectedInFilter}
+                onChange={(checked) => checked ? selectAllFiltered() : clearAll()}
+                label="Select All"
+                className="kp-selectAll"
+              />
+
+              <button
+                type="button"
+                className="kp-clearAll"
+                onClick={clearAll}
+                disabled={selectedCount === 0}
+              >
+                Clear All
+              </button>
+
+              <SearchInput
+                value={query}
+                onChange={setQuery}
+                placeholder="Search"
+                className="kp-searchInputCustom"
+              />
             </div>
           </div>
 
-          <div className={searchCls} role="search">
-            <span className="kong-search-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M17.5 17.5L13.8833 13.8833M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#909599" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
+          {/* ONLY THIS AREA SCROLLS */}
+          <div className="kp-gridScroll">
+            <div className="kp-gridContainer" ref={gridContainerRef}>
+              <div className="kp-grid">
+                {filtered.map((p) => {
+                  const isSelected = selectedIds.has(p.id);
+                  const isImported = !!p.imported;
 
-            <input
-              ref={inputRef}
-              className="kong-search-input"
-              aria-label="Search products"
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-            />
-            {search && (
-              <button
-                type="button"
-                className="kong-clear-btn"
-                onClick={handleClear}
-                aria-label="Clear search"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M15 5L5 15M5 5L15 15" stroke="#1A2126" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+                  return (
+                    <SelectCard
+                      key={p.id}
+                      title={p.name}
+                      subtitle={p.code}
+                      description={p.description}
+                      disabled={isImported}
+                      selected={isSelected}
+                      disabledBadgeText="Imported"
+                      onClick={() => toggleOne(p)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            {showScrollbar && (
+              <div className="kp-scrollbar">
+                <div 
+                  className="kp-scrollbar-track"
+                  style={{
+                    height: '100%',
+                    position: 'relative'
+                  }}
+                >
+                  <div
+                    className="kp-scrollbar-thumb"
+                    style={{
+                      position: 'absolute',
+                      top: `${thumbPosition}%`,
+                      height: `${thumbHeight}%`,
+                      width: '4px',
+                      backgroundColor: '#D9DFE8',
+                      borderRadius: '2px',
+                      transition: 'none'
+                    }}
+                  />
+                </div>
+              </div>
             )}
           </div>
-          
-          <div className="kong-products-select-actions">
-            <Checkbox
-              label="Select All"
-              checked={allSelected}
-              onChange={(checked) =>
-                checked ? handleSelectAll() : handleClearAll()
-              }
-            />
-            <button
-              type="button"
-              className="kong-products-clear-btn"
-              onClick={handleClearAll}
+
+          {/* footer (does NOT scroll, always bottom) */}
+          <div className="kp-footer">
+            <SecondaryButton 
+            className="kp-secondaryBtn"
+            onClick={handleViewHistory}>
+
+              View History
+            </SecondaryButton>
+
+            <PrimaryButton
+              onClick={onImport}
+              disabled={selectedCount === 0}
+              className="kp-primaryBtn"
             >
-              Clear All
-            </button>
+              Import {selectedCount || 0} Products
+            </PrimaryButton>
           </div>
-        </div>
-
-      {/* Scrollable content container */}
-      <div className="kong-products-content">
-        {/* Cards grid */}
-        <div className="kong-products-grid">
-          {filteredProducts.map((product) => (
-            <SelectableCard
-              key={product.id}
-              title={product.name}
-              version={product.name}
-              meta={product.description}
-              selected={product.selected || false}
-              onSelectedChange={() => toggleProduct(product.id)}
-            />
-          ))}
-        </div>
-      </div>
-
-        {/* Fixed footer with button */}
-        <div className="kong-products-footer-line" />
-        <div className="kong-products-footer-actions">
-          <PrimaryButton
-            className="kong-products-import-btn"
-            onClick={handleImport}
-          >
-            Import Products
-          </PrimaryButton>
         </div>
       </div>
     </div>
   );
-};
-
-export default KongProducts;
+}

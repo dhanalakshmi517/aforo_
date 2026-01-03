@@ -1,0 +1,152 @@
+:root {
+  --rbg-radius: 18px;
+  --rbg-border: rgba(16, 24, 40, 0.06);
+
+  --rbg-title: #19222d;
+  --rbg-sub: #a7b3c2;
+
+  --rbg-track: #f1f3f9;
+
+  --rbg-green: #57c79b;
+  --rbg-purple: #7b61d1;
+  --rbg-blue: #5c7bd4;
+  --rbg-sky: #56a1bf;
+
+  --rbg-tooltip: #344054;
+}
+
+.rbg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.rbg-card {
+  border-radius: var(--rbg-radius) !important;
+  border: 1px solid var(--rbg-border) !important;
+  padding: 28px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+}
+
+.rbg-head {
+  margin-bottom: 14px;
+}
+
+.rbg-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--rbg-title) !important;
+}
+
+.rbg-updated {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--rbg-sub) !important;
+}
+
+.rbg-kebab {
+  width: 2px;
+  height: 16px;
+  border-radius: 2px;
+  background: rgba(16, 24, 40, 0.15);
+  margin-top: 2px;
+}
+
+/* Left card bars */
+.rbg-bars {
+  display: grid;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.rbg-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.rbg-label {
+  font-size: 10px;
+  color: var(--rbg-sub);
+  white-space: nowrap;
+}
+
+.rbg-track {
+  width: 100%;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--rbg-track);
+  overflow: hidden;
+}
+
+.rbg-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.rbg-fill.is-green { background: var(--rbg-green); }
+.rbg-fill.is-purple { background: var(--rbg-purple); }
+.rbg-fill.is-blue { background: var(--rbg-blue); }
+.rbg-fill.is-sky { background: var(--rbg-sky); }
+
+/* Axis under bars */
+.rbg-axis {
+  position: relative;
+  height: 16px;
+  margin-top: 14px;
+  padding-left: 84px; /* aligns with label column */
+}
+
+.rbg-axis-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--rbg-sub);
+  white-space: nowrap;
+}
+
+/* Right card chart sizing + Tremor tweaks */
+.rbg-chart {
+  height: 220px;
+}
+
+/* Tooltip like your screenshot */
+.rbg-tooltip {
+  background: var(--rbg-tooltip);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  text-align: center;
+  min-width: 92px;
+}
+
+.rbg-tooltip-date {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.rbg-tooltip-val {
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.rbg-tooltip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #0b5cff;
+  margin: 6px auto 0;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .rbg-grid {
+    grid-template-columns: 1fr;
+  }
+}
