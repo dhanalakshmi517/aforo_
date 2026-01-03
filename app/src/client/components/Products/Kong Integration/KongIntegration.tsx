@@ -16,6 +16,7 @@ import EmptyHintCard from "./EmptyHintCard";
 
 type Props = {
   onBack?: () => void;
+  onClose?: () => void;
   onConnect?: (payload: { region: string; personalAccessToken: string }) => void;
 
   // Optional: pass your real region options
@@ -24,6 +25,7 @@ type Props = {
 
 export default function KongIntegration({
   onBack,
+  onClose,
   onConnect,
   regions,
 }: Props) {
