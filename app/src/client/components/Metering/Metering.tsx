@@ -171,12 +171,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const fetchMetrics = async () => {
     setIsLoading(true);
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
-      });
-      
-      const data: UsageMetricDTO[] = await Promise.race([getUsageMetrics(), timeoutPromise]) as UsageMetricDTO[];
+      const data: UsageMetricDTO[] = await getUsageMetrics();
       const mapped: Metric[] = data.map((m) => {
         let iconData = null;
         try {
@@ -210,10 +205,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       });
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      if (error?.response?.status === 401) {
-        logout();
-        navigate("/login");
-      }
+      // Don't set loading to false here - let the logout redirect happen
+      // The API's handleApiResponse will call logout() on 401
     } finally {
       setIsLoading(false);
     }
@@ -343,7 +336,8 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
 
   useEffect(() => {
     fetchMetrics();
-  }, [fetchMetrics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only on mount to prevent infinite loop
 
   // ... rest of the code remains the same ...
   if (showNewUsageMetricForm) {

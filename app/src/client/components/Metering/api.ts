@@ -56,7 +56,7 @@ export interface CreateMetricResult {
 // -------------------------------
 // Base URLs & auth
 // -------------------------------
-import { getAuthHeaders } from '../../utils/auth';
+import { getAuthHeaders, isAuthenticated, logout } from '../../utils/auth';
 
 const METRICS_BASE_URL =
   (import.meta as any).env?.VITE_METRICS_API_URL || 'http://54.146.189.144:8081/api';
@@ -64,17 +64,48 @@ const METRICS_BASE_URL =
 const PRODUCTS_BASE_URL =
   (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://3.208.93.68:8080/api';
 
+/**
+ * Handle API response errors and authentication
+ */
+async function handleApiResponse(res: Response): Promise<any> {
+  if (res.status === 401) {
+    logout();
+    throw new Error('Session expired. Please login again.');
+  }
+  if (!res.ok) {
+    let errorMessage = `API error ${res.status}`;
+    try {
+      const errorData = await res.json();
+      if (errorData?.message) errorMessage = errorData.message;
+    } catch {
+      errorMessage = res.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
+  }
+
+  const contentLength = res.headers.get('content-length');
+  const contentType = res.headers.get('content-type');
+  if (contentLength === '0' || (!contentType?.includes('application/json') && !contentLength)) {
+    return null;
+  }
+  try {
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return null;
+  }
+}
+
 // -------------------------------
 // Metrics list & read
 // -------------------------------
 export async function getUsageMetrics(): Promise<UsageMetricDTO[]> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
       headers: getAuthHeaders(),
     });
-    if (!response.ok) throw new Error(`API error with status ${response.status}`);
-
-    const payload = await response.json();
+    const payload = await handleApiResponse(response);
     const data = Array.isArray(payload)
       ? payload
       : Array.isArray((payload as any)?.data)
@@ -92,12 +123,12 @@ export async function getUsageMetrics(): Promise<UsageMetricDTO[]> {
 
 export async function getUsageMetric(id: number): Promise<UsageMetricDTO | null> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${id}`, {
       headers: getAuthHeaders(),
     });
-    if (!response.ok) return null;
-
-    const data = await response.json();
+    const data = await handleApiResponse(response);
+    if (!data) return null;
 
     // If the API doesn't return usageConditions, initialize it as an empty array
     if (!data.usageConditions) {
@@ -116,11 +147,13 @@ export async function getUsageMetric(id: number): Promise<UsageMetricDTO | null>
 // -------------------------------
 export async function deleteUsageMetric(id: number): Promise<boolean> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
-    return response.ok;
+    await handleApiResponse(response);
+    return true;
   } catch (error) {
     console.error('Error deleting usage metric:', error);
     return false;
@@ -134,6 +167,7 @@ export async function createBillableMetric(
   payload: BillableMetricPayload
 ): Promise<CreateMetricResult> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     console.log('Creating billable metric with payload:', JSON.stringify(payload, null, 2));
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics`, {
       method: 'POST',
@@ -145,32 +179,16 @@ export async function createBillableMetric(
     });
 
     console.log('Create response status:', response.status);
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}`;
-      try {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        errorMessage += `: ${JSON.stringify(errorData)}`;
-      } catch {
-        errorMessage += ': No error details available';
-      }
-      console.error('Failed to create billable metric:', errorMessage);
-      return { ok: false };
-    }
-
-    try {
-      const data = await response.json();
-      console.log('Create success response:', data);
+    const data = await handleApiResponse(response);
+    console.log('Create success response:', data);
+    
+    if (data) {
       const id = (data?.metricId ?? data?.id ?? data?.billableMetricId) as
         | number
         | undefined;
       return { ok: true, id };
-    } catch {
-      // No body / not JSON — still OK
-      console.log('Create successful but no response body');
-      return { ok: true };
     }
+    return { ok: true };
   } catch (error) {
     console.error('Error creating billable metric:', error);
     return { ok: false };
@@ -190,6 +208,7 @@ export async function updateBillableMetric(
   payload: BillableMetricDetails
 ): Promise<boolean> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     const response = await fetch(`${METRICS_BASE_URL}/billable-metrics/${metricId}`, {
       method: 'PUT',
       headers: {
@@ -198,7 +217,8 @@ export async function updateBillableMetric(
       },
       body: JSON.stringify(payload),
     });
-    return response.ok;
+    await handleApiResponse(response);
+    return true;
   } catch (error) {
     console.error('Error updating billable metric:', error);
     return false;
@@ -210,23 +230,12 @@ export async function updateBillableMetric(
 // -------------------------------
 export async function finalizeBillableMetric(metricId: number): Promise<boolean> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     const response = await fetch(
       `${METRICS_BASE_URL}/billable-metrics/${metricId}/finalize`,
       { method: 'POST', headers: getAuthHeaders() }
     );
-
-    if (!response.ok) {
-      // Log the error details
-      console.error('❌ Finalize failed with status:', response.status);
-      try {
-        const errorData = await response.json();
-        console.error('❌ Finalize error details:', JSON.stringify(errorData, null, 2));
-      } catch {
-        console.error('❌ No error details in response body');
-      }
-      return false;
-    }
-
+    await handleApiResponse(response);
     return true;
   } catch (error) {
     console.error('Error finalizing billable metric:', error);
@@ -239,6 +248,7 @@ export async function finalizeBillableMetric(metricId: number): Promise<boolean>
 // -------------------------------
 export async function getProducts(): Promise<Product[]> {
   try {
+    if (!isAuthenticated()) throw new Error('Not authenticated');
     console.log('getProducts API call started');
     console.log('Products API URL:', `${PRODUCTS_BASE_URL}/products`);
     console.log('Auth headers:', getAuthHeaders());
@@ -248,13 +258,7 @@ export async function getProducts(): Promise<Product[]> {
     });
 
     console.log('Products API response status:', response.status, response.statusText);
-
-    if (!response.ok) {
-      console.error('Products API error - Status:', response.status);
-      throw new Error(`API error with status ${response.status}`);
-    }
-
-    const payload = await response.json();
+    const payload = await handleApiResponse(response);
     console.log('Products API raw payload:', payload);
 
     const data = Array.isArray(payload)
