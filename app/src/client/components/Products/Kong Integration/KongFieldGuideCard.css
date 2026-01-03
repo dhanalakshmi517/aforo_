@@ -1,0 +1,109 @@
+:root {
+  --kfg-bg: #f3f8ff;
+  --kfg-title: #3b82f6;
+  --kfg-text: #6b7a8b;
+  --kfg-step-border: rgba(59, 130, 246, 0.45);
+  --kfg-step-text: #3b82f6;
+  --kfg-radius: 22px;
+}
+
+.kfgCard {
+  width: 100%;
+  padding: 28px 32px;
+  box-sizing: border-box;
+}
+
+.kfgHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.kfgStep {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1.5px solid var(--kfg-step-border);
+  color: var(--kfg-step-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.kfgTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--kfg-title);
+  text-align: center;
+}
+
+.kfgMedia {
+  display: flex;
+  justify-content: center;
+}
+
+.kfgImageWrap {
+  width: min(520px, 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.12);
+}
+
+.kfgImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.kfgList {
+  width: min(560px, 100%);
+  margin: 18px auto 0;
+  padding: 0;
+  list-style: none;
+  color: var(--kfg-text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.kfgItem {
+  position: relative;
+  padding-left: 14px;
+  margin: 8px 0;
+}
+
+.kfgItem::before {
+  content: "–";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--kfg-text);
+}
+
+/* Responsive tightening */
+@media (max-width: 640px) {
+  .kfgCard {
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+
+  .kfgHeader {
+    margin-bottom: 12px;
+  }
+
+  .kfgTitle {
+    font-size: 12.5px;
+  }
+
+  .kfgList {
+    margin-top: 14px;
+    font-size: 12.5px;
+  }
+}

@@ -171,7 +171,12 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const fetchMetrics = async () => {
     setIsLoading(true);
     try {
-      const data: UsageMetricDTO[] = await getUsageMetrics();
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+      });
+      
+      const data: UsageMetricDTO[] = await Promise.race([getUsageMetrics(), timeoutPromise]) as UsageMetricDTO[];
       const mapped: Metric[] = data.map((m) => {
         let iconData = null;
         try {
@@ -731,7 +736,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
             </tr>
           </thead>
           <tbody>
-            {isLoading && metrics.length === 0 ? (
+            {isLoading ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
                   <div className="metrics-loading-state">

@@ -1,0 +1,147 @@
+.region-guide-card {
+  background-color: #f5f9ff;
+  border-radius: 16px;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow-y: hidden;
+}
+
+.scroll-content {
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scroll-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.custom-scrollbar {
+  position: absolute;
+  right: 8px;
+  top: 56px;
+  bottom: 56px;
+  width: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* For screens below 1440px, enable scrolling */
+@media (max-width: 1439px) {
+  .region-guide-card {
+    height: 400px;
+    max-height: 400px;
+  }
+  
+  .custom-scrollbar {
+    top: 24px;
+    bottom: 24px;
+  }
+}
+
+/* For screens 1440px and above, allow full height without scroll */
+@media (min-width: 1440px) {
+  .region-guide-card {
+    overflow-y: hidden;
+    justify-content: center;
+  }
+  
+  .custom-scrollbar {
+    display: none;
+  }
+}
+
+.image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 200px;
+  flex-shrink: 0;
+  margin-top: -30px;
+}
+
+.guide-title {
+  color: #2563eb;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.guide-steps {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.step-text {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.region-image {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .region-guide-card {
+    padding: 32px 16px;
+  }
+  
+  .region-image {
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .region-guide-card {
+    padding: 24px 12px;
+  }
+  
+  .region-image {
+    max-width: 85%;
+  }
+}
+
+/* Large screens - allow image to grow without scroll */
+@media (min-width: 1440px) {
+  .image-container {
+    height: calc(100% - 112px);
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .region-image {
+    max-width: 95%;
+    max-height: 95%;
+  }
+}
+
+@media (min-width: 1600px) {
+  .region-image {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}

@@ -1,0 +1,346 @@
+:root {
+  --cbu-radius: 18px;
+  --cbu-border: rgba(16, 24, 40, 0.06);
+
+  --cbu-title: #19222d;
+  --cbu-sub: #a7b3c2;
+
+  --cbu-cell-low: #d9e8fb;
+  --cbu-cell-med: #86aef2;
+  --cbu-cell-high: #2f5fd2;
+
+  --cbu-cell-gap: 4px;
+  --cbu-cell-size: 20px;
+}
+
+/* layout */
+.cbu-grid {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+/* LEFT (tremor card gets className) */
+.cbu-left-card {
+  border-radius: var(--cbu-radius) !important;
+  border: 1px solid var(--cbu-border) !important;
+  padding: 28px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+}
+
+.cbu-head {
+  margin-bottom: 12px;
+}
+
+.cbu-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--cbu-title) !important;
+}
+
+.cbu-updated {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--cbu-sub) !important;
+}
+
+.cbu-heatmapWrap {
+  position: relative;
+  margin-top: 8px;
+}
+
+/* heatmap grid:
+   first column is y-label, next columns are cells */
+.cbu-heatmap {
+  display: grid;
+
+  /* 👇 this is the key change */
+  grid-template-columns: 74px repeat(var(--cbu-cols), minmax(var(--cbu-cell-size), 1fr));
+
+  gap: var(--cbu-cell-gap);
+  align-items: center;
+
+  width: 100%;              /* 👈 was max-content */
+  max-width: 100%;
+  overflow-x: auto;
+
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.cbu-heatmap::-webkit-scrollbar { display: none; }
+
+.cbu-yLabel {
+  font-size: 10px;
+  color: var(--cbu-sub);
+  white-space: nowrap;
+  padding-right: 6px;
+}
+.cbu-cell {
+  width: 100%;              /* 👈 fill the grid track */
+  height: 27px;             /* 👈 fixed height */
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  outline: none;
+}
+.cbu-xTicks {
+  display: grid;
+
+  /* 👇 match the heatmap columns */
+  grid-template-columns: repeat(var(--cbu-cols), minmax(var(--cbu-cell-size), 1fr));
+
+  gap: var(--cbu-cell-gap);
+  width: 100%;              /* 👈 was max-content */
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cbu-xTicks::-webkit-scrollbar { display: none; }
+.cbu-cell.is-low { background: var(--cbu-cell-low); }
+.cbu-cell.is-medium { background: var(--cbu-cell-med); }
+.cbu-cell.is-high { background: var(--cbu-cell-high); }
+
+.cbu-cell:focus-visible {
+  box-shadow: 0 0 0 3px rgba(47, 95, 210, 0.2);
+}
+
+/* Tooltip like your 2nd image */
+.cbu-tooltip {
+  position: absolute;
+  transform: translate(-12px, -10px); /* slightly to the right and above */
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14);
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  min-width: 160px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cbu-tooltip-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.cbu-tooltip-value {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7cff; /* blue-ish like screenshot */
+  font-weight: 500;
+}
+.cbu-tooltip-value span {
+  font-weight: 800;
+}
+
+/* x axis ticks */
+.cbu-xAxis {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: var(--cbu-cell-gap);
+  margin-top: 10px;
+  align-items: start;
+}
+
+.cbu-xAxisSpacer {
+  height: 1px;
+}
+
+.cbu-xTicks {
+  display: grid;
+  grid-template-columns: repeat(var(--cbu-cols), var(--cbu-cell-size));
+  gap: var(--cbu-cell-gap);
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cbu-xTicks::-webkit-scrollbar { display: none; }
+
+.cbu-xTick {
+  font-size: 10px;
+  color: var(--cbu-sub);
+  text-align: center;
+  transform: translateY(2px);
+}
+
+/* legend */
+.cbu-legend {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.cbu-legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cbu-legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.cbu-legendDot.is-low { background: var(--cbu-cell-low); }
+.cbu-legendDot.is-medium { background: var(--cbu-cell-med); }
+.cbu-legendDot.is-high { background: var(--cbu-cell-high); }
+
+.cbu-legendText {
+  font-size: 10px;
+  color: var(--cbu-sub);
+}
+
+/* RIGHT (plain CSS card) */
+.cbu-right-card {
+  border-radius: var(--cbu-radius);
+  border: 1px solid var(--cbu-border);
+  padding: 28px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+
+.cbu-right-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.cbu-right-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cbu-title);
+}
+
+.cbu-right-updated {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cbu-sub);
+}
+
+.cbu-updatesList {
+  display: grid;
+  gap: 12px;
+  overflow: auto;
+  padding-right: 6px;
+  max-height: 330px;
+}
+
+.cbu-updateItem {
+  border-radius: 12px;
+  background: #f7f9fc;
+  padding: 14px 14px;
+  border: 1px solid rgba(16, 24, 40, 0.04);
+}
+
+.cbu-updateTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.cbu-updateTitle {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cbu-updateTime {
+  font-size: 10px;
+  color: var(--cbu-sub);
+  white-space: nowrap;
+}
+
+.cbu-updateHeadline {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #101828;
+}
+
+.cbu-updateSub {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #667085;
+}
+
+.cbu-updateItem.is-success .cbu-updateTitle { color: #2f9e44; }
+.cbu-updateItem.is-info .cbu-updateTitle { color: #475467; }
+.cbu-updateItem.is-danger .cbu-updateTitle { color: #e03131; }
+.cbu-updateItem.is-neutral .cbu-updateTitle { color: #667085; }
+
+@media (max-width: 1100px) {
+  .cbu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Tooltip like your 2nd image */
+.cbu-tooltip {
+  position: absolute;
+  transform: translate(-50%, -12px); /* centered above */
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14);
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  min-width: 200px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cbu-tooltip-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #101828;
+}
+
+.cbu-tooltip-customer {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.cbu-tooltip-metric {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7cff;
+  font-weight: 500;
+}
+.cbu-tooltip-metric span {
+  font-weight: 900;
+}
+
+.cbu-bucket {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid rgba(16, 24, 40, 0.06);
+}
+
+.cbu-bucket.is-low {
+  background: rgba(217, 232, 251, 0.6);
+  color: #2f5fd2;
+}
+.cbu-bucket.is-medium {
+  background: rgba(134, 174, 242, 0.22);
+  color: #3557b8;
+}
+.cbu-bucket.is-high {
+  background: rgba(47, 95, 210, 0.14);
+  color: #2f5fd2;
+}

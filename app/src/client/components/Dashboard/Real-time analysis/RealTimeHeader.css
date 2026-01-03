@@ -1,0 +1,323 @@
+@import "../Variables.css";
+
+/* Root container */
+.co-header {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-neutral-50);
+  padding: var(--scale-400, 16px) var(--scale-500, 20px)
+    var(--scale-400, 16px) var(--scale-700, 28px);
+  border-bottom: 1px solid var(--border-subtle, #e4e7ec);
+  flex-shrink: 0;
+}
+
+/* Top row: breadcrumb + icons */
+.co-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.co-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.co-back-btn {
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.co-back-btn:hover {
+  background: rgba(68, 87, 111, 0.08);
+}
+
+.co-breadcrumb-text {
+  color: var(--color-neutral-1000);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.co-breadcrumb-link {
+  border: none;
+  background: transparent;
+  color: var(--text-subtle, #6b7280);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  transition: color 0.2s ease;
+}
+
+
+
+.co-breadcrumb-current {
+  margin-left: 4px;
+color: var(--color-neutral-1700);
+text-align: center;
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--fontsize-body-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.co-breadcrumb-separator {
+  color: var(--text-subtle, #9ca3af);
+}
+
+.co-icon-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.co-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+
+}
+
+.co-icon-btn:hover {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* Bottom row: title + search + filters */
+.co-header-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.co-title {
+  margin: 0;
+ color: var(--color-neutral-1700);
+
+/* body/lg/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+}
+
+.co-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Search */
+.co-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 14px;
+  min-width: 220px;
+  max-width: 320px;
+  background: #f9fafb;
+  flex: 1 1 200px;
+}
+
+.co-search-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+}
+
+.co-search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  background: transparent;
+  color: #111827;
+}
+
+.co-search-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Search states */
+.co-search.has-value {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.co-search.is-active {
+  border-color: #4f46e5;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.co-clear-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.co-clear-btn:hover {
+  color: #1a2126;
+}
+
+.co-clear-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Filter pills */
+.co-filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Refresh status pill */
+.co-refresh-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--border-radius-sm);
+  background:var(--color-primary-000);
+  padding: 8px 12px;
+  color: var(--color-primary-800);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.co-refresh-pill.is-live {
+  background: var(--color-primary-000);
+}
+
+.co-refresh-clock svg {
+  display: block;
+}
+
+.co-refresh-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #389315;
+}
+
+.co-refresh-spinner svg {
+  display: block;
+  animation: co-spin 1s linear infinite;
+}
+
+@keyframes co-spin {
+  to { transform: rotate(360deg); }
+}
+
+.co-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-400);
+  background: var(--color-neutral-white);
+  padding: 8px 12px;
+ overflow: hidden;
+color: var(--color-neutral-500);
+text-overflow: ellipsis;
+
+/* body/md/reg */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.co-filter-pill:hover {
+  background: var(--color-neutral-200);
+}
+
+.co-filter-chevron {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+
+/* Responsive behaviour */
+@media (max-width: 900px) {
+  .co-header-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .co-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .co-search {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .co-header-top {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .co-breadcrumb-text {
+    font-size: 13px;
+  }
+
+  .co-title {
+    font-size: 18px;
+  }
+}

@@ -1,0 +1,73 @@
+@import "../Variables/Variables.css";
+.backArrowBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* the “pillowy square” */
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-200);
+  background: var(--color-neutral-50);
+
+  /* icon color from your SVG */
+  color: var(--color-neutral-800);
+
+  cursor: pointer;
+
+}
+
+/* EXACT: 8px padding frame (icon is 20px => total 36px) */
+.backArrowBtn--sm {
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+}
+
+
+/* HOVER: slightly richer surface */
+.backArrowBtn:hover:not(.is-disabled) {
+  background: var(--color-neutral-150);
+  border-color: var(--color-neutral-300);
+  color: var(--icon-strong, #5f7e97);
+}
+
+/* ACTIVE: pressed-in */
+.backArrowBtn:active:not(.is-disabled) {
+  background: var(--color-neutral-50);
+  border-color: var(--color-primary-800);
+}
+
+/* FOCUS: clean ring */
+.backArrowBtn:focus-visible {
+  outline: 2px solid #0A79B8;
+  outline-offset: 2px;
+}
+
+/* DISABLED: quiet, distant */
+.backArrowBtn.is-disabled {
+  background: var(--color-neutral-125);
+  border-color: var(--color-neutral-200);
+  color: var(--color-neutral-300);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* LOADING: keep shape, swap icon for spinner */
+.backArrowBtn.is-loading {
+  cursor: progress;
+}
+
+.backArrowBtn__spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: backArrowSpin 900ms linear infinite;
+}
+
+@keyframes backArrowSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -635,7 +635,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                   <nav className="met-np-steps">
                     {steps.map((step, i) => {
                       const isActive = i === currentStep;
-                      const isCompleted = i < currentStep;
+                      // Only mark as completed if user has moved past it AND all required fields are filled
+                      const isStep0Completed = metricName.trim() && selectedProductId && unitOfMeasure;
+                      const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : true);
                       const showConnector = i < steps.length - 1;
                       return (
                         <button

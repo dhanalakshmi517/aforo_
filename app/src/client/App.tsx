@@ -48,18 +48,19 @@ const CreateCustomer = React.lazy(createCustomerLoader) as React.ComponentType<a
 
 const productsLoader = () => import('./components/Products/Products');
 const Products = React.lazy(productsLoader) as React.ComponentType<any>;
+
 const newProductLoader = () => import('./components/Products/NewProducts/NewProduct');
 const NewProduct = React.lazy(newProductLoader) as React.ComponentType<any>;
+
 const editProductLoader = () => import('./components/Products/EditProductsss/EditProduct');
 const EditProduct = React.lazy(editProductLoader) as React.ComponentType<any>;
-const KongProductSelect = React.lazy(
-  () => import('./components/Products/Kong Integration/KongProductSelect')
-) as React.ComponentType<any>;
 
 const meteringLoader = () => import('./components/Metering/Metering');
 const Metering = React.lazy(meteringLoader) as React.ComponentType<any>;
+
 const createUsageMetricLoader = () => import('./components/Metering/CreateUsageMetric');
 const CreateUsageMetric = React.lazy(createUsageMetricLoader) as React.ComponentType<any>;
+
 const editMetricsLoader = () => import('./components/Metering/EditMetering/EditMetrics');
 const EditMetrics = React.lazy(editMetricsLoader) as React.ComponentType<any>;
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
@@ -108,6 +109,17 @@ import RevenueAnalyticsDash3 from './components/Dashboard/RevenueAnalysis/Revenu
 import RevenueAnalyticsDash4 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash4';
 import GrowthOpportunities from './components/Dashboard/RevenueAnalysis/GrowthOpportunities';
 import RevenueAnalyticsDash5 from './components/Dashboard/RevenueAnalysis/RevenueAnalyticsDash5';
+import RealTimeHeader from './components/Dashboard/Real-time analysis/RealTimeHeader';
+import RealTimeKpiCards from './components/Dashboard/Real-time analysis/RealTimekpiCards';
+import CustomersByUsageCard from './components/Dashboard/Real-time analysis/CustomersByUsageCard';
+import RealTimePaymentsWidgets from './components/Dashboard/Real-time analysis/RealTimePaymentWidgets';
+import BillableHeatmapAndRevenue from './components/Dashboard/Real-time analysis/BIllableHeatmapAndRevenue';
+import ProductHeader from './components/Dashboard/Productanalyticsdashboard/ProductsHeaders';
+import ProductsKpiStrip from './components/Dashboard/Productanalyticsdashboard/ProductsKpiStrip';
+import RevenueBarsTwinCards from './components/Dashboard/Productanalyticsdashboard/RevenueBarTwinCards';
+import RatePlansByProductTables from './components/Dashboard/Productanalyticsdashboard/RatePlansByProductTables';
+import RepeatBuyersAndGrowth from './components/Dashboard/Productanalyticsdashboard/RepeatBuyersAndGrowth';
+import UsageVolumeByProductType from './components/Dashboard/Productanalyticsdashboard/UsageVolumeByProductType';
 
 // Wrapper to extract route params for EditMetrics
 function EditMetricsWrapper() {
@@ -440,16 +452,43 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <div className="flex min-h-screen">
-                      <SideNavbar
-                        activeTab={currentTab}
-                        onTabClick={handleSidebarClick}
-                        hidden={!showSidebar}
-                      />
-                      <main
-                        className="flex-1 px-6 py-6 bg-white"
-                        style={{ marginLeft: showSidebar ? '15rem' : '0' }}
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
                       >
-                        <ProductAnalyticsPage />
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main
+                        className="flex-1 flex flex-col"
+                        style={{
+                          backgroundColor: "#F9FBFD",
+                          marginLeft: sidebarHovered ? '15rem' : '80px',
+                          transition: 'margin-left 0.3s ease'
+                        }}
+                      >
+                        <ProductHeader />
+                        <div
+                          className="flex-1 overflow-y-auto"
+                          style={{ padding: '20px' }}
+                        >
+                          <ProductsKpiStrip />
+                          <RevenueBarsTwinCards />
+                          <RatePlansByProductTables />
+                          <RepeatBuyersAndGrowth />
+                          <UsageVolumeByProductType />
+                           <RevenueBarsTwinCards />
+
+                          <RatePlansByProductTables />
+
+                          <RepeatBuyersAndGrowth />
+
+                          <UsageVolumeByProductType />
+                        </div>
                       </main>
                     </div>
                   </ProtectedRoute>
@@ -493,6 +532,63 @@ export default function App() {
                           <TopChurningCustomers />
                           <CustomerSegmentation />
                           <NewVsExistingAndIndustries />
+                        </div>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Real-Time Analysis dashboard detail */}
+              <Route
+                path="/get-started/dashboards/real-time-analysis"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main
+                        className="flex-1 flex flex-col"
+                        style={{
+                          backgroundColor: "#F9FBFD",
+                          marginLeft: sidebarHovered ? '15rem' : '80px',
+                          transition: 'margin-left 0.3s ease'
+                        }}
+                      >
+                        <RealTimeHeader />
+                        <div
+                          className="flex-1 overflow-y-auto"
+                          style={{ padding: '20px' }}
+                        >
+                          <RealTimeKpiCards />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+
+                          <CustomersByUsageCard />
+<div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <RealTimePaymentsWidgets />
+<div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <BillableHeatmapAndRevenue/>
+
+                         <div
+                          style={{ padding: '20px' }}
+                        ></div>
+
+                          {/* Other real-time analysis components will go here */}
                         </div>
                       </main>
                     </div>
@@ -580,7 +676,7 @@ export default function App() {
                 path="/kong-integration"
                 element={
                   <ProtectedRoute>
-                    <KongIntegration onClose={() => navigate(-1)} />
+                    <KongIntegration onBack={() => navigate(-1)} />
                   </ProtectedRoute>
                 }
               />
@@ -901,7 +997,7 @@ export default function App() {
                         onTabClick={handleSidebarClick}
                         hidden={!showSidebar}
                       />
-                      <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
+                      <main className="flex-1 px-6 py-6" style={{ marginLeft: showSidebar ? '15rem' : '0' ,backgroundColor: "#FBFDFF", }}>
                         <Suspense fallback={RouteSpinner}>
                           <Integrations />
                         </Suspense>

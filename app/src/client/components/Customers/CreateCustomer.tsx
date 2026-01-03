@@ -405,7 +405,13 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
       return;
     }
 
-    // guard forward travel
+    // If no fields filled in Customer Details, allow free navigation
+    if (!hasAnyRequiredInput) {
+      gotoStep(index);
+      return;
+    }
+
+    // If at least one field is filled, validate before moving forward
     for (let i = 0; i < index; i += 1) {
       const ok = await validateStep(i);
       if (!ok) {
@@ -417,6 +423,11 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     // lock guards (same idea as metric)
     if (index === 1 && isBillingLocked) return;
     if (index === 2 && isReviewLocked) return;
+
+    // Clear account errors when navigating to billing tab without validation
+    if (index === 1) {
+      setAccountErrors({});
+    }
 
     gotoStep(index);
   };
@@ -626,7 +637,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
               <nav className="met-np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
-                  const isCompleted = i < currentStep;
+                  // Only mark as completed if user has moved past it AND all required fields are filled
+                  const isStep0Completed = companyName.trim() && customerName.trim() && companyType.trim();
+                  const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : true);
                   const showConnector = i < steps.length - 1;
 
                   return (

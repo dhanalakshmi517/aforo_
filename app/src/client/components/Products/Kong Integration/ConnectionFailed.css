@@ -1,0 +1,104 @@
+/* ConnectionFailed.css */
+
+.cfPage {
+  width: 100%;
+  min-height: 100vh;
+  background: #f6fbff;
+}
+
+.cfFrame {
+  padding: 18px 18px 22px;
+}
+
+.cfCard {
+  width: 100%;
+  min-height: 640px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 6px 22px rgba(2, 18, 45, 0.06);
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cfContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  gap: 10px;
+  padding: 30px 18px;
+}
+
+.cfIcon {
+  width: 204px;
+  height: 204px;
+
+  /* that soft glow/blur look */
+  filter: blur(0.6px);
+  opacity: 0.95;
+}
+
+.cfTitle {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #025a94;
+}
+
+.cfMessage {
+  max-width: 420px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: rgba(11, 18, 32, 0.55);
+}
+
+/* button like screenshot */
+.cfBtn {
+  margin-top: 6px;
+  height: 30px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(2, 90, 148, 0.18);
+  background: #025a94;
+  color: #eaf4ff;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(2, 90, 148, 0.16);
+  transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+}
+
+.cfBtn:hover {
+  background: #034a7d;
+  transform: translateY(-1px);
+}
+
+.cfBtn:active {
+  transform: translateY(0px);
+}
+
+.cfBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 520px) {
+  .cfCard {
+    min-height: 560px;
+  }
+
+  .cfIcon {
+    width: 176px;
+    height: 176px;
+  }
+}

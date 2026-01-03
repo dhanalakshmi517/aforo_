@@ -1,494 +1,370 @@
-import React, { useMemo, useState } from "react";
+// KongIntegration.tsx
+import * as React from "react";
+import { useMemo, useState } from "react";
 import "./KongIntegration.css";
 import KongBar from "./KongBar";
+import { InputField, SelectField } from "../../componenetsss/Inputs";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
-import SecondaryButton from "../../componenetsss/SecondaryButton";
-import SelectableCard from "../../componenetsss/SelectableCard";
-import kongHelperImage from "./kong1.svg";
-import kongImage from "./kong.svg";
+import { connectToKong, disconnectFromKong, fetchKongProducts, importKongProducts } from "./Kongapi";
+import SuccessKong from "./SuccessKong";
+import ConnectionFailed from "./ConnectionFailed";
 import KongProducts from "./KongProducts";
-import KongImportedProducts from "./KongImportedProducts";
-import { clearAuthData, getAuthData } from "../../../utils/auth";
+import ProductsImportedKong from "./ProductsImportedKong";
+import ImportHistoryKong from "./ImportHistoryKong";
+import type { KongProduct } from "./KongProducts";
+import EmptyHintCard from "./EmptyHintCard";
 
-interface KongIntegrationProps {
-  onClose: () => void;
-}
+type Props = {
+  onBack?: () => void;
+  onConnect?: (payload: { region: string; personalAccessToken: string }) => void;
 
-const KongIntegration: React.FC<KongIntegrationProps> = ({ onClose }) => {
-  const [currentStep, setCurrentStep] = useState<"connection" | "import" | "imported" | "assign">("connection");
-  const [isConnected, setIsConnected] = useState(false);
-  const [region, setRegion] = useState<string>("");
-  const [token, setToken] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("IN");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [kongProducts, setKongProducts] = useState<any[]>([]);
+  // Optional: pass your real region options
+  regions?: { label: string; value: string }[];
+};
+
+export default function KongIntegration({
+  onBack,
+  onConnect,
+  regions,
+}: Props) {
+  const regionOptions =
+    regions ??
+    [
+      { label: "Select Region", value: "" },
+      { label: "United States", value: "us" },
+      { label: "Singapore", value: "sg" },
+      { label: "Middle East", value: "me" },
+      { label: "Australia", value: "au" },
+      { label: "Europe", value: "eu" },
+      {label:"India",value:"in"}
+    ];
+
+  const [region, setRegion] = useState("");
+  const [personalAccessToken, setPersonalAccessToken] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState<"idle" | "success" | "failed">("idle");
+  const [connectionData, setConnectionData] = useState<any>(null);
   const [connectionId, setConnectionId] = useState<string | null>(null);
-  const [tokenFieldFocused, setTokenFieldFocused] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
+  const [showImported, setShowImported] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [products, setProducts] = useState<KongProduct[]>([]);
+  const [importedCount, setImportedCount] = useState(0);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  
+  const canConnect = !!region && !!personalAccessToken.trim();
 
-  const isImportStep = currentStep === "import";
-  const isImportedStep = currentStep === "imported";
-  const isAssignStep = currentStep === "assign";
-  const isStepOneCompleted = isConnected || isImportStep || isImportedStep || isAssignStep;
-
-  // Get base URL based on selected country
-  const getBaseUrl = () => {
-    switch (selectedCountry) {
-      case "AU": return "https://au.api.konghq.com";
-      case "EU": return "https://eu.api.konghq.com";
-      case "IN": return "https://in.api.konghq.com";
-      case "ME": return "https://me.api.konghq.com";
-      case "SG": return "https://sg.api.konghq.com";
-      case "US": return "https://us.api.konghq.com";
-      default: return "https://in.api.konghq.com";
-    }
-  };
-
-  // Handle country selection
-  const handleCountrySelect = (country: string) => {
-    setSelectedCountry(country);
-  };
-
-  // Fetch Kong products from database
-  const fetchKongProducts = async (id: string) => {
-    try {
-      const authData = getAuthData();
-      const response = await fetch(`http://44.203.209.2:8086/api/kong/fetch/from-db/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(authData?.token && { Authorization: `Bearer ${authData.token}` })
-        }
-      });
-      
-      if (response.status === 401) {
-        clearAuthData();
-        window.location.href = '/login?session_expired=true';
-        throw new Error("Session expired. Please login again.");
-      }
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Kong products:", data);
-      
-      // Extract products from response
-      const products = data[0]?.data || [];
-      setKongProducts(products);
-    } catch (err) {
-      console.error("Error fetching Kong products:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch Kong products");
-    }
-  };
-
-  // Handle importing selected products
-  const handleImportProducts = async (selectedIds: string[]) => {
-    if (selectedIds.length === 0) {
-      setError("Please select at least one product to import");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
+  async function handleConnect() {
+    if (!canConnect) return;
 
     try {
-      const authData = getAuthData();
-      const response = await fetch("http://44.203.209.2:8086/api/kong/import-selected", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authData?.token && { Authorization: `Bearer ${authData.token}` })
-        },
-        body: JSON.stringify(selectedIds)
-      });
-
-      if (response.status === 401) {
-        clearAuthData();
-        window.location.href = '/login?session_expired=true';
-        throw new Error("Session expired. Please login again.");
-      }
-
-      if (!response.ok) {
-        throw new Error(`Import failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Import response:", data);
+      const data = await connectToKong(region, personalAccessToken);
       
-      // Close modal on successful import
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to import products");
-      console.error("Import error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle API call to submit Kong integration details
-  const submitKongIntegration = async () => {
-    if (!token || !region) {
-      setError("Please fill in all required fields");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const authData = getAuthData();
-      const response = await fetch("http://44.203.209.2:8086/api/client-api-details", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authData?.token && { Authorization: `Bearer ${authData.token}` })
-        },
-        body: JSON.stringify({
-          base_url: getBaseUrl(),
-          endpoint: "/v2/api-products",
-          auth_token: token
-        })
-      });
-
-      if (response.status === 401) {
-        clearAuthData();
-        window.location.href = '/login?session_expired=true';
-        throw new Error("Session expired. Please login again.");
-      }
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API response:", data);
+      // Set success state and store connection data
+      setConnectionStatus("success");
+      setConnectionData(data);
       
-      // Extract connection ID and store it
-      const id = data.id;
-      if (id) {
-        setConnectionId(id);
+      // Store connection ID if returned from API
+      if (data && data.id) {
+        setConnectionId(data.id);
       }
-      
-      // Set connected state (show success screen)
-      setIsConnected(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect to Kong");
-      console.error("Kong integration error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  // Handle going to products (calls GET API)
-  const handleGoToProducts = async () => {
+      // Call the onConnect callback with the region and token
+      onConnect?.({ region, personalAccessToken: personalAccessToken.trim() });
+    } catch (error) {
+      console.error("Failed to connect Kong:", error);
+      // Set failed state
+      setConnectionStatus("failed");
+    }
+  }
+
+  // Handle going back to form from success/failed states
+  function handleBackToForm() {
+    setConnectionStatus("idle");
+    setConnectionData(null);
+  }
+
+  // Handle try again from failed state
+  function handleTryAgain() {
+    setConnectionStatus("idle");
+  }
+
+  // Handle disconnect from success state
+  async function handleDisconnect() {
     if (!connectionId) {
-      setError("Connection ID not found");
+      console.error('No connection ID available for disconnect');
+      // Still reset state even if no ID
+      setConnectionStatus("idle");
+      setConnectionData(null);
+      setConnectionId(null);
+      setRegion("");
+      setPersonalAccessToken("");
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    try {
+      await disconnectFromKong(connectionId);
+      console.log('Kong connection deleted successfully');
+      
+      // Reset state to show form again
+      setConnectionStatus("idle");
+      setConnectionData(null);
+      setConnectionId(null);
+      setRegion("");
+      setPersonalAccessToken("");
+    } catch (error) {
+      console.error('Failed to disconnect Kong:', error);
+      // You may want to show an error toast or message to the user here
+      // Still reset state to allow user to try again
+      setConnectionStatus("idle");
+      setConnectionData(null);
+      setConnectionId(null);
+      setRegion("");
+      setPersonalAccessToken("");
+    }
+  }
+
+  // Handle import products from success state
+  async function handleImportProducts() {
+    if (!connectionId) {
+      console.error('No connection ID available for fetching products');
+      return;
+    }
 
     try {
-      await fetchKongProducts(connectionId);
-      setCurrentStep("import");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch products");
-      console.error("Error:", err);
-    } finally {
-      setIsLoading(false);
+      const fetchedProducts = await fetchKongProducts(connectionId);
+      
+      // Transform API response to KongProduct format (matching sample.tsx structure)
+      const transformedProducts: KongProduct[] = Array.isArray(fetchedProducts)
+        ? fetchedProducts.map((product: any) => ({
+            id: product.id || product.name || "",
+            name: product.name || "Unknown Product",
+            code: product.code || product.version || "",
+            description: product.description || "",
+            imported: false,
+          }))
+        : [];
+
+      console.log("Transformed products:", transformedProducts);
+      setProducts(transformedProducts);
+      setShowProducts(true);
+    } catch (error) {
+      console.error("Failed to fetch Kong products:", error);
+      // You may want to show an error toast or message to the user here
     }
+  }
+
+  // Helper function to get country name from region code
+  const getCountryName = (regionCode: string): string => {
+    const regionMap: Record<string, string> = {
+      us: "United States",
+      sg: "Singapore", 
+      me: "Middle East",
+      au: "Australia",
+      eu: "Europe",
+      in: "India"
+    };
+    return regionMap[regionCode] || regionCode.toUpperCase();
   };
+
+  // Render products view if importing
+  if (showProducts) {
+    return (
+      <KongProducts
+        products={products}
+        onBack={() => setShowProducts(false)}
+        onImport={async (selectedIds) => {
+          if (selectedIds.length === 0) {
+            console.error("Please select at least one product to import");
+            return;
+          }
+
+          try {
+            await importKongProducts(selectedIds);
+            console.log("Products imported successfully");
+            setImportedCount(selectedIds.length);
+            setShowProducts(false);
+            setShowImported(true);
+          } catch (error) {
+            console.error("Failed to import products:", error);
+            // You might want to show an error message
+          }
+        }}
+        onViewHistory={() => {
+          setShowProducts(false);
+          setShowHistory(true);
+        }}
+        onManageConnection={() => setShowProducts(false)}
+      />
+    );
+  }
+
+  // Render imported products view
+  if (showImported) {
+    return (
+      <ProductsImportedKong
+        importedCount={importedCount}
+        onBack={onBack}
+        onViewHistory={() => {
+          setShowImported(false);
+          setShowHistory(true);
+        }}
+        onImportMore={() => {
+          setShowImported(false);
+          setShowProducts(true);
+        }}
+        onManageConnection={() => {
+          setShowImported(false);
+          setShowProducts(true);
+        }}
+      />
+    );
+  }
+
+  // Render import history view
+  if (showHistory) {
+    return (
+      <ImportHistoryKong
+        rows={[]}
+        onBack={() => setShowHistory(false)}
+        onManageConnection={() => setShowHistory(false)}
+      />
+    );
+  }
+
+  // Render different components based on connection status
+  if (connectionStatus === "success") {
+    return (
+      <SuccessKong
+        onBack={handleBackToForm}
+        credentials={[
+          { label: "Country Name", value: getCountryName(region) },
+          { label: "Auth Token", value: personalAccessToken.substring(0, 20) + "..." }
+        ]}
+        onDisconnect={handleDisconnect}
+        onImportProducts={handleImportProducts}
+      />
+    );
+  }
+
+  if (connectionStatus === "failed") {
+    return (
+      <ConnectionFailed
+        onBack={handleBackToForm}
+        onTryAgain={handleTryAgain}
+      />
+    );
+  }
 
   return (
-    <div className="kong-page">
-      <KongBar onBack={onClose} />
-      <div className="kong-frame">
-        {/* LEFT SIDEBAR */}
-        <aside className="kong-sidebar">
-          <div className="kong-stepper">
-            {/* Step 1: active card */}
-            <div
-              className={`kong-step ${
-(isStepOneCompleted && !isAssignStep) ? "kong-step--completed" : "kong-step--active"
-              }`}
-              onClick={() => isConnected && setCurrentStep("connection")}
-              style={{ cursor: isConnected ? "pointer" : "default" }}
-            >
-              <div
-                className={`kong-step-icon ${
-                  (isStepOneCompleted && !isAssignStep) ? "kong-step-icon--completed" : "kong-step-icon--active"
-                }`}
-              >
-                {isConnected ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                  >
-                    <path
-                      d="M10.2489 3.08115L12.665 0.665039M0.665039 12.665L3.08115 10.2489M9.12142 9.12142L6.86638 11.2959C6.68681 11.4761 6.47343 11.6191 6.23849 11.7166C6.00354 11.8142 5.75165 11.8644 5.49725 11.8644C5.24286 11.8644 4.99097 11.8142 4.75602 11.7166C4.52107 11.6191 4.3077 11.4761 4.12813 11.2959L2.03417 9.20195C1.85397 9.02238 1.71099 8.809 1.61344 8.57406C1.51588 8.33911 1.46566 8.08722 1.46566 7.83282C1.46566 7.57843 1.51588 7.32654 1.61344 7.09159C1.71099 6.85665 1.85397 6.64327 2.03417 6.4637L4.12813 4.39328M9.12142 9.12142L4.12813 4.39328M9.12142 9.12142L11.2959 6.86638C11.4761 6.68681 11.6191 6.47343 11.7166 6.23849C11.8142 6.00354 11.8644 5.75165 11.8644 5.49725C11.8644 5.24286 11.8142 4.99097 11.7166 4.75602C11.6191 4.52107 11.4761 4.3077 11.2959 4.12813L9.20195 2.03417C9.02238 1.85397 8.809 1.71099 8.57406 1.61344C8.33911 1.51588 8.08722 1.46566 7.83282 1.46566C7.57843 1.46566 7.32654 1.51588 7.09159 1.61344C6.85665 1.71099 6.64327 1.85397 6.4637 2.03417L4.12813 4.39328"
-                      stroke="#389315"
-                      strokeWidth="1.33"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="15"
-                    height="15"
-                    viewBox="0 0 15 15"
-                    fill="none"
-                  >
-                    <path
-                      d="M12.0001 2.6665L14.0001 0.666504M0.666748 13.9998L2.66675 11.9998M4.33341 8.33317L6.00008 6.6665M6.33341 10.3332L8.00008 8.6665M3.53341 12.8665C3.68206 13.0157 3.85869 13.134 4.05317 13.2148C4.24765 13.2955 4.45617 13.3371 4.66675 13.3371C4.87733 13.3371 5.08584 13.2955 5.28032 13.2148C5.47481 13.134 5.65144 13.0157 5.80008 12.8665L7.33341 11.3332L3.33341 7.33317L1.80008 8.8665C1.65092 9.01515 1.53257 9.19178 1.45181 9.38626C1.37106 9.58074 1.32949 9.78925 1.32949 9.99984C1.32949 10.2104 1.37106 10.4189 1.45181 10.6134C1.53257 10.8079 1.65092 10.9845 1.80008 11.1332L3.53341 12.8665ZM7.33341 3.33317L11.3334 7.33317L12.8667 5.79984C13.0159 5.65119 13.1343 5.47456 13.215 5.28008C13.2958 5.0856 13.3373 4.87709 13.3373 4.6665C13.3373 4.45592 13.2958 4.24741 13.215 4.05293C13.1343 3.85844 13.0159 3.68182 12.8667 3.53317L11.1334 1.79984C10.9848 1.65067 10.8081 1.53232 10.6137 1.45157C10.4192 1.37081 10.2107 1.32924 10.0001 1.32924C9.7895 1.32924 9.58099 1.37081 9.38651 1.45157C9.19202 1.53232 9.01539 1.65067 8.86675 1.79984L7.33341 3.33317Z"
-                      stroke="#F9FBFD"
-                      strokeWidth="1.33333"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </div>
-              <div className="kong-step-content">
-                <div className="kong-step-title">{isConnected ? "Manage Connection" : "Establish Connection"}</div>
-                <div className="kong-step-subtitle">
-                  {isConnected ? "Connected" : "Connecting"}
-                </div>
-              </div>
-            </div>
+    <div className="kiPage">
+      {/* TOP BAR */}
+      <KongBar
+        title="Kong Integration"
+        onBack={onBack}
+        onMagicClick={() => console.log("Magic clicked")}
+        onBellClick={() => console.log("Bell clicked")}
+      />
 
-            {/* Step 2 */}
-            <div
-              className={`kong-step ${
-                isImportStep || isAssignStep ? "kong-step--active" : "kong-step--inactive"
-              }`}
-              onClick={() => isImportStep && setCurrentStep("connection")}
-              style={{ cursor: isImportStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`kong-step-icon ${
-                  isImportStep || isAssignStep ? "kong-step-icon--active" : "kong-step-icon--inactive"
-                }`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="15"
-                  viewBox="0 0 14 15"
-                  fill="none"
-                >
-                  <path
-                    d="M0.961963 4.09368L6.76196 7.42702M6.76196 7.42702L12.562 4.09368M6.76196 7.42702L6.76196 14.0937M12.762 4.76035C12.7617 4.52653 12.7 4.29689 12.583 4.09446C12.466 3.89203 12.2978 3.72393 12.0953 3.60702L7.42863 0.940351C7.22594 0.823327 6.99601 0.761719 6.76196 0.761719C6.52791 0.761719 6.29799 0.823327 6.0953 0.940351L1.42863 3.60702C1.22614 3.72393 1.05795 3.89203 0.940937 4.09446C0.823925 4.29689 0.762203 4.52653 0.761963 4.76035V10.0937C0.762203 10.3275 0.823925 10.5571 0.940937 10.7596C1.05795 10.962 1.22614 11.1301 1.42863 11.247L6.0953 13.9137C6.29799 14.0307 6.52791 14.0923 6.76196 14.0923C6.99601 14.0923 7.22594 14.0307 7.42863 13.9137L12.0953 11.247C12.2978 11.1301 12.466 10.962 12.583 10.7596C12.7 10.5571 12.7617 10.3275 12.762 10.0937V4.76035Z"
-                    stroke={isImportStep || isAssignStep ? "#FFFFFF" : "#D1D7E0"}
-                    strokeWidth="1.52381"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+      {/* CONTENT */}
+      <div className="kongShell">
+        <div className="kiCard">
+          <div className="kiCardBody">
+            <div className="kiGrid">
+              {/* LEFT: FORM */}
+              <div className="kiLeft">
+                <div className="kongSectionTitle">Connection Management</div>
+
+                <div className="kiField">
+                  <div onClick={() => setFocusedField("region")}>
+                    <SelectField
+                      label="Select Region"
+                      value={region}
+                      onChange={(value) => {
+                        setRegion(value);
+                        setFocusedField("region");
+                      }}
+                      onBlur={() => setFocusedField(null)}
+                      options={regionOptions}
+                      placeholderOption="Select Region"
+                    />
+                  </div>
+                </div>
+
+                <div className="kiField">
+                  <InputField
+                    label="Personal Access Token"
+                    value={personalAccessToken}
+                    onChange={setPersonalAccessToken}
+                    placeholder="Enter personal access token"
+                    onFocus={() => setFocusedField("token")}
+                    onBlur={() => setFocusedField(null)}
                   />
+                </div>
+
+                <div className="kiLeftSpacer" />
+              </div>
+
+              {/* RIGHT: GUIDE CARDS */}
+              <div className="kiRight">
+                <EmptyHintCard focusedField={focusedField} />
+              </div>
+
+              </div>
+          </div>
+
+          {/* FOOTER BAR */}
+          <div className="kiFooter">
+            <div className="kiFooterLeft">
+              <span className="kiFooterIcon" aria-hidden="true">
+                <AforoMark />
+              </span>
+              <span className="kiFooterDivider" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1" height="22" viewBox="0 0 1 22" fill="none">
+                  <path d="M0.45459 0.45459V20.9091" stroke="#EEF1F6" stroke-width="0.909091" stroke-linecap="round"/>
                 </svg>
-              </div>
-              <div className="kong-step-content">
-                <div className="kong-step-title">Import Kong Products</div>
-                <div className="kong-step-subtitle">{isAssignStep ? "Assigning" : "Import"}</div>
-              </div>
+              </span>
+              <span className="kiFooterIcon" aria-hidden="true">
+                <KongMark />
+              </span>
             </div>
+
+            <PrimaryButton
+              onClick={handleConnect}
+              disabled={!canConnect}
+              className="kong-button"
+            >
+              Connect Kong
+            </PrimaryButton>
           </div>
-
-          <div className="kong-sidebar-footer">
-            <SecondaryButton disabled fullWidth className="kong-import-history">
-              Import History
-            </SecondaryButton>
-          </div>
-        </aside>
-
-        {/* MAIN CONTENT */}
-        <main className="kong-main">
-          {currentStep === "connection" ? (
-            <div className="kong-connection-card">
-              {!isConnected ? (
-                <>
-                  <div className="kong-connection-header">
-                    <h2>Connection Management</h2>
-                  </div>
-
-                  <div className="kong-connection-body">
-                    {/* FORM SIDE */}
-                    <div className="kong-form">
-                      <div className="kong-form-group">
-                        <label htmlFor="kong-region" className="kong-label">
-                          Select Region
-                        </label>
-                        <div className="kong-select-wrapper">
-                          <select
-                            id="kong-region"
-                            value={region}
-                            onChange={(event) => setRegion(event.target.value)}
-                            className={`kong-control kong-select ${region ? "is-filled" : ""}`}
-                          >
-                            <option value="" disabled>
-                              Select region
-                            </option>
-                            <option value="AU">AU (Australia)</option>
-                            <option value="EU">EU (Europe)</option>
-                            <option value="IN">IN (India)</option>
-                            <option value="ME">ME (Middle East)</option>
-                            <option value="SG">SG (Singapore)</option>
-                            <option value="US">US (North America)</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="kong-form-group">
-                        <label htmlFor="kong-token" className="kong-label">
-                          Personal Access Token
-                        </label>
-                        <input
-                          id="kong-token"
-                          type="text"
-                          placeholder="Enter access token"
-                          className={`kong-control kong-input ${token ? "is-filled" : ""}`}
-                          value={token}
-                          onChange={(event) => setToken(event.target.value)}
-                          onFocus={() => setTokenFieldFocused(true)}
-                          onBlur={() => setTokenFieldFocused(false)}
-                          autoComplete="off"
-                          spellCheck={false}
-                        />
-                      </div>
-
-                      {error && (
-                        <div className="kong-error-message">
-                          {error}
-                        </div>
-                      )}
-
-                      <PrimaryButton
-                        fullWidth
-                        className="kong-primary-button"
-                        onClick={submitKongIntegration}
-                        disabled={isLoading || !token || !region}
-                      >
-                        {isLoading ? "Connecting..." : "Connect Kong"}
-                      </PrimaryButton>
-                    </div>
-
-                    {/* HOW-TO CARD */}
-                    <div className="kong-helper-card">
-                      <div className="kong-helper-header">
-                        <span className="kong-helper-icon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                          >
-                            <path
-                              d="M7.57508 7.49984C7.771 6.94289 8.15771 6.47326 8.66671 6.17411C9.17571 5.87497 9.77416 5.76562 10.3561 5.86543C10.938 5.96524 11.4658 6.26777 11.846 6.71944C12.2262 7.17111 12.4343 7.74277 12.4334 8.33317C12.4334 9.99984 9.93341 10.8332 9.93341 10.8332M10.0001 14.1665H10.0084M18.3334 9.99984C18.3334 14.6022 14.6025 18.3332 10.0001 18.3332C5.39771 18.3332 1.66675 14.6022 1.66675 9.99984C1.66675 5.39746 5.39771 1.6665 10.0001 1.6665C14.6025 1.6665 18.3334 5.39746 18.3334 9.99984Z"
-                              stroke="#0262A1"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                        <span className="kong-helper-title">
-                          {tokenFieldFocused ? "Kong Integration Ready" : "How to Enter Personal Access Token"}
-                        </span>
-                      </div>
-
-                      <div className="kong-helper-body">
-                        <div className="kong-helper-image-placeholder">
-                          <img src={tokenFieldFocused ? kongImage : kongHelperImage} alt="Kong helper" className="kong-helper-img" />
-                        </div>
-
-                        {tokenFieldFocused ? (
-                          <div className="kong-helper-steps">
-                             <li>Step 1: Log in to Kong Admin Portal.</li>
-                            <li>Step 2: Go to User Profile → API Tokens or Personal Access Tokens.</li>
-                            <li>Step 3: Create or copy your token from there.</li>
-                            
-                          </div>
-                        ) : (
-                          <ol className="kong-helper-steps">
-                            <li>Step 1: Log in to your Kong Admin Portal.</li>
-                            <li>Step 2: Go to Workspace Settings or Cluster Info.</li>
-                            <li>Step 3: Check the Region/Cluster field—it will show which region your workspace or APIs are running in.</li>
-                           
-                          </ol>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : error ? (
-                <div className="kong-connected-body">
-                  <div className="kong-connected-illustration">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
-                      <g filter="url(#filter0_f_13019_74808)">
-                        <path d="M88.4167 60.9583L95.5833 53.8333H95.5C99.336 49.8585 101.438 44.5239 101.344 39.0007C101.25 33.4776 98.9687 28.2174 95 24.375C91.1123 20.6258 85.9218 18.5308 80.5208 18.5308C75.1198 18.5308 69.9294 20.6258 66.0417 24.375L58.875 31.5M31.4583 58.875L24.3333 66C20.4974 69.9748 18.3955 75.3095 18.4893 80.8326C18.583 86.3558 20.8647 91.616 24.8333 95.4583C28.7211 99.2075 33.9115 101.303 39.3125 101.303C44.7135 101.303 49.9039 99.2075 53.7917 95.4583L60.9167 88.3333M43.25 18.25V30.75M18.25 43.25H30.75M76.5833 89.0833V101.583M89.0833 76.5833H101.583" stroke="url(#paint0_linear_13019_74808)" strokeWidth="12.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </g>
-                      <defs>
-                        <filter id="filter0_f_13019_74808" x="-2.08301" y="-2.08447" width="124" height="124" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-                          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-                          <feGaussianBlur stdDeviation="6" result="effect1_foregroundBlur_13019_74808"/>
-                        </filter>
-                        <linearGradient id="paint0_linear_13019_74808" x1="97.6192" y1="101.583" x2="48.0694" y2="116.212" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#025A94"/>
-                          <stop offset="1" stopColor="#2A455E"/>
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  </div>
-                  <h2 className="kong-connected-title">Connection Failed</h2>
-                  <p className="kong-connected-description">
-                    {error}
-                  </p>
-                  <PrimaryButton className="kong-connected-cta" onClick={() => {
-                    setIsConnected(false);
-                    setError(null);
-                  }}>
-                    Try Again
-                  </PrimaryButton>
-                </div>
-              ) : (
-                <div className="kong-connected-body">
-                  <div className="kong-connected-illustration">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
-  <path d="M39.3482 51.8065C41.1375 54.1987 43.4205 56.1781 46.0421 57.6104C48.6638 59.0427 51.5628 59.8945 54.5425 60.1079C57.5223 60.3213 60.5131 59.8914 63.3121 58.8473C66.1111 57.8031 68.6528 56.1693 70.7648 54.0565L83.2648 41.5565C87.0598 37.6273 89.1597 32.3647 89.1122 26.9023C89.0647 21.4399 86.8737 16.2146 83.011 12.3519C79.1484 8.48927 73.9231 6.29825 68.4607 6.25079C62.9982 6.20332 57.7357 8.3032 53.8065 12.0982L46.6398 19.2232M56.0148 43.4732C54.2254 41.081 51.9425 39.1016 49.3209 37.6692C46.6992 36.2369 43.8002 35.3852 40.8205 35.1718C37.8407 34.9584 34.8499 35.3883 32.0509 36.4324C29.2519 37.4765 26.7102 39.1104 24.5982 41.2232L12.0982 53.7232C8.3032 57.6524 6.20332 62.9149 6.25079 68.3774C6.29825 73.8398 8.48927 79.065 12.3519 82.9277C16.2146 86.7904 21.4399 88.9814 26.9023 89.0289C32.3647 89.0763 37.6273 86.9765 41.5565 83.1815L48.6815 76.0565" stroke="url(#paint0_linear_13019_74807)" stroke-width="12.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <defs>
-    <linearGradient id="paint0_linear_13019_74807" x1="85.1713" y1="89.0297" x2="35.9091" y2="103.588" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#025A94"/>
-      <stop offset="1" stop-color="#2A455E"/>
-    </linearGradient>
-  </defs>
-</svg>
-                  </div>
-                  <h2 className="kong-connected-title">Connected To Kong</h2>
-                  <p className="kong-connected-description">
-                    You are successfully connected to Kong. You can now import API products and manage them seamlessly.
-                  </p>
-                  <PrimaryButton className="kong-connected-cta" onClick={handleGoToProducts} disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Import Products ➜ "}
-                  </PrimaryButton>
-                </div>
-              )}
-            </div>
-          ) : isImportStep ? (
-            <KongProducts products={kongProducts} onImport={(selectedIds) => handleImportProducts(selectedIds)} />
-          ) : isImportedStep ? (
-            <KongImportedProducts onBack={() => setCurrentStep("import")} />
-          ) : null}
-        </main>
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default KongIntegration;
+/* Bottom-left tiny marks (simple, clean placeholders that match the screenshot positions) */
+function AforoMark() {
+  return (
+   <svg xmlns="http://www.w3.org/2000/svg" width="23" height="19" viewBox="0 0 23 19" fill="none">
+  <path d="M9.06291 17.5641L7.33649 13.2135C6.94618 12.2299 6.75102 11.7382 6.90631 11.6483C7.06161 11.5585 7.39053 11.973 8.04837 12.8019L11.7653 17.4851C12.1597 17.9822 12.357 18.2307 12.6062 18.4047C12.7878 18.5315 12.9885 18.6284 13.2007 18.6919C13.4919 18.7789 13.8092 18.7789 14.4438 18.7789C17.9864 18.7789 19.7577 18.7789 20.7534 17.9834C21.4628 17.4166 21.9345 16.6049 22.0757 15.7079C22.274 14.4489 21.397 12.9099 19.6431 9.83196L18.8699 8.47519C15.7771 3.04762 14.2307 0.33383 11.9163 0.037962C11.5802 -0.00499916 11.2405 -0.0113082 10.9031 0.0191469C8.57925 0.228886 6.93316 2.88339 3.64098 8.1924L2.95857 9.29287C0.827786 12.729 -0.237605 14.4471 0.0446479 15.8563C0.193534 16.5997 0.571029 17.278 1.12434 17.7963C2.17329 18.7789 4.19487 18.7789 8.23803 18.7789C8.72371 18.7789 8.96655 18.7789 9.11055 18.6601C9.18701 18.597 9.24383 18.5133 9.27428 18.4189C9.33162 18.2413 9.24205 18.0156 9.06291 17.5641Z" fill="#8BA4B8"/>
+</svg>
+  );
+}
+
+function KongMark() {
+  return (
+   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22" fill="none">
+  <g clip-path="url(#clip0_15602_26562)">
+    <path d="M11.1328 4.89947C11.1834 4.8999 11.2339 4.90044 11.2844 4.90107C11.3368 4.90069 11.3892 4.9002 11.4415 4.89963C11.5512 4.89884 11.6608 4.89936 11.7705 4.90077C11.9102 4.90245 12.0497 4.90069 12.1894 4.89791C12.2976 4.89617 12.4057 4.89641 12.5139 4.8972C12.5654 4.89733 12.6168 4.89683 12.6682 4.89568C13.0881 4.88788 13.0881 4.88788 13.2494 5.03984C13.3276 5.12517 13.3953 5.21602 13.46 5.31187C13.5108 5.38585 13.5681 5.45402 13.6256 5.52283C13.6466 5.54862 13.6675 5.57441 13.689 5.60098C13.7911 5.72426 13.8965 5.8446 14.0018 5.96525C14.1167 6.09739 14.2281 6.23196 14.3383 6.36809C14.4237 6.47153 14.5116 6.57268 14.5998 6.67379C14.7098 6.79996 14.8186 6.9267 14.9239 7.05683C15.0441 7.20514 15.1686 7.34922 15.2939 7.49315C15.4389 7.65976 15.5818 7.82806 15.7241 7.99697C15.7912 8.07655 15.8585 8.15598 15.9257 8.23542C15.9527 8.26734 15.9797 8.29926 16.0067 8.33118C16.0201 8.34698 16.0335 8.36278 16.0473 8.37906C17.4652 10.0549 17.4652 10.0549 17.5058 10.1027C17.5328 10.1347 17.5598 10.1666 17.5869 10.1986C17.654 10.278 17.7212 10.3574 17.7883 10.4369C17.8151 10.4685 17.8418 10.5002 17.8685 10.5318C17.8818 10.5475 17.895 10.5632 17.9087 10.5793C17.9945 10.6808 18.0809 10.7817 18.1675 10.8824C18.2856 11.0196 18.4028 11.1572 18.5168 11.2979C18.6388 11.4483 18.7656 11.5943 18.8929 11.7403C19.0078 11.8725 19.1192 12.007 19.2294 12.1432C19.3149 12.2466 19.4028 12.3478 19.4909 12.4489C19.6228 12.6001 19.7514 12.7533 19.8777 12.9093C19.9631 13.0127 20.051 13.1138 20.1392 13.215C20.271 13.3662 20.3996 13.5194 20.5259 13.6753C20.6113 13.7788 20.6992 13.8799 20.7874 13.981C20.8974 14.1072 21.0062 14.2339 21.1115 14.3641C21.2316 14.5124 21.3562 14.6565 21.4815 14.8004C21.6265 14.967 21.7694 15.1353 21.9117 15.3042C21.9788 15.3838 22.0461 15.4632 22.1133 15.5427C22.1403 15.5746 22.1673 15.6065 22.1943 15.6384C22.2077 15.6542 22.2211 15.67 22.2348 15.6863C22.4914 15.9896 22.748 16.2928 23.0046 16.596C23.0247 16.6198 23.0247 16.6198 23.0452 16.644C23.072 16.6757 23.0988 16.7075 23.1254 16.7393C23.1955 16.8227 23.2667 16.9047 23.3401 16.9853C23.3552 17.0021 23.3702 17.019 23.3857 17.0363C23.4144 17.0684 23.4435 17.1002 23.4731 17.1315C23.5549 17.224 23.5818 17.2864 23.578 17.4089C23.5647 17.5457 23.5337 17.6792 23.5047 17.8133C23.4939 17.8639 23.494 17.8639 23.483 17.9156C23.4595 18.0268 23.4356 18.138 23.4117 18.2492C23.3952 18.3265 23.3788 18.4039 23.3624 18.4813C23.328 18.6433 23.2934 18.8052 23.2587 18.9672C23.2098 19.1954 23.1612 19.4237 23.1126 19.6521C23.044 19.9748 22.9752 20.2975 22.9062 20.6202C22.8994 20.6519 22.8926 20.6837 22.8856 20.7164C22.8794 20.7455 22.8731 20.7747 22.8667 20.8047C22.8613 20.8299 22.8559 20.8552 22.8503 20.8812C22.8365 20.9435 22.8212 21.0054 22.8057 21.0673C21.3181 21.0673 19.8304 21.0673 18.2976 21.0673C18.3629 20.7083 18.3629 20.7083 18.4134 20.5649C18.5252 20.2562 18.5252 20.2562 18.512 19.9388C18.4401 19.8173 18.3387 19.7288 18.2312 19.6391C18.1496 19.5677 18.0839 19.4848 18.0159 19.4007C17.9892 19.369 17.9625 19.3373 17.9356 19.3058C17.9225 19.2901 17.9093 19.2745 17.8957 19.2584C17.8284 19.1787 17.761 19.0991 17.6936 19.0195C17.6666 18.9876 17.6396 18.9557 17.6126 18.9237C17.5992 18.9079 17.5858 18.8921 17.5721 18.8759C17.3155 18.5726 17.0589 18.2694 16.8023 17.9661C16.7889 17.9503 16.7755 17.9345 16.7618 17.9183C16.7348 17.8864 16.7078 17.8545 16.6809 17.8226C16.6127 17.742 16.5445 17.6615 16.4761 17.581C16.3515 17.4342 16.2275 17.2871 16.1062 17.1374C15.9834 16.9865 15.8561 16.8398 15.7282 16.6932C15.6133 16.5611 15.5019 16.4265 15.3917 16.2903C15.3062 16.1869 15.2183 16.0858 15.1302 15.9846C14.9983 15.8334 14.8697 15.6802 14.7434 15.5243C14.658 15.4208 14.5701 15.3197 14.4819 15.2186C14.3501 15.0673 14.2215 14.9141 14.0952 14.7582C14.0098 14.6547 13.9219 14.5536 13.8337 14.4525C13.7012 14.3005 13.5718 14.1466 13.4448 13.9899C13.3511 13.8758 13.2548 13.764 13.1585 13.652C13.0178 13.4886 12.8785 13.324 12.7394 13.1592C12.6721 13.0795 12.6047 12.9999 12.5373 12.9203C12.5103 12.8884 12.4833 12.8565 12.4562 12.8246C12.4429 12.8088 12.4295 12.793 12.4157 12.7767C11.8688 12.1303 11.8688 12.1303 11.3218 11.4839C11.3085 11.4681 11.2951 11.4523 11.2813 11.436C11.2544 11.4041 11.2274 11.3723 11.2004 11.3404C11.1323 11.2598 11.064 11.1792 10.9957 11.0988C10.871 10.952 10.747 10.8048 10.6257 10.6552C10.503 10.5043 10.3756 10.3576 10.2478 10.211C10.1328 10.0788 10.0214 9.94424 9.91123 9.8081C9.82578 9.70467 9.7379 9.60352 9.64973 9.5024C9.5181 9.35146 9.3895 9.19875 9.26392 9.04271C9.20795 8.97528 9.15102 8.9096 9.09266 8.84428C9.07517 8.82459 9.05768 8.80489 9.03966 8.7846C9.0051 8.74583 8.97031 8.70727 8.93526 8.66893C8.91945 8.65114 8.90363 8.63334 8.88733 8.61501C8.87312 8.59933 8.85892 8.58365 8.84428 8.56749C8.79943 8.49929 8.78637 8.44948 8.78052 8.36801C8.80756 8.29947 8.80756 8.29947 8.8513 8.22794C8.87571 8.18718 8.87571 8.18718 8.90061 8.1456C8.92776 8.10164 8.92776 8.10164 8.95546 8.05679C8.99388 7.99286 9.03224 7.92891 9.07056 7.86493C9.08561 7.83999 9.08561 7.83999 9.10095 7.81456C9.20263 7.64592 9.30028 7.47502 9.3975 7.30379C9.447 7.21665 9.49669 7.12961 9.54637 7.04256C9.56113 7.0167 9.56113 7.0167 9.57618 6.99031C9.73329 6.71507 9.89206 6.44079 10.0506 6.16639C10.1088 6.06561 10.167 5.9648 10.2251 5.86397C10.2449 5.82964 10.2647 5.79531 10.2845 5.76098C10.3215 5.69671 10.3586 5.63243 10.3956 5.56816C10.4286 5.51089 10.4621 5.45389 10.4962 5.39723C10.55 5.3058 10.55 5.3058 10.5848 5.21095C10.7041 4.93648 10.8558 4.90357 11.1328 4.89947Z" fill="#169488"/>
+    <path d="M8.22338 9.16211C8.30131 9.20522 8.34127 9.25881 8.39557 9.32946C8.50566 9.46912 8.6191 9.60449 8.73625 9.73828C8.86873 9.89016 8.99808 10.044 9.12493 10.2006C9.20514 10.2982 9.28728 10.394 9.36974 10.4896C9.47393 10.6105 9.57684 10.7321 9.67728 10.8561C9.78332 10.9868 9.89266 11.1142 10.0032 11.241C10.1357 11.3929 10.2651 11.5467 10.3919 11.7033C10.4721 11.8009 10.5543 11.8967 10.6367 11.9923C10.7409 12.1132 10.8438 12.2348 10.9443 12.3588C11.0503 12.4895 11.1596 12.6169 11.2702 12.7437C11.4027 12.8956 11.532 13.0494 11.6589 13.206C11.7391 13.3036 11.8212 13.3994 11.9037 13.495C12.0295 13.641 12.1525 13.7889 12.2737 13.9387C12.3304 14.0069 12.3877 14.074 12.4462 14.1406C12.4636 14.1606 12.4811 14.1805 12.4991 14.201C12.5338 14.2405 12.5685 14.2798 12.6034 14.3189C12.6193 14.3369 12.6351 14.3549 12.6514 14.3735C12.6727 14.3974 12.6727 14.3974 12.6944 14.4219C12.7287 14.4674 12.7287 14.4674 12.7582 14.5558C12.727 14.6187 12.727 14.6187 12.6778 14.6919C12.6598 14.7192 12.6417 14.7465 12.6231 14.7745C12.6033 14.8038 12.5834 14.8331 12.563 14.8633C12.5219 14.925 12.4809 14.9868 12.4398 15.0485C12.419 15.0796 12.3982 15.1106 12.3768 15.1427C12.2891 15.2741 12.2032 15.4066 12.1173 15.5391C12.0862 15.587 12.0551 15.6349 12.024 15.6828C11.9208 15.8417 11.8179 16.0008 11.7152 16.16C11.7029 16.179 11.6906 16.198 11.678 16.2175C11.6675 16.2338 11.657 16.2501 11.6461 16.2669C11.6339 16.2857 11.6217 16.3044 11.6091 16.3236C11.597 16.3536 11.5848 16.3836 11.5724 16.4145C11.5244 16.4851 11.4994 16.4988 11.4145 16.5159C11.3087 16.5208 11.2043 16.5198 11.0984 16.5171C11.0577 16.5167 11.0169 16.5164 10.9761 16.5162C10.8884 16.5156 10.8006 16.5144 10.7129 16.5129C10.5739 16.5105 10.435 16.5097 10.296 16.5092C9.90084 16.5074 9.5057 16.5037 9.11056 16.4981C8.89229 16.495 8.67406 16.4933 8.45577 16.4931C8.34034 16.4929 8.22502 16.492 8.10962 16.4893C7.62094 16.4508 7.62094 16.4508 7.18866 16.6113C7.10876 16.7019 7.06199 16.803 7.01257 16.9129C6.96871 16.9765 6.92132 17.0352 6.87261 17.0953C6.85932 17.1125 6.84604 17.1298 6.83235 17.1476C6.70813 17.309 6.58295 17.4696 6.45783 17.6303C6.35751 17.7592 6.25754 17.8883 6.15809 18.0179C5.95479 18.2826 5.74937 18.5457 5.54428 18.8091C5.29062 19.1348 5.29062 19.1348 5.03843 19.4616C4.77575 19.8034 4.51305 20.145 4.23928 20.478C4.22516 20.4952 4.21104 20.5125 4.1965 20.5302C4.18133 20.5475 4.16616 20.5648 4.15053 20.5826C4.09095 20.6564 4.09095 20.6564 4.04492 20.756C3.97454 20.8852 3.89859 20.9897 3.77145 21.0675C3.51598 21.1396 3.23993 21.1169 2.97701 21.1093C2.87219 21.1067 2.76735 21.1065 2.6625 21.106C2.46441 21.1047 2.26641 21.1013 2.06835 21.0972C1.84269 21.0925 1.61703 21.0903 1.39133 21.0882C0.927486 21.0839 0.463737 21.0767 -3.70592e-05 21.0675C-0.00693504 20.4709 -0.0121234 19.8744 -0.0153035 19.2779C-0.0168197 19.0008 -0.0188848 18.7238 -0.0222651 18.4468C-0.0252116 18.2052 -0.0271052 17.9637 -0.02776 17.7221C-0.0281426 17.5943 -0.0290349 17.4665 -0.0311905 17.3387C-0.0332076 17.2181 -0.0338036 17.0976 -0.0333638 16.977C-0.0334441 16.9331 -0.0340202 16.8891 -0.0351604 16.8451C-0.0438384 16.4928 0.0640719 16.3098 0.29461 16.0585C0.324458 16.0211 0.353978 15.9834 0.382889 15.9453C0.406628 15.9152 0.430367 15.8851 0.454825 15.8541C0.482103 15.8194 0.509381 15.7848 0.536658 15.7501C0.550213 15.7329 0.563768 15.7157 0.577733 15.698C0.645498 15.612 0.713132 15.5258 0.780778 15.4397C0.807787 15.4053 0.834796 15.371 0.861806 15.3366C0.875176 15.3196 0.888545 15.3025 0.90232 15.285C1.48302 14.5459 2.06372 13.8069 2.64442 13.0678C2.6578 13.0508 2.67118 13.0337 2.68496 13.0162C2.71189 12.9819 2.73883 12.9476 2.76577 12.9134C2.83443 12.826 2.90307 12.7386 2.97164 12.6511C2.98562 12.6333 2.9996 12.6155 3.014 12.5972C3.04006 12.564 3.06611 12.5307 3.09215 12.4975C3.11742 12.4653 3.14326 12.4335 3.16957 12.4022C3.21499 12.3448 3.21499 12.3448 3.25073 12.2685C3.30825 12.1699 3.3522 12.1157 3.44734 12.0513C3.66008 12.0032 3.88855 12.026 4.10477 12.0347C4.56213 12.0732 4.56213 12.0732 4.96442 11.8992C5.00987 11.8528 5.05433 11.8053 5.09736 11.7566C5.13294 11.7254 5.16902 11.6946 5.20578 11.6648C5.23719 11.6377 5.26858 11.6106 5.29993 11.5835C5.3351 11.5532 5.37028 11.523 5.40547 11.4927C5.42285 11.4777 5.44024 11.4628 5.45814 11.4474C5.58665 11.3372 5.71616 11.2282 5.8455 11.119C5.92519 11.0517 6.00481 10.9843 6.08443 10.9169C6.11635 10.8899 6.14827 10.8629 6.18019 10.8358C6.19599 10.8225 6.21179 10.8091 6.22807 10.7953C6.53131 10.5387 6.83455 10.2822 7.13779 10.0256C7.15359 10.0122 7.1694 9.99882 7.18568 9.98504C7.21757 9.95806 7.24947 9.93107 7.28137 9.90409C7.37772 9.82257 7.47403 9.741 7.57027 9.65936C7.60213 9.63239 7.63402 9.60548 7.66596 9.57862C7.74701 9.51045 7.82731 9.44164 7.90664 9.37147C7.92257 9.35761 7.9385 9.34375 7.95491 9.32947C7.99891 9.29118 8.04262 9.25255 8.0863 9.2139C8.16169 9.16372 8.16169 9.16372 8.22338 9.16211Z" fill="#1F80BC"/>
+    <path d="M14.9765 0.0129587C15.086 0.0758231 15.1792 0.152735 15.2756 0.233829C15.3179 0.268731 15.3601 0.303605 15.4024 0.338452C15.4235 0.355909 15.4446 0.373367 15.4663 0.391353C15.5558 0.464791 15.6467 0.536392 15.7379 0.607663C15.7547 0.620826 15.7715 0.633989 15.7888 0.647551C15.8393 0.687081 15.8899 0.726566 15.9404 0.766035C16.1564 0.934623 16.3711 1.10446 16.5831 1.27798C16.744 1.40959 16.9072 1.53744 17.073 1.66287C17.2683 1.81073 17.4582 1.96416 17.6466 2.12076C17.7989 2.24711 17.9542 2.36821 18.1117 2.48799C18.2247 2.5746 18.3348 2.66477 18.4449 2.7549C18.5858 2.87008 18.7275 2.98344 18.8722 3.09375C19.04 3.22171 19.2039 3.35406 19.3673 3.48757C19.51 3.60403 19.654 3.71856 19.8003 3.83037C19.7565 3.9325 19.6985 3.99803 19.6196 4.07575C19.584 4.11108 19.584 4.11108 19.5477 4.14711C19.5229 4.17142 19.4981 4.19573 19.4725 4.22077C19.4475 4.24554 19.4225 4.2703 19.3967 4.29582C19.3349 4.35688 19.273 4.41779 19.211 4.47859C19.354 4.71335 19.5114 4.93225 19.6777 5.15075C19.6923 5.17064 19.7068 5.19054 19.7217 5.21103C19.7706 5.27636 19.7706 5.27636 19.8334 5.33753C20.0578 5.58666 20.0436 5.85786 20.0389 6.17624C20.0379 6.26692 20.0395 6.35729 20.0414 6.44795C20.0436 6.8652 20.0436 6.8652 19.9505 7.01342C19.8837 7.07327 19.8197 7.11677 19.7414 7.15988C19.7153 7.18183 19.6891 7.20379 19.6622 7.22641C19.6397 7.24456 19.6172 7.26272 19.5941 7.28142C19.567 7.30345 19.5398 7.32548 19.5119 7.34818C19.4896 7.36627 19.4896 7.36627 19.4669 7.38472C19.3678 7.46534 19.2691 7.54648 19.1705 7.62763C19.149 7.6453 19.1276 7.66297 19.1054 7.68118C18.9575 7.80314 18.8108 7.92654 18.6648 8.05083C18.5501 8.14818 18.4331 8.24222 18.3152 8.33559C18.2239 8.40931 18.1346 8.48517 18.0453 8.56129C17.8969 8.68778 17.746 8.81003 17.5905 8.92776C17.3634 8.7031 17.1531 8.46558 16.9525 8.21716C16.8766 8.12396 16.7991 8.03224 16.7213 7.94069C16.6224 7.82442 16.5247 7.70744 16.4285 7.58896C16.3266 7.46384 16.2225 7.341 16.1172 7.21881C15.99 7.0711 15.8653 6.92165 15.7424 6.77028C15.667 6.67831 15.5902 6.58754 15.5132 6.49692C15.4144 6.38064 15.3166 6.26367 15.2204 6.14519C15.1186 6.02007 15.0145 5.89723 14.9092 5.77504C14.7819 5.62733 14.6572 5.47788 14.5343 5.32651C14.4589 5.23454 14.3822 5.14377 14.3052 5.05315C14.1846 4.91134 14.0663 4.76793 13.949 4.62338C13.8944 4.55739 13.8391 4.49236 13.7828 4.42772C13.7584 4.3996 13.7584 4.3996 13.7335 4.37091C13.7013 4.33395 13.669 4.2971 13.6366 4.26037C13.5243 4.13149 13.5243 4.13149 13.5243 4.06608C12.7367 4.06608 11.9492 4.06608 11.1377 4.06608C11.3305 3.68039 11.5283 3.29967 11.7352 2.92164C11.782 2.83574 11.8281 2.74949 11.8742 2.66317C12.0202 2.39439 12.1484 2.20703 12.4047 2.03302C12.4837 1.97106 12.561 1.90714 12.6386 1.84334C12.6796 1.8099 12.7207 1.77648 12.7618 1.74309C12.8796 1.6472 12.9971 1.55102 13.1146 1.45477C13.2421 1.35059 13.3699 1.24687 13.4978 1.14309C13.6099 1.052 13.7219 0.960737 13.8337 0.869162C13.9863 0.744164 14.1394 0.619812 14.2925 0.495515C14.4372 0.378007 14.5815 0.259986 14.7255 0.141522C14.7472 0.123974 14.7689 0.106426 14.7913 0.0883469C14.8106 0.0701916 14.8299 0.0520363 14.8498 0.0333308C14.9092 -4.7212e-05 14.9092 -4.7212e-05 14.9765 0.0129587Z" fill="#119F6B"/>
+    <path d="M7.80115 17.2769C7.83268 17.2767 7.8642 17.2765 7.89669 17.2763C7.95108 17.2754 7.95108 17.2754 8.00658 17.2745C8.04669 17.2746 8.0868 17.2747 8.12691 17.2748C8.16921 17.2744 8.21152 17.274 8.25383 17.2735C8.36871 17.2723 8.48358 17.2721 8.59847 17.2721C8.69446 17.272 8.79045 17.2716 8.88643 17.2711C9.11301 17.2701 9.33957 17.2698 9.56615 17.2701C9.79961 17.2703 10.033 17.269 10.2665 17.267C10.4671 17.2653 10.6677 17.2647 10.8683 17.2648C10.9881 17.2649 11.1078 17.2646 11.2275 17.2632C11.3402 17.262 11.4529 17.262 11.5656 17.2631C11.6069 17.2632 11.6481 17.2629 11.6893 17.2622C11.9998 17.2567 11.9998 17.2567 12.1265 17.3534C12.1863 17.4198 12.237 17.4867 12.2867 17.5609C12.3139 17.5951 12.3413 17.629 12.3692 17.6626C12.394 17.6943 12.4186 17.7261 12.4432 17.758C12.4711 17.7937 12.4989 17.8295 12.5268 17.8652C12.5407 17.8832 12.5546 17.9011 12.569 17.9196C12.6361 18.0059 12.7035 18.0919 12.771 18.1779C12.7843 18.1948 12.7976 18.2117 12.8113 18.2291C12.9255 18.3744 13.0409 18.5186 13.1565 18.6627C13.2687 18.8028 13.3798 18.9438 13.4904 19.0851C13.575 19.193 13.6603 19.3003 13.7462 19.4071C13.7907 19.4626 13.8349 19.5182 13.8792 19.5739C13.9368 19.6462 13.9955 19.7174 14.055 19.7882C14.0825 19.8217 14.11 19.8551 14.1374 19.8886C14.1742 19.9324 14.1742 19.9324 14.2117 19.977C14.2756 20.0921 14.257 20.1442 14.2314 20.2717C14.2112 20.3346 14.189 20.3968 14.1651 20.4584C14.152 20.4921 14.1389 20.5259 14.1255 20.5607C14.1118 20.5954 14.0981 20.6301 14.084 20.6658C14.0704 20.7011 14.0567 20.7365 14.0426 20.7729C13.9412 21.0333 13.9412 21.0333 13.9073 21.0672C13.835 21.0701 13.7635 21.0711 13.6912 21.0708C13.6683 21.0708 13.6454 21.0708 13.6218 21.0709C13.5446 21.0709 13.4673 21.0707 13.39 21.0706C13.3348 21.0706 13.2797 21.0706 13.2245 21.0706C13.0743 21.0706 12.924 21.0704 12.7738 21.0702C12.617 21.07 12.4602 21.07 12.3033 21.07C12.0061 21.0699 11.7089 21.0697 11.4118 21.0694C11.0735 21.069 10.7352 21.0689 10.397 21.0687C9.70099 21.0684 9.00497 21.0679 8.30896 21.0672C8.31304 21.0115 8.31728 20.9557 8.32159 20.9C8.32394 20.8689 8.32628 20.8379 8.3287 20.8059C8.33755 20.7219 8.35209 20.6433 8.37203 20.5614C8.42685 20.3248 8.46983 20.1221 8.33799 19.9059C8.27926 19.8224 8.21747 19.7417 8.15405 19.6617C8.0594 19.5369 7.97915 19.4028 7.89645 19.2699C7.86145 19.2146 7.82639 19.1594 7.79126 19.1043C7.76577 19.0642 7.76577 19.0642 7.73978 19.0234C7.66614 18.9081 7.59165 18.7934 7.5171 18.6788C7.38476 18.4751 7.25637 18.2694 7.13037 18.0618C7.23851 17.9167 7.34786 17.7726 7.45817 17.6291C7.47052 17.613 7.48288 17.5969 7.49562 17.5803C7.5309 17.5345 7.56635 17.4888 7.60181 17.4431C7.61904 17.4173 7.63628 17.3916 7.65403 17.365C7.71967 17.2958 7.71967 17.2958 7.80115 17.2769Z" fill="#1E82B8"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_15602_26562">
+      <rect width="23.5718" height="21.0673" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
+  );
+}

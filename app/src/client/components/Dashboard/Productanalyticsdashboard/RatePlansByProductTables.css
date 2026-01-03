@@ -1,0 +1,136 @@
+:root {
+  --rpt-radius: 18px;
+  --rpt-border: rgba(16, 24, 40, 0.06);
+
+  --rpt-title: #19222d;
+  --rpt-sub: #7b97ae;
+
+  --rpt-head-bg: #f6f8fb;
+
+  --rpt-green: #2f9e44;
+  --rpt-red: #e03131;
+
+  --rpt-active-tile: #eaf7ea;
+  --rpt-cancel-tile: #fbeeee;
+}
+
+.rpt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.rpt-card {
+  border-radius: var(--rpt-radius) !important;
+  border: 1px solid var(--rpt-border) !important;
+  padding: 28px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+}
+
+.rpt-card-head {
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.rpt-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.rpt-icon.is-active {
+  background: var(--rpt-active-tile);
+  color: #7cc47f;
+}
+
+.rpt-icon.is-cancelled {
+  background: var(--rpt-cancel-tile);
+  color: #f0a3a3;
+}
+
+.rpt-plus {
+  font-size: 18px;
+  line-height: 18px;
+  font-weight: 700;
+}
+
+.rpt-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--rpt-title) !important;
+}
+
+.rpt-table-wrap {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.rpt-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.rpt-table thead tr {
+  background: var(--rpt-head-bg);
+}
+
+.rpt-th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rpt-sub);
+  padding: 10px 14px;
+}
+
+.rpt-th-right {
+  text-align: right;
+}
+
+.rpt-tr td {
+  padding: 12px 14px;
+  font-size: 11px;
+  color: #475467;
+  background: #fff;
+}
+
+.rpt-tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(16, 24, 40, 0.04);
+}
+
+.rpt-td-right {
+  text-align: right;
+}
+
+.rpt-rate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.rpt-rate.is-up {
+  color: var(--rpt-green);
+}
+
+.rpt-rate.is-down {
+  color: var(--rpt-red);
+}
+
+.rpt-arrow {
+  display: inline-block;
+}
+
+@media (max-width: 1100px) {
+  .rpt-grid {
+    grid-template-columns: 1fr;
+  }
+}

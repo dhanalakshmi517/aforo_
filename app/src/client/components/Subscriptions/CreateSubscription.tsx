@@ -609,7 +609,9 @@ export default function CreateSubscription({
                   <nav className="met-np-steps">
                     {steps.map((step, i) => {
                       const isActive = i === currentStep;
-                      const isCompleted = i < currentStep;
+                      // Only mark as completed if user has moved past it AND all required fields are filled
+                      const isStep0Completed = selectedCustomerId && selectedProductId && selectedRatePlanId && paymentType;
+                      const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : true);
                       const showConnector = i < steps.length - 1;
 
                       return (
