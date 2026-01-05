@@ -111,7 +111,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('status');
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
 
   // manage sidebar visibility
   useEffect(() => {
