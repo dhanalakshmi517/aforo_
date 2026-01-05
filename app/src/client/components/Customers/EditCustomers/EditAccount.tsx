@@ -149,15 +149,21 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
     setBillingAddress(updated);
     if (sameAsBilling) setCustomerAddress(updated);
 
-    // inline validations
-    if (!value.trim()) setErr(`billing_${field}`, 'This is a required field');
-    else clearErr(`billing_${field}`);
+    // inline validations (skip line2 as it's optional)
+    if (field !== 'line2') {
+      if (!value.trim()) setErr(`billing_${field}`, 'This is a required field');
+      else clearErr(`billing_${field}`);
+    }
   };
 
   const handleCustomerChange = (field: string, value: string) => {
     setCustomerAddress({ ...customerAddress, [field]: value });
-    if (!value.trim()) setErr(`customer_${field}`, 'This is a required field');
-    else clearErr(`customer_${field}`);
+    
+    // inline validations (skip line2 as it's optional)
+    if (field !== 'line2') {
+      if (!value.trim()) setErr(`customer_${field}`, 'This is a required field');
+      else clearErr(`customer_${field}`);
+    }
   };
 
   const addEmailField = () => setAdditionalEmails([...additionalEmails, '']);
@@ -242,12 +248,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
       </div>
 
       {/* Same as Billing */}
-      <div className="checkbox-row">
-        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
-        <span className="checkbox-label" onClick={handleToggleSame}>
-          Billing address is same as customer address
-        </span>
-      </div>
+  
 
     
 
@@ -270,8 +271,6 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           value={billingAddress.line2}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={(val) => handleBillingChange('line2', val)}
-          onBlur={() => !billingAddress.line2.trim() ? setErr('billing_line2', 'This is a required field') : clearErr('billing_line2')}
-          error={localErr.billing_line2 || errors.billingAddressLine2}
         />
         <div className="acc-form-row">
           <div className="acc-form-group">
@@ -328,6 +327,12 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           </div>
         </div>
       </div>
+          <div className="checkbox-row">
+        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
+        <span className="checkbox-label" onClick={handleToggleSame}>
+          Billing address is same as customer address
+        </span>
+      </div>
         {/* Customer Address */}
       <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
         <h4>Customer Address</h4>
@@ -347,9 +352,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           value={customerAddress.line2}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={(val) => handleCustomerChange('line2', val)}
-          onBlur={() => !sameAsBilling && !customerAddress.line2.trim() ? setErr('customer_line2', 'This is a required field') : clearErr('customer_line2')}
           disabled={sameAsBilling}
-          error={localErr.customer_line2 || errors.customerAddressLine2}
         />
         <div className="acc-form-row">
           <div className="acc-form-group">

@@ -464,7 +464,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             label="Product Type"
             value={productType}
             onChange={handleProductTypeChange}
-            options={[{ label: 'Select Product Type', value: '' }, ...productOptions]}
+            options={[{ label: '', value: '' }, ...productOptions]}
             required
             error={error}
           />

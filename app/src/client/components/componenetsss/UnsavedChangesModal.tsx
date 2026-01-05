@@ -37,6 +37,7 @@ const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({
             Discard Changes
           </button>
           <PrimaryButton 
+          className="un-pri-btn"
             onClick={onKeepEditing}
           >
             Keep Editing

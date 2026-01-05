@@ -505,10 +505,14 @@ const EditProduct: React.FC<EditProductProps> = ({
     }
 
     if (activeTab === 'configuration') {
-      // Run configuration tab validation via the exposed submit() method.
-      // Only proceed to the Review step if submit() returns true.
-      const ok = await configRef.current?.submit();
-      if (!ok) return;
+      // Only validate configuration if productType is set
+      const currentProductType = configuration.productType || productType;
+      if (currentProductType) {
+        // Run configuration tab validation via the exposed submit() method.
+        // Only proceed to the Review step if submit() returns true.
+        const ok = await configRef.current?.submit();
+        if (!ok) return;
+      }
       goToStep(2);
       return;
     }
@@ -796,30 +800,38 @@ const EditProduct: React.FC<EditProductProps> = ({
                         if (index < currentStep) {
                           // Special case: from Configuration back to General should also validate config
                           if (activeTab === 'configuration' && index === 0) {
-                            const ok = await configRef.current?.submit();
-                            if (!ok) return; // stay on Configuration if product type / fields invalid
+                            const currentProductType = configuration.productType || productType;
+                            if (currentProductType) {
+                              const ok = await configRef.current?.submit();
+                              if (!ok) return; // stay on Configuration if product type / fields invalid
+                            }
                           }
 
                           goToStep(index);
                           return;
                         }
 
-                        // Prevent jumping multiple steps ahead; move only one step at a time
-                        const nextIndex = currentStep + 1;
-
-                        // When moving forward from General, run general validation (same as Save & Next)
-                        if (activeTab === 'general') {
-                          const ok = validateForm();
-                          if (!ok) return;
-                          goToStep(nextIndex);
-                          return;
-                        }
-
-                        // When moving forward from Configuration, validate configuration via submit()
-                        if (activeTab === 'configuration') {
-                          const ok = await configRef.current?.submit();
-                          if (!ok) return;
-                          goToStep(nextIndex);
+                        // Forward: validate all steps up to the target step
+                        if (index > currentStep) {
+                          // Validate all steps from current to target
+                          for (let i = currentStep; i < index; i++) {
+                            if (i === 0) {
+                              const ok = validateForm();
+                              if (!ok) return;
+                            } else if (i === 1) {
+                              // Skip Configuration validation if jumping directly from General to Review
+                              if (index === 2 && currentStep === 0) {
+                                continue;
+                              }
+                              // Only validate configuration if we're actually on the Configuration tab
+                              const currentProductType = configuration.productType || productType;
+                              if (currentProductType) {
+                                const ok = await configRef.current?.submit();
+                                if (!ok) return;
+                              }
+                            }
+                          }
+                          goToStep(index);
                           return;
                         }
 

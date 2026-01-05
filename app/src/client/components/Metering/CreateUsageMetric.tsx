@@ -785,6 +785,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     value={aggregationFunction}
                                     onChange={(v: string) => {
                                       setAggregationFunction(v);
+                                      setAggregationWindow('');
                                       if (errors.aggregationFunction) {
                                         const { aggregationFunction, ...rest } = errors;
                                         setErrors(rest);

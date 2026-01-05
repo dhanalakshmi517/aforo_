@@ -92,6 +92,8 @@ line-height: var(--line-height-body-md);
   font-weight: 500;
   line-height: var(--line-height-body-md);
   transition: background-color 0.2s ease, color 0.2s ease;
+  height:40px;
+  width:160px;
 }
 
 .modal-discard-btn:hover {
@@ -103,6 +105,9 @@ line-height: var(--line-height-body-md);
   background-color: rgba(232, 93, 93, 0.15);
 }
 
+.un-pri-btn{
+  width:160px !important;
+}
 /* Fade animation */
 @keyframes fadeIn {
   from {

@@ -381,7 +381,6 @@ const AccountDetailsForm: React.FC<Props> = ({
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={locked ? () => {} : (val) => handleBillingChange('line2', val)}
           disabled={locked}
-          error={errors.billingAddressLine2}
         />
         <div className="acc-form-row">
           <div className="acc-form-group">
@@ -465,7 +464,6 @@ const AccountDetailsForm: React.FC<Props> = ({
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={locked ? () => {} : (val) => handleCustomerChange('line2', val)}
           disabled={sameAsBilling || locked}
-          error={errors.customerAddressLine2}
         />
         <div className="acc-form-row">
           <div className="acc-form-group">

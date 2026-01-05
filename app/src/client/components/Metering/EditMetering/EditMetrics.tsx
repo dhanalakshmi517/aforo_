@@ -179,7 +179,6 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     if (index === 0) {
       if (!metricName.trim()) e.metricName = 'Metric name is required';
       if (!selectedProductId) e.product = 'Product is required';
-      if (!version.trim()) e.version = 'Version is required';
       if (!unitOfMeasure) e.unitOfMeasure = 'Unit of Measure is required';
     }
 
@@ -201,7 +200,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     }
 
     if (index === 2) {
-      if (!metricName.trim() || !selectedProductId || !version.trim() || !unitOfMeasure || !billingCriteria) {
+      if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !billingCriteria) {
         e.form = 'Please fill all required fields';
       }
     }
@@ -398,7 +397,6 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
           <div className="edit-np-form-group">
             <InputField
               label="Version"
-              required
               value={version}
               onChange={(v: string) => {
                 setVersion(v);
@@ -517,20 +515,14 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
                           return;
                         }
 
-                        // forward: one step only + validate current step
-                        const nextIndex = currentStep + 1;
-
-                        if (activeTab === 'metric') {
-                          const ok = validateStep(0);
-                          if (!ok) return;
-                          goToStep(nextIndex);
-                          return;
-                        }
-
-                        if (activeTab === 'conditions') {
-                          const ok = validateStep(1);
-                          if (!ok) return;
-                          goToStep(nextIndex);
+                        // forward: validate all steps up to the target step
+                        if (index > currentStep) {
+                          // Validate all steps from current to target
+                          for (let i = currentStep; i < index; i++) {
+                            const ok = validateStep(i);
+                            if (!ok) return;
+                          }
+                          goToStep(index);
                           return;
                         }
                       }}
@@ -569,8 +561,6 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
                                     setErrors(rest);
                                   }
                                 }}
-                                errors={errors}
-                                onFieldEdited={clearConditionError}
                               />
 
                               {/* inline errors to match step validation */}

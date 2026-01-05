@@ -272,20 +272,29 @@ const EditCustomer: React.FC = () => {
       newAccErrs.primaryEmail = 'Enter a valid email address';
     }
 
-    [
+    const requiredAddressFields = [
       'billingAddressLine1',
-      'billingAddressLine2',
       'billingCity',
       'billingState',
       'billingPostalCode',
       'billingCountry',
-      'customerAddressLine1',
-      'customerAddressLine2',
-      'customerCity',
-      'customerState',
-      'customerPostalCode',
-      'customerCountry',
-    ].forEach(k => {
+    ];
+
+    // Only require customer address if billing is NOT same as customer
+    if (!a.billingSameAsCustomer) {
+      requiredAddressFields.push(
+        'customerAddressLine1',
+        'customerCity',
+        'customerState',
+        'customerPostalCode',
+        'customerCountry'
+      );
+    } else {
+      // If billing is same as customer, don't validate customer address at all
+      // Customer address will be auto-filled from billing address
+    }
+
+    requiredAddressFields.forEach(k => {
       // @ts-ignore
       if (!a[k]?.trim()) newAccErrs[k] = `${k.replace(/([A-Z])/g, ' $1')} is required`;
     });
@@ -306,18 +315,22 @@ const EditCustomer: React.FC = () => {
 
     const requiredKeys: (keyof AccountDetailsData)[] = [
       'billingAddressLine1',
-      'billingAddressLine2',
       'billingCity',
       'billingState',
       'billingPostalCode',
       'billingCountry',
-      'customerAddressLine1',
-      'customerAddressLine2',
-      'customerCity',
-      'customerState',
-      'customerPostalCode',
-      'customerCountry',
     ];
+
+    // Only require customer address if billing is NOT same as customer
+    if (!a.billingSameAsCustomer) {
+      requiredKeys.push(
+        'customerAddressLine1',
+        'customerCity',
+        'customerState',
+        'customerPostalCode',
+        'customerCountry'
+      );
+    }
 
     for (const k of requiredKeys) {
       const v = (a as any)[k];

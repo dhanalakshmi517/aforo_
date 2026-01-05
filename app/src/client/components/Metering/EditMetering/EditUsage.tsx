@@ -43,11 +43,9 @@ interface EditUsageProps {
   }[]>>;
   billingCriteria: string;
   onBillingCriteriaChange: (val: string) => void;
-  errors?: Record<string, string>;
-  onFieldEdited?: (errorKey: string) => void;
 }
 
-const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, conditions, setConditions, billingCriteria, onBillingCriteriaChange, errors = {}, onFieldEdited }) => {
+const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, conditions, setConditions, billingCriteria, onBillingCriteriaChange }) => {
   const [filters, setFilters] = useState<FilterCondition[]>(conditions.length ? conditions.map((c, i) => ({
     id: i,
     usageCondition: c.dimension,
@@ -60,11 +58,6 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
     setFilters((prev) =>
       prev.map((f) => (f.id === id ? { ...f, [field]: val } : f))
     );
-    const index = filters.findIndex(f => f.id === id);
-    if (index >= 0 && onFieldEdited) {
-      const fieldName = field === 'usageCondition' ? 'dimension' : field;
-      onFieldEdited(`${index}.${fieldName}`);
-    }
   };
 
   const handleAdd = () => {
@@ -82,6 +75,33 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
 
   return (
     <div className="usage-form-container">
+       <div className="billing-section">
+        <SelectField
+          label="Select Billing Criteria"
+          required
+          value={billingCriteria}
+          onChange={onBillingCriteriaChange}
+          options={[
+            { label: '--select--', value: '' },
+            { label: 'Bill based on usage conditions', value: 'BILL_BASED_ON_USAGE_CONDITIONS' },
+            { label: 'Bill excluding usage conditions', value: 'BILL_EXCLUDING_USAGE_CONDITIONS' },
+          ]}
+          placeholderOption="--select--"
+        />
+        <p className="billing-note">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <g clipPath="url(#clip0_5214_8669)">
+              <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+            <defs>
+              <clipPath id="clip0_5214_8669">
+                <rect width="12" height="12" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          Note: Multiple usage conditions must all be true (AND logic).
+        </p>
+      </div>
       
       {filters.map((filter, index) => (
         <div key={filter.id} className="filter-box">
@@ -110,12 +130,10 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
             return (
               <SelectField
                 label="Dimensions"
-                required
                 value={filter.usageCondition}
                 onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
                 options={genericDims.map((d) => ({ label: d, value: d } as SelectOption))}
                 placeholderOption="--select--"
-                error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined}
               />
             );
           })()}
@@ -142,26 +160,23 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                 return (
                   <SelectField
                     label="Operator"
-                    required
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
                     options={genericOps.map((o) => ({ label: o, value: o } as SelectOption))}
                     placeholderOption="--select--"
-                    error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined}
                   />
                 );
               })()}
             </div>
 
             <div className="column">
+                      <label>Value</label>
+
               <InputField
                 type="text"
-                required
-                label="Value"
                 placeholder="Enter value"
                 value={filter.value}
                 onChange={(val) => handleChange(filter.id, 'value', val)}
-                error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.value`] : undefined}
               />
             </div>
           </div>
@@ -172,33 +187,7 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
         Add Usage
       </SecondaryButton>
 
-      <div className="billing-section">
-        <SelectField
-          label="Select Billing Criteria"
-          required
-          value={billingCriteria}
-          onChange={onBillingCriteriaChange}
-          options={[
-            { label: '--select--', value: '' },
-            { label: 'Bill based on usage conditions', value: 'BILL_BASED_ON_USAGE_CONDITIONS' },
-            { label: 'Bill excluding usage conditions', value: 'BILL_EXCLUDING_USAGE_CONDITIONS' },
-          ]}
-          placeholderOption="--select--"
-        />
-        <p className="billing-note">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <g clipPath="url(#clip0_5214_8669)">
-              <path d="M6 8V6M6 4H6.005M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z" stroke="#1D7AFC" strokeLinecap="round" strokeLinejoin="round" />
-            </g>
-            <defs>
-              <clipPath id="clip0_5214_8669">
-                <rect width="12" height="12" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-          Note: Multiple usage conditions must all be true (AND logic).
-        </p>
-      </div>
+     
     </div>
   );
 };
