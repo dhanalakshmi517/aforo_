@@ -62,6 +62,8 @@ const ApiOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error,
       value={value}
       onChange={onChange}
       options={options}
+            required
+
       error={error}
       disabled={disabled}
       placeholder="--select--"

@@ -29,6 +29,8 @@ const LlmDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, e
       value={value}
       onChange={onChange}
       options={options}
+            required
+
       error={error}
       placeholder="--select--"
     />

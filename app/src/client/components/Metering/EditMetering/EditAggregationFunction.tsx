@@ -75,7 +75,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ l
       label={label}
       value={value}
       onChange={onChange}
-      options={[{ label: '--select--', value: '', disabled: true }, ...options.map(opt => ({ label: opt, value: opt }))]}
+      options={[{ label: '-- Select --', value: '', disabled: false }, ...options.map(opt => ({ label: opt, value: opt }))]}
       error={error}
       optional={optional}
     />

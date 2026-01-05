@@ -25,6 +25,8 @@ const EditLlmDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, lab
       label={label}
       value={value}
       onChange={onChange}
+            required
+
       options={options}
       placeholder="--select--"
     />

@@ -47,6 +47,8 @@ const LlmOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error,
       onChange={onChange}
       options={options}
       error={error}
+            required
+
       disabled={disabled}
       placeholder="--select--"
     />

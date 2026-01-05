@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 600px;
 }
 
 .acc-form-group {
@@ -47,7 +48,30 @@
 .acc-form-group .com-select-field:disabled,
 .acc-form-group .if-input:disabled,
 .acc-form-group .if-control:disabled,
-.acc-form-group select:disabled {
+.acc-form-group select:disabled,
+.acc-form-group .if-field input:disabled,
+.acc-form-group .if-field .if-control:disabled,
+.acc-form-group .if-field .if-select:disabled {
+  background-color: var(--color-neutral-100) !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Additional disabled state overrides for InputField components */
+.acc-form-group .if-field:disabled input,
+.acc-form-group .if-field:disabled .if-control,
+.acc-form-group .if-field:disabled .if-select,
+.acc-form-group .if-field .if-control:disabled,
+.acc-form-group .if-field .if-select:disabled {
+  background-color: var(--color-neutral-100) !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Override any conflicting disabled styles from Inputs.css */
+.address-section1.disabled .if-field input,
+.address-section1.disabled .if-field .if-control,
+.address-section1.disabled .if-field .if-select {
   background-color: var(--color-neutral-100) !important;
   cursor: not-allowed;
   opacity: 0.7;
@@ -65,19 +89,55 @@
   margin-bottom: 16px;
 }
 
+/* Override margin-bottom for fields inside acc-form-row */
+.acc-form-row .if-field,
+.acc-form-row .sf-field {
+  margin-bottom: 0 !important;
+}
 
 .acc-form-row {
   display: flex;
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
   margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+/* Ensure all form fields take full width of their containers */
+.account-details-form .if-field,
+.account-details-form .sf-field {
+  width: 100% !important;
+  max-width: none !important;
 }
 
 .acc-form-row .acc-form-group {
-  flex: 1;
-  min-width: 200px;
+  flex: 1 1 50%;
+  min-width: 0;
   margin-bottom: 0;
+}
+
+/* Override fixed widths from Inputs.css for account form */
+.acc-form-row .if-field {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.acc-form-row .if-control,
+.acc-form-row .if-select {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Additional override for InputField max-width constraint */
+.acc-form-row .if-field {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.acc-form-row .acc-form-group.acc-country {
+  flex: 1 1 50%;
+  min-width: 0;
 }
 
 .additional-email {
@@ -115,7 +175,7 @@
 }
 
 .address-section1.disabled {
-  background: #f5f5f5;
+  background: white;
 }
 
 .address-section {
@@ -126,9 +186,13 @@
 }
 
 .address-section h4 {
-  margin: 0 0 10px;
-  font-size: 15px;
-  color: #333;
+ margin: 0 0 10px;
+color: var(--color-neutral-1700);
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 24px; /* 150% */
 }
 
 .checkbox-row {

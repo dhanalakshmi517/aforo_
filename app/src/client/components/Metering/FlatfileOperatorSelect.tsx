@@ -52,6 +52,8 @@ const FlatfileOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, e
       value={value}
       onChange={onChange}
       options={options}
+            required
+
       error={error}
       disabled={disabled}
       placeholder="--select--"

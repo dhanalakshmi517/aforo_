@@ -404,6 +404,8 @@ const EditProduct: React.FC<EditProductProps> = ({
       if (!authData?.token) throw new Error('No authentication token found');
       if (!productId) throw new Error('Product ID is required for updating');
 
+      let actualChangesMade = false;
+
       if (includeGeneral) {
         const generalDetailsPayload = {
           productName: formData.productName?.trim() || '',
@@ -413,7 +415,31 @@ const EditProduct: React.FC<EditProductProps> = ({
           productType: configuration.productType || productType || '',
           lastUpdated: new Date().toISOString(),
         };
-        await updateGeneralDetails(productId, generalDetailsPayload);
+        
+        // Only update if there are actual changes
+        const origForm = originalFormDataRef.current;
+        if (origForm) {
+          const currentPayload = {
+            productName: origForm.productName?.trim() || '',
+            version: origForm.version?.trim() || '',
+            productDescription: origForm.description?.trim() || '',
+            status: isDraft ? 'DRAFT' : 'ACTIVE',
+            productType: configuration.productType || productType || '',
+          };
+          
+          const newPayload = {
+            productName: formData.productName?.trim() || '',
+            version: formData.version?.trim() || '',
+            productDescription: formData.description?.trim() || '',
+            status: isDraft ? 'DRAFT' : 'ACTIVE',
+            productType: configuration.productType || productType || '',
+          };
+          
+          if (!shallowEqual(currentPayload, newPayload)) {
+            await updateGeneralDetails(productId, generalDetailsPayload);
+            actualChangesMade = true;
+          }
+        }
       }
 
       if (hasIconChanged() && productId) {
@@ -433,6 +459,7 @@ const EditProduct: React.FC<EditProductProps> = ({
           }
 
           localStorage.setItem('productUpdated', Date.now().toString());
+          actualChangesMade = true;
         }
       }
 
@@ -443,13 +470,17 @@ const EditProduct: React.FC<EditProductProps> = ({
           try {
             const productTypeChanged = localStorage.getItem('editConfigProductTypeChanged') === 'true';
             await updateConfiguration(productId, configuration.productType, configuration, productTypeChanged);
+            actualChangesMade = true;
           } catch (configError) {
             console.error('Configuration update failed:', configError);
           }
         }
       }
 
-      if (isDraft && productId) await finalizeProduct(productId);
+      if (isDraft && productId) {
+        await finalizeProduct(productId);
+        actualChangesMade = true;
+      }
 
       originalFormDataRef.current = { ...formData };
       originalConfigRef.current = { ...configuration };
@@ -457,7 +488,7 @@ const EditProduct: React.FC<EditProductProps> = ({
       localStorage.removeItem('editConfigFormData');
       localStorage.removeItem('editConfigProductType');
 
-      return true;
+      return actualChangesMade;
     } catch (err) {
       console.error('Update failed:', err);
       return false;
@@ -474,10 +505,14 @@ const EditProduct: React.FC<EditProductProps> = ({
     }
 
     if (activeTab === 'configuration') {
-      // Run configuration tab validation via the exposed submit() method.
-      // Only proceed to the Review step if submit() returns true.
-      const ok = await configRef.current?.submit();
-      if (!ok) return;
+      // Only validate configuration if productType is set
+      const currentProductType = configuration.productType || productType;
+      if (currentProductType) {
+        // Run configuration tab validation via the exposed submit() method.
+        // Only proceed to the Review step if submit() returns true.
+        const ok = await configRef.current?.submit();
+        if (!ok) return;
+      }
       goToStep(2);
       return;
     }
@@ -765,30 +800,38 @@ const EditProduct: React.FC<EditProductProps> = ({
                         if (index < currentStep) {
                           // Special case: from Configuration back to General should also validate config
                           if (activeTab === 'configuration' && index === 0) {
-                            const ok = await configRef.current?.submit();
-                            if (!ok) return; // stay on Configuration if product type / fields invalid
+                            const currentProductType = configuration.productType || productType;
+                            if (currentProductType) {
+                              const ok = await configRef.current?.submit();
+                              if (!ok) return; // stay on Configuration if product type / fields invalid
+                            }
                           }
 
                           goToStep(index);
                           return;
                         }
 
-                        // Prevent jumping multiple steps ahead; move only one step at a time
-                        const nextIndex = currentStep + 1;
-
-                        // When moving forward from General, run general validation (same as Save & Next)
-                        if (activeTab === 'general') {
-                          const ok = validateForm();
-                          if (!ok) return;
-                          goToStep(nextIndex);
-                          return;
-                        }
-
-                        // When moving forward from Configuration, validate configuration via submit()
-                        if (activeTab === 'configuration') {
-                          const ok = await configRef.current?.submit();
-                          if (!ok) return;
-                          goToStep(nextIndex);
+                        // Forward: validate all steps up to the target step
+                        if (index > currentStep) {
+                          // Validate all steps from current to target
+                          for (let i = currentStep; i < index; i++) {
+                            if (i === 0) {
+                              const ok = validateForm();
+                              if (!ok) return;
+                            } else if (i === 1) {
+                              // Skip Configuration validation if jumping directly from General to Review
+                              if (index === 2 && currentStep === 0) {
+                                continue;
+                              }
+                              // Only validate configuration if we're actually on the Configuration tab
+                              const currentProductType = configuration.productType || productType;
+                              if (currentProductType) {
+                                const ok = await configRef.current?.submit();
+                                if (!ok) return;
+                              }
+                            }
+                          }
+                          goToStep(index);
                           return;
                         }
 
@@ -1088,11 +1131,8 @@ const EditProduct: React.FC<EditProductProps> = ({
             showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
             onClose();
           } else {
-            showToast({
-              kind: 'error',
-              title: 'Failed to Save Changes',
-              message: 'Could not update product. Please try again.',
-            });
+            // No actual changes were made, just close without showing success message
+            onClose();
           }
         }}
       />

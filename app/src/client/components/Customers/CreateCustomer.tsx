@@ -109,18 +109,22 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
 
     const requiredKeys: Array<keyof AccountDetailsData> = [
       "billingAddressLine1",
-      "billingAddressLine2",
       "billingCity",
       "billingState",
       "billingPostalCode",
       "billingCountry",
-      "customerAddressLine1",
-      "customerAddressLine2",
-      "customerCity",
-      "customerState",
-      "customerPostalCode",
-      "customerCountry",
     ];
+
+    // Only require customer address if billing is NOT same as customer
+    if (!accountDetails?.billingSameAsCustomer) {
+      requiredKeys.push(
+        "customerAddressLine1",
+        "customerCity",
+        "customerState",
+        "customerPostalCode",
+        "customerCountry"
+      );
+    }
 
     for (const k of requiredKeys) {
       // @ts-ignore
@@ -316,13 +320,11 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
       "phoneNumber",
       "primaryEmail",
       "billingAddressLine1",
-      "billingAddressLine2",
       "billingCity",
       "billingState",
       "billingPostalCode",
       "billingCountry",
       "customerAddressLine1",
-      "customerAddressLine2",
       "customerCity",
       "customerState",
       "customerPostalCode",
@@ -373,22 +375,30 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
 
       [
         "billingAddressLine1",
-        "billingAddressLine2",
         "billingCity",
         "billingState",
         "billingPostalCode",
         "billingCountry",
-        "customerAddressLine1",
-        "customerAddressLine2",
-        "customerCity",
-        "customerState",
-        "customerPostalCode",
-        "customerCountry",
       ].forEach((k) => {
         // @ts-ignore
         if (!accountDetails?.[k]?.trim())
           n[k] = `${k.replace(/([A-Z])/g, " $1")} is required`;
       });
+
+      // Only validate customer address if billing is NOT same as customer
+      if (!accountDetails?.billingSameAsCustomer) {
+        [
+          "customerAddressLine1",
+          "customerCity",
+          "customerState",
+          "customerPostalCode",
+          "customerCountry",
+        ].forEach((k) => {
+          // @ts-ignore
+          if (!accountDetails?.[k]?.trim())
+            n[k] = `${k.replace(/([A-Z])/g, " $1")} is required`;
+        });
+      }
 
       setAccountErrors({ ...accountErrors, ...n });
       return Object.keys({ ...accountErrors, ...n }).length === 0;

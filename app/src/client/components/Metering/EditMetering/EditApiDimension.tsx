@@ -31,6 +31,7 @@ const EditApiDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, lab
       value={value}
       onChange={onChange}
       options={options}
+      required
       placeholder="--select--"
     />
   );

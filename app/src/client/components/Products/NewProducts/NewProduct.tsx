@@ -383,7 +383,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       else if (error?.response?.data?.error) errorMessage = error.response.data.error;
       else if (error instanceof Error) errorMessage = error.message;
 
-      setErrors((prev) => ({ ...prev, form: errorMessage }));
+      // Check if the error is about product name already existing
+      if (errorMessage.toLowerCase().includes("product") && errorMessage.toLowerCase().includes("already exist")) {
+        setErrors((prev) => ({ ...prev, productName: errorMessage }));
+      } else {
+        setErrors((prev) => ({ ...prev, form: errorMessage }));
+      }
       return false;
     } finally {
       setIsSaving(false);
