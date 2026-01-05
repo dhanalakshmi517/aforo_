@@ -1,13 +1,11 @@
-<<<<<<< HEAD
-=======
+
 @import "../../Variables/Variables.css";
 
 
 
 
 
-.usage-form-container {
-}
+
 
 .filter-box {
   position: relative;
@@ -341,4 +339,3 @@ input[type='text'] {
   flex-shrink: 0;                    /* keep icon size fixed */
   margin-top: 2px;                   /* align visually with first text line */
 }
->>>>>>> 852df02df5ee7a50dad7c51f33c67462570cd2f5
