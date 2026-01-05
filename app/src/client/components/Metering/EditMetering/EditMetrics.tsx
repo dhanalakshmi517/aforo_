@@ -164,6 +164,15 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     setActiveTab(index === 0 ? 'metric' : index === 1 ? 'conditions' : 'review');
   };
 
+  const clearConditionError = (key: string) => {
+    setErrors(prev => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
   const validateStep = (index: number): boolean => {
     const e: Record<string, string> = {};
 
@@ -176,9 +185,19 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
 
     if (index === 1) {
       if (!billingCriteria) e.billingCriteria = 'Billing criteria is required';
-      // (Optional) if user typed partial condition row, block next:
-      const hasPartial = usageConditions.some(c => !!(c.dimension || c.operator || c.value) && !(c.dimension && c.operator && c.value));
-      if (hasPartial) e.usageConditions = 'Complete or clear incomplete conditions';
+      
+      // Only validate usage conditions if billing criteria is "Bill based on usage conditions"
+      if (billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS') {
+        // (Optional) if user typed partial condition row, block next:
+        const hasPartial = usageConditions.some(c => !!(c.dimension || c.operator || c.value) && !(c.dimension && c.operator && c.value));
+        if (hasPartial) e.usageConditions = 'Complete or clear incomplete conditions';
+        
+        // Check if first condition is complete
+        const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
+        if (!first.dimension || !first.operator || !first.value) {
+          e.usageConditions = 'Dimension, Operator, and Value are required for usage conditions';
+        }
+      }
     }
 
     if (index === 2) {
@@ -243,7 +262,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
       setLoading(true);
 
       const payload = buildChangedPayload();
-      if (Object.keys(payload).length <= 1) return true; // nothing to save
+      if (Object.keys(payload).length <= 1) return false; // nothing to save
 
       const ok = await updateBillableMetric(Number(metricId), payload);
       if (!ok) throw new Error('Failed to update metric');
@@ -550,6 +569,8 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
                                     setErrors(rest);
                                   }
                                 }}
+                                errors={errors}
+                                onFieldEdited={clearConditionError}
                               />
 
                               {/* inline errors to match step validation */}

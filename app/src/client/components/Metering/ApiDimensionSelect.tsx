@@ -34,6 +34,8 @@ const ApiDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, e
       onChange={onChange}
       options={options}
       error={error}
+            required
+
       placeholder="--select--"
     />
   );

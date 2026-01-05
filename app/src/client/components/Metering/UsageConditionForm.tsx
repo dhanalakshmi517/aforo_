@@ -9,7 +9,7 @@ import SqlDimensionSelect from './SqlDimensionSelect';
 import SqlOperatorSelect from './SqlOperatorSelect';
 import LlmDimensionSelect from './LlmDimensionSelect';
 import LlmOperatorSelect from './LlmOperatorSelect';
-import { InputField, SelectField } from '../Components/InputFields';
+import { InputField, SelectField } from '../componenetsss/Inputs';
 import SecondaryButton from '../componenetsss/SecondaryButton';
 
 interface FilterCondition {
@@ -211,7 +211,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 const commonProps = {
                   value: filter.usageCondition,
                   onChange: (val: string) => handleChange(filter.id, 'usageCondition', val),
-                  error: errors[`${index}.dimension`],
+                  error: billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined,
                   disabled: locked,
                   label: 'Dimension'
                 };
@@ -227,8 +227,9 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                       label="Dimensions"
                       placeholder="Dimension"
                       value={filter.usageCondition}
+                      required
                       onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
-                      error={errors[`${index}.dimension`]}
+                      error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined}
                       className={locked ? 'disabled-input' : ''}
                       disabled={locked}
                     />
@@ -247,11 +248,12 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                       <SelectField
                         label="Operator"
                         placeholder="--select--"
+                        required
                         value=""
                         onChange={() => { }}
                         options={[{ label: '--select--', value: '' }]}
                         disabled={true}
-                        error={errors[`${index}.operator`]}
+                        error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined}
                       />
                     </div>
                   );
@@ -261,7 +263,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                   dimension: filter.usageCondition,
                   value: filter.operator,
                   onChange: (val: string) => handleChange(filter.id, 'operator', val),
-                  error: errors[`${index}.operator`],
+                  error: billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined,
                   disabled: locked,
                   label: 'Operator'
                 };
@@ -274,6 +276,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 return (
                   <SelectField
                     label="Operator"
+                    required
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
                     options={[
@@ -285,7 +288,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                       { label: 'Less Than or Equal', value: '<=' }
                     ]}
                     disabled={locked || !filter.usageCondition}
-                    error={errors[`${index}.operator`]}
+                    error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined}
                   />
                 );
               })()}
@@ -296,10 +299,11 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 <InputField
                   label="Value"
                   placeholder="Value"
+                  required
                   value={filter.value}
                   onChange={(val) => handleChange(filter.id, 'value', val)}
                   className={locked || !filter.operator ? 'disabled-input' : ''}
-                  error={errors[`${index}.value`]}
+                  error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.value`] : undefined}
                   disabled={locked || !filter.operator}
                 />
               </div>

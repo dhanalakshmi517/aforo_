@@ -404,6 +404,8 @@ const EditProduct: React.FC<EditProductProps> = ({
       if (!authData?.token) throw new Error('No authentication token found');
       if (!productId) throw new Error('Product ID is required for updating');
 
+      let actualChangesMade = false;
+
       if (includeGeneral) {
         const generalDetailsPayload = {
           productName: formData.productName?.trim() || '',
@@ -413,7 +415,31 @@ const EditProduct: React.FC<EditProductProps> = ({
           productType: configuration.productType || productType || '',
           lastUpdated: new Date().toISOString(),
         };
-        await updateGeneralDetails(productId, generalDetailsPayload);
+        
+        // Only update if there are actual changes
+        const origForm = originalFormDataRef.current;
+        if (origForm) {
+          const currentPayload = {
+            productName: origForm.productName?.trim() || '',
+            version: origForm.version?.trim() || '',
+            productDescription: origForm.description?.trim() || '',
+            status: isDraft ? 'DRAFT' : 'ACTIVE',
+            productType: configuration.productType || productType || '',
+          };
+          
+          const newPayload = {
+            productName: formData.productName?.trim() || '',
+            version: formData.version?.trim() || '',
+            productDescription: formData.description?.trim() || '',
+            status: isDraft ? 'DRAFT' : 'ACTIVE',
+            productType: configuration.productType || productType || '',
+          };
+          
+          if (!shallowEqual(currentPayload, newPayload)) {
+            await updateGeneralDetails(productId, generalDetailsPayload);
+            actualChangesMade = true;
+          }
+        }
       }
 
       if (hasIconChanged() && productId) {
@@ -433,6 +459,7 @@ const EditProduct: React.FC<EditProductProps> = ({
           }
 
           localStorage.setItem('productUpdated', Date.now().toString());
+          actualChangesMade = true;
         }
       }
 
@@ -443,13 +470,17 @@ const EditProduct: React.FC<EditProductProps> = ({
           try {
             const productTypeChanged = localStorage.getItem('editConfigProductTypeChanged') === 'true';
             await updateConfiguration(productId, configuration.productType, configuration, productTypeChanged);
+            actualChangesMade = true;
           } catch (configError) {
             console.error('Configuration update failed:', configError);
           }
         }
       }
 
-      if (isDraft && productId) await finalizeProduct(productId);
+      if (isDraft && productId) {
+        await finalizeProduct(productId);
+        actualChangesMade = true;
+      }
 
       originalFormDataRef.current = { ...formData };
       originalConfigRef.current = { ...configuration };
@@ -457,7 +488,7 @@ const EditProduct: React.FC<EditProductProps> = ({
       localStorage.removeItem('editConfigFormData');
       localStorage.removeItem('editConfigProductType');
 
-      return true;
+      return actualChangesMade;
     } catch (err) {
       console.error('Update failed:', err);
       return false;
@@ -1088,11 +1119,8 @@ const EditProduct: React.FC<EditProductProps> = ({
             showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
             onClose();
           } else {
-            showToast({
-              kind: 'error',
-              title: 'Failed to Save Changes',
-              message: 'Could not update product. Please try again.',
-            });
+            // No actual changes were made, just close without showing success message
+            onClose();
           }
         }}
       />
