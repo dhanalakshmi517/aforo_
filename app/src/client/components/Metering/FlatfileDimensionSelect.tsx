@@ -32,6 +32,8 @@ const FlatfileDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChan
       value={value}
       onChange={onChange}
       options={options}
+            required
+
       error={error}
       placeholder="--select--"
     />

@@ -60,6 +60,7 @@ const EditApiOperator: React.FC<Props> = ({ dimension, value, onChange, label = 
     <SelectField
       label={label}
       value={value}
+      required
       onChange={onChange}
       options={options}
       placeholder="--select--"

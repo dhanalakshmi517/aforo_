@@ -45,6 +45,8 @@ const EditLlmOperator: React.FC<Props> = ({ dimension, value, onChange, label = 
       value={value}
       onChange={onChange}
       options={options}
+            required
+
       placeholder="--select--"
     />
   );

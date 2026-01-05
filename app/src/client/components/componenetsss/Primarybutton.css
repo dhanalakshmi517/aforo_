@@ -26,6 +26,8 @@ background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 2
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     white-space: nowrap;
+      transition: background-color 0.2s ease, color 0.2s ease;
+
   }
   
   /* Full width option */

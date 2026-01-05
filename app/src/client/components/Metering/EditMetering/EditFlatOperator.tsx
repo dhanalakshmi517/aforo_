@@ -51,6 +51,8 @@ const EditFlatOperator: React.FC<Props> = ({ dimension, value, onChange, label =
       label={label}
       value={value}
       onChange={onChange}
+            required
+
       options={options}
       placeholder="--select--"
     />

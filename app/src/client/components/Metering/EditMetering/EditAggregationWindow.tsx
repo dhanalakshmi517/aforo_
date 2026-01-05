@@ -112,7 +112,10 @@ const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
   }
 
   // convert to SelectOption objects for SelectField component
-  const selectOptions: SelectOption[] = options.map((opt) => ({ label: opt, value: opt }));
+  const selectOptions: SelectOption[] = [
+    { label: '-- Select --', value: '', disabled: false },
+    ...options.map((opt) => ({ label: opt, value: opt }))
+  ];
 
   return (
     <SelectField
@@ -120,7 +123,6 @@ const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
       value={value}
       onChange={onChange}
       options={selectOptions}
-      placeholderOption="--select--"
       error={error}
       optional={optional}
     />

@@ -179,8 +179,37 @@ input[type='text'] {
   display: flex;
   gap: 10px;
   flex-wrap: nowrap;
+  align-items: flex-end;
   font-size: var(--font-size-md);
   font-weight: 400;
+}
+
+.inline-fields-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+.inline-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-field label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--color-neutral-1400);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+}
+
+.inline-field .if-field,
+.inline-field input[type='text'],
+.inline-field select {
+  width: 100%;
+  min-width: 0;
 }
 
 /* Style for form inputs and selects */

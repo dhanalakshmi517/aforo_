@@ -164,25 +164,43 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     setActiveTab(index === 0 ? 'metric' : index === 1 ? 'conditions' : 'review');
   };
 
+  const clearConditionError = (key: string) => {
+    setErrors(prev => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
   const validateStep = (index: number): boolean => {
     const e: Record<string, string> = {};
 
     if (index === 0) {
       if (!metricName.trim()) e.metricName = 'Metric name is required';
       if (!selectedProductId) e.product = 'Product is required';
-      if (!version.trim()) e.version = 'Version is required';
       if (!unitOfMeasure) e.unitOfMeasure = 'Unit of Measure is required';
     }
 
     if (index === 1) {
       if (!billingCriteria) e.billingCriteria = 'Billing criteria is required';
-      // (Optional) if user typed partial condition row, block next:
-      const hasPartial = usageConditions.some(c => !!(c.dimension || c.operator || c.value) && !(c.dimension && c.operator && c.value));
-      if (hasPartial) e.usageConditions = 'Complete or clear incomplete conditions';
+      
+      // Only validate usage conditions if billing criteria is "Bill based on usage conditions"
+      if (billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS') {
+        // (Optional) if user typed partial condition row, block next:
+        const hasPartial = usageConditions.some(c => !!(c.dimension || c.operator || c.value) && !(c.dimension && c.operator && c.value));
+        if (hasPartial) e.usageConditions = 'Complete or clear incomplete conditions';
+        
+        // Check if first condition is complete
+        const first = usageConditions[0] || { dimension: '', operator: '', value: '' };
+        if (!first.dimension || !first.operator || !first.value) {
+          e.usageConditions = 'Dimension, Operator, and Value are required for usage conditions';
+        }
+      }
     }
 
     if (index === 2) {
-      if (!metricName.trim() || !selectedProductId || !version.trim() || !unitOfMeasure || !billingCriteria) {
+      if (!metricName.trim() || !selectedProductId || !unitOfMeasure || !billingCriteria) {
         e.form = 'Please fill all required fields';
       }
     }
@@ -243,7 +261,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
       setLoading(true);
 
       const payload = buildChangedPayload();
-      if (Object.keys(payload).length <= 1) return true; // nothing to save
+      if (Object.keys(payload).length <= 1) return false; // nothing to save
 
       const ok = await updateBillableMetric(Number(metricId), payload);
       if (!ok) throw new Error('Failed to update metric');
@@ -379,7 +397,6 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
           <div className="edit-np-form-group">
             <InputField
               label="Version"
-              required
               value={version}
               onChange={(v: string) => {
                 setVersion(v);
@@ -498,20 +515,14 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
                           return;
                         }
 
-                        // forward: one step only + validate current step
-                        const nextIndex = currentStep + 1;
-
-                        if (activeTab === 'metric') {
-                          const ok = validateStep(0);
-                          if (!ok) return;
-                          goToStep(nextIndex);
-                          return;
-                        }
-
-                        if (activeTab === 'conditions') {
-                          const ok = validateStep(1);
-                          if (!ok) return;
-                          goToStep(nextIndex);
+                        // forward: validate all steps up to the target step
+                        if (index > currentStep) {
+                          // Validate all steps from current to target
+                          for (let i = currentStep; i < index; i++) {
+                            const ok = validateStep(i);
+                            if (!ok) return;
+                          }
+                          goToStep(index);
                           return;
                         }
                       }}

@@ -149,15 +149,21 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
     setBillingAddress(updated);
     if (sameAsBilling) setCustomerAddress(updated);
 
-    // inline validations
-    if (!value.trim()) setErr(`billing_${field}`, 'This is a required field');
-    else clearErr(`billing_${field}`);
+    // inline validations (skip line2 as it's optional)
+    if (field !== 'line2') {
+      if (!value.trim()) setErr(`billing_${field}`, 'This is a required field');
+      else clearErr(`billing_${field}`);
+    }
   };
 
   const handleCustomerChange = (field: string, value: string) => {
     setCustomerAddress({ ...customerAddress, [field]: value });
-    if (!value.trim()) setErr(`customer_${field}`, 'This is a required field');
-    else clearErr(`customer_${field}`);
+    
+    // inline validations (skip line2 as it's optional)
+    if (field !== 'line2') {
+      if (!value.trim()) setErr(`customer_${field}`, 'This is a required field');
+      else clearErr(`customer_${field}`);
+    }
   };
 
   const addEmailField = () => setAdditionalEmails([...additionalEmails, '']);
@@ -187,6 +193,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           label="Customer Phone Number"
           value={phoneNumber}
           placeholder="e.g., +1234567890"
+          required
           onChange={(val) => {
             if (/^\+?\d*$/.test(val)) {
               setPhoneNumber(val);
@@ -209,6 +216,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
           value={primaryEmail}
           placeholder="e.g., johndoe@example.com"
           type="email"
+          required
           onChange={(val) => {
             setPrimaryEmail(val);
             if (!val.trim()) setErr('primaryEmail', 'This is a required field');
@@ -225,11 +233,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
 
       {/* Secondary Email IDs */}
       <div className="acc-form-group">
-        <label>Secondary Email IDs</label>
         {additionalEmails.map((email, idx) => (
           <div key={idx} className="email-row">
             <InputField
               type="email"
+
               placeholder="e.g., johndoe@example.com"
               value={email}
               onChange={(val) => updateAdditionalEmail(idx, val)}
@@ -240,12 +248,7 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
       </div>
 
       {/* Same as Billing */}
-      <div className="checkbox-row">
-        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
-        <span className="checkbox-label" onClick={handleToggleSame}>
-          Billing address is same as customer address
-        </span>
-      </div>
+  
 
     
 
@@ -254,122 +257,160 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
         <h4>Billing Address</h4>
         <InputField
           label=" Line 1"
+                    required
+
           value={billingAddress.line1}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={(val) => handleBillingChange('line1', val)}
           onBlur={() => !billingAddress.line1.trim() ? setErr('billing_line1', 'This is a required field') : clearErr('billing_line1')}
-          required
           error={localErr.billing_line1 || errors.billingAddressLine1}
         />
         <InputField
           label=" Line 2"
+
           value={billingAddress.line2}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={(val) => handleBillingChange('line2', val)}
-          onBlur={() => !billingAddress.line2.trim() ? setErr('billing_line2', 'This is a required field') : clearErr('billing_line2')}
-          error={localErr.billing_line2 || errors.billingAddressLine2}
         />
-        <InputField
-          label="City"
-          value={billingAddress.city}
-          placeholder="City"
-          onChange={(val) => handleBillingChange('city', val)}
-          onBlur={() => !billingAddress.city.trim() ? setErr('billing_city', 'This is a required field') : clearErr('billing_city')}
-          required
-          error={localErr.billing_city || errors.billingCity}
-        />
-        <InputField
-          label="State/Province/Region"
-          value={billingAddress.state}
-          placeholder="State/Province/Region"
-          onChange={(val) => handleBillingChange('state', val)}
-          onBlur={() => !billingAddress.state.trim() ? setErr('billing_state', 'This is a required field') : clearErr('billing_state')}
-          required
-          error={localErr.billing_state || errors.billingState}
-        />
-        <InputField
-          label="ZIP/Postal Code"
-          value={billingAddress.zip}
-          placeholder="ZIP/Postal Code"
-          onChange={(val) => handleBillingChange('zip', val)}
-          onBlur={() => !billingAddress.zip.trim() ? setErr('billing_zip', 'This is a required field') : clearErr('billing_zip')}
-          required
-          error={localErr.billing_zip || errors.billingPostalCode}
-        />
-        <SelectField
-          label="Country"
-          value={billingAddress.country}
-          placeholder="Select Country"
-          onChange={(val) => handleBillingChange('country', val)}
-          onBlur={() => !billingAddress.country.trim() ? setErr('billing_country', 'This is a required field') : clearErr('billing_country')}
-          options={countryOptions}
-          required
-          error={localErr.billing_country || errors.billingCountry}
-        />
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <InputField
+              label="City"
+                        required
+
+              value={billingAddress.city}
+              placeholder="City"
+              onChange={(val) => handleBillingChange('city', val)}
+              onBlur={() => !billingAddress.city.trim() ? setErr('billing_city', 'This is a required field') : clearErr('billing_city')}
+              error={localErr.billing_city || errors.billingCity}
+            />
+          </div>
+          <div className="acc-form-group">
+            <InputField
+              label="State/Province/Region"
+              
+              value={billingAddress.state}
+                        required
+
+              placeholder="State/Province/Region"
+              onChange={(val) => handleBillingChange('state', val)}
+              onBlur={() => !billingAddress.state.trim() ? setErr('billing_state', 'This is a required field') : clearErr('billing_state')}
+              error={localErr.billing_state || errors.billingState}
+            />
+          </div>
+        </div>
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <InputField
+              label="ZIP/Postal Code"
+              value={billingAddress.zip}
+                        required
+
+              placeholder="ZIP/Postal Code"
+              onChange={(val) => handleBillingChange('zip', val)}
+              onBlur={() => !billingAddress.zip.trim() ? setErr('billing_zip', 'This is a required field') : clearErr('billing_zip')}
+              error={localErr.billing_zip || errors.billingPostalCode}
+            />
+          </div>
+          <div className="acc-form-group acc-country">
+            <SelectField
+              label="Country"
+              value={billingAddress.country}
+              placeholder="Select Country"
+                        required
+
+              onChange={(val) => handleBillingChange('country', val)}
+              onBlur={() => !billingAddress.country.trim() ? setErr('billing_country', 'This is a required field') : clearErr('billing_country')}
+              options={countryOptions}
+              error={localErr.billing_country || errors.billingCountry}
+            />
+          </div>
+        </div>
+      </div>
+          <div className="checkbox-row">
+        <Checkbox checked={sameAsBilling} onToggle={handleToggleSame} />
+        <span className="checkbox-label" onClick={handleToggleSame}>
+          Billing address is same as customer address
+        </span>
       </div>
         {/* Customer Address */}
       <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
         <h4>Customer Address</h4>
         <InputField
-          label="Customer Address Line 1"
+          label=" Line 1"
           value={customerAddress.line1}
+                    required
+
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={(val) => handleCustomerChange('line1', val)}
           onBlur={() => !sameAsBilling && !customerAddress.line1.trim() ? setErr('customer_line1', 'This is a required field') : clearErr('customer_line1')}
-          required
           disabled={sameAsBilling}
           error={localErr.customer_line1 || errors.customerAddressLine1}
         />
         <InputField
-          label="Customer Address Line 2"
+          label=" Line 2"
           value={customerAddress.line2}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={(val) => handleCustomerChange('line2', val)}
-          onBlur={() => !sameAsBilling && !customerAddress.line2.trim() ? setErr('customer_line2', 'This is a required field') : clearErr('customer_line2')}
           disabled={sameAsBilling}
-          error={localErr.customer_line2 || errors.customerAddressLine2}
         />
-        <InputField
-          label="City"
-          value={customerAddress.city}
-          placeholder="City"
-          onChange={(val) => handleCustomerChange('city', val)}
-          onBlur={() => !sameAsBilling && !customerAddress.city.trim() ? setErr('customer_city', 'This is a required field') : clearErr('customer_city')}
-          required
-          disabled={sameAsBilling}
-          error={localErr.customer_city || errors.customerCity}
-        />
-        <InputField
-          label="State/Province/Region"
-          value={customerAddress.state}
-          placeholder="State/Province/Region"
-          onChange={(val) => handleCustomerChange('state', val)}
-          onBlur={() => !sameAsBilling && !customerAddress.state.trim() ? setErr('customer_state', 'This is a required field') : clearErr('customer_state')}
-          required
-          disabled={sameAsBilling}
-          error={localErr.customer_state || errors.customerState}
-        />
-        <InputField
-          label="ZIP/Postal Code"
-          value={customerAddress.zip}
-          placeholder="ZIP/Postal Code"
-          onChange={(val) => handleCustomerChange('zip', val)}
-          onBlur={() => !sameAsBilling && !customerAddress.zip.trim() ? setErr('customer_zip', 'This is a required field') : clearErr('customer_zip')}
-          required
-          disabled={sameAsBilling}
-          error={localErr.customer_zip || errors.customerPostalCode}
-        />
-        <SelectField
-          label="Country"
-          value={customerAddress.country}
-          placeholder="Select Country"
-          onChange={(val) => handleCustomerChange('country', val)}
-          onBlur={() => !sameAsBilling && !customerAddress.country.trim() ? setErr('customer_country', 'This is a required field') : clearErr('customer_country')}
-          options={countryOptions}
-          required
-          disabled={sameAsBilling}
-          error={localErr.customer_country || errors.customerCountry}
-        />
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <InputField
+              label="City"
+              value={customerAddress.city}
+              placeholder="City"
+                        required
+
+              onChange={(val) => handleCustomerChange('city', val)}
+              onBlur={() => !sameAsBilling && !customerAddress.city.trim() ? setErr('customer_city', 'This is a required field') : clearErr('customer_city')}
+              disabled={sameAsBilling}
+              error={localErr.customer_city || errors.customerCity}
+            />
+          </div>
+          <div className="acc-form-group">
+            <InputField
+              label="State/Province/Region"
+              value={customerAddress.state}
+              placeholder="State/Province/Region"
+              onChange={(val) => handleCustomerChange('state', val)}
+              onBlur={() => !sameAsBilling && !customerAddress.state.trim() ? setErr('customer_state', 'This is a required field') : clearErr('customer_state')}
+              disabled={sameAsBilling}
+                        required
+
+              error={localErr.customer_state || errors.customerState}
+            />
+          </div>
+        </div>
+        <div className="acc-form-row">
+          <div className="acc-form-group">
+            <InputField
+              label="ZIP/Postal Code"
+              value={customerAddress.zip}
+              placeholder="ZIP/Postal Code"
+              onChange={(val) => handleCustomerChange('zip', val)}
+              onBlur={() => !sameAsBilling && !customerAddress.zip.trim() ? setErr('customer_zip', 'This is a required field') : clearErr('customer_zip')}
+              disabled={sameAsBilling}
+                        required
+
+              error={localErr.customer_zip || errors.customerPostalCode}
+            />
+          </div>
+          <div className="acc-form-group acc-country">
+            <SelectField
+              label="Country"
+              value={customerAddress.country}
+              placeholder="Select Country"
+              onChange={(val) => handleCustomerChange('country', val)}
+              onBlur={() => !sameAsBilling && !customerAddress.country.trim() ? setErr('customer_country', 'This is a required field') : clearErr('customer_country')}
+              options={countryOptions}
+              disabled={sameAsBilling}
+                        required
+
+              error={localErr.customer_country || errors.customerCountry}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

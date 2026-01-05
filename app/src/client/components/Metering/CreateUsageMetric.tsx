@@ -722,7 +722,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                   error={errors.product}
                                   className="select-product"
                                 />
-                                <InputField label="Version" value={version}  required onChange={setVersion} placeholder="eg. v2.0" />
+                                <InputField label="Version" value={version} onChange={setVersion} placeholder="eg. v2.0" />
                                 <TextareaField label="Description" value={description} onChange={setDescription} placeholder="eg. Number of API calls consumed per month" />
 
                                 <div className="met-np-field">
@@ -785,6 +785,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                     value={aggregationFunction}
                                     onChange={(v: string) => {
                                       setAggregationFunction(v);
+                                      setAggregationWindow('');
                                       if (errors.aggregationFunction) {
                                         const { aggregationFunction, ...rest } = errors;
                                         setErrors(rest);

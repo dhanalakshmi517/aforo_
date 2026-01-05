@@ -27,6 +27,8 @@ const EditFlatDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, la
       label={label}
       value={value}
       onChange={onChange}
+            required
+
       options={options}
       placeholder="--select--"
     />
