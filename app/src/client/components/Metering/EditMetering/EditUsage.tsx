@@ -43,9 +43,11 @@ interface EditUsageProps {
   }[]>>;
   billingCriteria: string;
   onBillingCriteriaChange: (val: string) => void;
+  errors?: Record<string, string>;
+  onFieldEdited?: (errorKey: string) => void;
 }
 
-const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, conditions, setConditions, billingCriteria, onBillingCriteriaChange }) => {
+const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, conditions, setConditions, billingCriteria, onBillingCriteriaChange, errors = {}, onFieldEdited }) => {
   const [filters, setFilters] = useState<FilterCondition[]>(conditions.length ? conditions.map((c, i) => ({
     id: i,
     usageCondition: c.dimension,
@@ -58,6 +60,11 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
     setFilters((prev) =>
       prev.map((f) => (f.id === id ? { ...f, [field]: val } : f))
     );
+    const index = filters.findIndex(f => f.id === id);
+    if (index >= 0 && onFieldEdited) {
+      const fieldName = field === 'usageCondition' ? 'dimension' : field;
+      onFieldEdited(`${index}.${fieldName}`);
+    }
   };
 
   const handleAdd = () => {
@@ -134,6 +141,7 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                 onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
                 options={genericDims.map((d) => ({ label: d, value: d } as SelectOption))}
                 placeholderOption="--select--"
+                error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined}
               />
             );
           })()}
@@ -164,6 +172,7 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
                     options={genericOps.map((o) => ({ label: o, value: o } as SelectOption))}
                     placeholderOption="--select--"
+                    error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined}
                   />
                 );
               })()}
@@ -177,6 +186,7 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                 placeholder="Enter value"
                 value={filter.value}
                 onChange={(val) => handleChange(filter.id, 'value', val)}
+                error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.value`] : undefined}
               />
             </div>
           </div>
