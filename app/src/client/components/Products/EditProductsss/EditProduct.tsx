@@ -394,17 +394,29 @@ const EditProduct: React.FC<EditProductProps> = ({
   const saveAllChanges = async (
     { includeGeneral = true, includeConfig = true }: { includeGeneral?: boolean; includeConfig?: boolean } = {},
   ): Promise<boolean> => {
+    console.log('🔍 [SAVE DEBUG] saveAllChanges called');
+    console.log('🔍 [SAVE DEBUG] includeGeneral:', includeGeneral, 'includeConfig:', includeConfig);
+    
     // Early exit: if no changes exist at all, return false immediately
     const hasFormChanges = hasPendingChanges();
     const hasIconChanges = hasIconChanged();
     const isDraftStatus = isDraft;
     
+    console.log('🔍 [SAVE DEBUG] Change detection:');
+    console.log('  - hasFormChanges:', hasFormChanges);
+    console.log('  - hasIconChanges:', hasIconChanges);
+    console.log('  - isDraftStatus:', isDraftStatus);
+    console.log('  - formData:', formData);
+    console.log('  - originalFormDataRef.current:', originalFormDataRef.current);
+    
     if (!hasFormChanges && !hasIconChanges && !isDraftStatus) {
+      console.log('🔍 [SAVE DEBUG] No changes detected, returning false');
       return false;
     }
 
     try {
       setLoading(true);
+      console.log('🔍 [SAVE DEBUG] Starting save process...');
 
       const { getAuthData } = await import('../../../utils/auth');
       const authData = getAuthData();
@@ -412,8 +424,10 @@ const EditProduct: React.FC<EditProductProps> = ({
       if (!productId) throw new Error('Product ID is required for updating');
 
       let actualChangesMade = false;
+      console.log('🔍 [SAVE DEBUG] actualChangesMade initialized to:', actualChangesMade);
 
       if (includeGeneral && hasFormChanges) {
+        console.log('🔍 [SAVE DEBUG] Processing general details update...');
         const generalDetailsPayload = {
           productName: formData.productName?.trim() || '',
           version: formData.version?.trim() || '',
@@ -442,14 +456,24 @@ const EditProduct: React.FC<EditProductProps> = ({
             productType: configuration.productType || productType || '',
           };
           
+          console.log('🔍 [SAVE DEBUG] Comparing payloads:');
+          console.log('  - currentPayload:', currentPayload);
+          console.log('  - newPayload:', newPayload);
+          console.log('  - shallowEqual result:', shallowEqual(currentPayload, newPayload));
+          
           if (!shallowEqual(currentPayload, newPayload)) {
+            console.log('🔍 [SAVE DEBUG] Form data changed, calling updateGeneralDetails API...');
             await updateGeneralDetails(productId, generalDetailsPayload);
             actualChangesMade = true;
+            console.log('🔍 [SAVE DEBUG] API call completed, actualChangesMade set to:', actualChangesMade);
+          } else {
+            console.log('🔍 [SAVE DEBUG] Form data unchanged, skipping API call');
           }
         }
       }
 
       if (hasIconChanges && productId) {
+        console.log('🔍 [SAVE DEBUG] Processing icon update...');
         const iconResult = await updateProductIcon(productId, selectedIcon);
         if (iconResult.success) {
           setOriginalIcon(selectedIcon || null);
@@ -467,17 +491,23 @@ const EditProduct: React.FC<EditProductProps> = ({
 
           localStorage.setItem('productUpdated', Date.now().toString());
           actualChangesMade = true;
+          console.log('🔍 [SAVE DEBUG] Icon updated, actualChangesMade set to:', actualChangesMade);
         }
       }
 
       if (includeConfig && configuration.productType && productId) {
+        console.log('🔍 [SAVE DEBUG] Processing configuration update...');
         const { o, c } = normalizeConfigsForCompare(originalConfigRef.current, configuration);
         const hasConfigChanges = !shallowEqual(o, c);
+        console.log('🔍 [SAVE DEBUG] Config changes detected:', hasConfigChanges);
+        
         if (hasConfigChanges) {
           try {
             const productTypeChanged = localStorage.getItem('editConfigProductTypeChanged') === 'true';
+            console.log('🔍 [SAVE DEBUG] Calling updateConfiguration API...');
             await updateConfiguration(productId, configuration.productType, configuration, productTypeChanged);
             actualChangesMade = true;
+            console.log('🔍 [SAVE DEBUG] Config API call completed, actualChangesMade set to:', actualChangesMade);
           } catch (configError) {
             console.error('Configuration update failed:', configError);
           }
@@ -485,8 +515,10 @@ const EditProduct: React.FC<EditProductProps> = ({
       }
 
       if (isDraftStatus && productId) {
+        console.log('🔍 [SAVE DEBUG] Processing draft finalization...');
         await finalizeProduct(productId);
         actualChangesMade = true;
+        console.log('🔍 [SAVE DEBUG] Draft finalized, actualChangesMade set to:', actualChangesMade);
       }
 
       originalFormDataRef.current = { ...formData };
@@ -495,9 +527,10 @@ const EditProduct: React.FC<EditProductProps> = ({
       localStorage.removeItem('editConfigFormData');
       localStorage.removeItem('editConfigProductType');
 
+      console.log('🔍 [SAVE DEBUG] Save process completed, final actualChangesMade:', actualChangesMade);
       return actualChangesMade;
     } catch (err) {
-      console.error('Update failed:', err);
+      console.error('🔍 [SAVE DEBUG] Update failed:', err);
       return false;
     } finally {
       setLoading(false);

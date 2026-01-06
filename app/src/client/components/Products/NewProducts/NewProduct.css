@@ -1,5 +1,19 @@
 @import "../../Variables/Variables.css";
 
+:root {
+  /* Outer gaps */
+  --np-gap-left: 100px;
+  --np-gap-right: 100px;
+  --np-gap-top: 10px;
+  --np-gap-bottom: 15px;
+}
+
+/* Ensure full page height */
+html, body, #root{ 
+  height: 100%; 
+  margin: 0;
+  padding: 0;
+}
 
 
 /* Inline error message style for form fields */
