@@ -394,7 +394,14 @@ const EditProduct: React.FC<EditProductProps> = ({
   const saveAllChanges = async (
     { includeGeneral = true, includeConfig = true }: { includeGeneral?: boolean; includeConfig?: boolean } = {},
   ): Promise<boolean> => {
-    if (!hasPendingChanges() && !hasIconChanged() && !isDraft) return false;
+    // Early exit: if no changes exist at all, return false immediately
+    const hasFormChanges = hasPendingChanges();
+    const hasIconChanges = hasIconChanged();
+    const isDraftStatus = isDraft;
+    
+    if (!hasFormChanges && !hasIconChanges && !isDraftStatus) {
+      return false;
+    }
 
     try {
       setLoading(true);
@@ -406,7 +413,7 @@ const EditProduct: React.FC<EditProductProps> = ({
 
       let actualChangesMade = false;
 
-      if (includeGeneral) {
+      if (includeGeneral && hasFormChanges) {
         const generalDetailsPayload = {
           productName: formData.productName?.trim() || '',
           version: formData.version?.trim() || '',
@@ -442,7 +449,7 @@ const EditProduct: React.FC<EditProductProps> = ({
         }
       }
 
-      if (hasIconChanged() && productId) {
+      if (hasIconChanges && productId) {
         const iconResult = await updateProductIcon(productId, selectedIcon);
         if (iconResult.success) {
           setOriginalIcon(selectedIcon || null);
@@ -477,7 +484,7 @@ const EditProduct: React.FC<EditProductProps> = ({
         }
       }
 
-      if (isDraft && productId) {
+      if (isDraftStatus && productId) {
         await finalizeProduct(productId);
         actualChangesMade = true;
       }
@@ -527,11 +534,8 @@ const EditProduct: React.FC<EditProductProps> = ({
         showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
         onClose();
       } else {
-        showToast({
-          kind: 'error',
-          title: 'Failed to Save Changes',
-          message: 'Could not update product. Please try again.',
-        });
+        // No actual changes were made, just close without showing error
+        onClose();
       }
     }
   };

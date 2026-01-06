@@ -296,7 +296,7 @@ export default function App() {
   return (
     <ToastProvider>
       <TremorProvider>
-        <div className="min-h-screen" style={{ backgroundColor: '#FBFDFF' }}>
+        <div className="min-h-screen no-scrollbar" style={{ backgroundColor: '#FBFDFF' }}>
           <CookieConsentBanner />
           <Suspense
             fallback={
@@ -932,7 +932,6 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-
               {/* Customer Edit – no sidebar (as before) */}
               <Route
                 path="/get-started/customers/:id/edit"
