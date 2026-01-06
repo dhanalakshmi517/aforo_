@@ -1,4 +1,4 @@
-@import "../../Variables/Variables.css";
+@import "../Variables.css";
 
 :root {
   /* Outer gaps */
@@ -6,7 +6,6 @@
   --editsub-np-gap-right: 120px;
   --np-gap-top: 10px;
   --np-gap-bottom: 15px;
-
  
 }
 

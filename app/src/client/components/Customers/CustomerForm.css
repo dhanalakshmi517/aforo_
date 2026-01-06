@@ -73,7 +73,6 @@
   color: var(--color-primary-700);
 }
 
-@import "../Variables/Variables.css";
 
 :root {
   /* Outer gaps */
