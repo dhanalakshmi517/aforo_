@@ -3,7 +3,7 @@
 
 /* Matches your figma padding: left/right 20, top/bottom 16 */
 .sc {
-  width: 300px;
+  width: 250px;
   display: flex;
   flex-direction: column;
   gap: 6px;

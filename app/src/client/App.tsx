@@ -92,6 +92,7 @@ import Settings from './components/Settings/Settings';
 import KongIntegration from './components/Products/Kong Integration/KongIntegration';
 import ApigeeIntegration from './components/ApigeeIntegration/ApigeeIntegration';
 import ApigeeSuccess from './components/ApigeeIntegration/ApigeeSuccess';
+import { getApigeeProducts } from './components/ApigeeIntegration/api';
 import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
@@ -126,6 +127,27 @@ function EditMetricsWrapper() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   return <EditMetrics metricId={id} onClose={() => navigate('/get-started/metering')} />;
+}
+
+// Wrapper component to pass navigation state to ApigeeSuccess
+function ApigeeSuccessWrapper() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const state = location.state as any;
+  
+  const credentials = state ? [
+    { label: "Organization ID", value: state.orgId || "" },
+    { label: "Environment", value: state.environment || "" },
+    { label: "Analytics Mode", value: state.analyticsMode || "" }
+  ] : [];
+
+  return (
+    <ApigeeSuccess 
+      onBack={() => navigate('/get-started/integrations')} 
+      onImportProducts={() => navigate('/apigee-import')}
+      credentials={credentials}
+    />
+  );
 }
 
 export default function App() {
@@ -694,7 +716,7 @@ export default function App() {
                 path="/apigee-success"
                 element={
                   <ProtectedRoute>
-                    <ApigeeSuccess />
+                    <ApigeeSuccessWrapper />
                   </ProtectedRoute>
                 }
               />
@@ -702,7 +724,10 @@ export default function App() {
                 path="/apigee-failure"
                 element={
                   <ProtectedRoute>
-                    <ApigeeFailure />
+                    <ApigeeFailure 
+                      onBack={() => navigate('/get-started/integrations')}
+                      onTryAgain={() => navigate('/apigee-integration')}
+                    />
                   </ProtectedRoute>
                 }
               />
@@ -1031,7 +1056,7 @@ export default function App() {
                 path="/apigee-success"
                 element={
                   <ProtectedRoute>
-                    <ApigeeSuccess />
+                    <ApigeeSuccessWrapper />
                   </ProtectedRoute>
                 }
               />
@@ -1039,7 +1064,10 @@ export default function App() {
                 path="/apigee-failure"
                 element={
                   <ProtectedRoute>
-                    <ApigeeFailure />
+                    <ApigeeFailure 
+                      onBack={() => navigate('/get-started/integrations')}
+                      onTryAgain={() => navigate('/apigee-integration')}
+                    />
                   </ProtectedRoute>
                 }
               />

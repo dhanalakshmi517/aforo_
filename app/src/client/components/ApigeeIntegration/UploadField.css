@@ -1,0 +1,100 @@
+/* UploadField.css */
+.ufWrap {
+  --uf-border: #d1d7e0;
+  --uf-text: #667085;
+  --uf-text-strong: #101828;
+
+  --uf-btn-bg: #f2f6fb;
+  --uf-btn-border: #d6e6f5;
+  --uf-btn-text: #0262a1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  width: 456px;
+  height: 40px;
+
+  padding: 8px 20px;
+  border: 1px solid var(--uf-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.ufWrap:focus-within {
+  border-color: rgba(2, 98, 161, 0.45);
+  box-shadow: 0 0 0 4px rgba(2, 98, 161, 0.12);
+}
+
+.ufInputHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ufLeftText {
+  flex: 1;
+  min-width: 0;
+
+  font-family: inherit;
+  font-size: 20px;
+  line-height: 1.2;
+
+  color: rgba(102, 112, 133, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  padding-left: 2px;
+}
+
+.ufLeftText--filled {
+  color: var(--uf-text-strong);
+}
+
+.ufBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  height: 20px;
+  padding: 0 16px;
+
+  border-radius: 10px;
+  border: 1px solid var(--uf-btn-border);
+  background: var(--uf-btn-bg);
+
+  color: var(--uf-btn-text);
+  cursor: pointer;
+  user-select: none;
+
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ufBtn:hover {
+  filter: brightness(0.98);
+}
+
+.ufBtn:active {
+  transform: translateY(0.5px);
+}
+
+.ufBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ufBtnIcon {
+  display: inline-flex;
+  color: var(--uf-btn-text);
+}
+
+.ufWrap--disabled {
+  background: #fbfcfe;
+}
