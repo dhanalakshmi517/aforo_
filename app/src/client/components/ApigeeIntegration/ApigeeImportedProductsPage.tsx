@@ -13,7 +13,7 @@ const productLetterFromName = (name: string) => {
   return name.trim().charAt(0).toUpperCase();
 };
 
-const ApigeeImportedProducts: React.FC = () => {
+const ApigeeImportedProducts: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const importedCount = (location.state as any)?.importedCount as
@@ -26,16 +26,23 @@ const ApigeeImportedProducts: React.FC = () => {
 
   useEffect(() => {
     const fetchImported = async () => {
+      console.log('🔍 [API DEBUG] Starting fetchImported...');
       setLoading(true);
       try {
+        console.log('🔍 [API DEBUG] Calling getImportedApigeeProducts()...');
         const data = await getImportedApigeeProducts();
+        console.log('🔍 [API DEBUG] getImportedApigeeProducts() returned:', data);
+        console.log('🔍 [API DEBUG] Data type:', typeof data);
+        console.log('🔍 [API DEBUG] Data length:', data?.length);
         setItems(data || []);
       } catch (err) {
         console.error(
           '[ApigeeImportedProducts] Failed to fetch imported products',
           err
         );
+        console.log('🔍 [API DEBUG] Error details:', err);
       } finally {
+        console.log('🔍 [API DEBUG] fetchImported completed, setting loading to false');
         setLoading(false);
       }
     };
@@ -44,7 +51,11 @@ const ApigeeImportedProducts: React.FC = () => {
   }, []);
 
   const handleBack = () => {
-    navigate('/get-started/integrations');
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/get-started/integrations');
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -126,7 +137,7 @@ const ApigeeImportedProducts: React.FC = () => {
 
             {!loading && items.length === 0 && (
               <div className="apigee-imported-row apigee-imported-row-empty">
-                No Apigee products imported yet.
+                No history yet.
               </div>
             )}
 

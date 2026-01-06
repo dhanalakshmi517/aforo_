@@ -814,6 +814,7 @@ line-height: var(--line-height-body-lg);
   background: var(--color-neutral-white) !important;
   color: var(--color-neutral-1700) !important;
   border: 1px solid !important;
+  border-radius: var(--border-radius-sm) !important;
   border-image: linear-gradient(180deg, #E94436 0%, #FABC06 50%, #36A854 75%, #4285F3 100%) 1 !important;
 }
 

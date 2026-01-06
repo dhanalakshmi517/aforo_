@@ -281,6 +281,20 @@ const EditProduct: React.FC<EditProductProps> = ({
     setConfiguration(prev => {
       const updated = { ...prev, ...config };
       localStorage.setItem('editConfigFormData', JSON.stringify(updated));
+      
+      // If this is the initial configuration load (originalConfigRef is empty or only has productType),
+      // update the original reference to match the loaded configuration
+      if (originalConfigRef.current) {
+        const currentOrig = originalConfigRef.current;
+        const hasOnlyProductType = Object.keys(currentOrig).length === 1 && currentOrig.productType;
+        const hasMoreData = Object.keys(updated).length > 1;
+        
+        if (hasOnlyProductType && hasMoreData) {
+          console.log('🔍 [CONFIG DEBUG] Updating originalConfigRef with loaded configuration');
+          originalConfigRef.current = { ...updated };
+        }
+      }
+      
       return updated;
     });
   }, []);
@@ -382,11 +396,26 @@ const EditProduct: React.FC<EditProductProps> = ({
     const origForm = originalFormDataRef.current;
     const origCfg = originalConfigRef.current;
 
-    if (!origForm || !origCfg) return false;
+    console.log('🔍 [CHANGE DEBUG] hasPendingChanges called');
+    console.log('  - origForm:', origForm);
+    console.log('  - formData:', formData);
+    console.log('  - origCfg:', origCfg);
+    console.log('  - configuration:', configuration);
+
+    if (!origForm || !origCfg) {
+      console.log('🔍 [CHANGE DEBUG] No original refs, returning false');
+      return false;
+    }
 
     const formChanged = !shallowEqual(origForm, formData);
     const { o, c } = normalizeConfigsForCompare(origCfg, configuration);
     const cfgChanged = !shallowEqual(o, c);
+
+    console.log('🔍 [CHANGE DEBUG] Comparison results:');
+    console.log('  - formChanged:', formChanged);
+    console.log('  - cfgChanged:', cfgChanged);
+    console.log('  - normalized origCfg (o):', o);
+    console.log('  - normalized config (c):', c);
 
     return formChanged || cfgChanged;
   };
@@ -557,16 +586,27 @@ const EditProduct: React.FC<EditProductProps> = ({
       return;
     }
     if (activeTab === 'review') {
+      console.log('🔍 [REVIEW DEBUG] Review tab save logic triggered');
+      console.log('  - hasPendingChanges():', hasPendingChanges());
+      console.log('  - hasIconChanged():', hasIconChanged());
+      console.log('  - isDraft:', isDraft);
+      
       const changesExist = hasPendingChanges() || hasIconChanged() || isDraft;
+      console.log('  - changesExist:', changesExist);
+      
       if (!changesExist) {
+        console.log('🔍 [REVIEW DEBUG] No changes exist, closing');
         onClose();
         return;
       }
+      
+      console.log('🔍 [REVIEW DEBUG] Changes exist, calling saveAllChanges()');
       const success = await saveAllChanges();
       if (success) {
         showToast({ kind: 'success', title: 'Changes Saved', message: 'Product updated successfully.' });
         onClose();
       } else {
+        console.log('🔍 [REVIEW DEBUG] saveAllChanges() returned false, closing');
         // No actual changes were made, just close without showing error
         onClose();
       }
@@ -574,6 +614,31 @@ const EditProduct: React.FC<EditProductProps> = ({
   };
 
   const handlePreviousStep = () => {
+    console.log('🔍 [PREV STEP DEBUG] handlePreviousStep called');
+    console.log('  - activeTab:', activeTab);
+    console.log('  - currentStep:', currentStep);
+    console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
+    console.log('  - hasPendingChanges():', hasPendingChanges());
+    console.log('  - hasIconChanged():', hasIconChanged());
+    console.log('  - isDraft:', isDraft);
+    
+    // Check for empty required fields first (highest priority)
+    if (hasEmptyRequiredFields()) {
+      console.log('🔍 [PREV STEP DEBUG] Showing UnsavedChangesModal (empty fields)');
+      setShowUnsavedChangesModal(true);
+      return;
+    }
+
+    // Then check for unsaved changes
+    const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
+    if (hasChanges) {
+      console.log('🔍 [PREV STEP DEBUG] Showing SaveDraftModal (has changes)');
+      setShowSaveDraftModal(true);
+      return;
+    }
+
+    console.log('🔍 [PREV STEP DEBUG] No issues, navigating to previous step');
+    // Only navigate if no issues
     if (currentStep > 0) goToStep(currentStep - 1);
   };
 
@@ -799,14 +864,35 @@ const EditProduct: React.FC<EditProductProps> = ({
       <TopBar
         title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
         onBack={() => {
+          // Debug: Log the state of change detection
+          console.log('🔍 [BACK DEBUG] TopBar back clicked');
+          console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
+          console.log('  - hasPendingChanges():', hasPendingChanges());
+          console.log('  - hasIconChanged():', hasIconChanged());
+          console.log('  - isDraft:', isDraft);
+          console.log('  - formData:', formData);
+          console.log('  - originalFormDataRef.current:', originalFormDataRef.current);
+          console.log('  - configuration:', configuration);
+          console.log('  - originalConfigRef.current:', originalConfigRef.current);
+
+          // Check for empty required fields first (highest priority)
           if (hasEmptyRequiredFields()) {
+            console.log('🔍 [BACK DEBUG] Showing UnsavedChangesModal (empty fields)');
             setShowUnsavedChangesModal(true);
             return;
           }
 
+          // Then check for unsaved changes
           const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
-          if (hasChanges) setShowSaveDraftModal(true);
-          else onClose();
+          if (hasChanges) {
+            console.log('🔍 [BACK DEBUG] Showing SaveDraftModal (has changes)');
+            setShowSaveDraftModal(true);
+            return;
+          }
+
+          console.log('🔍 [BACK DEBUG] No issues, navigating back');
+          // Only navigate if no issues
+          onClose();
         }}
       />
 
@@ -833,18 +919,22 @@ const EditProduct: React.FC<EditProductProps> = ({
                         // If clicking the current step, do nothing
                         if (index === currentStep) return;
 
-                        // Navigating back to earlier steps
-                        if (index < currentStep) {
-                          // Special case: from Configuration back to General should also validate config
-                          if (activeTab === 'configuration' && index === 0) {
-                            const currentProductType = configuration.productType || productType;
-                            if (currentProductType) {
-                              const ok = await configRef.current?.submit();
-                              if (!ok) return; // stay on Configuration if product type / fields invalid
-                            }
+                        // Always validate the current step before allowing navigation
+                        let currentStepValid = true;
+                        if (currentStep === 0) {
+                          currentStepValid = validateForm();
+                        } else if (currentStep === 1) {
+                          const currentProductType = configuration.productType || productType;
+                          if (currentProductType) {
+                            const ok = await configRef.current?.submit();
+                            if (!ok) currentStepValid = false;
                           }
+                        }
+                        if (!currentStepValid) return;
 
-                          goToStep(index);
+                        // Navigating back to earlier steps (after validation)
+                        if (index < currentStep) {
+                          goToStep(index);    
                           return;
                         }
 

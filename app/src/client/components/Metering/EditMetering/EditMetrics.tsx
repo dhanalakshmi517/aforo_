@@ -213,8 +213,29 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     const original = originalValuesRef.current || {};
     const payload: any = { metricId: Number(metricId) };
 
+    console.log('🔍 [METRICS PAYLOAD DEBUG] buildChangedPayload called');
+    console.log('  - original:', original);
+    console.log('  - current values:');
+    console.log('    - metricName:', metricName);
+    console.log('    - version:', version);
+    console.log('    - unitOfMeasure:', unitOfMeasure);
+    console.log('    - description:', description);
+    console.log('    - aggregationFunction:', aggregationFunction);
+    console.log('    - aggregationWindow:', aggregationWindow);
+    console.log('    - billingCriteria:', billingCriteria);
+    console.log('    - selectedProductId:', selectedProductId);
+    console.log('    - usageConditions:', usageConditions);
+
     const pushIfChanged = (key: string, value: any) => {
-      if (value !== original[key]) payload[key] = value;
+      const isChanged = value !== original[key];
+      if (isChanged) {
+        console.log(`🔍 [METRICS PAYLOAD DEBUG] ${key} changed:`, {
+          original: original[key],
+          current: value,
+          different: isChanged
+        });
+        payload[key] = value;
+      }
     };
 
     pushIfChanged('metricName', metricName);
@@ -226,21 +247,45 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     pushIfChanged('billingCriteria', billingCriteria);
 
     if (selectedProductId && selectedProductId !== original.productId) {
+      console.log('🔍 [METRICS PAYLOAD DEBUG] productId changed:', {
+        original: original.productId,
+        current: selectedProductId
+      });
       payload.productId = Number(selectedProductId);
     }
 
     const currentConditions = JSON.stringify(usageConditions);
     const originalConditions = JSON.stringify(original.usageConditions || []);
     if (currentConditions !== originalConditions) {
+      console.log('🔍 [METRICS PAYLOAD DEBUG] usageConditions changed:', {
+        original: original.usageConditions,
+        current: usageConditions
+      });
       const valid = usageConditions.filter(c => c.dimension && c.operator && c.value);
       payload.usageConditions = valid.length ? valid : [];
     }
 
+    console.log('🔍 [METRICS PAYLOAD DEBUG] Final payload:', payload);
     return payload;
   };
 
   const hasPendingChanges = () => {
     const payload = buildChangedPayload();
+    console.log('🔍 [METRICS CHANGE DEBUG] hasPendingChanges called');
+    console.log('  - buildChangedPayload():', payload);
+    console.log('  - Object.keys(payload).length:', Object.keys(payload).length);
+    console.log('  - originalValuesRef.current:', originalValuesRef.current);
+    console.log('  - Current form values:');
+    console.log('    - metricName:', metricName);
+    console.log('    - version:', version);
+    console.log('    - unitOfMeasure:', unitOfMeasure);
+    console.log('    - description:', description);
+    console.log('    - aggregationFunction:', aggregationFunction);
+    console.log('    - aggregationWindow:', aggregationWindow);
+    console.log('    - billingCriteria:', billingCriteria);
+    console.log('    - selectedProductId:', selectedProductId);
+    console.log('    - usageConditions:', usageConditions);
+    
     return Object.keys(payload).length > 1;
   };
 
@@ -327,6 +372,34 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
   };
 
   const handlePreviousStep = () => {
+    console.log('🔍 [METRICS PREV STEP DEBUG] handlePreviousStep called');
+    console.log('  - activeTab:', activeTab);
+    console.log('  - currentStep:', currentStep);
+    console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
+    console.log('  - hasPendingChanges():', hasPendingChanges());
+    console.log('  - metricName:', metricName);
+    console.log('  - version:', version);
+    console.log('  - unitOfMeasure:', unitOfMeasure);
+    console.log('  - description:', description);
+    console.log('  - originalValuesRef.current:', originalValuesRef.current);
+    
+    // Check for empty required fields first (highest priority)
+    if (hasEmptyRequiredFields()) {
+      console.log('🔍 [METRICS PREV STEP DEBUG] Showing UnsavedChangesModal (empty fields)');
+      setShowUnsavedChangesModal(true);
+      return;
+    }
+
+    // Then check for unsaved changes
+    const hasChanges = hasPendingChanges();
+    if (hasChanges) {
+      console.log('🔍 [METRICS PREV STEP DEBUG] Showing SaveDraftModal (has changes)');
+      setShowSaveDraftModal(true);
+      return;
+    }
+
+    console.log('🔍 [METRICS PREV STEP DEBUG] No issues, navigating to previous step');
+    // Only navigate if no issues
     if (currentStep > 0) goToStep(currentStep - 1);
   };
 
@@ -476,14 +549,34 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
       <TopBar
         title={metricName ? `Edit ${metricName}` : 'Edit Usage Metric'}
         onBack={() => {
+          // Debug: Log the state of change detection
+          console.log('🔍 [METRICS BACK DEBUG] TopBar back clicked');
+          console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
+          console.log('  - hasPendingChanges():', hasPendingChanges());
+          console.log('  - metricName:', metricName);
+          console.log('  - version:', version);
+          console.log('  - unitOfMeasure:', unitOfMeasure);
+          console.log('  - description:', description);
+          console.log('  - originalValuesRef.current:', originalValuesRef.current);
+
+          // Check for empty required fields first (highest priority)
           if (hasEmptyRequiredFields()) {
+            console.log('🔍 [METRICS BACK DEBUG] Showing UnsavedChangesModal (empty fields)');
             setShowUnsavedChangesModal(true);
             return;
           }
 
+          // Then check for unsaved changes
           const hasChanges = hasPendingChanges();
-          if (hasChanges) setShowSaveDraftModal(true);
-          else onClose();
+          if (hasChanges) {
+            console.log('🔍 [METRICS BACK DEBUG] Showing SaveDraftModal (has changes)');
+            setShowSaveDraftModal(true);
+            return;
+          }
+
+          console.log('🔍 [METRICS BACK DEBUG] No issues, navigating back');
+          // Only navigate if no issues
+          onClose();
         }}
       />
 
@@ -509,7 +602,11 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
                       onClick={async () => {
                         if (index === currentStep) return;
 
-                        // go back freely
+                        // Always validate the current step before allowing navigation
+                        const currentStepValid = validateStep(currentStep);
+                        if (!currentStepValid) return;
+
+                        // go back freely (after validation)
                         if (index < currentStep) {
                           goToStep(index);
                           return;

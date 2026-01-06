@@ -291,7 +291,8 @@ export default function KongProducts({ products, onBack, onImport: onImportProp,
           <div className="kp-footer">
             <SecondaryButton 
             className="kp-secondaryBtn"
-            onClick={handleViewHistory}>
+            onClick={handleViewHistory}
+            disabled>
 
               View History
             </SecondaryButton>
