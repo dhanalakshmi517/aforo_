@@ -38,6 +38,16 @@ export type TextareaFieldProps = CommonProps & {
   onFocus?: () => void;
 };
 
+export type FileFieldProps = CommonProps & {
+  value?: File | null;
+  onChange: (file: File | null) => void;
+  accept?: string;
+  multiple?: boolean;
+  maxSize?: number; // in bytes
+  onBlur?: () => void;
+  onFocus?: () => void;
+};
+
 export type SelectOption = { label: string; value: string; disabled?: boolean };
 export type SelectFieldProps = CommonProps & {
   value?: string;
@@ -539,4 +549,183 @@ export const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaField
   }
 );
 TextareaField.displayName = "TextareaField";
+
+/** ---------- File Upload ---------- */
+export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
+  (
+    {
+      id,
+      name,
+      label,
+      placeholder = "Choose file...",
+      required,
+      disabled,
+      readOnly,
+      helperText,
+      error,
+      value,
+      onChange,
+      accept,
+      multiple = false,
+      maxSize,
+      onBlur,
+      onFocus,
+      className,
+      optional,
+    },
+    ref
+  ) => {
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [fileName, setFileName] = React.useState<string>("");
+    const controlId = id || React.useId();
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    React.useEffect(() => {
+      if (value) {
+        setFileName(value.name);
+      } else {
+        setFileName("");
+      }
+    }, [value]);
+
+    const handleFileChange = (file: File | null) => {
+      if (file) {
+        // Check file size if maxSize is specified
+        if (maxSize && file.size > maxSize) {
+          const sizeInMB = (maxSize / 1024 / 1024).toFixed(1);
+          // You could add an error state here
+          console.error(`File size exceeds ${sizeInMB}MB limit`);
+          return;
+        }
+      }
+      onChange(file);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0] || null;
+      handleFileChange(file);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(false);
+      
+      const file = e.dataTransfer.files?.[0] || null;
+      handleFileChange(file);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    const handleClick = () => {
+      if (!disabled && !readOnly) {
+        fileInputRef.current?.click();
+      }
+    };
+
+    const handleRemove = () => {
+      onChange(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    };
+
+    return (
+      <div className={`if-field ${className ?? ""}`}>
+        {label && (
+          <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
+            {label}{required && <span className="if-required">*</span>}{optional && <span className="if-optional">(Optional)</span>}
+          </label>
+        )}
+        
+        <div 
+          className={[
+            "if-file-wrapper",
+            isDragging ? "is-dragging" : "",
+            error ? "is-error" : "",
+            disabled ? "is-disabled" : "",
+          ].join(" ").trim()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={handleClick}
+        >
+          <input
+            ref={ref}
+            id={controlId}
+            name={name}
+            type="file"
+            accept={accept}
+            multiple={multiple}
+            disabled={disabled}
+            readOnly={readOnly}
+            onChange={handleInputChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            className="if-file-input"
+            aria-invalid={!!error}
+            aria-describedby={
+              error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
+            }
+          />
+          
+          <div className="if-file-content">
+            <div className="if-file-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M7 10V9a2 2 0 012-2h6a2 2 0 012 2v1M8 14v.01M12 14v.01M16 14v.01M8 18v.01M12 18v.01M16 18v.01" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            
+            <div className="if-file-text">
+              {fileName ? (
+                <span className="if-file-name">{fileName}</span>
+              ) : (
+                <span className="if-file-placeholder">{placeholder}</span>
+              )}
+              {!fileName && (
+                <span className="if-file-hint">or drag and drop</span>
+              )}
+            </div>
+            
+            {fileName && !disabled && !readOnly && (
+              <button
+                type="button"
+                className="if-file-remove"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove();
+                }}
+                aria-label="Remove file"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="if-msg">
+          {error ? (
+            <span id={`${controlId}-error`} className="if-error">
+              {error}
+            </span>
+          ) : helperText ? (
+            <span id={`${controlId}-help`} className="if-help">
+              {helperText}
+            </span>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+);
+FileField.displayName = "FileField";
 

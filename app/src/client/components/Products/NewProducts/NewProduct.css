@@ -93,7 +93,9 @@ html, body, #root{
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
+  overflow-y: hidden;
   /* padding-bottom: 40px;  */
+
 }
 
 /* Viewport fills screen */
@@ -826,7 +828,6 @@ html, body, #root{
   border-radius: var(--border-radius-lg);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
   overflow: hidden;
 }
 
@@ -858,16 +859,6 @@ html, body, #root{
   gap: 18px;
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
-}
-
-/* Steps container */
-.met-np-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* Remove gap between steps */
-  padding: 8px 8px 8px 0;
-  background-color: #f8f9fb;
-  position: relative;
 }
 
 /* Each step card */

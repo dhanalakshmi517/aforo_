@@ -6,9 +6,10 @@
   display: flex;
   height: 326px;
   padding: 27.943px 26.76px 28.196px 29.107px;
-
+  
   justify-content: center;
   align-items: center;
+  
 
   aspect-ratio: 1 / 1;
 }

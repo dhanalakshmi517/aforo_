@@ -2,7 +2,7 @@
 .empty-card {
   background-color: var(--color-neutral-50);
   border-radius: 16px;
-  padding: 20px 24px;
+  padding: 24px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,7 +91,7 @@ font-style: normal;
 font-weight: 500;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
   text-align: center;
-  margin-left: -90px;
+  margin-left: -100px;
 }
 
 .image-container {
@@ -147,7 +147,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .empty-guide-steps {
   width: 100%;
   margin-top: -50px;
-  margin-left: 220px;
+  margin-left: 320px;
 }
 
 .empty-step-item {

@@ -19,7 +19,6 @@ html, body, #root{
   min-height: 100vh; 
   background: #f7f8fb;
   /* padding-bottom: 40px;  */
-  overflow-y: hidden;
 }
 
 
