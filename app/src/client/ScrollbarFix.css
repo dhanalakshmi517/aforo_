@@ -1,4 +1,6 @@
 /* Global scrollbar hiding rules - ULTRA AGGRESSIVE FOR PRODUCTION */
+/* This file must be imported first in main.tsx to override all other CSS */
+
 html, body, #root, * {
   scrollbar-width: none !important; /* Firefox */
   -ms-overflow-style: none !important; /* IE and Edge */
@@ -28,9 +30,7 @@ body::-webkit-scrollbar,
 .create-subscription-form,
 .create-subscription-form *,
 .create-price-plan-form,
-.create-price-plan-form *,
-.allow-scrollbar,
-.allow-scrollbar * {
+.create-price-plan-form * {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }

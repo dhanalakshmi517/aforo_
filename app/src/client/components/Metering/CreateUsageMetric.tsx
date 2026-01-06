@@ -212,6 +212,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     return Boolean(
       metricName.trim() ||
       selectedProductId ||
+      version.trim() ||
+      description.trim() ||
       unitOfMeasure ||
       aggregationFunction ||
       aggregationWindow ||
@@ -221,6 +223,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   }, [
     metricName,
     selectedProductId,
+    version,
+    description,
     unitOfMeasure,
     aggregationFunction,
     aggregationWindow,
