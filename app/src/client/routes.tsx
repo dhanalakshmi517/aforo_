@@ -15,8 +15,18 @@ export default function RoutesComponent() {
       <Route path="/get-started" element={<EmptyPage />} />
       <Route path="/estimate-revenue" element={<EstimateRevenue />} />
       <Route path="/get-started/integrations/apigee" element={<ApigeeIntegration />} />
-      <Route path="/apigee-success" element={<ApigeeSuccess />} />
-      <Route path="/apigee-failure" element={<ApigeeFailure />} />
+      <Route path="/apigee-success" element={
+        <ApigeeSuccess 
+          onBack={() => {}}
+          onImportProducts={() => {}}
+        />
+      } />
+      <Route path="/apigee-failure" element={
+        <ApigeeFailure 
+          onBack={() => {}}
+          onTryAgain={() => {}}
+        />
+      } />
       <Route path="/get-started/integrations/apigee/import" element={<ApigeeImport />} />
       <Route path="/get-started/integrations/apigee/imported-products" element={<ApigeeImportedProducts />} />
       <Route path="/get-started/products/import" element={<ImportProducts />} />
