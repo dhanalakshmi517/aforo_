@@ -812,31 +812,6 @@ html, body, #root{
   overflow-x: hidden;
 }
 
-/* Card */
-.met-np-card {
-  margin-bottom: 40px;          /* gap beneath card */
-  padding-bottom: 32px; /* space below footer */
-  background: var(--color-neutral-white);
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
-  width: 100%;
-  position: relative;
-  border-radius: var(--border-radius-lg);
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 40px);
-  overflow: hidden;
-}
-
-/* Grid fills height */
-.met-np-grid{
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  flex: 1;
-  min-height: 0;
-}
-
 /* ===== Rail with vertical connector line ===== */
 .met-np-rail{
   background: var(--color-neutral-100);

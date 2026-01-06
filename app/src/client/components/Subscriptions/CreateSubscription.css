@@ -26,7 +26,8 @@
   margin-bottom: 8px;
   position: relative;
   width: 100%;
-  margin-top: 10px;
+    margin-top: 10px;
+
 }
 
 /* Select field styling */
@@ -72,7 +73,7 @@
   color: var(--color-primary-700);
 }
 
-@import "../../Variables/Variables.css";
+@import "../Variables/Variables.css";
 
 :root {
   /* Outer gaps */
@@ -92,7 +93,9 @@ html, body, #root{
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
+  overflow-y: hidden;
   /* padding-bottom: 40px;  */
+
 }
 
 /* Viewport fills screen */
@@ -825,7 +828,6 @@ html, body, #root{
   border-radius: var(--border-radius-lg);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
   overflow: hidden;
 }
 
@@ -857,16 +859,6 @@ html, body, #root{
   gap: 18px;
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
-}
-
-/* Steps container */
-.met-np-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* Remove gap between steps */
-  padding: 8px 8px 8px 0;
-  background-color: #f8f9fb;
-  position: relative;
 }
 
 /* Each step card */
@@ -1069,6 +1061,7 @@ margin-top: -2px
   width: 100%;
   max-width: 100%;
   padding-bottom: 10px;
+  margin-top: 16px;
 }
 
 /* Fixed section header at top (outside scrollable container) */
@@ -1081,7 +1074,7 @@ margin-top: -2px
   width: calc(100% + 48px);
   box-sizing: border-box;
   left: -24px;
-  margin-top: -15px;
+  margin-top: -18px;
 }
 
 /* Override SectionHeader styles when used in Metering */
