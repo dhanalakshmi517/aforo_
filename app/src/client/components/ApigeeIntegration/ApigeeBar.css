@@ -1,0 +1,125 @@
+@import "../Variables/Variables.css";
+
+
+.kongbar {
+  width: 100%;
+  background: var(--color-neutral-50);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.kongbar--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+
+.kongbar__inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* matches your spec: 16 vertical + 80 horizontal */
+  padding: 16px 80px;
+}
+
+@media (max-width: 1024px) {
+  .kongbar__inner {
+    padding: 16px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .kongbar__inner {
+    padding: 12px 16px;
+    height: 56px;
+  }
+}
+
+.kongbar__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.kongbar__backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-layer-250, #e6eaef);
+  background: var(--surface-layer-100, #ffffff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-500, #5b6572);
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.kongbar__backBtn:hover {
+  background: var(--surface-layer-100);
+  border-color: var(--surface-layer-250);
+  color: var(--text-700);
+}
+
+.kongbar__backBtn:active {
+  transform: translateY(0.5px);
+}
+
+.kongbar__backBtn:focus-visible {
+  outline: 2px solid var(--focus, #6aa6ff);
+  outline-offset: 2px;
+}
+
+.kongbar__titleWrap {
+  min-width: 0;
+}
+
+.kongbar__title {
+   color: var(--color-neutral-1700);
+
+font-family: var(--font-family-primary);
+font-size:16px;
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4); 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kongbar__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kongbar__iconBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-700, #2f3a46);
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.kongbar__iconBtn:hover {
+  background: var(--surface-layer-150, #f9fbfd);
+  border-color: var(--surface-layer-250, #e6eaef);
+}
+
+.kongbar__iconBtn:focus-visible {
+  outline: 2px solid var(--focus, #6aa6ff);
+  outline-offset: 2px;
+}
+
+.kongbar__icon {
+  display: block;
+}

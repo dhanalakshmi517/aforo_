@@ -1,502 +1,374 @@
-/* Apigee Integration Page Styles */
-.apigee-integration-page {
-    width: 100%;
-    height: 100vh;
-    background: #FAFBFC;
-    display: flex;
-    flex-direction: column;
+@import "../Variables/Variables.css";
+
+/* KongIntegration.css */
+
+.kiPage {
+  min-height: 100vh; /* ✅ FIX: remove calc(100vh + 25px) */
+  background: var(--color-neutral-50);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #203246;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header Styles - Fourth image specs */
-.apigee-header {
-    border-bottom: 1px solid var(--border-border-1, #E8ECF3);
-    display: flex;
-    height: 72px;
-    padding: 16px 40px;
-    align-items: center;
-    gap: 16px;
-    background: white;
+/* TOP BAR */
+.kiBar {
+  flex-shrink: 0;
 }
 
-/* Back Button Styles - First image specs */
-.back-button {
-    display: flex;
-    width: 46px;
-    height: 46px;
-    padding: 13px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    flex-shrink: 0;
+/* SHELL */
+.kongShell {
+  flex: 1;
+  display: flex;           /* ✅ so the card can stretch */
+  min-height: 0;
+  padding: 24px 80px;      /* same padding, but no extra hidden height now */
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
-.back-button:hover {
-    background: #F8F9FA;
-}
-
-.back-button svg {
-    flex-shrink: 0;
-}
-
-/* Aforo Logo Container - Second image specs */
-.aforo-logo-container {
-    display: flex;
-    width: 38.656px;
-    height: 26.2px;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 1.718px;
-    flex-shrink: 0;
-    background: #FFF;
-}
-
-/* X Separator - Third image specs */
-.header-x-separator {
-    color: var(--text-text-lighter, #CFD7E2);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-heading-h4, 22px);
-    font-style: normal;
-    font-weight: 700;
-    line-height: var(--line-height-heading-h4, 32px);
-}
-
-/* Apigee Logo Container */
-.apigee-logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Apigee Logo */
-.apigee-logo {
-    width: 38.656px;
-    height: 32.486px;
-    flex-shrink: 0;
-}
-
-/* Establish Connection Icon Styling */
-.establish-connection-icon {
-    width: 13.333px;
-    height: 13.333px;
-    flex-shrink: 0;
-}
-
-/* Main Content Area */
-.apigee-content {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-/* Sidebar Styles */
-.apigee-sidebar {
-    width: 280px;
-    background: white;
-    border-right: 1px solid var(--border-border-1, #E8ECF3);
-    padding: 24px 0 0 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-section {
-    padding: 0 24px;
-}
-
-.sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.sidebar-item.active {
-    background: #F0F9FF;
-    border: 1px solid #0EA5E9;
-}
-
-.sidebar-item.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.sidebar-item:not(.disabled):not(.active):hover {
-    background: #F8F9FA;
-}
-
-.sidebar-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: white;
-    flex-shrink: 0;
-}
-
-.sidebar-item.active .sidebar-icon {
-    border-radius: 17.693px;
-    background: var(--surface-primary-button-active, #025A94);
-}
-
-.sidebar-text h4 {
-    margin: 0;
-    color: var(--text-active, #0262A1);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 700;
-    line-height: var(--line-height-body-md, 20px);
-}
-
-.sidebar-text p {
-    margin: 4px 0 0 0;
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 12px;
-    font-weight: 400;
-    color: #6B7280;
-    line-height: 1.2;
-}
-
-.sidebar-item.active .sidebar-text h4 {
-    color: var(--text-active, #0262A1);
-}
-
-.sidebar-item.active .sidebar-text p {
-    color: var(--text-active, #0262A1);
-}
-
-/* Sidebar Footer */
-.sidebar-footer {
-    padding: 24px;
-    margin-top: auto;
-}
-
-/* Import History Button */
-.import-history-btn {
-    display: flex;
-    height: 40px;
-    padding: 8px 20px;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-    align-self: stretch;
-    width: 100%;
-
-    border-radius: var(--border-radius-sm, 8px);
-    border: 1px solid var(--border-border-4, #C3C2D0);
-    background: var(--surface-disabled-2, #F0F3F8);
-
-    color: var(--text-disabled-2, #BCC4D3);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-md, 20px);
-
-    cursor: not-allowed;
-    transition: none;
-}
-
-/* Main Content */
-.apigee-main {
-    flex: 1;
-    padding: 32px 40px;
-    overflow-y: auto;
-}
-
-/* Main Content Wrapper */
-.main-content-wrapper {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
-}
-
-/* Connection Section */
-.connection-section {
-    flex: 1;
-    max-width: 520px;
-}
-
-.connection-section h2 {
-    margin: 0 0 24px 0;
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 24px;
-    font-weight: 600;
-    color: #1F2937;
-}
-
-/* Connection Form */
-.connection-form {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-/* Info Card Section */
-.info-card-section {
-    flex-shrink: 0;
-    width: 400px;
-}
-
-/* Info Card */
-.info-card {
-    display: flex;
+@media (max-width: 980px) {
+  .kongShell {
     padding: 16px 20px 20px 20px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    align-self: stretch;
-
-    border-radius: 16px;
-    border: 1px solid var(--billable-metric-stroke---light, #F6F6F6);
-    background: var(--surface-information, #F5F9FF);
+  }
 }
 
-/* Info Card Header */
-.info-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    align-self: stretch;
+/* CARD */
+.kiCard {
+  flex: 1; /* ✅ fill available vertical space */
+  display: flex;
+  flex-direction: column;
+
+  background: var(--color-neutral-white);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-neutral-200);
+  box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6),
+    0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8),
+    0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+  overflow: hidden;
+  margin-bottom: 0;
 }
 
-.info-card-title {
-    color: var(--text-active, #0262A1);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-md, 20px);
+.kiCardBody {
+  flex: 1;
+  min-height: 0;
+  padding: 28px 28px 16px 28px;
+
+  display: flex;              /* ✅ NEW */
+  flex-direction: column;     /* ✅ NEW */
 }
 
-/* Info Card Content */
-.info-card-content {
-    display: flex;
-    flex-direction: column;
+
+.kiGrid {
+  flex: 1;                    /* ✅ NEW: fill available body height */
+  min-height: 0;              /* ✅ NEW: allow children to shrink */
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 28px;
+  align-items: stretch;       /* ✅ FIX: was start */
+}
+
+
+.kong-button {
+  width: 300px;
+  height: 40px;
+  color:var(--color-neutral-500)
+}
+
+@media (max-width: 980px) {
+  .kiGrid {
+    grid-template-columns: 1fr;
     gap: 16px;
-    align-self: stretch;
+  }
 }
 
-/* Info Card Image */
-.info-card-image {
-    width: 362px;
-    height: 161px;
-    aspect-ratio: 362/161;
-    border-radius: 12px;
-    background: lightgray;
-    box-shadow: 0 6px 80px 0 rgba(0, 0, 0, 0.07), 0 1.34px 17.869px 0 rgba(0, 0, 0, 0.04), 0 0.399px 5.32px 0 rgba(0, 0, 0, 0.03);
-    overflow: hidden;
-    position: relative;
+.kiLeft {
+  display: flex;              /* ✅ NEW */
+  flex-direction: column;     /* ✅ NEW */
+  min-height: 0;              /* ✅ NEW */
 }
 
-.image-placeholder {
-    color: #6B7280;
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 14px;
-    text-align: center;
+.kiLeftSpacer {
+  flex: 1;                    /* ✅ NEW: pushes footer naturally */
 }
 
-/* Image styling now handled inline via background-image */
-
-/* Info Steps */
-.info-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.kiRight {
+  display: flex;
+  min-height: 0;
+  height: auto;               /* ✅ remove height:100% dependency */
 }
 
-.info-steps p {
-    margin: 0;
-    color: var(--text-secondary, #6B7280);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px;
+.kongSectionTitle {
+  color: var(--color-neutral-1700);
+
+  /* body/lg/bold */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-lg, 16px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-body-lg, 24px); /* 150% */
+  margin-bottom: 14px;
 }
 
-/* Form Field */
-.form-field {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    align-self: stretch;
+.kiField {
+  margin-top: 20px;
 }
 
-/* Form Label */
-.form-label {
-    color: var(--text-primary, #1F2937);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-md, 20px);
+/* RIGHT SIDE */
+.kiRight {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
-/* Form Input */
-.form-input {
-    display: flex;
-    height: 40px;
-    padding: 10px 12px;
-    align-items: center;
-    gap: 8px;
-    align-self: stretch;
-
-    border-radius: var(--border-radius-sm, 8px);
-    border: 1px solid var(--border-border-2, #E8ECF3);
-    background: var(--surface-surface-1, #FFF);
-
-    color: var(--text-primary, #1F2937);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md, 20px);
-
-    outline: none;
-    transition: border-color 0.2s ease;
+/* FOOTER */
+.kiFooter {
+  flex-shrink: 0; /* ✅ keep footer height stable */
+  border-top: 1px solid rgba(20, 40, 60, 0.06);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.form-input:focus {
-    border-color: var(--border-primary, #0262A1);
+.kiFooterLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.form-input::placeholder {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    flex: 1 0 0;
-
-    overflow: hidden;
-    color: var(--text-placeholder, #C3C2D0);
-    text-overflow: ellipsis;
-
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--line-height-body-md, 20px);
+.kiFooterIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
 }
 
-/* File Upload Wrapper */
-.file-upload-wrapper {
-    position: relative;
-    display: flex;
-    align-self: stretch;
+.kiSectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  margin-bottom: 28px;
 }
 
-/* File Upload Input */
-.file-upload-input {
-    border: 1px dashed var(--border-primary, #0262A1);
-    padding-right: 100px;
-    /* Make space for the button */
+/* SUCCESS STATE */
+.kiLeftSuccess {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
 }
 
-/* Integrated Upload Button */
-.upload-btn-integrated {
-    position: absolute;
-    right: 8px;
-    top: 8px;
-    display: flex;
-    height: 24px;
-    padding: 4px 12px;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-
-    border-radius: var(--border-radius-sm, 8px) !important;
-    border: 1px dashed var(--border-primary, #0262A1);
-    background: var(--surface-secondary-button-active-2, #F2F9FD) !important;
-
-    color: var(--text-secondary-button-default, #004B80);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 16px;
-
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+.kiLeftContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
 }
 
-.upload-btn-integrated:hover {
-    background: var(--surface-surface-2, #F8F9FA);
+.kiDisconnectButton {
+  margin-top: 16px;
 }
 
-/* External File Info */
-.file-info-external {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-
-    color: var(--text-secondary, #6B7280);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 16px;
+.kiRightSuccess {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
-/* File Info */
-.file-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 8px 0 0 0;
-
-    color: var(--text-secondary, #6B7280);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 16px;
+.kiSuccessContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* Connect Button */
-.connect-btn {
-    display: flex;
-    height: 48px;
-    padding: 12px 24px;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    align-self: stretch;
+.kiSuccessTitle {
+text-align: center;
 
-    border-radius: var(--border-radius-sm, 8px);
-    border: none;
-    background: var(--surface-primary-button, #0262A1);
-
-    color: var(--text-on-primary, #FFFFFF);
-    font-family: var(--type-font-family-primary, "IBM Plex Sans");
-    font-size: var(--fontsize-body-md, 14px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--line-height-body-md, 20px);
-
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+/* heading/h4/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
+  margin: 0;
+  padding: 0;
+  background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 }
 
-.connect-btn:hover {
-    background: var(--surface-primary-button-hover, #025A94);
+.kiSuccessDescription {
+ color: var(--color-neutral-1700);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  margin: 0;
+  padding: 0;
 }
 
-.connect-btn:active {
-    background: var(--surface-primary-button-active, #025A94);
+.kiSuccessDetails {
+  background: var(--color-neutral-50, #f5f9ff);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kiSuccessDetailsTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-neutral-700, #555);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.kiDetailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.kiDetailLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-neutral-600, #666);
+  flex: 0 0 auto;
+}
+
+.kiDetailValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral-900, #203246);
+  text-align: right;
+  flex: 1;
+}
+
+
+/* ApigeeIntegration.css */
+
+/* Upload row: input + upload button aligned */
+.apgUploadRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.apgUploadGrow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Small upload button (matches your premium UI vibe) */
+.apgUploadBtn {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 24, 40, 0.10);
+  background: #fff;
+  color: #004b80;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.apgUploadBtn:hover {
+  background: rgba(2, 90, 148, 0.04);
+}
+
+.apgFileHint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #7b97ae;
+}
+
+.apgError {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.06);
+  color: #b42318;
+  font-size: 13px;
+}
+
+/* Right hint card (simple, clean) */
+.apgHintEmpty {
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  border-radius: 18px;
+  background: #fff;
+  padding: 18px;
+}
+
+.apgHintTitle {
+  font-weight: 700;
+  color: #19222d;
+  margin-bottom: 6px;
+}
+
+.apgHintSub {
+  color: #7b97ae;
+  font-size: 13px;
+}
+
+.apgHintCard {
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  border-radius: 18px;
+  background: #fff;
+  padding: 18px;
+}
+
+.apgHintHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.apgHintDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid #0262a1;
+}
+
+.apgHintHeadText {
+  font-weight: 700;
+  color: #19222d;
+  font-size: 14px;
+}
+
+.apgHintImg {
+  width: 100%;
+  height: 180px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  margin-bottom: 12px;
+}
+
+.apgHintSteps p {
+  margin: 0 0 8px 0;
+  color: #60758a;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Footer Apigee logo box (same size spirit as icons) */
+.apgFooterLogo {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
 }

@@ -1,0 +1,170 @@
+@import "../Variables/Variables.css";
+.empty-card {
+  background-color: var(--color-neutral-50);
+  border-radius: 16px;
+  padding: 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
+
+/* For screens below 1440px, set fixed height */
+@media (max-width: 1439px) {
+  .empty-card {
+    height: 410px;
+    max-height: 410px;
+  }
+}
+
+.empty-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.icon-box {
+  width: 70px;
+  height: 40px;
+  background-color: #E8F1FF;
+  border: 1px solid #E8F1FF;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.primary-text {
+ color: var(--color-primary-700);
+text-align: center;
+
+/* body/md/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  margin-bottom: 2px;
+}
+
+.secondary-text {
+ color: var(--color-primary-700);
+text-align: center;
+
+/* body/md/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+/* Guide card specific styles */
+.empty-card.region-guide,
+.empty-card.token-guide {
+  justify-content: flex-start;
+}
+
+.guide-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.guide-title {
+ color: #026BB0;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+
+/* body/md/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  text-align: center;
+  margin-left: -100px;
+}
+
+.image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 200px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.image-spinner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 8px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #026BB0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 12px;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-weight: 400;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.guide-image {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  margin-top: -110px;
+}
+
+.empty-guide-steps {
+  width: 100%;
+  margin-top: -50px;
+  margin-left: 320px;
+}
+
+.empty-step-item {
+  display: block;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.empty-step-text {
+color: var(--color-neutral-1700);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 420;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+text-align: left;
+}
+

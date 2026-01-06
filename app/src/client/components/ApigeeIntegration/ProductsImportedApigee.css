@@ -1,0 +1,160 @@
+/* ProductsImportedKong.css */
+@import "../Variables/Variables.css";
+
+:root {
+  --pik-bg: #f6f8fb;
+  --pik-card: #ffffff;
+  --pik-border: rgba(16, 24, 40, 0.08);
+
+  --pik-text: #19222d;
+  --pik-sub: #6b7a8a;
+
+  --pik-primary: #0b4f7d;
+  --pik-ghost-bg: #eef4fb;
+
+  --pik-radius: 16px;
+  --pik-shadow: 0 16px 34px rgba(16, 24, 40, 0.10);
+}
+
+/* page never scrolls */
+.pia-page {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-neutral-50);
+}
+
+.pia-topbar {
+  flex: 0 0 auto;
+}
+
+/* main padding: 24px 80px */
+.pia-content {
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: 24px 80px;
+  box-sizing: border-box;
+}
+
+/* big container card */
+.pia-card {
+  height: 100%;
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-shadow-1, #EEF1F6),
+    0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8),
+    0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* centered content */
+.pia-center {
+  width: min(640px, 92%);
+  text-align: center;
+  padding: 24px 18px;
+}
+
+.pia-heroIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.pia-title {
+text-align: center;
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px);
+background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent; /* 145.455% */
+}
+
+.pia-sub {
+color: var(--color-neutral-1700);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  margin: 0 auto 18px auto;
+  max-width: 520px;
+}
+
+.pia-actions {
+  display: inline-flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pia-btn {
+  height: 40px !important;
+  width:206px !important;
+  border-radius: 10px;
+
+  cursor: pointer;
+}
+
+
+.pia-secondaryBtn {
+  height: 40px !important;
+  width:206px !important;
+}
+.pia-primaryBtn {
+  height: 40px !important;
+  width:206px !important;
+}
+.pia-btn--ghost {
+  background: var(--pik-ghost-bg);
+  border-color: rgba(16, 24, 40, 0.06);
+  color: var(--pik-primary);
+  min-width: 140px;
+}
+
+.pia-btn--primary {
+  background: var(--pik-primary);
+  color: #fff;
+  min-width: 170px;
+}
+
+.pia-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .pia-content {
+    padding: 24px 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pia-content {
+    padding: 16px 16px;
+  }
+
+  .pia-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pia-btn {
+    width: 100%;
+  }
+}
