@@ -1,0 +1,38 @@
+.real-time-tracking {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+}
+
+.real-time-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.real-time-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.real-time-row {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .real-time-content {
+    padding: 16px;
+  }
+  
+  .real-time-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

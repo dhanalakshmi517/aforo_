@@ -8,6 +8,7 @@ import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 import ImportProducts from './components/componenetsss/ImportProducts';
+import RealTimeTracking from './components/Dashboard/Real-time analysis/RealTimeTracking';
 
 export default function RoutesComponent() {
   return (
@@ -30,6 +31,7 @@ export default function RoutesComponent() {
       <Route path="/get-started/integrations/apigee/import" element={<ApigeeImport />} />
       <Route path="/get-started/integrations/apigee/imported-products" element={<ApigeeImportedProducts />} />
       <Route path="/get-started/products/import" element={<ImportProducts />} />
+      <Route path="/get-started/dashboards/real-time-tracking" element={<RealTimeTracking />} />
     </Routes>
   );
 }

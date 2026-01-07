@@ -81,8 +81,7 @@ const ArrowIcon: React.FC<{ direction: TrendDirection }> = ({ direction }) => {
         <path d="M12 5.25H16.5M16.5 5.25V9.75M16.5 5.25L10.125 11.625L6.375 7.875L1.5 12.75" stroke="#6AB349" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
 
       ) : (
-       <path d="M12 5.25H16.5M16.5 5.25V9.75M16.5 5.25L10.125 11.625L6.375 7.875L1.5 12.75" stroke="#6AB349" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-
+  <path d="M5.17481 8.17505H0.674806M0.674806 8.17505V3.67505M0.674806 8.17505L7.04981 1.80005L10.7998 5.55005L15.6748 0.675049" stroke="#ED5142" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
       )}
     </svg>
   );

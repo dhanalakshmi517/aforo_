@@ -618,6 +618,63 @@ export default function App() {
                 }
               />
 
+              {/* Real-Time Tracking dashboard detail */}
+              <Route
+                path="/get-started/dashboards/real-time-tracking"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main
+                        className="flex-1 flex flex-col"
+                        style={{
+                          backgroundColor: "#F9FBFD",
+                          marginLeft: sidebarHovered ? '15rem' : '80px',
+                          transition: 'margin-left 0.3s ease'
+                        }}
+                      >
+                        <RealTimeHeader />
+                        <div
+                          className="flex-1 overflow-y-auto"
+                          style={{ padding: '20px' }}
+                        >
+                          <RealTimeKpiCards />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+
+                          <CustomersByUsageCard />
+<div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <RealTimePaymentsWidgets />
+<div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <BillableHeatmapAndRevenue/>
+
+                         <div
+                          style={{ padding: '20px' }}
+                        ></div>
+
+                          {/* Other real-time analysis components will go here */}
+                        </div>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Revenue Analysis dashboard detail */}
               <Route
                 path="/get-started/dashboards/revenue-analysis"
