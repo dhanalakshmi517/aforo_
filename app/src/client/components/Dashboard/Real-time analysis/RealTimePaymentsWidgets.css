@@ -1,4 +1,5 @@
 /* RealTimePaymentWidgets.css */
+@import "../Variables.css";
 
 .rtpw-section {
   width: 100%;
@@ -7,22 +8,22 @@
 .rtpw-grid {
   display: grid;
   grid-template-columns: 1.75fr 1fr;
-  gap: 14px;
+  gap: 20px;
   align-items: stretch;
 }
 
 .rtpw-left {
   display: grid;
   grid-template-rows: auto auto;
-  gap: 14px;
+  gap: 25px;
 }
 
 .rtpw-card {
-  background: #ffffff;
-  border: 1px solid #eef2f7;
-  border-radius: 14px;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
-  padding: 14px;
+  background:var(--color-neutral-white);
+  border: none;
+  border-radius: var(--border-radius-md);
+box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
+  padding: 28px;
 }
 
 .rtpw-card--tracker {
@@ -62,14 +63,25 @@
 
 .rtpw-title {
   margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #0f172a;
+color: var(--black-100, #1C1C1C);
+
+/* 14 Semibold */
+font-family: var(--font-family-primary);
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: 20px; /* 142.857% */
 }
 
 .rtpw-updated {
-  font-size: 10px;
-  color: #b0bccb;
+ color: var(--color-neutral-600);
+
+/* body/xs/thin */
+font-family: "IBM Plex Sans";
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 300;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
   white-space: nowrap;
 }
 
@@ -148,10 +160,17 @@
 /* Legend */
 .rtpw-legend {
   display: flex;
-  gap: 14px;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.rtpw-legend-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  padding-top: 8px;
 }
 
 .rtpw-legend-item {
@@ -167,8 +186,14 @@
 }
 
 .rtpw-legend-text {
-  font-size: 10px;
-  color: #64748b;
+color: var(--color-neutral-600);
+
+/* body/xs/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
 }
 
 /* Tooltip */

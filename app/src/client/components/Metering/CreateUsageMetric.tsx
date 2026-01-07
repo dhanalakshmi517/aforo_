@@ -261,31 +261,32 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const gotoStep = (index: number) => {
     if (index < 0 || index > 2) return;
 
-    // forward navigation guards - only validate when user has filled at least one field
-    if (index > currentStep) {
-      // going to conditions step - validate metric step only if user has filled at least one field
-      if (currentStep === 0 && index === 1) {
-        // Check if any metric fields are filled
-        const hasMetricInput = Boolean(
-          metricName.trim() ||
-          selectedProductId ||
-          version.trim() ||
-          description.trim() ||
-          unitOfMeasure ||
-          aggregationFunction ||
-          aggregationWindow
-        );
-        
-        if (hasMetricInput) {
-          const isValid = validateCurrentStep(0);
-          if (!isValid) return;
-        }
-      }
+    // Don't navigate if trying to go to the same step
+    if (index === currentStep) return;
+
+    // Validate current step before allowing navigation away from it
+    if (currentStep === 0) {
+      // Validate metric step only if user has filled at least one field
+      const hasMetricInput = Boolean(
+        metricName.trim() ||
+        selectedProductId ||
+        version.trim() ||
+        description.trim() ||
+        unitOfMeasure ||
+        aggregationFunction ||
+        aggregationWindow
+      );
       
-      // going to review step - validate conditions step
-      if (currentStep === 1 && index === 2) {
-        if (isReviewLocked) return;
+      if (hasMetricInput) {
+        const isValid = validateCurrentStep(0);
+        if (!isValid) return;
       }
+    }
+
+    if (currentStep === 1) {
+      // Always validate conditions step before leaving it
+      const isValid = validateCurrentStep(1);
+      if (!isValid) return;
     }
 
     setCurrentStep(index);

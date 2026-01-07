@@ -1,273 +1,396 @@
+// CustomersByUsageCard.tsx
 import * as React from "react";
 import { Card, Flex, Text } from "@tremor/react";
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+} from "recharts";
 import "./CustomersByUsageCard.css";
+import MiniScrollbar from "../../componenetsss/MiniScrollbar";
 
-type UsageRow = {
-  customerName: string;        // tooltip uses this
-  uomLabel?: string;           // shown at left (default: "API Calls")
-  values: number[];            // one value per time column
-};
+type Level = "low" | "medium" | "high";
+type UpdateType = "success" | "warning" | "error";
 
-type UpdateItem = {
-  type: "success" | "info" | "danger" | "neutral";
+export type RealTimeUpdateItem = {
+  id: string;
+  type: UpdateType;
   title: string;
-  headline: string;
-  subline: string;
+  amountLine: string;
+  subtitle: string;
   timeAgo: string;
 };
 
-type Props = {
-  titleLeft?: string;
-  titleRight?: string;
-  updatedText?: string;
-
-  times?: string[];
-  rows?: UsageRow[];
-
-  updates?: UpdateItem[];
-};
-
-type Bucket = "low" | "medium" | "high";
-
-type TooltipState = {
-  open: boolean;
-  x: number; // px within heatmap area
-  y: number; // px within heatmap area
-  time: string;
-  customerName: string;
+type HeatCellPoint = {
+  x: number; // pixel-like position inside plot area
+  y: number;
   value: number;
-  bucket: Bucket;
+  timeLabel: string;
+  rowLabel: string;
+  level: Level;
 };
 
-const formatExact = (n: number) => new Intl.NumberFormat().format(n);
+type Props = {
+  leftTitle?: string;
+  leftUpdatedText?: string;
+  rows?: string[];
+  times?: string[];
+  matrix?: number[][];
 
-const getBucket = (v: number): Bucket => {
-  if (v <= 1000) return "low";
-  if (v <= 10000) return "medium";
-  return "high";
+  rightTitle?: string;
+  rightUpdatedText?: string;
+  updates?: RealTimeUpdateItem[];
+  updatesMaxHeightPx?: number;
+
+  rightWidthPx?: number;
+  gapPx?: number;
 };
 
-const bucketText: Record<Bucket, string> = {
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-};
+const CELL_H = 28;      // ✅ fixed height
+const MIN_CELL_W = 28;  // ✅ minimum width
+const GAP = 4;          // ✅ fixed gap like your 2nd image
 
-const defaultTimes = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-];
+const Y_AXIS_PX = 84;
+const TOP_PAD_PX = 14;
+const BOTTOM_AXIS_PX = 20;
+const RIGHT_PAD_PX = 16;
+const LEFT_MARGIN_PX = 4;
 
-const defaultRows: UsageRow[] = [
-  { customerName: "ABC Company Ltd", uomLabel: "API Calls", values: [800, 1200, 2200, 900, 1100, 7800, 2400, 1900, 8200, 9000, 10200, 7600, 3200] },
-  { customerName: "Rahul Ltd",       uomLabel: "API Calls", values: [600, 900, 1400, 1000, 1800, 2600, 3100, 2900, 5200, 6100, 7400, 8800, 9300] },
-  { customerName: "Drive 34",        uomLabel: "API Calls", values: [900, 1300, 1600, 2500, 3200, 4000, 9800, 5200, 4100, 2300, 1900, 2600, 7200] },
-  { customerName: "Prod 2",          uomLabel: "API Calls", values: [500, 700, 900, 1200, 3500, 4200, 6100, 8300, 9100, 10400, 11900, 13100, 14500] },
-  { customerName: "Prox 5",          uomLabel: "API Calls", values: [450, 800, 1200, 1600, 2100, 2800, 3300, 4100, 5200, 7400, 9800, 12000, 15000] },
-  { customerName: "Microsoft Drive", uomLabel: "API Calls", values: [650, 900, 1400, 2000, 2600, 3200, 3800, 5200, 7000, 9000, 10100, 12000, 13500] },
-  { customerName: "Box Drive Pro",   uomLabel: "API Calls", values: [700, 1100, 1700, 2300, 2900, 3500, 4200, 6000, 8000, 9800, 11200, 12800, 14300] },
-  { customerName: "Kong Sandbox",    uomLabel: "API Calls", values: [420, 700, 1000, 1400, 1900, 2600, 3400, 5200, 7600, 9400, 11200, 13000, 15500] },
-];
+function useResizeWidth<T extends HTMLElement>() {
+  const ref = React.useRef<T | null>(null);
+  const [width, setWidth] = React.useState(0);
 
-const defaultUpdates: UpdateItem[] = [
-  { type: "success", title: "Payment Received", headline: "₹499 • Pro Plan - UPI", subline: "ABC Company Ltd", timeAgo: "2 sec ago" },
-  { type: "info",    title: "New Signup",       headline: "Free Trial Started",    subline: "ABC Company Ltd", timeAgo: "2 sec ago" },
-  { type: "danger",  title: "Payment Failed",   headline: "₹1,299 • Card Declined",subline: "ABC Company Ltd", timeAgo: "2 sec ago" },
-  { type: "success", title: "Plan Upgraded",    headline: "Basic → Pro",            subline: "Rahul Ltd",       timeAgo: "2 sec ago" },
-  { type: "success", title: "Plan Upgraded",    headline: "Basic → Pro",            subline: "Rahul Ltd",       timeAgo: "2 sec ago" },
-];
+  React.useLayoutEffect(() => {
+    if (!ref.current) return;
 
-const CustomersByUsageCard: React.FC<Props> = ({
-  titleLeft = "Customers by Usage",
-  titleRight = "Real-time updates",
-  updatedText = "Updated 3 mins ago",
-  times = defaultTimes,
-  rows = defaultRows,
-  updates = defaultUpdates,
-}) => {
-  const heatmapRef = React.useRef<HTMLDivElement>(null);
+    const el = ref.current;
+    const ro = new ResizeObserver(() => {
+      setWidth(el.clientWidth || 0);
+    });
 
-  const [tooltip, setTooltip] = React.useState<TooltipState>({
-    open: false,
-    x: 0,
-    y: 0,
-    time: "",
-    customerName: "",
-    value: 0,
-    bucket: "low",
-  });
+    ro.observe(el);
+    setWidth(el.clientWidth || 0);
 
-  const closeTooltip = React.useCallback(() => {
-    setTooltip((t) => ({ ...t, open: false }));
+    return () => ro.disconnect();
   }, []);
 
-  const openTooltip = React.useCallback(
-    (
-      e: React.MouseEvent<HTMLButtonElement>,
-      customerName: string,
-      time: string,
-      value: number
-    ) => {
-      const host = heatmapRef.current;
-      if (!host) return;
+  return { ref, width };
+}
 
-      const hostRect = host.getBoundingClientRect();
-      const cellRect = e.currentTarget.getBoundingClientRect();
+function levelFromValue(v: number): Level {
+  if (v < 100) return "low";
+  if (v < 1000) return "medium";
+  return "high";
+}
+function colorForLevel(level: Level) {
+  if (level === "low") return "#BED4ED";
+  if (level === "medium") return "#6C8FE5";
+  return "#354EB7";
+}
+function formatValue(v: number) {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
+  return `${v}`;
+}
+function toneColor(type: UpdateType) {
+  if (type === "success") return "#389315";
+  if (type === "warning") return "#F59E0B";
+  return "#ED5142";
+}
 
-      // anchor tooltip center above the cell
-      let x = cellRect.left - hostRect.left + cellRect.width / 2;
-      let y = cellRect.top - hostRect.top;
+function buildSampleHeatmap() {
+  const rows = [
+    "API Calls",
+    "GB",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+    "API Calls",
+  ];
+  const times = ["09:00", "10:00", "11:00", "12:00", "13:00", "13:00", "13:00", "13:00", "13:00", "14:00", "15:00"];
 
-      // prevent "top cut" (simple clamp)
-      y = Math.max(86, y);
-
-      setTooltip({
-        open: true,
-        x,
-        y,
-        time,
-        customerName,
-        value,
-        bucket: getBucket(value),
-      });
-    },
-    []
+  const matrix = rows.map((_, r) =>
+    times.map((_, c) => {
+      const base = Math.floor(Math.random() * 220);
+      const spike = (c === times.length - 1 ? 900 : 0) + (r === rows.length - 1 ? 600 : 0);
+      const midSpike = c >= 5 && c <= 8 ? Math.floor(Math.random() * 600) : 0;
+      const rare = Math.random() < 0.06 ? 1200 + Math.floor(Math.random() * 900) : 0;
+      return base + spike + midSpike + rare;
+    })
   );
 
-  const legend = [
-    { key: "low" as const, label: "Low (≤1000)" },
-    { key: "medium" as const, label: "Medium (1005 - 10000)" },
-    { key: "high" as const, label: "High (>10000)" },
+  return { rows, times, matrix };
+}
+
+function buildSampleUpdates(): RealTimeUpdateItem[] {
+  return [
+    { id: "1", type: "success", title: "Payment Received", amountLine: "₹499 • Pro Plan • UPI", subtitle: "ABC Company Ltd", timeAgo: "2 sec ago" },
+    { id: "2", type: "warning", title: "New Signup", amountLine: "Free Trial Started", subtitle: "ABC Company Ltd", timeAgo: "2 sec ago" },
+    { id: "3", type: "error", title: "Payment Failed", amountLine: "₹1,299 • Card Declined", subtitle: "ABC Company Ltd", timeAgo: "2 sec ago" },
+    { id: "4", type: "success", title: "Plan Upgraded", amountLine: "Basic → Pro", subtitle: "Rahul Ltd", timeAgo: "2 sec ago" },
+    { id: "5", type: "success", title: "Plan Upgraded", amountLine: "Basic → Pro", subtitle: "Anita Ltd", timeAgo: "2 sec ago" },
   ];
+}
+
+function HeatTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  const p: HeatCellPoint = payload[0].payload;
 
   return (
-    <div className="cbu-grid">
-      {/* LEFT: Tremor card */}
-      <Card className="cbu-left-card">
-        <Flex justifyContent="between" alignItems="start" className="cbu-head">
-          <Text className="cbu-title">{titleLeft}</Text>
-          <Text className="cbu-updated">{updatedText}</Text>
-        </Flex>
+    <div className="cbuTT">
+      <div className="cbuTTTop">
+        <div className="cbuTTDot" style={{ background: colorForLevel(p.level) }} />
+        <div className="cbuTTTitle">{p.rowLabel}</div>
+      </div>
 
-        <div
-          ref={heatmapRef}
-          className="cbu-heatmapWrap"
-          onMouseLeave={closeTooltip}
-        >
-          <div
-            className="cbu-heatmap"
-            style={{ ["--cbu-cols" as any]: times.length } as React.CSSProperties}
-            role="grid"
-            aria-label="Customers by usage heatmap (API Calls)"
-          >
-            {rows.map((r, rIdx) => (
-              <React.Fragment key={`${r.customerName}-${rIdx}`}>
-                <div className="cbu-yLabel">{r.uomLabel ?? "API Calls"}</div>
+      <div className="cbuTTRow">
+        <span className="cbuTTK">Time</span>
+        <span className="cbuTTV">{p.timeLabel}</span>
+      </div>
 
-                {times.map((t, cIdx) => {
-                  const value = r.values[cIdx] ?? 0;
-                  const bucket = getBucket(value);
+      <div className="cbuTTRow">
+        <span className="cbuTTK">Usage</span>
+        <span className="cbuTTV">{formatValue(p.value)}</span>
+      </div>
 
-                  return (
-                    <button
-                      key={`${rIdx}-${cIdx}`}
-                      type="button"
-                      className={`cbu-cell is-${bucket}`}
-                      role="gridcell"
-                      aria-label={`${r.customerName} • API Calls at ${t}: ${value} (${bucketText[bucket]})`}
-                      onMouseEnter={(e) => openTooltip(e, r.customerName, t, value)}
-                      onFocus={(e) => openTooltip(e as any, r.customerName, t, value)}
-                      onBlur={closeTooltip}
-                    />
-                  );
-                })}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {/* Tooltip */}
-          {tooltip.open && (
-            <div
-              className="cbu-tooltip"
-              style={{ left: tooltip.x, top: tooltip.y }}
-              role="status"
-              aria-live="polite"
-            >
-              <div className="cbu-tooltip-title">{tooltip.time}</div>
-
-              <div className="cbu-tooltip-customer">{tooltip.customerName}</div>
-
-              <div className="cbu-tooltip-metric">
-                API Calls: <span>{formatExact(tooltip.value)}</span>
-              </div>
-
-              <div className={`cbu-bucket is-${tooltip.bucket}`}>
-                {bucketText[tooltip.bucket]}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* X axis */}
-        <div className="cbu-xAxis">
-          <div className="cbu-xAxisSpacer" />
-          <div
-            className="cbu-xTicks"
-            style={{ ["--cbu-cols" as any]: times.length } as any}
-          >
-            {times.map((t) => (
-              <div key={t} className="cbu-xTick">
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="cbu-legend">
-          {legend.map((l) => (
-            <div key={l.key} className="cbu-legendItem">
-              <span className={`cbu-legendDot is-${l.key}`} />
-              <span className="cbu-legendText">{l.label}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* RIGHT: normal CSS card */}
-      <div className="cbu-right-card">
-        <div className="cbu-right-head">
-          <div className="cbu-right-title">{titleRight}</div>
-          <div className="cbu-right-updated">{updatedText}</div>
-        </div>
-
-        <div className="cbu-updatesList">
-          {updates.map((u, idx) => (
-            <div key={idx} className={`cbu-updateItem is-${u.type}`}>
-              <div className="cbu-updateTop">
-                <div className="cbu-updateTitle">{u.title}</div>
-                <div className="cbu-updateTime">{u.timeAgo}</div>
-              </div>
-
-              <div className="cbu-updateHeadline">{u.headline}</div>
-              <div className="cbu-updateSub">{u.subline}</div>
-            </div>
-          ))}
-        </div>
+      <div className="cbuTTHint">
+        {p.level === "low" ? "Low (<100)" : p.level === "medium" ? "Medium (100–1000)" : "High (>1000)"}
       </div>
     </div>
   );
-};
+}
 
-export default CustomersByUsageCard;
+function HeatCellShape({
+  cx,
+  cy,
+  payload,
+  cellW,
+}: {
+  cx?: number;
+  cy?: number;
+  payload?: HeatCellPoint;
+  cellW: number;
+}) {
+  if (cx == null || cy == null || !payload) return null;
+
+  const x = cx - cellW / 2;
+  const y = cy - CELL_H / 2;
+
+  return (
+    <rect
+      x={x}
+      y={y}
+      width={cellW}
+      height={CELL_H}
+      rx={0} // ✅ no radius like your 2nd image
+      ry={0}
+      fill={colorForLevel(payload.level)}
+      stroke="rgba(16, 24, 40, 0.04)"
+    />
+  );
+}
+
+export default function CustomersByUsageCard({
+  leftTitle = "Customers by Usage",
+  leftUpdatedText = "Updated 3 mins ago",
+  rows,
+  times,
+  matrix,
+
+  rightTitle = "Real-time updates",
+  rightUpdatedText = "Updated 3 mins ago",
+  updates,
+  updatesMaxHeightPx = 420,
+
+  rightWidthPx = 360,
+  gapPx = 20,
+}: Props) {
+  const sampleHeat = React.useMemo(() => buildSampleHeatmap(), []);
+  const sampleUpd = React.useMemo(() => buildSampleUpdates(), []);
+
+  const finalRows = rows ?? sampleHeat.rows;
+  const finalTimes = times ?? sampleHeat.times;
+  const finalMatrix = matrix ?? sampleHeat.matrix;
+  const finalUpdates = updates ?? sampleUpd;
+
+  // measure available width for the heatmap plot area
+  const { ref: heatWrapRef, width: heatWrapWidth } = useResizeWidth<HTMLDivElement>();
+
+  // ref for right side scrollable container
+  const rightScrollRef = React.useRef<HTMLDivElement>(null);
+
+  const cols = finalTimes.length;
+  const rowsCount = finalRows.length;
+
+  // plotWidth = wrapper width minus axis area and margins
+  const plotWidth = Math.max(
+    0,
+    heatWrapWidth - (Y_AXIS_PX + LEFT_MARGIN_PX + RIGHT_PAD_PX)
+  );
+
+  // ✅ auto cell width (fills container), but never below 28
+  const computedCellW = cols > 0
+    ? Math.floor((plotWidth - (cols - 1) * GAP) / cols)
+    : MIN_CELL_W;
+
+  const cellW = Math.max(MIN_CELL_W, computedCellW);
+
+  // pixel grid math (fixed gap, fixed height)
+  const xStep = cellW + GAP;
+  const yStep = CELL_H + GAP;
+
+  const xFirst = cellW / 2;
+  const yFirst = CELL_H / 2;
+
+  const xLastCenter = xFirst + (cols - 1) * xStep;
+  const yLastCenter = yFirst + (rowsCount - 1) * yStep;
+
+  const xDomainMax = xLastCenter + cellW / 2;
+  const yDomainMax = yLastCenter + CELL_H / 2;
+
+  const points: HeatCellPoint[] = React.useMemo(() => {
+    const out: HeatCellPoint[] = [];
+    for (let r = 0; r < rowsCount; r++) {
+      for (let c = 0; c < cols; c++) {
+        const v = finalMatrix?.[r]?.[c] ?? 0;
+        out.push({
+          x: xFirst + c * xStep,
+          y: yFirst + r * yStep,
+          value: v,
+          timeLabel: finalTimes[c],
+          rowLabel: finalRows[r],
+          level: levelFromValue(v),
+        });
+      }
+    }
+    return out;
+  }, [rowsCount, cols, finalMatrix, finalTimes, finalRows, xFirst, yFirst, xStep, yStep]);
+
+  // when screen is small, we keep cellW=28 and allow horizontal scroll using minWidth
+  const minGridWidth =
+    Y_AXIS_PX + LEFT_MARGIN_PX + RIGHT_PAD_PX + cols * MIN_CELL_W + (cols - 1) * GAP + 24;
+
+  const heatHeight =
+    TOP_PAD_PX + rowsCount * CELL_H + (rowsCount - 1) * GAP + BOTTOM_AXIS_PX + 10;
+
+  // ticks at the center of each cell
+  const xTicks = React.useMemo(
+    () => finalTimes.map((_, i) => xFirst + i * xStep),
+    [finalTimes, xFirst, xStep]
+  );
+  const yTicks = React.useMemo(
+    () => finalRows.map((_, i) => yFirst + i * yStep),
+    [finalRows, yFirst, yStep]
+  );
+
+  const tickToIndexX = (val: number) => Math.round((val - xFirst) / xStep);
+  const tickToIndexY = (val: number) => Math.round((val - yFirst) / yStep);
+
+  return (
+    <div className="cbuWrap" style={{ gridTemplateColumns: `1fr ${rightWidthPx}px`, gap: gapPx }}>
+      {/* LEFT */}
+      <Card className="cbuCard cbuLeft">
+        <Flex justifyContent="between" alignItems="start" className="cbuHead">
+          <Text className="cbuTitle">{leftTitle}</Text>
+          <Text className="cbuUpdated">{leftUpdatedText}</Text>
+        </Flex>
+
+        <div className="cbuScrollX" ref={heatWrapRef}>
+          <div className="cbuHeatSizer" style={{ width: "100%", minWidth: minGridWidth, height: heatHeight }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart
+                margin={{
+                  top: TOP_PAD_PX,
+                  right: RIGHT_PAD_PX,
+                  bottom: BOTTOM_AXIS_PX,
+                  left: LEFT_MARGIN_PX,
+                }}
+              >
+                <XAxis
+                  type="number"
+                  dataKey="x"
+                  domain={[0, xDomainMax]}
+                  ticks={xTicks}
+                  tickFormatter={(v) => finalTimes[tickToIndexX(v)] ?? ""}
+                  interval={0}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#7B97AE" }}
+                />
+
+                <YAxis
+                  type="number"
+                  dataKey="y"
+                  domain={[0, yDomainMax]}
+                  ticks={yTicks}
+                  tickFormatter={(v) => finalRows[tickToIndexY(v)] ?? ""}
+                  interval={0}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#7B97AE" }}
+                  width={Y_AXIS_PX}
+                />
+
+                <RTooltip content={<HeatTooltip />} cursor={false} />
+
+                <Scatter
+                  data={points}
+                  isAnimationActive={false}
+                  shape={(p: any) => <HeatCellShape {...p} cellW={cellW} />}
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="cbuLegend">
+          <div className="cbuLegItem">
+            <span className="cbuLegDot" style={{ background: "#D9E8FB" }} />
+            <span className="cbuLegText">Low (&lt;100$)</span>
+          </div>
+          <div className="cbuLegItem">
+            <span className="cbuLegDot" style={{ background: "#86AEF2" }} />
+            <span className="cbuLegText">Medium (100$ - 1000$)</span>
+          </div>
+          <div className="cbuLegItem">
+            <span className="cbuLegDot" style={{ background: "#2F5FD2" }} />
+            <span className="cbuLegText">High (&gt;1000$)</span>
+          </div>
+        </div>
+      </Card>
+
+      {/* RIGHT */}
+      <Card className="cbuCard cbuRight">
+        <Flex justifyContent="between" alignItems="start" className="cbuHead">
+          <Text className="cbuTitle">{rightTitle}</Text>
+          <Text className="cbuUpdated">{rightUpdatedText}</Text>
+        </Flex>
+
+        <div className="rtuList" ref={rightScrollRef} style={{ maxHeight: updatesMaxHeightPx }}>
+          {finalUpdates.map((it) => (
+            <div key={it.id} className="rtuItem">
+              <div className="rtuTop">
+                <div className="rtuChip" style={{ color: toneColor(it.type) }}>
+                  {it.title}
+                </div>
+                <div className="rtuTime">{it.timeAgo}</div>
+              </div>
+              <div className="rtuMain">{it.amountLine}</div>
+              <div className="rtuSub">{it.subtitle}</div>
+            </div>
+          ))}
+        </div>
+        
+        <MiniScrollbar containerRef={rightScrollRef} side="right" inset={8} />
+      </Card>
+    </div>
+  );
+}
