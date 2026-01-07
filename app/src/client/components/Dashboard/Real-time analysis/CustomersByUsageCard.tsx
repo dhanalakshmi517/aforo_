@@ -389,7 +389,7 @@ export default function CustomersByUsageCard({
           ))}
         </div>
         
-        <MiniScrollbar containerRef={rightScrollRef} side="right" inset={8} />
+        <MiniScrollbar containerRef={rightScrollRef as React.RefObject<HTMLElement>} side="right" inset={8} />
       </Card>
     </div>
   );
