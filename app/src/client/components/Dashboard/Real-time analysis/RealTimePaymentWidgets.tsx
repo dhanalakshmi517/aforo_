@@ -13,6 +13,7 @@ import {
   Legend,
 } from "recharts";
 import "./RealTimePaymentsWidgets.css";
+import StatusBadge from "../../componenetsss/StatusBadge";
 
 type TrackerStatus = "good" | "warn" | "bad";
 
@@ -56,16 +57,16 @@ const DEFAULT_TRACKER: TrackerPoint[] = Array.from({ length: 44 }).map((_, i) =>
 });
 
 const DEFAULT_METHODS: PaymentMethod[] = [
-  { name: "Razorpay", value: 32, color: "#63D3B0" },
-  { name: "Stripe", value: 24, color: "#5AAFD6" },
-  { name: "Gateway 1", value: 28, color: "#5E7BD7" },
-  { name: "Gateway 2", value: 16, color: "#B45BD0" },
+  { name: "Razorpay", value: 32, color: "#66CCA5" },
+  { name: "Stripe", value: 24, color: "#66B1CC" },
+  { name: "Gateway 1", value: 28, color: "#6685CC" },
+  { name: "Gateway 2", value: 16, color: "#C066CC" },
 ];
 
 const STATUS_COLORS: Record<TrackerStatus, string> = {
-  good: "#67B348",
-  warn: "#D6A21A",
-  bad: "#E14B3B",
+  good: "#6AB349",
+  warn: "#E2B226",
+  bad: "#ED5142",
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -90,14 +91,29 @@ function TrackerTooltip({ active, payload }: any) {
 }
 
 function DonutLegend({ payload }: any) {
+  // Split into two rows
+  const midPoint = Math.ceil(payload?.length / 2);
+  const firstRow = payload?.slice(0, midPoint);
+  const secondRow = payload?.slice(midPoint);
+
   return (
     <div className="rtpw-legend">
-      {payload?.map((entry: any) => (
-        <div className="rtpw-legend-item" key={entry.value}>
-          <span className="rtpw-legend-dot" style={{ background: entry.color }} />
-          <span className="rtpw-legend-text">{entry.value}</span>
-        </div>
-      ))}
+      <div className="rtpw-legend-row">
+        {firstRow?.map((entry: any) => (
+          <div className="rtpw-legend-item" key={entry.value}>
+            <span className="rtpw-legend-dot" style={{ background: entry.color }} />
+            <span className="rtpw-legend-text">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+      <div className="rtpw-legend-row">
+        {secondRow?.map((entry: any) => (
+          <div className="rtpw-legend-item" key={entry.value}>
+            <span className="rtpw-legend-dot" style={{ background: entry.color }} />
+            <span className="rtpw-legend-text">{entry.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -139,12 +155,12 @@ const RealTimePaymentWidgets: React.FC<Props> = ({
             <header className="rtpw-card-head">
               <div className="rtpw-head-left">
                 <h3 className="rtpw-title">{ingestionTitle}</h3>
-                <span
-                  className={`rtpw-badge rtpw-badge--${ingestionBadgeTone}`}
+                <StatusBadge 
+                  label={ingestionBadgeText} 
+                  variant="active" 
+                  size="md"
                   aria-label={`Ingestion status: ${ingestionBadgeText}`}
-                >
-                  {ingestionBadgeText}
-                </span>
+                />
               </div>
             </header>
 
@@ -162,7 +178,7 @@ const RealTimePaymentWidgets: React.FC<Props> = ({
                     content={<TrackerTooltip />}
                     wrapperStyle={{ outline: "none" }}
                   />
-                  <Bar dataKey="v" radius={[3, 3, 3, 3]} maxBarSize={14}>
+                  <Bar dataKey="v" barSize={21}>
                     {trackerData.map((p) => (
                       <Cell key={p.id} fill={STATUS_COLORS[p.status]} />
                     ))}
@@ -188,7 +204,7 @@ const RealTimePaymentWidgets: React.FC<Props> = ({
 
             <div className="rtpw-ratio-wrap" aria-label="Payments success vs fail ratio">
               <ResponsiveContainer width="100%" height={44}>
-                <BarChart data={ratioData} layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 10 }}>
+                <BarChart data={ratioData} layout="vertical" margin={{ top: 0, right: 0, bottom: 0, left: 0 }} barGap={4}>
                   <XAxis type="number" hide domain={[0, 100]} />
                   <YAxis type="category" dataKey="name" hide />
                   <Tooltip
@@ -213,8 +229,8 @@ const RealTimePaymentWidgets: React.FC<Props> = ({
                     }}
                     wrapperStyle={{ outline: "none" }}
                   />
-                  <Bar dataKey="success" stackId="a" fill="#67B348" radius={[6, 0, 0, 6]} />
-                  <Bar dataKey="fail" stackId="a" fill="#E14B3B" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="success" stackId="a" fill="#67B348" />
+                  <Bar dataKey="fail" stackId="a" fill="#E14B3B" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -229,7 +245,7 @@ const RealTimePaymentWidgets: React.FC<Props> = ({
           </header>
 
           <div className="rtpw-donut-wrap">
-            <ResponsiveContainer width="100%" height={210}>
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Tooltip
                   content={({ active, payload }: any) => {
@@ -253,7 +269,8 @@ const RealTimePaymentWidgets: React.FC<Props> = ({
                   nameKey="name"
                   innerRadius="45%"
                   outerRadius="85%"
-                  paddingAngle={2}
+                  paddingAngle={1}
+                  cornerRadius={8}
                   stroke="#ffffff"
                   strokeWidth={4}
                   isAnimationActive={false}

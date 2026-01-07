@@ -213,7 +213,8 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                   onChange: (val: string) => handleChange(filter.id, 'usageCondition', val),
                   error: billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined,
                   disabled: locked,
-                  label: 'Dimension'
+                  label: 'Dimension',
+                  required: billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS'
                 };
 
                 if (isApi) return <ApiDimensionSelect unitOfMeasure={upperUom} {...commonProps} />;
@@ -224,10 +225,10 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 return (
                   <div className={`input-container ${locked ? 'disabled' : ''}`}>
                     <InputField
-                      label="Dimensions"
+                      label="Dimension"
                       placeholder="Dimension"
                       value={filter.usageCondition}
-                      required
+                      required={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS'}
                       onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
                       error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined}
                       className={locked ? 'disabled-input' : ''}
@@ -265,7 +266,8 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                   onChange: (val: string) => handleChange(filter.id, 'operator', val),
                   error: billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined,
                   disabled: locked,
-                  label: 'Operator'
+                  label: 'Operator',
+                  required: billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS'
                 };
 
                 if (isApi) return <ApiOperatorSelect {...operatorProps} />;
@@ -276,7 +278,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 return (
                   <SelectField
                     label="Operator"
-                    required
+                    required={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS'}
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
                     options={[
@@ -299,7 +301,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 <InputField
                   label="Value"
                   placeholder="Value"
-                  required
+                  required={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS'}
                   value={filter.value}
                   onChange={(val) => handleChange(filter.id, 'value', val)}
                   className={locked || !filter.operator ? 'disabled-input' : ''}

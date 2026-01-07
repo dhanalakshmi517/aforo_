@@ -82,6 +82,8 @@ const DashboardGallery: React.FC<Props> = ({ cards = defaultCards, onCardClick }
 
     if (card.id === "cust") {
       navigate("/get-started/dashboards/customer-analysis");
+    } else if (card.id === "realtime") {
+      navigate("/get-started/dashboards/real-time-tracking");
     } else if (card.id === "revenue") {
       navigate("/get-started/dashboards/revenue-analysis");
     }
