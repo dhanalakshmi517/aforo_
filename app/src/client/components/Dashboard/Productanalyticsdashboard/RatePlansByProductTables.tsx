@@ -117,7 +117,7 @@ function TableCard({ tone, title, emoji, rows }: TableCardProps) {
             );
           })}
         </div>
-        <MiniScrollbar containerRef={bodyRef} side="right" inset={8} />
+        <MiniScrollbar containerRef={bodyRef as React.RefObject<HTMLElement>} side="right" inset={8} />
       </div>
     </Card>
   );
