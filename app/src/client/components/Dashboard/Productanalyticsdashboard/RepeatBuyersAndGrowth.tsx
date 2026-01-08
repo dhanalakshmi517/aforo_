@@ -1,144 +1,220 @@
 import * as React from "react";
-import { Card, Flex, Text, LineChart } from "@tremor/react";
+import { Card, Flex, Text } from "@tremor/react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip as RTooltip,
+  LineChart,
+  Line,
+} from "recharts";
 import "./RepeatBuyersAndGrowth.css";
 
-type Band = "green" | "purple" | "blue" | "sky";
-
 type BarRow = {
-  label: string;
-  value: number; // in millions
-  max: number;   // in millions (110)
-  band: Band;
-};
-
-const formatM = (n: number) => (n === 0 ? "0" : `${n}M`);
-
-const Axis: React.FC<{ max: number; ticks: number[] }> = ({ max, ticks }) => {
-  return (
-    <div className="rbg-axis">
-      {ticks.map((t) => (
-        <div
-          key={t}
-          className="rbg-axis-tick"
-          style={{ left: `${(t / max) * 100}%` }}
-        >
-          {formatM(t)}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const RepeatBuyersCard: React.FC<{
-  title: string;
-  updatedText?: string;
-  rows: BarRow[];
-}> = ({ title, updatedText = "Updated 3 mins ago", rows }) => {
-  const max = rows[0]?.max ?? 110;
-  const ticks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110];
-
-  return (
-    <Card className="rbg-card">
-      <Flex justifyContent="between" alignItems="start" className="rbg-head">
-        <Text className="rbg-title">{title}</Text>
-        <Text className="rbg-updated">{updatedText}</Text>
-      </Flex>
-
-      <div className="rbg-bars">
-        {rows.map((r) => {
-          const pct = Math.max(0, Math.min(100, (r.value / r.max) * 100));
-          return (
-            <div key={r.label} className="rbg-row">
-              <div className="rbg-label">{r.label}</div>
-              <div className="rbg-track">
-                <div className={`rbg-fill is-${r.band}`} style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <Axis max={max} ticks={ticks} />
-    </Card>
-  );
+  name: string;
+  value: number;
+  band: "green" | "purple" | "blue" | "teal";
 };
 
 type GrowthPoint = {
-  month: string;
-  Growth: number;
-  date?: string; // for tooltip
+  label: string; // Jan..Jul
+  value: number; // %
+  dateText?: string; // "Apr 10, 2025"
 };
 
-const CustomTooltip: React.FC<any> = ({ active, payload }) => {
-  if (!active || !payload?.length) return null;
-  const p = payload[0]?.payload as GrowthPoint;
-  const v = payload[0]?.value as number;
+type Props = {
+  leftTitle?: string;
+  rightTitle?: string;
+  updatedText?: string;
 
+  bars?: BarRow[];
+  growth?: GrowthPoint[];
+};
+
+const sampleBars: BarRow[] = [
+  { name: "Drive 34", value: 102_000_000, band: "green" },
+  { name: "Produt 2", value: 90_000_000, band: "purple" },
+  { name: "Prod 2", value: 82_000_000, band: "blue" },
+  { name: "Prox 5", value: 76_000_000, band: "teal" },
+];
+
+const sampleGrowth: GrowthPoint[] = [
+  { label: "Jan", value: 44 },
+  { label: "Feb", value: 62 },
+  { label: "Mar", value: 66 },
+  { label: "Apr", value: 58, dateText: "Apr 10, 2025" }, // tooltip anchor like screenshot
+  { label: "May", value: 50 },
+  { label: "Jun", value: 56 },
+  { label: "Jul", value: 82 },
+];
+
+function formatMillions(v: number) {
+  if (!v) return "0";
+  return `${Math.round(v / 1_000_000)}M`;
+}
+
+function bandFill(band: BarRow["band"]) {
+  if (band === "green") return "#54C48C";
+  if (band === "purple") return "#7B63D1";
+  if (band === "blue") return "#5D78C8";
+  return "#5AA7C6";
+}
+
+function BarTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  const p: BarRow = payload[0].payload;
   return (
-    <div className="rbg-tooltip">
-      <div className="rbg-tooltip-date">{p?.date ?? p?.month}</div>
-      <div className="rbg-tooltip-val">{v}%</div>
-      <div className="rbg-tooltip-dot" />
+    <div className="rbg-tt">
+      <div className="rbg-ttTop">
+        <div className="rbg-ttDot" style={{ background: bandFill(p.band) }} />
+        <div className="rbg-ttTitle">{p.name}</div>
+      </div>
+      <div className="rbg-ttRow">
+        <span className="rbg-ttK">Repeat buyers</span>
+        <span className="rbg-ttV">{formatMillions(p.value)}</span>
+      </div>
     </div>
   );
-};
+}
 
-const ProductGrowthCard: React.FC<{ title: string; data: GrowthPoint[] }> = ({
-  title,
-  data,
-}) => {
+function GrowthTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  const p: GrowthPoint = payload[0].payload;
+
   return (
-    <Card className="rbg-card">
-      <Flex justifyContent="between" alignItems="start" className="rbg-head">
-        <Text className="rbg-title">{title}</Text>
-        <span className="rbg-kebab" aria-hidden="true" />
-      </Flex>
-
-      <div className="rbg-chart">
-        <LineChart
-          data={data}
-          index="month"
-          categories={["Growth"]}
-          showLegend={false}
-          showGridLines={true}
-          showXAxis={true}
-          showYAxis={true}
-          yAxisWidth={30}
-          minValue={0}
-          maxValue={100}
-          curveType="natural"
-          valueFormatter={(v) => `${v}%`}
-          customTooltip={CustomTooltip}
-        />
-      </div>
-    </Card>
+    <div className="rbg-growthTT">
+      <div className="rbg-growthDate">{p.dateText ?? "Apr 10, 2025"}</div>
+      <div className="rbg-growthVal">{Math.round(p.value)}%</div>
+    </div>
   );
-};
+}
 
-const RepeatBuyersAndGrowth: React.FC = () => {
-  const repeatBuyersRows: BarRow[] = [
-    { label: "Drive 34", value: 98, max: 110, band: "green" },
-    { label: "Product 2", value: 86, max: 110, band: "purple" },
-    { label: "Prod 2", value: 80, max: 110, band: "blue" },
-    { label: "Prox 5", value: 74, max: 110, band: "sky" },
-  ];
+function GrowthDot(props: any) {
+  const { cx, cy, payload } = props;
+  const isActive = payload?.label === "Apr";
+  if (!isActive) return null;
 
-  const growthData: GrowthPoint[] = [
-    { month: "Jan", Growth: 40, date: "Jan 10, 2025" },
-    { month: "Feb", Growth: 62, date: "Feb 10, 2025" },
-    { month: "Mar", Growth: 66, date: "Mar 10, 2025" },
-    { month: "Apr", Growth: 53, date: "Apr 10, 2025" }, // your tooltip point (53%)
-    { month: "May", Growth: 49, date: "May 10, 2025" },
-    { month: "Jun", Growth: 60, date: "Jun 10, 2025" },
-    { month: "Jul", Growth: 84, date: "Jul 10, 2025" },
-  ];
+  return (
+    <g>
+      {/* small dark dot on the line */}
+      <circle cx={cx} cy={cy} r={4} fill="#0B1F3A" />
+      {/* subtle outer ring */}
+      <circle cx={cx} cy={cy} r={9} fill="rgba(11,31,58,0.08)" />
+    </g>
+  );
+}
+
+export default function RepeatBuyersAndGrowth({
+  leftTitle = "Repeat Buyers per Product",
+  rightTitle = "Product Growth",
+  updatedText = "Updated 3 mins ago",
+  bars,
+  growth,
+}: Props) {
+  const barData = bars ?? sampleBars;
+  const growthData = growth ?? sampleGrowth;
+
+  const maxBar = React.useMemo(() => Math.max(...barData.map((d) => d.value)), [barData]);
+  const barMaxTick = React.useMemo(() => {
+    const step = 10_000_000;
+    return Math.ceil(maxBar / step) * step;
+  }, [maxBar]);
 
   return (
     <div className="rbg-grid">
-      <RepeatBuyersCard title="Repeat Buyers per Product" rows={repeatBuyersRows} />
-      <ProductGrowthCard title="Product Growth" data={growthData} />
+      {/* LEFT: Repeat buyers (horizontal bars) */}
+      <Card className="rbg-card">
+        <div className="rbg-head">
+          <Text className="rbg-title">{leftTitle}</Text>
+          <Text className="rbg-updated">{updatedText}</Text>
+        </div>
+
+        <div className="rbg-chartWrap">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={barData}
+              layout="vertical"
+              margin={{ top: 4, right: 18, left: 0, bottom: 14 }}
+              barCategoryGap={20}
+            >
+              <CartesianGrid horizontal={false} stroke="rgba(16, 24, 40, 0.04)" />
+              <XAxis
+                type="number"
+                domain={[0, barMaxTick]}
+                tickFormatter={(v) => (v === 0 ? "0" : formatMillions(v))}
+                tick={{ fontSize: 12, fill: "#A7B3C2" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={{ fontSize: 12, fill: "#A7B3C2" }}
+                axisLine={false}
+                tickLine={false}
+                width={72}
+              />
+              <RTooltip content={<BarTooltip />} cursor={false} />
+
+              {/* actual colored bar */}
+              <Bar
+                dataKey="value"
+                isAnimationActive={false}
+                shape={(props: any) => {
+                  const { x, y, width, height, payload } = props;
+                  const fill = bandFill(payload.band);
+                  return <rect x={x} y={y} width={width} height={height} fill={fill} />;
+                }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      {/* RIGHT: Product growth (line) */}
+      <Card className="rbg-card">
+        <div className="rbg-head">
+          <Text className="rbg-title">{rightTitle}</Text>
+          <Text className="rbg-updated">{updatedText}</Text>
+        </div>
+
+        <div className="rbg-chartWrap">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={growthData} margin={{ top: 10, right: 18, left: 18, bottom: 10 }}>
+              {/* super faint grid like screenshot */}
+              <CartesianGrid vertical={false} stroke="rgba(16, 24, 40, 0.03)" />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 12, fill: "#C2CFDD" }}
+                axisLine={false}
+                tickLine={false}
+                padding={{ left: 10, right: 10 }}
+              />
+              <YAxis
+                domain={[0, 100]}
+                ticks={[25, 50, 75, 100]}
+                tick={{ fontSize: 12, fill: "#C2CFDD" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <RTooltip content={<GrowthTooltip />} cursor={false} />
+
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#6A85D9"
+                strokeWidth={2.6}
+                dot={<GrowthDot />}
+                activeDot={{ r: 4 }}
+                isAnimationActive={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
     </div>
   );
-};
-
-export default RepeatBuyersAndGrowth;
+}

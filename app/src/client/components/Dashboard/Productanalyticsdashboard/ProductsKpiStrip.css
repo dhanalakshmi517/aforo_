@@ -1,100 +1,126 @@
 :root {
-  --pkpi-radius: 28px;
-  --pkpi-border: rgba(16, 24, 40, 0.06);
+  --pks-radius: 18px;
+  --pks-border: rgba(16, 24, 40, 0.06);
+  --pks-gap: 16px;
 
-  --pkpi-text: #19222d;
-  --pkpi-sub: #7b97ae;
+  --pks-title: #90a4b8;
+  --pks-value: #19222d;
 
-  --pkpi-green: #2f9e44;
-
-  /* Pastel tiles like screenshot */
-  --pkpi-lavender: #f3f0fb;
-  --pkpi-mint: #eef8f2;
-  --pkpi-sky: #eef6ff;
+  --pks-green: #6ab349;
 }
+@import "./Variables.css";
 
-.pkpi-row {
-  display: flex;
-  gap: 14px;
+/* strip */
+.pks-wrap {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--pks-gap);
   width: 100%;
-  align-items: stretch;
-
-  overflow-x: auto;
-  padding: 6px 2px;
-  scrollbar-width: none;
-}
-.pkpi-row::-webkit-scrollbar {
-  display: none;
 }
 
-.pkpi-card {
-  min-width: 220px;
-  flex: 1 1 0;
+/* tremor card */
+.pks-card {
+  border-radius: 16px !important;
 
-  border-radius: var(--pkpi-radius) !important;
-  border: 1px solid var(--pkpi-border) !important;
-  padding: 16px 18px !important;
+  /* ✅ requested */
+  padding: 16px !important;
 
-  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+  /* keep same height vibe */
+  min-height: 90px;
 }
 
-.pkpi-card.v-lavender { background: var(--pkpi-lavender) !important; }
-.pkpi-card.v-mint     { background: var(--pkpi-mint) !important; }
-.pkpi-card.v-sky      { background: var(--pkpi-sky) !important; }
+/* tones (soft, like screenshot) */
+.pks-lavender {
+  background: #F0EEF7 !important;
+}
+.pks-mint {
+  background: #EEF6F7!important;
+}
+.pks-ice {
+  background: #EEF3F7 !important;
+}
 
-.pkpi-top {
+.pks-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
-.pkpi-title {
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  color: var(--pkpi-sub) !important;
+.pks-title {
+color: var(--color-neutral-800);
+
+/* body/sm/bold */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--fontsize-body-sm, 12px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
-.pkpi-trend {
+.pks-delta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: var(--pkpi-green);
-  font-size: 11px;
-  font-weight: 700;
+  gap: 8px;
+  color: var(--pks-green);
   white-space: nowrap;
 }
 
-.pkpi-trend-value {
-  line-height: 16px;
+.pks-deltaText {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pks-green);
 }
 
-.pkpi-trend-icon {
-  color: var(--pkpi-green);
-  display: inline-block;
+.pks-value {
+  margin-top: 10px;
+color:  #389315;
+
+/* body/sm/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--fontsize-body-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
 }
 
-.pkpi-trend-spacer {
-  width: 52px; /* keeps title alignment even when no trend */
-  height: 16px;
+.pks-valueNum {
+color: var(--color-neutral-1700);
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h2, 28px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h2, 36px); /* 128.571% */
 }
 
-.pkpi-value {
-  margin-top: 8px;
-  font-size: 24px;
-  line-height: 28px;
-  font-weight: 800;
-  color: var(--pkpi-text);
-  letter-spacing: -0.2px;
+.pks-valueText {
+color: var(--color-neutral-1700);
+
+/* heading/h6/bold */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
 }
 
-.pkpi-value.is-text {
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 800;
-  letter-spacing: 0;
+.pks-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #7b97ae;
 }
 
-/* tighter like screenshot */
-@media (min-width: 1200px) {
-  .pkpi-card {
-    min-width: 0;
+/* responsive */
+@media (max-width: 1200px) {
+  .pks-wrap {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 780px) {
+  .pks-wrap {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  .pks-card {
+    min-height: auto;
   }
 }

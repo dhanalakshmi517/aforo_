@@ -1,0 +1,173 @@
+@import "../Variables.css";
+:root {
+  --dcard-radius: 26px;
+  --dcard-pad: 16px;
+
+  --dcard-border: rgba(16, 24, 40, 0.06);
+  --dcard-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+
+  --dcard-title: #19222d;
+  --dcard-sub: #8da0b4;
+  --dcard-icon: #25303d;
+
+  --dcard-thumb-radius: 18px;
+  --dcard-thumb-border: rgba(16, 24, 40, 0.08);
+
+  --dcard-loader-bg: #fbfcfe;
+  --dcard-loader-text: #8da0b4;
+}
+
+.dcard {
+  width: 100%;
+  background:var(--color-neutral-white);
+  border-radius: var(--border-radius-lg);
+box-shadow: 0 0 8px 2px var(--shadow-shadow-1, #EEF1F6);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.dcard.is-clickable {
+  cursor: pointer;
+}
+
+
+/* Thumbnail area */
+.dcard-thumb {
+  width: 100%;
+  border-radius: var(--dcard-thumb-radius);
+  overflow: hidden;
+  height: 164px;
+  background: #fff;
+  border: 1.5px solid var(--color-neutral-1700);
+  aspect-ratio: 16 / 9;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+
+}
+
+.dcard-thumbInner {
+  width: 100%;
+  height: 100%;
+}
+
+/* Actual image */
+.dcard-img {
+  width: auto;
+  height: auto;
+  max-width: 130%;
+  height: 294px;
+  display: block;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  object-position: center center;
+  object-fit: contain;
+  margin-top: -30px;
+}
+
+.dcard-img.is-loaded {
+  opacity: 1;
+}
+
+/* Loader */
+.dcard-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+background: linear-gradient(244deg, var(--surface-layer-300, rgba(217, 223, 232, 0.20)) 34.42%, var(--surface-layer-4, rgba(255, 255, 255, 0.20)) 96.96%);
+
+  color: var(--dcard-loader-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dcard-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid var(--color-primary-700);
+  border-top-color: var(--color-primary-1700);
+  animation: dcard-spin 900ms linear infinite;
+}
+
+@keyframes dcard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dcard-loaderText {
+  line-height: 1;
+}
+
+/* Error */
+.dcard-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--dcard-loader-bg);
+  text-align: center;
+  padding: 12px;
+}
+
+.dcard-errorTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dcard-title);
+}
+
+.dcard-errorSub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dcard-loader-text);
+}
+
+/* Body */
+.dcard-body {
+  padding-top: 14px; /* space between thumbnail and title row */
+}
+
+.dcard-titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* EXACT from your screenshot */
+}
+
+.dcard-titleIcon {
+  flex: 0 0 auto;
+}
+
+.dcard-title {
+color: var(--color-neutral-1700);
+
+/* heading/h6/med */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+}
+
+.dcard-subtitle {
+  margin-top: 8px;
+overflow: hidden;
+color: var(--color-neutral-800);
+text-overflow: ellipsis;
+
+/* body/sm/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}

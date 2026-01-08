@@ -1,109 +1,155 @@
 import * as React from "react";
-import { Card, Flex, Text, LineChart } from "@tremor/react";
+import { Card, Flex, Text } from "@tremor/react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 import "./UsageVolumeByProductType.css";
 
 type Point = {
-  time: string;           // "09:00"
-  "Product A": number;    // in millions
-  "Product B": number;    // in millions
+  time: string;
+  productA: number; // light line
+  productB: number; // dark line
 };
 
 type Props = {
   title?: string;
+  updatedText?: string;
   data?: Point[];
-  highlightTime?: string;     // e.g. "12:00"
-  highlightSeries?: "Product A" | "Product B";
-  avatarSrc?: string;         // optional image src
+  heightPx?: number; // card chart height area
 };
 
-const formatMillions = (v: number) => (v === 0 ? "0" : `${Math.round(v)}M`);
-
-const defaultData: Point[] = [
-  { time: "09:00", "Product A": 14, "Product B": 4 },
-  { time: "10:00", "Product A": 9,  "Product B": 16 },
-  { time: "11:00", "Product A": 6,  "Product B": 20 },
-  { time: "12:00", "Product A": 5,  "Product B": 21 },
-  { time: "13:00", "Product A": 6,  "Product B": 18 },
-  { time: "14:00", "Product A": 13, "Product B": 9 },
-  { time: "15:00", "Product A": 27, "Product B": 12 },
-  { time: "16:00", "Product A": 26, "Product B": 31 },
+const sampleData: Point[] = [
+  { time: "09:00", productA: 4_000_000, productB: 14_000_000 },
+  { time: "10:00", productA: 12_000_000, productB: 8_000_000 },
+  { time: "11:00", productA: 18_000_000, productB: 5_500_000 },
+  { time: "12:00", productA: 21_000_000, productB: 4_800_000 },
+  { time: "13:00", productA: 20_500_000, productB: 5_800_000 },
+  { time: "14:00", productA: 15_000_000, productB: 9_000_000 },
+  { time: "15:00", productA: 11_000_000, productB: 13_000_000 },
 ];
 
-const UsageVolumeByProductType: React.FC<Props> = ({
+function formatMillions(v: number) {
+  if (v === 0) return "0";
+  return `${Math.round(v / 1_000_000)}M`;
+}
+
+function UsageTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+
+  const a = payload.find((p: any) => p.dataKey === "productA");
+  const b = payload.find((p: any) => p.dataKey === "productB");
+
+  return (
+    <div className="uvpt-tt">
+      <div className="uvpt-ttTitle">{label}</div>
+
+      <div className="uvpt-ttRow">
+        <span className="uvpt-ttKey">
+          <span className="uvpt-ttDot uvpt-dotA" />
+          Product A
+        </span>
+        <span className="uvpt-ttVal">{formatMillions(a?.value ?? 0)}</span>
+      </div>
+
+      <div className="uvpt-ttRow">
+        <span className="uvpt-ttKey">
+          <span className="uvpt-ttDot uvpt-dotB" />
+          Product B
+        </span>
+        <span className="uvpt-ttVal">{formatMillions(b?.value ?? 0)}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function UsageVolumeByProductType({
   title = "Usage volume by product & type",
-  data = defaultData,
-  highlightTime = "12:00",
-  highlightSeries = "Product B",
-  avatarSrc,
-}) => {
-  const idx = Math.max(0, data.findIndex((d) => d.time === highlightTime));
-  const safeIdx = idx === -1 ? 0 : idx;
-
-  const maxY = React.useMemo(() => {
-    let m = 0;
-    for (const d of data) {
-      m = Math.max(m, d["Product A"], d["Product B"]);
-    }
-    // match screenshot scale-ish (cap at 30/32M)
-    return Math.max(30, Math.ceil(m / 5) * 5);
-  }, [data]);
-
-  const xPct = React.useMemo(() => {
-    if (data.length <= 1) return 0;
-    return (safeIdx / (data.length - 1)) * 100;
-  }, [safeIdx, data.length]);
-
-  const yPct = React.useMemo(() => {
-    const v = (data[safeIdx]?.[highlightSeries] ?? 0) as number;
-    // 0..100 where 0 is top, 100 bottom
-    const t = 1 - Math.max(0, Math.min(1, v / maxY));
-    return t * 100;
-  }, [data, safeIdx, highlightSeries, maxY]);
-
+  updatedText = "Updated 3 mins ago",
+  data = sampleData,
+  heightPx = 300,
+}: Props) {
   return (
     <Card className="uvpt-card">
       <Flex justifyContent="between" alignItems="start" className="uvpt-head">
         <Text className="uvpt-title">{title}</Text>
+        <Text className="uvpt-updated">{updatedText}</Text>
       </Flex>
 
-      <div className="uvpt-chartWrap">
-        <LineChart
-          className="uvpt-chart"
-          data={data}
-          index="time"
-          categories={["Product B", "Product A"]}
-          colors={["blue", "indigo"]} // gives one light + one stronger tone (close to screenshot)
-          showLegend={false}
-          showGridLines={true}
-          showXAxis={true}
-          showYAxis={true}
-          yAxisWidth={34}
-          minValue={0}
-          maxValue={maxY}
-          curveType="natural"
-          valueFormatter={formatMillions}
-        />
+      <div className="uvpt-chartWrap" style={{ height: heightPx }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={data}
+            margin={{ top: 6, right: 6, left: 0, bottom: 10 }}
+          >
+            <defs>
+              <linearGradient id="uvptFillA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--uvpt-lineA)" stopOpacity={0.18} />
+                <stop offset="100%" stopColor="var(--uvpt-lineA)" stopOpacity={0} />
+              </linearGradient>
 
-        {/* Floating avatar marker */}
-        <div
-          className="uvpt-marker"
-          style={{ left: `${xPct}%`, top: `${yPct}%` }}
-          aria-label={`Highlight at ${highlightTime}`}
-        >
-          <div className="uvpt-markerRing">
-            <div className="uvpt-avatar">
-              {avatarSrc ? (
-                <img src={avatarSrc} alt="" />
-              ) : (
-                <span className="uvpt-avatarFallback" aria-hidden="true">👩🏻</span>
-              )}
-            </div>
-          </div>
-          <div className="uvpt-markerShadow" />
-        </div>
+              <linearGradient id="uvptFillB" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--uvpt-lineB)" stopOpacity={0.12} />
+                <stop offset="100%" stopColor="var(--uvpt-lineB)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+
+            <CartesianGrid
+              vertical={false}
+              stroke="rgba(16, 24, 40, 0.06)"
+            />
+
+            <XAxis
+              dataKey="time"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "var(--uvpt-axis)" }}
+              dy={10}
+            />
+
+            <YAxis
+              domain={[0, 30_000_000]}
+              ticks={[0, 10_000_000, 20_000_000, 30_000_000]}
+              tickFormatter={formatMillions}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "var(--uvpt-axis)" }}
+              width={40}
+            />
+
+            <Tooltip content={<UsageTooltip />} cursor={false} />
+
+            {/* Light line */}
+            <Area
+              type="monotone"
+              dataKey="productA"
+              stroke="var(--uvpt-lineA)"
+              strokeWidth={2.5}
+              fill="url(#uvptFillA)"
+              fillOpacity={1}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+
+            {/* Dark line */}
+            <Area
+              type="monotone"
+              dataKey="productB"
+              stroke="var(--uvpt-lineB)"
+              strokeWidth={2.5}
+              fill="url(#uvptFillB)"
+              fillOpacity={1}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </Card>
   );
-};
-
-export default UsageVolumeByProductType;
+}

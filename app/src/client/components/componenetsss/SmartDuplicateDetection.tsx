@@ -17,22 +17,16 @@ const SmartDuplicateDetection: React.FC<SmartDuplicateDetectionProps> = ({
     <div className="info-box">
       <div className="info-header">
         <div className="info-title">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            className="info-icon"
-          >
-            <path
-              d="M8.93343 12.2663V8.93294M8.93343 5.59961H8.94176M17.2668 8.93294C17.2668 13.5353 13.5358 17.2663 8.93343 17.2663C4.33106 17.2663 0.600098 13.5353 0.600098 8.93294C0.600098 4.33057 4.33106 0.599609 8.93343 0.599609C13.5358 0.599609 17.2668 4.33057 17.2668 8.93294Z"
-              stroke="#373B40"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <g clip-path="url(#clip0_15971_29362)">
+    <path d="M10.0001 13.3337V10.0003M10.0001 6.66699H10.0084M18.3334 10.0003C18.3334 14.6027 14.6025 18.3337 10.0001 18.3337C5.39771 18.3337 1.66675 14.6027 1.66675 10.0003C1.66675 5.39795 5.39771 1.66699 10.0001 1.66699C14.6025 1.66699 18.3334 5.39795 18.3334 10.0003Z" stroke="#034A7D" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_15971_29362">
+      <rect width="20" height="20" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
           <span>Smart duplicate detection</span>
         </div>
         <button className="close-btn" onClick={onClose}>

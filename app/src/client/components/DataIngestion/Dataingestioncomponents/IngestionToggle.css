@@ -1,0 +1,57 @@
+@import "../../Variables/Variables.css";
+/* Outer pill — EXACT: padding 4, gap 4, height hugs content (36px with children) */
+.it-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;          /* ✅ outer padding */
+  gap: 4px;              /* ✅ space between segments */
+  border-radius: 20px;
+  border: 1px solid var(--color-neutral-300);
+  background: var(--color-neutral-white);
+  box-sizing: border-box;
+}
+
+/* Segment button — EXACT: inner height 28 (36 - 8 padding), horizontal padding 16 */
+.it-seg {
+  height: 28px;          /* ✅ key to match 36px overall */
+  padding: 0 16px;       /* ✅ left/right padding from your Figma */
+  border: 0;
+  border-radius: var(--border-radius-lg);
+  background: transparent;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: var(--font-family-primary);
+ color: var(--color-neutral-800);
+
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md);
+
+  transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+
+.it-seg.is-active {
+  background: var(--color-primary-700);
+  color: var(--color-neutral-white);
+  font-weight: 500;
+  box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6), 0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8), 0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+}
+
+.it-seg:focus {
+  outline: none;
+}
+
+.it-seg:focus-visible {
+  box-shadow: 0 0 0 3px rgba(2, 107, 176, 0.18);
+}
+
+.it-seg:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

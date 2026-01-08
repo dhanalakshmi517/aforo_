@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './DataHeader.css';
+import IngestionToggle from '../DataIngestion/Dataingestioncomponents/Ingestiontoggle';
 
 export interface DataHeaderProps {
   title: string;
@@ -65,26 +66,12 @@ const DataHeader: React.FC<DataHeaderProps> = ({
       <div className="dh-header-actions">
         {/* Segmented Toggle */}
         {showToggle && (
-          <div className="rp-segmented" role="tablist" aria-label="Mode">
-            <button
-              role="tab"
-              aria-selected={current === 'left'}
-              className={`rp-segment ${current === 'left' ? 'is-active' : ''}`}
-              onClick={() => setToggle('left')}
-              type="button"
-            >
-              {toggleLeftLabel}
-            </button>
-            <button
-              role="tab"
-              aria-selected={current === 'right'}
-              className={`rp-segment ${current === 'right' ? 'is-active' : ''}`}
-              onClick={() => setToggle('right')}
-              type="button"
-            >
-              {toggleRightLabel}
-            </button>
-          </div>
+          <IngestionToggle
+            value={current === 'left' ? 'manual' : 'realtime'}
+            onChange={(v) => setToggle(v === 'manual' ? 'left' : 'right')}
+            leftLabel={toggleLeftLabel}
+            rightLabel={toggleRightLabel}
+          />
         )}
 
         {/* Filter */}
