@@ -1,0 +1,175 @@
+:root {
+  --put-radius: 22px;
+  --put-border: rgba(16, 24, 40, 0.06);
+  --put-title: #19222d;
+  --put-sub: #a7b3c2;
+  --put-gap: 20px;
+}
+
+/* ===== layout ===== */
+.put-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* like screenshot: left wider */
+  gap: var(--put-gap);
+  width: 100%;
+  align-items: stretch;
+}
+
+/* ===== card ===== */
+.put-card {
+  border-radius: var(--put-radius) !important;
+  border: 1px solid var(--put-border) !important;
+  background: #fff !important;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.put-cardInner {
+  padding: 28px; /* matches your frame */
+  height: 512px; /* matches the “Fixed 512px” feel */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== headers ===== */
+.put-head {
+  margin-bottom: 14px;
+}
+
+.put-titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  width: 100%;
+}
+
+.put-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--put-title);
+}
+
+.put-updated {
+  font-size: 12px;
+  color: var(--put-sub);
+  margin-top: 6px;
+}
+
+.put-badge {
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+}
+
+/* right header row */
+.put-headRowRight {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+/* ===== heatmap area ===== */
+/* This is the key: gives the ResponsiveContainer a real height */
+.put-heatArea {
+  flex: 1;
+  min-height: 320px;
+  width: 100%;
+}
+
+/* ===== legend ===== */
+.put-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  align-items: center;
+  padding-top: 12px;
+}
+
+.put-legItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.put-legDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.put-legText {
+  font-size: 12px;
+  color: #7b97ae;
+}
+
+/* ===== right bar area ===== */
+.put-barArea {
+  flex: 1;
+  min-height: 360px;
+  width: 100%;
+}
+
+/* ===== tooltip ===== */
+.put-tt {
+  background: #ffffff;
+  border: 1px solid rgba(16, 24, 40, 0.10);
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.16);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 200px;
+}
+
+.put-ttTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.put-ttDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.put-ttTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #19222d;
+}
+
+.put-ttRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.put-ttK {
+  color: #7b97ae;
+}
+
+.put-ttV {
+  color: #19222d;
+  font-weight: 700;
+}
+
+.put-ttHint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #a7b3c2;
+}
+
+/* ===== responsive ===== */
+@media (max-width: 1100px) {
+  .put-grid {
+    grid-template-columns: 1fr;
+  }
+  .put-cardInner {
+    height: auto;
+    min-height: 520px;
+  }
+}

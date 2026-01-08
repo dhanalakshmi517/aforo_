@@ -1,89 +1,83 @@
 import * as React from "react";
-import { Card, Flex, Text } from "@tremor/react";
+import { Card, Text } from "@tremor/react";
 import "./ProductsKpiStrip.css";
 
-type Trend = {
-  value: string; // "+6.08%"
-};
+type KpiTone = "lavender" | "mint" | "ice";
 
-type KpiVariant = "lavender" | "mint" | "sky";
-
-export type ProductKpiItem = {
+export type ProductKpi = {
   id: string;
   title: string;
-  value: string;
-  trend?: Trend; // optional (only first 3 in your screenshot)
-  variant?: KpiVariant;
+  value: string | number;
+  /** optional delta like "+6.08%" */
+  deltaText?: string;
+  /** show the green rising arrow */
+  showTrend?: boolean;
+  /** background tone */
+  tone?: KpiTone;
+  /** for cards like “Most Sold Product” */
+  subtitle?: string;
 };
 
 type Props = {
-  items?: ProductKpiItem[];
+  items?: ProductKpi[];
   className?: string;
 };
 
-const TrendUpIcon: React.FC = () => (
-  <svg
-    className="pkpi-trend-icon"
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M3.2 10.2L6.4 7.0L8.6 9.2L12.8 5.0"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M10.6 5H12.8V7.2"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+function TrendIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path
+        d="M12 5.25H16.5M16.5 5.25V9.75M16.5 5.25L10.125 11.625L6.375 7.875L1.5 12.75"
+        stroke="#6AB349"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-const defaultItems: ProductKpiItem[] = [
-  { id: "total", title: "Total Products", value: "85", trend: { value: "+6.08%" }, variant: "lavender" },
-  { id: "active", title: "Active Products", value: "85", trend: { value: "+6.08%" }, variant: "mint" },
-  { id: "inactive", title: "Inactive Products", value: "40", trend: { value: "+6.08%" }, variant: "sky" },
-  { id: "mostSold", title: "Most Sold Product", value: "Microsoft Drive Pro", variant: "lavender" },
-  { id: "highestRev", title: "Highest Revenue Product", value: "Box Drive Pro", variant: "lavender" },
+const sample: ProductKpi[] = [
+  { id: "total", title: "Total Products", value: 85, deltaText: "+6.08%", showTrend: true, tone: "lavender" },
+  { id: "active", title: "Active Products", value: 85, deltaText: "+6.08%", showTrend: true, tone: "mint" },
+  { id: "inactive", title: "Inactive Products", value: 40, deltaText: "+6.08%", showTrend: true, tone: "ice" },
+  { id: "most", title: "Most Sold Product", value: "Microsoft Drive Pro", tone: "lavender" },
+  { id: "highest", title: "Highest Revenue Product", value: "Box Drive Pro", tone: "lavender" },
 ];
 
-const ProductsKpiStrip: React.FC<Props> = ({ items = defaultItems, className = "" }) => {
+function toneClass(tone?: KpiTone) {
+  if (tone === "mint") return "pks-card pks-mint";
+  if (tone === "ice") return "pks-card pks-ice";
+  return "pks-card pks-lavender";
+}
+
+export default function ProductKpiStrip({ items = sample, className = "" }: Props) {
   return (
-    <div className={`pkpi-row ${className}`.trim()} role="list" aria-label="Product KPIs">
-      {items.map((it) => (
-        <Card
-          key={it.id}
-          className={`pkpi-card v-${it.variant || "lavender"}`}
-        >
-          <Flex justifyContent="between" alignItems="start" className="pkpi-top">
-            <Text className="pkpi-title">{it.title}</Text>
+    <div className={`pks-wrap ${className}`}>
+      {items.map((kpi) => {
+        const isNumeric = typeof kpi.value === "number" || /^[0-9]+$/.test(String(kpi.value));
+        return (
+          <Card key={kpi.id} className={toneClass(kpi.tone)}>
+            <div className="pks-top">
+              <Text className="pks-title">{kpi.title}</Text>
 
-            {it.trend ? (
-              <div className="pkpi-trend" aria-label={`Trend ${it.trend.value}`}>
-                <span className="pkpi-trend-value">{it.trend.value}</span>
-                <TrendUpIcon />
-              </div>
-            ) : (
-              <span className="pkpi-trend-spacer" />
-            )}
-          </Flex>
+              {kpi.deltaText ? (
+                <div className="pks-delta">
+                  <span className="pks-deltaText">{kpi.deltaText}</span>
+                  {kpi.showTrend ? <TrendIcon /> : null}
+                </div>
+              ) : (
+                <div />
+              )}
+            </div>
 
-          <div className={`pkpi-value ${it.value.length > 8 ? "is-text" : ""}`}>
-            {it.value}
-          </div>
-        </Card>
-      ))}
+            <div className={`pks-value ${isNumeric ? "pks-valueNum" : "pks-valueText"}`}>
+              {kpi.value}
+            </div>
+
+            {kpi.subtitle ? <div className="pks-sub">{kpi.subtitle}</div> : null}
+          </Card>
+        );
+      })}
     </div>
   );
-};
-
-export default ProductsKpiStrip;
+}
