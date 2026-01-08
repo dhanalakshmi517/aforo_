@@ -1,0 +1,58 @@
+@import "../Variables.css";
+.dsh-wrap {
+  width: 100%;
+  background: var(--color-neutral-50);
+}
+
+.dsh-inner {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.dsh-title {
+  margin: 0;
+color: var(--color-neutral-1700);
+
+/* body/lg/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
+}
+
+.dsh-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dsh-add {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: #0b5ea8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dsh-add:hover {
+  filter: brightness(0.97);
+}
+
+.dsh-add:active {
+  transform: translateY(1px);
+}
+
+.dsh-divider {
+  width: 1px;
+  height: 18px;
+  background: #d9dfe8;
+  border-radius: 999px;
+}

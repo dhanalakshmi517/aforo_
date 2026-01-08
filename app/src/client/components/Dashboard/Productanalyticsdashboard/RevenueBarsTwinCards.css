@@ -1,105 +1,99 @@
 :root {
   --rbtc-radius: 18px;
   --rbtc-border: rgba(16, 24, 40, 0.06);
+  --rbtc-gap: 20px;
 
   --rbtc-title: #19222d;
   --rbtc-sub: #a7b3c2;
-
-  --rbtc-track: #f1f3f9;
-
-  /* bar colors close to screenshot */
-  --rbtc-green: #57c79b;
-  --rbtc-purple: #7b61d1;
-  --rbtc-blue: #5c7bd4;
-  --rbtc-sky: #56a1bf;
 }
 
+/* two cards side-by-side like screenshot */
 .rbtc-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: var(--rbtc-gap);
   width: 100%;
+  align-items: stretch;
 }
 
+/* card look */
 .rbtc-card {
   border-radius: var(--rbtc-radius) !important;
   border: 1px solid var(--rbtc-border) !important;
-  padding: 18px !important;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06) !important;
   background: #fff !important;
-  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+  padding: 20px !important;
 }
 
 .rbtc-head {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
+  justify-content: space-between !important;
 }
 
 .rbtc-title {
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  color: var(--rbtc-title) !important;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rbtc-title);
 }
 
 .rbtc-updated {
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  color: var(--rbtc-sub) !important;
-}
-
-.rbtc-bars {
-  display: grid;
-  gap: 14px;
-  margin-top: 6px;
-}
-
-/* label + bar */
-.rbtc-row {
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 12px;
-  align-items: center;
-}
-
-.rbtc-label {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--rbtc-sub);
-  white-space: nowrap;
+  text-align: right;
 }
 
-.rbtc-track {
+/* chart area */
+.rbtc-chart {
   width: 100%;
-  height: 12px;
-  border-radius: 4px;
-  background: var(--rbtc-track);
-  overflow: hidden;
 }
 
-.rbtc-fill {
-  height: 100%;
-  border-radius: 4px;
+/* tooltip */
+.rbtc-tt {
+  background: #fff;
+  border: 1px solid rgba(16, 24, 40, 0.10);
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.16);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 190px;
 }
 
-.rbtc-fill.is-green { background: var(--rbtc-green); }
-.rbtc-fill.is-purple { background: var(--rbtc-purple); }
-.rbtc-fill.is-blue { background: var(--rbtc-blue); }
-.rbtc-fill.is-sky { background: var(--rbtc-sky); }
-
-/* Axis aligned under bars */
-.rbtc-axis {
-  position: relative;
-  height: 16px;
-  margin-top: 14px;
-  padding-left: 84px; /* label width + gap alignment */
+.rbtc-ttTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.rbtc-axis-tick {
-  position: absolute;
-  top: 0;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: var(--rbtc-sub);
-  white-space: nowrap;
+.rbtc-ttDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
 }
 
+.rbtc-ttTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #19222d;
+}
+
+.rbtc-ttRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.rbtc-ttK {
+  color: #7b97ae;
+}
+
+.rbtc-ttV {
+  color: #19222d;
+  font-weight: 800;
+}
+
+/* responsive: stack cards */
 @media (max-width: 1100px) {
   .rbtc-grid {
     grid-template-columns: 1fr;

@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 70px;
+  min-height: 68px;
   padding: var(--scale-400, 16px) var(--scale-500, 10px) var(--scale-400, 16px) var(--scale-700, 20px);
   box-sizing: border-box;
   background:var(--color-neutral-50);

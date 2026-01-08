@@ -5,7 +5,7 @@
 border: 1px solid  #EEF4FB;
 background: var(--color-neutral-white);
 
-  box-shadow: var(--shadow-5);
+box-shadow: 0 0 8px 2px var(--shadow-shadow-1, #EEF1F6);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -70,7 +70,7 @@ line-height: var(--line-height-body-md);
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 overflow: hidden;
 color: var(--color-neutral-1700);
 text-overflow: ellipsis;

@@ -121,6 +121,7 @@ import RevenueBarsTwinCards from './components/Dashboard/Productanalyticsdashboa
 import RatePlansByProductTables from './components/Dashboard/Productanalyticsdashboard/RatePlansByProductTables';
 import RepeatBuyersAndGrowth from './components/Dashboard/Productanalyticsdashboard/RepeatBuyersAndGrowth';
 import UsageVolumeByProductType from './components/Dashboard/Productanalyticsdashboard/UsageVolumeByProductType';
+import ProductsUsageTrends from './components/Dashboard/Productanalyticsdashboard/ProductUsageTrends';
 
 // Wrapper to extract route params for EditMetrics
 function EditMetricsWrapper() {
@@ -593,21 +594,21 @@ export default function App() {
                         >
                           <RealTimeKpiCards />
                           <div
-                          style={{ padding: '20px' }}
+                          style={{ padding: '10px' }}
                         ></div>
 
                           <CustomersByUsageCard />
 <div
-                          style={{ padding: '20px' }}
+                          style={{ padding: '10px' }}
                         ></div>
                           <RealTimePaymentsWidgets />
 <div
-                          style={{ padding: '20px' }}
+                          style={{ padding: '10px' }}
                         ></div>
                           <BillableHeatmapAndRevenue/>
 
                          <div
-                          style={{ padding: '20px' }}
+                          style={{ padding: '10px' }}
                         ></div>
 
                           {/* Other real-time analysis components will go here */}
@@ -667,6 +668,7 @@ export default function App() {
                           style={{ padding: '20px' }}
                         ></div>
 
+
                           {/* Other real-time analysis components will go here */}
                         </div>
                       </main>
@@ -715,6 +717,71 @@ export default function App() {
                           <GrowthOpportunities />
                           <RevenueAnalyticsDash4 />
                           <RevenueAnalyticsDash5 />
+                        </div>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Product Analysis dashboard detail */}
+              <Route
+                path="/get-started/dashboards/product-analysis"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen">
+                      <div
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
+                      >
+                        <SideNavbar
+                          activeTab={currentTab}
+                          onTabClick={handleSidebarClick}
+                          hidden={!showSidebar}
+                          collapsible={true}
+                        />
+                      </div>
+                      <main
+                        className="flex-1 flex flex-col"
+                        style={{
+                          backgroundColor: "#FBFDFF",
+                          marginLeft: sidebarHovered ? '15rem' : '80px',
+                          transition: 'margin-left 0.3s ease'
+                        }}
+                      >
+                        <div className="sticky top-0">
+                          <ProductHeader />
+                        </div>
+                        <div
+                          className="flex-1 overflow-y-auto"
+                          style={{ padding: '20px' }}
+                        >
+                          <ProductsKpiStrip />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <RevenueBarsTwinCards />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+                        
+                          <RatePlansByProductTables />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+                        <ProductsUsageTrends />
+                         <div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <RepeatBuyersAndGrowth />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+                          <UsageVolumeByProductType />
+                          <div
+                          style={{ padding: '20px' }}
+                        ></div>
+                        
                         </div>
                       </main>
                     </div>

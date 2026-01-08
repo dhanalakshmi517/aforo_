@@ -1,0 +1,59 @@
+/* IngetsionFileChip.css */
+
+.ifc-chip {
+  height: 36px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  /* ✅ fixed width behavior */
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ifc-chip.is-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ifc-chip.is-clickable:hover {
+  background: #fbfdff;
+  border-color: rgba(7, 68, 112, 0.14);
+}
+
+.ifc-chip.is-clickable:active {
+  transform: translateY(1px);
+}
+
+.ifc-chip.is-clickable:focus-visible {
+  outline: 2px solid rgba(2, 107, 176, 0.35);
+  outline-offset: 2px;
+}
+
+.ifc-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.ifc-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #19222d;
+
+  /* ✅ truncation */
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
