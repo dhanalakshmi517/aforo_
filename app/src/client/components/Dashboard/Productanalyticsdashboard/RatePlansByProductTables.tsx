@@ -125,7 +125,7 @@ function TableCard({ tone, title, emoji, rows }: TableCardProps) {
 
 export default function RatePlansByProductTables({
   leftTitle = "Active Rate Plans per Product",
-  rightTitle = "Cancelled Rate Plns per Product",
+  rightTitle = "Cancelled Rate Plans per Product",
   leftEmoji = "＋",
   rightEmoji = "✖",
 
