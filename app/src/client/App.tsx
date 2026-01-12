@@ -67,6 +67,8 @@ const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptio
 const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
 const createSubscriptionLoader = () => import('./components/Subscriptions/CreateSubscription');
 const CreateSubscription = React.lazy(createSubscriptionLoader) as React.ComponentType<any>;
+const editSubscriptionLoader = () => import('./components/Subscriptions/EditSubscriptions/EditSubscription');
+const EditSubscription = React.lazy(editSubscriptionLoader) as React.ComponentType<any>;
 const dataIngestionLoader = () => import('./components/DataIngestion/DataIngestionPage');
 const DataIngestionPage = React.lazy(dataIngestionLoader) as React.ComponentType<any>;
 const integrationsLoader = () => import('./components/Integrations/Integrations');
@@ -128,6 +130,44 @@ function EditMetricsWrapper() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   return <EditMetrics metricId={id} onClose={() => navigate('/get-started/metering')} />;
+}
+
+// Wrapper to extract route params for EditSubscription
+function EditSubscriptionWrapper() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [subscription, setSubscription] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadSubscription = async () => {
+      if (id) {
+        try {
+          const { getSubscription } = await import('./components/Subscriptions/api');
+          const subscriptionData = await getSubscription(Number(id));
+          setSubscription(subscriptionData);
+        } catch (error) {
+          console.error('Failed to load subscription:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadSubscription();
+  }, [id]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <EditSubscription
+      onClose={() => navigate('/get-started/subscriptions')}
+      onRefresh={() => {}}
+      initial={subscription}
+    />
+  );
 }
 
 // Wrapper component to pass navigation state to ApigeeSuccess
@@ -1047,13 +1087,29 @@ export default function App() {
                 path="/get-started/subscriptions/new"
                 element={
                   <ProtectedRoute>
-                    <div className="flex min-h-screen px-6 py-6 bg-white">
+                    <div className="flex min-h-screen px-6 bg-white">
                       <div className="w-full">
                         <CreateSubscription
                           onClose={() => navigate('/get-started/subscriptions')}
                           onCreateSuccess={() => navigate('/get-started/subscriptions')}
                           onRefresh={() => { }}
                         />
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Edit Subscription – no sidebar */}
+              <Route
+                path="/get-started/subscriptions/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex min-h-screen bg-white">
+                      <div className="w-full">
+                        <Suspense fallback={RouteSpinner}>
+                          <EditSubscriptionWrapper />
+                        </Suspense>
                       </div>
                     </div>
                   </ProtectedRoute>

@@ -13,6 +13,7 @@ import SecondaryButton from "../componenetsss/SecondaryButton";
 import ProductCreatedSuccess from "../componenetsss/ProductCreatedSuccess";
 import SectionHeader from "../componenetsss/SectionHeader";
 import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
+import InfoInlineNote from "../componenetsss/InfoInlineNote";
 
 import {
   Api,
@@ -77,6 +78,8 @@ export default function CreateSubscription({
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
+  const [initialFormState, setInitialFormState] = useState<any>(null);
 
   // lists
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -180,9 +183,6 @@ export default function CreateSubscription({
     })();
   }, [activeSubscriptionId, draftData]);
 
-  // ─────────────────────────────────────────────────────────────
-  // Apply draftData object (same style as metric hydrate)
-  // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!draftData) return;
 
@@ -196,11 +196,19 @@ export default function CreateSubscription({
     if (pt === "PREPAID" || pt === "POSTPAID") setPaymentType(pt);
 
     if ((draftData as any).adminNotes) setAdminNotes((draftData as any).adminNotes);
-  }, [draftData]);
 
-  // ─────────────────────────────────────────────────────────────
-  // Set selected names from selected IDs once lists are ready
-  // ─────────────────────────────────────────────────────────────
+    if (!initialFormState) {
+      setInitialFormState({
+        selectedCustomerId: (draftData as any).customerId ?? null,
+        selectedProductId: (draftData as any).productId ?? null,
+        selectedRatePlanId: (draftData as any).ratePlanId ?? null,
+        paymentType: pt === "PREPAID" || pt === "POSTPAID" ? pt : "",
+        adminNotes: (draftData as any).adminNotes || ""
+      });
+    }
+  }, [draftData, initialFormState]);
+
+  
   useEffect(() => {
     if (selectedCustomerId && customers.length) {
       const c = customers.find((x) => x.customerId === selectedCustomerId);
@@ -222,15 +230,20 @@ export default function CreateSubscription({
     }
   }, [ratePlans, selectedRatePlanId]);
 
-  // Reset "Saved!" state on any edit (same as metric)
   useEffect(() => {
     if (isDraftSaved) setIsDraftSaved(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, adminNotes]);
 
-  // ─────────────────────────────────────────────────────────────
-  // typed or started?
-  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (isDraftSaved) {
+      const timer = setTimeout(() => {
+        setIsDraftSaved(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isDraftSaved]);
+
+  
   const hasAnyRequiredInput = useMemo(() => {
     return Boolean(
       selectedCustomerId ||
@@ -241,7 +254,36 @@ export default function CreateSubscription({
     );
   }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, adminNotes]);
 
-  const topActionsDisabled = !hasAnyRequiredInput && !subscriptionId;
+  const hasUserMadeChanges = useMemo(() => {
+    if (!initialFormState) {
+      // No draft loaded, enable buttons if user has input
+      return hasAnyRequiredInput;
+    }
+    // Draft loaded, check if current state differs from initial state
+    return (
+      selectedCustomerId !== initialFormState.selectedCustomerId ||
+      selectedProductId !== initialFormState.selectedProductId ||
+      selectedRatePlanId !== initialFormState.selectedRatePlanId ||
+      paymentType !== initialFormState.paymentType ||
+      adminNotes !== initialFormState.adminNotes
+    );
+  }, [
+    initialFormState,
+    selectedCustomerId,
+    selectedProductId,
+    selectedRatePlanId,
+    paymentType,
+    adminNotes,
+    hasAnyRequiredInput
+  ]);
+
+  useEffect(() => {
+    if (hasUserMadeChanges && !hasEverBeenEnabled) {
+      setHasEverBeenEnabled(true);
+    }
+  }, [hasUserMadeChanges, hasEverBeenEnabled]);
+
+  const topActionsDisabled = !hasEverBeenEnabled;
 
   const canGoReview = useMemo(() => {
     return Boolean(
@@ -525,8 +567,8 @@ export default function CreateSubscription({
             value: rp.ratePlanId.toString(),
           }))}
         disabled={!selectedProductId}
-        helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
       />
+      <InfoInlineNote text="Select a rate plan associated with the chosen product. Changing the product will reset this selection." />
 
                     <DropdownField
         label="Payment Type"
@@ -758,8 +800,10 @@ export default function CreateSubscription({
           <ConfirmDeleteModal
             isOpen={showDeleteConfirm}
             productName={selectedCustomerName || "this purchase"}
+            entityType="purchase"
             discardLabel="Keep editing"
             confirmLabel="Discard"
+            isDiscardMode={true}
             onConfirm={async () => {
               setShowDeleteConfirm(false);
               await deleteAndClose();

@@ -108,6 +108,8 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
+  const [initialFormState, setInitialFormState] = useState<any>(null);
 
   // form
   const [metricId, setMetricId] = useState<number | null>(null);
@@ -148,6 +150,19 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
             usageConditions: (data as any).usageConditions || [],
             version: (data as any).version || ''
           });
+
+          const loadedState = {
+            metricName: (data as any).metricName || '',
+            selectedProductId: String((data as any).productId || ''),
+            version: (data as any).version || '',
+            unitOfMeasure: (data as any).unitOfMeasure || '',
+            description: (data as any).description || '',
+            aggregationFunction: (data as any).aggregationFunction || '',
+            aggregationWindow: (data as any).aggregationWindow || '',
+            billingCriteria: (data as any).billingCriteria || '',
+            usageConditions: (data as any).usageConditions || []
+          };
+          setInitialFormState(loadedState);
 
           setMetricId((data as any).metricId ?? (data as any).billableMetricId ?? null);
           setMetricName((data as any).metricName || '');
@@ -233,6 +248,43 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   ]);
 
   const isConditionsLocked = !hasAnyRequiredInput;
+
+  const hasUserMadeChanges = useMemo(() => {
+    if (!initialFormState) {
+      // No draft loaded, enable buttons if user has input
+      return hasAnyRequiredInput;
+    }
+    // Draft loaded, check if current state differs from initial state
+    return (
+      metricName !== initialFormState.metricName ||
+      selectedProductId !== initialFormState.selectedProductId ||
+      version !== initialFormState.version ||
+      unitOfMeasure !== initialFormState.unitOfMeasure ||
+      description !== initialFormState.description ||
+      aggregationFunction !== initialFormState.aggregationFunction ||
+      aggregationWindow !== initialFormState.aggregationWindow ||
+      billingCriteria !== initialFormState.billingCriteria ||
+      JSON.stringify(usageConditions) !== JSON.stringify(initialFormState.usageConditions)
+    );
+  }, [
+    initialFormState,
+    metricName,
+    selectedProductId,
+    version,
+    unitOfMeasure,
+    description,
+    aggregationFunction,
+    aggregationWindow,
+    billingCriteria,
+    usageConditions,
+    hasAnyRequiredInput
+  ]);
+
+  useEffect(() => {
+    if (hasUserMadeChanges && !hasEverBeenEnabled) {
+      setHasEverBeenEnabled(true);
+    }
+  }, [hasUserMadeChanges, hasEverBeenEnabled]);
 
   // Lock review step if Usage Conditions step (step 2) is incomplete
   const isReviewLocked = useMemo(() => {
@@ -571,11 +623,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
   };
 
   const productOptions = [
-    { label: 'Select a product...', value: '', disabled: true },
+    { label: 'product...', value: '', disabled: true },
     ...products.map(p => ({ label: p.productName, value: String(p.productId) }))
   ];
 
-  const topActionsDisabled = !hasAnyRequiredInput && !metricId;
+  const topActionsDisabled = !hasEverBeenEnabled;
 
   const LockBadge = () => (
     <span
@@ -993,8 +1045,10 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
           <ConfirmDeleteModal
             isOpen={showDeleteConfirm}
             productName={metricName || 'this metric'}
-               discardLabel="Keep editing"
-          confirmLabel="Discard"
+            entityType="metric"
+            isDiscardMode={true}
+            discardLabel="Keep editing"
+            confirmLabel="Discard"
             onConfirm={async () => {
               setShowDeleteConfirm(false);
               await deleteAndClose();
