@@ -322,6 +322,129 @@ const CreatePricePlan = React.forwardRef<
     setPersistentDraftData(plan);
   };
 
+  const validatePricingStep = React.useCallback((): { isValid: boolean; errors: Record<string, string> } => {
+    const e: Record<string, string> = {};
+    const selectedPricingModel = getRatePlanData("PRICING_MODEL") || "";
+
+    if (!selectedPricingModel) {
+      e.pricingModel = "Please select a pricing model";
+      return { isValid: false, errors: e };
+    }
+
+    if (selectedPricingModel === "Flat Fee") {
+      const flatFeeAmount = getRatePlanData("FLAT_FEE_AMOUNT");
+      const apiCalls = getRatePlanData("FLAT_FEE_API_CALLS");
+      const overageRate = getRatePlanData("FLAT_FEE_OVERAGE");
+      // Check for zero or empty
+      if (!flatFeeAmount || Number(flatFeeAmount) <= 0) e.flatFeeAmount = "Flat fee amount is required";
+      if (!apiCalls || Number(apiCalls) <= 0) e.apiCalls = "Number of API calls is required";
+      if (!overageRate || Number(overageRate) <= 0) e.overageRate = "Overage unit rate is required";
+    } else if (selectedPricingModel === "Usage-Based") {
+      const perUnitAmount = getRatePlanData("USAGE_PER_UNIT_AMOUNT");
+      if (!perUnitAmount || Number(perUnitAmount) <= 0) e.perUnitAmount = "Per unit amount is required";
+    } else if (selectedPricingModel === "Tiered Pricing") {
+      const tieredTiers = JSON.parse(getRatePlanData("TIERED_TIERS") || "[]");
+      const overage = getRatePlanData("TIERED_OVERAGE");
+      if (tieredTiers.length === 0) e.tieredTiers = "At least one tier is required";
+
+      const hasInvalidTier = tieredTiers.some(
+        (tier: any) =>
+          !tier.from?.toString().trim() ||
+          !tier.price?.toString().trim() ||
+          (!tier.isUnlimited && !tier.to?.toString().trim())
+      );
+      if (hasInvalidTier) e.tieredTiers = "All tier fields are required";
+
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < tieredTiers.length; i++) {
+        const tier = tieredTiers[i];
+        if (!tier.isUnlimited && tier.from && tier.to && Number(tier.to) <= Number(tier.from)) {
+          e.tieredTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && tieredTiers[i - 1].to) {
+          const expectedFrom = Number(tieredTiers[i - 1].to) + 1;
+          if (Number(tier.from) !== expectedFrom) {
+            e.tieredTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
+      const hasUnlimited = tieredTiers.some((t: any) => t.isUnlimited);
+      if (!hasUnlimited && (!overage || Number(overage) <= 0)) {
+        e.tieredOverage = "Overage charge is required when no unlimited tier";
+      }
+    } else if (selectedPricingModel === "Volume-Based") {
+      const volumeTiers = JSON.parse(getRatePlanData("VOLUME_TIERS") || "[]");
+      const overage = getRatePlanData("VOLUME_OVERAGE");
+      const noUpperLimit = getRatePlanData("VOLUME_NO_UPPER_LIMIT") === "true";
+      if (volumeTiers.length === 0) e.volumeTiers = "At least one volume tier is required";
+
+      // Validate all tier fields are filled
+      const hasInvalidTier = volumeTiers.some(
+        (tier: any) =>
+          tier.from === null || tier.from === undefined || tier.from === '' ||
+          tier.price === null || tier.price === undefined || tier.price === '' ||
+          (!tier.isUnlimited && (tier.to === null || tier.to === undefined || tier.to === ''))
+      );
+      if (hasInvalidTier) e.volumeTiers = "All tier fields are required";
+
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < volumeTiers.length; i++) {
+        const tier = volumeTiers[i];
+        if (!tier.isUnlimited && tier.from != null && tier.to != null && Number(tier.to) <= Number(tier.from)) {
+          e.volumeTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && volumeTiers[i - 1].to != null) {
+          const expectedFrom = Number(volumeTiers[i - 1].to) + 1;
+          if (Number(tier.from) !== expectedFrom) {
+            e.volumeTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
+      if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
+        e.volumeOverage = "Overage unit rate is required when no unlimited tier";
+      }
+    } else if (selectedPricingModel === "Stairstep") {
+      const stairTiers = JSON.parse(getRatePlanData("STAIR_TIERS") || "[]");
+      const overage = getRatePlanData("STAIR_OVERAGE");
+      const noUpperLimit = getRatePlanData("STAIR_NO_UPPER_LIMIT") === "true";
+      if (stairTiers.length === 0) e.stairTiers = "At least one stair tier is required";
+
+      // Validate all stair fields are filled
+      const hasInvalidStair = stairTiers.some(
+        (stair: any) =>
+          !stair.from?.toString().trim() ||
+          !stair.cost?.toString().trim() ||
+          (!stair.isUnlimited && !stair.to?.toString().trim())
+      );
+      if (hasInvalidStair) e.stairTiers = "All stair fields are required";
+
+      // Check for validation errors (to > from, sequential validation)
+      for (let i = 0; i < stairTiers.length; i++) {
+        const stair = stairTiers[i];
+        if (!stair.isUnlimited && stair.from && stair.to && Number(stair.to) <= Number(stair.from)) {
+          e.stairTiers = "Each tier's 'to' value must be greater than 'from' value";
+          break;
+        }
+        if (i > 0 && stairTiers[i - 1].to) {
+          const expectedFrom = Number(stairTiers[i - 1].to) + 1;
+          if (Number(stair.from) !== expectedFrom) {
+            e.stairTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
+            break;
+          }
+        }
+      }
+      if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
+        e.stairOverage = "Overage charge is required when no unlimited tier";
+      }
+    }
+
+    return { isValid: Object.keys(e).length === 0, errors: e };
+  }, [getRatePlanData]);
+
   // ===== Lock logic =====
   const isStep0Filled = React.useMemo(() => {
     return Boolean(planName.trim() && billingFrequency && paymentMethod);
@@ -332,9 +455,10 @@ const CreatePricePlan = React.forwardRef<
   }, [selectedProductName, selectedMetricId]);
 
   const isStep2Filled = React.useMemo(() => {
-    const pricingModel = getRatePlanData("PRICING_MODEL");
-    return Boolean(pricingModel);
-  }, [currentStep]);
+    // Strict validation: pricing model + all required fields
+    const { isValid } = validatePricingStep();
+    return isValid;
+  }, [currentStep, validatePricingStep]);
 
   const isStep1Locked = !isStep0Filled;
   const isStep2Locked = !isStep0Filled || !isStep1Filled;
@@ -456,121 +580,9 @@ const CreatePricePlan = React.forwardRef<
     return Object.keys(e).length === 0;
   };
 
-  const validatePricingStep = (): { isValid: boolean; errors: Record<string, string> } => {
-    const e: Record<string, string> = {};
-    const selectedPricingModel = getRatePlanData("PRICING_MODEL") || "";
 
-    if (!selectedPricingModel) {
-      e.pricingModel = "Please select a pricing model";
-      return { isValid: false, errors: e };
-    }
 
-    if (selectedPricingModel === "Flat Fee") {
-      const flatFeeAmount = getRatePlanData("FLAT_FEE_AMOUNT");
-      const apiCalls = getRatePlanData("FLAT_FEE_API_CALLS");
-      const overageRate = getRatePlanData("FLAT_FEE_OVERAGE");
-      if (!flatFeeAmount || Number(flatFeeAmount) <= 0) e.flatFeeAmount = "Flat fee amount is required";
-      if (!apiCalls || Number(apiCalls) <= 0) e.apiCalls = "Number of API calls is required";
-      if (!overageRate || Number(overageRate) <= 0) e.overageRate = "Overage unit rate is required";
-    } else if (selectedPricingModel === "Usage-Based") {
-      const perUnitAmount = getRatePlanData("USAGE_PER_UNIT_AMOUNT");
-      if (!perUnitAmount || Number(perUnitAmount) <= 0) e.perUnitAmount = "Per unit amount is required";
-    } else if (selectedPricingModel === "Tiered Pricing") {
-      const tieredTiers = JSON.parse(getRatePlanData("TIERED_TIERS") || "[]");
-      const overage = getRatePlanData("TIERED_OVERAGE");
-      if (tieredTiers.length === 0) e.tieredTiers = "At least one tier is required";
-      const hasInvalidTier = tieredTiers.some(
-        (tier: any) =>
-          !tier.from?.toString().trim() ||
-          !tier.price?.toString().trim() ||
-          (!tier.isUnlimited && !tier.to?.toString().trim())
-      );
-      if (hasInvalidTier) e.tieredTiers = "All tier fields are required";
-      // Check for validation errors (to > from, sequential validation)
-      for (let i = 0; i < tieredTiers.length; i++) {
-        const tier = tieredTiers[i];
-        if (!tier.isUnlimited && tier.from && tier.to && Number(tier.to) <= Number(tier.from)) {
-          e.tieredTiers = "Each tier's 'to' value must be greater than 'from' value";
-          break;
-        }
-        if (i > 0 && tieredTiers[i - 1].to) {
-          const expectedFrom = Number(tieredTiers[i - 1].to) + 1;
-          if (Number(tier.from) !== expectedFrom) {
-            e.tieredTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
-            break;
-          }
-        }
-      }
-      const hasUnlimited = tieredTiers.some((t: any) => t.isUnlimited);
-      if (!hasUnlimited && (!overage || Number(overage) <= 0)) {
-        e.tieredOverage = "Overage charge is required when no unlimited tier";
-      }
-    } else if (selectedPricingModel === "Volume-Based") {
-      const volumeTiers = JSON.parse(getRatePlanData("VOLUME_TIERS") || "[]");
-      const overage = getRatePlanData("VOLUME_OVERAGE");
-      const noUpperLimit = getRatePlanData("VOLUME_NO_UPPER_LIMIT") === "true";
-      if (volumeTiers.length === 0) e.volumeTiers = "At least one volume tier is required";
-      // Validate all tier fields are filled
-      const hasInvalidTier = volumeTiers.some(
-        (tier: any) =>
-          tier.from === null || tier.from === undefined || tier.from === '' ||
-          tier.price === null || tier.price === undefined || tier.price === '' ||
-          (!tier.isUnlimited && (tier.to === null || tier.to === undefined || tier.to === ''))
-      );
-      if (hasInvalidTier) e.volumeTiers = "All tier fields are required";
-      // Check for validation errors (to > from, sequential validation)
-      for (let i = 0; i < volumeTiers.length; i++) {
-        const tier = volumeTiers[i];
-        if (!tier.isUnlimited && tier.from != null && tier.to != null && Number(tier.to) <= Number(tier.from)) {
-          e.volumeTiers = "Each tier's 'to' value must be greater than 'from' value";
-          break;
-        }
-        if (i > 0 && volumeTiers[i - 1].to != null) {
-          const expectedFrom = Number(volumeTiers[i - 1].to) + 1;
-          if (Number(tier.from) !== expectedFrom) {
-            e.volumeTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
-            break;
-          }
-        }
-      }
-      if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
-        e.volumeOverage = "Overage unit rate is required when no unlimited tier";
-      }
-    } else if (selectedPricingModel === "Stairstep") {
-      const stairTiers = JSON.parse(getRatePlanData("STAIR_TIERS") || "[]");
-      const overage = getRatePlanData("STAIR_OVERAGE");
-      const noUpperLimit = getRatePlanData("STAIR_NO_UPPER_LIMIT") === "true";
-      if (stairTiers.length === 0) e.stairTiers = "At least one stair tier is required";
-      // Validate all stair fields are filled
-      const hasInvalidStair = stairTiers.some(
-        (stair: any) =>
-          !stair.from?.toString().trim() ||
-          !stair.cost?.toString().trim() ||
-          (!stair.isUnlimited && !stair.to?.toString().trim())
-      );
-      if (hasInvalidStair) e.stairTiers = "All stair fields are required";
-      // Check for validation errors (to > from, sequential validation)
-      for (let i = 0; i < stairTiers.length; i++) {
-        const stair = stairTiers[i];
-        if (!stair.isUnlimited && stair.from && stair.to && Number(stair.to) <= Number(stair.from)) {
-          e.stairTiers = "Each tier's 'to' value must be greater than 'from' value";
-          break;
-        }
-        if (i > 0 && stairTiers[i - 1].to) {
-          const expectedFrom = Number(stairTiers[i - 1].to) + 1;
-          if (Number(stair.from) !== expectedFrom) {
-            e.stairTiers = "Tier ranges must be sequential (from = previous tier's to + 1)";
-            break;
-          }
-        }
-      }
-      if (!noUpperLimit && (!overage || Number(overage) <= 0)) {
-        e.stairOverage = "Overage charge is required when no unlimited tier";
-      }
-    }
 
-    return { isValid: Object.keys(e).length === 0, errors: e };
-  };
 
   const ensureRatePlanCreated = async (): Promise<boolean> => {
     if (ratePlanId) return true;
@@ -628,8 +640,8 @@ const CreatePricePlan = React.forwardRef<
     const ok = await canNavigateTo(index);
     if (!ok) return;
 
-    // Remove all pricing validation for navigation - allow free movement between steps
-    // Users can navigate freely and validation will only occur on final submission
+    // Allow internal navigation if valid, but still save best-effort
+    // Removed "Remove all pricing validation..." comment since we ARE using validation now
 
     // best-effort persist current step
     try {
@@ -1110,7 +1122,23 @@ const CreatePricePlan = React.forwardRef<
               <nav className="rate-np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
-                  const isCompleted = i < currentStep;
+
+                  // Check if each step's required fields are filled (like NewProduct)
+                  const isStep0Completed = planName.trim() && billingFrequency && paymentMethod;
+                  const isStep1Completed = selectedProductName && selectedMetricId !== null;
+                  const { isValid: isStep2Valid } = validatePricingStep();
+                  const isStep2Completed = isStep2Valid;
+                  const isStep3Completed = true; // Extras are optional
+
+                  // Only mark as completed if user has moved past it AND all required fields are filled
+                  const isCompleted = i < currentStep && (
+                    i === 0 ? isStep0Completed :
+                      i === 1 ? isStep1Completed :
+                        i === 2 ? isStep2Completed :
+                          i === 3 ? isStep3Completed :
+                            true
+                  );
+
                   const showConnector = i < steps.length - 1;
 
                   // Only disable Review step in sidebar (like NewProduct)
@@ -1134,10 +1162,17 @@ const CreatePricePlan = React.forwardRef<
                     >
                       <span className="rate-np-step__bullet" aria-hidden="true">
                         <span className="rate-np-step__icon">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-                            <circle cx="12" cy="12" r="11" stroke={isActive ? "var(--color-primary-800)" : "#C3C2D0"} strokeWidth="2" />
-                            <circle cx="12" cy="12" r="6" fill={isActive ? "var(--color-primary-800)" : "#C3C2D0"} />
-                          </svg>
+                          {isCompleted ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
+                              <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                              <circle cx="12" cy="12" r="11" stroke={isActive ? "var(--color-primary-800)" : "#C3C2D0"} strokeWidth="2" />
+                              <circle cx="12" cy="12" r="6" fill={isActive ? "var(--color-primary-800)" : "#C3C2D0"} />
+                            </svg>
+                          )}
                         </span>
                         {showConnector && <span className="rate-np-step__connector" />}
                       </span>
@@ -1181,23 +1216,27 @@ const CreatePricePlan = React.forwardRef<
                           style={{
                             position: "absolute",
                             left: "50%",
-                            bottom: "20px",
+                            bottom: "10px",
                             transform: "translateX(-50%)",
                             color: "#8C8F96",
                             fontSize: 14,
+                            fontWeight: 500,
                             pointerEvents: "none",
                             whiteSpace: "nowrap",
                           }}
                         >
-                          Fill the previous steps to unlock this step
+                          Fill The Previous Steps To Unlock This Step
                         </div>
                       ) : (
                         <>
-                          <div className="rate-np-btn-group rate-np-btn-group--back">
-                            <SecondaryButton type="button" onClick={handleBack}>
-                              Back
-                            </SecondaryButton>
-                          </div>
+                          {/* Hide back button on first step (like NewProduct) */}
+                          {currentStep > 0 && (
+                            <div className="rate-np-btn-group rate-np-btn-group--back">
+                              <SecondaryButton type="button" onClick={handleBack}>
+                                Back
+                              </SecondaryButton>
+                            </div>
+                          )}
 
                           <div className="rate-np-btn-group rate-np-btn-group--next">
                             <PrimaryButton type="button" onClick={handleNext} disabled={saving}>
