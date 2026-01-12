@@ -151,11 +151,13 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         const plan = await fetchRatePlanWithDetails(ratePlanId);
 
         const productNameResolved = plan.productName || plan.product?.productName || '';
+        const productIdResolved = plan.productId || plan.product?.productId || null;
         const original = {
           ratePlanName: plan.ratePlanName || '',
           description: plan.description || '',
           billingFrequency: plan.billingFrequency || '',
           productName: productNameResolved,
+          productId: productIdResolved ? Number(productIdResolved) : null,
           paymentType: plan.paymentType || '',
           billableMetricId: plan.billableMetricId ? Number(plan.billableMetricId) : null,
         };
@@ -185,7 +187,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
             if (fullMetric) {
               // Store in state for immediate access
               setBillableMetricData(fullMetric);
-              
+
               // Also store in session storage for step navigation
               setRatePlanData('BILLABLE_METRIC_NAME', fullMetric.metricName);
               if ((fullMetric as any).description) {
@@ -243,11 +245,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           const volumeTiersJson = JSON.stringify(volumeTiersData);
           localStorage.setItem('volumeTiers', volumeTiersJson);
           setRatePlanData('VOLUME_TIERS', volumeTiersJson);
-          
+
           const volumeOverage = String(plan.volumePricing.overageUnitRate || '');
           localStorage.setItem('volumeOverage', volumeOverage);
           setRatePlanData('VOLUME_OVERAGE', volumeOverage);
-          
+
           const volumeGrace = String(plan.volumePricing.graceBuffer || '');
           localStorage.setItem('volumeGrace', volumeGrace);
           setRatePlanData('VOLUME_GRACE', volumeGrace);
@@ -262,11 +264,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           const tieredTiersJson = JSON.stringify(tieredTiersData);
           localStorage.setItem('tieredTiers', tieredTiersJson);
           setRatePlanData('TIERED_TIERS', tieredTiersJson);
-          
+
           const tieredOverage = String(plan.tieredPricing.overageUnitRate || '');
           localStorage.setItem('tieredOverage', tieredOverage);
           setRatePlanData('TIERED_OVERAGE', tieredOverage);
-          
+
           const tieredGrace = String(plan.tieredPricing.graceBuffer || '');
           localStorage.setItem('tieredGrace', tieredGrace);
           setRatePlanData('TIERED_GRACE', tieredGrace);
@@ -281,11 +283,11 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           const stairTiersJson = JSON.stringify(stairTiersData);
           localStorage.setItem('stairTiers', stairTiersJson);
           setRatePlanData('STAIR_TIERS', stairTiersJson);
-          
+
           const stairOverage = String(plan.stairStepPricing.overageUnitRate || '');
           localStorage.setItem('stairOverage', stairOverage);
           setRatePlanData('STAIR_OVERAGE', stairOverage);
-          
+
           const stairGrace = String(plan.stairStepPricing.graceBuffer || '');
           localStorage.setItem('stairGrace', stairGrace);
           setRatePlanData('STAIR_GRACE', stairGrace);
@@ -296,7 +298,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           localStorage.setItem('usagePerUnit', usagePerUnit);
           setRatePlanData('USAGE_PER_UNIT_AMOUNT', usagePerUnit);
         }
-        
+
         if (plan.flatFeeAmount) {
           setRatePlanData('FLAT_FEE_AMOUNT', String(plan.flatFeeAmount));
         }
@@ -334,7 +336,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           localStorage.setItem('eligibility', plan.discount.eligibility || '');
           localStorage.setItem('discountStart', plan.discount.startDate || '');
           localStorage.setItem('discountEnd', plan.discount.endDate || '');
-          
+
           setRatePlanData('DISCOUNT_PERCENT', String(plan.discount.percentageDiscount || ''));
           setRatePlanData('DISCOUNT_FLAT', String(plan.discount.flatDiscountAmount || ''));
         }
@@ -345,7 +347,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           localStorage.setItem('freeTrialDuration', String(plan.freemium.freeTrialDuration || ''));
           localStorage.setItem('freeStart', plan.freemium.startDate || '');
           localStorage.setItem('freeEnd', plan.freemium.endDate || '');
-          
+
           setRatePlanData('FREEMIUM_UNITS', String(plan.freemium.freeUnits || ''));
         }
       } catch (e) {
@@ -353,11 +355,13 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         try {
           const basicPlan = await fetchRatePlan(ratePlanId);
           const productNameResolved = basicPlan.productName || basicPlan.product?.productName || '';
+          const productIdResolved = basicPlan.productId || basicPlan.product?.productId || null;
           const original = {
             ratePlanName: basicPlan.ratePlanName || '',
             description: basicPlan.description || '',
             billingFrequency: basicPlan.billingFrequency || '',
             productName: productNameResolved,
+            productId: productIdResolved ? Number(productIdResolved) : null,
             paymentType: basicPlan.paymentType || '',
             billableMetricId: basicPlan.billableMetricId ? Number(basicPlan.billableMetricId) : null,
           };
@@ -400,7 +404,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
     // Check step 2 (pricing) validation
     if (validatePricingFn) {
-      const mockSetErrors = () => {};
+      const mockSetErrors = () => { };
       const isValid = validatePricingFn(mockSetErrors);
       if (!isValid) return true;
     }
@@ -612,10 +616,6 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   };
 
   const handleBack = () => {
-    if (hasEmptyRequiredFields()) {
-      setShowUnsavedChangesModal(true);
-      return;
-    }
     if (hasChanges()) setShowEditPopup(true);
     else exitToList();
   };
@@ -867,7 +867,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
     return (
       <div className="editrate-np-section">
         <div className="editrate-np-review-container">
-          <EditReview 
+          <EditReview
             ratePlanName={ratePlanName}
             description={description}
             billingFrequency={billingFrequency}
