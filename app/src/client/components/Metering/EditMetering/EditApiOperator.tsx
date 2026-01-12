@@ -1,7 +1,7 @@
 // EditApiOperator.tsx
 
 import React from 'react';
-import { SelectField } from '../../componenetsss/Inputs';
+import { DropdownField } from '../../componenetsss/Inputs';
 
 interface Props {
   dimension: string;
@@ -57,7 +57,7 @@ const EditApiOperator: React.FC<Props> = ({ dimension, value, onChange, label = 
   }));
   
   return (
-    <SelectField
+    <DropdownField
       label={label}
       value={value}
       required

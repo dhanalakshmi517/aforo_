@@ -1,7 +1,7 @@
 // EditAggregationWindow.tsx
 
 import React from 'react';
-import { SelectField, SelectOption } from '../../componenetsss/Inputs';
+import { DropdownField, SelectOption } from '../../componenetsss/Inputs';
 
 interface EditAggregationWindowProps {
   label?: string;
@@ -118,7 +118,7 @@ const EditAggregationWindow: React.FC<EditAggregationWindowProps> = ({
   ];
 
   return (
-    <SelectField
+    <DropdownField
       label={label}
       value={value}
       onChange={onChange}

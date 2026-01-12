@@ -59,13 +59,12 @@ box-shadow: 0 0 8px 2px var(--shadow-shadow-1, #EEF1F6);
   width: auto;
   height: auto;
   max-width: 130%;
-  height: 294px;
+  height: 324px;
   display: block;
   opacity: 0;
   transition: opacity 120ms ease;
   object-position: center center;
   object-fit: contain;
-  margin-top: -30px;
 }
 
 .dcard-img.is-loaded {

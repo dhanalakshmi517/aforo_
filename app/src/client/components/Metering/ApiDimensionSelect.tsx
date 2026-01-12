@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField } from '../Components/InputFields';
+import { DropdownField, InputField } from '../componenetsss/Inputs';
 import './ApiDimensionSelect.css';
 
 type Props = {
@@ -28,7 +28,7 @@ const ApiDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, e
   }));
 
   return (
-    <SelectField
+    <DropdownField
       label="Dimension"
       value={value}
       onChange={onChange}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { InputField, SelectField } from '../componenetsss/Inputs';
+import { InputField, DropdownField } from '../componenetsss/Inputs';
 import { checkEmailExists } from './api';
 import { getAuthHeaders } from '../../utils/auth';
 import './AccountDetailsForm.css';
@@ -422,7 +422,7 @@ const AccountDetailsForm: React.FC<Props> = ({
             />
           </div>
           <div className="acc-form-group acc-country">
-            <SelectField
+            <DropdownField
               label="Country"
               value={billingAddress.country}
               placeholder="Select Country"
@@ -505,7 +505,7 @@ const AccountDetailsForm: React.FC<Props> = ({
             />
           </div>
           <div className="acc-form-group acc-country">
-            <SelectField
+            <DropdownField
               label="Country"
               value={customerAddress.country}
               placeholder="Select Country"

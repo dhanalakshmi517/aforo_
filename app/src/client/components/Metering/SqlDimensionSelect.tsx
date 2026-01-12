@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField } from '../componenetsss/Inputs';
+import { DropdownField } from '../componenetsss/Inputs';
 import './ApiDimensionSelect.css';
 
 
@@ -26,7 +26,7 @@ const SqlDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, e
   }));
 
   return (
-    <SelectField
+    <DropdownField
       label="Dimension"
       value={value}
       onChange={onChange}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import './ConfigurationTab.css';
-import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
+import { DropdownField, InputField, TextareaField } from '../../componenetsss/Inputs';
 import { saveProductConfiguration, getProductConfiguration } from '../api';
 
 /* ------------------------------------
@@ -40,6 +40,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'Auth Type',
       type: 'select',
       required: true,
+      placeholder: 'Auth Type',
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },
@@ -52,6 +53,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'File Format',
       type: 'select',
+      placeholder: 'File Format',
       required: true,
       options: [
         { label: 'CSV', value: 'CSV' },
@@ -74,6 +76,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'DB Type',
       type: 'select',
       required: true,
+      placeholder: 'DB Type',
       options: [
         { label: 'MySQL', value: 'MYSQL' },
         { label: 'Postgres', value: 'POSTGRES' },
@@ -87,6 +90,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Auth Type',
       type: 'select',
+      placeholder: 'Auth Type',
       required: true,
       options: [
         { label: 'None', value: 'NONE' },
@@ -102,6 +106,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Auth Type',
       type: 'select',
+      placeholder: 'Auth Type',
             required: true,
 
 
@@ -662,7 +667,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         case 'select':
           return (
             <div className="config-form-group">
-              <SelectField
+              <DropdownField
                 {...commonProps}
                 options={field.options || getSelectOptions(field.label) || []}
                 disabled={readOnly} // Dropdowns stay enabled when locked, only disabled when readOnly
@@ -771,8 +776,9 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         )}
         <div className="config-form-group">
           {/* Product type dropdown with inline error */}
-          <SelectField
+          <DropdownField
             label="Type of Product"
+            placeholder="Type of Product"
             value={productType}
             onChange={locked ? () => {} : handleProductTypeChange} // Prevent changes when locked but allow viewing
             options={productOptions}

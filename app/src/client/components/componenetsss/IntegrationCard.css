@@ -107,19 +107,23 @@ line-height: var(--line-height-body-md);
   max-width: 21ch;
 }
 
-.integration-card__action {
+.integration-card__action__po {
   margin-top: 9px;
-  width: 100%;
-height:30px;
+  width: 100% !important;
+  height: 30px !important;
   border: none;
- 
-
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-
   cursor: pointer;
+  padding: 8px 20px;
+}
+
+.integration-card__action__po.af-secondary-color-btn {
+  height: 30px !important;
+  min-width: auto !important;
+  width: 100% !important;
 }
 
 

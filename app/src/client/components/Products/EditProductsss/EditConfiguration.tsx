@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import './ConfigurationTab.css';
-import { SelectField, InputField, TextareaField } from '../../componenetsss/Inputs';
+import { DropdownField, InputField, TextareaField } from '../../componenetsss/Inputs';
 import { getProductConfiguration } from '../api';
 
 export interface FieldProps {
@@ -361,11 +361,10 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         case 'select':
           return (
             <div key={index !== undefined ? `field-${index}` : field.label} className="edit-con-form-group">
-              <SelectField
+              <DropdownField
                 label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
-                onBlur={handleBlur}
                 options={[
                   { label: field.placeholder || 'Select an option', value: '' },
                   ...(field.options || getSelectOptions(field.label) || []),
@@ -460,7 +459,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
     return (
       <div className="edit-con-configuration-tab">
         <div className="edit-con-form-group">
-          <SelectField
+          <DropdownField
             label="Product Type"
             value={productType}
             onChange={handleProductTypeChange}

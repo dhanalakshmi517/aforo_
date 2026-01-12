@@ -51,6 +51,7 @@ import { ToastProvider, useToast } from '../componenetsss/ToastProvider';
 import PrimaryButton from '../componenetsss/PrimaryButton';
 import TertiaryButton from '../componenetsss/TertiaryButton';
 import ProductIcon, { ProductIconData } from './ProductIcon';
+import GlassStackTile from '../componenetsss/GlassStackTile';
 
 interface Product {
   productId: string;
@@ -650,62 +651,23 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
   // Mini ProductIcon renderer for the table
   const TableProductIcon: React.FC<{ iconData: ProductIconData }> = ({ iconData }) => {
-    const tile = iconData.tileColor ?? '#CC9434';
-
     return (
-      <div
-        style={{
-          width: 40,
-          height: 40,
-          position: 'relative',
-          background: 'transparent',
-        }}
-      >
-        {/* BACK TILE */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 4,
-            top: 4,
-            width: 34,
-            borderRadius: '9px',
-
-            height: 34,
-            backgroundColor: tile,
-            background: tile,
-          }}
-        />
-        {/* GLASS FOREGROUND TILE */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '40%',
-            top: '50%',
-            transform: 'translate(-49%, -50%) translate(9px, 6px)',
-            width: 34,
-            height: 34,
-            display: 'flex',
-            justifyContent: 'center',
-            borderRadius: '9px',
-            alignItems: 'center',
-            border: '0.6px solid #FFF',
-            backgroundColor: getSoftTileBg(iconData, 0.10),
-            background: getSoftTileBg(iconData, 0.10),
-            backdropFilter: 'blur(3.875000238418579px)',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)', // optional: adds soft depth
-          }}
-        >
+      <GlassStackTile
+        frontIcon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
+            width="17"
+            height="17"
             viewBox={iconData.viewBox ?? "0 0 18 18"}
             fill="none"
           >
             <path d={iconData.svgPath} fill="#FFFFFF" />
           </svg>
-        </div>
-      </div>
+        }
+        backColor={iconData.tileColor}
+        size={40}
+        offsetY={-3}
+      />
     );
   };
 
@@ -1408,7 +1370,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                               className="product-name-cell__icon"
                               style={{
                                 background: '#FFFFFF',
-                                borderColor: '#D4D4D8',
+                                border: '0.6px solid #EEF1F6',
                               }}
                             >
                               {product.iconData ? (
@@ -1439,25 +1401,19 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                   />
                                 </div>
                               ) : (
-                                <div
-                                  className="product-avatar"
-                                  style={{
-                                    width: 41,
-                                    height: 41,
-                                    borderRadius: 8,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '14px',
-                                    fontWeight: 600,
-                                    backgroundColor:
-                                      getRandomBackgroundColor(parseInt(product.productId) || 0),
-                                    border: `1px solid ${getRandomBorderColor(parseInt(product.productId) || 0)
-                                      }`
-                                  }}
-                                >
-                                  {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
-                                </div>
+                                <GlassStackTile
+                                  frontIcon={
+                                    <span style={{
+                                      fontSize: '14px',
+                                      fontWeight: 500,
+                                      color: '#FFFFFF'
+                                    }}>
+                                      {product.productName?.substring(0, 2).toUpperCase() || 'PR'}
+                                    </span>
+                                  }
+                                  size={40}
+                                  colorIndex={parseInt(product.productId) || 0}
+                                />
                               )}
                             </div>
 

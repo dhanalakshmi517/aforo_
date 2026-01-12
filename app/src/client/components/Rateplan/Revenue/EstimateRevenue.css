@@ -220,3 +220,151 @@ h2 {
         transform: rotate(360deg);
     }
 }
+
+/* === Responsive Design for Smaller Screens === */
+@media (max-width: 768px) {
+    .estimate-container {
+        margin: 20px auto;
+        padding: 20px;
+        max-width: 100%;
+    }
+
+    h2 {
+        margin-left: 20px;
+        font-size: var(--font-size-h5);
+    }
+
+    .back-arrow {
+        margin-left: 20px;
+        font-size: var(--font-size-md);
+    }
+
+    .input-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .input-section input {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .input-section button {
+        width: 100%;
+        margin-left: 0;
+        max-width: 200px;
+    }
+
+    /* Make table responsive */
+    .estimate-table {
+        font-size: var(--font-size-sm);
+    }
+
+    .estimate-table th,
+    .estimate-table td {
+        padding: 8px 6px;
+        font-size: var(--font-size-sm);
+    }
+
+    /* Hide calculation columns on very small screens */
+    @media (max-width: 600px) {
+        .estimate-table th:nth-child(3),
+        .estimate-table th:nth-child(4),
+        .estimate-table td:nth-child(3),
+        .estimate-table td:nth-child(4) {
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .estimate-container {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    h2 {
+        margin-left: 0;
+        text-align: center;
+        font-size: var(--font-size-md);
+    }
+
+    .back-arrow {
+        margin-left: 0;
+        text-align: center;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .input-section input {
+        max-width: 100%;
+    }
+
+    .estimate-table {
+        font-size: var(--font-size-xs);
+    }
+
+    .estimate-table th,
+    .estimate-table td {
+        padding: 6px 4px;
+        font-size: var(--font-size-xs);
+    }
+
+    /* Stack table rows for better mobile experience */
+    .estimate-table,
+    .estimate-table thead,
+    .estimate-table tbody,
+    .estimate-table th,
+    .estimate-table td,
+    .estimate-table tr {
+        display: block;
+    }
+
+    .estimate-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .estimate-table tr {
+        border: 1px solid var(--color-neutral-200);
+        margin-bottom: 10px;
+        border-radius: var(--border-radius-sm);
+    }
+
+    .estimate-table td {
+        border: none;
+        border-bottom: 1px solid var(--color-neutral-200);
+        position: relative;
+        padding-left: 100px;
+        text-align: left;
+        white-space: normal;
+    }
+
+    .estimate-table td:before {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 90px;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        font-size: var(--font-size-xs);
+        color: var(--color-neutral-800);
+    }
+
+    /* Add labels for mobile */
+    .estimate-table tr:nth-child(1) td:nth-child(1):before { content: "Model Type"; }
+    .estimate-table tr:nth-child(2) td:nth-child(1):before { content: "Pricing"; }
+    .estimate-table tr:nth-child(3) td:nth-child(1):before { content: "Flat Fee"; }
+    .estimate-table tr:nth-child(4) td:nth-child(1):before { content: "Setup Fee"; }
+    .estimate-table tr:nth-child(5) td:nth-child(1):before { content: "Discount"; }
+    .estimate-table tr:nth-child(6) td:nth-child(1):before { content: "Freemium"; }
+    .estimate-table tr:nth-child(7) td:nth-child(1):before { content: "Commitment"; }
+    .estimate-table tr:nth-child(8) td:nth-child(1):before { content: "Total"; }
+
+    .total-row td:first-child:before {
+        content: "Total" !important;
+    }
+}

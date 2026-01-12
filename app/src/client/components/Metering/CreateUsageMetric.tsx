@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../componenetsss/TopBar';
-import { InputField, TextareaField, SelectField } from '../componenetsss/Inputs';
+import { InputField, TextareaField, DropdownField } from '../componenetsss/Inputs';
 import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
 import SaveDraft from '../componenetsss/SaveDraft';
 import { useToast } from '../componenetsss/ToastProvider';
@@ -284,9 +284,11 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
 
     if (currentStep === 1) {
-      // Always validate conditions step before leaving it
-      const isValid = validateCurrentStep(1);
-      if (!isValid) return;
+      // Skip validation if conditions step is locked
+      if (!isConditionsLocked) {
+        const isValid = validateCurrentStep(1);
+        if (!isValid) return;
+      }
     }
 
     setCurrentStep(index);
@@ -707,7 +709,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                 <InputField label="Metric Name" value={metricName} onChange={setMetricName}
                                 required
                                  placeholder="eg. API Calls" error={errors.metricName} />
-                                <SelectField
+                                <DropdownField
                                   label="Product"
                                   value={selectedProductId}
                                   required
@@ -743,7 +745,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
                                     if (opts) {
                                       return (
-                                        <SelectField
+                                        <DropdownField
                                           label="Unit of Measure"
                                           placeholder="Select unit (eg. calls, GB, hours)"
                                           required

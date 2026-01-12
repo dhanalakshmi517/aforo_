@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../componenetsss/TopBar";
-import { TextareaField, SelectField } from "../componenetsss/Inputs";
+import { TextareaField, DropdownField } from "../componenetsss/Inputs";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import SaveDraft from "../componenetsss/SaveDraft";
 import { useToast } from "../componenetsss/ToastProvider";
@@ -373,8 +373,18 @@ export default function CreateSubscription({
     }
   };
 
-  // discard behavior (match metric: preserve drafts, just close)
+  // discard behavior - delete draft if it has an ID, then close
   const deleteAndClose = async () => {
+    // If we have a subscription ID (draft), delete it using the delete API
+    if (subscriptionId) {
+      try {
+        await Api.deleteSubscription(subscriptionId);
+        console.log('Draft subscription deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete draft subscription:', error);
+        // Still close even if delete fails
+      }
+    }
     onClose();
   };
 
@@ -452,9 +462,10 @@ export default function CreateSubscription({
   // ─────────────────────────────────────────────────────────────
   const renderStep0 = () => (
     <div className="met-np-grid-2">
-      <SelectField
+                    <DropdownField
         label="Customer Name"
         required
+        placeholder="Customer"
         value={selectedCustomerId?.toString() || ""}
         onChange={(val) => {
           const id = Number(val);
@@ -464,15 +475,15 @@ export default function CreateSubscription({
           setSelectedCustomerName(cust?.customerName || "");
         }}
         error={errors.customerId}
-        placeholderOption="e.g., Aditya Inc"
         options={customers.map((c) => ({
           label: c.customerName,
           value: c.customerId.toString(),
         }))}
       />
 
-      <SelectField
+                    <DropdownField
         label="Product"
+        placeholder="product"
         required
         value={selectedProductId?.toString() || ""}
         onChange={(val) => {
@@ -487,15 +498,15 @@ export default function CreateSubscription({
           setSelectedRatePlanName("");
         }}
         error={errors.productId}
-        placeholderOption="Select Product"
         options={products.map((p) => ({
           label: p.productName,
           value: p.productId.toString(),
         }))}
       />
 
-      <SelectField
+                    <DropdownField
         label="Rate Plan"
+        placeholder="RatePlan"
         required
         value={selectedRatePlanId?.toString() || ""}
         onChange={(val) => {
@@ -507,7 +518,6 @@ export default function CreateSubscription({
           setSelectedRatePlanName(rp?.ratePlanName || "");
         }}
         error={errors.ratePlanId}
-        placeholderOption="Select Rate Plan"
         options={ratePlans
           .filter((rp) => (selectedProductId ? rp.productId === selectedProductId : true))
           .map((rp) => ({
@@ -518,9 +528,10 @@ export default function CreateSubscription({
         helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
       />
 
-      <SelectField
+                    <DropdownField
         label="Payment Type"
         required
+        placeholder="PaymentType"
         value={paymentType}
         onChange={(val) => {
           if (val === "PREPAID" || val === "POSTPAID" || val === "") {
@@ -529,7 +540,6 @@ export default function CreateSubscription({
           }
         }}
         error={errors.paymentType}
-        placeholderOption="Select Payment Type"
         options={[
           { label: "Post-Paid", value: "POSTPAID" },
           { label: "Pre-Paid", value: "PREPAID" },

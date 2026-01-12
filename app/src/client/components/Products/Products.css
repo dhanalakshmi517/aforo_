@@ -17,14 +17,13 @@ html, body, #root, .app, .main-content {
   /* top | right | bottom | left */
   padding: 0 10px 16px 16px;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow: hidden;
   /* Page background */
   background: #FBFDFF;
 
   /* make it occupy viewport height minus navbar (adjust 64px if needed) */
-  height: auto;
   display: flex;
   flex-direction: column;
 }
@@ -803,19 +802,16 @@ line-height: var(--line-height-body-lg);
 
 /* Kong source - gradient background */
 .pro-source-badge--kong {
-  border-image: linear-gradient(180deg, #119F6B 0%, #14997A 50%, #1F80BC 100%) !important;
-  color:var(--color-neutral-1700) !important;
-  border: none !important;
-    background: var(--color-neutral-white) !important;
+ background-color: var(--color-neutral-white) !important;
+  color: var(--color-neutral-1700) !important;
+  border: 0.7px solid var(--color-neutral-300) !important;
 
 }
 /* Apigee source - gradient border */
 .pro-source-badge--apigee {
-  background: var(--color-neutral-white) !important;
+  background-color: var(--color-neutral-white) !important;
   color: var(--color-neutral-1700) !important;
-  border: 1px solid !important;
-  border-radius: var(--border-radius-sm) !important;
-  border-image: linear-gradient(180deg, #E94436 0%, #FABC06 50%, #36A854 75%, #4285F3 100%) 1 !important;
+  border: 0.7px solid var(--color-neutral-300) !important;
 }
 
 /* Main container for Products page */
@@ -1468,7 +1464,7 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   min-width: 0;                              /* allow inner content to shrink for ellipsis */
 }
 
-/* Left “icon pill” container */
+/* Left "icon pill" container */
 .product-name-cell__icon {
   display: flex;
   padding: 8px;    
@@ -1479,6 +1475,11 @@ line-height: var(--line-height-body-sm, 18px); /* 150% */
   height: auto;                              /* auto height to fit content */
   border-radius: 12px;                        /* round all corners */
   border: 0.6px solid var(--color-neutral-200);
+}
+
+/* Center GlassStackTile within icon container */
+.product-name-cell__icon .gst {
+  margin: 0 auto;
 }
 
 /* The actual avatar inside the icon pill */
