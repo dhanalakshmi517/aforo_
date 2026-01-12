@@ -8,7 +8,7 @@ import EditSqlDimension from './EditSqlDimension';
 import EditSqlOperator from './EditSqlOperator';
 import EditLlmDimension from './EditLlmDimension';
 import EditLlmOperator from './EditLlmOperator';
-import { SelectField, InputField, SelectOption } from '../../componenetsss/Inputs';
+import { DropdownField, InputField, SelectOption } from '../../componenetsss/Inputs';
 import DeleteIconButton from '../../componenetsss/DeleteIconButton';
 import SecondaryButton from '../../componenetsss/SecondaryButton';
 
@@ -83,7 +83,7 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
   return (
     <div className="usage-form-container">
        <div className="billing-section">
-        <SelectField
+        <DropdownField
           label="Select Billing Criteria"
           required
           value={billingCriteria}
@@ -93,7 +93,6 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
             { label: 'Bill based on usage conditions', value: 'BILL_BASED_ON_USAGE_CONDITIONS' },
             { label: 'Bill excluding usage conditions', value: 'BILL_EXCLUDING_USAGE_CONDITIONS' },
           ]}
-          placeholderOption="--select--"
         />
         <p className="billing-note">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -135,13 +134,12 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
               genericDims = [filter.usageCondition, ...genericDims];
             }
             return (
-              <SelectField
+              <DropdownField
                 label="Dimensions"
                 value={filter.usageCondition}
                 onChange={(val) => handleChange(filter.id, 'usageCondition', val)}
                 options={genericDims.map((d) => ({ label: d, value: d } as SelectOption))}
-                placeholderOption="--select--"
-                error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.dimension`] : undefined}
+                error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.usageCondition`] : undefined}
               />
             );
           })()}
@@ -166,12 +164,11 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                   genericOps = [filter.operator, ...genericOps];
                 }
                 return (
-                  <SelectField
+                  <DropdownField
                     label="Operator"
                     value={filter.operator}
                     onChange={(val) => handleChange(filter.id, 'operator', val)}
                     options={genericOps.map((o) => ({ label: o, value: o } as SelectOption))}
-                    placeholderOption="--select--"
                     error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.operator`] : undefined}
                   />
                 );
@@ -179,9 +176,8 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
             </div>
 
             <div className="column">
-                      <label>Value</label>
-
               <InputField
+                label="Value"
                 type="text"
                 placeholder="Enter value"
                 value={filter.value}

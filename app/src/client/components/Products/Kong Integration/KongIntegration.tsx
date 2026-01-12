@@ -3,7 +3,7 @@ import * as React from "react";
 import { useMemo, useState } from "react";
 import "./KongIntegration.css";
 import KongBar from "./KongBar";
-import { InputField, SelectField } from "../../componenetsss/Inputs";
+import { InputField, DropdownField } from "../../componenetsss/Inputs";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import { connectToKong, disconnectFromKong, fetchKongProducts, importKongProducts } from "./Kongapi";
 import SuccessKong from "./SuccessKong";
@@ -278,16 +278,14 @@ export default function KongIntegration({
 
                 <div className="kiField">
                   <div onClick={() => setFocusedField("region")}>
-                    <SelectField
+                    <DropdownField
                       label="Select Region"
                       value={region}
                       onChange={(value) => {
                         setRegion(value);
                         setFocusedField("region");
                       }}
-                      onBlur={() => setFocusedField(null)}
                       options={regionOptions}
-                      placeholderOption="Select Region"
                     />
                   </div>
                 </div>

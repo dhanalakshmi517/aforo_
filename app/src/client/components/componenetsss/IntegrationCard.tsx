@@ -64,7 +64,7 @@ const IntegrationCard: React.FC<Props> = ({
         aria-label={menuAriaLabel}
         disabled={disabled}
       >
-        <KebabIcon />
+        {/* <KebabIcon /> */}
       </button>
 
       <div className="integration-card__top">
@@ -89,7 +89,7 @@ const IntegrationCard: React.FC<Props> = ({
       <SecondaryButton
         onClick={onAction}
         disabled={disabled}
-        className="integration-card__action"
+        className="integration-card__action__po"
       >
         <span className="integration-card__plus" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">

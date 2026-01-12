@@ -9,7 +9,7 @@ import {
   MinimumCommitmentPayload
 } from './api';
 import './Extras.css';
-import { InputField, SelectField, TextareaField } from '../componenetsss/Inputs';
+import { InputField, DropdownField, TextareaField } from '../componenetsss/Inputs';
 import { clearExtrasLocalStorage } from './utils/localStorageExtras';
 import { getRatePlanData, setRatePlanData } from './utils/sessionStorage';
 
@@ -894,7 +894,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <div className="extras-two-col-row">
               <div className="extras-field">
                 <label>Discount Type</label>
-                <SelectField
+                <DropdownField
                   value={discountForm.discountType}
                   onChange={(val) => {
                     const nextType = (val as 'PERCENTAGE' | 'FLAT') || 'PERCENTAGE';
@@ -1093,9 +1093,9 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
         {activeSections.includes('freemium') && (
           <div className="section-content">
             <label>Freemium Type</label>
-            <SelectField
+            <DropdownField
               value={freemiumType}
-              onChange={val => {
+              onChange={(val: string) => {
                 const ui = val as UIFreemiumType;
                 console.log('👤 User manually selected freemium type:', ui);
                 userHasSelectedFreemiumRef.current = true; // Mark that user has made a selection

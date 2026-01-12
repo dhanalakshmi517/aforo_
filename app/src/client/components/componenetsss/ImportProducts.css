@@ -1,18 +1,20 @@
+@import "../Variables/Variables.css";
 .ip-page{
   width:100%;
-  min-height:100vh;
-  background:#ffffff;
+  height:100vh;
+  background:var(--color-neutral-white);
   box-sizing:border-box;
+  overflow:hidden;
 }
 
 /* TOPBAR */
 .ip-topbar{
-  height:56px;
+  height:72px;
   display:flex;
   align-items:center;
   gap:10px;
-  padding:0 24px;
-  border-bottom:1px solid #eef2f7;
+padding: 16px 120px;
+  border-bottom:1px solid var(--color-neutral-200);
 }
 
 .ip-back{
@@ -42,9 +44,11 @@
 .ip-body{
   display:flex;
   gap:20px;
-  padding:22px 24px;
+  padding: 20px 120px;
   box-sizing:border-box;
   align-items:stretch;
+  height: calc(100vh - 72px);
+  overflow:hidden;
 }
 
 /* 50 / 50 style columns */
@@ -64,15 +68,15 @@
   font-size:14px;
   font-weight:600;
   color:#111827;
-  margin:6px 0 14px 0;
+  margin:0 0 14px 0;
 }
 
 /* LEFT GRID */
 .ip-gateway-grid{
   display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap:14px;
-  max-width:100%;
+  max-width:300px;
 }
 
 .ip-gateway-card{

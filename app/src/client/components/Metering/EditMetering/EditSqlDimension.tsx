@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField } from '../../componenetsss/Inputs';
+import { DropdownField } from '../../componenetsss/Inputs';
 
 type Props = {
   unitOfMeasure: string;
@@ -23,7 +23,7 @@ const EditSqlDimension: React.FC<Props> = ({ unitOfMeasure, value, onChange, lab
   }));
 
   return (
-    <SelectField
+    <DropdownField
       label={label}
       value={value}
       onChange={onChange}

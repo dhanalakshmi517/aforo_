@@ -11,15 +11,12 @@ import { configurationFields } from './EditConfiguration';
 import EditReview from './EditReview';
 import TopBar from '../../componenetsss/TopBar';
 import { useToast } from '../../componenetsss/ToastProvider';
-import PrimaryButton from '../../componenetsss/PrimaryButton';
-import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditButton from '../../componenetsss/EditButton';
 import DeleteButton from '../../componenetsss/DeleteButton';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import ProductIconPickerModal from '../ProductIconPickerModal';
 import { ProductIconData } from '../ProductIcon';
-import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
-import MetricRow from '../../componenetsss/MetricRow';
+import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 import './EditProduct.css';
 import { updateGeneralDetails, fetchGeneralDetails, updateConfiguration } from './EditProductApi';
 import { finalizeProduct, deleteProduct, updateProductIcon } from '../api';
@@ -896,335 +893,264 @@ const EditProduct: React.FC<EditProductProps> = ({
         }}
       />
 
-      {/* === SHELL: EXACTLY LIKE EditSubscription (editsub-np-*) === */}
-      <div className="editsub-np-viewport">
-        <div className="editsub-np-card">
-          <div className="editsub-np-grid">
-            {/* Sidebar / rail */}
-            <aside className="editsub-np-rail">
-              <nav className="editsub-np-steps">
-                {steps.map((step, index) => {
-                  const isActive = index === currentStep;
-                  const isCompleted = index < currentStep;
+      {/* === USING ConfigurationStepShell === */}
+      <ConfigurationStepShell
+        steps={steps.map((step, index) => ({
+          id: String(index),
+          label: step.title,
+        }))}
+        activeStepId={String(currentStep)}
+        onStepClick={async (stepId) => {
+          const index = parseInt(stepId, 10);
+          
+          // If clicking the current step, do nothing
+          if (index === currentStep) return;
 
-                  return (
-                    <MetricRow
-                      key={step.id}
-                      title={step.title}
-                      state={isActive ? 'active' : 'default'}
-                      className={['editsub-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : '']
-                        .join(' ')
-                        .trim()}
-                      onClick={async () => {
-                        // If clicking the current step, do nothing
-                        if (index === currentStep) return;
+          // Always validate the current step before allowing navigation
+          let currentStepValid = true;
+          if (currentStep === 0) {
+            currentStepValid = validateForm();
+          } else if (currentStep === 1) {
+            const currentProductType = configuration.productType || productType;
+            if (currentProductType) {
+              const ok = await configRef.current?.submit();
+              if (!ok) currentStepValid = false;
+            }
+          }
+          if (!currentStepValid) return;
 
-                        // Always validate the current step before allowing navigation
-                        let currentStepValid = true;
-                        if (currentStep === 0) {
-                          currentStepValid = validateForm();
-                        } else if (currentStep === 1) {
-                          const currentProductType = configuration.productType || productType;
-                          if (currentProductType) {
-                            const ok = await configRef.current?.submit();
-                            if (!ok) currentStepValid = false;
-                          }
-                        }
-                        if (!currentStepValid) return;
+          // Navigating back to earlier steps (after validation)
+          if (index < currentStep) {
+            goToStep(index);    
+            return;
+          }
 
-                        // Navigating back to earlier steps (after validation)
-                        if (index < currentStep) {
-                          goToStep(index);    
-                          return;
-                        }
-
-                        // Forward: validate all steps up to the target step
-                        if (index > currentStep) {
-                          // Validate all steps from current to target
-                          for (let i = currentStep; i < index; i++) {
-                            if (i === 0) {
-                              const ok = validateForm();
-                              if (!ok) return;
-                            } else if (i === 1) {
-                              // Skip Configuration validation if jumping directly from General to Review
-                              if (index === 2 && currentStep === 0) {
-                                continue;
-                              }
-                              // Only validate configuration if we're actually on the Configuration tab
-                              const currentProductType = configuration.productType || productType;
-                              if (currentProductType) {
-                                const ok = await configRef.current?.submit();
-                                if (!ok) return;
-                              }
-                            }
-                          }
-                          goToStep(index);
-                          return;
-                        }
-
-                        // From Review we don't move further right via sidebar
-                      }}
+          // Forward: validate all steps up to the target step
+          if (index > currentStep) {
+            // Validate all steps from current to target
+            for (let i = currentStep; i < index; i++) {
+              if (i === 0) {
+                const ok = validateForm();
+                if (!ok) return;
+              } else if (i === 1) {
+                // Skip Configuration validation if jumping directly from General to Review
+                if (index === 2 && currentStep === 0) {
+                  continue;
+                }
+                // Only validate configuration if we're actually on the Configuration tab
+                const currentProductType = configuration.productType || productType;
+                if (currentProductType) {
+                  const ok = await configRef.current?.submit();
+                  if (!ok) return;
+                }
+              }
+            }
+            goToStep(index);
+            return;
+          }
+        }}
+        onBack={handlePreviousStep}
+        onSave={handleNextStep}
+        backLabel="Back"
+        saveLabel={activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Save Changes') : 'Save & Next'}
+      >
+        <form className="editsub-np-form" onSubmit={e => e.preventDefault()}>
+          <div className="editsub-np-form-section" ref={formSectionRef}>
+            {/* GENERAL */}
+            {activeTab === 'general' && (
+              <div className="edit-np-section">
+                <div className="edit-np-form-row">
+                  <div className="edit-np-form-group">
+                    <InputField
+                      label="Product Name"
+                      value={formData.productName}
+                      onChange={(val: string) => handleInputChange('productName', val)}
+                      placeholder="eg. Google Maps API"
+                      error={errors.productName}
+                      required
                     />
-                  );
-                })}
-              </nav>
-            </aside>
+                  </div>
 
-            {/* Main content area */}
-            <main className="editsub-np-main">
-              <div className="editsub-np-main__inner">
-                <div className="editsub-np-body">
-                  <form className="editsub-np-form" onSubmit={e => e.preventDefault()}>
-                    <div className="editsub-np-form-section" ref={formSectionRef}>
-                      {/* GENERAL */}
-                      {activeTab === 'general' && (
-                        <div className="edit-np-section">
-                          <div className="edit-np-form-row">
-                            <div className="edit-np-form-group">
-                              <InputField
-                                label="Product Name"
-                                value={formData.productName}
-                                onChange={(val: string) => handleInputChange('productName', val)}
-                                placeholder="eg. Google Maps API"
-                                error={errors.productName}
-                                required
-                              />
-                            </div>
-
-                            <div className="edit-np-form-group">
-                              <InputField
-                                label="Version"
-                                value={formData.version}
-                                onChange={(val: string) => handleInputChange('version', val)}
-                                placeholder="eg., 2.3-VOS"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Product Icon Field - No Icon */}
-                          {!selectedIcon && (
-                            <div className="edit-np-form-group">
-                              <label className="edit-np-label">
-                                Product Icon 
-                              </label>
-
-                              <div className="prod-np-icon-field-wrapper">
-                                <div className="prod-np-icon-placeholder">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
-                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA" />
-                                    <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05" />
-                                    <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1" />
-                                    <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1" />
-                                  </svg>
-                                </div>
-
-                                <span className="prod-np-icon-placeholder-text">Add product icon</span>
-
-                                <button
-                                  type="button"
-                                  className="prod-np-icon-add-btn"
-                                  onClick={() => setIsIconPickerOpen(true)}
-                                >
-                                  <span>+ Add</span>
-                                </button>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Product Icon Field - Icon Selected */}
-                          {selectedIcon &&
-                            (() => {
-                              const extractDisplayColor = (colorStr: string): string => {
-                                if (!colorStr) return '#CC9434';
-                                const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
-                                return match ? match[1].trim() : colorStr;
-                              };
-
-                              const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
-                              const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
-                              const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
-
-                              return (
-                                <div className="edit-np-form-group">
-                                  <label className="edit-np-label">
-                                    Product Icon
-                                  </label>
-
-                                  <div className="prod-np-icon-field-wrapper">
-                                    <div className="prod-np-icon-preview">
-                                      <div
-                                        style={{
-                                          width: 50.6537,
-                                          height: 46.3351,
-                                          borderRadius: 12,
-                                          border: '0.6px solid var(--border-border-2, #D5D4DF)',
-                                          background: `
-                                            linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-                                            linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
-                                            radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
-                                          `,
-                                          display: 'flex',
-                                          padding: 8,
-                                          justifyContent: 'center',
-                                          alignItems: 'center',
-                                          position: 'relative',
-                                          overflow: 'hidden',
-                                        }}
-                                      >
-                                        <div
-                                          style={{
-                                            position: 'absolute',
-                                            left: 10.5,
-                                            top: 8.2,
-                                            width: 29.45,
-                                            height: 25.243,
-                                            borderRadius: 5.7,
-                                            background: tileColor,
-                                          }}
-                                        />
-
-                                        <div
-                                          style={{
-                                            width: 29.339,
-                                            height: 26.571,
-                                            padding: '1.661px 3.321px',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            gap: 2.214,
-                                            flexShrink: 0,
-                                            borderRadius: 6,
-                                            border: '0.6px solid #FFF',
-                                            background: 'rgba(202, 171, 213, 0.10)',
-                                            backdropFilter: 'blur(3.875px)',
-                                            transform: 'translate(3px, 2px)',
-                                            boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
-                                          }}
-                                        >
-                                          <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="18"
-                                            height="18"
-                                            viewBox={selectedIcon.viewBox ?? '0 0 18 18'}
-                                            fill="none"
-                                            style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
-                                          >
-                                            <path d={selectedIcon.svgPath} fill="#FFFFFF" />
-                                          </svg>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <div className="prod-np-icon-actions">
-                                      <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
-                                      <DeleteButton onClick={() => setSelectedIcon(null)} label="Remove" variant="soft" />
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })()}
-
-                          <ProductIconPickerModal
-                            isOpen={isIconPickerOpen}
-                            onClose={() => setIsIconPickerOpen(false)}
-                            onSelect={icon => {
-                              setSelectedIcon(icon);
-                              setIsIconPickerOpen(false);
-                            }}
-                            maxCombosPerIcon={24}
-                          />
-
-
-                          <div className="edit-np-form-group">
-                            <TextareaField
-                              label="Description"
-                              value={formData.description}
-                              onChange={(val: string) => handleInputChange('description', val)}
-                              placeholder="eg. API for mapping applications."
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* CONFIGURATION */}
-                      {activeTab === 'configuration' && (
-                        <div className="edit-np-section">
-                          <div className="edit-np-configuration-tab">
-                            <ConfigurationTab
-                              onConfigChange={handleConfigChange}
-                              onProductTypeChange={handleProductTypeChange}
-                              ref={configRef}
-                              productId={productId}
-                              initialProductType={configuration.productType || productType}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* REVIEW */}
-                      {activeTab === 'review' && (
-                        <div className="edit-np-section">
-                          <div className="edit-np-review-container">
-                            <EditReview generalDetails={formData} configuration={configuration} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Custom Scrollbar (kept same logic, class renamed to editsub-*) */}
-                    {formSectionRef.current &&
-                      formSectionRef.current.scrollHeight > formSectionRef.current.clientHeight && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            right: '8px',
-                            top: `${scrollHeight}%`,
-                            transition: 'top 0.1s ease-out',
-                            pointerEvents: 'none',
-                          }}
-                        >
-                          <VerticalScrollbar
-                            height={`${
-                              (formSectionRef.current.clientHeight / formSectionRef.current.scrollHeight) * 100
-                            }%`}
-                            color="#C3C2D0"
-                            thickness={4}
-                            className="editsub-scrollbar-custom"
-                          />
-                        </div>
-                      )}
-
-                    {/* Footer (EditSubscription classnames) */}
-                    <div className="editsub-np-form-footer">
-                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
-                        {activeTab !== 'general' && (
-                          <SecondaryButton type="button" onClick={handlePreviousStep}>
-                            Back
-                          </SecondaryButton>
-                        )}
-                      </div>
-
-                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
-                        <PrimaryButton type="button" onClick={handleNextStep} disabled={loading}>
-                          {loading ? '' : activeTab === 'review' ? (isDraft ? 'Finalize Product' : 'Save Changes') : 'Save & Next'}
-                        </PrimaryButton>
-                      </div>
-                    </div>
-                  </form>
-
+                  <div className="edit-np-form-group">
+                    <InputField
+                      label="Version"
+                      value={formData.version}
+                      onChange={(val: string) => handleInputChange('version', val)}
+                      placeholder="eg., 2.3-VOS"
+                    />
+                  </div>
                 </div>
 
+                {/* Product Icon Field - No Icon */}
+                {!selectedIcon && (
+                  <div className="edit-np-form-group">
+                    <label className="edit-np-label">
+                      Product Icon 
+                    </label>
+
+                    <div className="prod-np-icon-field-wrapper">
+                      <div className="prod-np-icon-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+                          <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA" />
+                          <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05" />
+                          <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1" />
+                          <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1" />
+                        </svg>
+                      </div>
+
+                      <span className="prod-np-icon-placeholder-text">Add product icon</span>
+
+                      <button
+                        type="button"
+                        className="prod-np-icon-add-btn"
+                        onClick={() => setIsIconPickerOpen(true)}
+                      >
+                        <span>+ Add</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Product Icon Field - Icon Selected */}
+                {selectedIcon &&
+                  (() => {
+                    const extractDisplayColor = (colorStr: string): string => {
+                      if (!colorStr) return '#CC9434';
+                      const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+                      return match ? match[1].trim() : colorStr;
+                    };
+
+                    const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
+                    const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
+                    const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
+
+                    return (
+                      <div className="edit-np-form-group">
+                        <label className="edit-np-label">
+                          Product Icon
+                        </label>
+
+                        <div className="prod-np-icon-field-wrapper">
+                          <div className="prod-np-icon-preview">
+                            <div
+                              style={{
+                                width: 50.6537,
+                                height: 46.3351,
+                                borderRadius: 12,
+                                border: '0.6px solid var(--border-border-2, #D5D4DF)',
+                                background: `
+                                  linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
+                                  linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
+                                  radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
+                                `,
+                                display: 'flex',
+                                padding: 8,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                position: 'relative',
+                                overflow: 'hidden',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: 10.5,
+                                  top: 8.2,
+                                  width: 29.45,
+                                  height: 25.243,
+                                  borderRadius: 5.7,
+                                  background: tileColor,
+                                }}
+                              />
+
+                              <div
+                                style={{
+                                  width: 29.339,
+                                  height: 26.571,
+                                  padding: '1.661px 3.321px',
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  gap: 2.214,
+                                  flexShrink: 0,
+                                  borderRadius: 6,
+                                  border: '0.6px solid #FFF',
+                                  background: 'rgba(202, 171, 213, 0.10)',
+                                  backdropFilter: 'blur(3.875px)',
+                                  transform: 'translate(3px, 2px)',
+                                  boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                }}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="18"
+                                  height="18"
+                                  viewBox={selectedIcon.viewBox ?? '0 0 18 18'}
+                                  fill="none"
+                                  style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+                                >
+                                  <path d={selectedIcon.svgPath} fill="#FFFFFF" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="prod-np-icon-actions">
+                            <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
+                            <DeleteButton onClick={() => setSelectedIcon(null)} label="Remove" variant="soft" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                <ProductIconPickerModal
+                  isOpen={isIconPickerOpen}
+                  onClose={() => setIsIconPickerOpen(false)}
+                  onSelect={icon => {
+                    setSelectedIcon(icon);
+                    setIsIconPickerOpen(false);
+                  }}
+                  maxCombosPerIcon={24}
+                />
+
+                <div className="edit-np-form-group">
+                  <TextareaField
+                    label="Description"
+                    value={formData.description}
+                    onChange={(val: string) => handleInputChange('description', val)}
+                    placeholder="eg. API for mapping applications."
+                  />
+                </div>
               </div>
+            )}
 
-            </main>
+            {/* CONFIGURATION */}
+            {activeTab === 'configuration' && (
+              <div className="edit-np-section">
+                <div className="edit-np-configuration-tab">
+                  <ConfigurationTab
+                    onConfigChange={handleConfigChange}
+                    onProductTypeChange={handleProductTypeChange}
+                    ref={configRef}
+                    productId={productId}
+                    initialProductType={configuration.productType || productType}
+                  />
+                </div>
+              </div>
+            )}
 
-
+            {/* REVIEW */}
+            {activeTab === 'review' && (
+              <div className="edit-np-section">
+                <div className="edit-np-review-container">
+                  <EditReview generalDetails={formData} configuration={configuration} />
+                </div>
+              </div>
+            )}
           </div>
-                        <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
-
-
-        </div>
-      </div>
+        </form>
+      </ConfigurationStepShell>
 
 
       {/* Save draft popup */}

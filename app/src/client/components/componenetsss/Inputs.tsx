@@ -289,6 +289,7 @@ export type DropdownFieldProps = CommonProps & {
   value?: string;
   onChange: (value: string) => void;
   options: DropdownOption[];
+  placeholder?: string;
 };
 
 export const DropdownField: React.FC<DropdownFieldProps> = ({
@@ -312,7 +313,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   const [writing, setWriting] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState<number>(() => {
     const idx = options.findIndex((o) => o.value === value);
-    return idx >= 0 ? idx : 0;
+    return idx >= 0 ? idx : -1;
   });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
 
@@ -328,11 +329,14 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   }, []);
 
   React.useEffect(() => {
-    setActiveIndex((i) => Math.min(Math.max(i, 0), options.length - 1));
+    setActiveIndex((i) => {
+      if (i === -1) return -1;
+      return Math.min(Math.max(i, 0), options.length - 1);
+    });
   }, [options.length]);
 
   const move = (dir: 1 | -1) => {
-    let i = activeIndex;
+    let i = activeIndex === -1 ? (dir === 1 ? 0 : options.length - 1) : activeIndex;
     if (!options.length) return;
     do {
       i = (i + dir + options.length) % options.length;
@@ -431,6 +435,199 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       {/* Menu */}
       {open && (
         <div id={listboxId} role="listbox" className="dd-menu" aria-labelledby={controlId} tabIndex={-1}>
+          {options.map((opt, i) => {
+            const isSel = opt.value === value;
+            const isDis = !!opt.disabled;
+            return (
+              <div
+                key={opt.value}
+                role="option"
+                aria-selected={isSel}
+                aria-disabled={isDis}
+                className={[
+                  "dd-item",
+                  isSel ? "is-selected" : "",
+                  isDis ? "is-disabled" : "",
+                  i === activeIndex ? "is-active" : "",
+                ].join(" ").trim()}
+                onMouseEnter={() => !isDis && setActiveIndex(i)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => !isDis && selectAt(i)}
+              >
+                {opt.icon && <span className="dd-item-icon">{opt.icon}</span>}
+                <span className="dd-item-label">{opt.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="if-msg">
+        {error ? (
+          <span className="if-error">{error}</span>
+        ) : helperText ? (
+          <span className="if-help">{helperText}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+/** ---------- Fixed Width Dropdown ---------- */
+export type FixedDropdownFieldProps = CommonProps & {
+  value?: string;
+  onChange: (value: string) => void;
+  options: DropdownOption[];
+  placeholder?: string;
+  width?: 'small' | 'medium'; // small: 150px, medium: 320px
+};
+
+export const FixedDropdownField: React.FC<FixedDropdownFieldProps> = ({
+  id,
+  name,
+  label,
+  placeholder = "Placeholder",
+  required,
+  disabled,
+  helperText,
+  error,
+  value,
+  onChange,
+  options,
+  className,
+  optional,
+  width = 'small',
+}) => {
+  const controlId = id || React.useId();
+  const listboxId = `${controlId}-listbox`;
+  const [open, setOpen] = React.useState(false);
+  const [writing, setWriting] = React.useState(false);
+  const [activeIndex, setActiveIndex] = React.useState<number>(() => {
+    const idx = options.findIndex((o) => o.value === value);
+    return idx >= 0 ? idx : -1;
+  });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+
+  const selected = options.find((o) => o.value === value);
+
+  React.useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!wrapperRef.current) return;
+      if (!wrapperRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  React.useEffect(() => {
+    setActiveIndex((i) => {
+      if (i === -1) return -1;
+      return Math.min(Math.max(i, 0), options.length - 1);
+    });
+  }, [options.length]);
+
+  const move = (dir: 1 | -1) => {
+    let i = activeIndex === -1 ? (dir === 1 ? 0 : options.length - 1) : activeIndex;
+    if (!options.length) return;
+    do {
+      i = (i + dir + options.length) % options.length;
+    } while (options[i]?.disabled && i !== activeIndex);
+    setActiveIndex(i);
+  };
+
+  const selectAt = (i: number) => {
+    const opt = options[i];
+    if (!opt || opt.disabled) return;
+    onChange(opt.value);
+    setOpen(false);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return;
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        if (!open) setOpen(true);
+        move(1);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        if (!open) setOpen(true);
+        move(-1);
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        if (!open) setOpen(true);
+        else selectAt(activeIndex);
+        break;
+      case "Escape":
+        setOpen(false);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const widthClass = width === 'small' ? 'dd-fixed-small' : 'dd-fixed-medium';
+
+  return (
+    <div className={`if-field ${className ?? ""} dd-wrap ${widthClass}`} ref={wrapperRef}>
+      {label && (
+        <label htmlFor={controlId} className={`if-label ${error ? 'is-error' : ''}`}>
+          {label} {required ? "*" : null}{optional && <span style={{ color: 'var(--text-text-medium, #7B97AE)', fontFamily: 'var(--type-font-family-primary, "IBM Plex Sans")', fontSize: 'var(--fontsize-body-md, 14px)', fontStyle: 'normal', fontWeight: 400, lineHeight: 'var(--line-height-body-md, 20px)' }}> (Optional)</span>}
+        </label>
+      )}
+
+      {/* Trigger */}
+      <button
+        id={controlId}
+        name={name}
+        type="button"
+        className={[
+          "if-control",
+          "dd-trigger",
+          writing || open ? "is-writing" : "",
+          error ? "is-error" : "",
+          disabled ? "is-disabled" : "",
+        ].join(" ").trim()}
+        disabled={disabled}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
+        onClick={() => {
+          if (!disabled) setOpen((o) => !o);
+        }}
+        onFocus={() => setWriting(true)}
+        onBlur={() => setWriting(false)}
+        onKeyDown={onKeyDown}
+      >
+        <span className={selected ? "dd-value" : "dd-placeholder"}>
+          {selected ? (
+            <>
+              {selected.icon && <span className="dd-icon">{selected.icon}</span>}
+              {selected.label}
+            </>
+          ) : (
+            placeholder
+          )}
+        </span>
+        <span className={`dd-caret ${open ? "rot" : ""}`} aria-hidden>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M5 8l5 5 5-5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </button>
+
+      {/* Menu */}
+      {open && (
+        <div id={listboxId} role="listbox" className="dd-menu dd-fixed-menu" aria-labelledby={controlId} tabIndex={-1}>
           {options.map((opt, i) => {
             const isSel = opt.value === value;
             const isDis = !!opt.disabled;

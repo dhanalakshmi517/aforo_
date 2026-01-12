@@ -35,7 +35,7 @@ import Pricing, { PricingHandle } from "./Pricing";
 import Extras, { ExtrasHandle } from "./Extras";
 import Review from "./Review";
 
-import { InputField, TextareaField, SelectField } from "../componenetsss/Inputs";
+import { InputField, TextareaField, DropdownField } from "../componenetsss/Inputs";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
 import ProductCreatedSuccess from "../componenetsss/ProductCreatedSuccess";
@@ -925,7 +925,7 @@ const CreatePricePlan = React.forwardRef<
               }}
               error={errors.planName}
             />
-            <SelectField
+            <DropdownField
               label="Billing Frequency"
               required
 
@@ -945,7 +945,7 @@ const CreatePricePlan = React.forwardRef<
               ]}
               error={errors.billingFrequency}
             />
-            <SelectField
+            <DropdownField
               label="Payment type"
               required
 

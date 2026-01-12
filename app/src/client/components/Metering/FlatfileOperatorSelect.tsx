@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField } from '../componenetsss/Inputs';
+import { DropdownField } from '../componenetsss/Inputs';
 
 interface Props {
   dimension: string;
@@ -47,7 +47,7 @@ const FlatfileOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, e
   }));
 
   return (
-    <SelectField
+    <DropdownField
       label="Operator"
       value={value}
       onChange={onChange}

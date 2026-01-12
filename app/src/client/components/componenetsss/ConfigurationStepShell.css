@@ -1,0 +1,222 @@
+/* ConfigurationStepShell.css */
+@import "../Variables/Variables.css";
+
+:root {
+  --topbar-h: 72px;   /* your top header height */
+  --footer-h: 64px;   /* approx footer strip height */
+}
+
+/* Base */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-neutral-50);
+  overflow: hidden; /* ✅ never scroll the page */
+}
+
+/* Shell takes viewport minus topbar */
+.cfgShell {
+  width: 100%;
+  height: calc(100dvh - var(--topbar-h));
+  min-height: calc(100vh - var(--topbar-h));
+  box-sizing: border-box;
+
+  padding: 24px 110px;
+  overflow: hidden;
+}
+
+/* Card */
+.cfgShellCard {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 280px 1fr;
+
+  background: var(--color-neutral-white);
+  border-radius: 12px;
+  border: 1px solid var(--color-neutral-200);
+  overflow: hidden;
+  box-shadow: 0 5px 20px 0 var(--shadow-shadow-1, #EEF1F6);
+
+}
+
+/* ✅ IMPORTANT for grid: allow children to shrink so scroll can work */
+.cfgShellSide,
+.cfgShellMain {
+  min-height: 0;
+}
+
+/* LEFT */
+.cfgShellSide {
+  padding: 24px;
+  border-right: 1px solid var(--color-neutral-200);
+  background: var(--color-neutral-white);
+}
+
+.cfgShellSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.cfgShellStep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  padding: 8px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cfgShellStep:hover {
+  background: rgba(2, 107, 176, 0.05);
+}
+
+.cfgShellBrace {
+  width: 14px;
+  min-width: 14px;
+  font-size: 26px;
+  line-height: 1;
+  color: #026bb0;
+  transform: translateY(-1px);
+}
+
+.cfgShellStepText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a7b3c2;
+}
+
+.cfgShellStep.isActive .cfgShellStepText {
+  color: #19222d;
+}
+
+/* RIGHT */
+.cfgShellMain {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--color-neutral-white);
+  position: relative;
+}
+
+/* ✅ ONLY this scrolls (the form area) */
+.cfgShellBody {
+  flex: 1;
+  min-height: 0;          /* ✅ critical in flex */
+  overflow: auto;         /* ✅ scroll lives here */
+  overscroll-behavior: contain;
+
+  padding: 16px;
+  background:var(--color-neutral-white) ;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* Keep form narrow like your design */
+.cfgShellBody > * {
+  width: 100%;
+  max-width: 680px;
+}
+
+/* ✅ Footer ALWAYS visible, doesn't scroll away */
+.cfgShellFooter {
+  height: var(--footer-h);
+  padding: 16px;
+
+  border-top: 1px solid var(--color-neutral-200);
+  background: var(--color-neutral-white);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  position: sticky; /* ✅ even if footer accidentally sits inside scroll container */
+  bottom: 0;
+  z-index: 10;
+}
+
+/* When on first step (no back button), keep save button on the right */
+.cfgShellFooter--first-step {
+  justify-content: flex-end;
+}
+
+/* Buttons (optional) */
+.cfgShellBtn {
+  height: 34px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.cfgShellBtnBack {
+  background: #f3f7fb;
+  color: #2b3a4a;
+  border-color: rgba(16, 24, 40, 0.08);
+}
+
+.cfgShellBtnBack:hover {
+  background: #eaf1f8;
+}
+
+.cfgShellBtnSave {
+  background: #0b5f9a;
+  color: #ffffff;
+}
+
+.cfgShellBtnSave:hover {
+  filter: brightness(0.96);
+}
+
+/* Optional scrollbar */
+.cfgShellBody::-webkit-scrollbar {
+  width: 10px;
+}
+.cfgShellBody::-webkit-scrollbar-thumb {
+  background: rgba(16, 24, 40, 0.18);
+  border-radius: 12px;
+  border: 3px solid #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .cfgShell {
+    padding: 16px 20px;
+  }
+  .cfgShellCard {
+    max-width: 100%;
+  }
+  .cfgShellBody {
+    padding: 20px 24px;
+  }
+  .cfgShellFooter {
+    padding: 14px 24px;
+  }
+}
+
+@media (max-width: 860px) {
+  .cfgShellCard {
+    grid-template-columns: 220px 1fr;
+  }
+  .cfgShellBody > * {
+    max-width: 100%;
+  }
+}

@@ -11,14 +11,12 @@ import type { Customer } from '../Customers';
 import EditReview from './EditReview';
 import { AccountDetailsData } from './EditAccount';
 import EditAccount from './EditAccount';
-import { InputField, SelectField } from '../../componenetsss/Inputs';
+import { InputField, DropdownField } from '../../componenetsss/Inputs';
 import TopBar from '../../TopBar/TopBar';
-import MetricRow from '../../componenetsss/MetricRow';
 import LogoUploader from '../LogoUploader';
 import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
-import PrimaryButton from '../../componenetsss/PrimaryButton';
-import SecondaryButton from '../../componenetsss/SecondaryButton';
+import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 
 import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
@@ -549,11 +547,13 @@ const EditCustomer: React.FC = () => {
 
             <div className="edit-np-form-row">
               <div className="edit-np-form-group">
-                <SelectField
+                <DropdownField
                   label="Comapny Type"
+                  placeholder="Company Type"
                   value={companyType}
                   onChange={val => {
                     setCompanyType(val);
+
                     if (!val.trim())
                       setErrors(p => ({ ...p, companyType: 'Company Type is required' }));
                     else if (errors.companyType)
@@ -562,10 +562,6 @@ const EditCustomer: React.FC = () => {
                           Object.entries(p).filter(([k]) => k !== 'companyType'),
                         ),
                       }));
-                  }}
-                  onBlur={() => {
-                    if (!companyType.trim())
-                      setErrors(p => ({ ...p, companyType: 'Company Type is required' }));
                   }}
                   options={[
                     { label: 'Select company type', value: '' },
@@ -614,80 +610,33 @@ const EditCustomer: React.FC = () => {
     <>
       <TopBar title="Edit Customer" onBack={openLeavePopup} />
 
-      {/* same shell as EditSubscription – viewport → card → grid → rail + main */}
-      <div className="editsub-np-viewport">
-        <div className="editsub-np-card">
-          <div className="editsub-np-grid">
-            {/* LEFT rail – stepper */}
-            <aside className="editsub-np-rail">
-              <nav className="editsub-np-steps">
-                {steps.map((step, index) => {
-                  const isActive = index === currentStep;
-                  const isCompleted = index < currentStep;
-
-                  return (
-                    <MetricRow
-                      key={step.id}
-                      title={step.title}
-                      state={isActive ? 'active' : 'default'}
-                      className={[
-                        'editsub-np-step',
-                        isActive ? 'active' : '',
-                        isCompleted ? 'completed' : '',
-                      ]
-                        .join(' ')
-                        .trim()}
-                      onClick={() => handleStepClick(index)}
-                    />
-                  );
-                })}
-              </nav>
-            </aside>
-
-            {/* MAIN area – matches EditSubscription structure */}
-            <main className="editsub-np-main">
-              <div className="editsub-np-main__inner">
-                <div className="editsub-np-body">
-                  <form
-                    className="editsub-np-form"
-                    onSubmit={e => {
-                      e.preventDefault();
-                    }}
-                  >
-                    <div className="editsub-np-form-section">
-                      {renderStepContent()}
-                    </div>
-
-                    <div className="af-skel-rule af-skel-rule--bottom" />
-
-                    {/* FOOTER actions – Back / Save & Next / Save Changes */}
-                    <div className="editsub-np-form-footer">
-                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
-                        {activeTab !== 'details' && (
-                          <SecondaryButton
-                            onClick={handlePreviousStep}
-                          >
-                            Back
-                          </SecondaryButton>
-                        )}
-                      </div>
-
-                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
-                        <PrimaryButton
-                          onClick={handleNextStep}
-                        >
-                          {activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
-                        </PrimaryButton>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div className="af-skel-rule af-skel-rule--bottom" />
-            </main>
+      {/* === USING ConfigurationStepShell === */}
+      <ConfigurationStepShell
+        steps={steps.map((step, index) => ({
+          id: String(index),
+          label: step.title,
+        }))}
+        activeStepId={String(currentStep)}
+        onStepClick={(stepId) => {
+          const index = parseInt(stepId, 10);
+          handleStepClick(index);
+        }}
+        onBack={handlePreviousStep}
+        onSave={handleNextStep}
+        backLabel="Back"
+        saveLabel={activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
+      >
+        <form
+          className="editsub-np-form"
+          onSubmit={e => {
+            e.preventDefault();
+          }}
+        >
+          <div className="editsub-np-form-section">
+            {renderStepContent()}
           </div>
-        </div>
-      </div>
+        </form>
+      </ConfigurationStepShell>
 
       {/* Leave / Save popup */}
       <EditPopup

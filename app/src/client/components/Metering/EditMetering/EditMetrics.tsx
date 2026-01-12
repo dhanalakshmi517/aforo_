@@ -1,18 +1,15 @@
-// EditMetrics.tsx (NOW USING EditSubscription SHELL + CLASSNAMES — SAME AS EditProduct)
+// EditMetrics.tsx (NOW USING ConfigurationStepShell)
 
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import TopBar from '../../componenetsss/TopBar';
-import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
+import { InputField, TextareaField, DropdownField } from '../../componenetsss/Inputs';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { useToast } from '../../componenetsss/ToastProvider';
-import PrimaryButton from '../../componenetsss/PrimaryButton';
-import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
-import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
-import MetricRow from '../../componenetsss/MetricRow';
+import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 
 import { getProducts, Product, updateBillableMetric, getBillableMetricById } from './api';
@@ -435,7 +432,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
           </div>
 
           <div className="edit-np-form-group">
-            <SelectField
+            <DropdownField
               label="Product"
               required
               placeholder="Select Product"
@@ -495,7 +492,7 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
 
         <div className="edit-np-form-row">
           <div className="edit-np-form-group">
-            <SelectField
+            <DropdownField
               label="UOM"
               required
               placeholder="Select Unit"
@@ -580,169 +577,106 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
         }}
       />
 
-      {/* === SHELL: EXACTLY LIKE EditProduct / EditSubscription (editsub-np-*) === */}
-      <div className="editsub-np-viewport">
-        <div className="editsub-np-card">
-          <div className="editsub-np-grid">
-            {/* Sidebar / rail */}
-            <aside className="editsub-np-rail">
-              <nav className="editsub-np-steps">
-                {steps.map((step, index) => {
-                  const isActive = index === currentStep;
-                  const isCompleted = index < currentStep;
+      {/* === USING ConfigurationStepShell === */}
+      <ConfigurationStepShell
+        steps={steps.map((step, index) => ({
+          id: String(index),
+          label: step.title,
+        }))}
+        activeStepId={String(currentStep)}
+        onStepClick={async (stepId) => {
+          const index = parseInt(stepId, 10);
+          
+          if (index === currentStep) return;
 
-                  return (
-                    <MetricRow
-                      key={step.id}
-                      title={step.title}
-                      state={isActive ? 'active' : 'default'}
-                      className={['editsub-np-step', isActive ? 'active' : '', isCompleted ? 'completed' : '']
-                        .join(' ')
-                        .trim()}
-                      onClick={async () => {
-                        if (index === currentStep) return;
+          // Always validate the current step before allowing navigation
+          const currentStepValid = validateStep(currentStep);
+          if (!currentStepValid) return;
 
-                        // Always validate the current step before allowing navigation
-                        const currentStepValid = validateStep(currentStep);
-                        if (!currentStepValid) return;
+          // go back freely (after validation)
+          if (index < currentStep) {
+            goToStep(index);
+            return;
+          }
 
-                        // go back freely (after validation)
-                        if (index < currentStep) {
-                          goToStep(index);
-                          return;
-                        }
+          // forward: validate all steps up to the target step
+          if (index > currentStep) {
+            // Validate all steps from current to target
+            for (let i = currentStep; i < index; i++) {
+              const ok = validateStep(i);
+              if (!ok) return;
+            }
+            goToStep(index);
+            return;
+          }
+        }}
+        onBack={handlePreviousStep}
+        onSave={handleNextStep}
+        backLabel="Back"
+        saveLabel={activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
+      >
+        <form className="editsub-np-form" onSubmit={e => e.preventDefault()}>
+          <div className="editsub-np-form-section" ref={formSectionRef}>
+            {loading ? (
+              <div style={{ padding: 20 }}>Loading...</div>
+            ) : (
+              <>
+                {/* METRIC */}
+                {activeTab === 'metric' && renderMetricTab()}
 
-                        // forward: validate all steps up to the target step
-                        if (index > currentStep) {
-                          // Validate all steps from current to target
-                          for (let i = currentStep; i < index; i++) {
-                            const ok = validateStep(i);
-                            if (!ok) return;
-                          }
-                          goToStep(index);
-                          return;
+                {/* CONDITIONS */}
+                {activeTab === 'conditions' && (
+                  <div className="edit-np-section">
+                    <EditUsage
+                      productType={selectedProductType}
+                      unitOfMeasure={unitOfMeasure}
+                      conditions={usageConditions}
+                      setConditions={setUsageConditions}
+                      billingCriteria={billingCriteria}
+                      onBillingCriteriaChange={(v: string) => {
+                        setBillingCriteria(v);
+                        if (errors.billingCriteria) {
+                          const { billingCriteria, ...rest } = errors;
+                          setErrors(rest);
                         }
                       }}
                     />
-                  );
-                })}
-              </nav>
-            </aside>
 
-            {/* Main content area */}
-            <main className="editsub-np-main">
-              <div className="editsub-np-main__inner">
-                <div className="editsub-np-body">
-                  <form className="editsub-np-form" onSubmit={e => e.preventDefault()}>
-                    <div className="editsub-np-form-section" ref={formSectionRef}>
-                      {loading ? (
-                        <div style={{ padding: 20 }}>Loading...</div>
-                      ) : (
-                        <>
-                          {/* METRIC */}
-                          {activeTab === 'metric' && renderMetricTab()}
-
-                          {/* CONDITIONS */}
-                          {activeTab === 'conditions' && (
-                            <div className="edit-np-section">
-                              <EditUsage
-                                productType={selectedProductType}
-                                unitOfMeasure={unitOfMeasure}
-                                conditions={usageConditions}
-                                setConditions={setUsageConditions}
-                                billingCriteria={billingCriteria}
-                                onBillingCriteriaChange={(v: string) => {
-                                  setBillingCriteria(v);
-                                  if (errors.billingCriteria) {
-                                    const { billingCriteria, ...rest } = errors;
-                                    setErrors(rest);
-                                  }
-                                }}
-                              />
-
-                              {/* inline errors to match step validation */}
-                              {!!errors.usageConditions && (
-                                <div style={{ marginTop: 10, fontSize: 12, color: '#B42318' }}>
-                                  {errors.usageConditions}
-                                </div>
-                              )}
-                              {!!errors.billingCriteria && (
-                                <div style={{ marginTop: 10, fontSize: 12, color: '#B42318' }}>
-                                  {errors.billingCriteria}
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* REVIEW */}
-                          {activeTab === 'review' && (
-                            <div className="edit-np-section">
-                              <EditReview
-                                metricName={metricName}
-                                description={description}
-                                productName={selectedProductName}
-                                version={version}
-                                unitOfMeasure={unitOfMeasure}
-                                aggregationFunction={aggregationFunction}
-                                aggregationWindow={aggregationWindow}
-                                usageConditions={usageConditions}
-                                billingCriteria={billingCriteria}
-                              />
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Custom Scrollbar (same logic as EditProduct) */}
-                    {formSectionRef.current &&
-                      formSectionRef.current.scrollHeight > formSectionRef.current.clientHeight && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            right: '8px',
-                            top: `${scrollHeight}%`,
-                            transition: 'top 0.1s ease-out',
-                            pointerEvents: 'none',
-                          }}
-                        >
-                          <VerticalScrollbar
-                            height={`${
-                              (formSectionRef.current.clientHeight / formSectionRef.current.scrollHeight) * 100
-                            }%`}
-                            color="#C3C2D0"
-                            thickness={4}
-                            className="editsub-scrollbar-custom"
-                          />
-                        </div>
-                      )}
-
-                    {/* Footer (EditSubscription classnames) */}
-                    <div className="editsub-np-form-footer">
-                      <div className="editsub-np-btn-group editsub-np-btn-group--back">
-                        {activeTab !== 'metric' && (
-                          <SecondaryButton type="button" onClick={handlePreviousStep} disabled={loading}>
-                            Back
-                          </SecondaryButton>
-                        )}
+                    {/* inline errors to match step validation */}
+                    {!!errors.usageConditions && (
+                      <div style={{ marginTop: 10, fontSize: 12, color: '#B42318' }}>
+                        {errors.usageConditions}
                       </div>
-
-                      <div className="editsub-np-btn-group editsub-np-btn-group--next">
-                        <PrimaryButton type="button" onClick={handleNextStep} disabled={loading}>
-                          {loading ? '' : activeTab === 'review' ? 'Save Changes' : 'Save & Next'}
-                        </PrimaryButton>
+                    )}
+                    {!!errors.billingCriteria && (
+                      <div style={{ marginTop: 10, fontSize: 12, color: '#B42318' }}>
+                        {errors.billingCriteria}
                       </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </main>
+                    )}
+                  </div>
+                )}
+
+                {/* REVIEW */}
+                {activeTab === 'review' && (
+                  <div className="edit-np-section">
+                    <EditReview
+                      metricName={metricName}
+                      description={description}
+                      productName={selectedProductName}
+                      version={version}
+                      unitOfMeasure={unitOfMeasure}
+                      aggregationFunction={aggregationFunction}
+                      aggregationWindow={aggregationWindow}
+                      usageConditions={usageConditions}
+                      billingCriteria={billingCriteria}
+                    />
+                  </div>
+                )}
+              </>
+            )}
           </div>
-
-          {/* match your EditProduct bottom rule placement */}
-          <div className="edit-af-skel-rule edit-af-skel-rule--bottom" />
-        </div>
-      </div>
+        </form>
+      </ConfigurationStepShell>
 
       {/* Save draft popup (same pattern as EditProduct) */}
       <EditPopup

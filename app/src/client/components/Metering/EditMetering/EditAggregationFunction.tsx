@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField } from '../../componenetsss/Inputs';
+import { DropdownField } from '../../componenetsss/Inputs';
 
 interface AggregationFunctionSelectProps {
   label?: string;
@@ -71,7 +71,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({ l
     options = [value, ...options];
   }
   return (
-    <SelectField
+    <DropdownField
       label={label}
       value={value}
       onChange={onChange}

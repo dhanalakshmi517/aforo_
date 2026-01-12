@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField } from '../componenetsss/Inputs';
+import { DropdownField } from '../componenetsss/Inputs';
 import './ApiDimensionSelect.css';
 
 
@@ -27,7 +27,7 @@ const FlatfileDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChan
   }));
 
   return (
-    <SelectField
+    <DropdownField
       label="Dimension"
       value={value}
       onChange={onChange}

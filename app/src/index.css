@@ -36,3 +36,23 @@ body {
 .tremor-BarChart-root {
     height: 300px !important;
 }
+
+/* Hide scrollbar globally */
+.no-scrollbar {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;     /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+}
+
+/* Hide scrollbar for all elements */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;     /* Firefox */
+}
