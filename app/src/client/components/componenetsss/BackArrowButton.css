@@ -26,7 +26,7 @@
 
 /* HOVER: slightly richer surface */
 .backArrowBtn:hover:not(.is-disabled) {
-  background: var(--color-neutral-150);
+  background: var(--color-neutral-100);
   border-color: var(--color-neutral-300);
   color: var(--icon-strong, #5f7e97);
 }

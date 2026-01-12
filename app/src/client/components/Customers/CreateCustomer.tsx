@@ -6,7 +6,7 @@ import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
 import SectionHeader from "../componenetsss/SectionHeader";
-import { InputField, SelectField } from "../componenetsss/Inputs";
+import { InputField, DropdownField } from "../componenetsss/Inputs";
 import AccountDetailsForm, { AccountDetailsData } from "./AccountDetailsForm";
 import CustomerReview from "./CustomerReview";
 import LogoUploader from "./LogoUploader";
@@ -796,10 +796,11 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                               required
                             />
 
-                            <SelectField
+                            <DropdownField
                               label="Company Type"
                               value={companyType}
                               onChange={setCompanyType}
+                              placeholder="Company Type"
                               error={errors.companyType}
                               required
                               options={[

@@ -2,16 +2,13 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import TopBar from '../../componenetsss/TopBar';
-import { InputField, TextareaField, SelectField } from '../../componenetsss/Inputs';
+import { InputField, TextareaField, DropdownField } from '../../componenetsss/Inputs';
 import ConfirmDeleteModal from '../../componenetsss/ConfirmDeleteModal';
 import { useToast } from '../../componenetsss/ToastProvider';
-import PrimaryButton from '../../componenetsss/PrimaryButton';
-import SecondaryButton from '../../componenetsss/SecondaryButton';
 import EditPopup from '../../componenetsss/EditPopUp';
 import SaveAsDraftModal from '../../Products/Componenets/SaveAsDraftModel';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
-import VerticalScrollbar from '../../componenetsss/VerticalScrollbar';
-import MetricRow from '../../componenetsss/MetricRow';
+import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 
 import EditBillable from './EditBillable';
 import EditPricing from './EditPricing';
@@ -738,7 +735,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         </div>
 
         <div className="editrate-np-form-group">
-          <SelectField
+          <DropdownField
             label='Billing Frequency'
             required
             value={billingFrequency}
@@ -761,7 +758,7 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
 
       <div className="editrate-np-form-row">
         <div className="editrate-np-form-group">
-          <SelectField
+          <DropdownField
             label='Payment Type'
             required
 
@@ -891,151 +888,100 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
         onBack={handleBack}
       />
 
-      <div className="editrate-np-viewport">
-        <div className="editrate-np-card">
-          <div className="editrate-np-grid">
-            {/* Left rail */}
-            <aside className="editrate-np-rail">
-              <nav className="editrate-np-steps">
-                {steps.map((step, index) => {
-                  const isActive = index === currentStep;
-                  const isCompleted = index < currentStep;
-                  return (
-                    <MetricRow
-                      key={step.id}
-                      title={step.title}
-                      state={isActive ? 'active' : 'default'}
-                      className={`editrate-np-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`.trim()}
-                      onClick={() => handleSidebarStepClick(index)}
-                    />
-                  );
-                })}
-              </nav>
-            </aside>
+      {/* === USING ConfigurationStepShell === */}
+      <ConfigurationStepShell
+        steps={steps.map((step, index) => ({
+          id: String(index),
+          label: step.title,
+        }))}
+        activeStepId={String(currentStep)}
+        onStepClick={(stepId) => {
+          const index = parseInt(stepId, 10);
+          handleSidebarStepClick(index);
+        }}
+        onBack={() => gotoStep(Math.max(0, currentStep - 1))}
+        onSave={activeTab === 'review' ? handleSubmitFinal : handleNext}
+        backLabel="Back"
+        saveLabel={activeTab === 'review' ? 'Save changes' : (loading ? 'Saving...' : 'Next')}
+      >
+        <form
+          className="editrate-np-form"
+          onSubmit={e => {
+            e.preventDefault();
+          }}
+        >
+          <div className="editrate-np-form-section">{renderContent()}</div>
+        </form>
+      </ConfigurationStepShell>
 
-            {/* MAIN area – aligned with Metrics skeleton */}
-            <main className="editrate-np-main">
-              <div className="editrate-np-main__inner">
-                <div className="editrate-np-body">
-                  <form
-                    className="editrate-np-form"
-                    onSubmit={e => {
-                      e.preventDefault();
-                    }}
-                  >
-                    <div className="editrate-np-form-section">{renderContent()}</div>
+      <SaveAsDraftModal
+        isOpen={showSaveDraftModal}
+        onSave={() => {
+          setShowSaveDraftModal(false);
+          exitToList();
+        }}
+        onDelete={() => {
+          setShowSaveDraftModal(false);
+          setShowDeleteConfirm(true);
+        }}
+      />
 
-                    <div className="af-skel-rule af-skel-rule--bottom" />
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        productName={ratePlanName || 'this plan'}
+        onConfirm={async () => {
+          if (!ratePlanId) {
+            setShowDeleteConfirm(false);
+            exitToList();
+            return;
+          }
+          try {
+            setLoading(true);
+            await deleteRatePlan(ratePlanId);
+            showToast({
+              kind: 'success',
+              title: 'Deleted',
+              message: 'Rate plan deleted successfully.',
+            });
+            setShowDeleteConfirm(false);
+            exitToList();
+          } catch (e: any) {
+            console.error('Delete failed:', e);
+            showToast({
+              kind: 'error',
+              title: 'Failed to Delete',
+              message: e?.message || 'Could not delete rate plan.',
+            });
+          } finally {
+            setLoading(false);
+          }
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
 
-                    {/* FOOTER – same alignment pattern */}
-                    <div className="editrate-np-form-footer">
-                      <div className="editrate-np-btn-group editrate-np-btn-group--back">
-                        {activeTab !== 'details' && (
-                          <SecondaryButton
-                            type="button"
-                            onClick={() => gotoStep(Math.max(0, currentStep - 1))}
-                            disabled={loading}
-                          >
-                            Back
-                          </SecondaryButton>
-                        )}
-                      </div>
+      <EditPopup
+        isOpen={showEditPopup}
+        onDismiss={() => setShowEditPopup(false)}
+        onClose={() => {
+          setShowEditPopup(false);
+          exitToList();
+        }}
+        onSave={async () => {
+          await handleSaveDraft();
+          setShowEditPopup(false);
+        }}
+      />
 
-                      <div className="editrate-np-btn-group editrate-np-btn-group--next">
-                        {activeTab !== 'review' ? (
-                          <PrimaryButton type="button" onClick={handleNext} disabled={loading}>
-                            {loading ? 'Saving...' : 'Next'}
-                          </PrimaryButton>
-                        ) : (
-                          <PrimaryButton type="button" onClick={handleSubmitFinal} disabled={loading}>
-                            {loading ? 'Saving...' : 'Save changes'}
-                          </PrimaryButton>
-                        )}
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </main>
-          </div>
-        </div>
-
-        <VerticalScrollbar
-          height="100%"
-          color="#D9DFE8"
-          thickness={4}
-          className="editrate-np-scrollbar"
-        />
-
-        <SaveAsDraftModal
-          isOpen={showSaveDraftModal}
-          onSave={() => {
-            setShowSaveDraftModal(false);
+      {showUnsavedChangesModal && (
+        <UnsavedChangesModal
+          onDiscard={() => {
+            setShowUnsavedChangesModal(false);
             exitToList();
           }}
-          onDelete={() => {
-            setShowSaveDraftModal(false);
-            setShowDeleteConfirm(true);
-          }}
+          onKeepEditing={() => setShowUnsavedChangesModal(false)}
+          onClose={() => setShowUnsavedChangesModal(false)}
         />
-
-        <ConfirmDeleteModal
-          isOpen={showDeleteConfirm}
-          productName={ratePlanName || 'this plan'}
-          onConfirm={async () => {
-            if (!ratePlanId) {
-              setShowDeleteConfirm(false);
-              exitToList();
-              return;
-            }
-            try {
-              setLoading(true);
-              await deleteRatePlan(ratePlanId);
-              showToast({
-                kind: 'success',
-                title: 'Deleted',
-                message: 'Rate plan deleted successfully.',
-              });
-              setShowDeleteConfirm(false);
-              exitToList();
-            } catch (e: any) {
-              console.error('Delete failed:', e);
-              showToast({
-                kind: 'error',
-                title: 'Failed to Delete',
-                message: e?.message || 'Could not delete rate plan.',
-              });
-            } finally {
-              setLoading(false);
-            }
-          }}
-          onCancel={() => setShowDeleteConfirm(false)}
-        />
-
-        <EditPopup
-          isOpen={showEditPopup}
-          onDismiss={() => setShowEditPopup(false)}
-          onClose={() => {
-            setShowEditPopup(false);
-            exitToList();
-          }}
-          onSave={async () => {
-            await handleSaveDraft();
-            setShowEditPopup(false);
-          }}
-        />
-
-        {showUnsavedChangesModal && (
-          <UnsavedChangesModal
-            onDiscard={() => {
-              setShowUnsavedChangesModal(false);
-              exitToList();
-            }}
-            onKeepEditing={() => setShowUnsavedChangesModal(false)}
-            onClose={() => setShowUnsavedChangesModal(false)}
-          />
-        )}
-      </div>
+      )}
     </>
   );
 };

@@ -73,6 +73,11 @@ line-height: var(--line-height-body-sm); /* 150% */
   margin-bottom: 0;
 }
 
+.condition-field .if-field {
+  width: 100%;
+  max-width: 100%;
+}
+
 .operator-value-group {
   display: flex;
   gap: 12px;      /* smaller gap between Operator and Value */
@@ -86,6 +91,11 @@ line-height: var(--line-height-body-sm); /* 150% */
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
+}
+
+.operator-field .if-field {
+  width: 100%;
+  max-width: 100%;
 }
 
 .value-field .if-field {
@@ -181,7 +191,7 @@ input[type='text'] {
   display: flex;
   gap: 10px;
   flex-wrap: nowrap;
-  align-items: flex-end;
+  align-items: flex-start;
   font-size: var(--font-size-md);
   font-weight: 400;
 }

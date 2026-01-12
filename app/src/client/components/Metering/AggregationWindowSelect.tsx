@@ -1,5 +1,5 @@
 import React from 'react';
-import { SelectField, InputField } from '../componenetsss/Inputs';
+import { DropdownField, InputField } from '../componenetsss/Inputs';
 
 interface AggregationWindowSelectProps {
   label?: string;
@@ -29,7 +29,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
   // Show placeholder dropdown until product/unit are selected so UI stays consistent
   if (!productType || !unitOfMeasure) {
     return (
-      <SelectField
+      <DropdownField
         label={label}
         value=""
         onChange={() => { }}
@@ -125,7 +125,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
 
   if (options) {
     return (
-      <SelectField
+      <DropdownField
         label={label}
         value={value}
         onChange={onChange}

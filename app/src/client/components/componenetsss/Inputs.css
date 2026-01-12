@@ -28,7 +28,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px; /* Gap between label and control */
-  width: 456px;
+  width: 100%;
+  max-width: 456px;
   margin-bottom: 10px !important  ; /* Decreased bottom margin for tighter spacing between fields */
 }
 
@@ -36,7 +37,7 @@
   color: var(--color-neutral-1700);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-weight: 500;
+  font-weight: 420;
   line-height: var(--line-height-body-md);
   user-select: none;
   display: flex;
@@ -57,19 +58,19 @@
   color: var(--color-neutral-500);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-weight: 400;
+  font-weight: 420;
   line-height: var(--line-height-body-md);
 }
 
 /* ---------- DEFAULT (base) ---------- */
 .if-control {
-  width: 456px;
+  width: 100%;
   height: 40px;
   padding: 8px 12px;
   font-size: var(--font-size-md);
   color: var(--color-neutral-1400);
   background: var(--color-neutral-white) !important;
-  border: 1px solid var(--color-neutral-300);
+  border: 1px solid var(--color-neutral-400);
   border-radius: var(--border-radius-sm);
   font-weight: 400;
   outline: none;
@@ -81,7 +82,7 @@
 /* Select-specific sizing */
 .if-select {
     /* override width or height here */
-    width: 456px;       /* example */
+    width: 100%;       /* example */
     height: 40px;  
     padding: 8px 12px;
     line-height: 1.5; /* Ensure proper line height */
@@ -93,7 +94,7 @@
     resize: vertical;
     min-height: 90px;   /* minimum height */
     line-height: 1.45;
-    width: 456px;       /* custom width */
+    width: 100%;       /* custom width */
     height: 90px;      /* fixed starting height */
   }
 
@@ -221,7 +222,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   height: 40px;
-  border: 1px solid var(--color-neutral-300) !important;
+  border: 1px solid var(--color-neutral-400) !important;
   border-radius: 6px;
   font-size: 14px;
   color: var(--color-neutral-1400);
@@ -258,7 +259,7 @@ select.if-select:focus-visible,
 .if-select option:first-child,
 .if-select option[value=""] {
 overflow: hidden;
-color:var(--color-neutral-200);
+color:var(--color-neutral-300);
 text-overflow: ellipsis;
 
 /* body/md/reg */
@@ -271,7 +272,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* Styling for selected placeholder */
 .if-select:invalid {
-  color: var(--color-neutral-200);
+  color: var(--color-neutral-300);
 }
 
  
@@ -318,7 +319,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   cursor: pointer;
   transition: all 0.2s ease;
   height: 40px;
-  border: 1px solid var(--color-neutral-300) !important;
+  border: 1px solid var(--color-neutral-400) !important;
   border-radius: 6px;
   font-size: 14px;
   color: var(--color-neutral-1400);
@@ -395,10 +396,30 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   background: var(--if-bg-subtle);
   cursor: pointer;
   text-align: left;
+  width: 100%;
 }
 
-.dd-placeholder { color: var(--color-neutral-200); }
-.dd-value { display: inline-flex; align-items: center; gap: 8px; }
+.dd-placeholder {
+  color: var(--color-neutral-300);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-value { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
 
 .dd-icon {
   display: inline-flex;
@@ -414,38 +435,65 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 /* Menu container (like your mock) */
 .dd-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 2px);
   left: 0;
   right: 0;
-  z-index: 50;
-  background: var(--if-bg);
-  border: 1px solid var(--if-border);
-  border-radius: var(--if-radius);
-  box-shadow: var(--if-shadow);
-  padding: 8px;
+  z-index: 1000;
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: 8px;
+  padding: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  min-width: 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  /* Prevent overflow beyond viewport */
+  max-width: min(100%, 300px);
 }
 
-/* Menu items (soft rounded “pills”) */
+/* Menu items (soft rounded "pills") */
 .dd-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--if-radius-sm);
+  gap: 16px;
+  padding: 4px 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   user-select: none;
+  transition: all 0.15s ease;
+ color: var(--color-neutral-1000);
+
+/* body/lg/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 24px); /* 150% */
+  white-space: nowrap;
 }
-.dd-item + .dd-item { margin-top: 6px; }
+.dd-item + .dd-item { margin-top: 2px; }
 
 .dd-item:hover:not(.is-disabled),
 .dd-item.is-active:not(.is-disabled) {
-  background: var(--if-item-hover);
-  border-color: rgba(0,0,0,0.04);
+  background: var(--color-neutral-100);
+  border-color: none;
+  color: #111827;
 }
 
-.dd-item.is-selected .dd-item-label { font-weight: 600; }
+.dd-item.is-selected {
+  background:var(--color-neutral-white);
+  border-color:none;
+  color:var(--color-neutral-1000);
+}
+
+.dd-item.is-selected .dd-item-label { 
+  font-weight: 420; 
+  color:var(--color-neutral-1000);
+}
 
 /* ---------- File Field ---------- */
 .if-file-wrapper {
@@ -521,13 +569,13 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   color: var(--if-text);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
-  font-weight: 500;
+  font-weight: 420;
   line-height: var(--line-height-body-md);
   word-break: break-all;
 }
 
 .if-file-placeholder {
-  color: var(--if-text-muted);
+  color: var(--color-neutral-300);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: 400;
@@ -601,4 +649,38 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   justify-content: center;
   opacity: 0.85;
 }
-.dd-item-label { line-height: 1; }
+.dd-item-label { 
+  line-height: 1; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== Fixed Width Dropdown ========== */
+.dd-fixed-small {
+  width: 150px !important;
+  max-width: 150px !important;
+}
+
+.dd-fixed-medium {
+  width: 320px !important;
+  max-width: 320px !important;
+}
+
+.dd-fixed-menu {
+  width: inherit !important;
+  max-width: inherit !important;
+  min-width: inherit !important;
+}
+
+.dd-fixed-small .dd-fixed-menu {
+  width: 150px !important;
+  max-width: 150px !important;
+  min-width: 150px !important;
+}
+
+.dd-fixed-medium .dd-fixed-menu {
+  width: 320px !important;
+  max-width: 320px !important;
+  min-width: 320px !important;
+}

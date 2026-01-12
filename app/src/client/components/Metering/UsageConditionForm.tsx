@@ -9,7 +9,7 @@ import SqlDimensionSelect from './SqlDimensionSelect';
 import SqlOperatorSelect from './SqlOperatorSelect';
 import LlmDimensionSelect from './LlmDimensionSelect';
 import LlmOperatorSelect from './LlmOperatorSelect';
-import { InputField, SelectField } from '../componenetsss/Inputs';
+import { InputField, DropdownField } from '../componenetsss/Inputs';
 import SecondaryButton from '../componenetsss/SecondaryButton';
 
 interface FilterCondition {
@@ -165,9 +165,10 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
 
       {/* Billing section at the top */}
       <div className="billing-section">
-        <SelectField
+        <DropdownField
           label="Select Billing Criteria"
           value={billingCriteria}
+          placeholder='Select Billing Criteria'
           required
           onChange={(val) => {
             onBillingCriteriaChange(val);
@@ -246,11 +247,12 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 if (!filter.usageCondition) {
                   return (
                     <div className="select-container">
-                      <SelectField
+                      <DropdownField
                         label="Operator"
                         placeholder="--select--"
                         required
                         value=""
+                        className="operator-usage"
                         onChange={() => { }}
                         options={[{ label: '--select--', value: '' }]}
                         disabled={true}
@@ -276,7 +278,7 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
                 if (isLlm) return <LlmOperatorSelect {...operatorProps} />;
 
                 return (
-                  <SelectField
+                  <DropdownField
                     label="Operator"
                     required={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS'}
                     value={filter.operator}

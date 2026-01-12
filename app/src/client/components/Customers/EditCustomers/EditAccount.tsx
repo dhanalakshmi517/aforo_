@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { InputField, SelectField } from '../../componenetsss/Inputs';
+import { InputField, DropdownField, SelectField } from '../../componenetsss/Inputs';
 import './EditAccount.css';
 
 export interface AccountDetailsData {
@@ -313,14 +313,13 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
             />
           </div>
           <div className="acc-form-group acc-country">
-            <SelectField
+            <DropdownField
               label="Country"
               value={billingAddress.country}
               placeholder="Select Country"
                         required
 
-              onChange={(val) => handleBillingChange('country', val)}
-              onBlur={() => !billingAddress.country.trim() ? setErr('billing_country', 'This is a required field') : clearErr('billing_country')}
+              onChange={(val: string) => handleBillingChange('country', val)}
               options={countryOptions}
               error={localErr.billing_country || errors.billingCountry}
             />
@@ -397,12 +396,11 @@ const EditAccount: React.FC<Props> = ({ data, onChange, errors = {} }) => {
             />
           </div>
           <div className="acc-form-group acc-country">
-            <SelectField
+            <DropdownField
               label="Country"
               value={customerAddress.country}
               placeholder="Select Country"
-              onChange={(val) => handleCustomerChange('country', val)}
-              onBlur={() => !sameAsBilling && !customerAddress.country.trim() ? setErr('customer_country', 'This is a required field') : clearErr('customer_country')}
+              onChange={(val: string) => handleCustomerChange('country', val)}
               options={countryOptions}
               disabled={sameAsBilling}
                         required

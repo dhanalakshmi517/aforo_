@@ -1,7 +1,7 @@
 // EditLlmOperator.tsx
 
 import React from 'react';
-import { SelectField } from '../../componenetsss/Inputs';
+import { DropdownField } from '../../componenetsss/Inputs';
 
 interface Props {
   dimension: string;
@@ -40,7 +40,7 @@ const EditLlmOperator: React.FC<Props> = ({ dimension, value, onChange, label = 
   }));
   
   return (
-    <SelectField
+    <DropdownField
       label={label}
       value={value}
       onChange={onChange}

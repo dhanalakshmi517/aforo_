@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Billable.css';
 import { setRatePlanData } from './utils/sessionStorage';
-import { SelectField } from '../componenetsss/Inputs';
+import { DropdownField } from '../componenetsss/Inputs';
 
 interface Metric {
   id: number;
@@ -103,7 +103,7 @@ const Billable: React.FC<BillableProps> = ({
     <div className="billable-section">
       {/* Product Selection Dropdown */}
       <div style={{ marginBottom: '24px', maxWidth: '539px' }}>
-        <SelectField
+        <DropdownField
           label="Select Product"
           required
           value={selectedProductName}
