@@ -7,6 +7,7 @@ import { useToast } from '../../componenetsss/ToastProvider';
 import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
 import EditReview from './EditReview';
+import InfoInlineNote from '../../componenetsss/InfoInlineNote';
 
 import './EditSubscription.css';
 import '../../componenetsss/EditSkeletonForm.css';
@@ -333,7 +334,6 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                         );
                       }}
                       options={[
-                        { label: 'e.g., Aditya Inc', value: '' },
                         ...customers.map(c => ({
                           label: c.customerName,
                           value: c.customerId.toString(),
@@ -351,18 +351,21 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       value={selectedProductId?.toString() || ''}
                       onChange={value => {
                         const id = Number(value);
-                        setSelectedProductId(id || null);
                         const prod = products.find(
                           p => p.productId === id,
                         );
                         setSelectedProductName(
                           prod?.productName || '',
                         );
-                        setSelectedRatePlanId(null);
-                        setSelectedRatePlanName('');
+                        if (id !== selectedProductId) {
+                          setSelectedProductId(id || null);
+                          setSelectedRatePlanId(null);
+                          setSelectedRatePlanName('');
+                        } else {
+                          setSelectedProductId(id || null);
+                        }
                       }}
                       options={[
-                        { label: 'Select Product', value: '' },
                         ...products.map(p => ({
                           label: p.productName,
                           value: p.productId.toString(),
@@ -389,7 +392,6 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                         );
                       }}
                       options={[
-                        { label: 'Select Rate Plan', value: '' },
                         ...ratePlans
                           .filter(rp =>
                             selectedProductId
@@ -402,8 +404,8 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                           })),
                       ]}
                       disabled={!selectedProductId}
-                      helperText="Select a rate plan associated with the chosen product. Changing the product will reset this selection."
                     />
+                    <InfoInlineNote text="Select a rate plan associated with the chosen product. Changing the product will reset this selection." />
                   </div>
 
                   <div className="editsub-np-form-group">
@@ -415,7 +417,6 @@ const EditSubscription: React.FC<EditSubscriptionProps> = ({
                       value={paymentType}
                       onChange={setPaymentType}
                       options={[
-                        { label: 'Select Payment Type', value: '' },
                         { label: 'Prepaid', value: 'PREPAID' },
                         { label: 'Postpaid', value: 'POSTPAID' },
                       ]}

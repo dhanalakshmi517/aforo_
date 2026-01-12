@@ -438,7 +438,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   top: calc(100% + 2px);
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 9999;
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-400);
   border-radius: 8px;
@@ -458,7 +458,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
@@ -479,7 +479,7 @@ line-height: var(--line-height-body-md, 24px); /* 150% */
 
 .dd-item:hover:not(.is-disabled),
 .dd-item.is-active:not(.is-disabled) {
-  background: var(--color-neutral-100);
+  background: var(--color-primary-100);
   border-color: none;
   color: #111827;
 }

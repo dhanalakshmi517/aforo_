@@ -13,6 +13,12 @@ interface ConfirmDeleteModalProps {
   discardLabel?: string;
   /** Optional label override for the right (primary delete) button. Default: "Yes, Delete" */
   confirmLabel?: string;
+  /** Optional title text override for discard vs delete behavior */
+  title?: string;
+  /** Optional subtitle text override */
+  subtitle?: string;
+  /** Use discard styling instead of delete styling */
+  isDiscardMode?: boolean;
 }
 
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
@@ -23,6 +29,9 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   onCancel,
   discardLabel = "Discard",
   confirmLabel = "Yes, Delete",
+  title,
+  subtitle,
+  isDiscardMode = false,
 }) => {
   if (!isOpen) return null;
 
@@ -53,9 +62,17 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         </button>
 
         <p id="del-modal-title" className="del-modal-title">
-          Are you sure you want to delete the <br /> {entityType} "{productName}"?
+          {title || (isDiscardMode 
+            ? `Are you sure you want to discard the ${entityType} "${productName}"?`
+            : `Are you sure you want to delete the ${entityType} "${productName}"?`
+          )}
         </p>
-        <p className="del-modal-subtitle">This action cannot be undone.</p>
+        <p className="del-modal-subtitle">
+          {subtitle || (isDiscardMode 
+            ? "This action cannot be undone."
+            : "This action cannot be undone."
+          )}
+        </p>
 
         <div className="del-modal-actions">
           <SecondaryButton fullWidth onClick={onCancel}>

@@ -81,6 +81,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
 
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [isDraft, setIsDraft] = useState(false);
+  const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
 
   // Lock logic (same pattern as metric)
   const hasAnyRequiredInput = useMemo(() => {
@@ -607,7 +608,36 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     }
   };
 
-  const topActionsDisabled = !hasAnyRequiredInput && !customerId;
+  const hasUserMadeChanges = useMemo(() => {
+    if (!originalData) {
+      // No draft loaded, enable buttons if user has input
+      return hasAnyRequiredInput;
+    }
+    // Draft loaded, check if current state differs from original state
+    return (
+      originalData.companyName !== companyName ||
+      originalData.customerName !== customerName ||
+      originalData.companyType !== companyType ||
+      companyLogo !== null ||
+      JSON.stringify(originalData.accountDetails) !== JSON.stringify(accountDetails)
+    );
+  }, [
+    originalData,
+    companyName,
+    customerName,
+    companyType,
+    companyLogo,
+    accountDetails,
+    hasAnyRequiredInput
+  ]);
+
+  useEffect(() => {
+    if (hasUserMadeChanges && !hasEverBeenEnabled) {
+      setHasEverBeenEnabled(true);
+    }
+  }, [hasUserMadeChanges, hasEverBeenEnabled]);
+
+  const topActionsDisabled = !hasEverBeenEnabled;
 
   return (
     <>
@@ -975,6 +1005,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
       <ConfirmDeleteModal
         isOpen={showDeleteModal}
         productName={(customerName || companyName || "this customer").trim()}
+        entityType="customer"
+        isDiscardMode={true}
         onConfirm={confirmDeleteTopRight}
         onCancel={() => setShowDeleteModal(false)}
         discardLabel="Keep editing"
