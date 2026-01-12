@@ -1,0 +1,28 @@
+/* InfoInlineNote.css */
+.infoNote {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: -6px;
+}
+
+.infoNote__icon {
+  margin-top: 3px; /* nudges icon into the text line like the screenshot */
+  flex: 0 0 auto;
+}
+
+.infoNote__text {
+  margin: 0;
+
+  /* ✅ text wraps after 456px (or your prop), then continues next line */
+  width: min(456px, 100%);
+  white-space: normal;
+  overflow-wrap: anywhere;
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #344054;
+}

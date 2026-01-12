@@ -105,6 +105,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
+  const [initialFormState, setInitialFormState] = useState<any>(null);
 
   // form
   const [formData, setFormData] = useState({
@@ -266,7 +268,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     return formChanged || iconChanged;
   }, [formData, selectedIcon, lastSavedData, lastSavedIcon, hasAnyRequiredInput]);
 
-  const topActionsDisabled = !hasAnyRequiredInput && !createdProductId;
+  useEffect(() => {
+    if (hasUnsavedChanges && !hasEverBeenEnabled) {
+      setHasEverBeenEnabled(true);
+    }
+  }, [hasUnsavedChanges, hasEverBeenEnabled]);
+
+  const topActionsDisabled = !hasEverBeenEnabled;
 
   const LockBadge = () => (
     <span
@@ -948,6 +956,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         discardLabel="Keep editing"
         confirmLabel="Discard"
         productName={formData.productName || "this product"}
+        isDiscardMode={true}
         onConfirm={async () => {
           setShowDeleteConfirm(false);
           await deleteAndClose();

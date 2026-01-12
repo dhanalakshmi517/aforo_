@@ -311,6 +311,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   const listboxId = `${controlId}-listbox`;
   const [open, setOpen] = React.useState(false);
   const [writing, setWriting] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [activeIndex, setActiveIndex] = React.useState<number>(() => {
     const idx = options.findIndex((o) => o.value === value);
     return idx >= 0 ? idx : -1;
@@ -318,6 +319,14 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   const wrapperRef = React.useRef<HTMLDivElement>(null);
 
   const selected = options.find((o) => o.value === value);
+  
+  const filteredOptions = React.useMemo(() => {
+    if (!searchQuery.trim()) return options;
+    const query = searchQuery.toLowerCase();
+    return options.filter((opt) => 
+      opt.label.toLowerCase().includes(query) || opt.value.toLowerCase().includes(query)
+    );
+  }, [options, searchQuery]);
 
   React.useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
@@ -331,24 +340,25 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
   React.useEffect(() => {
     setActiveIndex((i) => {
       if (i === -1) return -1;
-      return Math.min(Math.max(i, 0), options.length - 1);
+      return Math.min(Math.max(i, 0), filteredOptions.length - 1);
     });
-  }, [options.length]);
+  }, [filteredOptions.length]);
 
   const move = (dir: 1 | -1) => {
-    let i = activeIndex === -1 ? (dir === 1 ? 0 : options.length - 1) : activeIndex;
-    if (!options.length) return;
+    let i = activeIndex === -1 ? (dir === 1 ? 0 : filteredOptions.length - 1) : activeIndex;
+    if (!filteredOptions.length) return;
     do {
-      i = (i + dir + options.length) % options.length;
-    } while (options[i]?.disabled && i !== activeIndex);
+      i = (i + dir + filteredOptions.length) % filteredOptions.length;
+    } while (filteredOptions[i]?.disabled && i !== activeIndex);
     setActiveIndex(i);
   };
 
   const selectAt = (i: number) => {
-    const opt = options[i];
+    const opt = filteredOptions[i];
     if (!opt || opt.disabled) return;
     onChange(opt.value);
     setOpen(false);
+    setSearchQuery("");
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -372,8 +382,21 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
         break;
       case "Escape":
         setOpen(false);
+        setSearchQuery("");
+        break;
+      case "Backspace":
+        e.preventDefault();
+        setSearchQuery((q) => q.slice(0, -1));
+        if (!open) setOpen(true);
         break;
       default:
+        // Handle regular character input for search
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          const newQuery = searchQuery + e.key;
+          setSearchQuery(newQuery);
+          if (!open) setOpen(true);
+        }
         break;
     }
   };
@@ -386,7 +409,6 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
         </label>
       )}
 
-      {/* Trigger */}
       <button
         id={controlId}
         name={name}
@@ -435,7 +457,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       {/* Menu */}
       {open && (
         <div id={listboxId} role="listbox" className="dd-menu" aria-labelledby={controlId} tabIndex={-1}>
-          {options.map((opt, i) => {
+          {filteredOptions.map((opt, i) => {
             const isSel = opt.value === value;
             const isDis = !!opt.disabled;
             return (
