@@ -1003,6 +1003,9 @@ margin-top: -2px
   line-height: var(--line-height-body-lg); /* 150% */
 }
 
+/* First step icon always shows primary color when not completed */
+.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
+.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
 
 /* ===== Main area ===== */
 .met-np-main { 

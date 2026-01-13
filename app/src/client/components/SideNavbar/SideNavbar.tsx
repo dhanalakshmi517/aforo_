@@ -142,7 +142,7 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
       ),
     },
     {
-      name:'Data Ingetion',
+      name:'Data Ingestion',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
         <path d="M5.25 8.39502V11.395C5.25 11.7928 5.40804 12.1744 5.68934 12.4557C5.97064 12.737 6.35218 12.895 6.75 12.895H9.75M3.75 2.39502H6.75C7.57843 2.39502 8.25 3.06659 8.25 3.89502V6.89502C8.25 7.72345 7.57843 8.39502 6.75 8.39502H3.75C2.92157 8.39502 2.25 7.72345 2.25 6.89502V3.89502C2.25 3.06659 2.92157 2.39502 3.75 2.39502ZM11.25 9.89502H14.25C15.0784 9.89502 15.75 10.5666 15.75 11.395V14.395C15.75 15.2234 15.0784 15.895 14.25 15.895H11.25C10.4216 15.895 9.75 15.2234 9.75 14.395V11.395C9.75 10.5666 10.4216 9.89502 11.25 9.89502Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
