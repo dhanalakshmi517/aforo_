@@ -1,0 +1,79 @@
+:root {
+  --spc-border: rgba(16, 24, 40, 0.10);
+  --spc-text: #19222d;
+  --spc-muted: rgba(25, 34, 45, 0.55);
+
+  --spc-track: rgba(2, 107, 176, 0.10);
+  --spc-fill: #026BB0;
+
+  --spc-radius: 10px;
+}
+
+.spc-card {
+  width: 100%;
+  border: 1px solid var(--spc-border);
+  border-radius: var(--spc-radius);
+  background: #fff;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+.spc-label {
+  text-align: center;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--spc-text);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 10px;
+}
+
+/* Progress bar */
+.spc-track {
+  position: relative;
+  height: 8px;
+  width: 100%;
+  background: var(--spc-track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.spc-fill {
+  height: 100%;
+  background: var(--spc-fill);
+  border-radius: 999px;
+  min-width: 10px; /* keeps that “pill” look at low % like 8% */
+}
+
+/* Bottom meta row */
+.spc-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--spc-muted);
+}
+
+.spc-percent,
+.spc-eta {
+  white-space: nowrap;
+}
+
+/* Responsive: on narrow screens, let label wrap + stack meta */
+@media (max-width: 420px) {
+  .spc-label {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .spc-meta {
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

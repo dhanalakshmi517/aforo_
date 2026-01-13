@@ -67,7 +67,11 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
 /* Guide card specific styles */
 .empty-card.region-guide,
-.empty-card.token-guide {
+.empty-card.token-guide,
+.empty-card.environment-guide,
+.empty-card.analytics-guide,
+.empty-card.json-guide,
+.empty-card.orgId-guide {
   justify-content: flex-start;
 }
 
@@ -91,7 +95,6 @@ font-style: normal;
 font-weight: 500;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
   text-align: center;
-  margin-left: -100px;
 }
 
 .image-container {
@@ -99,7 +102,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 200px;
+  min-height: 300px;
   flex-shrink: 0;
   position: relative;
 }
@@ -141,13 +144,21 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   width: auto;
   height: auto;
   object-fit: contain;
-  margin-top: -110px;
+  max-height: 300px;
+  min-height: 300px;
+}
+
+/* Specific styling for Org ID image to make it larger */
+.orgId-guide .guide-image {
+  max-height: 420px;
+  min-height: 420px;
+  max-width: 100%;
 }
 
 .empty-guide-steps {
   width: 100%;
-  margin-top: -50px;
-  margin-left: 320px;
+  text-align: left;
+  margin-bottom: 90px;
 }
 
 .empty-step-item {

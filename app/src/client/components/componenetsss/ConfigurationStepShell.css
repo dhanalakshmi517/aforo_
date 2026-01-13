@@ -119,7 +119,7 @@ body {
   overflow: auto;         /* ✅ scroll lives here */
   overscroll-behavior: contain;
 
-  padding: 16px;
+  padding: 16px 16px 1px 20px ;
   background:var(--color-neutral-white) ;
 
   display: flex;

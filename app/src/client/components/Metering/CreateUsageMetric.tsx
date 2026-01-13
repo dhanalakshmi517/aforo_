@@ -288,6 +288,9 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
 
   // Lock review step if Usage Conditions step (step 2) is incomplete
   const isReviewLocked = useMemo(() => {
+    // Lock if no fields filled in Define Metric step
+    if (!hasAnyRequiredInput) return true;
+    
     // Billing criteria is always required
     if (!billingCriteria) return true;
 
@@ -300,7 +303,7 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
 
     return false; // Unlock if validation passes
-  }, [billingCriteria, usageConditions]);
+  }, [hasAnyRequiredInput, billingCriteria, usageConditions]);
 
   const handleTopbarBack = () => {
     if (hasAnyRequiredInput || metricId) {
@@ -310,11 +313,21 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
     }
   };
 
-  const gotoStep = (index: number) => {
+  const gotoStep = async (index: number) => {
     if (index < 0 || index > 2) return;
 
     // Don't navigate if trying to go to the same step
     if (index === currentStep) return;
+
+    // Prevent access to locked steps (only for review step)
+    if (index === 2 && isReviewLocked) return;
+
+    // Prevent navigation to second step if user has started filling first step but not completed it
+    if (index === 1 && hasAnyRequiredInput && !(metricName.trim() && selectedProductId && unitOfMeasure)) {
+      // Show validation errors like Save & Next does
+      validateCurrentStep(0);
+      return;
+    }
 
     // Validate current step before allowing navigation away from it
     if (currentStep === 0) {
@@ -340,6 +353,14 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
       if (!isConditionsLocked) {
         const isValid = validateCurrentStep(1);
         if (!isValid) return;
+      }
+      
+      // If navigating to review step, save the conditions data like "Save & Next" does
+      if (index === 2) {
+        setSaving(true);
+        const ok = await saveOrUpdateMetric(false, true);
+        setSaving(false);
+        if (!ok) return;
       }
     }
 
@@ -712,10 +733,14 @@ export default function CreateUsageMetric({ onClose, draftMetricId }: CreateUsag
                                   <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
                                   <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
-                              ) : (
+                              ) : (i === 0 && !isCompleted) || (isActive && (metricName.trim() && selectedProductId && unitOfMeasure)) ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                   <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
                                   <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                                </svg>
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+                                  <path d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z" stroke="#BAC4D5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                               )}
                             </span>

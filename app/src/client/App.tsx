@@ -99,6 +99,8 @@ import ApigeeFailure from './components/ApigeeIntegration/ApigeeFailure';
 import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 import SalesSite from './components/comingsoon/SalesSite';
+import QBIntegration from './components/Integrations/Quickbooks/QBIntegration';
+import SuccessQB from './components/Integrations/Quickbooks/SuccessQB';
 import TopHealthyCustomers from './components/Dashboard/customeranalysis/TopHealthyCustomers';
 import TopChurningCustomers from './components/Dashboard/customeranalysis/TopChurningCustomers';
 import CustomerSegmentation from './components/Dashboard/customeranalysis/CustomerSegmentation';
@@ -262,7 +264,7 @@ export default function App() {
     if (path.startsWith('/get-started/products')) return 'Products';
     if (path.startsWith('/get-started/rate-plans')) return 'Rate Plans';
     if (path.startsWith('/get-started/metering')) return 'Billable Metrics';
-    if (path.startsWith('/get-started/data-ingetion')) return 'Data Ingetion';
+    if (path.startsWith('/get-started/data-ingestion')) return 'Data Ingestion';
     if (path.startsWith('/get-started/subscriptions')) return 'Purchases';
     if (path.startsWith('/get-started/dashboards')) return 'Dashboards';
     if (path.startsWith('/get-started/integrations')) return 'Integrations';
@@ -333,8 +335,8 @@ export default function App() {
       ? 'metering'
       : tab === 'Purchases'
         ? 'subscriptions'
-        : tab === 'Data Ingetion'
-          ? 'data-ingetion'
+        : tab === 'Data Ingestion'
+          ? 'data-ingestion'
           : tab === 'Integrations'
             ? 'integrations'
             : tab.toLowerCase().replace(/\s+/g, '-');
@@ -1171,7 +1173,7 @@ export default function App() {
 
               {/* Data Ingestion */}
               <Route
-                path="/get-started/data-ingetion"
+                path="/get-started/data-ingestion"
                 element={
                   <ProtectedRoute>
                     <div className="flex min-h-screen">
@@ -1264,6 +1266,34 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ApigeeImportedProducts />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* QuickBooks Integration Routes */}
+              <Route
+                path="/quickbooks-integration"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={RouteSpinner}>
+                      <QBIntegration 
+                        onBack={() => navigate('/get-started/integrations')}
+                        onConnect={() => navigate('/quickbooks-success')}
+                      />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quickbooks-success"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={RouteSpinner}>
+                      <SuccessQB 
+                        onBack={() => navigate('/quickbooks-integration')}
+                        onViewCustomerSyncStatus={() => {}}
+                      />
+                    </Suspense>
                   </ProtectedRoute>
                 }
               />
