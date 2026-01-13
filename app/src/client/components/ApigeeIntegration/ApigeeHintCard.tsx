@@ -183,7 +183,7 @@ const ApigeeHintCard: React.FC<ApigeeHintCardProps> = ({ focusedField }) => {
             )}
 
             <img
-              src={orgIdSvg}
+              src={environmentSvg}
               alt="Apigee analytics guide"
               className="guide-image"
               onLoad={() => setAnalyticsImageLoading(false)}

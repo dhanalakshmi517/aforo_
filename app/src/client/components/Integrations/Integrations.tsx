@@ -18,6 +18,10 @@ const Integrations: React.FC = () => {
     navigate('/apigee-integration');
   };
 
+  const handleQuickBooksSync = () => {
+    navigate('/quickbooks-integration');
+  };
+
   return (
     <div className="integrations-page">
       <IntegrationHeader

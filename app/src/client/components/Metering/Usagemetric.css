@@ -970,7 +970,6 @@ margin-top: -2px
    border-radius: var(--border-radius-sm);
     } */
 .met-np-step.completed .met-np-step__connector{ background-color: var(--color-primary-800); }
-
 .met-np-step.completed .met-np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
 .met-np-step.completed .met-np-step__icon svg{ visibility:hidden; }
 .met-np-step.active .met-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
@@ -987,6 +986,9 @@ margin-top: -2px
   line-height: var(--line-height-body-lg); /* 150% */
 }
 
+/* First step icon always shows primary color when not completed */
+.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
+.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
 
 /* ===== Main area ===== */
 .met-np-main { 

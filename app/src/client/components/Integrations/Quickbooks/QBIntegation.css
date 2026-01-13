@@ -1,0 +1,233 @@
+/* QBIntegration.css */
+.qbint-page {
+  height: 100vh;
+  overflow: hidden; /* ✅ no scrollbar */
+  background: radial-gradient(1200px 600px at 30% -10%, #f3fbff 0%, #f7fbff 55%, #f6f9ff 100%);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #0f172a;
+}
+
+.qbint-topbar {
+  height: 64px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.qbint-topbarInner {
+  height: 100%;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.qbint-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qbint-topTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.qbint-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qbint-iconBtn {
+  height: 36px;
+  width: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(15, 23, 42, 0.72);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.qbint-iconBtn:hover {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.qbint-iconBtn:active {
+  transform: translateY(1px);
+}
+
+.qbint-backBtn {
+  border-radius: 10px;
+}
+
+/* Main area */
+.qbint-main {
+  /* ✅ matches your screenshot callouts */
+  padding: 19px 80px 24px;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+/* Card */
+.qbint-card {
+  height: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column; /* body grows, footer pins */
+}
+
+/* Body uses the big white canvas */
+.qbint-cardBody {
+  flex: 1;
+  padding: 28px; /* ✅ callout shows 28 */
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  align-items: start;
+  min-height: 0; /* important for no overflow glitches */
+}
+
+.qbint-copy {
+  max-width: 640px;
+  padding-top: 4px;
+  margin-top: 3.125rem;
+}
+
+.qbint-h1 {
+  margin: 0 0 12px;
+  font-size: clamp(22px, 2.1vw, 28px);
+  line-height: 1.18;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0b1220;
+}
+
+.qbint-p {
+  margin: 0;
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(30, 41, 59, 0.72);
+}
+
+/* Hero image */
+.qbint-heroWrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 0;
+}
+
+.qbint-hero {
+  width: 100%;
+  height: auto;
+  max-height: clamp(220px, 42vh, 360px); /* ✅ shrinks to avoid scroll */
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Footer pinned inside card */
+.qbint-cardFooter {
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  padding: 20px; /* ✅ callout shows 20 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+}
+
+.qbint-marks {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 120px;
+}
+
+.qbint-mark {
+  height: 18px;
+  width: auto;
+  display: block;
+}
+
+.qbint-markStub {
+  height: 18px;
+  width: 18px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.08);
+}
+
+
+/* Button */
+.qbint-connectBtn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(2, 107, 176, 0.22);
+  background: #0b5fa3;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 10px 20px rgba(11, 95, 163, 0.22);
+}
+
+.qbint-connectBtn:hover {
+  filter: brightness(1.03);
+}
+
+.qbint-connectBtn:active {
+  transform: translateY(1px);
+}
+
+/* ✅ Responsive: no scroll, just reflow */
+@media (max-width: 1100px) {
+  .qbint-main {
+    padding: 18px 32px 22px;
+  }
+  .qbint-cardBody {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .qbint-hero {
+    max-height: clamp(200px, 34vh, 320px);
+  }
+}
+
+@media (max-width: 560px) {
+  .qbint-topbarInner {
+    padding: 0 16px;
+  }
+  .qbint-main {
+    padding: 14px 14px 16px;
+  }
+  .qbint-cardBody {
+    padding: 18px;
+  }
+  .qbint-cardFooter {
+    padding: 16px;
+  }
+  .qbint-connectBtn {
+    width: 100%;
+  }
+  .qbint-cardFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .qbint-marks {
+    justify-content: center;
+  }
+}

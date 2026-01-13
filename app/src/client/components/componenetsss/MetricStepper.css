@@ -1,0 +1,230 @@
+:root {
+  --ms-primary: #034a7d;
+  --ms-muted: #bac4d5;
+
+  --ms-title-active: #111827;
+  --ms-desc-active: #1f2937;
+
+  --ms-title-muted: #8fa4b8;
+  --ms-desc-muted: #9db0c3;
+
+  --ms-card-bg: #f5f7fb;
+  --ms-card-border: rgba(16, 24, 40, 0.06);
+  --ms-card-shadow: 0 8px 18px rgba(16, 24, 40, 0.06);
+
+  --ms-radius: 12px;
+  --ms-marker-col: 44px;
+  --ms-circle: 26px;
+  --ms-circle-top: 2px;
+  --ms-line-w: 2px;
+}
+
+.msStepper {
+  width: 100%;
+}
+
+.msStepperList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.msStepperItem {
+  margin: 0;
+}
+
+.msStepBtn {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+
+  display: grid;
+  grid-template-columns: var(--ms-marker-col) 1fr;
+  column-gap: 14px;
+  align-items: start;
+
+  position: relative;
+}
+
+.msStepBtn:disabled {
+  cursor: not-allowed;
+}
+
+/* the “card” that appears on hover + clicked */
+.msStepBtn::before {
+  content: "";
+  position: absolute;
+  left: 32px; /* keeps the rail clean like your screenshot */
+  right: 0;
+  top: -10px;
+  bottom: -10px;
+  border-radius: var(--ms-radius);
+  background: var(--ms-card-bg);
+  border: 1px solid var(--ms-card-border);
+  box-shadow: var(--ms-card-shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+  z-index: 0;
+}
+
+/* marker column */
+.msStepMarker {
+  width: var(--ms-marker-col);
+  position: relative;
+  z-index: 1;
+  min-height: calc(var(--ms-circle) + 10px);
+}
+
+/* the circle itself */
+.msDot {
+  width: var(--ms-circle);
+  height: var(--ms-circle);
+  margin-top: var(--ms-circle-top);
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* connector lines */
+.msLine {
+  position: absolute;
+  left: calc(var(--ms-marker-col) / 2);
+  width: var(--ms-line-w);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  z-index: 0;
+}
+
+.msLineTop {
+  top: 0;
+  height: calc(var(--ms-circle-top) + (var(--ms-circle) / 2));
+}
+
+.msLineBottom {
+  top: calc(var(--ms-circle-top) + (var(--ms-circle) / 2));
+  bottom: -10px;
+}
+
+.msLine-primary {
+  background: var(--ms-primary);
+}
+.msLine-muted {
+  background: var(--ms-muted);
+}
+
+/* content */
+.msStepContent {
+  display: grid;
+  gap: 6px;
+  padding-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.msTitle {
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.msDesc {
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 500;
+  max-width: 42ch;
+}
+
+/* icon sizing */
+.msIcon {
+  width: var(--ms-circle);
+  height: var(--ms-circle);
+  display: block;
+}
+
+/* ------- VARIANTS (your 4 from image #2 + the rail states) ------- */
+
+/* default: no card, muted text (like the first in image #2) */
+.msVar-default .msTitle {
+  color: var(--ms-title-muted);
+}
+.msVar-default .msDesc {
+  color: var(--ms-desc-muted);
+}
+.msVar-default .msDot {
+  color: var(--ms-primary); /* matches your demo rows */
+}
+
+/* hover: card appears, still muted text */
+.msVar-hover::before {
+  opacity: 1;
+}
+.msVar-hover .msTitle {
+  color: var(--ms-title-muted);
+}
+.msVar-hover .msDesc {
+  color: var(--ms-desc-muted);
+}
+.msVar-hover .msDot {
+  color: var(--ms-primary);
+}
+
+/* active: no card, dark text */
+.msVar-active .msTitle {
+  color: var(--ms-title-active);
+}
+.msVar-active .msDesc {
+  color: var(--ms-desc-active);
+}
+.msVar-active .msDot {
+  color: var(--ms-primary);
+}
+
+/* clicked/selected: card stays + dark text */
+.msVar-selected::before {
+  opacity: 1;
+}
+.msVar-selected .msTitle {
+  color: var(--ms-title-active);
+}
+.msVar-selected .msDesc {
+  color: var(--ms-desc-active);
+}
+.msVar-selected .msDot {
+  color: var(--ms-primary);
+}
+
+/* completed: check icon + muted text (you can switch to dark if you want) */
+.msVar-completed .msTitle {
+  color: var(--ms-title-muted);
+}
+.msVar-completed .msDesc {
+  color: var(--ms-desc-muted);
+}
+.msVar-completed .msDot {
+  color: var(--ms-primary);
+}
+
+/* locked: grey everything */
+.msVar-locked .msTitle {
+  color: var(--ms-muted);
+}
+.msVar-locked .msDesc {
+  color: var(--ms-muted);
+}
+.msVar-locked .msDot {
+  color: var(--ms-muted);
+}
+
+/* focus */
+.msStepBtn:focus-visible {
+  outline: 2px solid rgba(3, 74, 125, 0.35);
+  outline-offset: 6px;
+  border-radius: var(--ms-radius);
+}

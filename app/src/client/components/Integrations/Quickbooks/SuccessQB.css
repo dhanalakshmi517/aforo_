@@ -1,0 +1,188 @@
+/* SuccessKong.css */
+@import "../../Variables/Variables.css";
+
+.skPage {
+  min-height: 100vh;
+  background: var(--color-neutral-50);
+  display: flex;
+  flex-direction: column;
+}
+
+/* matches the 80px paddings shown */
+.skFrame {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  padding: 24px 80px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.skCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background:var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-shadow-1, #EEF1F6),
+    0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8),
+    0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.skInner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  padding: 64px 72px;
+}
+
+.skLeft {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skRight {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.skTitle {
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
+
+  background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+.skSubtitle {
+  margin-top: 10px;
+ color: var(--color-neutral-1700);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */}
+
+/* ReviewComponent styling */
+.skReviewComponent {
+  width: 440px;
+  margin-top: 40px;
+}
+
+/* actions */
+.skActions {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* Custom styles for button components */
+.skDisconnectButton {
+  height: 40px !important;
+  width: 230px !important;
+}
+
+.skPrimaryButton {
+  height: 40px !important;
+  width: 230px !important;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .skFrame {
+    padding: 40px;
+  }
+
+  .skInner {
+    gap: 48px;
+    padding: 48px 36px;
+  }
+}
+
+@media (max-width: 900px) {
+  .skInner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .skLeft,
+  .skRight {
+    width: 100%;
+  }
+
+  .skCreds {
+    width: min(360px, 92vw);
+  }
+}
+
+@media (max-width: 520px) {
+  .skFrame {
+    padding: 20px;
+  }
+
+  .skActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .skBtnDisconnect,
+  .skBtnPrimary {
+    width: min(360px, 92vw);
+  }
+}
+
+
+/* ---------- QB Success tweaks (keeps existing sk* classnames) ---------- */
+.skRight--qb {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.skRight--qb .skSubtitle {
+  max-width: 420px;
+}
+
+.skActions--qb {
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.skSyncBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(237, 81, 66, 0.08);
+  border: 1px solid rgba(237, 81, 66, 0.18);
+}
+
+.skPrimaryButton--qb svg {
+  margin-left: 10px;
+}
