@@ -423,76 +423,99 @@ const RatePlans: React.FC<RatePlansProps> = ({
       .filter(id => !detailsById[id]);
     if (toFetch.length === 0) return;
 
-    toFetch.forEach(async (id) => {
-      setDetailsById(prev => ({ ...prev, [id]: 'loading' }));
-      try {
-        const d = await fetchRatePlanWithDetails(id);
-        console.log(`RatePlans - Rate Plan ${id} Details:`, d);
-
-        // --- Robust normalization for many backend shapes ---
-        const pricingModelName = firstNonEmpty(d, [
-          'pricingModelName',
-          'pricingModel.name',
-          'pricingModel',
-          'modelName',
-          'pricingModelType',
-          'pricing.name',
-          'rateCard.pricingModelName'
-        ], '—');
-
-        // Extract billable metric details
-        let bmName = '';
-        let uomShort = '';
-
-        // First try to get from the response directly
-        bmName = firstNonEmpty(d, [
-          'billableMetric.name',
-          'billableMetric.metricName',
-          'billableMetricName',
-          'metricName',
-          'metric.name',
-          'billableMetric.title'
-        ], '');
-
-        uomShort = firstNonEmpty(d, [
-          'billableMetric.uomShort',
-          'billableMetric.uom.short',
-          'billableMetric.uom',
-          'uom.short',
-          'uomShort',
-          'uom',
-          'billableMetricUom',
-          'billableMetric.uomSymbol'
-        ], '');
-
-        // If not found, fetch by billableMetricId
-        if (!bmName && d.billableMetricId) {
-          try {
-            const billableMetric = await fetchBillableMetricById(d.billableMetricId);
-            console.log(`RatePlans - Billable Metric ${d.billableMetricId}:`, billableMetric);
-            if (billableMetric) {
-              bmName = billableMetric.metricName || '';
-              uomShort = billableMetric.unitOfMeasure || billableMetric.uomShort || billableMetric.uom || '';
-            }
-          } catch (bmError) {
-            console.warn(`Failed to fetch billable metric ${d.billableMetricId}:`, bmError);
-          }
-        }
-
-        const normalized: RatePlanDetails = {
-          ratePlanId: id,
-          pricingModelName,
-          billableMetric: {
-            uomShort,
-            name: bmName
-          }
-        };
-        console.log(`RatePlans - Normalized Data for ${id}:`, normalized);
-        setDetailsById(prev => ({ ...prev, [id]: normalized }));
-      } catch (e) {
-        setDetailsById(prev => ({ ...prev, [id]: 'error' }));
-      }
+    // Mark all as loading first
+    setDetailsById(prev => {
+      const updated = { ...prev };
+      toFetch.forEach(id => { updated[id] = 'loading'; });
+      return updated;
     });
+
+    // ⚡ OPTIMIZED: Fetch all rate plan details in parallel using Promise.all
+    const fetchAllDetails = async () => {
+      const results = await Promise.all(
+        toFetch.map(async (id) => {
+          try {
+            const d = await fetchRatePlanWithDetails(id);
+            console.log(`RatePlans - Rate Plan ${id} Details:`, d);
+
+            // --- Robust normalization for many backend shapes ---
+            const pricingModelName = firstNonEmpty(d, [
+              'pricingModelName',
+              'pricingModel.name',
+              'pricingModel',
+              'modelName',
+              'pricingModelType',
+              'pricing.name',
+              'rateCard.pricingModelName'
+            ], '—');
+
+            // Extract billable metric details
+            let bmName = '';
+            let uomShort = '';
+
+            // First try to get from the response directly
+            bmName = firstNonEmpty(d, [
+              'billableMetric.name',
+              'billableMetric.metricName',
+              'billableMetricName',
+              'metricName',
+              'metric.name',
+              'billableMetric.title'
+            ], '');
+
+            uomShort = firstNonEmpty(d, [
+              'billableMetric.uomShort',
+              'billableMetric.uom.short',
+              'billableMetric.uom',
+              'uom.short',
+              'uomShort',
+              'uom',
+              'billableMetricUom',
+              'billableMetric.uomSymbol'
+            ], '');
+
+            // If not found, fetch by billableMetricId
+            if (!bmName && d.billableMetricId) {
+              try {
+                const billableMetric = await fetchBillableMetricById(d.billableMetricId);
+                console.log(`RatePlans - Billable Metric ${d.billableMetricId}:`, billableMetric);
+                if (billableMetric) {
+                  bmName = billableMetric.metricName || '';
+                  uomShort = billableMetric.unitOfMeasure || billableMetric.uomShort || billableMetric.uom || '';
+                }
+              } catch (bmError) {
+                console.warn(`Failed to fetch billable metric ${d.billableMetricId}:`, bmError);
+              }
+            }
+
+            const normalized: RatePlanDetails = {
+              ratePlanId: id,
+              pricingModelName,
+              billableMetric: {
+                uomShort,
+                name: bmName
+              }
+            };
+            console.log(`RatePlans - Normalized Data for ${id}:`, normalized);
+            return { id, data: normalized };
+          } catch (e) {
+            console.error(`Failed to fetch rate plan ${id}:`, e);
+            return { id, data: 'error' as const };
+          }
+        })
+      );
+
+      // Batch update all results at once
+      setDetailsById(prev => {
+        const updated = { ...prev };
+        results.forEach(({ id, data }) => {
+          updated[id] = data;
+        });
+        return updated;
+      });
+    };
+
+    fetchAllDetails();
   }, [filteredPlans, detailsById]);
 
   // ============================================================
@@ -1196,7 +1219,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             />
           </div>
         ) : (
-          <div className="check-container">
+          <div className="customers-container">
             <PageHeader
               title="Rate Plans"
               searchTerm={searchTerm}
@@ -1350,68 +1373,68 @@ const RatePlans: React.FC<RatePlansProps> = ({
                 selectedPaymentTypes.length > 0 ||
                 selectedBillingFrequencies.length > 0 ||
                 selectedPricingModels.length > 0) && (
-                <div className="products-active-filters-row">
-                  <div className="products-active-filters-chips">
-                    {selectedRatePlanIds.map((id) => {
-                      const plan = ratePlansState.find((p) => String(p.ratePlanId) === String(id));
-                      const label = plan?.ratePlanName || `Rate Plan ${id}`;
-                      return (
+                  <div className="products-active-filters-row">
+                    <div className="products-active-filters-chips">
+                      {selectedRatePlanIds.map((id) => {
+                        const plan = ratePlansState.find((p) => String(p.ratePlanId) === String(id));
+                        const label = plan?.ratePlanName || `Rate Plan ${id}`;
+                        return (
+                          <FilterChip
+                            key={`rate-plan-chip-${id}`}
+                            label={label}
+                            onRemove={() =>
+                              setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                            }
+                          />
+                        );
+                      })}
+                      {selectedStatuses.map((s) => (
                         <FilterChip
-                          key={`rate-plan-chip-${id}`}
-                          label={label}
+                          key={s}
+                          label={s.charAt(0).toUpperCase() + s.slice(1)}
                           onRemove={() =>
-                            setSelectedRatePlanIds((prev) => prev.filter((x) => x !== id))
+                            setSelectedStatuses((prev) => prev.filter((x) => x !== s))
                           }
                         />
-                      );
-                    })}
-                    {selectedStatuses.map((s) => (
-                      <FilterChip
-                        key={s}
-                        label={s.charAt(0).toUpperCase() + s.slice(1)}
-                        onRemove={() =>
-                          setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                        }
-                      />
-                    ))}
+                      ))}
 
-                    {selectedPaymentTypes.map((pt) => (
-                      <FilterChip
-                        key={pt}
-                        label={pt.charAt(0).toUpperCase() + pt.slice(1)}
-                        onRemove={() =>
-                          setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
-                        }
-                      />
-                    ))}
+                      {selectedPaymentTypes.map((pt) => (
+                        <FilterChip
+                          key={pt}
+                          label={pt.charAt(0).toUpperCase() + pt.slice(1)}
+                          onRemove={() =>
+                            setSelectedPaymentTypes((prev) => prev.filter((x) => x !== pt))
+                          }
+                        />
+                      ))}
 
-                    {selectedBillingFrequencies.map((bf) => (
-                      <FilterChip
-                        key={bf}
-                        label={bf.charAt(0).toUpperCase() + bf.slice(1)}
-                        onRemove={() =>
-                          setSelectedBillingFrequencies((prev) => prev.filter((x) => x !== bf))
-                        }
-                      />
-                    ))}
+                      {selectedBillingFrequencies.map((bf) => (
+                        <FilterChip
+                          key={bf}
+                          label={bf.charAt(0).toUpperCase() + bf.slice(1)}
+                          onRemove={() =>
+                            setSelectedBillingFrequencies((prev) => prev.filter((x) => x !== bf))
+                          }
+                        />
+                      ))}
 
-                    {selectedPricingModels.map((pm) => (
-                      <FilterChip
-                        key={pm}
-                        label={pm.charAt(0).toUpperCase() + pm.slice(1)}
-                        onRemove={() =>
-                          setSelectedPricingModels((prev) => prev.filter((x) => x !== pm))
-                        }
-                      />
-                    ))}
+                      {selectedPricingModels.map((pm) => (
+                        <FilterChip
+                          key={pm}
+                          label={pm.charAt(0).toUpperCase() + pm.slice(1)}
+                          onRemove={() =>
+                            setSelectedPricingModels((prev) => prev.filter((x) => x !== pm))
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    <ResetButton
+                      label="Reset"
+                      onClick={handleResetRatePlanFilters}
+                    />
                   </div>
-
-                  <ResetButton
-                    label="Reset"
-                    onClick={handleResetRatePlanFilters}
-                  />
-                </div>
-              )}
+                )}
               <table className="customers-table">
                 <colgroup>
                   <col className="col-rateplan-name" />

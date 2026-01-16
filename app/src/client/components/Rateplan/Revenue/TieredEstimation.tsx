@@ -14,10 +14,10 @@ function parseTieredTiers(): Tier[] {
     const arr = JSON.parse(getRatePlanData('TIERED_TIERS') || '[]');
     return Array.isArray(arr)
       ? arr.map((t: any) => ({
-          usageStart: Number(t.from || 0),
-          usageEnd: t.to === '' || t.isUnlimited ? null : Number(t.to || 0),
-          pricePerUnit: Number(t.price || 0),
-        }))
+        usageStart: Number(t.from || 0),
+        usageEnd: t.to === '' || t.isUnlimited ? null : Number(t.to || 0),
+        pricePerUnit: Number(t.price || 0),
+      }))
       : [];
   } catch {
     return [];
@@ -49,11 +49,14 @@ const TieredEstimation: React.FC = () => {
 
   const usageNum = Number(usage) || 0;
 
+  // ✅ FIXED: Apply minimum usage commitment - use higher of actual or minimum
+  const effectiveUsage = incCommit && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+
   // calculate tiered charge
-  function computeTieredCharge(units: number): { charge: number; rows: {tier: Tier; units: number; amount: number}[] } {
+  function computeTieredCharge(units: number): { charge: number; rows: { tier: Tier; units: number; amount: number }[] } {
     let remaining = units;
     let total = 0;
-    const rows: {tier: Tier; units: number; amount: number}[] = [];
+    const rows: { tier: Tier; units: number; amount: number }[] = [];
     for (const tier of tiers) {
       if (remaining <= 0) break;
       const from = tier.usageStart;
@@ -71,12 +74,12 @@ const TieredEstimation: React.FC = () => {
     return { charge: total, rows };
   }
 
-  const { charge: tieredCharge, rows: tierRows } = computeTieredCharge(usageNum);
+  const { charge: tieredCharge, rows: tierRows } = computeTieredCharge(effectiveUsage);
 
   // overage if usage exceeds last tier and unlimited false
   const lastTierEnd = tiers.length ? tiers[tiers.length - 1].usageEnd : null;
-  const isOver = lastTierEnd !== null && usageNum > lastTierEnd;
-  const overUnits = isOver ? usageNum - (lastTierEnd ?? 0) : 0;
+  const isOver = lastTierEnd !== null && effectiveUsage > lastTierEnd;
+  const overUnits = isOver ? effectiveUsage - (lastTierEnd ?? 0) : 0;
   const overCharge = overUnits * overageRate;
 
   const freemiumReduction = incFree ? freemiumUnits * (tiers[0]?.pricePerUnit || 0) : 0; // use first tier rate
@@ -89,6 +92,7 @@ const TieredEstimation: React.FC = () => {
       : discountFlat
     : 0;
   let total = subtotal - discountVal;
+  // Also apply minimum charge if set (fallback)
   if (incCommit && minimumCharge > 0) total = Math.max(total, minimumCharge);
 
   const handleCalculate = () => {
@@ -109,6 +113,7 @@ const TieredEstimation: React.FC = () => {
             <label>Enter Estimated Usage</label>
             <input
               type="number"
+              step="any"
               placeholder="Enter Estimated Usage"
               value={usage}
               onChange={(e) => setUsage(e.target.value)}
@@ -163,32 +168,32 @@ const TieredEstimation: React.FC = () => {
             </tr>
             {/* Setup Fee */}
             <tr>
-              <td><label className="switch"><input type="checkbox" checked={incSetup} onChange={e=>setIncSetup(e.target.checked)}/><span className="slider"></span></label>&nbsp;Setup Fee</td>
-              <td>{setupFee>0?`$${setupFee}`:'-'}</td>
-              {showCalc && <><td>{incSetup?`$${setupFee}`:'-'}</td><td>{incSetup?`$${setupFee.toFixed(2)}`:'-'}</td></>}
+              <td><label className="switch"><input type="checkbox" checked={incSetup} onChange={e => setIncSetup(e.target.checked)} /><span className="slider"></span></label>&nbsp;Setup Fee</td>
+              <td>{setupFee > 0 ? `$${setupFee}` : '-'}</td>
+              {showCalc && <><td>{incSetup ? `$${setupFee}` : '-'}</td><td>{incSetup ? `$${setupFee.toFixed(2)}` : '-'}</td></>}
             </tr>
             {/* Discounts */}
             <tr>
-              <td><label className="switch"><input type="checkbox" checked={incDiscount} onChange={e=>setIncDiscount(e.target.checked)}/><span className="slider"></span></label>&nbsp;Discounts</td>
-              <td>{discountPercent>0?`${discountPercent}%`:discountFlat>0?`$${discountFlat}`:'-'}</td>
+              <td><label className="switch"><input type="checkbox" checked={incDiscount} onChange={e => setIncDiscount(e.target.checked)} /><span className="slider"></span></label>&nbsp;Discounts</td>
+              <td>{discountPercent > 0 ? `${discountPercent}%` : discountFlat > 0 ? `$${discountFlat}` : '-'}</td>
               {showCalc && (
                 <>
-                  <td>{incDiscount?(discountPercent>0?`${discountPercent}% of $${subtotal.toFixed(2)}`:`$${discountFlat}`):'-'}</td>
-                  <td>{incDiscount?`-$${discountVal.toFixed(2)}`:'-'}</td>
+                  <td>{incDiscount ? (discountPercent > 0 ? `${discountPercent}% of $${subtotal.toFixed(2)}` : `$${discountFlat}`) : '-'}</td>
+                  <td>{incDiscount ? `-$${discountVal.toFixed(2)}` : '-'}</td>
                 </>
               )}
             </tr>
             {/* Freemium */}
             <tr>
-              <td><label className="switch"><input type="checkbox" checked={incFree} onChange={e=>setIncFree(e.target.checked)}/><span className="slider"></span></label>&nbsp;Freemium</td>
+              <td><label className="switch"><input type="checkbox" checked={incFree} onChange={e => setIncFree(e.target.checked)} /><span className="slider"></span></label>&nbsp;Freemium</td>
               <td>{freemiumUnits}</td>
-              {showCalc && <><td>{incFree?`${freemiumUnits} * ${(tiers[0]?.pricePerUnit||0)}`:'-'}</td><td>{incFree?`-$${freemiumReduction.toFixed(2)}`:'-'}</td></>}
+              {showCalc && <><td>{incFree ? `${freemiumUnits} * ${(tiers[0]?.pricePerUnit || 0)}` : '-'}</td><td>{incFree ? `-$${freemiumReduction.toFixed(2)}` : '-'}</td></>}
             </tr>
             {/* Minimum Commitment */}
             <tr>
-              <td><label className="switch"><input type="checkbox" checked={incCommit} onChange={e=>setIncCommit(e.target.checked)}/><span className="slider"></span></label>&nbsp;Minimum Commitment</td>
-              <td>{minimumCharge>0?`${minimumUsage} units / $${minimumCharge}`:'-'}</td>
-              {showCalc && <><td>{incCommit?`Floor to $${minimumCharge}`:'-'}</td><td>{incCommit?`$${Math.max(total,minimumCharge).toFixed(2)}`:'-'}</td></>}
+              <td><label className="switch"><input type="checkbox" checked={incCommit} onChange={e => setIncCommit(e.target.checked)} /><span className="slider"></span></label>&nbsp;Minimum Commitment</td>
+              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : (minimumUsage > 0 ? `${minimumUsage} units` : '-')}</td>
+              {showCalc && <><td>{incCommit ? (minimumUsage > 0 && usageNum < minimumUsage ? `Using ${minimumUsage} units (minimum)` : minimumCharge > 0 ? `Max($${(subtotal - discountVal).toFixed(2)}, $${minimumCharge})` : '-') : '-'}</td><td>{incCommit ? `$${total.toFixed(2)}` : '-'}</td></>}
             </tr>
             {showCalc && (<tr className="total-row"><td colSpan={3}>Total</td><td>${total.toFixed(2)}</td></tr>)}
           </tbody>

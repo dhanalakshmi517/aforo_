@@ -205,12 +205,12 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
     const change = (i: number, field: keyof Stair, val: string) => {
       if (field === 'to' && stairs[i].isUnlimited) return;
       const n = [...stairs]; (n[i] as any)[field] = val;
-      
+
       // If 'to' field changed, update next tier's 'from' field
       if (field === 'to' && val && isNonNegInt(val) && i < n.length - 1) {
         n[i + 1].from = String(Number(val) + 1);
       }
-      
+
       setStairs(n);
       pushChangeUp(n);
 
@@ -270,6 +270,9 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                 <div className="field-col small-field">
                   <input
                     className={`input-small ${t.from && e.from ? 'error-input' : ''}`}
+                    type="number"
+                    step="1"
+                    min="0"
                     value={row.from}
                     onChange={(ev) => change(i, 'from', ev.target.value)}
                     onBlur={() => markTouched(i, 'from')}
@@ -284,6 +287,9 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                 <div className="field-col small-field">
                   <input
                     className={`input-small ${t.to && e.to ? 'error-input' : ''}`}
+                    type="number"
+                    step="1"
+                    min="0"
                     value={row.isUnlimited ? 'Unlimited' : row.to}
                     placeholder="To"
                     disabled={row.isUnlimited || locked}
@@ -296,6 +302,9 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                 <div className="field-col large-field">
                   <input
                     className={`input-large ${t.cost && e.cost ? 'error-input' : ''}`}
+                    type="number"
+                    step="0.01"
+                    min="0"
                     value={row.cost}
                     onChange={(ev) => change(i, 'cost', ev.target.value)}
                     onBlur={() => markTouched(i, 'cost')}
@@ -333,11 +342,13 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
               <label className="extra-label">
                 Overage Charge
                 <input
-                  type="text"
+                  type="number"
+                  step="0.01"
+                  min="0"
                   className={`input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                   value={overageCharge}
-                  onChange={(e) => { 
-                    setOverageCharge(e.target.value); 
+                  onChange={(e) => {
+                    setOverageCharge(e.target.value);
                     pushOverageUp(e.target.value);
                     if (overageTouched) setOverageTouched(false);
                     if (onClearError) onClearError('stairOverage');
@@ -360,7 +371,9 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
               <label className="extra-label">
                 Grace Buffer (optional)
                 <input
-                  type="text"
+                  type="number"
+                  step="1"
+                  min="0"
                   className="input-extra"
                   value={graceBuffer}
                   onChange={(e) => { setGraceBuffer(e.target.value); pushGraceUp(e.target.value); }}

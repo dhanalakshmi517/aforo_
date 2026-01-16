@@ -6,6 +6,7 @@ app OpenSaaS {
 
   head: [
     "<meta charset='utf-8' />",
+    "<link rel='icon' type='image/png' href='/favicon.png' />",
     "<meta name='viewport' content='width=device-width, initial-scale=1' />",
     "<meta name='description' content='Your apps main description and features.' />",
     "<meta name='author' content='Your (App) Name' />",
