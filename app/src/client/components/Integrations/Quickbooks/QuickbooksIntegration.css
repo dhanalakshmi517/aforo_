@@ -1,0 +1,319 @@
+@import "../../Variables/Variables.css";
+:root {
+  --qbi-bg: #f6f8fb;
+  --qbi-panel: #ffffff;
+
+  --qbi-border: rgba(16, 24, 40, 0.10);
+  --qbi-shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
+
+  --qbi-title: #026BB0;
+  --qbi-text: #19222d;
+  --qbi-muted: rgba(25, 34, 45, 0.55);
+
+  --qbi-track: rgba(2, 107, 176, 0.10);
+  --qbi-fill: #026BB0;
+
+  --qbi-radius: 12px;
+  --qbi-pad: 28px;
+}
+
+.qbi-page {
+  min-height: 100vh;
+  background: var(--qbi-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.qbi-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--qbi-bg);
+  border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+}
+
+.qbi-shell {
+  flex: 1;
+  padding: 18px 6px;
+  display: flex;
+  justify-content: center;
+}
+
+.qbi-panel {
+  width: 100%;
+  max-width: 1120px;
+  background: var(--qbi-panel);
+  border: 1px solid var(--qbi-border);
+  border-radius: var(--qbi-radius);
+  box-shadow: var(--qbi-shadow);
+  padding: var(--qbi-pad);
+  box-sizing: border-box;
+
+  /* makes the big empty “Auto” space possible */
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+
+.qbi-title {
+ 
+/* heading/h3/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h3, 26px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h3, 36px); /* 138.462% */
+background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+.qbi-body {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+}
+
+.qbi-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.qbi-card {
+box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
+
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px 18px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 118px;
+  overflow: hidden;
+}
+
+.qbi-cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.qbi-cardTitle {
+color: var(--color-neutral-1400);
+
+/* heading/h5/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h5, 20px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h5, 28px); /* 140% */
+}
+
+.qbi-cardValue {
+color: var(--color-neutral-1700);
+
+/* heading/h1 */
+font-family: "IBM Plex Sans";
+font-size: 48px;
+font-style: normal;
+font-weight: 700;
+line-height: 60px; /* 125% */
+letter-spacing: -1.92px;
+}
+
+.qbi-cardHelper {
+ color: var(--color-neutral-800);
+
+/* body/xs/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
+  max-width: 280px;
+}
+
+.qbi-watermark {
+filter: blur(6px);  display: grid;
+  place-items: center;
+}
+
+.qbi-wmSvg {
+  width: 110px;
+  height: 110px;
+}
+
+.qbi-spacer {
+  flex: 1; /* creates the “Auto” middle space like your 3rd image */
+}
+
+.qbi-bottom {
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+/* CTA (idle) */
+.qbi-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.qbi-ctaLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.qbi-plusBox {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: rgba(2, 107, 176, 0.06);
+  color: var(--qbi-title);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.qbi-ctaText {
+  min-width: 0;
+}
+
+.qbi-ctaTitle {
+  color: var(--color-primary-700);
+
+/* heading/h6/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+}
+
+.qbi-ctaSub {
+  margin-top: 2px;
+ color: var(--color-neutral-800);
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 720px;
+}
+
+.qbi-btn {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(2, 107, 176, 0.55);
+  background: #fff;
+  color: var(--qbi-title);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qbi-btn:hover {
+  background: rgba(2, 107, 176, 0.05);
+}
+
+/* Progress (syncing) */
+.qbi-progressWrap {
+  width: 100%;
+}
+
+.qbi-progressLabel {
+  text-align: center;
+  font-size: 11px;
+  line-height: 14px;
+  color: rgba(25, 34, 45, 0.65);
+  margin-bottom: 8px;
+}
+
+.qbi-track {
+  width: 100%;
+  height: 8px;
+  background: var(--qbi-track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.qbi-fill {
+  height: 100%;
+  background: var(--qbi-fill);
+  border-radius: 999px;
+  min-width: 10px; /* keeps that “pill” look at low % */
+}
+
+.qbi-progressMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 14px;
+  color: rgba(25, 34, 45, 0.55);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .qbi-panel {
+    padding: 20px;
+    min-height: 0; /* let height be natural on small screens */
+  }
+
+  .qbi-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .qbi-watermark {
+    width: 120px;
+  }
+
+  .qbi-wmSvg {
+    width: 96px;
+    height: 96px;
+  }
+
+  .qbi-spacer {
+    flex: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .qbi-shell {
+    padding: 14px 14px;
+  }
+
+  .qbi-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .qbi-btn {
+    width: 100%;
+    height: 36px;
+  }
+
+  .qbi-ctaSub {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}

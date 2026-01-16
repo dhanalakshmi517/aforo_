@@ -2,6 +2,7 @@ import * as React from "react";
 import "./QBIntegation.css";
 import KongBar from "../../Products/Kong Integration/KongBar";
 import qbpreview from "./qbpreview.svg";
+import { connectQuickBooks } from "./QBAPI";
 
 type Props = {
   title?: string;
@@ -47,6 +48,29 @@ you get instant access to revenue, customer activity, and product performance â€
   connectLabel = "Connect Quickbooks",
   className = "",
 }: Props) {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleConnect = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await connectQuickBooks();
+      
+      // Redirect to the auth URL in a new tab
+      if (response.authUrl) {
+        window.open(response.authUrl, '_blank');
+      }
+      
+      // Call the original onConnect if provided
+      onConnect?.();
+    } catch (error) {
+      console.error('Failed to connect to QuickBooks:', error);
+      // You could add error handling here (show toast, etc.)
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className={`qbint-page ${className}`}>
       <KongBar 
@@ -95,8 +119,13 @@ you get instant access to revenue, customer activity, and product performance â€
               )}
             </div>
 
-            <button type="button" className="qbint-connectBtn" onClick={onConnect}>
-              {connectLabel}
+            <button 
+              type="button" 
+              className="qbint-connectBtn" 
+              onClick={handleConnect}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Connecting...' : connectLabel}
             </button>
           </div>
         </section>
