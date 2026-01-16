@@ -32,25 +32,25 @@ const EstimateRevenue: React.FC = () => {
   const [isCalculating, setIsCalculating] = useState(false);
 
   // Read saved values
-  const flatFee        = safeNum(getRatePlanData('FLAT_FEE_AMOUNT'));
-  const numberUnits    = safeNum(getRatePlanData('FLAT_FEE_API_CALLS'));
-  const overageCharge  = safeNum(getRatePlanData('FLAT_FEE_OVERAGE'));
-  const usagePerUnit   = safeNum(getRatePlanData('USAGE_PER_UNIT_AMOUNT'));
+  const flatFee = safeNum(getRatePlanData('FLAT_FEE_AMOUNT'));
+  const numberUnits = safeNum(getRatePlanData('FLAT_FEE_API_CALLS'));
+  const overageCharge = safeNum(getRatePlanData('FLAT_FEE_OVERAGE'));
+  const usagePerUnit = safeNum(getRatePlanData('USAGE_PER_UNIT_AMOUNT'));
 
   const pricingModelRaw = getRatePlanData('PRICING_MODEL');
   const modelKind = normalizePricingModel(pricingModelRaw);
   const isUsageBased = modelKind === 'usage';
 
-  const setupFee        = safeNum(getRatePlanData('SETUP_FEE'));
+  const setupFee = safeNum(getRatePlanData('SETUP_FEE'));
   const discountPercent = safeNum(getRatePlanData('DISCOUNT_PERCENT'));
-  const discountFlat    = safeNum(getRatePlanData('DISCOUNT_FLAT'));
+  const discountFlat = safeNum(getRatePlanData('DISCOUNT_FLAT'));
   // helper reads latest freemium units from session storage (handles legacy FREE_UNITS key too)
-const readFreemiumUnits = () => safeNum(getRatePlanData('FREEMIUM_UNITS')) || safeNum(getRatePlanData('FREE_UNITS'));
+  const readFreemiumUnits = () => safeNum(getRatePlanData('FREEMIUM_UNITS')) || safeNum(getRatePlanData('FREE_UNITS'));
 
-// state so later session-storage updates are reflected
-const [freemiumUnits, setFreemiumUnits] = useState<number>(readFreemiumUnits());
-  const minimumUsage    = safeNum(getRatePlanData('MINIMUM_USAGE'));
-  const minimumCharge   = safeNum(getRatePlanData('MINIMUM_CHARGE'));
+  // state so later session-storage updates are reflected
+  const [freemiumUnits, setFreemiumUnits] = useState<number>(readFreemiumUnits());
+  const minimumUsage = safeNum(getRatePlanData('MINIMUM_USAGE'));
+  const minimumCharge = safeNum(getRatePlanData('MINIMUM_CHARGE'));
 
   // Toggles — default freemium to ON when units are saved (so users see its effect immediately)
   const [includeSetup, setIncludeSetup] = useState(false);
@@ -96,8 +96,8 @@ const [freemiumUnits, setFreemiumUnits] = useState<number>(readFreemiumUnits());
 
       const _discountAmount = includeDiscount
         ? (discountPercent > 0
-            ? (discountPercent / 100) * _subtotal
-            : discountFlat)
+          ? (discountPercent / 100) * _subtotal
+          : discountFlat)
         : 0;
 
       let _totalEstimation = _subtotal - _discountAmount;
@@ -122,15 +122,15 @@ const [freemiumUnits, setFreemiumUnits] = useState<number>(readFreemiumUnits());
     } else {
       // Flat fee branch (kept same semantics, with freemium reducing overage if toggled)
       // overage before freemium
-const rawOverage = Math.max(0, usageNum - numberUnits);
-// apply freemium only to overage units, never below zero
-const effectiveOverage = includeFreemium ? Math.max(0, rawOverage - freemiumUnits) : rawOverage;
-const overageTotal = effectiveOverage * overageCharge;
+      const rawOverage = Math.max(0, usageNum - numberUnits);
+      // apply freemium only to overage units, never below zero
+      const effectiveOverage = includeFreemium ? Math.max(0, rawOverage - freemiumUnits) : rawOverage;
+      const overageTotal = effectiveOverage * overageCharge;
 
-const freemiumTotal = includeFreemium ? (Math.min(rawOverage, freemiumUnits) * overageCharge) : 0;
+      const freemiumTotal = includeFreemium ? (Math.min(rawOverage, freemiumUnits) * overageCharge) : 0;
 
-const setupComponent = includeSetup ? setupFee : 0;
-const subtotal = flatFee + setupComponent + overageTotal; // freemium already deducted via effectiveOverage
+      const setupComponent = includeSetup ? setupFee : 0;
+      const subtotal = flatFee + setupComponent + overageTotal; // freemium already deducted via effectiveOverage
 
       const _baseAmount = flatFee + overageTotal;
       const _freemiumSavings = freemiumTotal;
@@ -139,8 +139,8 @@ const subtotal = flatFee + setupComponent + overageTotal; // freemium already de
 
       const _discountAmount = includeDiscount
         ? (discountPercent > 0
-            ? (discountPercent / 100) * _subtotal
-            : discountFlat)
+          ? (discountPercent / 100) * _subtotal
+          : discountFlat)
         : 0;
 
       let _totalEstimation = _subtotal - _discountAmount;
@@ -191,7 +191,7 @@ const subtotal = flatFee + setupComponent + overageTotal; // freemium already de
 
     setIsCalculating(true);
     setShowCalculation(false);
-    
+
     try {
       // Build request payload matching backend expectations
       const request: RevenueEstimationRequest = {
@@ -228,10 +228,10 @@ const subtotal = flatFee + setupComponent + overageTotal; // freemium already de
       };
 
       console.log('🚀 Sending revenue estimation request:', request);
-      
+
       const response = await estimateRevenue(request);
       console.log('✅ Backend response:', response);
-      
+
       setBackendResponse(response);
       setShowCalculation(true);
     } catch (error) {
@@ -367,8 +367,8 @@ const subtotal = flatFee + setupComponent + overageTotal; // freemium already de
                     <td>
                       {freemiumUnits > 0
                         ? (isUsageBased
-                            ? `${Math.min(usageNum, freemiumUnits)} free units * $${usagePerUnit}`
-                            : `${Math.min(Math.max(0, usageNum - numberUnits), freemiumUnits)} * $${overageCharge}`)
+                          ? `${Math.min(usageNum, freemiumUnits)} free units * $${usagePerUnit}`
+                          : `${Math.min(Math.max(0, usageNum - numberUnits), freemiumUnits)} * $${overageCharge}`)
                         : 'No free units'}
                     </td>
                     <td>{freemiumUnits > 0 ? `-$${freemiumSavings.toFixed(2)}` : '$0'}</td>

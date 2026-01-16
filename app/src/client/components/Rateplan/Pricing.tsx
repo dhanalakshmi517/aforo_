@@ -621,14 +621,14 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
             onChange={v => {
               const value = v;
               console.log('🎯 Pricing: User selected pricing model:', value);
-              
+
               // If locked, prevent selection and revert to empty state
               if (locked) {
                 console.log('🔒 Pricing: Locked mode - reverting selection to empty');
                 setSelected('');
                 return;
               }
-              
+
               setSelected(value);
               if (value === 'Tiered Pricing' && tiers.length === 0) {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);

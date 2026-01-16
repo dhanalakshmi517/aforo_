@@ -168,12 +168,12 @@ const EditTiered: React.FC<EditTieredProps> = ({
     // Update state only; persistence handled by useEffect([tiers])
     setTiers(prev => {
       const updated = prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[];
-      
+
       // If 'to' field changed, update next tier's 'from' field
       if (field === 'to' && value && !isNaN(Number(value)) && index < updated.length - 1) {
         updated[index + 1] = { ...updated[index + 1], from: String(Number(value) + 1) };
       }
-      
+
       return updated;
     });
 
@@ -220,6 +220,9 @@ const EditTiered: React.FC<EditTieredProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-tiered-input-small ${tierTouched[index]?.from && tierErrors[index]?.from ? 'error-input' : ''}`}
+                type="number"
+                step="1"
+                min="0"
                 value={tier.from}
                 onChange={(e) => handleChange(index, 'from', e.target.value)}
                 onBlur={() => markTouched(index, 'from')}
@@ -233,6 +236,9 @@ const EditTiered: React.FC<EditTieredProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-tiered-input-small ${!tier.isUnlimited && tierTouched[index]?.to && tierErrors[index]?.to ? 'error-input' : ''}`}
+                type="number"
+                step="1"
+                min="0"
                 value={tier.isUnlimited ? 'Unlimited' : tier.to}
                 placeholder="To"
                 disabled={tier.isUnlimited}
@@ -246,6 +252,9 @@ const EditTiered: React.FC<EditTieredProps> = ({
             <div className="field-col large-field">
               <input
                 className={`edit-tiered-input-large ${tierTouched[index]?.price && tierErrors[index]?.price ? 'error-input' : ''}`}
+                type="number"
+                step="0.01"
+                min="0"
                 value={tier.price}
                 onChange={(e) => handleChange(index, 'price', e.target.value)}
                 onBlur={() => markTouched(index, 'price')}
@@ -288,7 +297,9 @@ const EditTiered: React.FC<EditTieredProps> = ({
             <label>
               Overage Charge
               <input
-                type="text"
+                type="number"
+                step="0.01"
+                min="0"
                 className="edit-tiered-input-extra"
                 value={overageCharge}
                 onChange={(e) => {
@@ -310,7 +321,9 @@ const EditTiered: React.FC<EditTieredProps> = ({
             <label>
               Grace Buffer (optional)
               <input
-                type="text"
+                type="number"
+                step="1"
+                min="0"
                 className="edit-tiered-input-extra"
                 value={graceBuffer}
                 onChange={(e) => {

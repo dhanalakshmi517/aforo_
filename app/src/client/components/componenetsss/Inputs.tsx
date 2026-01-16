@@ -828,7 +828,7 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
-      
+
       const file = e.dataTransfer.files?.[0] || null;
       handleFileChange(file);
     };
@@ -863,8 +863,8 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
             {label}{required && <span className="if-required">*</span>}{optional && <span className="if-optional">(Optional)</span>}
           </label>
         )}
-        
-        <div 
+
+        <div
           className={[
             "if-file-wrapper",
             isDragging ? "is-dragging" : "",
@@ -894,14 +894,14 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
               error ? `${controlId}-error` : helperText ? `${controlId}-help` : undefined
             }
           />
-          
+
           <div className="if-file-content">
             <div className="if-file-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M7 10V9a2 2 0 012-2h6a2 2 0 012 2v1M8 14v.01M12 14v.01M16 14v.01M8 18v.01M12 18v.01M16 18v.01" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 10V9a2 2 0 012-2h6a2 2 0 012 2v1M8 14v.01M12 14v.01M16 14v.01M8 18v.01M12 18v.01M16 18v.01" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            
+
             <div className="if-file-text">
               {fileName ? (
                 <span className="if-file-name">{fileName}</span>
@@ -912,7 +912,7 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
                 <span className="if-file-hint">or drag and drop</span>
               )}
             </div>
-            
+
             {fileName && !disabled && !readOnly && (
               <button
                 type="button"
@@ -924,7 +924,7 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
                 aria-label="Remove file"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             )}

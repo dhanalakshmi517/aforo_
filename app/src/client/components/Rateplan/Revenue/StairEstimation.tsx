@@ -24,11 +24,11 @@ const StairEstimation: React.FC = () => {
   interface Stair { label: string; range: string; amount: number; max: number; }
   const stairs: Stair[] = storedStairs.length > 0
     ? storedStairs.map((s: any, i: number): Stair => ({
-        label: `Stair ${i + 1}`,
-        range: `${s.from}–${s.to ?? '∞'}`,
-        amount: Number(s.cost),
-        max: s.to ?? Number.MAX_SAFE_INTEGER,
-      }))
+      label: `Stair ${i + 1}`,
+      range: `${s.from}–${s.to ?? '∞'}`,
+      amount: Number(s.cost),
+      max: s.to ?? Number.MAX_SAFE_INTEGER,
+    }))
     : [];
 
   const usageNum = Number(usage) || 0;
@@ -45,9 +45,9 @@ const StairEstimation: React.FC = () => {
   const freemiumAmount = includeFreemium ? freemiumUnits * perUnitRate : 0;
 
   const subtotal = stairCharge + overageAmount + setupAmount - freemiumAmount;
-  const discountAmount = includeDiscount ? (discountPercent>0 ? (discountPercent/100)*subtotal : discountFlat) : 0;
+  const discountAmount = includeDiscount ? (discountPercent > 0 ? (discountPercent / 100) * subtotal : discountFlat) : 0;
   let totalEstimation = subtotal - discountAmount;
-  if(includeCommitment && minimumCharge>0){
+  if (includeCommitment && minimumCharge > 0) {
     totalEstimation = Math.max(totalEstimation, minimumCharge);
   }
 
@@ -129,7 +129,7 @@ const StairEstimation: React.FC = () => {
                 </label>
                 &nbsp;Setup Fee
               </td>
-              <td>{setupFee>0 ? `$${setupFee}` : '-'}</td>
+              <td>{setupFee > 0 ? `$${setupFee}` : '-'}</td>
               {showCalculation && <><td>{includeSetup ? `$${setupFee}` : '-'}</td><td>{includeSetup ? `$${setupFee}` : '-'}</td></>}
             </tr>
 
@@ -145,10 +145,10 @@ const StairEstimation: React.FC = () => {
                 </label>
                 &nbsp;Discounts
               </td>
-              <td>{discountPercent>0 ? `${discountPercent}%` : discountFlat>0 ? `$${discountFlat}` : '-'}</td>
+              <td>{discountPercent > 0 ? `${discountPercent}%` : discountFlat > 0 ? `$${discountFlat}` : '-'}</td>
               {showCalculation && (
                 <>
-                  <td>{includeDiscount ? (discountPercent>0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`) : '-'}</td>
+                  <td>{includeDiscount ? (discountPercent > 0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`) : '-'}</td>
                   <td>{includeDiscount ? `-$${discountAmount.toFixed(2)}` : '-'}</td>
                 </>
               )}

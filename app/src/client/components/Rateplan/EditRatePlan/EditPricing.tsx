@@ -474,7 +474,7 @@ const EditPricing: React.FC<EditPricingProps> = ({ ratePlanId, registerSavePrici
               setSelected(model);
               setRatePlanData('PRICING_MODEL', model);
               localStorage.setItem('pricingModel', model);
-              
+
               // Clear pricing model validation error when user selects a model
               if (onClearError) {
                 onClearError('pricingModel');

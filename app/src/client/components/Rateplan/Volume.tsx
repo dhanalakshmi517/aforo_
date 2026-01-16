@@ -203,6 +203,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 <input
                   className={`tiered-input-small ${touched.from && error.from ? 'error-input' : ''}`}
                   type="number"
+                  step="any"
                   value={Number.isNaN(tier.from) ? '' : tier.from}
                   onChange={(e) => onChange(index, 'from', e.target.value)}
                   onBlur={() => markTouched(index, 'from')}
@@ -230,6 +231,7 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 <input
                   className={`tiered-input-large ${touched.price && error.price ? 'error-input' : ''}`}
                   type="number"
+                  step="any"
                   value={Number.isNaN(tier.price) ? '' : tier.price}
                   onChange={(e) => onChange(index, 'price', e.target.value)}
                   onBlur={() => markTouched(index, 'price')}
@@ -296,7 +298,9 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
             <label>
               Overage Charge
               <input
-                type="text"
+                type="number"
+                step="0.01"
+                min="0"
                 className={`volume-input-extra ${!noUpperLimit && overageTouched && overageError ? 'error-input' : ''}`}
                 placeholder="Enter overage charge"
                 value={overageUnitRate}
@@ -322,7 +326,9 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
             <label>
               Grace Buffer (optional)
               <input
-                type="text"
+                type="number"
+                step="1"
+                min="0"
                 className="volume-input-extra"
                 placeholder="Enter grace buffer"
                 value={graceBuffer}
