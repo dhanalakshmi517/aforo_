@@ -100,6 +100,7 @@ import ApigeeImport from './components/ApigeeIntegration/ApigeeImport';
 import ApigeeImportedProducts from './components/ApigeeIntegration/ApigeeImportedProductsPage';
 import SalesSite from './components/comingsoon/SalesSite';
 import QBIntegration from './components/Integrations/Quickbooks/QBIntegration';
+import QuickbooksIntegration from './components/Integrations/Quickbooks/QuickbooksIntegration';
 import SuccessQB from './components/Integrations/Quickbooks/SuccessQB';
 import TopHealthyCustomers from './components/Dashboard/customeranalysis/TopHealthyCustomers';
 import TopChurningCustomers from './components/Dashboard/customeranalysis/TopChurningCustomers';
@@ -1291,7 +1292,19 @@ export default function App() {
                     <Suspense fallback={RouteSpinner}>
                       <SuccessQB 
                         onBack={() => navigate('/quickbooks-integration')}
-                        onViewCustomerSyncStatus={() => {}}
+                        onViewCustomerSyncStatus={() => navigate('/quickbooks-sync-status')}
+                      />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quickbooks-sync-status"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={RouteSpinner}>
+                      <QuickbooksIntegration 
+                        onBack={() => navigate('/quickbooks-success')}
                       />
                     </Suspense>
                   </ProtectedRoute>

@@ -191,7 +191,7 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
     if (tiers.length > 0 && tiers[tiers.length - 1].to) {
       newFrom = String(Number(tiers[tiers.length - 1].to) + 1);
     }
-    
+
     const newTier: Tier = { from: newFrom, to: '', price: '' };
     const updatedTiers = [...tiers, newTier];
     setTiers(updatedTiers);
@@ -212,12 +212,12 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
 
     const updatedTiers = [...tiers];
     (updatedTiers[index] as any)[field] = value;
-    
+
     // If 'to' field changed, update next tier's 'from' field
     if (field === 'to' && value && !Number.isNaN(Number(value)) && index < updatedTiers.length - 1) {
       updatedTiers[index + 1].from = String(Number(value) + 1);
     }
-    
+
     setTiers(updatedTiers);
     if (onChange) onChange(index, field, value);
 
@@ -276,6 +276,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
               <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${touched.from && error.from ? 'error-input' : ''}`}
+                  type="number"
+                  step="1"
+                  min="0"
                   value={tier.from}
                   onChange={(e) => handleChangeTier(index, 'from', e.target.value)}
                   onBlur={() => markTouched(index, 'from')}
@@ -290,6 +293,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
               <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${(!tier.isUnlimited && touched.to && error.to) ? 'error-input' : ''}`}
+                  type="number"
+                  step="1"
+                  min="0"
                   value={tier.isUnlimited ? 'Unlimited' : tier.to}
                   placeholder="To"
                   disabled={!!tier.isUnlimited || locked}
@@ -302,6 +308,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
               <div className="field-col large-field">
                 <input
                   className={`tiered-input-large ${touched.price && error.price ? 'error-input' : ''}`}
+                  type="number"
+                  step="0.01"
+                  min="0"
                   value={tier.price}
                   onChange={(e) => handleChangeTier(index, 'price', e.target.value)}
                   onBlur={() => markTouched(index, 'price')}
@@ -339,7 +348,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
             <label>
               Overage Charge
               <input
-                type="text"
+                type="number"
+                step="0.01"
+                min="0"
                 className={`tiered-input-extra ${overageTouched && overageError ? 'error-input' : ''}`}
                 value={overageCharge}
                 onChange={(e) => {
@@ -364,7 +375,9 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
             <label>
               Grace Buffer (optional)
               <input
-                type="text"
+                type="number"
+                step="1"
+                min="0"
                 className="tiered-input-extra"
                 value={graceBuffer}
                 onChange={(e) => setGraceBuffer(e.target.value)}

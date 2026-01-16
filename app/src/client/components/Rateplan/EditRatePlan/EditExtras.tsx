@@ -105,18 +105,18 @@ export default function EditExtras({
 
   const validateFreemiumDateRange = (startDate: string, endDate: string, trialDuration: number): string => {
     if (!startDate || !endDate || !trialDuration) return '';
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     // Calculate difference in days
     const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays !== trialDuration) {
       return `Date range must be exactly ${trialDuration} days (currently ${diffDays} days)`;
     }
-    
+
     return '';
   };
 
@@ -251,9 +251,9 @@ export default function EditExtras({
     }
 
     // Validate freemium date range matches trial duration
-    if ((freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && 
-        freeTrialDuration && Number(freeTrialDuration) > 0 && 
-        freeStart && freeEnd) {
+    if ((freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') &&
+      freeTrialDuration && Number(freeTrialDuration) > 0 &&
+      freeStart && freeEnd) {
       const rangeError = validateFreemiumDateRange(freeStart, freeEnd, Number(freeTrialDuration));
       if (rangeError) {
         setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));

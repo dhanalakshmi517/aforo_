@@ -26,9 +26,9 @@ const UsageEstimation: React.FC = () => {
   const usageTotal = usageNum * perUsageRate;
   const setupComponent = includeSetup ? setupFee : 0;
   const subtotal = usageTotal + setupComponent;
-  const discountAmount = includeDiscount ? (discountPercent>0 ? (discountPercent/100)*subtotal : discountFlat) : 0;
+  const discountAmount = includeDiscount ? (discountPercent > 0 ? (discountPercent / 100) * subtotal : discountFlat) : 0;
   let totalEstimation = subtotal - discountAmount;
-  if(includeCommitment && minimumCharge>0){
+  if (includeCommitment && minimumCharge > 0) {
     totalEstimation = Math.max(totalEstimation, minimumCharge);
   }
 
@@ -93,7 +93,7 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Setup Fee
               </td>
-              <td>{setupFee>0 ? `$${setupFee}` : '-'}</td>
+              <td>{setupFee > 0 ? `$${setupFee}` : '-'}</td>
               {showCalculation && includeSetup && <><td>{`$${setupFee}`}</td><td>{`$${setupComponent.toFixed(2)}`}</td></>}
             </tr>
             <tr>
@@ -108,10 +108,10 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Discounts
               </td>
-              <td>{discountPercent>0 ? `${discountPercent}%` : discountFlat>0 ? `$${discountFlat}` : '-'}</td>
+              <td>{discountPercent > 0 ? `${discountPercent}%` : discountFlat > 0 ? `$${discountFlat}` : '-'}</td>
               {showCalculation && (
                 <>
-                  <td>{discountPercent>0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`}</td>
+                  <td>{discountPercent > 0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`}</td>
                   <td>{`-$${discountAmount.toFixed(2)}`}</td>
                 </>
               )}
@@ -128,7 +128,7 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Freemium Setup
               </td>
-              <td>{freemiumUnits>0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
+              <td>{freemiumUnits > 0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
               {showCalculation && <><td>-</td><td>-</td></>}
             </tr>
             <tr>
@@ -143,7 +143,7 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Minimum Commitment
               </td>
-              <td>{minimumCharge>0 ? `${minimumUsage} units / $${minimumCharge}` : '-'}</td>
+              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : '-'}</td>
               {showCalculation && <><td>-</td><td>-</td></>}
             </tr>
             {showCalculation && (

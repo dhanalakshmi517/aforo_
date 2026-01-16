@@ -174,13 +174,12 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */}
 }
 
 .skSyncBadge {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 48px;
+  height: 40px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  background: rgba(237, 81, 66, 0.08);
-  border: 1px solid rgba(237, 81, 66, 0.18);
+  background:#FFF7F5;
 }
 
 .skPrimaryButton--qb svg {

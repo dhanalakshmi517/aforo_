@@ -156,7 +156,7 @@ const EditStair: React.FC<EditStairProps> = ({
     if (stairs.length > 0 && stairs[stairs.length - 1].to) {
       newFrom = String(Number(stairs[stairs.length - 1].to) + 1);
     }
-    
+
     const next = [...stairs, { from: newFrom, to: '', cost: '', isUnlimited: false }];
     setStairs(next);
   };
@@ -169,7 +169,7 @@ const EditStair: React.FC<EditStairProps> = ({
   const handleChange = (index: number, field: keyof Stair, value: string) => {
     const updated = [...stairs];
     (updated[index] as any)[field] = value;
-    
+
     // If 'to' field changed, update next tier's 'from' field
     if (field === 'to' && value && !isNaN(Number(value)) && index < updated.length - 1) {
       updated[index + 1].from = String(Number(value) + 1);
@@ -215,6 +215,9 @@ const EditStair: React.FC<EditStairProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-input-small ${touched[index]?.from && rowErrors[index]?.from ? 'error-input' : ''}`}
+                type="number"
+                step="1"
+                min="0"
                 value={stair.from}
                 onChange={(e) => handleChange(index, 'from', e.target.value)}
                 onBlur={() => markTouched(index, 'from')}
@@ -228,6 +231,9 @@ const EditStair: React.FC<EditStairProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-input-small ${!stair.isUnlimited && touched[index]?.to && rowErrors[index]?.to ? 'error-input' : ''}`}
+                type="number"
+                step="1"
+                min="0"
                 value={stair.isUnlimited ? 'Unlimited' : stair.to}
                 placeholder="To"
                 disabled={stair.isUnlimited}
@@ -241,6 +247,9 @@ const EditStair: React.FC<EditStairProps> = ({
             <div className="field-col large-field">
               <input
                 className={`edit-input-large ${touched[index]?.cost && rowErrors[index]?.cost ? 'error-input' : ''}`}
+                type="number"
+                step="0.01"
+                min="0"
                 value={stair.cost}
                 onChange={(e) => handleChange(index, 'cost', e.target.value)}
                 onBlur={() => markTouched(index, 'cost')}
@@ -283,7 +292,9 @@ const EditStair: React.FC<EditStairProps> = ({
             <label>
               Overage Charge
               <input
-                type="text"
+                type="number"
+                step="0.01"
+                min="0"
                 className="edit-input-extra-stairs"
                 value={overageCharge}
                 onChange={(e) => {
@@ -305,7 +316,9 @@ const EditStair: React.FC<EditStairProps> = ({
             <label>
               Grace Buffer (optional)
               <input
-                type="text"
+                type="number"
+                step="1"
+                min="0"
                 className="edit-input-extra-stairs"
                 value={graceBuffer}
                 onChange={(e) => {

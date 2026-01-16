@@ -122,6 +122,7 @@ const Integrations: React.FC = () => {
               </svg>
             }
             actionLabel="Sync"
+            onAction={handleQuickBooksSync}
           />
 
           {/* Stripe Integration Card */}

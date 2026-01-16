@@ -105,7 +105,15 @@ export interface BillableMetric {
 export const fetchBillableMetrics = async (productName?: string): Promise<BillableMetric[]> => {
   const url = productName ? `${BM_BASE}?product=${encodeURIComponent(productName)}` : BM_BASE;
   const response = await axios.get(nocache(url));
-  return response.data;
+
+  // Filter to only include ACTIVE metrics (exclude DRAFT)
+  const allMetrics = response.data;
+  const activeMetrics = allMetrics.filter((m: any) => {
+    const status = (m.status || m.metricStatus || '').toUpperCase();
+    return status === 'ACTIVE' || status === 'PUBLISHED' || status === 'FINALIZED';
+  });
+
+  return activeMetrics;
 };
 
 // ⬇️ UPDATED: guard against invalid/zero ids

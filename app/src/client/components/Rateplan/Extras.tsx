@@ -509,18 +509,18 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
 
   const validateFreemiumDateRange = (startDate: string, endDate: string, trialDuration: number): string => {
     if (!startDate || !endDate || !trialDuration) return '';
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     // Calculate difference in days
     const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays !== trialDuration) {
       return `Date range must be exactly ${trialDuration} days (currently ${diffDays} days)`;
     }
-    
+
     return '';
   };
 
@@ -807,7 +807,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <div className="extras-two-col-row">
               <div className="extras-field">
                 <label>
-                  Enter one-time Setup Fee 
+                  Enter one-time Setup Fee
                 </label>
                 <InputField
                   type="number"
@@ -1221,23 +1221,23 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                 const startDateError = validateDate(freemiumPayload.startDate);
                 const endDateError = validateDate(freemiumPayload.endDate);
                 let dateRangeError = '';
-                
+
                 // Validate date range matches trial duration for FREE_TRIAL_DURATION types
-                if ((freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') && 
-                    freemiumPayload.freeTrialDuration > 0 && 
-                    freemiumPayload.startDate && 
-                    freemiumPayload.endDate) {
+                if ((freemiumType === 'FREE_TRIAL_DURATION' || freemiumType === 'FREE_UNITS_PER_DURATION') &&
+                  freemiumPayload.freeTrialDuration > 0 &&
+                  freemiumPayload.startDate &&
+                  freemiumPayload.endDate) {
                   dateRangeError = validateFreemiumDateRange(
-                    freemiumPayload.startDate, 
-                    freemiumPayload.endDate, 
+                    freemiumPayload.startDate,
+                    freemiumPayload.endDate,
                     freemiumPayload.freeTrialDuration
                   );
                 }
-                
+
                 if (startDateError || endDateError || dateRangeError) {
-                  setValidationErrors(prev => ({ 
-                    ...prev, 
-                    freemiumStartDate: startDateError, 
+                  setValidationErrors(prev => ({
+                    ...prev,
+                    freemiumStartDate: startDateError,
                     freemiumEndDate: endDateError,
                     freemiumDateRange: dateRangeError
                   }));

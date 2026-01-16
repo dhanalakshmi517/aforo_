@@ -68,6 +68,7 @@ const EditFlat: React.FC<EditFlatProps> = ({ validationErrors = {}, onClearError
           <input
             id="flat-fee-amount"
             type="number"
+            step="any"
             placeholder="Enter amount"
             value={flatFee}
             onChange={handleChange(setFlatFee, 'FLAT_FEE_AMOUNT', 'flatFeeAmount', 'flatFeeAmount')}
@@ -85,6 +86,7 @@ const EditFlat: React.FC<EditFlatProps> = ({ validationErrors = {}, onClearError
           <input
             id="flat-fee-api"
             type="number"
+            step="any"
             placeholder="Enter limit"
             value={apiCalls}
             onChange={handleChange(setApiCalls, 'FLAT_FEE_API_CALLS', 'flatFeeApiCalls', 'apiCalls')}
@@ -102,6 +104,7 @@ const EditFlat: React.FC<EditFlatProps> = ({ validationErrors = {}, onClearError
           <input
             id="flat-fee-overage"
             type="number"
+            step="any"
             placeholder="Enter overage per unit"
             value={overageRate}
             onChange={handleChange(setOverageRate, 'FLAT_FEE_OVERAGE', 'flatFeeOverage', 'overageRate')}
@@ -121,6 +124,7 @@ const EditFlat: React.FC<EditFlatProps> = ({ validationErrors = {}, onClearError
           <input
             id="flat-fee-grace"
             type="number"
+            step="any"
             placeholder="Enter grace buffer"
             value={graceBuffer}
             onChange={handleChange(setGraceBuffer, 'FLAT_FEE_GRACE', 'flatFeeGrace', 'graceBuffer')}

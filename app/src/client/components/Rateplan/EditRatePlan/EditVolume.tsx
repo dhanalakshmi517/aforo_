@@ -165,12 +165,12 @@ const EditVolume: React.FC<EditVolumeProps> = ({
   const handleChange = (index: number, field: keyof Tier, value: string) => {
     setTiers(prev => {
       const updated = prev.map((tier, i) => (i === index ? { ...tier, [field]: value } : tier)) as Tier[];
-      
+
       // If 'to' field changed, update next tier's 'from' field
       if (field === 'to' && value && !isNaN(Number(value)) && index < updated.length - 1) {
         updated[index + 1] = { ...updated[index + 1], from: String(Number(value) + 1) };
       }
-      
+
       return updated;
     });
 
@@ -217,6 +217,9 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-volume-input-small ${tierTouched[index]?.from && tierErrors[index]?.from ? 'error-input' : ''}`}
+                type="number"
+                step="1"
+                min="0"
                 value={tier.from}
                 onChange={(e) => handleChange(index, 'from', e.target.value)}
                 onBlur={() => markTouched(index, 'from')}
@@ -230,6 +233,9 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-volume-input-small ${!tier.isUnlimited && tierTouched[index]?.to && tierErrors[index]?.to ? 'error-input' : ''}`}
+                type="number"
+                step="1"
+                min="0"
                 value={tier.isUnlimited ? 'Unlimited' : tier.to}
                 placeholder="To"
                 disabled={tier.isUnlimited}
@@ -243,6 +249,9 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             <div className="field-col large-field">
               <input
                 className={`edit-volume-input-large ${tierTouched[index]?.price && tierErrors[index]?.price ? 'error-input' : ''}`}
+                type="number"
+                step="0.01"
+                min="0"
                 value={tier.price}
                 onChange={(e) => handleChange(index, 'price', e.target.value)}
                 onBlur={() => markTouched(index, 'price')}
@@ -285,7 +294,9 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             <label>
               Overage Charge
               <input
-                type="text"
+                type="number"
+                step="0.01"
+                min="0"
                 className="edit-volume-input-extra"
                 value={overageCharge}
                 onChange={(e) => {
@@ -307,7 +318,9 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             <label>
               Grace Buffer (optional)
               <input
-                type="text"
+                type="number"
+                step="1"
+                min="0"
                 className="edit-volume-input-extra"
                 value={graceBuffer}
                 onChange={(e) => {
