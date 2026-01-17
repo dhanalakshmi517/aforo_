@@ -1,21 +1,29 @@
-/* ConnectionFailed.css */
+@import "../../Variables/Variables.css";
 
-.cfPage {
+.qb-cfPage {
   width: 100%;
-  min-height: 100vh;
-  background: #f6fbff;
+  height: 100vh;          /* ✅ lock to viewport */
+  overflow: hidden;       /* ✅ no scrollbar */
+  background: var(--color-neutral-50);
 }
 
-.cfFrame {
-  padding: 18px 18px 22px;
+/* ✅ match your other screens: 19px top, 80px sides, 24px bottom */
+.qb-cfFrame {
+  padding: 19px 80px 24px;
+  height: calc(100vh - 64px); /* ✅ assumes QBBar/header is 64px */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.cfCard {
+/* ✅ fill the frame, no forced min height */
+.qb-cfCard {
   width: 100%;
-  min-height: 640px;
+  height: 100%;
+  min-height: 0;
+
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 0 6px 22px rgba(2, 18, 45, 0.06);
   overflow: hidden;
 
@@ -24,7 +32,7 @@
   justify-content: center;
 }
 
-.cfContent {
+.qb-cfContent {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,69 +43,68 @@
   padding: 30px 18px;
 }
 
-.cfIcon {
+.qb-cfIcon {
   width: 204px;
   height: 204px;
-
-  /* that soft glow/blur look */
   filter: blur(0.6px);
   opacity: 0.95;
 }
 
-.cfTitle {
-  margin-top: 6px;
-  font-size: 14px;
-  font-weight: 800;
-  color: #025a94;
+.qb-cfTitle {
+ text-align: center;
+
+/* heading/h4/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h4, 22px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h4, 32px); /* 145.455% */
+background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 }
 
-.cfMessage {
+.qb-cfMessage {
   max-width: 420px;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.45;
-  color: rgba(11, 18, 32, 0.55);
+color: var(--color-neutral-1700);
+text-align: center;
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 /* button like screenshot */
-.cfBtn {
+.qb-cfBtn {
   margin-top: 6px;
-  height: 30px;
-  padding: 0 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(2, 90, 148, 0.18);
-  background: #025a94;
-  color: #eaf4ff;
-
-  font-size: 11px;
-  font-weight: 800;
-
-  cursor: pointer;
-  box-shadow: 0 10px 22px rgba(2, 90, 148, 0.16);
-  transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
 }
 
-.cfBtn:hover {
-  background: #034a7d;
-  transform: translateY(-1px);
-}
 
-.cfBtn:active {
-  transform: translateY(0px);
-}
 
-.cfBtn:disabled {
+/* ✅ fix your disabled selector (you had .cfBtn:disabled) */
+.qb-cfBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-@media (max-width: 520px) {
-  .cfCard {
-    min-height: 560px;
+/* ✅ responsive padding like your main pages */
+@media (max-width: 1100px) {
+  .qb-cfFrame {
+    padding: 18px 32px 22px;
+  }
+}
+
+@media (max-width: 560px) {
+  .qb-cfFrame {
+    padding: 14px 14px 16px;
   }
 
-  .cfIcon {
+  .qb-cfIcon {
     width: 176px;
     height: 176px;
   }

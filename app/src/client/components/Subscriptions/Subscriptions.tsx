@@ -52,6 +52,16 @@ const formatIST = (iso?: string) => {
   return `${fmt} IST`;
 };
 
+const truncateCustomerName = (name: string) => {
+  if (!name) return name;
+  return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+};
+
+const truncateRatePlanName = (name: string) => {
+  if (!name) return name;
+  return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+};
+
 // Payment pill (same visuals as RatePlans.tsx)
 const PaymentPill: React.FC<{ value?: string }> = ({ value }) => {
   const raw = String(value || '').trim().toUpperCase().replace(/[_-]/g, '');
@@ -83,17 +93,20 @@ const PaymentPill: React.FC<{ value?: string }> = ({ value }) => {
 };
 
 // Small rate plan chip
-const RatePlanChip: React.FC<{ name?: string }> = ({ name }) => (
-  <div className="rp-name-chip">
-    <div className="rp-name-initials">
-      {(name || 'RP').trim().split(/\s+/).map((s) => s[0]).join('').slice(0, 1).toUpperCase()}
+const RatePlanChip: React.FC<{ name?: string }> = ({ name }) => {
+  const displayName = name || 'N/A';
+  return (
+    <div className="rp-name-chip">
+      <div className="rp-name-initials">
+        {(name || 'RP').trim().split(/\s+/).map((s) => s[0]).join('').slice(0, 1).toUpperCase()}
+      </div>
+      <div className="rp-name-texts">
+        <div className="rp-name-title" title={displayName}>{truncateRatePlanName(displayName)}</div>
+        <div className="rp-name-subtitle">Pricing Model Name</div>
+      </div>
     </div>
-    <div className="rp-name-texts">
-      <div className="rp-name-title">{name || 'N/A'}</div>
-      <div className="rp-name-subtitle">Pricing Model Name</div>
-    </div>
-  </div>
-);
+  );
+};
 
 /* ---------- NEW: logo resolution (same approach as Customers.tsx) ---------- */
 const FILE_HOST = 'http://44.201.19.187:8081';
@@ -976,7 +989,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
                                 {!logo && <span className="avatar-initials">{initialsFrom(cust?.customerName)}</span>}
                               </div>
                               <div className="cust-block">
-                                <div className="cust-name">{cust?.customerName || `Customer ${sub.customerId}`}</div>
+                                <div className="cust-name" title={cust?.customerName || `Customer ${sub.customerId}`}>{truncateCustomerName(cust?.customerName || `Customer ${sub.customerId}`)}</div>
                                 <div className="cust-email">{cust?.primaryEmail || '—'}</div>
                               </div>
                             </div>

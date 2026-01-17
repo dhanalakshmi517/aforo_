@@ -83,6 +83,14 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   const navigate = useNavigate();
   const formatStatus = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '-';
   const display = (v: any) => (v === undefined || v === null || String(v).trim() === '' ? '-' : v);
+  const truncateProductName = (name: string) => {
+    if (!name) return '-';
+    return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+  };
+  const truncateMetricName = (name: string) => {
+    if (!name) return '-';
+    return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+  };
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -648,10 +656,10 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
                           </div>
                         </div>
                       </div>
-                      <span className="metric-label">{display(metric.usageMetric)}</span>
+                      <span className="metric-label" title={metric.usageMetric}>{truncateMetricName(metric.usageMetric)}</span>
                     </div>
                   </td>
-                  <td>{display(metric.productName)}</td>
+                  <td title={metric.productName}>{truncateProductName(metric.productName)}</td>
                   <td>{display(metric.unit)}</td>
                   <td>
                     <Tooltip
