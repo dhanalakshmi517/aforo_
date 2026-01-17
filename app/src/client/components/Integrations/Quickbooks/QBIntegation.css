@@ -1,10 +1,10 @@
 /* QBIntegration.css */
+@import "../../Variables/Variables.css";
+
 .qbint-page {
   height: 100vh;
   overflow: hidden; /* ✅ no scrollbar */
-  background: radial-gradient(1200px 600px at 30% -10%, #f3fbff 0%, #f7fbff 55%, #f6f9ff 100%);
-  font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: #0f172a;
+  background: var(--color-neutral-50);
 }
 
 .qbint-topbar {
@@ -73,6 +73,9 @@
   overflow: hidden;
 }
 
+.connect-btn-qb {
+  width:180px;
+}
 /* Card */
 .qbint-card {
   height: 100%;
@@ -105,20 +108,26 @@
 
 .qbint-h1 {
   margin: 0 0 12px;
-  font-size: clamp(22px, 2.1vw, 28px);
-  line-height: 1.18;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #0b1220;
+  color: var(--color-neutral-1700);
+
+/* heading/h3/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h3, 26px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h3, 36px); /* 138.462% */
 }
 
 .qbint-p {
   margin: 0;
-  max-width: 640px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: rgba(30, 41, 59, 0.72);
-}
+color: var(--color-neutral-1000);
+
+/* body/lg/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-lg, 24px); /* 150% */}
 
 /* Hero image */
 .qbint-heroWrap {
@@ -129,18 +138,71 @@
 }
 
 .qbint-hero {
-  width: 100%;
+  width: 140%;
   height: auto;
-  max-height: clamp(220px, 42vh, 360px); /* ✅ shrinks to avoid scroll */
+  max-height: clamp(380px, 60vh, 550px); /* ✅ further increased height */
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
+  margin-top: -70px;
 }
 
-/* Footer pinned inside card */
+/* Connecting state */
+.qbint-connectingState {
+  height: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.qbint-connectingContent {
+  text-align: center;
+  max-width: 400px;
+  padding: 40px;
+}
+
+.qbint-spinner {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-top: 2px solid var(--color-neutral-1700);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 24px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.qbint-connectingTitle {
+  margin: 0 0 12px;
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-h3, 26px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--line-height-heading-h3, 36px);
+}
+
+.qbint-connectingSubtitle {
+  margin: 0;
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-lg, 16px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg, 24px);
+}
 .qbint-cardFooter {
   border-top: 1px solid rgba(15, 23, 42, 0.06);
-  padding: 20px; /* ✅ callout shows 20 */
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -155,42 +217,108 @@
   min-width: 120px;
 }
 
-.qbint-mark {
-  height: 18px;
-  width: auto;
-  display: block;
-}
-
-.qbint-markStub {
-  height: 18px;
-  width: 18px;
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.08);
-}
 
 
 /* Button */
 .qbint-connectBtn {
   height: 40px;
   padding: 0 18px;
-  border-radius: 10px;
-  border: 1px solid rgba(2, 107, 176, 0.22);
-  background: #0b5fa3;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.01em;
+ 
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 10px 20px rgba(11, 95, 163, 0.22);
 }
 
-.qbint-connectBtn:hover {
-  filter: brightness(1.03);
+
+/* overlay stays the same */
+.qbint-card {
+  position: relative;
 }
 
-.qbint-connectBtn:active {
-  transform: translateY(1px);
+.qbint-card--connecting .qbint-cardBody,
+.qbint-card--connecting .qbint-cardFooter {
+  filter: blur(8px);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: filter 180ms ease, opacity 180ms ease;
+}
+
+/* full overlay */
+.qbint-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  z-index: 20;
+}
+
+/* view status overlay - higher z-index to appear on top */
+.qbint-overlay--viewStatus {
+  z-index: 25;
+}
+
+/* ✅ Connecting overlay - spinner and text side by side */
+.qbint-overlay:not(.qbint-overlay--viewStatus) .qbint-overlayInline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.qbint-overlay:not(.qbint-overlay--viewStatus) .qbint-spinner {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.qbint-overlay:not(.qbint-overlay--viewStatus) .qbint-overlayTitle {
+  margin: 0;
+  line-height: 1;
+}
+
+/* ✅ View Status overlay - text and button stacked vertically */
+.qbint-overlay--viewStatus .qbint-overlayInline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.qbint-spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  border-top-color:var(--color-neutral-1700);
+  animation: spin 1s linear infinite;
+}
+
+.qbint-overlayTitle {
+color: var(--color-neutral-1700);
+text-align: center;
+
+/* heading/h5/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h5, 20px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h5, 28px); /* 140% */
+}
+
+
+
+
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* ✅ Responsive: no scroll, just reflow */
@@ -203,7 +331,7 @@
     gap: 18px;
   }
   .qbint-hero {
-    max-height: clamp(200px, 34vh, 320px);
+    max-height: clamp(320px, 48vh, 480px);
   }
 }
 

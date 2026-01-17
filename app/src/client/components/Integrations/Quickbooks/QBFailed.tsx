@@ -2,6 +2,7 @@
 import * as React from "react";
 import "./QBFailed.css";
 import QBBar from "./QBBar";
+import PrimaryButton from "../../componenetsss/PrimaryButton";
 
 type Props = {
   onBack: () => void;
@@ -20,19 +21,19 @@ const QBFailed: React.FC<Props> = ({
   buttonText = "Try Again",
 }) => {
   return (
-    <div className="cfPage">
+    <div className="qb-cfPage">
       <QBBar onBack={onBack} />
 
-      <div className="cfFrame">
-        <div className="cfCard">
-          <div className="cfContent">
-            <div className="cfIcon" aria-hidden="true">
+      <div className="qb-cfFrame">
+        <div className="qb-cfCard">
+          <div className="qb-cfContent">
+            <div className="qb-cfIcon" aria-hidden="true">
               <FailureSvg />
             </div>
 
-            <div className="cfTitle">{title}</div>
+            <div className="qb-cfTitle">{title}</div>
 
-            <div className="cfMessage">
+            <div className="qb-cfMessage">
               {message.split("\n").map((line, idx) => (
                 <React.Fragment key={idx}>
                   {line}
@@ -41,9 +42,9 @@ const QBFailed: React.FC<Props> = ({
               ))}
             </div>
 
-            <button type="button" className="cfBtn" onClick={onTryAgain}>
+            <PrimaryButton onClick={onTryAgain} className="qb-cfBtn">
               {buttonText}
-            </button>
+            </PrimaryButton>
           </div>
         </div>
       </div>

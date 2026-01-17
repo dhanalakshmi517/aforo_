@@ -147,6 +147,16 @@ const initialsFrom = (name?: string) =>
 const prettyType = (t?: string) =>
   (t || "-").toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 
+const truncateCompanyName = (name: string) => {
+  if (!name || name === "-") return name;
+  return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+};
+
+const truncateCustomerName = (name: string) => {
+  if (!name || name === "-") return name;
+  return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+};
+
 const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCustomerForm }) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -881,7 +891,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                                 {!imgSrc && <span className="avatar-initials">{initials}</span>}
                               </div>
                               <div className="company-block">
-                                <div className="company-name">{companyTitle}</div>
+                                <div className="company-name" title={companyTitle}>{truncateCompanyName(companyTitle)}</div>
                                 <div className="company-type">{prettyType(customer.companyType)}</div>
                               </div>
                             </div>
@@ -890,7 +900,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
                           {/* 2) Customer */}
                           <td className="customer-cell">
                             <div className="cell-stack">
-                              <div className="person-name">{personTitle}</div>
+                              <div className="person-name" title={personTitle}>{truncateCustomerName(personTitle)}</div>
                               <div className="person-email">{customer.primaryEmail ?? "-"}</div>
                             </div>
                           </td>
