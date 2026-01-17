@@ -2,7 +2,7 @@ import * as React from "react";
 import "./QBIntegation.css";
 import KongBar from "../../Products/Kong Integration/KongBar";
 import qbpreview from "./qbpreview.svg";
-import { connectQuickBooks, checkQuickBooksStatus } from "./QBAPI";
+import { connectQuickBooks, checkQuickBooksStatus, getCustomerOverview, disconnectQuickBooks } from "./QBAPI";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SuccessQB from "./SuccessQB";
 import QBFailed from "./QBFailed";
@@ -73,6 +73,9 @@ you get instant access to revenue, customer activity, and product performance â€
     if (isConnecting) return;
 
     console.log('Starting connection process...');
+    // Reset all states to show the initial connection page
+    setConnectionStatus(null);
+    setShowViewStatus(false);
     setIsConnecting(true);
 
     try {
@@ -86,26 +89,75 @@ you get instant access to revenue, customer activity, and product performance â€
       }
 
       // Don't call onConnect() here - it navigates away and unmounts the component
-      console.log('Setting 30-second timer...');
+      console.log('Setting 5-second timer...');
 
       timeoutRef.current = setTimeout(() => {
-        console.log('30 seconds elapsed - Setting showViewStatus to true');
+        console.log('5 seconds elapsed - Setting showViewStatus to true');
         setIsConnecting(false);
         setShowViewStatus(true);
-      }, 30000);
+      }, 5000);
     } catch (error) {
       console.error("Failed to connect to QuickBooks:", error);
       setIsConnecting(false);
     }
   };
 
+  const handleNavigateToConnectPage = () => {
+    // Just reset state to show the initial connection page without calling any API
+    console.log('Navigating back to connect page...');
+    setConnectionStatus(null);
+    setShowViewStatus(false);
+    setIsConnecting(false);
+  };
+
   const handleViewStatus = async () => {
+    console.log('View Status button clicked!');
     try {
+      console.log('Calling checkQuickBooksStatus API...');
       const data = await checkQuickBooksStatus();
-      setConnectionStatus(data.status);
+      console.log('API response:', data);
+      // Use 'connected' field instead of 'status'
+      setConnectionStatus(data.connected);
     } catch (error) {
       console.error('Failed to check connection status:', error);
       setConnectionStatus(false);
+    }
+  };
+
+  const handleViewCustomerSyncStatus = async () => {
+    console.log('View Customer Sync Status clicked!');
+    try {
+      console.log('Calling getCustomerOverview API...');
+      const data = await getCustomerOverview();
+      console.log('Customer overview API response:', data);
+      
+      // Store customer data and navigate to QuickbooksIntegration
+      // You could use localStorage, context, or pass via navigation state
+      localStorage.setItem('customerData', JSON.stringify(data));
+      
+      // Navigate to QuickbooksIntegration page
+      window.location.href = '/quickbooks-integration';
+    } catch (error) {
+      console.error('Failed to get customer overview:', error);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    console.log('Disconnect clicked!');
+    try {
+      console.log('Calling disconnectQuickBooks API...');
+      const response = await disconnectQuickBooks();
+      console.log('Disconnect API response:', response);
+      
+      if (response.success) {
+        console.log('QuickBooks disconnected successfully');
+        // Reset connection status to show the initial connection screen
+        setConnectionStatus(null);
+        setShowViewStatus(false);
+        setIsConnecting(false);
+      }
+    } catch (error) {
+      console.error('Failed to disconnect QuickBooks:', error);
     }
   };
 
@@ -210,10 +262,14 @@ you get instant access to revenue, customer activity, and product performance â€
           </main>
         </>
       ) : connectionStatus === true ? (
-        <SuccessQB onBack={onBack!} />
-      ) : (
-        <QBFailed onBack={onBack!} onTryAgain={handleConnect} />
-      )}
+          <SuccessQB 
+            onBack={onBack!} 
+            onViewCustomerSyncStatus={handleViewCustomerSyncStatus}
+            onDisconnect={handleDisconnect}
+          />
+        ) : (
+          <QBFailed onBack={onBack!} onTryAgain={handleNavigateToConnectPage} />
+        )}
     </div>
   );
 }

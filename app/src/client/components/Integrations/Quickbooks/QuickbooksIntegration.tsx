@@ -1,22 +1,110 @@
 // QickbooksIntegration.tsx
 import * as React from "react";
 import "./QuickbooksIntegration.css";
+import { useNavigate } from "react-router-dom";
 
 import QBConnectionBar from "./QBConnectionBar"; // adjust path
+import { bulkSyncCustomers, getCustomerOverviewForDisplay } from "./QBAPI";
+import TertiaryButton from "../../componenetsss/TertiaryButton";
 
 type Props = {
   onBack?: () => void;
 };
 
 export default function QickbooksIntegration({ onBack }: Props) {
+  const navigate = useNavigate();
   const [syncing, setSyncing] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [timeLeft, setTimeLeft] = React.useState(8);
+  const [customerData, setCustomerData] = React.useState<{
+    synced_customers: number;
+    non_synced_customers: number;
+  } | null>(null);
+
+  // Load customer data from localStorage on component mount
+  React.useEffect(() => {
+    const storedData = localStorage.getItem('customerData');
+    if (storedData) {
+      try {
+        const data = JSON.parse(storedData);
+        setCustomerData({
+          synced_customers: data.synced_customers || 0,
+          non_synced_customers: data.non_synced_customers || 0
+        });
+      } catch (error) {
+        console.error('Error parsing customer data:', error);
+      }
+    }
+  }, []);
+
+  const handleManageConnection = () => {
+    // Navigate back to SuccessQB component
+    navigate("/quickbooks-success");
+  };
+
+  const handleSyncData = async () => {
+    try {
+      setSyncing(true);
+      setProgress(0);
+      setTimeLeft(8);
+      
+      console.log('Starting bulk sync...');
+      const response = await bulkSyncCustomers();
+      console.log('Bulk sync response:', response);
+      
+      if (response.success) {
+        console.log('Bulk sync completed successfully');
+        // Refresh customer data after sync
+        await getCustomerOverviewForDisplay();
+        // Reload the component to show updated data
+        const storedData = localStorage.getItem('customerData');
+        if (storedData) {
+          const data = JSON.parse(storedData);
+          setCustomerData({
+            synced_customers: data.synced_customers || 0,
+            non_synced_customers: data.non_synced_customers || 0
+          });
+        }
+        
+        // Start progress animation
+        const progressInterval = setInterval(() => {
+          setProgress(prev => {
+            if (prev >= 100) {
+              clearInterval(progressInterval);
+              // Reset after a short delay to show completion
+              setTimeout(() => {
+                setSyncing(false);
+                setProgress(0);
+                setTimeLeft(8);
+              }, 1000);
+              return 100;
+            }
+            return prev + 12.5; // Increment by 12.5% (8 steps to reach 100%)
+          });
+          
+          setTimeLeft(prev => {
+            if (prev <= 1) {
+              return 0;
+            }
+            return prev - 1; // Decrease by 1 second each time
+          });
+        }, 1000); // Update every second
+      }
+    } catch (error) {
+      console.error('Failed to sync data:', error);
+      setSyncing(false);
+      setProgress(0);
+      setTimeLeft(8);
+    }
+  };
 
   return (
     <div className="qbiqPage">
       <QBConnectionBar
         title="Quickbooks Integration"
-        onBack={onBack}
+        onBack={() => navigate('/get-started/integrations')}
         rightActionLabel="Manage Connection"
+        onRightAction={handleManageConnection}
         className="qbiqTopbar"
       />
 
@@ -29,7 +117,7 @@ export default function QickbooksIntegration({ onBack }: Props) {
               <div className="qbiqStatCard">
                 <div className="qbiqStatLeft">
                   <div className="qbiqStatTitle">Customers In Sync</div>
-                  <div className="qbiqStatValue">18</div>
+                  <div className="qbiqStatValue">{customerData?.synced_customers || 0}</div>
                   <div className="qbiqStatSub">
                     Your recently created customers have been synced successfully.
                   </div>
@@ -42,7 +130,7 @@ export default function QickbooksIntegration({ onBack }: Props) {
               <div className="qbiqStatCard">
                 <div className="qbiqStatLeft">
                   <div className="qbiqStatTitle">Customers Out of Sync</div>
-                  <div className="qbiqStatValue">24</div>
+                  <div className="qbiqStatValue">{customerData?.non_synced_customers || 0}</div>
                   <div className="qbiqStatSub">
                     Customers failed to sync because earlier ones aren't synced yet.
                   </div>
@@ -71,21 +159,21 @@ export default function QickbooksIntegration({ onBack }: Props) {
                   </div>
                 </div>
 
-                <button className="qbiqBtn" type="button" onClick={() => setSyncing(true)}>
-                  Sync Data
-                </button>
+                <TertiaryButton onClick={handleSyncData} disabled={syncing} className="qbiqBtn">
+                  {syncing ? 'Syncing...' : 'Sync Data'}
+                </TertiaryButton>
               </div>
             ) : (
               <div className="qbiqProgressCard">
                 <div className="qbiqProgressTop">Sycing your previous data...</div>
 
                 <div className="qbiqTrack">
-                  <div className="qbiqFill" style={{ width: "12%" }} />
+                  <div className="qbiqFill" style={{ width: `${progress}%` }} />
                 </div>
 
                 <div className="qbiqMeta">
-                  <div>8%</div>
-                  <div>2m left</div>
+                  <div>{Math.round(progress)}%</div>
+                  <div>{timeLeft} seconds left</div>
                 </div>
               </div>
             )}
