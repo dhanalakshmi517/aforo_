@@ -22,8 +22,8 @@
 
 .qbiqCard {
   height: 100%;
-  background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-200);
   border-radius: 16px;
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
   overflow: hidden;
@@ -39,14 +39,19 @@
 
 .qbiqH1 {
   margin: 0 0 18px;
-  color: #0b5fa3;
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 30px;
+
+/* heading/h3/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h3, 26px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h3, 36px); /* 138.462% */
+background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 }
 
-/* ✅ top tiles */
 .qbiqStats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -54,13 +59,12 @@
 }
 
 .qbiqStatCard {
-  height: 160px;
+  height: 216px;
   border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  background: #fff;
+box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
+  background: var(--color-neutral-white);
 
-  padding: 18px;
+padding: 20px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -72,30 +76,41 @@
 }
 
 .qbiqStatTitle {
-  color: #0f172a;
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 22px;
+ color: var(--color-neutral-1400);
+
+/* heading/h5/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h5, 20px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-heading-h5, 28px); /* 140% */
   margin-bottom: 10px;
 }
 
 .qbiqStatValue {
-  color: #0f172a;
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: 44px;
-  font-weight: 700;
-  line-height: 48px;
+ color: var(--color-neutral-1700);
+
+/* heading/h1 */
+font-family: var(--font-family-primary);
+font-size: 48px;
+font-style: normal;
+font-weight: 700;
+line-height: 60px; /* 125% */
+letter-spacing: -1.92px;
   margin-bottom: 14px;
 }
 
 .qbiqStatSub {
-  color: rgba(15, 23, 42, 0.42);
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 14px;
+ color: var(--color-neutral-800);
+
+/* body/xs/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-xs, 10px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-xs, 16px); /* 160% */
   max-width: 260px;
+  margin-top: 20px;
 }
 
 .qbiqStatIcon {
@@ -113,10 +128,10 @@
 
 /* ✅ bottom idle card */
 .qbiqBottomCard {
-  border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: #fff;
-  padding: 14px 16px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-neutral-300);
+  background: var(--color-neutral-white);
+  padding: 16px 20px;
 
   display: flex;
   align-items: center;
@@ -132,10 +147,10 @@
 }
 
 .qbiqSmallIcon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: rgba(11, 95, 163, 0.06);
+  width: 52px;
+  height: 52px;
+  border-radius: var(--border-radius-sm);
+  background:var(--color-primary-100);
   display: grid;
   place-items: center;
   flex: 0 0 auto;
@@ -146,20 +161,26 @@
 }
 
 .qbiqBottomTitle {
-  color: #0b5fa3;
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 18px;
+ color: var(--color-primary-700);
+
+/* heading/h6/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-h6, 18px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
   margin-bottom: 2px;
 }
 
 .qbiqBottomSub {
-  color: rgba(15, 23, 42, 0.45);
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 16px;
+  color: var(--color-neutral-800);
+
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
   white-space: nowrap;
   overflow: hidden;
@@ -209,14 +230,14 @@
 .qbiqTrack {
   height: 10px;
   border-radius: 999px;
-  background: rgba(11, 95, 163, 0.08);
+  background: var(--color-primary-100);
   overflow: hidden;
 }
 
 .qbiqFill {
   height: 100%;
   border-radius: 999px;
-  background: #0b5fa3;
+  background: var(--color-primary-700);
 }
 
 .qbiqMeta {

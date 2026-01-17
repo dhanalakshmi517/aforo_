@@ -3,6 +3,7 @@ import "./QBBar.css"; // Reuse the same CSS
 import BackArrowButton from "../../componenetsss/BackArrowButton";
 import Spark from "../../componenetsss/Spark";
 import Bell from "../../componenetsss/Bell";
+import PrimaryButton from "../../componenetsss/PrimaryButton";
 
 type QBBarProps = {
   title?: string;
@@ -11,6 +12,8 @@ type QBBarProps = {
   /** right-side actions */
   onMagicClick?: () => void;
   onBellClick?: () => void;
+  onDisconnect?: () => void;
+  rightActionLabel?: string;
 
   /** optional: hide icons */
   showMagic?: boolean;
@@ -26,6 +29,8 @@ const QBBar: React.FC<QBBarProps> = ({
   onBack,
   onMagicClick,
   onBellClick,
+  onDisconnect,
+  rightActionLabel,
   showMagic = true,
   showBell = true,
   className = "",
@@ -67,6 +72,15 @@ const QBBar: React.FC<QBBarProps> = ({
               onClick={onBellClick}
               ariaLabel="Notifications"
             />
+          )}
+
+          {onDisconnect && rightActionLabel && (
+            <PrimaryButton
+              onClick={onDisconnect}
+              className="skDisconnectButton"
+            >
+              {rightActionLabel}
+            </PrimaryButton>
           )}
         </div>
       </div>

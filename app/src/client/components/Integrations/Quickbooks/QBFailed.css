@@ -17,6 +17,7 @@
 
 /* ✅ fill the frame, no forced min height */
 .qb-cfCard {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -90,6 +91,114 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* ✅ Overlay styles for QBFailed */
+.qb-cf-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 20;
+}
+
+.qb-cf-overlay--viewStatus {
+  z-index: 25;
+}
+
+/* ✅ Connecting overlay - normal blur effect */
+.qb-cf-overlay:not(.qb-cf-overlay--viewStatus) {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+/* ✅ View Status overlay - more blur effect */
+.qb-cf-overlay--viewStatus {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+/* ✅ Connecting overlay - spinner and text side by side */
+.qb-cf-overlay:not(.qb-cf-overlay--viewStatus) .qb-cf-overlayInline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* ✅ View Status overlay - text and button stacked vertically */
+.qb-cf-overlay--viewStatus .qb-cf-overlayInline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.qb-cf-spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  border-top-color: var(--color-neutral-1700);
+  animation: spin 1s linear infinite;
+}
+
+.qb-cf-overlayTitle {
+  color: var(--color-neutral-1700);
+  text-align: center;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-h5, 20px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-heading-h5, 28px);
+}
+
+.qb-cf-overlay .af-primary-btn {
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(11, 95, 163, 0.7);
+  background: #ffffff !important;
+  color: #0b5fa3 !important;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qb-cf-overlay .af-primary-btn .af-btn-label {
+  color: #0b5fa3 !important;
+}
+
+.qb-cf-overlay .af-primary-btn:hover {
+  background: rgba(11, 95, 163, 0.04) !important;
+  transform: translateY(-1px);
+}
+
+.qb-cf-overlay .af-primary-btn:active {
+  transform: translateY(0);
+}
+
+/* ✅ Don't blur the content when overlay is active */
+.qb-cfCard--connecting .qb-cfContent {
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* ✅ responsive padding like your main pages */

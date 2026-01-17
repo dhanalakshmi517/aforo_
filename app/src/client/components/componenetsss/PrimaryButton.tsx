@@ -18,11 +18,19 @@ export default function PrimaryButton({
   fullWidth = false,
   className = "",
 }: Props) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Enter" && !disabled && onClick) {
+      e.preventDefault();
+      onClick(e as any);
+    }
+  };
+
   return (
     <button
       type={type}
       className={["af-primary-btn", fullWidth ? "is-full" : "", className].join(" ").trim()}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       disabled={disabled}
     >
       <span className="af-btn-label">{children}</span>
