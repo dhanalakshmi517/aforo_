@@ -5,6 +5,7 @@ import QBBar from "./QBBar";
 import QBMark from "../../componenetsss/QBMark";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import { useNavigate } from "react-router-dom";
+import { disconnectQuickBooks, getCustomerOverviewForDisplay } from "./QBAPI";
 
 type SuccessQBProps = {
   onBack: () => void;
@@ -13,7 +14,9 @@ type SuccessQBProps = {
   subtitle?: string;
 
   onViewCustomerSyncStatus?: () => void;
+  onDisconnect?: () => void;
   isViewDisabled?: boolean;
+  isDisconnectDisabled?: boolean;
 };
 
 const SuccessQB: React.FC<SuccessQBProps> = ({
@@ -22,21 +25,52 @@ const SuccessQB: React.FC<SuccessQBProps> = ({
   subtitle =
     "You are successfully connected to Apigee. You can now import API\nproducts and manage them seamlessly.",
   onViewCustomerSyncStatus,
+  onDisconnect,
   isViewDisabled = false,
+  isDisconnectDisabled = false,
 }) => {
   const navigate = useNavigate();
 
-  const handleViewSyncStatus = () => {
-    if (onViewCustomerSyncStatus) {
-      onViewCustomerSyncStatus();
-    } else {
-      // Default navigation to QuickbooksIntegration
+  const handleViewSyncStatus = async () => {
+    try {
+      await getCustomerOverviewForDisplay();
+      
+      // Navigate to QuickbooksIntegration component
+      navigate("/quickbooks-sync-status");
+    } catch (error) {
+      console.error('Failed to view customer sync status:', error);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      console.log('Disconnecting QuickBooks...');
+      const response = await disconnectQuickBooks();
+      console.log('Disconnect response:', response);
+      
+      // Always navigate after disconnect attempt, regardless of response
+      console.log('Navigating to first page...');
+      navigate("/quickbooks-integration");
+      
+      if (response && response.success) {
+        console.log('QuickBooks disconnected successfully');
+      } else {
+        console.log('Disconnect response was not successful:', response);
+      }
+    } catch (error) {
+      console.error('Failed to disconnect QuickBooks:', error);
+      // Still navigate even if there's an error
+      console.log('Error occurred, but still navigating to first page...');
       navigate("/quickbooks-integration");
     }
   };
   return (
     <div className="skPage">
-      <QBBar onBack={onBack} />
+      <QBBar 
+        onBack={onBack} 
+        showMagic={false}
+        showBell={false}
+      />
 
       <div className="skFrame">
         <div className="skCard">
@@ -61,7 +95,13 @@ const SuccessQB: React.FC<SuccessQBProps> = ({
 
               <div className="skActions skActions--qb">
                 {/* small pink icon box (left of button) */}
-                <div className="skSyncBadge" aria-hidden="true">
+                <div 
+                  className="skSyncBadge" 
+                  aria-hidden="true"
+                  onClick={handleDisconnect}
+                  style={{ cursor: 'pointer' }}
+                  title="Disconnect"
+                >
                   <SyncBadgeIcon />
                 </div>
 
