@@ -70,7 +70,7 @@ const SuccessQB: React.FC<SuccessQBProps> = ({
                   disabled={isViewDisabled}
                   className="skPrimaryButton skPrimaryButton--qb"
                 >
-                  View Sync Status <ChevronRightIcon />
+                  View Customer Sync Status 
                 </PrimaryButton>
               </div>
             </div>

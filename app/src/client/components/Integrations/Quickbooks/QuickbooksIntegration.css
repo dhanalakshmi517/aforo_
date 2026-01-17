@@ -1,319 +1,270 @@
+/* QickbooksIntegration.css */
 @import "../../Variables/Variables.css";
+
 :root {
-  --qbi-bg: #f6f8fb;
-  --qbi-panel: #ffffff;
-
-  --qbi-border: rgba(16, 24, 40, 0.10);
-  --qbi-shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
-
-  --qbi-title: #026BB0;
-  --qbi-text: #19222d;
-  --qbi-muted: rgba(25, 34, 45, 0.55);
-
-  --qbi-track: rgba(2, 107, 176, 0.10);
-  --qbi-fill: #026BB0;
-
-  --qbi-radius: 12px;
-  --qbi-pad: 28px;
+  --qbiqTopbarH: 64px; /* if your topbar differs, change this */
 }
 
-.qbi-page {
-  min-height: 100vh;
-  background: var(--qbi-bg);
+/* ✅ No scroll anywhere */
+.qbiqPage {
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-neutral-50);
+}
+
+.qbiqMain {
+  height: calc(100vh - var(--qbiqTopbarH));
+  overflow: hidden;
+
+  /* from your frame guides */
+  padding: 26px 80px 25px;
+}
+
+.qbiqCard {
+  height: 100%;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.qbiqInner {
+  height: 100%;
+  padding: 28px; /* ✅ 28 padding all sides */
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
-.qbi-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--qbi-bg);
-  border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+.qbiqH1 {
+  margin: 0 0 18px;
+  color: #0b5fa3;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 30px;
 }
 
-.qbi-shell {
-  flex: 1;
-  padding: 18px 6px;
-  display: flex;
-  justify-content: center;
-}
-
-.qbi-panel {
-  width: 100%;
-  max-width: 1120px;
-  background: var(--qbi-panel);
-  border: 1px solid var(--qbi-border);
-  border-radius: var(--qbi-radius);
-  box-shadow: var(--qbi-shadow);
-  padding: var(--qbi-pad);
-  box-sizing: border-box;
-
-  /* makes the big empty “Auto” space possible */
-  display: flex;
-  flex-direction: column;
-  min-height: 520px;
-}
-
-.qbi-title {
- 
-/* heading/h3/bold */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-h3, 26px);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-heading-h3, 36px); /* 138.462% */
-background: var(--Gradient-blue, linear-gradient(254deg, var(--surface-primary-button-active, #025A94) 26.47%, var(--surface-primary-button-pressed, #034A7D) 76.37%));
-background-clip: text;
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-}
-
-.qbi-body {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  flex: 1;
-}
-
-.qbi-cards {
+/* ✅ top tiles */
+.qbiqStats {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
 }
 
-.qbi-card {
-box-shadow: 0 1.34px 17.869px 0 var(--shadow-shadow-1, #EEF1F6), 0 0.399px 5.32px 0 var(--shadow-shadow-1, #EEF1F6);
-
+.qbiqStatCard {
+  height: 160px;
   border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   background: #fff;
-  padding: 16px 18px;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  min-height: 118px;
-  overflow: hidden;
-}
 
-.qbi-cardText {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.qbi-cardTitle {
-color: var(--color-neutral-1400);
-
-/* heading/h5/med */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-h5, 20px);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-heading-h5, 28px); /* 140% */
-}
-
-.qbi-cardValue {
-color: var(--color-neutral-1700);
-
-/* heading/h1 */
-font-family: "IBM Plex Sans";
-font-size: 48px;
-font-style: normal;
-font-weight: 700;
-line-height: 60px; /* 125% */
-letter-spacing: -1.92px;
-}
-
-.qbi-cardHelper {
- color: var(--color-neutral-800);
-
-/* body/xs/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-xs, 10px);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-xs, 16px); /* 160% */
-  max-width: 280px;
-}
-
-.qbi-watermark {
-filter: blur(6px);  display: grid;
-  place-items: center;
-}
-
-.qbi-wmSvg {
-  width: 110px;
-  height: 110px;
-}
-
-.qbi-spacer {
-  flex: 1; /* creates the “Auto” middle space like your 3rd image */
-}
-
-.qbi-bottom {
-  border: 1px solid rgba(16, 24, 40, 0.08);
-  border-radius: 10px;
-  background: #fff;
-  padding: 12px 14px;
-}
-
-/* CTA (idle) */
-.qbi-cta {
+  padding: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  min-width: 0;
 }
 
-.qbi-ctaLeft {
+.qbiqStatLeft {
+  min-width: 0;
+}
+
+.qbiqStatTitle {
+  color: #0f172a;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  margin-bottom: 10px;
+}
+
+.qbiqStatValue {
+  color: #0f172a;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 48px;
+  margin-bottom: 14px;
+}
+
+.qbiqStatSub {
+  color: rgba(15, 23, 42, 0.42);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  max-width: 260px;
+}
+
+.qbiqStatIcon {
+  width: 180px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* ✅ middle auto space */
+.qbiqAutoSpace {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ✅ bottom idle card */
+.qbiqBottomCard {
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  padding: 14px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.qbiqBottomLeft {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
 }
 
-.qbi-plusBox {
-  width: 52px;
-  height: 52px;
+.qbiqSmallIcon {
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
-  background: rgba(2, 107, 176, 0.06);
-  color: var(--qbi-title);
+  background: rgba(11, 95, 163, 0.06);
   display: grid;
   place-items: center;
-  font-weight: 700;
   flex: 0 0 auto;
 }
 
-.qbi-ctaText {
+.qbiqBottomCopy {
   min-width: 0;
 }
 
-.qbi-ctaTitle {
-  color: var(--color-primary-700);
-
-/* heading/h6/bold */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-h6, 18px);
-font-style: normal;
-font-weight: 700;
-line-height: var(--line-height-heading-h6, 24px); /* 133.333% */
+.qbiqBottomTitle {
+  color: #0b5fa3;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+  margin-bottom: 2px;
 }
 
-.qbi-ctaSub {
-  margin-top: 2px;
- color: var(--color-neutral-800);
+.qbiqBottomSub {
+  color: rgba(15, 23, 42, 0.45);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
 
-/* body/md/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 720px;
+  max-width: 900px;
 }
 
-.qbi-btn {
-  flex: 0 0 auto;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 9px;
-  border: 1px solid rgba(2, 107, 176, 0.55);
+.qbiqBtn {
+  height: 38px;
+  padding: 0 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 95, 163, 0.55);
   background: #fff;
-  color: var(--qbi-title);
-  font-size: 12px;
-  font-weight: 600;
+  color: #0b5fa3;
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.qbi-btn:hover {
-  background: rgba(2, 107, 176, 0.05);
+.qbiqBtn:hover {
+  background: rgba(11, 95, 163, 0.04);
 }
 
-/* Progress (syncing) */
-.qbi-progressWrap {
-  width: 100%;
+.qbiqBtn:active {
+  transform: translateY(1px);
 }
 
-.qbi-progressLabel {
+/* ✅ progress card (second image) */
+.qbiqProgressCard {
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  padding: 14px 16px 12px;
+}
+
+.qbiqProgressTop {
   text-align: center;
-  font-size: 11px;
-  line-height: 14px;
-  color: rgba(25, 34, 45, 0.65);
-  margin-bottom: 8px;
+  color: rgba(15, 23, 42, 0.72);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  margin-bottom: 10px;
 }
 
-.qbi-track {
-  width: 100%;
-  height: 8px;
-  background: var(--qbi-track);
+.qbiqTrack {
+  height: 10px;
   border-radius: 999px;
+  background: rgba(11, 95, 163, 0.08);
   overflow: hidden;
 }
 
-.qbi-fill {
+.qbiqFill {
   height: 100%;
-  background: var(--qbi-fill);
   border-radius: 999px;
-  min-width: 10px; /* keeps that “pill” look at low % */
+  background: #0b5fa3;
 }
 
-.qbi-progressMeta {
+.qbiqMeta {
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
-  margin-top: 8px;
+  color: rgba(15, 23, 42, 0.6);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
   font-size: 11px;
+  font-weight: 600;
   line-height: 14px;
-  color: rgba(25, 34, 45, 0.55);
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .qbi-panel {
-    padding: 20px;
-    min-height: 0; /* let height be natural on small screens */
+/* ✅ responsive: still no scroll */
+@media (max-width: 1180px) {
+  .qbiqMain {
+    padding: 22px 40px 22px;
   }
+}
 
-  .qbi-cards {
+@media (max-width: 980px) {
+  .qbiqStats {
     grid-template-columns: 1fr;
   }
-
-  .qbi-watermark {
-    width: 120px;
+  .qbiqStatCard {
+    height: 150px;
   }
-
-  .qbi-wmSvg {
-    width: 96px;
-    height: 96px;
-  }
-
-  .qbi-spacer {
-    flex: 0;
+  .qbiqBottomSub {
+    max-width: 520px;
   }
 }
 
-@media (max-width: 520px) {
-  .qbi-shell {
-    padding: 14px 14px;
+@media (max-width: 560px) {
+  .qbiqMain {
+    padding: 16px 14px 16px;
   }
-
-  .qbi-cta {
+  .qbiqInner {
+    padding: 18px;
+  }
+  .qbiqBottomCard {
     flex-direction: column;
     align-items: stretch;
   }
-
-  .qbi-btn {
+  .qbiqBtn {
     width: 100%;
-    height: 36px;
   }
-
-  .qbi-ctaSub {
+  .qbiqBottomSub {
     white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
+    max-width: none;
   }
 }
