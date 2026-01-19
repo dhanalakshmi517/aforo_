@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import "./ThankYou.css";
 import visual from './visual.svg';
 import SigninLogo from './signin.svg';
@@ -7,15 +7,6 @@ import Footer from './Footer';
 import LandNavBar from "../LandingComponents/LandNavBar";
 
 const ThankYou: React.FC = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/');
-    }, 10000); // 1 hour
-    
-    return () => clearTimeout(timer);
-  }, [navigate]);
 
   return (
     <div className="landing-section" style={{ backgroundColor: 'white' }}>

@@ -65,12 +65,12 @@
 /* ---------- DEFAULT (base) ---------- */
 .if-control {
   width: 100%;
-  height: 40px;
+  height: 36px;
   padding: 8px 12px;
   font-size: var(--font-size-md);
   color: var(--color-neutral-1400);
   background: var(--color-neutral-white) !important;
-  border: 1px solid var(--color-neutral-400);
+  border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
   font-weight: 400;
   outline: none;
@@ -83,7 +83,7 @@
 .if-select {
     /* override width or height here */
     width: 100%;       /* example */
-    height: 40px;  
+    height: 36px;  
     padding: 8px 12px;
     line-height: 1.5; /* Ensure proper line height */
     /* fixed height for dropdown */
@@ -221,7 +221,7 @@
   padding: 8px 36px 8px 12px !important;
   cursor: pointer;
   transition: all 0.2s ease;
-  height: 40px;
+  height: 36px;
   border: 1px solid var(--color-neutral-400) !important;
   border-radius: 6px;
   font-size: 14px;
@@ -301,7 +301,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .if-field input:not([type]) {
   margin: 0;
   padding: 8px 12px;
-  height: 40px;
+  height: 36px;
   line-height: 1.5;
 }
 
@@ -318,8 +318,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   padding: 8px 36px 8px 12px !important;
   cursor: pointer;
   transition: all 0.2s ease;
-  height: 40px;
-  border: 1px solid var(--color-neutral-400) !important;
+  height: 36px;
+  border: 1px solid var(--color-neutral-300) !important;
   border-radius: 6px;
   font-size: 14px;
   color: var(--color-neutral-1400);
@@ -397,6 +397,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   cursor: pointer;
   text-align: left;
   width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .dd-placeholder {
@@ -417,6 +419,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
   flex: 1;
   min-width: 0;
 }
@@ -440,7 +444,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   right: 0;
   z-index: 9999;
   background: var(--color-neutral-white);
-  border: 1px solid var(--color-neutral-400);
+  border: 1px solid var(--color-neutral-300);
   border-radius: 8px;
   padding: 6px;
   max-height: 240px;
@@ -479,9 +483,9 @@ line-height: var(--line-height-body-md, 24px); /* 150% */
 
 .dd-item:hover:not(.is-disabled),
 .dd-item.is-active:not(.is-disabled) {
-  background: var(--color-primary-100);
+  background: var(--color-primary-800);
   border-color: none;
-  color: #111827;
+  color: var(--color-neutral-white);
 }
 
 .dd-item.is-selected {

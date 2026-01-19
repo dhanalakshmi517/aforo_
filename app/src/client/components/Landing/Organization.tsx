@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createOrganization, fetchCountries, type OrganizationPayload } from "./api";
 import { useNavigate } from "react-router-dom";
 import CountrySelector from "../Common/CountrySelector";
+import { DropdownField, InputField } from "../componenetsss/Inputs";
 import { Checkbox } from "../componenetsss/Checkbox";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import "./Organization.css";
@@ -220,28 +221,28 @@ const Organization: React.FC = () => {
       const digitsOnly = phoneNumberWithoutFormatting.replace(/^91/, '');
       if (digitsOnly.length !== 10) {
         phoneIsValid = false;
-        phoneError = 'Indian phone numbers must be 10 digits';
+        phoneError = 'Indian phone number';
       }
     } else if (countryCode === 'US' || countryCode === 'CA') {
       // US/Canada: 10 digits after country code (1)
       const digitsOnly = phoneNumberWithoutFormatting.replace(/^1/, '');
       if (digitsOnly.length !== 10) {
         phoneIsValid = false;
-        phoneError = 'US/Canada phone numbers must be 10 digits';
+        phoneError = 'US/Canada phone number';
       }
     } else {
       // Default validation for other countries (at least 8 digits)
       const digitsOnly = phoneNumberWithoutFormatting.replace(/^\+?[0-9]{1,3}/, '');
       if (digitsOnly.length < 8) {
         phoneIsValid = false;
-        phoneError = 'Invalid phone number length';
+        phoneError = 'Invalid phone number';
       }
     }
 
     const requiredFields: [string, string][] = [
       ["firstName", "This field is required"],
       ["lastName", "This field is required"],
-      ["email", "Invalid email id"],
+      ["email", "Enter your work Email"],
       ["company", "This field is required"],
       ["role", "This field is required"],
       ["empSize", "This field is required"],
@@ -254,8 +255,19 @@ const Organization: React.FC = () => {
       newErrors.phone = phoneError;
     }
 
+    // Validate "Other" role field
+    if (selectedRole === 'OTHER' && !otherRole.trim()) {
+      newErrors.role = "This field is required";
+    }
+
     requiredFields.forEach(([field, message]) => {
-      const value = formValues[field]?.toString().trim();
+      let value;
+      if (field === 'empSize') {
+        value = empSize?.toString().trim();
+      } else {
+        value = formValues[field]?.toString().trim();
+      }
+      
       if (!value) {
         newErrors[field] = "This field is required";
       } else if (field === 'email') {
@@ -374,7 +386,7 @@ const Organization: React.FC = () => {
           </h1>
           <p className="org-sub">
             Onboarding with Aforo begins with a conversation.
-            contact us to explore how we can help your company get started.
+            Contact us to explore how we can help your company get started.
           </p>
           <img src={contactSales} alt="Contact sales illustration" className="contact-sales" />
         </section>
@@ -384,57 +396,51 @@ const Organization: React.FC = () => {
           <form className="org-form" noValidate onSubmit={handleSubmit}>
             <div className="org-row">
               <div className="org-field">
-                <label htmlFor="firstName" className="form-label">
-                  First Name
-                </label>
-                <input
+                <InputField
                   id="firstName"
                   name="firstName"
+                  label="First Name"
                   placeholder="Sarah"
                   value={formData.firstName}
-                  onChange={handleFieldChange}
-                  onBlur={(e) => {
-                    if (!e.target.value.trim()) {
+                  onChange={(value) => handleFieldChange({ target: { name: 'firstName', value } } as any)}
+                  onBlur={() => {
+                    if (!formData.firstName.trim()) {
                       setErrors(prev => ({ ...prev, firstName: 'This field is required' }));
                     }
                   }}
-                  className={errors.firstName ? 'error' : ''}
+                  error={errors.firstName}
+                  required
                 />
-                {errors.firstName && (<span className="error-msg">{errors.firstName}</span>)}
               </div>
               <div className="org-field">
-                <label htmlFor="lastName" className="form-label">
-                  Last Name
-                </label>
-                <input
+                <InputField
                   id="lastName"
                   name="lastName"
+                  label="Last Name"
                   placeholder="Johnson"
                   value={formData.lastName}
-                  onChange={handleFieldChange}
-                  onBlur={(e) => {
-                    if (!e.target.value.trim()) {
+                  onChange={(value) => handleFieldChange({ target: { name: 'lastName', value } } as any)}
+                  onBlur={() => {
+                    if (!formData.lastName.trim()) {
                       setErrors(prev => ({ ...prev, lastName: 'This field is required' }));
                     }
                   }}
-                  className={errors.lastName ? 'error' : ''}
+                  error={errors.lastName}
+                  required
                 />
-                {errors.lastName && (<span className="error-msg">{errors.lastName}</span>)}
               </div>
             </div>
 
             <div className="org-field">
-              <label htmlFor="email" className="form-label">
-                Business Email
-              </label>
-              <input
+              <InputField
                 id="email"
                 type="email"
                 name="email"
+                label="Business Email"
                 placeholder="john@example.com"
                 value={formData.email}
-                onChange={(e) => {
-                  handleFieldChange(e);
+                onChange={(value) => {
+                  handleFieldChange({ target: { name: 'email', value } } as any);
                   // Clear email error when user types
                   if (errors.email) {
                     setErrors(prev => {
@@ -444,81 +450,69 @@ const Organization: React.FC = () => {
                     });
                   }
                 }}
-                onBlur={(e) => {
-                  const val = e.target.value.trim();
+                onBlur={() => {
+                  const val = formData.email.trim();
                   if (!val) {
                     setErrors(prev => ({ ...prev, email: 'This field is required' }));
                   } else if (!emailRegex.test(val)) {
                     setErrors(prev => ({ ...prev, email: 'Invalid email id' }));
                   }
                 }}
-                className={errors.email ? 'error' : ''}
+                error={errors.email}
+                required
               />
-              {errors.email && (<span className="error-msg">{errors.email}</span>)}
             </div>
 
             <div className="org-row">
               <div className="org-field">
-                <label htmlFor="company" className="form-label">Company</label>
-                <input
+                <InputField
                   id="company"
                   name="company"
+                  label="Company"
                   placeholder="BrightPath Ltd"
                   value={formData.company}
-                  onChange={handleFieldChange}
-                  onBlur={(e) => {
-                    if (!e.target.value.trim()) {
+                  onChange={(value) => handleFieldChange({ target: { name: 'company', value } } as any)}
+                  onBlur={() => {
+                    if (!formData.company.trim()) {
                       setErrors(prev => ({ ...prev, company: 'This field is required' }));
                     }
                   }}
-                  className={errors.company ? 'error' : ''}
+                  error={errors.company}
+                  required
                 />
-                {errors.company && (<span className="error-msg">{errors.company}</span>)}
               </div>
 
               <div className="org-field">
-                <label htmlFor="role" className="form-label">Your Role</label>
-                <div className="role-selector">
-                  <select
-                    id="role"
-                    name="role"
-                    value={selectedRole}
-                    onChange={handleFieldChange}
-                    onBlur={(e) => {
-                      if (!e.target.value) {
-                        setErrors(prev => ({ ...prev, role: 'This field is required' }));
-                      }
-                    }}
-                    className={errors.role ? 'error' : ''}
-                    required
-                  >
-                    <option value="" disabled hidden>
-                      Select your role...
-                    </option>
-                    <option value="OWNER">Owner</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="CEO">CEO</option>
-                    <option value="CTO">CTO</option>
-                    <option value="CFO">CFO</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="ENGINEER">Engineer</option>
-                    <option value="MARKETING">Marketing</option>
-                    <option value="SALES">Sales</option>
-                    <option value="SUPPORT">Support</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-
-                  {errors.role && selectedRole !== 'OTHER' && (
-                    <span className="error-msg">{errors.role}</span>
-                  )}
-                </div>
+                <DropdownField
+                  id="role"
+                  name="role"
+                  label="Your Role"
+                  placeholder="Select your role..."
+                  value={selectedRole}
+                  onChange={(value) => handleFieldChange({ target: { name: 'role', value } } as any)}
+                  options={[
+                    { value: 'OWNER', label: 'Owner' },
+                    { value: 'ADMIN', label: 'Admin' },
+                    { value: 'CEO', label: 'CEO' },
+                    { value: 'CTO', label: 'CTO' },
+                    { value: 'CFO', label: 'CFO' },
+                    { value: 'MANAGER', label: 'Manager' },
+                    { value: 'ENGINEER', label: 'Engineer' },
+                    { value: 'MARKETING', label: 'Marketing' },
+                    { value: 'SALES', label: 'Sales' },
+                    { value: 'SUPPORT', label: 'Support' },
+                    { value: 'OTHER', label: 'Other' }
+                  ]}
+                  error={errors.role && selectedRole !== 'OTHER' ? errors.role : undefined}
+                  required
+                />
               </div>
             </div>
 
             {selectedRole === 'OTHER' && (
               <div className="org-field other-role-input" style={{ marginTop: '8px', width: '100%' }}>
                 <label htmlFor="otherRole" className="form-label">
-                  Specify your role
+                  Specify your role *
                 </label>
                 <input
                   type="text"
@@ -530,73 +524,66 @@ const Organization: React.FC = () => {
                   style={{ width: '100%' }}
                 />
                 {!otherRole.trim() && errors.role && (
-                  <span className="error-msg">Specify your role</span>
+                  <span className="error-msg">This Field is Required</span>
                 )}
               </div>
             )}
             <div className="org-field">
-              <label htmlFor="empSize" className="form-label">
-                Employee size of the company
-              </label>
-              <select
+              <DropdownField
                 id="empSize"
                 name="empSize"
-                value={empSize}   // controlled input
-                onChange={handleFieldChange}
-                onBlur={(e) => {
-                  if (!e.target.value) {
-                    setErrors(prev => ({ ...prev, empSize: 'This field is required' }));
-                  }
-                }}
-                className={errors.empSize ? 'error' : ''}
+                placeholder="Select Company Size..."
+                label="Employee size of the company"
+                value={empSize}
+                onChange={(value) => handleFieldChange({ target: { name: 'empSize', value } } as any)}
+                options={[
+                  { value: '_1_10', label: '1-10' },
+                  { value: '_11_50', label: '11-50' },
+                  { value: '_51_100', label: '51-100' },
+                  { value: '_101_500', label: '101-500' },
+                  { value: '_501_1000', label: '501-1000' },
+                  { value: '_1001_5000', label: '1001-5000' },
+                  { value: '_5001_10000', label: '5001-10000' },
+                  { value: '_10001_50000', label: '10001-50000' },
+                  { value: '_50001_100000', label: '50001-100000' },
+                  { value: '_100001_PLUS', label: '100001+' }
+                ]}
+                error={errors.empSize}
                 required
-              >
-                <option value="" disabled hidden>
-                  Select company size
-                </option>
-                <option value="_1_10">1-10</option>
-                <option value="_11_50">11-50</option>
-                <option value="_51_100">51-100</option>
-                <option value="_101_500">101-500</option>
-                <option value="_501_1000">501-1000</option>
-                <option value="_1001_5000">1001-5000</option>
-                <option value="_5001_10000">5001-10000</option>
-                <option value="_10001_50000">10001-50000</option>
-                <option value="_50001_100000">50001-100000</option>
-                <option value="_100001_PLUS">100001+</option>
-              </select>
-              {errors.empSize && (
-                <span className="error-msg">{errors.empSize}</span>
-              )}
+              />
             </div>
 
 
             <div className="org-row">
-              <div className="org-field" onBlur={(e) => {
-                // Check if focus moved outside the country selector container
-                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                  if (!selectedCountry) {
-                    setErrors(prev => ({ ...prev, country: 'This field is required' }));
-                  }
-                }
-              }}>
-                <label htmlFor="country" className="form-label">Country</label>
+              <div className="org-field">
                 {isLoading ? (
                   <div>Loading countries...</div>
                 ) : (
-                  <CountrySelector
+                  <DropdownField
+                    id="country"
+                    name="country"
+                    label="Country"
                     value={selectedCountry}
-                    onChange={handleCountrySelect}
-                    countries={countries}
+                    onChange={(value) => {
+                      handleCountrySelect(value);
+                      const country = countries.find(c => c.code === value);
+                      if (country) {
+                        handleDialCodeChange(country.dialCode);
+                      }
+                    }}
+                    options={countries.map(country => ({
+                      value: country.code,
+                      label: country.name,
+                      icon: <span className={`fi fi-${country.code.toLowerCase()}`} style={{ fontSize: '20px' }}></span>
+                    }))}
                     error={errors.country}
-                    onDialCodeChange={handleDialCodeChange}
-                    showCountryCode={false}
-                    showDialCode={false}
+                    required
+                    placeholder="Select a country"
                   />
                 )}
               </div>
               <div className="org-fields">
-                <label htmlFor="phone" className="form-label">Phone Number</label>
+                <label htmlFor="phone" className="form-label">Phone Number *</label>
                 <div className="phone-input-container">
                   <div className={`phone-input-wrapper ${errors.phone ? 'error' : ''}`}>
                     <div className="country-code-display">
@@ -673,7 +660,7 @@ const Organization: React.FC = () => {
             </div>
 
             <div className="org-field">
-              <label htmlFor="help" className="form-label">How can we help you? <span className="optional-text">(optional)</span></label>
+              <label htmlFor="help" className="form-label">How can we help you? </label>
               <textarea
                 id="help"
                 name="help"
@@ -694,7 +681,6 @@ const Organization: React.FC = () => {
                 name="agree"
                 checked={agreed}
                 onChange={setAgreed}
-                disabled={!isFormValid}
                 label={
                   <span>
                     Yes, I'd like to receive mails on occasional updates, feature launches, and tips to help me grow with Aforo. You can unsubscribe anytime.
@@ -706,8 +692,8 @@ const Organization: React.FC = () => {
 
             <PrimaryButton
               type="submit"
-              disabled={isSubmitting || !agreed}
               fullWidth={true}
+              className="prim-org-btn"
             >
               {isSubmitting ? 'Submitting…' : 'Contact Sales'}
             </PrimaryButton>
