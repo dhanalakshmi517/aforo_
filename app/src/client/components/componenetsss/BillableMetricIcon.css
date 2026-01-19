@@ -1,0 +1,32 @@
+.bmIcon {
+  border-radius: var(--border-radius-sm, 8px);
+  border: 1px solid #f6f6f6;
+  background: var(--bm-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  color: var(--bm-accent);
+  font-family: inherit;
+  line-height: 1;
+  user-select: none;
+}
+
+.bmIcon-top {
+  font-weight: 800;
+  font-size: 28px;
+  letter-spacing: 0.2px;
+}
+
+.bmIcon-bottom {
+  font-weight: 500;
+  font-size: 22px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  opacity: 0.95;
+}
