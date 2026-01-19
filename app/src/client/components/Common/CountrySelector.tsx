@@ -30,7 +30,9 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -78,7 +80,55 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       onDialCodeChange?.(country.dialCode);
     }
     setIsOpen(false);
+    setFocusedIndex(-1);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex(prev => {
+          const newIndex = prev < filteredCountries.length - 1 ? prev + 1 : prev;
+          // Scroll the focused item into view
+          setTimeout(() => {
+            const item = listRef.current?.querySelector(`[data-index="${newIndex}"]`) as HTMLElement;
+            item?.scrollIntoView({ block: 'nearest' });
+          }, 0);
+          return newIndex;
+        });
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex(prev => {
+          const newIndex = prev > 0 ? prev - 1 : prev;
+          // Scroll the focused item into view
+          setTimeout(() => {
+            const item = listRef.current?.querySelector(`[data-index="${newIndex}"]`) as HTMLElement;
+            item?.scrollIntoView({ block: 'nearest' });
+          }, 0);
+          return newIndex;
+        });
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (focusedIndex >= 0 && filteredCountries[focusedIndex]) {
+          handleSelect(filteredCountries[focusedIndex].code);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        setFocusedIndex(-1);
+        break;
+    }
+  };
+
+  // Reset focused index when search term changes
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [searchTerm]);
 
   return (
     <div className="country-selector" ref={dropdownRef}>
@@ -97,7 +147,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         {selectedCountry ? (
           <div className="selected-option">
             <span className={`fi fi-${selectedCountry.code.toLowerCase()}`}></span>
-            <span>{selectedCountry.name}</span>
+            <span className="country-name">{selectedCountry.name}</span>
             {showCountryCode && <span className="country-code-text">({selectedCountry.code})</span>}
             {showDialCode && <span className="dial-code-text">{selectedCountry.dialCode}</span>}
           </div>
@@ -118,7 +168,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       </div>
 
       {isOpen && (
-        <div className="dropdown">
+        <div className="dropdown" onKeyDown={handleKeyDown}>
           <div className="p-2 border-b border-gray-200">
             <input
               type="text"
@@ -130,12 +180,13 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
               autoFocus
             />
           </div>
-          <div className="dropdown-list" role="listbox">
+          <div className="dropdown-list" ref={listRef} role="listbox">
             {filteredCountries.length > 0 ? (
-              filteredCountries.map(country => (
+              filteredCountries.map((country, index) => (
                 <div
                   key={country.code}
-                  className={`dropdown-item ${value === country.code ? 'selected' : ''}`}
+                  data-index={index}
+                  className={`dropdown-item ${value === country.code ? 'selected' : ''} ${focusedIndex === index ? 'focused' : ''}`}
                   onClick={() => handleSelect(country.code)}
                   role="option"
                   aria-selected={value === country.code}
@@ -196,10 +247,17 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           align-items: center; 
           gap: 10px; 
           color: var(--color-neutral-1700); 
-          white-space: nowrap;
+          line-height: 1.5;
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+        }
+        .selected-option .country-name {
           overflow: hidden;
           text-overflow: ellipsis;
-          line-height: 1.5;
+          white-space: nowrap;
+          flex: 1;
+          min-width: 0;
         }
         .selected-option .fi { 
           width: 24px;
@@ -270,6 +328,10 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           border-radius: 6px;
           transition: all 0.15s ease;
           background-color: var(--color-neutral-white);
+        }
+        .dropdown-item.focused {
+          background-color: var(--color-primary-50);
+          border: 1px solid var(--color-primary-200);
         }
         .search-input:focus {
           border-color: var(--color-neutral-300); /* keep neutral on the input */

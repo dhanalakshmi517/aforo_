@@ -127,7 +127,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
         <h2 className="signin-title">Sign in to your aforo account</h2>
 
         <form className="signin-form" noValidate onSubmit={handleSubmit}>
-          <label className="field-label" htmlFor="email">Business Email</label>
+          <label className="field-label" htmlFor="email">Business Email *</label>
           <input
             id="email"
             type="email"
@@ -142,7 +142,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
           {emailError && <p id="email-error" className="field-error" role="alert">{emailError}</p>}
 
           <div className="password-row">
-            <label className="field-label" htmlFor="password">Password</label>
+            <label className="field-label" htmlFor="password">Password *</label>
             <a className="forgot-link" href="#">Forgot password?</a>
           </div>
 

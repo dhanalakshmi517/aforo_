@@ -66,7 +66,6 @@ export default function QickbooksIntegration({ onBack }: Props) {
           });
         }
         
-        // Start progress animation
         const progressInterval = setInterval(() => {
           setProgress(prev => {
             if (prev >= 100) {

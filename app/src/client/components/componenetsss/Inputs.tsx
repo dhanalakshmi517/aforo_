@@ -431,11 +431,13 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
         onBlur={() => setWriting(false)}
         onKeyDown={onKeyDown}
       >
-        <span className={selected ? "dd-value" : "dd-placeholder"}>
-          {selected ? (
+        <span className={selected || searchQuery ? "dd-value" : "dd-placeholder"}>
+          {searchQuery ? (
+            searchQuery
+          ) : selected ? (
             <>
               {selected.icon && <span className="dd-icon">{selected.icon}</span>}
-              {selected.label}
+              {selected.label.length > 15 ? `${selected.label.substring(0, 15)}...` : selected.label}
             </>
           ) : (
             placeholder
