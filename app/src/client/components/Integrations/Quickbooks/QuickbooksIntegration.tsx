@@ -52,7 +52,7 @@ export default function QickbooksIntegration({ onBack }: Props) {
       const response = await bulkSyncCustomers();
       console.log('Bulk sync response:', response);
       
-      if (response.success) {
+      if (response && response.message && response.message.includes('completed')) {
         console.log('Bulk sync completed successfully');
         // Refresh customer data after sync
         await getCustomerOverviewForDisplay();

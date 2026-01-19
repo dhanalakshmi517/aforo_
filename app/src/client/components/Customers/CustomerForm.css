@@ -798,13 +798,13 @@ html, body, #root{
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
-  /* padding-bottom: 40px;  */
+  padding-bottom: 40px;  
 }
 
 /* Viewport fills screen */
 .met-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
-  padding: var(--np-gap-top) var(--np-gap-right) 30px var(--np-gap-left);
+  padding: var(--np-gap-top) var(--np-gap-right) 40px var(--np-gap-left);
   box-sizing: border-box;
   height: calc(100vh - 20px);
   width: 100%;
