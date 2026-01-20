@@ -391,7 +391,7 @@ const DataIngestionPage: React.FC = () => {
     });
 
   return (
-    <div className="customers-container">
+    <div className="check-container">
       <div className="data-page">
         <DataHeader
           title="Data Ingestion"
