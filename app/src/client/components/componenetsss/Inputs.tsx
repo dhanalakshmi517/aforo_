@@ -1,6 +1,5 @@
 import * as React from "react";
 import "./Inputs.css";
-import Portal from "./Portal";
 
 /** ---------- Shared Types ---------- */
 export type CommonProps = {
@@ -317,9 +316,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
     const idx = options.findIndex((o) => o.value === value);
     return idx >= 0 ? idx : -1;
   });
-  const [menuPosition, setMenuPosition] = React.useState({ top: 0, left: 0, width: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   const selected = options.find((o) => o.value === value);
   
@@ -346,17 +343,6 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       return Math.min(Math.max(i, 0), filteredOptions.length - 1);
     });
   }, [filteredOptions.length]);
-
-  React.useEffect(() => {
-    if (open && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setMenuPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: rect.width
-      });
-    }
-  }, [open]);
 
   const move = (dir: 1 | -1) => {
     let i = activeIndex === -1 ? (dir === 1 ? 0 : filteredOptions.length - 1) : activeIndex;
@@ -424,7 +410,6 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       )}
 
       <button
-        ref={buttonRef}
         id={controlId}
         name={name}
         type="button"
@@ -964,4 +949,3 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
   }
 );
 FileField.displayName = "FileField";
-
