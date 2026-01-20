@@ -108,6 +108,64 @@ export const configurationFields: Record<string, FieldProps[]> = {
 
 export const getSelectOptions = (_: string) => null;
 
+/* ------------------------------------
+ * Inline Validation Helpers
+ * ------------------------------------*/
+
+// DB Type → Connection String validation patterns
+const connectionStringPatterns: Record<string, { pattern: RegExp; example: string }> = {
+  MYSQL: { pattern: /^jdbc:mysql:\/\//, example: 'jdbc:mysql://hostname:port/database' },
+  POSTGRES: { pattern: /^jdbc:postgresql:\/\//, example: 'jdbc:postgresql://hostname:port/database' },
+  SQLSERVER: { pattern: /^jdbc:sqlserver:\/\//, example: 'jdbc:sqlserver://hostname:port;databaseName=database' },
+  ORACLE: { pattern: /^jdbc:oracle:thin:@/, example: 'jdbc:oracle:thin:@hostname:port:database' },
+  BIGQUERY: { pattern: /^jdbc:bigquery:\/\//, example: 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=project' },
+  SNOWFLAKE: { pattern: /^jdbc:snowflake:\/\//, example: 'jdbc:snowflake://account.snowflakecomputing.com/?db=database' },
+  OTHERS: { pattern: /^jdbc:/, example: 'Accepts any JDBC connection string starting with jdbc:' },
+};
+
+// File Format → File Location validation patterns
+const fileLocationPatterns: Record<string, { pattern: RegExp; example: string }> = {
+  CSV: { pattern: /\.csv$/i, example: 'Must end with .csv' },
+  JSON: { pattern: /\.json$/i, example: 'Must end with .json' },
+  XML: { pattern: /\.xml$/i, example: 'Must end with .xml' },
+  PARQUET: { pattern: /\.parquet$/i, example: 'Must end with .parquet' },
+  OTHERS: { pattern: /.*/, example: 'Accepts any file path' },
+};
+
+// Validate Connection String based on DB Type
+const validateConnectionString = (dbType: string, connectionString: string): string | null => {
+  if (!connectionString || !dbType) return null;
+  const config = connectionStringPatterns[dbType];
+  if (!config) return null;
+  if (!config.pattern.test(connectionString)) {
+    return `Invalid format for ${dbType}. Expected: ${config.example}`;
+  }
+  return null;
+};
+
+// Validate File Location based on File Format
+const validateFileLocation = (fileFormat: string, fileLocation: string): string | null => {
+  if (!fileLocation || !fileFormat) return null;
+  if (fileFormat === 'OTHERS') return null; // No restriction for OTHERS
+  const config = fileLocationPatterns[fileFormat];
+  if (!config) return null;
+  if (!config.pattern.test(fileLocation)) {
+    return `Invalid format. ${config.example}`;
+  }
+  return null;
+};
+
+// Validate Endpoint URL format (for API product type)
+const validateEndpointURL = (url: string): string | null => {
+  if (!url) return null;
+  // More permissive pattern: allows localhost, IPs, domains, and template variables like {endpoint}
+  const urlPattern = /^https?:\/\/.+/;
+  if (!urlPattern.test(url)) {
+    return 'Invalid URL format. Must start with http:// or https://';
+  }
+  return null;
+};
+
 export const clearEditConfigStorage = () => {
   localStorage.removeItem('editConfigFormData');
   localStorage.removeItem('editConfigProductType');
@@ -206,8 +264,32 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       const fields = configurationFields[productType] || [];
       const errs: Record<string, string> = {};
       fields.forEach((f) => {
-        if (f.required && !(`${formData[f.label] || ''}`.trim())) {
+        const fieldValue = `${formData[f.label] || ''}`.trim();
+        if (f.required && !fieldValue) {
           errs[f.label] = `${f.label} is required`;
+        }
+        // Validate Connection String based on DB Type
+        else if (f.label === 'Connection String' && fieldValue) {
+          const dbType = formData['DB Type'];
+          const connError = validateConnectionString(dbType, fieldValue);
+          if (connError) {
+            errs[f.label] = connError;
+          }
+        }
+        // Validate File Location based on File Format
+        else if (f.label === 'File Location' && fieldValue) {
+          const fileFormat = formData['File Format'];
+          const fileError = validateFileLocation(fileFormat, fieldValue);
+          if (fileError) {
+            errs[f.label] = fileError;
+          }
+        }
+        // Validate Endpoint URL format for API product type
+        else if (f.label === 'Endpoint URL' && fieldValue) {
+          const urlError = validateEndpointURL(fieldValue);
+          if (urlError) {
+            errs[f.label] = urlError;
+          }
         }
       });
       setFieldErrors(errs);
@@ -331,10 +413,88 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         if (def?.required && !value) {
           setFieldErrors((prev) => ({ ...prev, [field]: `${field} is required` }));
         } else {
-          setFieldErrors((prev) => {
-            const { [field]: _, ...rest } = prev;
-            return rest;
-          });
+          // Check for Connection String validation based on DB Type
+          if (field === 'Connection String' && value) {
+            const dbType = newFormData['DB Type'];
+            const connError = validateConnectionString(dbType, value);
+            if (connError) {
+              setFieldErrors((prev) => ({ ...prev, [field]: connError }));
+            } else {
+              setFieldErrors((prev) => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+              });
+            }
+          }
+          // Check for File Location validation based on File Format
+          else if (field === 'File Location' && value) {
+            const fileFormat = newFormData['File Format'];
+            const fileError = validateFileLocation(fileFormat, value);
+            if (fileError) {
+              setFieldErrors((prev) => ({ ...prev, [field]: fileError }));
+            } else {
+              setFieldErrors((prev) => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+              });
+            }
+          }
+          // Check for Endpoint URL validation for API product type
+          else if (field === 'Endpoint URL' && value) {
+            const urlError = validateEndpointURL(value);
+            if (urlError) {
+              setFieldErrors((prev) => ({ ...prev, [field]: urlError }));
+            } else {
+              setFieldErrors((prev) => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+              });
+            }
+          }
+          // Re-validate Connection String when DB Type changes
+          else if (field === 'DB Type') {
+            const connString = newFormData['Connection String'];
+            if (connString) {
+              const connError = validateConnectionString(value, connString);
+              if (connError) {
+                setFieldErrors((prev) => ({ ...prev, 'Connection String': connError }));
+              } else {
+                setFieldErrors((prev) => {
+                  const { 'Connection String': _, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }
+            setFieldErrors((prev) => {
+              const { [field]: _, ...rest } = prev;
+              return rest;
+            });
+          }
+          // Re-validate File Location when File Format changes
+          else if (field === 'File Format') {
+            const fileLocation = newFormData['File Location'];
+            if (fileLocation) {
+              const fileError = validateFileLocation(value, fileLocation);
+              if (fileError) {
+                setFieldErrors((prev) => ({ ...prev, 'File Location': fileError }));
+              } else {
+                setFieldErrors((prev) => {
+                  const { 'File Location': _, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }
+            setFieldErrors((prev) => {
+              const { [field]: _, ...rest } = prev;
+              return rest;
+            });
+          }
+          else {
+            setFieldErrors((prev) => {
+              const { [field]: _, ...rest } = prev;
+              return rest;
+            });
+          }
         }
       },
       [formData, onConfigChange, productType]
@@ -347,6 +507,41 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
       const handleBlur = () => {
         if (field.required && !fieldValue) {
           setFieldErrors((prev) => ({ ...prev, [field.label]: `${field.label} is required` }));
+        } else if (field.label === 'Connection String' && fieldValue) {
+          // Validate Connection String on blur
+          const dbType = formData['DB Type'];
+          const connError = validateConnectionString(dbType, fieldValue);
+          if (connError) {
+            setFieldErrors((prev) => ({ ...prev, [field.label]: connError }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field.label]: _, ...rest } = prev;
+              return rest;
+            });
+          }
+        } else if (field.label === 'File Location' && fieldValue) {
+          // Validate File Location on blur
+          const fileFormat = formData['File Format'];
+          const fileError = validateFileLocation(fileFormat, fieldValue);
+          if (fileError) {
+            setFieldErrors((prev) => ({ ...prev, [field.label]: fileError }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field.label]: _, ...rest } = prev;
+              return rest;
+            });
+          }
+        } else if (field.label === 'Endpoint URL' && fieldValue) {
+          // Validate Endpoint URL on blur
+          const urlError = validateEndpointURL(fieldValue);
+          if (urlError) {
+            setFieldErrors((prev) => ({ ...prev, [field.label]: urlError }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field.label]: _, ...rest } = prev;
+              return rest;
+            });
+          }
         } else if (fieldError) {
           setFieldErrors((prev) => {
             const { [field.label]: _, ...rest } = prev;
