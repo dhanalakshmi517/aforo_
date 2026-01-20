@@ -344,6 +344,17 @@ const Organization: React.FC = () => {
           ...prev,
           phone: 'Invalid phone number' // Show simple error message
         }));
+      } else if (err.response?.data?.businessEmail) {
+        setErrors(prev => ({
+          ...prev,
+          email: 'This email is already registered. Please use a different email.'
+        }));
+      } else if (err.message?.includes('An organization with this email already exists') || 
+                 err.response?.data?.message?.includes('An organization with this email already exists')) {
+        setErrors(prev => ({
+          ...prev,
+          email: 'This email is already registered. Please use a different email.'
+        }));
       } else {
         // For other errors, show a generic error
         alert(`Failed to submit: ${err.message || 'An error occurred. Please try again.'}`);
