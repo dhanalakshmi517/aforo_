@@ -122,8 +122,8 @@
 /* ---------- DISABLED ---------- */
 .if-control.is-disabled,
 .if-control:disabled {
-  color: var(--color-neutral-200);
-  background: var(--color-neutral-200);
+  color: var(--color-neutral-600);
+  background: var(--color-neutral-100);
   cursor: not-allowed;
   border-color: var(--color-neutral-200);
 }
@@ -305,6 +305,22 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   line-height: 1.5;
 }
 
+/* Input field placeholder styling to match dropdown */
+.if-field input[type="text"]::placeholder,
+.if-field input[type="password"]::placeholder,
+.if-field input[type="email"]::placeholder,
+.if-field input[type="number"]::placeholder,
+.if-field input:not([type])::placeholder {
+  color: var(--color-neutral-300);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Select field specific styles */
 .if-field .if-select-wrapper {
   width: 100%;
@@ -462,21 +478,22 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
- color: var(--color-neutral-1000);
+  color: var(--color-neutral-1000);
+  min-height: 40px;
 
-/* body/lg/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 24px); /* 150% */
+  /* body/lg/reg */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.4;
   white-space: nowrap;
 }
 .dd-item + .dd-item { margin-top: 2px; }
@@ -497,6 +514,18 @@ line-height: var(--line-height-body-md, 24px); /* 150% */
 .dd-item.is-selected .dd-item-label { 
   font-weight: 420; 
   color:var(--color-neutral-1000);
+}
+
+/* Ensure selected item shows white text on hover */
+.dd-item.is-selected:hover:not(.is-disabled),
+.dd-item.is-selected.is-active:not(.is-disabled) {
+  background: var(--color-primary-800);
+  color: var(--color-neutral-white);
+}
+
+.dd-item.is-selected:hover:not(.is-disabled) .dd-item-label,
+.dd-item.is-selected.is-active:not(.is-disabled) .dd-item-label {
+  color: var(--color-neutral-white);
 }
 
 /* ---------- File Field ---------- */

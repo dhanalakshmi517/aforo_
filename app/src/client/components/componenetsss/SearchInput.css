@@ -1,8 +1,7 @@
 @import "../Variables/Variables.css";
 .si{
   width: 203px;
-  height: 40px;
-
+  height: 36px;
   display: flex;
   padding: 8px 12px;
   align-items: center;
@@ -13,7 +12,6 @@
   border-radius: 10px;
   border: 1px solid var(--color-neutral-300);
   background: var(--color-neutral-50);
-
   box-sizing: border-box;
   overflow: hidden;
   position: relative;

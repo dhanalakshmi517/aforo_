@@ -431,6 +431,17 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     const aDate = parseDate(a.createdOn);
     const bDate = parseDate(b.createdOn);
 
+    // Debug logging
+    console.log('Sorting:', {
+      customerA: a.companyName,
+      createdOnA: a.createdOn,
+      parsedDateA: aDate,
+      customerB: b.companyName,
+      createdOnB: b.createdOn,
+      parsedDateB: bDate,
+      sortOrder: createdSortOrder
+    });
+
     if (aDate === bDate) return 0;
     if (createdSortOrder === 'oldest') {
       return aDate - bDate;
