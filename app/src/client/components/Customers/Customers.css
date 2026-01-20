@@ -378,7 +378,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
 .customers-table td:not(.product-name-td) {
-  padding: 16px;
+  padding: 14px;
   border-bottom: 1px solid #E9E9EE;
 }
 

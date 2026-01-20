@@ -101,6 +101,20 @@
   color: #E34935;
 }
 
+/* Company Logo field label styling */
+.company-logo-label {
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 420;
+  line-height: var(--line-height-body-md);
+  user-select: none;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 /* Safety: never show the native file input if some global rule overrides [hidden] */
 .logo-uploader input[type="file"]{
   display: none !important;
