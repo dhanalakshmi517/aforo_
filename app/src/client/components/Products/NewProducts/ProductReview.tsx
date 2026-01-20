@@ -9,9 +9,12 @@ import ReviewComponent, { ReviewRow } from "../../componenetsss/ReviewComponent"
 // Utility to prettify camelCase or snake_case keys into labels
 const prettify = (key: string): string => {
   return key
-    .replace(/([A-Z])/g, ' $1')     // camelCase -> camel Case
-    .replace(/_/g, ' ')             // snake_case -> snake case
-    .replace(/^./, (s) => s.toUpperCase()); // capitalise first letter
+    // Handle consecutive capitals (acronyms like URL, API, DB)
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')  // URLPath -> URL Path
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')      // endpointURL -> endpoint URL
+    .replace(/_/g, ' ')                          // snake_case -> snake case
+    .replace(/^./, (s) => s.toUpperCase())       // capitalize first letter
+    .trim();
 };
 
 interface ProductReviewProps {
@@ -27,7 +30,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({
     label: prettify(k),
     value: v || '-'
   }));
-  
+
   const configRows: ReviewRow[] = Object.entries(configuration).map(([k, v]) => ({
     label: prettify(k),
     value: v || '-'

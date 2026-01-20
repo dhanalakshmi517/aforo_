@@ -420,7 +420,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ showNewSubscriptionForm, 
   const searchDisabled = isEmpty;
 
   return (
-    <div className="check-container">
+    <div className="customers-container">
       {editingSub ? (
         <EditSubscription
           initial={editingSub}
