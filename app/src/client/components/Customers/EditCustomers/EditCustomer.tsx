@@ -483,31 +483,7 @@ const EditCustomer: React.FC = () => {
         return (
           <div className="edit-np-section">
             <div className="edit-np-form-row">
-              <div className="edit-np-form-group">
-                <InputField
-                  label="Customer Name"
-                  value={customerName}
-                  placeholder="Enter customer name"
-                  onChange={val => {
-                    setCustomerName(val);
-                    if (!val.trim())
-                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
-                    else if (errors.customerName)
-                      setErrors(p => ({
-                        ...Object.fromEntries(
-                          Object.entries(p).filter(([k]) => k !== 'customerName'),
-                        ),
-                      }));
-                  }}
-                  onBlur={() => {
-                    if (!customerName.trim())
-                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
-                  }}
-                  error={errors.customerName}
-                  required
-                />
-              </div>
-              <div className="edit-np-form-group">
+               <div className="edit-np-form-group">
                 <InputField
                   label="Company Name"
                   value={companyName}
@@ -532,16 +508,41 @@ const EditCustomer: React.FC = () => {
                   required
                 />
               </div>
-            </div>
 
-            <div className="editcust-np-form-group">
-              <label className="editcust-np-label">Company Logo</label>
-              <LogoUploader
-                logo={companyLogo}
-                logoUrl={companyLogoUrl}
-                onChange={handleLogoChange}
-                onRemove={handleLogoRemove}
-              />
+
+              <div className="editcust-np-form-group">
+                <label className="editcust-np-label">Company Logo</label>
+                <LogoUploader
+                  logo={companyLogo}
+                  logoUrl={companyLogoUrl}
+                  onChange={handleLogoChange}
+                  onRemove={handleLogoRemove}
+                />
+              </div>
+              <div className="edit-np-form-group">
+                <InputField
+                  label="Customer Name"
+                  value={customerName}
+                  placeholder="Enter customer name"
+                  onChange={val => {
+                    setCustomerName(val);
+                    if (!val.trim())
+                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
+                    else if (errors.customerName)
+                      setErrors(p => ({
+                        ...Object.fromEntries(
+                          Object.entries(p).filter(([k]) => k !== 'customerName'),
+                        ),
+                      }));
+                  }}
+                  onBlur={() => {
+                    if (!customerName.trim())
+                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
+                  }}
+                  error={errors.customerName}
+                  required
+                />
+              </div>
             </div>
 
             <div className="edit-np-form-row">
@@ -574,6 +575,7 @@ const EditCustomer: React.FC = () => {
             </div>
           </div>
         );
+
 
 
       case 'account':
