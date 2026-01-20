@@ -219,6 +219,64 @@ export const getSelectOptions = (fieldLabel: string): Array<{ label: string; val
 };
 
 /* ------------------------------------
+ * Inline Validation Helpers
+ * ------------------------------------*/
+
+// DB Type → Connection String validation patterns
+const connectionStringPatterns: Record<string, { pattern: RegExp; example: string }> = {
+  MYSQL: { pattern: /^jdbc:mysql:\/\//, example: 'jdbc:mysql://hostname:port/database' },
+  POSTGRES: { pattern: /^jdbc:postgresql:\/\//, example: 'jdbc:postgresql://hostname:port/database' },
+  SQLSERVER: { pattern: /^jdbc:sqlserver:\/\//, example: 'jdbc:sqlserver://hostname:port;databaseName=database' },
+  ORACLE: { pattern: /^jdbc:oracle:thin:@/, example: 'jdbc:oracle:thin:@hostname:port:database' },
+  BIGQUERY: { pattern: /^jdbc:bigquery:\/\//, example: 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=project' },
+  SNOWFLAKE: { pattern: /^jdbc:snowflake:\/\//, example: 'jdbc:snowflake://account.snowflakecomputing.com/?db=database' },
+  OTHERS: { pattern: /^jdbc:/, example: 'Accepts any JDBC connection string starting with jdbc:' },
+};
+
+// File Format → File Location validation patterns
+const fileLocationPatterns: Record<string, { pattern: RegExp; example: string }> = {
+  CSV: { pattern: /\.csv$/i, example: 'Must end with .csv' },
+  JSON: { pattern: /\.json$/i, example: 'Must end with .json' },
+  XML: { pattern: /\.xml$/i, example: 'Must end with .xml' },
+  PARQUET: { pattern: /\.parquet$/i, example: 'Must end with .parquet' },
+  OTHERS: { pattern: /.*/, example: 'Accepts any file path' },
+};
+
+// Validate Connection String based on DB Type
+export const validateConnectionString = (dbType: string, connectionString: string): string | null => {
+  if (!connectionString || !dbType) return null;
+  const config = connectionStringPatterns[dbType];
+  if (!config) return null;
+  if (!config.pattern.test(connectionString)) {
+    return `Invalid format for ${dbType}. Expected: ${config.example}`;
+  }
+  return null;
+};
+
+// Validate File Location based on File Format
+export const validateFileLocation = (fileFormat: string, fileLocation: string): string | null => {
+  if (!fileLocation || !fileFormat) return null;
+  if (fileFormat === 'OTHERS') return null; // No restriction for OTHERS
+  const config = fileLocationPatterns[fileFormat];
+  if (!config) return null;
+  if (!config.pattern.test(fileLocation)) {
+    return `Invalid format. ${config.example}`;
+  }
+  return null;
+};
+
+// Validate Endpoint URL format (for API product type)
+export const validateEndpointURL = (url: string): string | null => {
+  if (!url) return null;
+  // More permissive pattern: allows localhost, IPs, domains, and template variables like {endpoint}
+  const urlPattern = /^https?:\/\/.+/;
+  if (!urlPattern.test(url)) {
+    return 'Invalid URL format. Must start with http:// or https://';
+  }
+  return null;
+};
+
+/* ------------------------------------
  * Public API
  * ------------------------------------*/
 export interface ConfigurationTabHandle {
@@ -284,9 +342,11 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           console.log('Syncing product type to:', normalizedType);
           setProductType(normalizedType);
           localStorage.setItem('configProductType', normalizedType);
+          // Notify parent component so configuration state gets updated
+          onProductTypeChange(normalizedType);
         }
       }
-    }, [initialProductType]);
+    }, [initialProductType, productType, onProductTypeChange]);
 
     // Fetch existing configuration when editing a draft product
     useEffect(() => {
@@ -401,26 +461,78 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     // Validation (no network)
     const validate = (): boolean => {
+      console.log('🔍 [VALIDATE] Starting validation...');
+      console.log('🔍 [VALIDATE] Product Type:', productType);
+      console.log('🔍 [VALIDATE] Form Data:', formData);
+      
       if (!productType) {
+        console.log('❌ [VALIDATE] No product type selected');
         setError('Please select a product type first');
         return false;
       }
       const fields = configurationFields[productType] || [];
+      console.log('🔍 [VALIDATE] Fields to validate:', fields.map(f => f.label));
+      
       const errs: Record<string, string> = {};
       fields.forEach((f) => {
-        if (f.required && !(`${formData[f.label] || ''}`.trim())) {
+        const fieldValue = `${formData[f.label] || ''}`.trim();
+        console.log(`🔍 [VALIDATE] Field "${f.label}": value="${fieldValue}", required=${f.required}`);
+        
+        if (f.required && !fieldValue) {
           errs[f.label] = 'This field is required';
+          console.log(`  ❌ Required field empty`);
+        }
+        // Validate Connection String based on DB Type
+        else if (f.label === 'Connection String' && fieldValue) {
+          const dbType = formData['DB Type'];
+          console.log(`  🔗 Checking Connection String for DB Type: ${dbType}`);
+          const connError = validateConnectionString(dbType, fieldValue);
+          if (connError) {
+            errs[f.label] = connError;
+            console.log(`  ❌ Connection String error: ${connError}`);
+          } else {
+            console.log(`  ✅ Connection String valid`);
+          }
+        }
+        // Validate File Location based on File Format
+        else if (f.label === 'File Location' && fieldValue) {
+          const fileFormat = formData['File Format'];
+          console.log(`  📁 Checking File Location for File Format: ${fileFormat}`);
+          const fileError = validateFileLocation(fileFormat, fieldValue);
+          if (fileError) {
+            errs[f.label] = fileError;
+            console.log(`  ❌ File Location error: ${fileError}`);
+          } else {
+            console.log(`  ✅ File Location valid`);
+          }
+        }
+        // Validate Endpoint URL format for API product type
+        else if (f.label === 'Endpoint URL' && fieldValue) {
+          console.log(`  🌐 Checking Endpoint URL format`);
+          const urlError = validateEndpointURL(fieldValue);
+          if (urlError) {
+            errs[f.label] = urlError;
+            console.log(`  ❌ Endpoint URL error: ${urlError}`);
+          } else {
+            console.log(`  ✅ Endpoint URL valid`);
+          }
         }
       });
+      
+      console.log('🔍 [VALIDATE] Total errors found:', Object.keys(errs).length);
+      console.log('🔍 [VALIDATE] Errors object:', errs);
       setFieldErrors(errs);
       setError(Object.keys(errs).length ? '' : '');
-      return Object.keys(errs).length === 0;
+      const isValid = Object.keys(errs).length === 0;
+      console.log(`🔍 [VALIDATE] Validation result: ${isValid ? '✅ PASS' : '❌ FAIL'}`);
+      return isValid;
     };
 
     // Save configuration to the server
-    const saveConfiguration = async (configData: Record<string, any>, isDraft: boolean = false): Promise<boolean> => {
-      console.log('Starting saveConfiguration with:', { productId, productType, configData, isDraft });
-      if (!productId || !productType) {
+    const saveConfiguration = async (configData: Record<string, any>, isDraft: boolean = false, overrideProductId?: string): Promise<boolean> => {
+      const effectiveProductId = overrideProductId || productId;
+      console.log('Starting saveConfiguration with:', { effectiveProductId, overrideProductId, productId, productType, configData, isDraft });
+      if (!effectiveProductId || !productType) {
         console.error('Missing productId or productType');
         return false;
       }
@@ -483,17 +595,17 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         console.log('===================================');
         
         console.log('Sending request to API with:', {
-          productId,
+          effectiveProductId,
           productType: normalizedType,
           requestBody,
           isUpdate
         });
         
-        await saveProductConfiguration(productId, productType, requestBody, hasSaved);
+        await saveProductConfiguration(effectiveProductId, productType, requestBody, hasSaved);
         
         // Mark as saved after first successful save (regardless of draft status)
         setHasSaved(true);
-        localStorage.setItem(`configHasSaved_${productId}`, 'true');
+        localStorage.setItem(`configHasSaved_${effectiveProductId}`, 'true');
         console.log(isDraft ? 'Draft saved successfully' : 'Configuration saved successfully');
         return true;
       } catch (error) {
@@ -520,13 +632,24 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
 
     // Expose submit via ref (client-side only)
     React.useImperativeHandle(ref, () => ({
-      submit: async (skipValidation: boolean = false, saveToServer: boolean = true) => {
+      submit: async (skipValidation: boolean = false, saveToServer: boolean = true, overrideProductId?: string) => {
+        console.log('📝 [SUBMIT] Called with:', { skipValidation, saveToServer, overrideProductId });
+        console.log('📝 [SUBMIT] Current fieldErrors state:', fieldErrors);
+        
         // Skip validation when saving as draft (skipValidation=true)
         if (!skipValidation) {
           // Run validation for Save & Next and final submit
-          if (!validate()) return false;
+          console.log('📝 [SUBMIT] Running validation (skipValidation=false)...');
+          const isValid = validate();
+          console.log('📝 [SUBMIT] Validation returned:', isValid);
+          if (!isValid) {
+            console.log('❌ [SUBMIT] Validation failed, returning false');
+            return false;
+          }
+          console.log('✅ [SUBMIT] Validation passed');
         } else {
           // Clear any existing errors when saving as draft
+          console.log('📝 [SUBMIT] Skipping validation (draft mode)');
           setFieldErrors({});
           setError('');
         }
@@ -545,6 +668,15 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         
         // Save to server for both draft and final submit
         try {
+          // Use overrideProductId if provided (for when product is created during draft save)
+          const effectiveProductId = overrideProductId || productId;
+          console.log('📝 [SUBMIT] Using productId:', effectiveProductId, '(override:', overrideProductId, ', prop:', productId, ')');
+          
+          if (!effectiveProductId) {
+            console.error('❌ [SUBMIT] No productId available');
+            return false;
+          }
+          
           console.log('Original formData:', JSON.parse(JSON.stringify(formData)));
           
           // Clean the form data before saving
@@ -557,7 +689,9 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           
           console.log('Cleaned formData before sendConfiguration:', cleanedFormData);
           const isDraft = skipValidation; // If skipValidation is true, it's a draft save
-          const success = await saveConfiguration(cleanedFormData, isDraft);
+          
+          // Call saveConfiguration with the effectiveProductId
+          const success = await saveConfiguration(cleanedFormData, isDraft, effectiveProductId);
           if (success && onSubmit) {
             return await onSubmit(isDraft);
           }
@@ -621,12 +755,99 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
           // inline validation for required fields
           const def = (configurationFields[productType] || []).find((f) => f.label === field);
           if (def?.required && !value) {
+            console.log(`⚠️ [INPUT_CHANGE] Required field "${field}" is empty`);
             setFieldErrors((prev) => ({ ...prev, [field]: 'This field is required' }));
           } else {
-            setFieldErrors((prev) => {
-              const { [field]: _, ...rest } = prev;
-              return rest;
-            });
+            // Check for Connection String validation based on DB Type
+            if (field === 'Connection String' && value) {
+              const dbType = newFormData['DB Type'];
+              console.log(`🔗 [INPUT_CHANGE] Validating Connection String with DB Type: ${dbType}`);
+              const connError = validateConnectionString(dbType, value);
+              if (connError) {
+                console.log(`❌ [INPUT_CHANGE] Connection String error: ${connError}`);
+                setFieldErrors((prev) => ({ ...prev, [field]: connError }));
+              } else {
+                console.log(`✅ [INPUT_CHANGE] Connection String valid`);
+                setFieldErrors((prev) => {
+                  const { [field]: _, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }
+            // Check for File Location validation based on File Format
+            else if (field === 'File Location' && value) {
+              const fileFormat = newFormData['File Format'];
+              const fileError = validateFileLocation(fileFormat, value);
+              if (fileError) {
+                console.log(` [INPUT_CHANGE] File Location error: ${fileError}`);
+                setFieldErrors((prev) => ({ ...prev, [field]: fileError }));
+              } else {
+                console.log(` [INPUT_CHANGE] File Location valid`);
+                setFieldErrors((prev) => {
+                  const { [field]: _, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }
+            // Check for Endpoint URL validation for API product type
+            else if (field === 'Endpoint URL' && value) {
+              console.log(` [INPUT_CHANGE] Validating Endpoint URL`);
+              const urlError = validateEndpointURL(value);
+              if (urlError) {
+                console.log(` [INPUT_CHANGE] Endpoint URL error: ${urlError}`);
+                setFieldErrors((prev) => ({ ...prev, [field]: urlError }));
+              } else {
+                console.log(` [INPUT_CHANGE] Endpoint URL valid`);
+                setFieldErrors((prev) => {
+                  const { [field]: _, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }
+            // Re-validate Connection String when DB Type changes
+            else if (field === 'DB Type') {
+              const connString = newFormData['Connection String'];
+              if (connString) {
+                const connError = validateConnectionString(value, connString);
+                if (connError) {
+                  setFieldErrors((prev) => ({ ...prev, 'Connection String': connError }));
+                } else {
+                  setFieldErrors((prev) => {
+                    const { 'Connection String': _, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }
+              setFieldErrors((prev) => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+              });
+            }
+            // Re-validate File Location when File Format changes
+            else if (field === 'File Format') {
+              const fileLocation = newFormData['File Location'];
+              if (fileLocation) {
+                const fileError = validateFileLocation(value, fileLocation);
+                if (fileError) {
+                  setFieldErrors((prev) => ({ ...prev, 'File Location': fileError }));
+                } else {
+                  setFieldErrors((prev) => {
+                    const { 'File Location': _, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }
+              setFieldErrors((prev) => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+              });
+            }
+            else {
+              setFieldErrors((prev) => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+              });
+            }
           }
         }
       },
@@ -641,6 +862,41 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
         if (readOnly) return;
         if (field.required && !fieldValue) {
           setFieldErrors((prev) => ({ ...prev, [field.label]: 'This field is required' }));
+        } else if (field.label === 'Connection String' && fieldValue) {
+          // Validate Connection String on blur
+          const dbType = formData['DB Type'];
+          const connError = validateConnectionString(dbType, fieldValue);
+          if (connError) {
+            setFieldErrors((prev) => ({ ...prev, [field.label]: connError }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field.label]: _, ...rest } = prev;
+              return rest;
+            });
+          }
+        } else if (field.label === 'File Location' && fieldValue) {
+          // Validate File Location on blur
+          const fileFormat = formData['File Format'];
+          const fileError = validateFileLocation(fileFormat, fieldValue);
+          if (fileError) {
+            setFieldErrors((prev) => ({ ...prev, [field.label]: fileError }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field.label]: _, ...rest } = prev;
+              return rest;
+            });
+          }
+        } else if (field.label === 'Endpoint URL' && fieldValue) {
+          // Validate Endpoint URL on blur
+          const urlError = validateEndpointURL(fieldValue);
+          if (urlError) {
+            setFieldErrors((prev) => ({ ...prev, [field.label]: urlError }));
+          } else {
+            setFieldErrors((prev) => {
+              const { [field.label]: _, ...rest } = prev;
+              return rest;
+            });
+          }
         } else if (fieldError) {
           setFieldErrors((prev) => {
             const { [field.label]: _, ...rest } = prev;
