@@ -382,6 +382,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       const payload: any = {
         ...basePayload,
         ...(isDraft ? { status: "DRAFT" } : {}),
+        ...(configuration.productType ? { productType: configuration.productType } : {}),
       };
 
       if (createdProductId) {
@@ -399,25 +400,28 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         await updateProduct(createdProductId, payload);
 
         localStorage.setItem("productUpdated", Date.now().toString());
+        setLastSavedData({ ...formData });
+        setLastSavedIcon(selectedIcon);
+        return createdProductId;
       } else {
         const resp = await createProduct(payload);
-        const id = resp?.productId;
-        if (id) {
-          setCreatedProductId(id);
+        const newProductId = resp?.productId;
+        if (newProductId) {
+          setCreatedProductId(newProductId);
 
           if (selectedIcon) {
             const iconCache = JSON.parse(localStorage.getItem("iconDataCache") || "{}");
-            iconCache[id] = JSON.stringify({ iconData: selectedIcon });
+            iconCache[newProductId] = JSON.stringify({ iconData: selectedIcon });
             localStorage.setItem("iconDataCache", JSON.stringify(iconCache));
           }
 
           localStorage.setItem("productUpdated", Date.now().toString());
         }
+        
+        setLastSavedData({ ...formData });
+        setLastSavedIcon(selectedIcon);
+        return newProductId || null;
       }
-
-      setLastSavedData({ ...formData });
-      setLastSavedIcon(selectedIcon);
-      return true;
     } catch (error: any) {
       console.error("Failed to save product:", error);
 
@@ -445,11 +449,16 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       setIsDraftSaving(true);
       setIsDraftSaved(false);
 
-      const ok = await saveProduct(true);
-      if (!ok) return false;
+      const productId = await saveProduct(true);
+      if (!productId) return false;
+
+      // Ensure createdProductId is set before saving configuration
+      if (!createdProductId) {
+        setCreatedProductId(productId);
+      }
 
       if (activeTab === "configuration" && configRef.current) {
-        await configRef.current.submit(true);
+        await configRef.current.submit(true, true, productId);
       }
 
       await new Promise((r) => setTimeout(r, 400));
@@ -601,12 +610,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         }}
       />
 
-      <div className="met-np-viewport">
-        <div className="met-np-card">
-          <div className="met-np-grid">
+      <div className="prod-np-viewport">
+        <div className="prod-np-card">
+          <div className="prod-np-grid">
             {/* LEFT rail */}
-            <aside className="met-np-rail">
-              <nav className="met-np-steps">
+            <aside className="prod-np-rail">
+              <nav className="prod-np-steps">
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
                   // Only mark as completed if user has moved past it AND all required fields are filled
@@ -624,7 +633,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       key={step.id}
                       type="button"
                       className={[
-                        "met-np-step",
+                        "prod-np-step",
                         isActive ? "active" : "",
                         isCompleted ? "completed" : "",
                         isDisabled || modalLock ? "disabled" : "",
@@ -644,8 +653,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             : ""
                       }
                     >
-                      <span className="met-np-step__bullet" aria-hidden="true">
-                        <span className="met-np-step__icon">
+                      <span className="prod-np-step__bullet" aria-hidden="true">
+                        <span className="prod-np-step__icon">
                           {isCompleted ? (
                             // Completed step - show checkmark
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -671,12 +680,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             </svg>
                           )}
                         </span>
-                        {showConnector && <span className="met-np-step__connector" />}
+                        {showConnector && <span className="prod-np-step__connector" />}
                       </span>
 
-                      <span className="met-np-step__text">
-                        <span className="met-np-step__title">{step.title}</span>
-                        <span className="met-np-step__desc">{step.desc}</span>
+                      <span className="prod-np-step__text">
+                        <span className="prod-np-step__title">{step.title}</span>
+                        <span className="prod-np-step__desc">{step.desc}</span>
                       </span>
                     </button>
                   );
@@ -685,32 +694,32 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
             </aside>
 
             {/* MAIN */}
-            <main className="met-np-main">
+            <main className="prod-np-main">
               <div className="af-skel-rule af-skel-rule--top" />
 
-              <div className="met-np-main__inner">
-                <div className="met-np-body">
+              <div className="prod-np-main__inner">
+                <div className="prod-np-body">
                   {activeTab === "general" && (
-                    <SectionHeader title="GENERAL DETAILS" className="met-np-section-header-fixed" />
+                    <SectionHeader title="GENERAL DETAILS" className="prod-np-section-header-fixed" />
                   )}
 
                   {activeTab === "configuration" && (
-                    <div className="met-np-section-header-fixed" style={{ display: "flex", alignItems: "center" }}>
+                    <div className="prod-np-section-header-fixed" style={{ display: "flex", alignItems: "center" }}>
                       <SectionHeader title="CONFIGURATION" />
                       {isConfigurationLocked && <LockBadge />}
                     </div>
                   )}
 
                   {activeTab === "review" && (
-                    <SectionHeader title="REVIEW & CONFIRM" className="met-np-section-header-fixed" />
+                    <SectionHeader title="REVIEW & CONFIRM" className="prod-np-section-header-fixed" />
                   )}
 
-                  <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="met-np-form-section">
+                  <form className="prod-np-form" onSubmit={(e) => e.preventDefault()}>
+                    <div className="prod-np-form-section">
                       {/* STEP 1: GENERAL */}
                       {activeTab === "general" && (
                         <section>
-                          <div className="met-np-grid-2">
+                          <div className="prod-np-grid-2">
                             <InputField
                               label="Product Name"
                               value={formData.productName}
@@ -895,7 +904,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                         <section>
                           <ConfigurationTab
                             onConfigChange={(c) => setConfiguration((prev) => ({ ...prev, ...c }))}
-                            onProductTypeChange={(t) => setConfiguration({ productType: t })}
+                            onProductTypeChange={(t) => setConfiguration((prev) => ({ ...prev, productType: t }))}
                             ref={configRef}
                             productId={createdProductId || undefined}
                             onSubmit={async () => true}
@@ -929,11 +938,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                     </div>
 
                     {/* FOOTER ✅ same pattern as CreateUsageMetric */}
-                    <div className="met-np-form-footer" style={{ position: "relative" }}>
-                      {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
+                    <div className="prod-np-form-footer" style={{ position: "relative" }}>
+                      {errors.form && <div className="prod-np-error-message">{errors.form}</div>}
 
                       {activeTab === "general" && (
-                        <div className="met-np-btn-group met-np-btn-group--next">
+                        <div className="prod-np-btn-group prod-np-btn-group--next">
                           <PrimaryButton type="button" onClick={handleSaveAndNext}>
                             Save & Next
                           </PrimaryButton>
@@ -944,7 +953,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                         <>
                           {isConfigurationLocked ? (
                             <div
-                              className="met-np-footer-hint"
+                              className="prod-np-footer-hint"
                               style={{
                                 position: "absolute",
                                 left: "50%",
@@ -960,12 +969,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             </div>
                           ) : (
                             <>
-                              <div className="met-np-btn-group met-np-btn-group--back">
+                              <div className="prod-np-btn-group prod-np-btn-group--back">
                                 <SecondaryButton type="button" onClick={() => void gotoStep(0)}>
                                   Back
                                 </SecondaryButton>
                               </div>
-                              <div className="met-np-btn-group met-np-btn-group--next">
+                              <div className="prod-np-btn-group prod-np-btn-group--next">
                                 <PrimaryButton type="button" onClick={handleSaveAndNext} disabled={isSaving}>
                                   Save & Next
                                 </PrimaryButton>
@@ -977,12 +986,12 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
                       {activeTab === "review" && (
                         <>
-                          <div className="met-np-btn-group met-np-btn-group--back">
+                          <div className="prod-np-btn-group prod-np-btn-group--back">
                             <SecondaryButton type="button" onClick={() => void gotoStep(1)}>
                               Back
                             </SecondaryButton>
                           </div>
-                          <div className="met-np-btn-group met-np-btn-group--next">
+                          <div className="prod-np-btn-group prod-np-btn-group--next">
                             <PrimaryButton type="button" onClick={handleFinalCreate} disabled={isSaving}>
                               {isSaving ? "Submitting..." : "Create Product"}
                             </PrimaryButton>
