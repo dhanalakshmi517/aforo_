@@ -611,31 +611,7 @@ const EditProduct: React.FC<EditProductProps> = ({
   };
 
   const handlePreviousStep = () => {
-    console.log('🔍 [PREV STEP DEBUG] handlePreviousStep called');
-    console.log('  - activeTab:', activeTab);
-    console.log('  - currentStep:', currentStep);
-    console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
-    console.log('  - hasPendingChanges():', hasPendingChanges());
-    console.log('  - hasIconChanged():', hasIconChanged());
-    console.log('  - isDraft:', isDraft);
-    
-    // Check for empty required fields first (highest priority)
-    if (hasEmptyRequiredFields()) {
-      console.log('🔍 [PREV STEP DEBUG] Showing UnsavedChangesModal (empty fields)');
-      setShowUnsavedChangesModal(true);
-      return;
-    }
-
-    // Then check for unsaved changes
-    const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
-    if (hasChanges) {
-      console.log('🔍 [PREV STEP DEBUG] Showing SaveDraftModal (has changes)');
-      setShowSaveDraftModal(true);
-      return;
-    }
-
-    console.log('🔍 [PREV STEP DEBUG] No issues, navigating to previous step');
-    // Only navigate if no issues
+    // Footer back button - just navigate to previous step without any popup
     if (currentStep > 0) goToStep(currentStep - 1);
   };
 
@@ -667,24 +643,36 @@ const EditProduct: React.FC<EditProductProps> = ({
           let hasStructuredIconData = false;
 
           // PRIORITY 0: localStorage cache
-          try {
-            const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
-            const cachedIconJson = iconCache[productId];
-            if (cachedIconJson) {
-              const parsedCache =
-                typeof cachedIconJson === 'string' ? JSON.parse(cachedIconJson) : cachedIconJson;
-              if (parsedCache?.iconData) {
-                setSelectedIcon(parsedCache.iconData as ProductIconData);
-                setOriginalIcon(parsedCache.iconData as ProductIconData);
-                hasStructuredIconData = true;
-              } else if (parsedCache?.id && parsedCache?.svgPath) {
-                setSelectedIcon(parsedCache as ProductIconData);
-                setOriginalIcon(parsedCache as ProductIconData);
-                hasStructuredIconData = true;
+          // BUT: Skip cache if backend shows icon was intentionally removed (productIcon === null)
+          if (data.productIcon !== null) {
+            try {
+              const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+              const cachedIconJson = iconCache[productId];
+              if (cachedIconJson) {
+                const parsedCache =
+                  typeof cachedIconJson === 'string' ? JSON.parse(cachedIconJson) : cachedIconJson;
+                if (parsedCache?.iconData) {
+                  setSelectedIcon(parsedCache.iconData as ProductIconData);
+                  setOriginalIcon(parsedCache.iconData as ProductIconData);
+                  hasStructuredIconData = true;
+                } else if (parsedCache?.id && parsedCache?.svgPath) {
+                  setSelectedIcon(parsedCache as ProductIconData);
+                  setOriginalIcon(parsedCache as ProductIconData);
+                  hasStructuredIconData = true;
+                }
               }
+            } catch (cacheErr) {
+              console.warn('EditProduct: Failed to read icon cache from localStorage:', cacheErr);
             }
-          } catch (cacheErr) {
-            console.warn('EditProduct: Failed to read icon cache from localStorage:', cacheErr);
+          } else {
+            // Icon was removed - clear the cache
+            try {
+              const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+              delete iconCache[productId];
+              localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+            } catch (cacheErr) {
+              console.warn('EditProduct: Failed to clear icon cache:', cacheErr);
+            }
           }
 
           // PRIORITY 1: structured JSON in productIcon
@@ -708,8 +696,10 @@ const EditProduct: React.FC<EditProductProps> = ({
           }
 
           // PRIORITY 3: reconstruct from SVG file path
+          // BUT: only if productIcon is NOT explicitly null (which indicates intentional removal)
           if (
             !hasStructuredIconData &&
+            data.productIcon !== null &&
             data.icon &&
             typeof data.icon === 'string' &&
             data.icon.includes('/uploads/')
@@ -861,34 +851,14 @@ const EditProduct: React.FC<EditProductProps> = ({
       <TopBar
         title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
         onBack={() => {
-          // Debug: Log the state of change detection
-          console.log('🔍 [BACK DEBUG] TopBar back clicked');
-          console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
-          console.log('  - hasPendingChanges():', hasPendingChanges());
-          console.log('  - hasIconChanged():', hasIconChanged());
-          console.log('  - isDraft:', isDraft);
-          console.log('  - formData:', formData);
-          console.log('  - originalFormDataRef.current:', originalFormDataRef.current);
-          console.log('  - configuration:', configuration);
-          console.log('  - originalConfigRef.current:', originalConfigRef.current);
-
-          // Check for empty required fields first (highest priority)
-          if (hasEmptyRequiredFields()) {
-            console.log('🔍 [BACK DEBUG] Showing UnsavedChangesModal (empty fields)');
-            setShowUnsavedChangesModal(true);
-            return;
-          }
-
-          // Then check for unsaved changes
+          // Check for unsaved changes (ignore empty required fields)
           const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
           if (hasChanges) {
-            console.log('🔍 [BACK DEBUG] Showing SaveDraftModal (has changes)');
             setShowSaveDraftModal(true);
             return;
           }
 
-          console.log('🔍 [BACK DEBUG] No issues, navigating back');
-          // Only navigate if no issues
+          // No changes, just navigate back
           onClose();
         }}
       />
@@ -906,7 +876,13 @@ const EditProduct: React.FC<EditProductProps> = ({
           // If clicking the current step, do nothing
           if (index === currentStep) return;
 
-          // Always validate the current step before allowing navigation
+          // Navigating back to earlier steps - NO validation needed
+          if (index < currentStep) {
+            goToStep(index);    
+            return;
+          }
+
+          // Forward navigation - validate current step first
           let currentStepValid = true;
           if (currentStep === 0) {
             currentStepValid = validateForm();
@@ -918,12 +894,6 @@ const EditProduct: React.FC<EditProductProps> = ({
             }
           }
           if (!currentStepValid) return;
-
-          // Navigating back to earlier steps (after validation)
-          if (index < currentStep) {
-            goToStep(index);    
-            return;
-          }
 
           // Forward: validate all steps up to the target step
           if (index > currentStep) {
@@ -1097,7 +1067,20 @@ const EditProduct: React.FC<EditProductProps> = ({
 
                           <div className="prod-np-icon-actions">
                             <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
-                            <DeleteButton onClick={() => setSelectedIcon(null)} label="Remove" variant="soft" />
+                            <DeleteButton onClick={() => {
+                              setSelectedIcon(null);
+                              // Clear cache immediately to prevent icon from reappearing
+                              if (productId) {
+                                try {
+                                  const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+                                  delete iconCache[productId];
+                                  localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
+                                  console.log('🗑️ Cleared icon cache for product', productId);
+                                } catch (e) {
+                                  console.warn('Failed to clear icon cache:', e);
+                                }
+                              }
+                            }} label="Remove" variant="soft" />
                           </div>
                         </div>
                       </div>

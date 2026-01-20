@@ -391,7 +391,7 @@ const DataIngestionPage: React.FC = () => {
     });
 
   return (
-    <div className="check-container">
+    <div className="customers-container">
       <div className="data-page">
         <DataHeader
           title="Data Ingestion"
@@ -522,10 +522,10 @@ const DataIngestionPage: React.FC = () => {
                                       r.status === "Failed"
                                         ? "failed"
                                         : r.status === "Staged"
-                                        ? "staged"
-                                        : r.status === "Uploading"
-                                        ? "uploading"
-                                        : "success"
+                                          ? "staged"
+                                          : r.status === "Uploading"
+                                            ? "uploading"
+                                            : "success"
                                     }
                                     size="sm"
                                   />

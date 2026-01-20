@@ -2,8 +2,8 @@
 
 /* ---------- Tokens ---------- */
 :root {
-  --if-border: rgba(0,0,0,0.15);
-  --if-border-hover: rgba(0,0,0,0.25);
+  --if-border: rgba(0, 0, 0, 0.15);
+  --if-border-hover: rgba(0, 0, 0, 0.25);
   --if-border-focus: #3b82f6;
   --if-border-error: #ef4444;
   --if-bg: #ffffff;
@@ -19,18 +19,21 @@
   --if-padding-x: 12px;
   --if-font: 14px;
   --if-ring: 3px;
-  --if-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  --if-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* ---------- Field layout ---------- */
 .if-field {
-  position: relative;               /* for dropdown menu positioning */
+  position: relative;
+  /* for dropdown menu positioning */
   display: flex;
   flex-direction: column;
-  gap: 4px; /* Gap between label and control */
+  gap: 4px;
+  /* Gap between label and control */
   width: 100%;
   max-width: 456px;
-  margin-bottom: 10px !important  ; /* Decreased bottom margin for tighter spacing between fields */
+  margin-bottom: 10px !important;
+  /* Decreased bottom margin for tighter spacing between fields */
 }
 
 .if-label {
@@ -75,28 +78,34 @@
   font-weight: 400;
   outline: none;
   transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
-  box-shadow: 0 0 0 0 rgba(0,0,0,0);
-  line-height: var(--line-height-body-sm); /* Added line-height for better text alignment */
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  line-height: var(--line-height-body-sm);
+  /* Added line-height for better text alignment */
 }
 
 /* Select-specific sizing */
 .if-select {
-    /* override width or height here */
-    width: 100%;       /* example */
-    height: 36px;  
-    padding: 8px 12px;
-    line-height: 1.5; /* Ensure proper line height */
-    /* fixed height for dropdown */
-  }
-  
-  /* Textarea-specific sizing */
-  .if-textarea {
-    resize: vertical;
-    min-height: 90px;   /* minimum height */
-    line-height: 1.45;
-    width: 100%;       /* custom width */
-    height: 90px;      /* fixed starting height */
-  }
+  /* override width or height here */
+  width: 100%;
+  /* example */
+  height: 40px;
+  padding: 8px 12px;
+  line-height: 1.5;
+  /* Ensure proper line height */
+  /* fixed height for dropdown */
+}
+
+/* Textarea-specific sizing */
+.if-textarea {
+  resize: vertical;
+  min-height: 90px;
+  /* minimum height */
+  line-height: 1.45;
+  width: 100%;
+  /* custom width */
+  height: 90px;
+  /* fixed starting height */
+}
 
 /* ---------- HOVER ---------- */
 .if-control:hover:not(.is-error):not(.is-disabled):not(:disabled) {
@@ -106,17 +115,18 @@
 
 /* ---------- WRITING / FOCUS ---------- */
 .if-control:focus:not(.is-error):not(.is-disabled):not(:disabled),
-.if-control:focus-visible:not(.is-error):not(.is-disabled):not(:disabled){
+.if-control:focus-visible:not(.is-error):not(.is-disabled):not(:disabled) {
   border-color: var(--color-primary-600);
   background-color: var(--color-neutral-white);
-      box-shadow: 0 0 0 3px rgba(29, 122, 252, 0.1);
+  box-shadow: 0 0 0 3px rgba(29, 122, 252, 0.1);
 
 }
 
 /* ---------- ERROR ---------- */
 .if-control.is-error {
   border-color: var(--color-error-300) !important;
-  background-color: var(--color-neutral-white) !important; /* lighter red background */
+  background-color: var(--color-neutral-white) !important;
+  /* lighter red background */
 }
 
 /* ---------- DISABLED ---------- */
@@ -145,7 +155,7 @@
   margin-top: 2px;
 }
 
-.if-help { 
+.if-help {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -157,7 +167,8 @@
   font-size: var(--font-size-xs, 10px);
   font-style: normal;
   font-weight: 500;
-  line-height: var(--line-height-body-xs, 16px); /* 160% */
+  line-height: var(--line-height-body-xs, 16px);
+  /* 160% */
 }
 
 .if-help::before {
@@ -171,11 +182,12 @@
   background-size: contain;
   background-repeat: no-repeat;
   flex-shrink: 0;
-  margin-top: 2px; /* nudge icon slightly further down to visually center */
+  margin-top: 2px;
+  /* nudge icon slightly further down to visually center */
 }
 
-.if-error { 
-  font-size: 12px; 
+.if-error {
+  font-size: 12px;
   color: var(--color-error-400);
   display: block;
   margin: 0;
@@ -200,7 +212,8 @@
   position: absolute;
   top: 50%;
   right: 12px;
-  transform: translateY(-50%) rotate(0deg); /* Point down by default */
+  transform: translateY(-50%) rotate(0deg);
+  /* Point down by default */
   width: 16px;
   height: 16px;
   background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -210,7 +223,8 @@
 }
 
 .if-select-wrapper.is-open::after {
-  transform: translateY(-50%) rotate(180deg); /* Point up when open */
+  transform: translateY(-50%) rotate(180deg);
+  /* Point up when open */
 }
 
 .if-select {
@@ -241,8 +255,8 @@ select.if-select:focus-visible,
 .if-field .if-select:focus,
 .if-field .if-select:focus-visible,
 .if-field select.if-select:focus,
-.if-field select.if-select:focus-visible { 
-  outline: none !important; 
+.if-field select.if-select:focus-visible {
+  outline: none !important;
   border-color: var(--color-primary-600) !important;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
   background-color: var(--color-neutral-white) !important;
@@ -258,16 +272,17 @@ select.if-select:focus-visible,
 /* Placeholder option styling */
 .if-select option:first-child,
 .if-select option[value=""] {
-overflow: hidden;
-color:var(--color-neutral-300);
-text-overflow: ellipsis;
+  overflow: hidden;
+  color: var(--color-neutral-300);
+  text-overflow: ellipsis;
 
-/* body/md/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  /* body/md/reg */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
+  /* 142.857% */
 }
 
 /* Styling for selected placeholder */
@@ -275,9 +290,13 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   color: var(--color-neutral-300);
 }
 
- 
+
 /* ---------- Textarea ---------- */
-.if-textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
+.if-textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.45;
+}
 
 /* ===== Custom Input and Select Fields ===== */
 .input-field-wrapper {
@@ -290,7 +309,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   width: 100%;
   max-width: 456px;
   margin-bottom: 0;
-  padding-bottom: 4px; /* Space for error message */
+  padding-bottom: 4px;
+  /* Space for error message */
 }
 
 /* Input field specific styles */
@@ -340,8 +360,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .if-field .if-select:focus,
 .if-field .if-select:focus-visible,
 .if-field select.if-select:focus,
-.if-field select.if-select:focus-visible { 
-  outline: none !important; 
+.if-field select.if-select:focus-visible {
+  outline: none !important;
   border-color: var(--color-primary-600) !important;
   box-shadow: 0 0 0 2px var(--color-primary-300) !important;
   background-color: var(--color-neutral-white) !important;
@@ -386,7 +406,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 /* ========== Custom Dropdown ========== */
 .dd-wrap {
   /* host for trigger + menu */
-  position: relative; /* Ensure dropdown menu can be absolutely positioned */
+  position: relative;
+  /* Ensure dropdown menu can be absolutely positioned */
 }
 
 .dd-trigger {
@@ -412,9 +433,9 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   white-space: nowrap;
 }
 
-.dd-value { 
-  display: inline-flex; 
-  align-items: center; 
+.dd-value {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -433,8 +454,16 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   justify-content: center;
 }
 
-.dd-caret { display: inline-flex; margin-left: 8px; transition: transform .15s ease; opacity: 0.8; }
-.dd-caret.rot { transform: rotate(180deg); }
+.dd-caret {
+  display: inline-flex;
+  margin-left: 8px;
+  transition: transform .15s ease;
+  opacity: 0.8;
+}
+
+.dd-caret.rot {
+  transform: rotate(180deg);
+}
 
 /* Menu container (like your mock) */
 .dd-menu {
@@ -462,41 +491,62 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 6px 8px;
+  padding: 12px 12px 14px 12px;
+  min-height: 44px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
- color: var(--color-neutral-1000);
+  color: var(--color-neutral-1000);
 
-/* body/lg/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 24px); /* 150% */
+  /* body/lg/reg */
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.6;
+  /* 150% */
   white-space: nowrap;
 }
-.dd-item + .dd-item { margin-top: 2px; }
+
+.dd-item+.dd-item {
+  margin-top: 2px;
+}
 
 .dd-item:hover:not(.is-disabled),
 .dd-item.is-active:not(.is-disabled) {
-  background: var(--color-primary-800);
+  background: var(--color-primary-500);
   border-color: none;
-  color: var(--color-neutral-white);
+  color: #FFFFFF;
 }
 
 .dd-item.is-selected {
-  background:var(--color-neutral-white);
-  border-color:none;
-  color:var(--color-neutral-1000);
+  background: var(--color-primary-600);
+  border-color: none;
+  color: #FFFFFF;
 }
 
-.dd-item.is-selected .dd-item-label { 
-  font-weight: 420; 
-  color:var(--color-neutral-1000);
+.dd-item.is-selected .dd-item-label {
+  font-weight: 420;
+  color: #FFFFFF;
+}
+
+.dd-item-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.dd-item-label {
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---------- File Field ---------- */
@@ -623,16 +673,16 @@ line-height: var(--line-height-body-md, 24px); /* 150% */
   .if-field {
     width: 100%;
   }
-  
+
   .if-file-wrapper {
     padding: 16px;
     min-height: 70px;
   }
-  
+
   .if-file-content {
     gap: 8px;
   }
-  
+
   .if-file-icon {
     width: 20px;
     height: 20px;
@@ -643,21 +693,6 @@ line-height: var(--line-height-body-md, 24px); /* 150% */
   color: var(--if-text-muted);
   cursor: not-allowed;
   opacity: 0.6;
-}
-
-.dd-item-icon {
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.85;
-}
-.dd-item-label { 
-  line-height: 1; 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ========== Fixed Width Dropdown ========== */
