@@ -320,7 +320,7 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
   }, []);
 
   return (
-    <div className="check-container">
+    <div className="customers-container">
       <PageHeader
         title="Billable Metrics"
         searchTerm={searchQuery}

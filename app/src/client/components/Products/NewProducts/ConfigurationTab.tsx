@@ -67,12 +67,6 @@ export const configurationFields: Record<string, FieldProps[]> = {
   ],
   [ProductTypeEnum.SQLResult]: [
     {
-      label: 'Connection String',
-      type: 'text',
-      placeholder: 'eg. https://api.example.com/v1/{endpoint}',
-      required: true,
-    },
-    {
       label: 'DB Type',
       type: 'select',
       required: true,
@@ -86,6 +80,12 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Snowflake', value: 'SNOWFLAKE' },
         { label: 'Others', value: 'OTHERS' },
       ],
+    },
+    {
+      label: 'Connection String',
+      type: 'text',
+      placeholder: 'eg. https://api.example.com/v1/{endpoint}',
+      required: true,
     },
     {
       label: 'Auth Type',

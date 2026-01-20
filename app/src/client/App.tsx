@@ -6,6 +6,8 @@ import CookieConsentBanner from './components/cookie-consent/Banner';
 import { RatePlan } from './components/Rateplan/RatePlans';
 import { useNavigate, useLocation, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import SignIn from './components/Landing/SignIn';
+import ForgotPassword from './components/Landing/ForgotPassword';
+import ResetLinkSent from './components/Landing/ResetLinkSent';
 import { ToastProvider } from './components/componenetsss/ToastProvider';
 import TremorProvider from './components/TremorProvider';
 
@@ -379,6 +381,14 @@ export default function App() {
               <Route
                 path="/signin"
                 element={user ? <Navigate to="/get-started" replace /> : <SignIn />}
+              />
+              <Route
+                path="/forgot-password"
+                element={<ForgotPassword />}
+              />
+              <Route
+                path="/reset-link-sent"
+                element={<ResetLinkSent />}
               />
               <Route
                 path="/contact-sales"

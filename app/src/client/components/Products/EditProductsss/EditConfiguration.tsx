@@ -62,7 +62,6 @@ export const configurationFields: Record<string, FieldProps[]> = {
     { label: 'File Location', type: 'text', placeholder: '/path/to/file or s3://bucket/key', required: true },
   ],
   [ProductTypeEnum.SQLResult]: [
-    { label: 'Connection String', type: 'text', placeholder: 'jdbc:mysql://host:3306/db?user=usr&password=pwd', required: true },
     {
       label: 'DB Type',
       type: 'select',
@@ -77,6 +76,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
         { label: 'Others', value: 'OTHERS' },
       ],
     },
+    { label: 'Connection String', type: 'text', placeholder: 'jdbc:mysql://host:3306/db?user=usr&password=pwd', required: true },
     {
       label: 'Auth Type',
       type: 'select',
@@ -365,10 +365,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
                 label={labelText}
                 value={fieldValue}
                 onChange={handleInputChange(field.label)}
-                options={[
-                  { label: field.placeholder || 'Select an option', value: '' },
-                  ...(field.options || getSelectOptions(field.label) || []),
-                ]}
+                options={field.options || getSelectOptions(field.label) || []}
                 error={fieldError}
                 required={field.required}
               />
@@ -463,7 +460,7 @@ const EditConfiguration = React.forwardRef<ConfigurationTabHandle, Configuration
             label="Product Type"
             value={productType}
             onChange={handleProductTypeChange}
-            options={[{ label: '', value: '' }, ...productOptions]}
+            options={productOptions}
             required
             error={error}
           />

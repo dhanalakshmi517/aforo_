@@ -1,0 +1,247 @@
+.resetlink-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+.resetlink-card {
+  position: relative;
+  width: 100%;
+  max-width: 486px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.1);
+  padding: 48px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.resetlink-back-button {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resetlink-back-button:hover {
+  background-color: rgba(3, 74, 125, 0.1);
+}
+
+.resetlink-back-button:active {
+  background-color: rgba(3, 74, 125, 0.2);
+}
+
+.resetlink-background-decoration {
+  position: absolute;
+  bottom: -150px;
+  right: -150px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.resetlink-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  margin-top: 24px;
+}
+
+.resetlink-icon-box {
+  position: relative;
+  width: 180px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Layer 1: Gmail icon at the back - visible on the LEFT and TOP */
+.resetlink-gmail-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 106px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.resetlink-gmail-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Layer 2: Blur overlay - positioned lower, covers BOTTOM RIGHT of Gmail */
+.resetlink-blur-overlay {
+  position: absolute;
+  top: 25px;
+  left: 50px;
+  width: 100px;
+  height: 85px;
+  background: linear-gradient(135deg, 
+    rgba(255, 240, 245, 0.85) 0%, 
+    rgba(240, 245, 255, 0.85) 30%, 
+    rgba(255, 250, 240, 0.85) 60%, 
+    rgba(245, 255, 250, 0.85) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 12px;
+  z-index: 2;
+}
+
+/* Layer 3: Mail icon with checkmark - positioned LOWER on the RIGHT */
+.resetlink-mail-icon {
+  position: absolute;
+  top: 35px;
+  right: 10px;
+  width: 75px;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.resetlink-mail-icon svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.resetlink-title {
+  color: #19222D;
+  text-align: center;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 32px;
+  margin: 0 0 16px 0;
+}
+
+.resetlink-description {
+  color: #47424A;
+  text-align: center;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  margin: 0 0 32px 0;
+  align-self: stretch;
+}
+
+.resetlink-signin-button {
+  display: flex;
+  height: 40px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 8px;
+  background: linear-gradient(82deg, rgba(193, 198, 203, 0.20) 3.76%, rgba(255, 255, 255, 0.00) 97.83%), #F2F9FD;
+  border: none;
+  cursor: pointer;
+  color: #034A7D;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.resetlink-signin-button:hover {
+  background: linear-gradient(82deg, rgba(193, 198, 203, 0.30) 3.76%, rgba(255, 255, 255, 0.05) 97.83%), #F2F9FD;
+}
+
+.resetlink-signin-button:active {
+  background: linear-gradient(82deg, rgba(193, 198, 203, 0.40) 3.76%, rgba(255, 255, 255, 0.10) 97.83%), #E8F4FA;
+}
+
+.resetlink-resend {
+  color: #47424A;
+  text-align: center;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.resetlink-resend-text {
+  color: #47424A;
+}
+
+.resetlink-resend-link {
+  color: #1D7AFC;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.resetlink-resend-link:hover {
+  color: #0056D6;
+  text-decoration: underline;
+}
+
+.resetlink-resend-link:active {
+  color: #003D99;
+}
+
+.resetlink-resend-link:disabled {
+  color: #9CA3AF;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .resetlink-card {
+    max-width: calc(100% - 32px);
+    padding: 32px 24px;
+  }
+
+  .resetlink-title {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .resetlink-description {
+    font-size: 13px;
+    line-height: 18px;
+  }
+}

@@ -8,6 +8,7 @@ type Props = {
   disabled?: boolean;
   fullWidth?: boolean;                // optional 100% width
   className?: string;
+  isLoading?: boolean;                // optional loading state
 };
 
 export default function PrimaryButton({
@@ -17,6 +18,7 @@ export default function PrimaryButton({
   disabled = false,
   fullWidth = false,
   className = "",
+  isLoading = false,
 }: Props) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Enter" && !disabled && onClick) {

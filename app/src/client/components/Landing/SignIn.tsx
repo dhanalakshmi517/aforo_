@@ -143,7 +143,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
 
           <div className="password-row">
             <label className="field-label" htmlFor="password">Password *</label>
-            <a className="forgot-link" href="#">Forgot password?</a>
+            <a className="forgot-link" href="#" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}>Forgot password?</a>
           </div>
 
           <div className="password-wrapper">
