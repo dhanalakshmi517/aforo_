@@ -54,10 +54,10 @@
 .rp-header-search:active { background:#FFF; border-color:#0B80C2; box-shadow:0 0 0 1px #0B80C2 inset; }
 .rp-header-search.has-value { width:180px; height:36px; background:#FFF; border-color:#D5D4DF; }
 .rp-header-search.has-value:hover { background:#FFF; border-color:#D5D4DF; }
-.rp-header-search.is-disabled { width:180px; height:36px; background:var(--color-neutral-250); border-color:#D5D4DF; cursor:not-allowed; box-shadow:none; }
+.rp-header-search.is-disabled { width:180px; height:36px; background:var(--color-neutral-250); border-color:none; cursor:not-allowed; box-shadow:none; }
 .rp-header-search.is-disabled:hover,
 .rp-header-search.is-disabled.is-active,
-.rp-header-search.is-disabled:focus-within { background:var(--color-neutral-250); border-color:#D5D4DF; box-shadow:none; }
+.rp-header-search.is-disabled:focus-within { background:var(--color-neutral-250); border-color:none; box-shadow:none; }
 .rp-header-search.is-disabled, .rp-header-search.is-disabled * { pointer-events:none !important; }
 
 .rp-search-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; flex-shrink:0; }
@@ -167,6 +167,7 @@
   width: 2px;
   height: 33px;
   flex-shrink: 0;
+  margin-top:-2px ;
 }
 .header-divider svg { width: 2px; height: 34px; stroke-width: 1px; stroke: var(--border-border-1, #E9E9EE); }
 
