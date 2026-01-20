@@ -847,7 +847,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
           {/* LIST TABLE (hidden when Kong integration is open) */}
           {!showCreateProduct && !isEditFormOpen && !showKongIntegration && (
-            <div className="customers-container">
+            <div className="check-container">
               <Header
                 title="Products"
                 searchTerm={productQuery}
