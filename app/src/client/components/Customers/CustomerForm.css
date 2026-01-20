@@ -78,7 +78,7 @@
   /* Outer gaps */
   --np-gap-left: 100px;
   --np-gap-right: 100px;
-  --np-gap-top: 10px;
+  --np-gap-top: 25px;
   --np-gap-bottom: 15px;
 }
 
@@ -798,13 +798,13 @@ html, body, #root{
 .create-product-page { 
   min-height: 100vh; 
   background: #f7f8fb;
-  padding-bottom: 40px;  
+  overflow: hidden;
 }
 
 /* Viewport fills screen */
 .met-np-viewport {
   border-bottom: 1px solid var(--color-neutral-300);
-  padding: var(--np-gap-top) var(--np-gap-right) 40px var(--np-gap-left);
+  padding: 24px var(--np-gap-right) 0px var(--np-gap-left);
   box-sizing: border-box;
   height: calc(100vh - 20px);
   width: 100%;
@@ -816,7 +816,7 @@ html, body, #root{
 
 /* Card */
 .met-np-card {
-  margin-bottom: 40px;          /* gap beneath card */
+  margin-bottom: 80px;          /* gap beneath card */
   padding-bottom: 32px; /* space below footer */
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-300);
@@ -1063,6 +1063,7 @@ margin-top: -2px
   width: 100%;
   max-width: 100%;
   padding-bottom: 10px;
+  padding-left: 8px;
   margin-top: 16px;
 }
 

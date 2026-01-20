@@ -221,14 +221,14 @@ const Organization: React.FC = () => {
       const digitsOnly = phoneNumberWithoutFormatting.replace(/^91/, '');
       if (digitsOnly.length !== 10) {
         phoneIsValid = false;
-        phoneError = 'Indian phone number';
+        phoneError = 'Invalid phone number';
       }
     } else if (countryCode === 'US' || countryCode === 'CA') {
       // US/Canada: 10 digits after country code (1)
       const digitsOnly = phoneNumberWithoutFormatting.replace(/^1/, '');
       if (digitsOnly.length !== 10) {
         phoneIsValid = false;
-        phoneError = 'US/Canada phone number';
+        phoneError = 'Invalid phone number';
       }
     } else {
       // Default validation for other countries (at least 8 digits)
@@ -272,9 +272,9 @@ const Organization: React.FC = () => {
         newErrors[field] = "This field is required";
       } else if (field === 'email') {
         if (!emailRegex.test(value)) {
-          newErrors[field] = 'Invalid email id';
+          newErrors[field] = 'Enter your work Email';
         } else if (!value.endsWith('.com') && !value.endsWith('.net') && !value.endsWith('.org') && !value.endsWith('.io') && !value.endsWith('.co') && !value.endsWith('.ai')) {
-          newErrors[field] = 'Invalid email id';
+          newErrors[field] = 'Enter your work Email';
         }
       } else if (field === 'phone' && !phoneIsValid) {
         // Use the specific phone error message we set earlier
@@ -455,7 +455,7 @@ const Organization: React.FC = () => {
                   if (!val) {
                     setErrors(prev => ({ ...prev, email: 'This field is required' }));
                   } else if (!emailRegex.test(val)) {
-                    setErrors(prev => ({ ...prev, email: 'Invalid email id' }));
+                    setErrors(prev => ({ ...prev, email: 'Enter your work Email' }));
                   }
                 }}
                 error={errors.email}
@@ -698,6 +698,17 @@ const Organization: React.FC = () => {
               {isSubmitting ? 'Submitting…' : 'Contact Sales'}
             </PrimaryButton>
           </form>
+          
+          <div className="org-signin-section">
+            <p className="org-signin-text">Already have an account?</p>
+            <button 
+              type="button" 
+              className="org-signin-btn"
+              onClick={() => navigate('/signin')}
+            >
+              Sign In
+            </button>
+          </div>
         </section>
       </div>
     </div>

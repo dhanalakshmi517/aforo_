@@ -6,6 +6,7 @@ import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
 import SectionHeader from "../componenetsss/SectionHeader";
+import CreateFormShell from "../componenetsss/CreateFormShell";
 import { InputField, DropdownField } from "../componenetsss/Inputs";
 import AccountDetailsForm, { AccountDetailsData } from "./AccountDetailsForm";
 import CustomerReview from "./CustomerReview";
@@ -83,7 +84,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
   const [isDraft, setIsDraft] = useState(false);
   const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
 
-  // Lock logic (same pattern as metric)
+  // Lock logic
   const hasAnyRequiredInput = useMemo(() => {
     return Boolean(
       companyName.trim() ||
@@ -93,10 +94,29 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     );
   }, [companyName, customerName, companyType, companyLogo]);
 
-  const isBillingLocked = !hasAnyRequiredInput;
+  const isStep0Completed = companyName.trim() && customerName.trim() && companyType.trim();
+  
+  const isBillingLocked = !isStep0Completed;
+
+  const isBillingComplete = useMemo(() => {
+    if (!accountDetails) return false;
+    if (!accountDetails.phoneNumber?.trim()) return false;
+    if (!accountDetails.primaryEmail?.trim()) return false;
+    if (!accountDetails.billingAddressLine1?.trim()) return false;
+    if (!accountDetails.billingCity?.trim()) return false;
+    if (!accountDetails.billingState?.trim()) return false;
+    if (!accountDetails.billingPostalCode?.trim()) return false;
+    if (!accountDetails.billingCountry?.trim()) return false;
+    if (!accountDetails.customerAddressLine1?.trim()) return false;
+    if (!accountDetails.customerCity?.trim()) return false;
+    if (!accountDetails.customerState?.trim()) return false;
+    if (!accountDetails.customerPostalCode?.trim()) return false;
+    if (!accountDetails.customerCountry?.trim()) return false;
+    return true;
+  }, [accountDetails]);
 
   const isReviewLocked = useMemo(() => {
-    if (!hasAnyRequiredInput) return true; // Review locked if no fields filled in Customer Details
+    if (!hasAnyRequiredInput) return true;
     if (!accountDetails) return true;
 
     const email = (accountDetails.primaryEmail ?? "").trim();
@@ -105,8 +125,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     if (!accountDetails.phoneNumber?.trim()) return true;
     if (!email || !hasValidEmail) return true;
 
-    // if email uniqueness/other account errors exist, lock review
-    if (Object.keys(accountErrors || {}).length > 0) return true;
+    // Don't check accountErrors here as they might be stale
+    // Validation will be performed when clicking review tab
 
     const requiredKeys: Array<keyof AccountDetailsData> = [
       "billingAddressLine1",
@@ -116,7 +136,6 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
       "billingCountry",
     ];
 
-    // Only require customer address if billing is NOT same as customer
     if (!accountDetails?.billingSameAsCustomer) {
       requiredKeys.push(
         "customerAddressLine1",
@@ -133,8 +152,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     }
 
     return false;
-  }, [isBillingLocked, accountDetails, accountErrors]);
+  }, [hasAnyRequiredInput, accountDetails]);
 
+  // Lock badge (tab header)
   const LockBadge = () => (
     <span
       style={{
@@ -145,7 +165,6 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
         justifyContent: "center",
         alignItems: "center",
         gap: "5px",
-        marginLeft: "8px",
       }}
       aria-label="Locked"
     >
@@ -167,9 +186,52 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     </span>
   );
 
+  // ✅ Sidebar lock icon (the one you asked)
+  const StepLockIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="26"
+      height="26"
+      viewBox="0 0 26 26"
+      fill="none"
+    >
+      <path
+        d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
+        stroke="#BAC4D5"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  // ✅ Completed icon (your blue check)
+  const CompletedIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z"
+        fill="#034A7D"
+      />
+    </svg>
+  );
+
+  // ✅ Active icon (your grey ring)
+  const ActiveRingIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+      <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+    </svg>
+  );
+
   // email helpers
   const initialPrimaryEmailRef = useRef<string | null>(null);
-  const emailCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const emailCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Track original data for change detection
   const [originalData, setOriginalData] = useState<{
@@ -212,7 +274,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     };
     setAccountDetails(acc);
 
-    const id = draftCustomer.customerId ?? (draftCustomer as any).id ?? null;
+    const id = (draftCustomer as any).customerId ?? (draftCustomer as any).id ?? null;
     if (id != null) setCustomerId(id);
 
     setIsDraft(true);
@@ -257,17 +319,19 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
           email,
           isDraft ? customerId ?? undefined : undefined
         );
-        if (exists)
+
+        if (exists) {
           setAccountErrors((prev) => ({
             ...prev,
             primaryEmail: "This email address is already registered",
           }));
-        else
+        } else {
           setAccountErrors((prev) => {
             const n = { ...prev };
             delete n.primaryEmail;
             return n;
           });
+        }
       } catch {
         /* ignore */
       }
@@ -291,8 +355,10 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
 
     const shouldCheck =
       !!email &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
-      (!isDraft || normalized !== initial);
+      /^[^\s@]+@[^\s@]+\.[^\s@]+\.[^\s@]+$/.test(email) === false
+        ? false
+        : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+          (!isDraft || normalized !== initial);
 
     if (shouldCheck) {
       emailCheckTimeoutRef.current = setTimeout(
@@ -386,7 +452,6 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
           n[k] = `${k.replace(/([A-Z])/g, " $1")} is required`;
       });
 
-      // Only validate customer address if billing is NOT same as customer
       if (!accountDetails?.billingSameAsCustomer) {
         [
           "customerAddressLine1",
@@ -401,8 +466,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
         });
       }
 
-      setAccountErrors({ ...accountErrors, ...n });
-      return Object.keys({ ...accountErrors, ...n }).length === 0;
+      setAccountErrors(n);
+      return Object.keys(n).length === 0;
     }
 
     return true;
@@ -416,18 +481,10 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
       return;
     }
 
-    // lock guards (same idea as metric - only for review step)
     if (index === 2 && isReviewLocked) return;
 
-    // Prevent navigation to second step if user has started filling first step but not completed it
-    if (index === 1 && hasAnyRequiredInput && !(companyName.trim() && customerName.trim() && companyType.trim())) {
-      // Show validation errors like Save & Next does
-      await validateStep(0);
-      return;
-    }
-
-    // If at least one field is filled, validate before moving forward
-    if (hasAnyRequiredInput) {
+    // Only validate for Review & Confirm step (index 2)
+    if (index === 2 && hasAnyRequiredInput) {
       for (let i = 0; i < index; i += 1) {
         const ok = await validateStep(i);
         if (!ok) {
@@ -437,10 +494,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
       }
     }
 
-    // Clear account errors when navigating to billing tab without validation
-    if (index === 1) {
-      setAccountErrors({});
-    }
+    if (index === 1) setAccountErrors({});
 
     gotoStep(index);
   };
@@ -575,6 +629,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
         }
       }
       setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 3000);
     } catch (e) {
       console.error("Error saving draft:", e);
     } finally {
@@ -582,21 +637,21 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     }
   };
 
-  const discardAndClose = async () => {
-    try {
-      if (customerId != null) await deleteCustomer(customerId);
-    } catch (e) {
-      console.error("Error deleting on back modal:", e);
-    } finally {
-      setShowSaveDraftModal(false);
-      onClose();
-    }
-  };
-
   const saveDraftThenClose = async () => {
     await handleSaveDraft();
     setShowSaveDraftModal(false);
     onClose();
+  };
+
+  const discardAndClose = async () => {
+    try {
+      if (customerId != null) await deleteCustomer(customerId);
+    } catch (e) {
+      console.error("Error deleting draft:", e);
+    } finally {
+      setShowSaveDraftModal(false);
+      onClose();
+    }
   };
 
   const confirmDeleteTopRight = async () => {
@@ -611,11 +666,8 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
   };
 
   const hasUserMadeChanges = useMemo(() => {
-    if (!originalData) {
-      // No draft loaded, enable buttons if user has input
-      return hasAnyRequiredInput;
-    }
-    // Draft loaded, check if current state differs from original state
+    if (!originalData) return hasAnyRequiredInput;
+
     return (
       originalData.companyName !== companyName ||
       originalData.customerName !== customerName ||
@@ -630,16 +682,20 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
     companyType,
     companyLogo,
     accountDetails,
-    hasAnyRequiredInput
+    hasAnyRequiredInput,
   ]);
 
   useEffect(() => {
-    if (hasUserMadeChanges && !hasEverBeenEnabled) {
-      setHasEverBeenEnabled(true);
-    }
+    if (hasUserMadeChanges && !hasEverBeenEnabled) setHasEverBeenEnabled(true);
   }, [hasUserMadeChanges, hasEverBeenEnabled]);
 
   const topActionsDisabled = !hasEverBeenEnabled;
+
+  const clearLogoError = () => {
+    if (errors.companyLogo) {
+      setErrors((prev) => ({ ...prev, companyLogo: "" }));
+    }
+  };
 
   return (
     <>
@@ -671,171 +727,170 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
         }}
       />
 
-      <div className="met-np-viewport">
-        <div className="met-np-card">
-          <div className="met-np-grid">
-            {/* LEFT rail */}
-            <aside className="met-np-rail">
-              <nav className="met-np-steps">
-                {steps.map((step, i) => {
-                  const isActive = i === currentStep;
-                  // Only mark as completed if user has moved past it AND all required fields are filled
-                  const isStep0Completed = companyName.trim() && customerName.trim() && companyType.trim();
-                  const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : true);
-                  const showConnector = i < steps.length - 1;
+      <CreateFormShell
+        rail={
+          <nav className="met-np-steps">
+            {steps.map((step, i) => {
+              const isActive = (i === 0 && !isStep0Completed) || (i === currentStep && isStep0Completed) || (i === 1 && isStep0Completed && currentStep <= 1);
 
-                  return (
-                    <button
-                      key={step.id}
-                      type="button"
-                      className={[
-                        "met-np-step",
-                        isActive ? "active" : "",
-                        isCompleted ? "completed" : "",
-                      ]
-                        .join(" ")
-                        .trim()}
-                      onClick={() => {
-                        void handleStepClick(i);
-                      }}
-                    >
-                      <span className="met-np-step__bullet" aria-hidden="true">
-                        <span className="met-np-step__icon">
-                          {isCompleted ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                cx="12"
-                                cy="12"
-                                r="11.5"
-                                fill="var(--color-primary-800)"
-                                stroke="var(--color-primary-800)"
-                              />
-                              <path
-                                d="M7 12l3 3 6-6"
-                                stroke="#fff"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          ) : (i === 0 && !isCompleted) || (isActive && (companyName.trim() && customerName.trim() && companyType.trim())) ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                cx="12"
-                                cy="12"
-                                r="11"
-                                stroke="#C3C2D0"
-                                strokeWidth="2"
-                              />
-                              <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
-                            </svg>
-                          ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
-                              <path d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z" stroke="#BAC4D5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                          )}
-                        </span>
-                        {showConnector && (
-                          <span className="met-np-step__connector" />
-                        )}
-                      </span>
+              const isCompleted =
+                i === 0 ? Boolean(isStep0Completed) : i < currentStep && isStep0Completed;
 
-                      <span className="met-np-step__text">
-                        <span className="met-np-step__title">{step.title}</span>
-                        <span className="met-np-step__desc">{step.desc}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </aside>
+              const isLocked =
+                (i === 1 && isBillingLocked) || (i === 2 && isReviewLocked);
 
-            {/* MAIN */}
-            <main className="met-np-main">
-              <div className="af-skel-rule af-skel-rule--top" />
-              <div className="met-np-main__inner">
-                <div className="met-np-body">
-                  {activeTab === "general" && (
-                    <SectionHeader
-                      title="CUSTOMER DETAILS"
-                      className="met-np-section-header-fixed"
-                    />
-                  )}
+              const showConnector = i < steps.length - 1;
 
-                  {activeTab === "billing" && (
-                    <div
-                      className="met-np-section-header-fixed"
-                      style={{ display: "flex", alignItems: "center" }}
-                    >
-                      <SectionHeader title="ACCOUNT DETAILS" />
-                      {isBillingLocked && <LockBadge />}
-                    </div>
-                  )}
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  className={[
+                    "met-np-step",
+                    isActive ? "active" : "",
+                    isCompleted ? "completed" : "",
+                    isLocked ? "locked" : "",
+                  ]
+                    .join(" ")
+                    .trim()}
+                  onClick={() => void handleStepClick(i)}
+                  disabled={i === 2 && isReviewLocked}
+                >
+                  <span className="met-np-step__bullet" aria-hidden="true">
+                    <span className="met-np-step__icon">
+                      {isActive ? (
+                        <ActiveRingIcon />
+                      ) : isCompleted ? (
+                        <CompletedIcon />
+                      ) : (
+                        <StepLockIcon />
+                      )}
+                    </span>
 
-                  {activeTab === "review" && (
-                    <div
-                      className="met-np-section-header-fixed"
-                      style={{ display: "flex", alignItems: "center" }}
-                    >
-                      <SectionHeader title="REVIEW & CONFIRM" />
-                      {isReviewLocked && <LockBadge />}
-                    </div>
-                  )}
+                    {showConnector && <span className="met-np-step__connector" />}
+                  </span>
 
-                  <form
-                    className="met-np-form"
-                    onSubmit={(e) => e.preventDefault()}
-                  >
-                    <div className="met-np-form-section">
+                  <span className="met-np-step__text">
+                    <span className="met-np-step__title">{step.title}</span>
+                    <span className="met-np-step__desc">{step.desc}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        }
+        title={
+          activeTab === "general"
+            ? "CUSTOMER DETAILS"
+            : activeTab === "billing"
+            ? "ACCOUNT DETAILS"
+            : "REVIEW & CONFIRM"
+        }
+        locked={activeTab === "billing" ? isBillingLocked : activeTab === "review" ? isReviewLocked : false}
+        footerLeft={
+          activeTab === "general" ? null : activeTab === "billing" ? (
+            <SecondaryButton type="button" onClick={() => setCurrentStep(0)}>
+              Back
+            </SecondaryButton>
+          ) : isReviewLocked ? null : (
+            <SecondaryButton type="button" onClick={() => setCurrentStep(1)}>
+              Back
+            </SecondaryButton>
+          )
+        }
+        footerHint={
+          (activeTab === "billing" && isBillingLocked) || (activeTab === "review" && isReviewLocked)
+            ? "Complete the previous steps to unlock this step"
+            : undefined
+        }
+        footerRight={
+          activeTab === "general" ? (
+            <PrimaryButton
+              type="button"
+              onClick={handleNext}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : "Save & Next"}
+            </PrimaryButton>
+          ) : activeTab === "billing" ? (
+            <PrimaryButton
+              type="button"
+              onClick={handleNext}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : "Save & Next"}
+            </PrimaryButton>
+          ) : isReviewLocked ? null : (
+            <PrimaryButton
+              type="button"
+              onClick={handleNext}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Create Customer"}
+            </PrimaryButton>
+          )
+        }
+      >
+        <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
+          <div className="met-np-form-section">
                       {/* STEP 1: GENERAL */}
                       {activeTab === "general" && (
                         <section>
                           <div className="met-np-grid-2">
                             <InputField
+                              label="Customer Name"
+                              value={customerName}
+                              placeholder="eg., John Doe"
+                              onChange={(v: any) => {
+                                setCustomerName(v?.target ? v.target.value : v);
+                                clearLogoError();
+                              }}
+                              onFocus={() => {
+                                if (errors.customerName) {
+                                  setErrors((prev) => ({ ...prev, customerName: "" }));
+                                }
+                              }}
+                              error={errors.customerName}
+                              required
+                            />
+
+                            <InputField
                               label="Company Name"
                               value={companyName}
                               placeholder="eg., ABC Company"
-                              onChange={(v) => setCompanyName(v)}
+                              onChange={(v: any) => {
+                                setCompanyName(v?.target ? v.target.value : v);
+                                clearLogoError();
+                              }}
+                              onFocus={() => {
+                                if (errors.companyName) {
+                                  setErrors((prev) => ({ ...prev, companyName: "" }));
+                                }
+                              }}
                               error={errors.companyName}
                               required
                             />
 
                             <div className="met-np-field">
-                              <label className="customer-visually-hidden">
-                                Company Logo
-                              </label>
+                              <label className="company-logo-label">Company Logo</label>
                               <LogoUploader
                                 logo={companyLogo}
                                 logoUrl={initialLogoUrl}
-                                onChange={(file) => setCompanyLogo(file)}
+                                onChange={(file: File | null) => setCompanyLogo(file)}
+                                error={errors.companyLogo}
+                                onError={(error: string) =>
+                                  setErrors((prev) => ({ ...prev, companyLogo: error }))
+                                }
                               />
                             </div>
-
-                            <InputField
-                              label="Customer Name"
-                              value={customerName}
-                              placeholder="eg., John Doe"
-                              onChange={(v) => setCustomerName(v)}
-                              error={errors.customerName}
-                              required
-                            />
 
                             <DropdownField
                               label="Company Type"
                               value={companyType}
-                              onChange={setCompanyType}
+                              onChange={(v: string) => {
+                                setCompanyType(v);
+                                clearLogoError();
+                              }}
                               placeholder="Company Type"
                               error={errors.companyType}
                               required
@@ -853,7 +908,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                         <section>
                           <AccountDetailsForm
                             data={accountDetails ?? undefined}
-                            onChange={(d) => {
+                            onChange={(d: AccountDetailsData) => {
                               setAccountDetails(d);
                               if (draftSaved) setDraftSaved(false);
                             }}
@@ -861,10 +916,12 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                             onEmailBlur={handleEmailBlur}
                             currentCustomerId={customerId ?? undefined}
                             isDraft={isDraft}
-                            initialPrimaryEmail={
-                              initialPrimaryEmailRef.current ?? undefined
-                            }
+                            initialPrimaryEmail={initialPrimaryEmailRef.current ?? undefined}
                             locked={isBillingLocked}
+                            onClearLogoError={clearLogoError}
+                            onClearFieldError={(fieldName: string) => {
+                              setAccountErrors((prev) => ({ ...prev, [fieldName]: "" }));
+                            }}
                           />
                         </section>
                       )}
@@ -882,74 +939,16 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                       )}
                     </div>
 
-                    {/* FOOTER (metric-style) */}
-                    <div
-                      className="met-np-form-footer"
-                      style={{ position: "relative" }}
-                    >
+                    {/* FOOTER */}
+                    <div className="met-np-form-footer" style={{ position: "relative" }}>
                       {errors.form && (
-                        <div className="met-met-np-error-message">
-                          {errors.form}
-                        </div>
+                        <div className="met-met-np-error-message">{errors.form}</div>
                       )}
 
-                      {activeTab === "general" && (
-                        <div className="met-np-btn-group met-np-btn-group--next">
-                          <PrimaryButton
-                            type="button"
-                            onClick={handleNext}
-                            disabled={isSubmitting}
-                          >
-                            Save & Next
-                          </PrimaryButton>
-                        </div>
-                      )}
-
-                      {activeTab === "billing" && (
-                        <>
-                          {isBillingLocked ? (
-                            <div
-                              className="met-np-footer-hint"
-                              style={{
-                                position: "absolute",
-                                left: "50%",
-                                bottom: "20px",
-                                transform: "translateX(-50%)",
-                                color: "#8C8F96",
-                                fontSize: 14,
-                                pointerEvents: "none",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              Fill the previous steps to unlock this step
-                            </div>
-                          ) : (
-                            <>
-                              <div className="met-np-btn-group met-np-btn-group--back">
-                                <SecondaryButton
-                                  type="button"
-                                  onClick={() => setCurrentStep(0)}
-                                >
-                                  Back
-                                </SecondaryButton>
-                              </div>
-                              <div className="met-np-btn-group met-np-btn-group--next">
-                                <PrimaryButton
-                                  type="button"
-                                  onClick={handleNext}
-                                  disabled={isSubmitting}
-                                >
-                                  Save & Next
-                                </PrimaryButton>
-                              </div>
-                            </>
-                          )}
-                        </>
-                      )}
-
+                      
                       {activeTab === "review" && (
                         <>
-                          {isReviewLocked ? (
+                          {isReviewLocked && (
                             <div
                               className="met-np-footer-hint"
                               style={{
@@ -965,49 +964,22 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                             >
                               Complete the previous steps to unlock this step
                             </div>
-                          ) : (
-                            <>
-                              <div className="met-np-btn-group met-np-btn-group--back">
-                                <SecondaryButton
-                                  type="button"
-                                  onClick={() => setCurrentStep(1)}
-                                >
-                                  Back
-                                </SecondaryButton>
-                              </div>
-                              <div className="met-np-btn-group met-np-btn-group--next">
-                                <PrimaryButton
-                                  type="button"
-                                  onClick={handleNext}
-                                  disabled={isSubmitting}
-                                >
-                                  {isSubmitting ? "Submitting..." : "Create Customer"}
-                                </PrimaryButton>
-                              </div>
-                            </>
                           )}
                         </>
                       )}
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </main>
           </div>
+        </form>
+      </CreateFormShell>
 
-          <div className="af-skel-rule af-skel-rule--bottom" />
+      {/* Save Draft dialog */}
+      <SaveDraft
+        isOpen={showSaveDraftModal}
+        onClose={() => setShowSaveDraftModal(false)}
+        onSave={saveDraftThenClose}
+        onDelete={discardAndClose}
+      />
 
-          {/* Save Draft dialog on back (metric pattern: inside card) */}
-          <SaveDraft
-            isOpen={showSaveDraftModal}
-            onClose={() => setShowSaveDraftModal(false)}
-            onSave={saveDraftThenClose}
-            onDelete={discardAndClose}
-          />
-        </div>
-      </div>
-
-      {/* Delete (top-right) */}
+      {/* Delete modal */}
       <ConfirmDeleteModal
         isOpen={showDeleteModal}
         productName={(customerName || companyName || "this customer").trim()}

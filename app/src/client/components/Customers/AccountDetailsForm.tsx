@@ -36,6 +36,10 @@ interface Props {
   initialPrimaryEmail?: string;
   /** NEW: lock state from parent */
   locked?: boolean;
+  /** NEW: callback to clear logo error when user interacts with form */
+  onClearLogoError?: () => void;
+  /** NEW: callback to clear specific field error on focus */
+  onClearFieldError?: (fieldName: string) => void;
 }
 
 const AccountDetailsForm: React.FC<Props> = ({
@@ -46,12 +50,15 @@ const AccountDetailsForm: React.FC<Props> = ({
   currentCustomerId,
   isDraft = false,
   initialPrimaryEmail = '',
-  locked = false
+  locked = false,
+  onClearLogoError,
+  onClearFieldError
 }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [primaryEmailError, setPrimaryEmailError] = useState<string>(''); // inline error for email
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
+  const [additionalEmailErrors, setAdditionalEmailErrors] = useState<string[]>([]);
 
   const [billingAddress, setBillingAddress] = useState({
     line1: '',
@@ -148,6 +155,7 @@ const AccountDetailsForm: React.FC<Props> = ({
     if (sameAsBilling) {
       setCustomerAddress(updated);
     }
+    handleFieldInteraction();
   };
 
   // sync incoming props to local state
@@ -177,16 +185,30 @@ const AccountDetailsForm: React.FC<Props> = ({
 
   const handleCustomerChange = (field: string, value: string) => {
     setCustomerAddress({ ...customerAddress, [field]: value });
+    handleFieldInteraction();
   };
 
   const addEmailField = () => {
     setAdditionalEmails([...additionalEmails, '']);
+    setAdditionalEmailErrors([...additionalEmailErrors, '']);
   };
 
   const updateAdditionalEmail = (index: number, value: string) => {
     const updated = [...additionalEmails];
+    const updatedErrors = [...additionalEmailErrors];
+    
     updated[index] = value;
+    
+    // Validate if email is same as primary email
+    if (value.trim() && value.trim().toLowerCase() === primaryEmail.trim().toLowerCase()) {
+      updatedErrors[index] = 'Please enter a different email ID';
+    } else {
+      updatedErrors[index] = '';
+    }
+    
     setAdditionalEmails(updated);
+    setAdditionalEmailErrors(updatedErrors);
+    handleFieldInteraction();
   };
 
   const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
@@ -232,10 +254,14 @@ const AccountDetailsForm: React.FC<Props> = ({
     if (valueChanged && primaryEmailError) {
       setPrimaryEmailError('');
     }
+    if (valueChanged) {
+      handleFieldInteraction();
+    }
   };
 
   const handlePrimaryEmailFocus = () => {
     if (primaryEmailError) setPrimaryEmailError('');
+    onClearFieldError?.('primaryEmail');
   };
 
   // Toggle billing same as customer
@@ -276,6 +302,11 @@ const AccountDetailsForm: React.FC<Props> = ({
     billingAddress
   ]);
 
+  // Clear logo error when user interacts with any form field
+  const handleFieldInteraction = () => {
+    onClearLogoError?.();
+  };
+
   const lastSentRef = useRef<string>('');
   useEffect(() => {
     if (!onChange) return;
@@ -315,13 +346,19 @@ const AccountDetailsForm: React.FC<Props> = ({
           placeholder="e.g., +1234567890"
           onChange={(val) => {
             if (locked) return; // Prevent changes when locked
-            if (/^\+?\d*$/.test(val)) setPhoneNumber(val);
+            if (/^\+?\d*$/.test(val)) {
+              setPhoneNumber(val);
+              handleFieldInteraction();
+            }
+          }}
+          onFocus={() => {
+            onClearFieldError?.('phoneNumber');
           }}
           type="tel"
           inputMode="tel"
+          error={errors.phoneNumber}
           disabled={locked}
         />
-        {errors.phoneNumber && <span className="field-error">{errors.phoneNumber}</span>}
       </div>
 
       <div className="acc-form-group">
@@ -350,6 +387,7 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={email}
               onChange={locked ? () => {} : (val) => updateAdditionalEmail(idx, val)} // Prevent changes when locked
               disabled={locked}
+              error={additionalEmailErrors[idx] || ''}
             />
           </div>
         ))}
@@ -366,15 +404,22 @@ const AccountDetailsForm: React.FC<Props> = ({
       {/* Billing Address */}
       <div className="address-section">
         <h4>Billing Address</h4>
+              <div className="acc-form-group">
+
         <InputField
           label=" Line 1"
           value={billingAddress.line1}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={locked ? () => {} : (val) => handleBillingChange('line1', val)}
+          onFocus={() => {
+            onClearFieldError?.('billingAddressLine1');
+          }}
           disabled={locked}
           error={errors.billingAddressLine1}
           required
         />
+        </div>
+        <div className="acc-form-group">
         <InputField
           label="Line 2"
           value={billingAddress.line2}
@@ -382,6 +427,8 @@ const AccountDetailsForm: React.FC<Props> = ({
           onChange={locked ? () => {} : (val) => handleBillingChange('line2', val)}
           disabled={locked}
         />
+
+        </div>
         <div className="acc-form-row">
           <div className="acc-form-group">
             <InputField
@@ -389,6 +436,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={billingAddress.city}
               placeholder="City"
               onChange={locked ? () => {} : (val) => handleBillingChange('city', val)}
+              onFocus={() => {
+                onClearFieldError?.('billingCity');
+              }}
               disabled={locked}
               error={errors.billingCity}
                         required
@@ -401,6 +451,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={billingAddress.state}
               placeholder="State/Province/Region"
               onChange={locked ? () => {} : (val) => handleBillingChange('state', val)}
+              onFocus={() => {
+                onClearFieldError?.('billingState');
+              }}
               disabled={locked}
                         required
 
@@ -417,6 +470,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={billingAddress.zip}
               placeholder="ZIP/Postal Code"
               onChange={locked ? () => {} : (val) => handleBillingChange('zip', val)}
+              onFocus={() => {
+                onClearFieldError?.('billingPostalCode');
+              }}
               disabled={locked}
               error={errors.billingPostalCode}
             />
@@ -448,16 +504,23 @@ const AccountDetailsForm: React.FC<Props> = ({
       {/* Customer Address */}
       <div className={`address-section1 ${sameAsBilling ? 'disabled' : ''}`}>
         <h4>Customer Address</h4>
+              <div className="acc-form-group">
+
         <InputField
           label="Line 1"
           value={customerAddress.line1}
           placeholder="e.g., 123 Main Street, Apt 4B, New York, NY 10001"
           onChange={locked ? () => {} : (val) => handleCustomerChange('line1', val)}
+          onFocus={() => {
+            onClearFieldError?.('customerAddressLine1');
+          }}
           disabled={sameAsBilling || locked}
                     required
 
           error={errors.customerAddressLine1}
         />
+        </div>
+        <div className="acc-form-group">
         <InputField
           label=" Line 2"
           value={customerAddress.line2}
@@ -465,6 +528,7 @@ const AccountDetailsForm: React.FC<Props> = ({
           onChange={locked ? () => {} : (val) => handleCustomerChange('line2', val)}
           disabled={sameAsBilling || locked}
         />
+        </div>
         <div className="acc-form-row">
           <div className="acc-form-group">
             <InputField
@@ -472,6 +536,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={customerAddress.city}
               placeholder="City"
               onChange={locked ? () => {} : (val) => handleCustomerChange('city', val)}
+              onFocus={() => {
+                onClearFieldError?.('customerCity');
+              }}
               disabled={sameAsBilling || locked}
               error={errors.customerCity}
                         required
@@ -484,6 +551,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={customerAddress.state}
               placeholder="State/Province/Region"
               onChange={locked ? () => {} : (val) => handleCustomerChange('state', val)}
+              onFocus={() => {
+                onClearFieldError?.('customerState');
+              }}
               disabled={sameAsBilling || locked}
               error={errors.customerState}
                         required
@@ -498,6 +568,9 @@ const AccountDetailsForm: React.FC<Props> = ({
               value={customerAddress.zip}
               placeholder="ZIP/Postal Code"
               onChange={locked ? () => {} : (val) => handleCustomerChange('zip', val)}
+              onFocus={() => {
+                onClearFieldError?.('customerPostalCode');
+              }}
               disabled={sameAsBilling || locked}
               error={errors.customerPostalCode}
                         required
