@@ -709,18 +709,39 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
     console.log('🔄 Updating product icon using same approach as createProduct...');
 
     if (iconData === null) {
-      // Remove icon - update product with empty productIcon AND icon fields
-      console.log('🗑️ Removing product icon via /api/products/{id}...');
+      // Remove icon - use DELETE endpoint to actually remove the icon file
+      console.log('🗑️ Removing product icon...');
 
       const api = createApiClient();
-      // Clear BOTH productIcon (JSON data) and icon (SVG file path) to prevent fallback
-      await api.patch(`/products/${productId}`, { productIcon: null, icon: null }, {
-        headers: {
-          'X-Organization-Id': authData?.organizationId?.toString() || ''
-        }
-      });
+      
+      // STEP 1: Delete the icon file via DELETE endpoint
+      try {
+        console.log('📤 Step 1: Deleting icon file via DELETE /products/{id}/icon...');
+        await api.delete(`/products/${productId}/icon`, {
+          headers: {
+            'X-Organization-Id': authData?.organizationId?.toString() || ''
+          }
+        });
+        console.log('✅ Step 1 complete: Icon file deleted');
+      } catch (deleteErr: any) {
+        console.warn('⚠️ Icon file delete failed:', deleteErr?.message);
+      }
+      
+      // STEP 2: Clear productIcon JSON field via PATCH
+      try {
+        console.log('📤 Step 2: Clearing productIcon JSON field...');
+        await api.patch(`/products/${productId}`, { productIcon: null }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Organization-Id': authData?.organizationId?.toString() || ''
+          }
+        });
+        console.log('✅ Step 2 complete: productIcon JSON cleared');
+      } catch (patchErr: any) {
+        console.warn('⚠️ productIcon clear failed:', patchErr?.message);
+      }
 
-      console.log('✅ Product icon removed successfully (both productIcon and icon fields cleared)');
+      console.log('✅ Product icon removed successfully');
       return { success: true, message: 'Product icon removed successfully' };
     } else {
       // Follow the same approach as createProduct - use FormData with both structured data and file

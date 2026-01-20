@@ -143,8 +143,9 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
         p.productId === productId
           ? {
             ...p,
-            productIcon: iconData ? JSON.stringify({ iconData }) : undefined,
-            iconData: iconData || undefined
+            productIcon: iconData ? JSON.stringify({ iconData }) : null,  // null signals explicit removal
+            iconData: iconData || null,  // null signals explicit removal
+            icon: iconData ? p.icon : undefined  // clear icon path to prevent SVG fallback
           }
           : p
       )
@@ -245,130 +246,146 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
         let iconData: ProductIconData | null = null;
 
-        // Prefer locally updated icons (from this session)
-        const localIconJson = updatedIcons[product.productId];
-        if (localIconJson) {
-          const parsedLocal = parseProductIconField(localIconJson);
-          iconData = extractIconData(parsedLocal, product.productName || 'Product');
-          if (iconData) {
-            console.log(`✅ Using in-memory cached icon for ${product.productId}`);
-          }
-        }
+        // DEBUG: Log what we received from backend
+        console.log(`📦 Product ${product.productId} (${product.productName}):`, {
+          productIcon: product.productIcon,
+          productIconType: typeof product.productIcon,
+          icon: product.icon,
+          iconUrl: iconUrl
+        });
 
-        // Check localStorage cache (persistent across page refreshes)
-        // This is needed because backend doesn't properly return productIcon field
-        if (!iconData) {
+        // FIRST: Check if icon was EXPLICITLY removed (null or empty string from backend)
+        // IMPORTANT: undefined means field was never set - NOT removed! Must check for SVG fallback
+        const isEmptyObject = (val: any) => val && typeof val === 'object' && Object.keys(val).length === 0;
+        
+        // Only treat as "removed" if productIcon is EXPLICITLY null or empty string (not undefined!)
+        const iconWasRemoved = product.productIcon !== undefined && (
+                               product.productIcon === null || 
+                               product.productIcon === '' || 
+                               product.productIcon === 'null' ||
+                               isEmptyObject(product.productIcon));
+        
+        console.log(`🔍 Product ${product.productId} iconWasRemoved: ${iconWasRemoved}, productIcon type: ${typeof product.productIcon}`);
+        
+        if (iconWasRemoved) {
+          // Icon was removed - clear caches and skip all icon loading
+          console.log(`🗑️ Icon was explicitly removed for product ${product.productId}, clearing caches`);
           try {
             const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
-            const cachedIconJson = iconCache[product.productId];
-            if (cachedIconJson) {
-              const parsedCache = parseProductIconField(cachedIconJson);
-              iconData = extractIconData(parsedCache, product.productName || 'Product');
-              if (iconData) {
-                console.log(`✅ Using localStorage cached icon for ${product.productId}:`, iconData);
-              }
+            if (iconCache[product.productId]) {
+              delete iconCache[product.productId];
+              localStorage.setItem('iconDataCache', JSON.stringify(iconCache));
             }
           } catch (e) {
-            console.warn('Failed to read icon cache from localStorage:', e);
+            console.warn('Failed to clear icon cache:', e);
           }
-        }
-
-        // Backend `productIcon` (robust parsing)
-        if (!iconData && product.productIcon) {
-          console.log(`🔍 Product ${product.productId} has productIcon field:`, product.productIcon);
-          try {
-            const parsed = parseProductIconField(product.productIcon);
-            console.log(`📊 Parsed productIcon for ${product.productId}:`, parsed);
-            iconData = extractIconData(parsed, product.productName || 'Product');
+          // iconData stays null - no icon loading
+        } else {
+          // Only load icons if NOT removed
+          
+          // 1. Check in-memory cache
+          const localIconJson = updatedIcons[product.productId];
+          if (localIconJson) {
+            const parsedLocal = parseProductIconField(localIconJson);
+            iconData = extractIconData(parsedLocal, product.productName || 'Product');
             if (iconData) {
-              console.log(`✅ Successfully extracted iconData for ${product.productId}:`, iconData);
-            } else {
-              console.log(`❌ Failed to extract iconData for ${product.productId} from parsed:`, parsed);
+              console.log(`✅ Using in-memory cached icon for ${product.productId}`);
             }
-          } catch (e) {
-            console.error(`❌ Error parsing productIcon for ${product.productId}:`, e);
           }
-        } else if (!iconData) {
-          console.log(`🚫 Product ${product.productId} has no productIcon field, trying individual fetch...`);
-
-          // Fallback: Try fetching individual product data if productIcon is missing
-          try {
-            const individualProduct = await getProductById(product.productId);
-            if (individualProduct?.productIcon) {
-              console.log(`🔄 Found productIcon in individual fetch for ${product.productId}`);
-              const parsed = parseProductIconField(individualProduct.productIcon);
+          
+          // 2. Check localStorage cache
+          if (!iconData) {
+            try {
+              const iconCache = JSON.parse(localStorage.getItem('iconDataCache') || '{}');
+              const cachedIconJson = iconCache[product.productId];
+              if (cachedIconJson) {
+                const parsedCache = parseProductIconField(cachedIconJson);
+                iconData = extractIconData(parsedCache, product.productName || 'Product');
+                if (iconData) {
+                  console.log(`✅ Using localStorage cached icon for ${product.productId}`);
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to read icon cache:', e);
+            }
+          }
+          
+          // 3. Parse backend productIcon
+          if (!iconData && product.productIcon) {
+            try {
+              const parsed = parseProductIconField(product.productIcon);
               iconData = extractIconData(parsed, product.productName || 'Product');
               if (iconData) {
-                console.log(`✅ Successfully extracted iconData from individual fetch for ${product.productId}`);
+                console.log(`✅ Parsed productIcon for ${product.productId}`);
               }
-            } else {
-              console.log(`🚫 Individual fetch also has no productIcon for ${product.productId}`);
+            } catch (e) {
+              console.error(`❌ Error parsing productIcon for ${product.productId}:`, e);
             }
-          } catch (e) {
-            console.error(`❌ Error fetching individual product ${product.productId}:`, e);
           }
-        }
-
-        // Fallback: reconstruct from actual SVG if still no iconData
-        if (!iconData && product.icon && iconUrl) {
-          console.log(`🔄 Falling back to SVG reconstruction for product ${product.productId}`);
-          try {
-            const svgResponse = await fetch(iconUrl);
-            const svgText = await svgResponse.text();
-
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(svgText, 'image/svg+xml');
-
-            // back tile color (rect ~width 29.45 in the big editor-preview SVGs)
-            const rects = doc.querySelectorAll('rect');
-            let tileColor = '#0F6DDA';
-            for (const rect of Array.from(rects)) {
-              const width = rect.getAttribute('width');
-              const fill = rect.getAttribute('fill');
-              if (width && fill && fill.startsWith('#')) {
-                const w = parseFloat(width);
-                if (w > 29 && w < 30) { tileColor = fill; break; }
+          
+          // 4. Fallback: fetch individual product
+          if (!iconData) {
+            try {
+              const individualProduct = await getProductById(product.productId);
+              if (individualProduct?.productIcon && individualProduct.productIcon !== null && individualProduct.productIcon !== '') {
+                const parsed = parseProductIconField(individualProduct.productIcon);
+                iconData = extractIconData(parsed, product.productName || 'Product');
               }
+            } catch (e) {
+              console.error(`❌ Error fetching individual product ${product.productId}:`, e);
             }
+          }
+          
+          // 5. Fallback: reconstruct from SVG file
+          if (!iconData && product.icon && iconUrl) {
+            try {
+              const svgResponse = await fetch(iconUrl);
+              const svgText = await svgResponse.text();
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-            const pathElement = doc.querySelector('path[fill="#FFFFFF"]') || doc.querySelector('path');
-            let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
-            let viewBox = '0 0 24 24';
-            if (pathElement) {
-              svgPath = pathElement.getAttribute('d') || svgPath;
-              const svgEl = pathElement.closest('svg');
-              if (svgEl) viewBox = svgEl.getAttribute('viewBox') || viewBox;
-            }
-
-            // optional gradient extraction
-            let outerBg: [string, string] | undefined;
-            const gradientElement = doc.querySelector('linearGradient');
-            if (gradientElement) {
-              const stops = gradientElement.querySelectorAll('stop');
-              if (stops.length >= 2) {
-                const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
-                const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
-                if (color1 && color2) outerBg = [color1.trim(), color2.trim()];
+              const rects = doc.querySelectorAll('rect');
+              let tileColor = '#0F6DDA';
+              for (const rect of Array.from(rects)) {
+                const width = rect.getAttribute('width');
+                const fill = rect.getAttribute('fill');
+                if (width && fill && fill.startsWith('#')) {
+                  const w = parseFloat(width);
+                  if (w > 29 && w < 30) { tileColor = fill; break; }
+                }
               }
-            }
 
-            iconData = {
-              id: `product-${product.productId}`,
-              label: product.productName || 'Product',
-              svgPath,
-              tileColor,
-              viewBox,
-              ...(outerBg && { outerBg })
-            };
-          } catch (err) {
-            console.error('Failed to parse SVG, using default:', err);
-            iconData = {
-              id: `product-${product.productId}`,
-              label: product.productName || 'Product',
-              svgPath: 'M12 2L2 7L12 12L22 7L12 2Z',
-              tileColor: '#0F6DDA',
-              viewBox: '0 0 24 24'
-            };
+              const pathElement = doc.querySelector('path[fill="#FFFFFF"]') || doc.querySelector('path');
+              let svgPath = 'M12 2L2 7L12 12L22 7L12 2Z';
+              let viewBox = '0 0 24 24';
+              if (pathElement) {
+                svgPath = pathElement.getAttribute('d') || svgPath;
+                const svgEl = pathElement.closest('svg');
+                if (svgEl) viewBox = svgEl.getAttribute('viewBox') || viewBox;
+              }
+
+              let outerBg: [string, string] | undefined;
+              const gradientElement = doc.querySelector('linearGradient');
+              if (gradientElement) {
+                const stops = gradientElement.querySelectorAll('stop');
+                if (stops.length >= 2) {
+                  const color1 = stops[0].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+                  const color2 = stops[1].getAttribute('style')?.match(/stop-color:([^;]+)/)?.[1];
+                  if (color1 && color2) outerBg = [color1.trim(), color2.trim()];
+                }
+              }
+
+              iconData = {
+                id: `product-${product.productId}`,
+                label: product.productName || 'Product',
+                svgPath,
+                tileColor,
+                viewBox,
+                ...(outerBg && { outerBg })
+              };
+            } catch (err) {
+              console.error('Failed to parse SVG:', err);
+            }
           }
         }
 
@@ -491,6 +508,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     setSelectedProductTypes([]);
     setSelectedSources([]);
     setSelectedStatuses([]);
+    setCreatedSortOrder(null);
   };
 
   // Close filters when clicking outside their header/filter areas (ignore portal-root)
@@ -741,7 +759,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return (
       <ToastProvider>
         <div>
-          <div className="check-container">
+          <div className="customers-container">
             <Header
               title="Products"
               searchTerm=""
@@ -829,7 +847,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
 
           {/* LIST TABLE (hidden when Kong integration is open) */}
           {!showCreateProduct && !isEditFormOpen && !showKongIntegration && (
-            <div className="check-container">
+            <div className="customers-container">
               <Header
                 title="Products"
                 searchTerm={productQuery}
@@ -873,7 +891,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   }
                 }}
                 filterButtonRef={filterButtonRef}
-                onSettingsClick={() => setShowKongIntegration(true)}
+                onSettingsClick={() => { }}
                 onNotificationsClick={() => { }}
 
               />
@@ -1238,7 +1256,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <div
                           ref={createdSortRef}
                           className="products-th-label-with-filter"
-                          onMouseEnter={() => {
+                          onClick={() => {
                             // close others
                             setIsProductTypeFilterOpen(false);
                             setIsSourceFilterOpen(false);
@@ -1251,10 +1269,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                                 left: rect.left,
                               });
                             }
-                            setIsCreatedSortOpen(true);
-                          }}
-                          onMouseLeave={() => {
-                            setIsCreatedSortOpen(false);
+                            setIsCreatedSortOpen(!isCreatedSortOpen);
                           }}
                         >
                           <span>Created On</span>
