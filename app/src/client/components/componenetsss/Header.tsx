@@ -76,7 +76,6 @@ const Header: React.FC<HeaderProps> = ({
                 ? 'filled'
                 : 'default'
             }
-            className="rp-header-search-input"
           />
         )}
 

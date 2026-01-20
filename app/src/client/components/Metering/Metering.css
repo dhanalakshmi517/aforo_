@@ -726,7 +726,7 @@ line-height: var(--line-height-body-sm);
   min-height:calc(100vh - 300px);
 }
 .metrics-empty-state-text{
-  font-size:14px;
+  font-size:14px !important;
   color:var(--color-neutral-800);
   text-align:center;
 }

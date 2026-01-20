@@ -51,7 +51,7 @@ const SearchInput: React.FC<Props> = ({
       className={[
         "si",
         `si--${state}`,
-        isDisabled ? "si--disabled" : "",
+        isDisabled ? "sif--disabled" : "",
         className,
       ].join(" ")}
     >

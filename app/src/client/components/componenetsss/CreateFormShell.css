@@ -63,12 +63,6 @@ body {
   background: var(--color-neutral-white);
   position: relative;
 }
-/* ✅ Remove old "footer spacer" inside create forms (shell already has footer) */
-.cfsBody .met-np-form,
-.cfsBody .met-np-form-section {
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-}
 
 
 /* ✅ HEADER: STICKY like footer */
@@ -133,6 +127,11 @@ text-transform: uppercase;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
+}
+
+/* Ensure dropdowns appear above sticky header */
+.cfsBody .if-select__menu {
+  z-index: 99999 !important;
 }
 
 .cfsBodyInner {

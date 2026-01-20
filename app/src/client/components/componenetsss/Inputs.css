@@ -273,7 +273,7 @@ select.if-select:focus-visible,
 .if-select option:first-child,
 .if-select option[value=""] {
   overflow: hidden;
-  color: var(--color-neutral-300);
+  color: var(--color-neutral-200);
   text-overflow: ellipsis;
 
   /* body/md/reg */
@@ -287,7 +287,7 @@ select.if-select:focus-visible,
 
 /* Styling for selected placeholder */
 .if-select:invalid {
-  color: var(--color-neutral-300);
+  color: var(--color-neutral-200);
 }
 
 
@@ -408,6 +408,8 @@ select.if-select:focus-visible,
   /* host for trigger + menu */
   position: relative;
   /* Ensure dropdown menu can be absolutely positioned */
+  overflow: visible !important;
+  z-index: 100;
 }
 
 .dd-trigger {
@@ -423,7 +425,7 @@ select.if-select:focus-visible,
 }
 
 .dd-placeholder {
-  color: var(--color-neutral-300);
+  color: var(--color-neutral-200);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: 400;
@@ -477,13 +479,17 @@ select.if-select:focus-visible,
   border-radius: 8px;
   padding: 6px;
   max-height: 240px;
-  overflow-y: auto;
+  overflow-y: visible;
   min-width: 100%;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  /* Prevent overflow beyond viewport */
   max-width: min(100%, 300px);
+}
+
+/* Position menu above button if near bottom of viewport */
+.dd-wrap:has(.dd-menu) {
+  overflow: visible;
 }
 
 /* Menu items (soft rounded "pills") */
@@ -491,8 +497,8 @@ select.if-select:focus-visible,
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 12px 14px 12px;
-  min-height: 44px;
+  padding: 8px 12px;
+  min-height: 36px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
@@ -506,8 +512,7 @@ select.if-select:focus-visible,
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
-  line-height: 1.6;
-  /* 150% */
+  line-height: 1.4;
   white-space: nowrap;
 }
 
@@ -517,9 +522,9 @@ select.if-select:focus-visible,
 
 .dd-item:hover:not(.is-disabled),
 .dd-item.is-active:not(.is-disabled) {
-  background: var(--color-primary-500);
+  background: var(--color-primary-100);
   border-color: none;
-  color: #FFFFFF;
+  color:var(--color-neutral-1700);
 }
 
 .dd-item.is-selected {
@@ -629,7 +634,7 @@ select.if-select:focus-visible,
 }
 
 .if-file-placeholder {
-  color: var(--color-neutral-300);
+  color: var(--color-neutral-200);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: 400;

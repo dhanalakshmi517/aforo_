@@ -480,102 +480,105 @@ const EditCustomer: React.FC = () => {
   // ------- step content -------
   const renderStepContent = () => {
     switch (activeTab) {
-      case 'details':
-        return (
-          <div className="edit-np-section">
-            <div className="edit-np-form-row">
-              <div className="edit-np-form-group">
-                <InputField
-                  label="Company Name"
-                  value={companyName}
-                  placeholder="Enter company name"
-                  onChange={val => {
-                    setCompanyName(val);
-                    if (!val.trim())
-                      setErrors(p => ({ ...p, companyName: 'Company Name is required' }));
-                    else if (errors.companyName)
-                      setErrors(p => ({
-                        ...Object.fromEntries(
-                          Object.entries(p).filter(([k]) => k !== 'companyName',
-                          ),
-                        ),
-                      }));
-                  }}
-                  onBlur={() => {
-                    if (!companyName.trim())
-                      setErrors(p => ({ ...p, companyName: 'Company Name is required' }));
-                  }}
-                  error={errors.companyName}
-                  required
-                />
-              </div>
+    case "details":
+  return (
+    <div className="edit-np-section">
+      <div className="edit-np-form-row">
+        {/* ✅ 1) Customer Name FIRST */}
+        <div className="edit-np-form-group">
+          <InputField
+            label="Customer Name"
+            value={customerName}
+            placeholder="Enter customer name"
+            onChange={(val) => {
+              setCustomerName(val);
+              if (!val.trim())
+                setErrors((p) => ({ ...p, customerName: "Customer Name is required" }));
+              else if (errors.customerName)
+                setErrors((p) => ({
+                  ...Object.fromEntries(
+                    Object.entries(p).filter(([k]) => k !== "customerName")
+                  ),
+                }));
+            }}
+            onBlur={() => {
+              if (!customerName.trim())
+                setErrors((p) => ({ ...p, customerName: "Customer Name is required" }));
+            }}
+            error={errors.customerName}
+            required
+          />
+        </div>
 
+        {/* ✅ 2) Company Name SECOND */}
+        <div className="edit-np-form-group">
+          <InputField
+            label="Company Name"
+            value={companyName}
+            placeholder="Enter company name"
+            onChange={(val) => {
+              setCompanyName(val);
+              if (!val.trim())
+                setErrors((p) => ({ ...p, companyName: "Company Name is required" }));
+              else if (errors.companyName)
+                setErrors((p) => ({
+                  ...Object.fromEntries(
+                    Object.entries(p).filter(([k]) => k !== "companyName")
+                  ),
+                }));
+            }}
+            onBlur={() => {
+              if (!companyName.trim())
+                setErrors((p) => ({ ...p, companyName: "Company Name is required" }));
+            }}
+            error={errors.companyName}
+            required
+          />
+        </div>
 
-              <div className="editcust-np-form-group">
-                <label className="editcust-np-label">Company Logo</label>
-                <LogoUploader
-                  logo={companyLogo}
-                  logoUrl={companyLogoUrl}
-                  onChange={handleLogoChange}
-                  onRemove={handleLogoRemove}
-                />
-              </div>
-              <div className="edit-np-form-group">
-                <InputField
-                  label="Customer Name"
-                  value={customerName}
-                  placeholder="Enter customer name"
-                  onChange={val => {
-                    setCustomerName(val);
-                    if (!val.trim())
-                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
-                    else if (errors.customerName)
-                      setErrors(p => ({
-                        ...Object.fromEntries(
-                          Object.entries(p).filter(([k]) => k !== 'customerName'),
-                        ),
-                      }));
-                  }}
-                  onBlur={() => {
-                    if (!customerName.trim())
-                      setErrors(p => ({ ...p, customerName: 'Customer Name is required' }));
-                  }}
-                  error={errors.customerName}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="edit-np-form-row">
-              <div className="edit-np-form-group">
-                <DropdownField
-                  label="Comapny Type"
-                  placeholder="Company Type"
-                  value={companyType}
-                  onChange={val => {
-                    setCompanyType(val);
-
-                    if (!val.trim())
-                      setErrors(p => ({ ...p, companyType: 'Company Type is required' }));
-                    else if (errors.companyType)
-                      setErrors(p => ({
-                        ...Object.fromEntries(
-                          Object.entries(p).filter(([k]) => k !== 'companyType'),
-                        ),
-                      }));
-                  }}
-                  options={[
-                    { label: 'Select company type', value: '' },
-                    { label: 'Individual', value: 'INDIVIDUAL' },
-                    { label: 'Business', value: 'BUSINESS' },
-                  ]}
-                  error={errors.companyType}
-                  required
-                />
-              </div>
-            </div>
+        {/* 3) Logo stays after the two name fields */}
+        <div className="editcust-np-form-group">
+          <label className="editcust-np-logo-label">Company Logo</label>
+          <div className="editcust-np-logo-uploader">
+            <LogoUploader
+              logo={companyLogo}
+              logoUrl={companyLogoUrl}
+              onChange={handleLogoChange}
+              onRemove={handleLogoRemove}
+            />
           </div>
-        );
+        </div>
+      </div>
+
+      <div className="edit-np-form-row">
+        <div className="edit-np-form-group">
+          <DropdownField
+            label="Comapny Type"
+            placeholder="Company Type"
+            value={companyType}
+            onChange={(val) => {
+              setCompanyType(val);
+
+              if (!val.trim())
+                setErrors((p) => ({ ...p, companyType: "Company Type is required" }));
+              else if (errors.companyType)
+                setErrors((p) => ({
+                  ...Object.fromEntries(
+                    Object.entries(p).filter(([k]) => k !== "companyType")
+                  ),
+                }));
+            }}
+            options={[
+              { label: "Individual", value: "INDIVIDUAL" },
+              { label: "Business", value: "BUSINESS" },
+            ]}
+            error={errors.companyType}
+            required
+          />
+        </div>
+      </div>
+    </div>
+  );
 
       case 'account':
         return (

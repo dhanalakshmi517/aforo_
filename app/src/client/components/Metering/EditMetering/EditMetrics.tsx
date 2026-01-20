@@ -372,31 +372,9 @@ const EditMetrics: React.FC<EditMetricsProps> = ({ onClose, metricId: propMetric
     console.log('🔍 [METRICS PREV STEP DEBUG] handlePreviousStep called');
     console.log('  - activeTab:', activeTab);
     console.log('  - currentStep:', currentStep);
-    console.log('  - hasEmptyRequiredFields():', hasEmptyRequiredFields());
-    console.log('  - hasPendingChanges():', hasPendingChanges());
-    console.log('  - metricName:', metricName);
-    console.log('  - version:', version);
-    console.log('  - unitOfMeasure:', unitOfMeasure);
-    console.log('  - description:', description);
-    console.log('  - originalValuesRef.current:', originalValuesRef.current);
     
-    // Check for empty required fields first (highest priority)
-    if (hasEmptyRequiredFields()) {
-      console.log('🔍 [METRICS PREV STEP DEBUG] Showing UnsavedChangesModal (empty fields)');
-      setShowUnsavedChangesModal(true);
-      return;
-    }
-
-    // Then check for unsaved changes
-    const hasChanges = hasPendingChanges();
-    if (hasChanges) {
-      console.log('🔍 [METRICS PREV STEP DEBUG] Showing SaveDraftModal (has changes)');
-      setShowSaveDraftModal(true);
-      return;
-    }
-
-    console.log('🔍 [METRICS PREV STEP DEBUG] No issues, navigating to previous step');
-    // Only navigate if no issues
+    // Allow free backward navigation without validation
+    console.log('🔍 [METRICS PREV STEP DEBUG] Free backward navigation allowed');
     if (currentStep > 0) goToStep(currentStep - 1);
   };
 

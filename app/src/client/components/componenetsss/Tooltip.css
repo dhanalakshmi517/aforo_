@@ -7,7 +7,6 @@
 /* Tooltip Box */
 .tooltip-box {
   position: absolute;
-  min-height: 32px;
   background-color: var(--color-neutral-1000);
   color: var(--color-neutral-white);
   padding: 8px 10px;
@@ -22,13 +21,12 @@ line-height: var(--line-height-body-xs, 16px); /* 160% */
   white-space: normal;
   z-index: 100;
   opacity: 1;
-  min-width: 120px;              /* give room so words don't stack vertically */
-  max-width: 320px;              /* prevent it from becoming too wide */
   width: auto;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;              /* normal sentence layout */
+  align-items: left;
+  justify-content: left;
+  text-align: left;  
+  max-width:320px;            /* normal sentence layout */
 }
 
 /* Tooltip positions */

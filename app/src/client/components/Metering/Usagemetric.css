@@ -899,13 +899,17 @@ html, body, #root{
 }
 
 .met-np-step:nth-child(2) .met-np-step__connector {
-  height: 109px; /* Height for second connector */
+  height: 100px; /* Height for second connector */
 }
 
 
 /* Vertical tweaks for steps after the first */
 .met-np-step:not(:first-child) .met-np-step__bullet { margin-top: -20px; }
 .met-np-step:not(:first-child) .met-np-step__text { margin-top: -20px; }
+
+/* Additional upward movement for the last step only */
+.met-np-step:last-child .met-np-step__bullet { margin-top: -40px; }
+.met-np-step:last-child .met-np-step__text { margin-top: -40px; }
 
 /* Step container */
 .met-np-step {
