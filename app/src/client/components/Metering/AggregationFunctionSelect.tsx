@@ -94,6 +94,7 @@ const AggregationFunctionSelect: React.FC<AggregationFunctionSelectProps> = ({
         label={label}
         value={value}
         onChange={onChange}
+        placeholder="Select aggregation function"
         options={[
           { label: '-- Select --', value: '', disabled: false },
           ...options.map(opt => ({ label: opt, value: opt }))

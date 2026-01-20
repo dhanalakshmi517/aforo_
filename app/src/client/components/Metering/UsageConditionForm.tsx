@@ -136,6 +136,18 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
     }
   }, [billingCriteria, filters.length, deleteError]);
 
+  // Clear billing error when all required conditions are filled
+  useEffect(() => {
+    if (billingError && billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS') {
+      const allConditionsFilled = filters.every(filter => 
+        filter.usageCondition && filter.operator && filter.value
+      );
+      if (allConditionsFilled && filters.length > 0 && onFieldEdited) {
+        onFieldEdited('billingCriteria');
+      }
+    }
+  }, [filters, billingCriteria, billingError, onFieldEdited]);
+
   const upperType = (productType || '').toUpperCase();
   const upperUom = (unitOfMeasure || '').toUpperCase();
 
@@ -172,6 +184,10 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
           required
           onChange={(val) => {
             onBillingCriteriaChange(val);
+            // Clear billing error when billing criteria is changed
+            if (billingError && onFieldEdited) {
+              onFieldEdited('billingCriteria');
+            }
           }}
           options={[
             { label: 'Bill based on usage conditions', value: 'BILL_BASED_ON_USAGE_CONDITIONS' },
@@ -195,11 +211,15 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
         </p>
       </div>
 
-      {filters.map((filter, index) => (
-        <div key={filter.id} className="filter-box">
-          <div className="filter-header">
-            <p>USAGE CONDITION {index + 1}</p>
-            <DeleteIconButton
+      {/* Only show usage condition filters when "Bill based on usage conditions" is selected */}
+      {billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' && (
+        <>
+          <div className="filters-container">
+            {filters.map((filter, index) => (
+              <div key={filter.id} className="filter-box">
+              <div className="filter-header">
+                <p>USAGE CONDITION {index + 1}</p>
+                <DeleteIconButton
               onClick={() => handleRemove(filter.id)}
               disabled={locked}
               title="Delete filter condition"
@@ -209,6 +229,9 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
           <div className="condition-row">
             <div className="condition-field">
               {(() => {
+                console.log('Debug - billingCriteria:', billingCriteria, 'Type:', typeof billingCriteria);
+                console.log('Debug - Should show asterisk:', billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS');
+                
                 const commonProps = {
                   value: filter.usageCondition,
                   onChange: (val: string) => handleChange(filter.id, 'usageCondition', val),
@@ -315,11 +338,12 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
           </div>
         </div>
       ))}
+      </div>
 
       {deleteError && (
         <div style={{ color: '#D32F2F', fontSize: '14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 1C4.13438 1 1 4.13438 1 8C1 11.8656 4.13438 15 8 15C11.8656 15 15 11.8656 15 8C15 4.13438 11.8656 1 8 1ZM8 10.5C7.72344 10.5 7.5 10.2766 7.5 10V8C7.5 7.72344 7.72344 7.5 8 7.5C8.27656 7.5 8.5 7.72344 8.5 8V10C8.5 10.2766 8.27656 10.5 8 10.5ZM8.5 6H7.5V5H8.5V6Z" fill="#D32F2F" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M5.59961 3.6V5.6M5.59961 7.6H5.60461M10.5996 5.6C10.5996 2.83858 8.36103 0.6 5.59961 0.6C2.83819 0.6 0.599609 2.83858 0.599609 5.6C0.599609 8.36142 2.83819 10.6 5.59961 10.6C8.36103 10.6 10.5996 8.36142 10.5996 5.6Z" stroke="#ED5142" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           {deleteError}
         </div>
@@ -332,6 +356,8 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
       >
         + Add Usage
       </SecondaryButton>
+        </>
+      )}
     </div>
   );
 };
