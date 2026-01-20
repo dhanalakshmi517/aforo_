@@ -81,7 +81,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 ? 'filled'
                 : 'default'
             }
-            className="rp-header-search-input"
           />
         )}
 

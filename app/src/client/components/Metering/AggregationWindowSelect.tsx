@@ -128,6 +128,7 @@ const AggregationWindowSelect: React.FC<AggregationWindowSelectProps> = ({
       <DropdownField
         label={label}
         value={value}
+        placeholder="Select aggregation window"
         onChange={onChange}
         options={[
           { label: '-- Select --', value: '', disabled: false },

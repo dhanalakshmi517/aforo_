@@ -579,6 +579,20 @@ gap: 4px;
 align-items: center;
 }
 
+.editcust-np-logo-label {
+  color: var(--color-neutral-1700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 420 !important;
+  line-height: var(--line-height-body-md) !important;
+  user-select: none;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .np-icon-field-wrapper {
   display: flex;
   align-items: center;
@@ -588,6 +602,11 @@ align-items: center;
   border-radius: 6px;
   padding: 12px;
   cursor: pointer;
+  margin-top: 6px;
+}
+
+.editcust-np-logo-uploader{
+  padding-bottom: 4px;
 }
 
 .np-icon-placeholder {

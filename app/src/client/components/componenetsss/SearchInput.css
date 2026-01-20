@@ -80,16 +80,16 @@ line-height: var(--line-height-body-md, 20px);}
   background: var(--color-neutral-white);
 }
 
-.si--disabled{
+.sif--disabled{
   background: var(--color-neutral-150);
-  border-color: none;
+  border: none;
 }
 
-.si--disabled .si-input{
+.sif--disabled .sif-input{
   color: var(--color-neutral-500);
   cursor: not-allowed;
 }
 
-.si--disabled .si-input::placeholder{
+.sif--disabled .si-input::placeholder{
   color: var(--color-neutral-300);
 }

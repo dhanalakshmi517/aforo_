@@ -32,6 +32,12 @@ const Organization: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState('');
   const [empSize, setEmpSize] = useState('');
   const [otherRole, setOtherRole] = useState('');
+  
+  // Truncate function for long labels
+  const truncateLabel = (label: string, maxLength: number = 13) => {
+    return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
+  };
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -573,7 +579,7 @@ const Organization: React.FC = () => {
                     }}
                     options={countries.map(country => ({
                       value: country.code,
-                      label: country.name,
+                      label: truncateLabel(country.name),
                       icon: <span className={`fi fi-${country.code.toLowerCase()}`} style={{ fontSize: '20px' }}></span>
                     }))}
                     error={errors.country}

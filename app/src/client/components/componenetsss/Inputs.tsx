@@ -437,7 +437,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
           ) : selected ? (
             <>
               {selected.icon && <span className="dd-icon">{selected.icon}</span>}
-              {selected.label.length > 15 ? `${selected.label.substring(0, 15)}...` : selected.label}
+              {selected.label}
             </>
           ) : (
             placeholder
@@ -949,4 +949,3 @@ export const FileField = React.forwardRef<HTMLInputElement, FileFieldProps>(
   }
 );
 FileField.displayName = "FileField";
-
