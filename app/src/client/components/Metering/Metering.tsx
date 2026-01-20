@@ -430,31 +430,31 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
           anchorLeft={mainFilterPanelPosition.left}
         />
       )}
-      {selectedStatuses.length > 0 && (
-        <div className="products-active-filters-row">
-          <div className="products-active-filters-chips">
-            {selectedStatuses.map((s) => (
-              <FilterChip
-                key={s}
-                label={s.charAt(0).toUpperCase() + s.slice(1)}
-                onRemove={() =>
-                  setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                }
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="products-filters-reset"
-            onClick={() => {
-              setSelectedStatuses([]);
-            }}
-          >
-            Reset
-          </button>
-        </div>
-      )}
       <div className="customers-table-wrapper">
+        {selectedStatuses.length > 0 && (
+          <div className="products-active-filters-row">
+            <div className="products-active-filters-chips">
+              {selectedStatuses.map((s) => (
+                <FilterChip
+                  key={s}
+                  label={s.charAt(0).toUpperCase() + s.slice(1)}
+                  onRemove={() =>
+                    setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                  }
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="products-filters-reset"
+              onClick={() => {
+                setSelectedStatuses([]);
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        )}
         <table className="customers-table">
           <thead>
             <tr>
