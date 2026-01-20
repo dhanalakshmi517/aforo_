@@ -374,12 +374,12 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 /* First column special spacing */
 .customers-table td.product-name-td {
   padding: 0;
-  border-bottom: 1px solid #E9E9EE;
+  border-bottom: 1px solid var(--color-neutral-200);
 }
 
 .customers-table td:not(.product-name-td) {
   padding: 14px;
-  border-bottom: 1px solid #E9E9EE;
+  border-bottom: 1px solid var(--color-neutral-200);
 }
 
 /* Empty state table cell */

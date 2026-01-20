@@ -82,7 +82,7 @@ line-height: var(--line-height-body-md, 20px);}
 
 .si--disabled{
   background: var(--color-neutral-150);
-  border-color: var(--color-neutral-300);
+  border-color: none;
 }
 
 .si--disabled .si-input{

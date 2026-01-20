@@ -759,7 +759,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
     return (
       <ToastProvider>
         <div>
-          <div className="customers-container">
+          <div className="check-container">
             <Header
               title="Products"
               searchTerm=""

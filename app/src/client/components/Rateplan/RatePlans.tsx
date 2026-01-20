@@ -1219,7 +1219,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             />
           </div>
         ) : (
-          <div className="customers-container">
+          <div className="check-container">
             <PageHeader
               title="Rate Plans"
               searchTerm={searchTerm}
