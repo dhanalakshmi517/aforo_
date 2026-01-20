@@ -1,9 +1,10 @@
 // CreateSubscription.tsx
 import * as React from "react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../componenetsss/TopBar";
+import CreateFormShell from "../componenetsss/CreateFormShell";
 import { TextareaField, DropdownField } from "../componenetsss/Inputs";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import SaveDraft from "../componenetsss/SaveDraft";
@@ -11,9 +12,8 @@ import { useToast } from "../componenetsss/ToastProvider";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import SecondaryButton from "../componenetsss/SecondaryButton";
 import ProductCreatedSuccess from "../componenetsss/ProductCreatedSuccess";
-import SectionHeader from "../componenetsss/SectionHeader";
-import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
 import InfoInlineNote from "../componenetsss/InfoInlineNote";
+import ReviewComponent, { ReviewRow } from "../componenetsss/ReviewComponent";
 
 import {
   Api,
@@ -26,17 +26,19 @@ import {
 import "../componenetsss/SkeletonForm.css";
 import "./CreateSubscription.css";
 
-type ActiveTab = "details" | "review";
+type StepKey = "details" | "review";
 type PaymentKind = "PREPAID" | "POSTPAID";
 
 const steps = [
   {
     id: 1,
+    key: "details" as StepKey,
     title: "Purchase Details",
     desc: "Provide purchase-related details.",
   },
   {
     id: 2,
+    key: "review" as StepKey,
     title: "Review & Confirm",
     desc: "Check and finalize details.",
   },
@@ -47,10 +49,7 @@ interface CreateSubscriptionProps {
   onCreateSuccess: (sub: SubscriptionType) => void;
   onRefresh?: () => void;
 
-  /** optional - same idea as metric: open an existing draft */
   draftSubscriptionId?: number;
-
-  /** optional - parent can pass draft object */
   draftData?: SubscriptionType;
 }
 
@@ -69,15 +68,17 @@ export default function CreateSubscription({
   const activeSubscriptionId = draftFromState || draftSubscriptionId;
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("details");
+  const activeTab: StepKey = steps[currentStep].key;
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
+
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
   const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
   const [initialFormState, setInitialFormState] = useState<any>(null);
 
@@ -104,7 +105,38 @@ export default function CreateSubscription({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // ─────────────────────────────────────────────────────────────
-  // Page + back button handling (same as CreateUsageMetric)
+  // Icons (same vibe as your CreateCustomer)
+  // ─────────────────────────────────────────────────────────────
+  const StepLockIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <path
+        d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
+        stroke="#BAC4D5"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  const CompletedIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z"
+        fill="#034A7D"
+      />
+    </svg>
+  );
+
+  const ActiveRingIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+      <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+    </svg>
+  );
+
+  // ─────────────────────────────────────────────────────────────
+  // Page behavior (same as your create screens)
   // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     document.body.classList.add("create-product-page");
@@ -149,11 +181,11 @@ export default function CreateSubscription({
   }, [showToast]);
 
   // ─────────────────────────────────────────────────────────────
-  // Hydrate draft by ID (optional), without breaking builds if api method missing
+  // Hydrate draft
   // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!activeSubscriptionId) return;
-    if (draftData) return; // prefer provided object
+    if (draftData) return;
 
     (async () => {
       try {
@@ -165,23 +197,32 @@ export default function CreateSubscription({
         if (!fn) return;
 
         const data = await fn(activeSubscriptionId);
+        if (!data) return;
 
-        if (data) {
-          setSubscriptionId((data as any).subscriptionId ?? null);
-          if ((data as any).customerId != null) setSelectedCustomerId((data as any).customerId);
-          if ((data as any).productId != null) setSelectedProductId((data as any).productId);
-          if ((data as any).ratePlanId != null) setSelectedRatePlanId((data as any).ratePlanId);
+        setSubscriptionId((data as any).subscriptionId ?? null);
+        if ((data as any).customerId != null) setSelectedCustomerId((data as any).customerId);
+        if ((data as any).productId != null) setSelectedProductId((data as any).productId);
+        if ((data as any).ratePlanId != null) setSelectedRatePlanId((data as any).ratePlanId);
 
-          const pt = (data as any).paymentType;
-          if (pt === "PREPAID" || pt === "POSTPAID") setPaymentType(pt);
+        const pt = (data as any).paymentType;
+        if (pt === "PREPAID" || pt === "POSTPAID") setPaymentType(pt);
 
-          if ((data as any).adminNotes) setAdminNotes((data as any).adminNotes);
+        if ((data as any).adminNotes) setAdminNotes((data as any).adminNotes);
+
+        if (!initialFormState) {
+          setInitialFormState({
+            selectedCustomerId: (data as any).customerId ?? null,
+            selectedProductId: (data as any).productId ?? null,
+            selectedRatePlanId: (data as any).ratePlanId ?? null,
+            paymentType: pt === "PREPAID" || pt === "POSTPAID" ? pt : "",
+            adminNotes: (data as any).adminNotes || "",
+          });
         }
       } catch (e) {
         console.error("Failed to hydrate subscription draft", e);
       }
     })();
-  }, [activeSubscriptionId, draftData]);
+  }, [activeSubscriptionId, draftData, initialFormState]);
 
   useEffect(() => {
     if (!draftData) return;
@@ -203,12 +244,12 @@ export default function CreateSubscription({
         selectedProductId: (draftData as any).productId ?? null,
         selectedRatePlanId: (draftData as any).ratePlanId ?? null,
         paymentType: pt === "PREPAID" || pt === "POSTPAID" ? pt : "",
-        adminNotes: (draftData as any).adminNotes || ""
+        adminNotes: (draftData as any).adminNotes || "",
       });
     }
   }, [draftData, initialFormState]);
 
-  
+  // names from IDs
   useEffect(() => {
     if (selectedCustomerId && customers.length) {
       const c = customers.find((x) => x.customerId === selectedCustomerId);
@@ -230,20 +271,20 @@ export default function CreateSubscription({
     }
   }, [ratePlans, selectedRatePlanId]);
 
+  // reset "Saved!" when user edits
   useEffect(() => {
     if (isDraftSaved) setIsDraftSaved(false);
   }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, adminNotes]);
 
   useEffect(() => {
-    if (isDraftSaved) {
-      const timer = setTimeout(() => {
-        setIsDraftSaved(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
+    if (!isDraftSaved) return;
+    const timer = setTimeout(() => setIsDraftSaved(false), 2000);
+    return () => clearTimeout(timer);
   }, [isDraftSaved]);
 
-  
+  // ─────────────────────────────────────────────────────────────
+  // Lock logic (same philosophy as CreateCustomer)
+  // ─────────────────────────────────────────────────────────────
   const hasAnyRequiredInput = useMemo(() => {
     return Boolean(
       selectedCustomerId ||
@@ -254,12 +295,20 @@ export default function CreateSubscription({
     );
   }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType, adminNotes]);
 
+  const isStep0Completed = useMemo(() => {
+    return Boolean(
+      selectedCustomerId &&
+        selectedProductId &&
+        selectedRatePlanId &&
+        (paymentType === "PREPAID" || paymentType === "POSTPAID")
+    );
+  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType]);
+
+  const isReviewLocked = !isStep0Completed;
+
   const hasUserMadeChanges = useMemo(() => {
-    if (!initialFormState) {
-      // No draft loaded, enable buttons if user has input
-      return hasAnyRequiredInput;
-    }
-    // Draft loaded, check if current state differs from initial state
+    if (!initialFormState) return hasAnyRequiredInput;
+
     return (
       selectedCustomerId !== initialFormState.selectedCustomerId ||
       selectedProductId !== initialFormState.selectedProductId ||
@@ -274,44 +323,30 @@ export default function CreateSubscription({
     selectedRatePlanId,
     paymentType,
     adminNotes,
-    hasAnyRequiredInput
+    hasAnyRequiredInput,
   ]);
 
   useEffect(() => {
-    if (hasUserMadeChanges && !hasEverBeenEnabled) {
-      setHasEverBeenEnabled(true);
-    }
+    if (hasUserMadeChanges && !hasEverBeenEnabled) setHasEverBeenEnabled(true);
   }, [hasUserMadeChanges, hasEverBeenEnabled]);
 
   const topActionsDisabled = !hasEverBeenEnabled;
 
-  const canGoReview = useMemo(() => {
-    return Boolean(
-      selectedCustomerId &&
-        selectedProductId &&
-        selectedRatePlanId &&
-        (paymentType === "PREPAID" || paymentType === "POSTPAID")
-    );
-  }, [selectedCustomerId, selectedProductId, selectedRatePlanId, paymentType]);
-
   // ─────────────────────────────────────────────────────────────
-  // Validation (same pattern as metric validateCurrentStep)
+  // Validation
   // ─────────────────────────────────────────────────────────────
-  const validateCurrentStep = (step: number): boolean => {
-    const step0Errors: Record<string, string> = {};
+  const validateStep = (s: number): boolean => {
+    if (s !== 0) return true;
 
-    if (step === 0) {
-      if (!selectedCustomerId) step0Errors.customerId = "Customer is required";
-      if (!selectedProductId) step0Errors.productId = "Product is required";
-      if (!selectedRatePlanId) step0Errors.ratePlanId = "Rate Plan is required";
-      if (!(paymentType === "PREPAID" || paymentType === "POSTPAID"))
-        step0Errors.paymentType = "Payment Type is required";
+    const n: Record<string, string> = {};
+    if (!selectedCustomerId) n.customerId = "Customer is required";
+    if (!selectedProductId) n.productId = "Product is required";
+    if (!selectedRatePlanId) n.ratePlanId = "Rate Plan is required";
+    if (!(paymentType === "PREPAID" || paymentType === "POSTPAID"))
+      n.paymentType = "Payment Type is required";
 
-      setErrors(step0Errors);
-      return Object.keys(step0Errors).length === 0;
-    }
-
-    return true;
+    setErrors(n);
+    return Object.keys(n).length === 0;
   };
 
   const clearError = (key: string) => {
@@ -324,31 +359,44 @@ export default function CreateSubscription({
   };
 
   // ─────────────────────────────────────────────────────────────
-  // navigation (same philosophy as metric gotoStep)
+  // Step navigation (with lock + validation)
   // ─────────────────────────────────────────────────────────────
-  const gotoStep = (index: number) => {
-    if (index < 0 || index > 1) return;
+  const gotoStep = (index: number) => setCurrentStep(index);
 
-    if (index > currentStep) {
-      if (currentStep === 0 && index === 1) {
-        const ok = validateCurrentStep(0);
-        if (!ok) return;
-        if (!canGoReview) return;
+  const handleStepClick = async (index: number) => {
+    if (index === currentStep) return;
+
+    // back navigation always allowed
+    if (index < currentStep) {
+      gotoStep(index);
+      return;
+    }
+
+    // prevent clicking locked review
+    if (index === 1 && isReviewLocked) return;
+
+    // when going to review, validate details
+    if (index === 1) {
+      const ok = validateStep(0);
+      if (!ok) {
+        gotoStep(0);
+        return;
       }
     }
 
-    setCurrentStep(index);
-    const map: ActiveTab[] = ["details", "review"];
-    setActiveTab(map[index] || "details");
+    gotoStep(index);
   };
 
+  // ─────────────────────────────────────────────────────────────
+  // TopBar back
+  // ─────────────────────────────────────────────────────────────
   const handleTopbarBack = () => {
     if (hasAnyRequiredInput || subscriptionId) setShowSavePrompt(true);
     else navigate("/get-started/subscriptions");
   };
 
   // ─────────────────────────────────────────────────────────────
-  // draft save (same UX as metric: TopBar shows Saved!)
+  // Draft payload + save
   // ─────────────────────────────────────────────────────────────
   const buildDraftPayload = () => {
     const payload: any = { status: "DRAFT" };
@@ -388,7 +436,8 @@ export default function CreateSubscription({
   };
 
   const saveBeforeNext = async () => {
-    if (!validateCurrentStep(currentStep)) return false;
+    const ok = validateStep(0);
+    if (!ok) return false;
 
     setSaving(true);
     try {
@@ -415,23 +464,20 @@ export default function CreateSubscription({
     }
   };
 
-  // discard behavior - delete draft if it has an ID, then close
+  // discard behavior - delete draft then close
   const deleteAndClose = async () => {
-    // If we have a subscription ID (draft), delete it using the delete API
     if (subscriptionId) {
       try {
         await Api.deleteSubscription(subscriptionId);
-        console.log('Draft subscription deleted successfully');
       } catch (error) {
-        console.error('Failed to delete draft subscription:', error);
-        // Still close even if delete fails
+        console.error("Failed to delete draft subscription:", error);
       }
     }
     onClose();
   };
 
   // ─────────────────────────────────────────────────────────────
-  // final submit
+  // Final submit
   // ─────────────────────────────────────────────────────────────
   const handleFinalSubmit = async () => {
     if (!subscriptionId) {
@@ -449,7 +495,6 @@ export default function CreateSubscription({
     setSaving(true);
     try {
       const resp = await Api.confirmSubscription(subscriptionId);
-
       dismissToast(processingToastId);
 
       setShowSuccess(true);
@@ -476,35 +521,29 @@ export default function CreateSubscription({
     }
   };
 
-  const handleSaveAndNext = async () => {
+  const handleNext = async () => {
     if (activeTab === "details") {
       const ok = await saveBeforeNext();
       if (!ok) return;
-      gotoStep(1);
+      setCurrentStep(1);
       return;
     }
-
     if (activeTab === "review") {
       await handleFinalSubmit();
     }
   };
 
   const handleGoAllPurchases = () => {
-    showToast({
-      kind: "success",
-      title: "Purchase Created Successfully",
-      message: "Your purchase has been created successfully.",
-    });
     navigate("/get-started/subscriptions");
     onClose();
   };
 
   // ─────────────────────────────────────────────────────────────
-  // Render blocks
+  // Render blocks (same content you had)
   // ─────────────────────────────────────────────────────────────
-  const renderStep0 = () => (
+  const renderDetails = () => (
     <div className="met-np-grid-2">
-                    <DropdownField
+      <DropdownField
         label="Customer Name"
         required
         placeholder="Customer"
@@ -523,9 +562,9 @@ export default function CreateSubscription({
         }))}
       />
 
-                    <DropdownField
+      <DropdownField
         label="Product"
-        placeholder="product"
+        placeholder="Product"
         required
         value={selectedProductId?.toString() || ""}
         onChange={(val) => {
@@ -546,9 +585,9 @@ export default function CreateSubscription({
         }))}
       />
 
-                    <DropdownField
+      <DropdownField
         label="Rate Plan"
-        placeholder="RatePlan"
+        placeholder="Rate Plan"
         required
         value={selectedRatePlanId?.toString() || ""}
         onChange={(val) => {
@@ -568,12 +607,13 @@ export default function CreateSubscription({
           }))}
         disabled={!selectedProductId}
       />
+
       <InfoInlineNote text="Select a rate plan associated with the chosen product. Changing the product will reset this selection." />
 
-                    <DropdownField
+      <DropdownField
         label="Payment Type"
         required
-        placeholder="PaymentType"
+        placeholder="Payment Type"
         value={paymentType}
         onChange={(val) => {
           if (val === "PREPAID" || val === "POSTPAID" || val === "") {
@@ -599,8 +639,8 @@ export default function CreateSubscription({
     </div>
   );
 
-  const renderStep1 = () => {
-    const reviewRows: ReviewRow[] = [
+  const renderReview = () => {
+    const rows: ReviewRow[] = [
       { label: "Customer Name", value: selectedCustomerName || "—" },
       { label: "Product", value: selectedProductName || "—" },
       { label: "Rate Plan", value: selectedRatePlanName || "—" },
@@ -618,204 +658,186 @@ export default function CreateSubscription({
 
     return (
       <section>
-        <ReviewComponent title="PURCHASE DETAILS" rows={reviewRows} />
+        <ReviewComponent title="PURCHASE DETAILS" rows={rows} />
       </section>
     );
   };
 
   // ─────────────────────────────────────────────────────────────
-  // UI (same as CreateUsageMetric structure + met-np classnames)
+  // Success Screen
+  // ─────────────────────────────────────────────────────────────
+  if (showSuccess) {
+    return (
+      <ProductCreatedSuccess
+        productName={selectedCustomerName || "Purchase"}
+        titleOverride={`“${selectedCustomerName || "Purchase"}” Purchase Created Successfully`}
+        primaryLabelOverride="Go to All Purchases"
+        onPrimaryClick={handleGoAllPurchases}
+      />
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Main UI (CreateFormShell like CreateCustomer)
   // ─────────────────────────────────────────────────────────────
   return (
     <>
-      {showSuccess ? (
-        <ProductCreatedSuccess
-          productName={selectedCustomerName || "Purchase"}
-          titleOverride={`“${selectedCustomerName || "Purchase"}” Purchase Created Successfully`}
-          primaryLabelOverride="Go to All Purchases"
-          onPrimaryClick={handleGoAllPurchases}
-        />
-      ) : (
-        <>
-          <TopBar
-            title="Create New Purchase"
-            onBack={handleTopbarBack}
-            cancel={{
-              onClick: () => setShowDeleteConfirm(true),
-              disabled: topActionsDisabled,
-            }}
-            save={{
-              onClick: handleSaveDraft,
-              label: isDraftSaved ? "Saved!" : "Save as Draft",
-              saved: isDraftSaved,
-              saving: isDraftSaving,
-              labelWhenSaved: "Saved as Draft",
-              disabled: topActionsDisabled,
-            }}
-          />
+      <TopBar
+        title="Create New Purchase"
+        onBack={handleTopbarBack}
+        cancel={{
+          onClick: () => setShowDeleteConfirm(true),
+          disabled: topActionsDisabled,
+        }}
+        save={{
+          onClick: handleSaveDraft,
+          label: isDraftSaved ? "Saved!" : "Save as Draft",
+          saved: isDraftSaved,
+          saving: isDraftSaving,
+          labelWhenSaved: "Saved as Draft",
+          disabled: topActionsDisabled,
+        }}
+      />
 
-          <div className="met-np-viewport">
-            <div className="met-np-card">
-              <div className="met-np-grid">
-                <aside className="met-np-rail">
-                  <nav className="met-np-steps">
-                    {steps.map((step, i) => {
-                      const isActive = i === currentStep;
-                      // Only mark as completed if user has moved past it AND all required fields are filled
-                      const isStep0Completed = selectedCustomerId && selectedProductId && selectedRatePlanId && paymentType;
-                      const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : true);
-                      const showConnector = i < steps.length - 1;
+      <CreateFormShell
+        rail={
+          <nav className="met-np-steps">
+            {steps.map((step, i) => {
+              const isLocked = i === 1 && isReviewLocked;
+              const isCompleted = i === 0 ? Boolean(isStep0Completed) : i < currentStep;
+              const isActive =
+                (i === 0 && !isStep0Completed) ||
+                (i === currentStep && isStep0Completed) ||
+                (i === 1 && isStep0Completed && currentStep <= 1);
 
-                      return (
-                        <button
-                          key={step.id}
-                          type="button"
-                          className={[
-                            "met-np-step",
-                            isActive ? "active" : "",
-                            isCompleted ? "completed" : "",
-                          ]
-                            .join(" ")
-                            .trim()}
-                          onClick={() => gotoStep(i)}
-                        >
-                          <span className="met-np-step__bullet" aria-hidden="true">
-                            <span className="met-np-step__icon">
-                              {isCompleted ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                  <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                                  <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                              ) : (i === 0 && !isCompleted) || (isActive && (selectedCustomerId && selectedProductId && selectedRatePlanId && paymentType)) ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                  <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
-                                  <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
-                                </svg>
-                              ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
-                                  <path d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z" stroke="#BAC4D5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                              )}
-                            </span>
-                            {showConnector && <span className="met-np-step__connector" />}
-                          </span>
+              const showConnector = i < steps.length - 1;
 
-                          <span className="met-np-step__text">
-                            <span className="met-np-step__title">{step.title}</span>
-                            <span className="met-np-step__desc">{step.desc}</span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </nav>
-                </aside>
-
-                <main className="met-np-main">
-                  <div className="af-skel-rule af-skel-rule--top" />
-                  <div className="met-np-main__inner">
-                    <div className="met-np-body">
-                      {activeTab === "details" && (
-                        <SectionHeader title="PURCHASE DETAILS" className="met-np-section-header-fixed" />
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  className={[
+                    "met-np-step",
+                    isActive ? "active" : "",
+                    isCompleted ? "completed" : "",
+                    isLocked ? "locked" : "",
+                  ].join(" ").trim()}
+                  onClick={() => void handleStepClick(i)}
+                  disabled={i === 1 && isReviewLocked}
+                >
+                  <span className="met-np-step__bullet" aria-hidden="true">
+                    <span className="met-np-step__icon">
+                      {isActive ? (
+                        <ActiveRingIcon />
+                      ) : isCompleted ? (
+                        <CompletedIcon />
+                      ) : (
+                        <StepLockIcon />
                       )}
-                      {activeTab === "review" && (
-                        <SectionHeader title="REVIEW & CONFIRM" className="met-np-section-header-fixed" />
-                      )}
+                    </span>
 
-                      <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
-                        <div className="met-np-form-section">
-                          {activeTab === "details" && <section>{renderStep0()}</section>}
-                          {activeTab === "review" && <section>{renderStep1()}</section>}
-                        </div>
+                    {showConnector && <span className="met-np-step__connector" />}
+                  </span>
 
-                        <div className="met-np-form-footer" style={{ position: "relative" }}>
-                          {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
-
-                          {activeTab === "details" && (
-                            <div className="met-np-btn-group met-np-btn-group--next">
-                              <PrimaryButton onClick={handleSaveAndNext} disabled={saving}>
-                                {saving ? "Saving..." : "Save & Next"}
-                              </PrimaryButton>
-                            </div>
-                          )}
-
-                          {activeTab === "review" && (
-                            <>
-                              {!canGoReview ? (
-                                <div
-                                  className="met-np-footer-hint"
-                                  style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    bottom: "20px",
-                                    transform: "translateX(-50%)",
-                                    color: "#8C8F96",
-                                    fontSize: 14,
-                                    pointerEvents: "none",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  Complete the previous step to unlock this step
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="met-np-btn-group met-np-btn-group--back">
-                                    <SecondaryButton onClick={() => gotoStep(0)} disabled={saving}>
-                                      Back
-                                    </SecondaryButton>
-                                  </div>
-                                  <div className="met-np-btn-group met-np-btn-group--next">
-                                    <PrimaryButton onClick={handleFinalSubmit} disabled={saving}>
-                                      {saving ? "Submitting..." : "Create Purchase"}
-                                    </PrimaryButton>
-                                  </div>
-                                </>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </main>
-              </div>
-
-              <div className="af-skel-rule af-skel-rule--bottom" />
-
-              <SaveDraft
-                isOpen={showSavePrompt}
-                onClose={async () => {
-                  setShowSavePrompt(false);
-                  await deleteAndClose();
-                }}
-                onSave={async () => {
-                  const ok = await handleSaveDraft();
-                  showToast({
-                    kind: ok ? "success" : "error",
-                    title: ok ? "Draft Saved" : "Failed to Save Draft",
-                    message: ok ? "Purchase draft saved successfully." : "Unable to save draft. Please try again.",
-                  });
-                  onClose();
-                }}
-                onDismiss={() => setShowSavePrompt(false)}
-              />
-            </div>
+                  <span className="met-np-step__text">
+                    <span className="met-np-step__title">{step.title}</span>
+                    <span className="met-np-step__desc">{step.desc}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        }
+        title={activeTab === "details" ? "PURCHASE DETAILS" : "REVIEW & CONFIRM"}
+        locked={activeTab === "review" ? isReviewLocked : false}
+        footerLeft={
+          activeTab === "details" ? null : isReviewLocked ? null : (
+            <SecondaryButton type="button" onClick={() => setCurrentStep(0)} disabled={saving}>
+              Back
+            </SecondaryButton>
+          )
+        }
+        footerHint={
+          activeTab === "review" && isReviewLocked
+            ? "Complete the previous steps to unlock this step"
+            : undefined
+        }
+        footerRight={
+          activeTab === "details" ? (
+            <PrimaryButton type="button" onClick={handleNext} disabled={saving}>
+              {saving ? "Saving..." : "Save & Next"}
+            </PrimaryButton>
+          ) : isReviewLocked ? null : (
+            <PrimaryButton type="button" onClick={handleNext} disabled={saving}>
+              {saving ? "Submitting..." : "Create Purchase"}
+            </PrimaryButton>
+          )
+        }
+      >
+        <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
+          <div className="met-np-form-section">
+            {activeTab === "details" && <section>{renderDetails()}</section>}
+            {activeTab === "review" && <section>{renderReview()}</section>}
           </div>
 
-          <ConfirmDeleteModal
-            isOpen={showDeleteConfirm}
-            productName={selectedCustomerName || "this purchase"}
-            entityType="purchase"
-            discardLabel="Keep editing"
-            confirmLabel="Discard"
-            isDiscardMode={true}
-            onConfirm={async () => {
-              setShowDeleteConfirm(false);
-              await deleteAndClose();
-            }}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
-        </>
-      )}
+          {/* FOOTER AREA INSIDE SHELL (only for inline errors / hint overlay) */}
+          <div className="met-np-form-footer" style={{ position: "relative" }}>
+            {errors.form && <div className="met-met-np-error-message">{errors.form}</div>}
+
+            {activeTab === "review" && isReviewLocked && (
+              <div
+                className="met-np-footer-hint"
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  bottom: "20px",
+                  transform: "translateX(-50%)",
+                  color: "#8C8F96",
+                  fontSize: 14,
+                  pointerEvents: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Complete the previous steps to unlock this step
+              </div>
+            )}
+          </div>
+        </form>
+      </CreateFormShell>
+
+      {/* Save Draft prompt */}
+      <SaveDraft
+        isOpen={showSavePrompt}
+        onClose={async () => {
+          setShowSavePrompt(false);
+          await deleteAndClose();
+        }}
+        onSave={async () => {
+          const ok = await handleSaveDraft();
+          showToast({
+            kind: ok ? "success" : "error",
+            title: ok ? "Draft Saved" : "Failed to Save Draft",
+            message: ok ? "Purchase draft saved successfully." : "Unable to save draft. Please try again.",
+          });
+          onClose();
+        }}
+        onDismiss={() => setShowSavePrompt(false)}
+      />
+
+      {/* Discard modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        productName={selectedCustomerName || "this purchase"}
+        entityType="purchase"
+        discardLabel="Keep editing"
+        confirmLabel="Discard"
+        isDiscardMode={true}
+        onConfirm={async () => {
+          setShowDeleteConfirm(false);
+          await deleteAndClose();
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </>
   );
 }
