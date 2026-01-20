@@ -155,6 +155,11 @@ const FlatFeeForm = forwardRef<FlatFeeHandle, FlatFeeFormProps>(({ data, onChang
             placeholder="Enter limit"
             value={apiCalls}
             onChange={handleChange(setApiCalls, 'api')}
+            onKeyDown={(e) => {
+              if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '-' || e.key === '+') {
+                e.preventDefault();
+              }
+            }}
             onBlur={() => markTouched('api')}
             className={touched.api && errors.api ? 'error-input' : undefined}
             disabled={locked}

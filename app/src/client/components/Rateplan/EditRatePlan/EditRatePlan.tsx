@@ -616,8 +616,17 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
   };
 
   const handleBack = () => {
-    if (hasChanges()) setShowEditPopup(true);
-    else exitToList();
+    // Match EditCustomer pattern: check required fields first
+    if (hasEmptyRequiredFields()) {
+      setShowUnsavedChangesModal(true);
+      return;
+    }
+
+    if (hasChanges()) {
+      setShowEditPopup(true);
+    } else {
+      exitToList();
+    }
   };
 
   const handleNext = async () => {
@@ -967,8 +976,55 @@ const EditRatePlan: React.FC<EditRatePlanProps> = ({ onClose }) => {
           exitToList();
         }}
         onSave={async () => {
-          await handleSaveDraft();
-          setShowEditPopup(false);
+          // In Edit mode, save changes and show "Updated" toast, not "Draft Saved"
+          if (!ratePlanId || draftStatus === 'saving') return;
+
+          try {
+            setDraftStatus('saving');
+
+            // Save Details diff-only
+            const ok = await persistOnlyDetails(true);
+            if (!ok) {
+              setDraftStatus('idle');
+              setShowEditPopup(false);
+              return;
+            }
+
+            // Save child tabs too (best effort)
+            if (savePricingFn) {
+              try {
+                await savePricingFn();
+              } catch (e) {
+                console.warn('Pricing save warning:', e);
+              }
+            }
+            if (saveExtrasFn) {
+              try {
+                await saveExtrasFn();
+              } catch (e) {
+                console.warn('Extras save warning:', e);
+              }
+            }
+
+            setDraftStatus('saved');
+            showToast({
+              kind: 'success',
+              title: 'Changes Saved',
+              message: 'Rate plan updated successfully.',
+            });
+
+            setTimeout(() => setDraftStatus('idle'), 3500);
+            setShowEditPopup(false);
+            exitToList();
+          } catch (e) {
+            console.error('Save failed:', e);
+            setDraftStatus('idle');
+            showToast({
+              kind: 'error',
+              title: 'Failed to Save',
+              message: 'Unable to save changes. Please try again.',
+            });
+          }
         }}
       />
 

@@ -233,9 +233,6 @@ const EditVolume: React.FC<EditVolumeProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-volume-input-small ${!tier.isUnlimited && tierTouched[index]?.to && tierErrors[index]?.to ? 'error-input' : ''}`}
-                type="number"
-                step="1"
-                min="0"
                 value={tier.isUnlimited ? 'Unlimited' : tier.to}
                 placeholder="To"
                 disabled={tier.isUnlimited}

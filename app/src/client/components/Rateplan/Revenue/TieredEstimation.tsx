@@ -50,42 +50,47 @@ const TieredEstimation: React.FC = () => {
   const usageNum = Number(usage) || 0;
 
   // ✅ FIXED: Apply minimum usage commitment - use higher of actual or minimum
-  const effectiveUsage = incCommit && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+  let effectiveUsage = incCommit && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+  
+  // ✅ FIXED: Apply freemium - reduce billable units before calculating tiers
+  const freemiumApplied = incFree && freemiumUnits > 0 ? Math.min(freemiumUnits, effectiveUsage) : 0;
+  const billableUsage = effectiveUsage - freemiumApplied;
 
-  // calculate tiered charge
+  // ✅ FIXED: Calculate tiered charge - progressively charge units in each tier
   function computeTieredCharge(units: number): { charge: number; rows: { tier: Tier; units: number; amount: number }[] } {
-    let remaining = units;
     let total = 0;
     const rows: { tier: Tier; units: number; amount: number }[] = [];
+    let processedUnits = 0;
+    
     for (const tier of tiers) {
-      if (remaining <= 0) break;
-      const from = tier.usageStart;
-      const to = tier.usageEnd === null ? Infinity : tier.usageEnd;
-      if (units < from) continue; // not reached this tier
-      const maxInTier = Math.min(to, units) - from + 1; // inclusive ranges assumed
-      const applyUnits = Math.min(maxInTier, remaining);
-      if (applyUnits > 0) {
-        const amt = applyUnits * tier.pricePerUnit;
-        rows.push({ tier, units: applyUnits, amount: amt });
+      if (processedUnits >= units) break; // Already processed all units
+      
+      const tierEnd = tier.usageEnd === null ? Infinity : tier.usageEnd;
+      
+      // Calculate how many units to charge in this tier
+      const unitsInTier = Math.max(0, Math.min(tierEnd, units) - processedUnits);
+      
+      if (unitsInTier > 0) {
+        const amt = unitsInTier * tier.pricePerUnit;
+        rows.push({ tier, units: unitsInTier, amount: amt });
         total += amt;
-        remaining -= applyUnits;
+        processedUnits += unitsInTier;
       }
     }
     return { charge: total, rows };
   }
 
-  const { charge: tieredCharge, rows: tierRows } = computeTieredCharge(effectiveUsage);
+  const { charge: tieredCharge, rows: tierRows } = computeTieredCharge(billableUsage);
 
-  // overage if usage exceeds last tier and unlimited false
+  // overage if billable usage exceeds last tier and unlimited false
   const lastTierEnd = tiers.length ? tiers[tiers.length - 1].usageEnd : null;
-  const isOver = lastTierEnd !== null && effectiveUsage > lastTierEnd;
-  const overUnits = isOver ? effectiveUsage - (lastTierEnd ?? 0) : 0;
+  const isOver = lastTierEnd !== null && billableUsage > lastTierEnd;
+  const overUnits = isOver ? billableUsage - (lastTierEnd ?? 0) : 0;
   const overCharge = overUnits * overageRate;
 
-  const freemiumReduction = incFree ? freemiumUnits * (tiers[0]?.pricePerUnit || 0) : 0; // use first tier rate
   const setupCharge = incSetup ? setupFee : 0;
 
-  let subtotal = tieredCharge + overCharge + setupCharge - freemiumReduction;
+  let subtotal = tieredCharge + overCharge + setupCharge;
   const discountVal = incDiscount
     ? discountPercent > 0
       ? (discountPercent / 100) * subtotal
@@ -146,10 +151,10 @@ const TieredEstimation: React.FC = () => {
                     Tier {idx + 1}<br />
                     <small>{t.usageStart} – {t.usageEnd === null ? '∞' : t.usageEnd}</small>
                   </td>
-                  <td>${t.pricePerUnit}</td>
+                  <td>${t.pricePerUnit}/unit</td>
                   {showCalc && (
                     <>
-                      <td>{unitsRow ? `${unitsRow.units} * ${t.pricePerUnit}` : '-'}</td>
+                      <td>{unitsRow ? `${unitsRow.units.toFixed(0)} × $${t.pricePerUnit}` : '-'}</td>
                       <td>{unitsRow ? `$${unitsRow.amount.toFixed(2)}` : '-'}</td>
                     </>
                   )}
@@ -158,10 +163,10 @@ const TieredEstimation: React.FC = () => {
             })}
             <tr>
               <td>Overage Rate</td>
-              <td>{overageRate}</td>
+              <td>${overageRate}/unit</td>
               {showCalc && (
                 <>
-                  <td>{isOver ? `${overUnits} * ${overageRate}` : '-'}</td>
+                  <td>{isOver ? `${overUnits.toFixed(0)} × $${overageRate}` : '-'}</td>
                   <td>{isOver ? `$${overCharge.toFixed(2)}` : '-'}</td>
                 </>
               )}
@@ -186,8 +191,8 @@ const TieredEstimation: React.FC = () => {
             {/* Freemium */}
             <tr>
               <td><label className="switch"><input type="checkbox" checked={incFree} onChange={e => setIncFree(e.target.checked)} /><span className="slider"></span></label>&nbsp;Freemium</td>
-              <td>{freemiumUnits}</td>
-              {showCalc && <><td>{incFree ? `${freemiumUnits} * ${(tiers[0]?.pricePerUnit || 0)}` : '-'}</td><td>{incFree ? `-$${freemiumReduction.toFixed(2)}` : '-'}</td></>}
+              <td>Free Units - {freemiumUnits}</td>
+              {showCalc && <><td>{incFree && freemiumApplied > 0 ? `Reduced usage: ${effectiveUsage} - ${freemiumApplied} = ${billableUsage}` : '-'}</td><td>{incFree && freemiumApplied > 0 ? `Applied to tiers` : '-'}</td></>}
             </tr>
             {/* Minimum Commitment */}
             <tr>
@@ -195,7 +200,7 @@ const TieredEstimation: React.FC = () => {
               <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : (minimumUsage > 0 ? `${minimumUsage} units` : '-')}</td>
               {showCalc && <><td>{incCommit ? (minimumUsage > 0 && usageNum < minimumUsage ? `Using ${minimumUsage} units (minimum)` : minimumCharge > 0 ? `Max($${(subtotal - discountVal).toFixed(2)}, $${minimumCharge})` : '-') : '-'}</td><td>{incCommit ? `$${total.toFixed(2)}` : '-'}</td></>}
             </tr>
-            {showCalc && (<tr className="total-row"><td colSpan={3}>Total</td><td>${total.toFixed(2)}</td></tr>)}
+            {showCalc && (<tr className="total-row"><td colSpan={3}>Total Estimation</td><td>${total.toFixed(2)}</td></tr>)}
           </tbody>
         </table>
       </div>

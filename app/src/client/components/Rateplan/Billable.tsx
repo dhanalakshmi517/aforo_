@@ -130,10 +130,11 @@ const Billable: React.FC<BillableProps> = ({
               <div style={{
                 padding: '24px',
                 textAlign: 'center',
-                color: '#6b7280',
-                fontSize: '14px'
+                color: '#E34935',
+                fontSize: '14px',
+                fontWeight: 500
               }}>
-                No billable metrics found for this product.
+                No Billable Metrics Found for This Product
               </div>
             ) : (
               metrics.map((metric) => (

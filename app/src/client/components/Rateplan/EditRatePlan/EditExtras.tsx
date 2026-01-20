@@ -3,6 +3,7 @@ import './EditExtras.css';
 
 import { saveSetupFee, saveDiscounts, saveFreemiums, saveMinimumCommitment } from '../api';
 import { setRatePlanData } from '../utils/sessionStorage';
+import { InputField } from '../../componenetsss/Inputs';
 
 interface EditExtrasProps {
   noUpperLimit: boolean;
@@ -520,7 +521,7 @@ export default function EditExtras({
                 }
               }}
             >
-              <option value="">--Select--</option>
+              <option value="" disabled hidden>--Select--</option>
               <option value="PERCENTAGE">Recurring / One-time (Percentage)</option>
               <option value="FLAT">Flat Amount</option>
             </select>
@@ -580,13 +581,13 @@ export default function EditExtras({
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input
+                <InputField
                   type="date"
                   value={discountStart}
-                  onChange={e => {
-                    setDiscountStart(e.target.value);
-                    setRatePlanData('DISCOUNT_START', e.target.value);
-                    const error = validateDate(e.target.value);
+                  onChange={(val) => {
+                    setDiscountStart(val);
+                    setRatePlanData('DISCOUNT_START', val);
+                    const error = validateDate(val);
                     setValidationErrors(prev => ({ ...prev, discountStartDate: error }));
                   }}
                 />
@@ -598,13 +599,13 @@ export default function EditExtras({
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input
+                <InputField
                   type="date"
                   value={discountEnd}
-                  onChange={e => {
-                    setDiscountEnd(e.target.value);
-                    setRatePlanData('DISCOUNT_END', e.target.value);
-                    const error = validateDate(e.target.value);
+                  onChange={(val) => {
+                    setDiscountEnd(val);
+                    setRatePlanData('DISCOUNT_END', val);
+                    const error = validateDate(val);
                     setValidationErrors(prev => ({ ...prev, discountEndDate: error }));
                   }}
                 />
@@ -644,7 +645,7 @@ export default function EditExtras({
                 }
               }}
             >
-              <option value="">--Select--</option>
+              <option value="" disabled hidden>--Select--</option>
               <option value="FREE_UNITS">Free Units</option>
               <option value="FREE_TRIAL_DURATION">Free Trial Duration</option>
               <option value="FREE_UNITS_PER_DURATION">Free Units for Duration</option>
@@ -689,17 +690,17 @@ export default function EditExtras({
             <div className="date-range">
               <div className="date-input">
                 <label>Start Date</label>
-                <input
+                <InputField
                   type="date"
                   value={freeStart}
-                  onChange={e => {
-                    setFreeStart(e.target.value);
-                    setRatePlanData('FREEMIUM_START', e.target.value);
-                    const error = validateDate(e.target.value);
+                  onChange={(val) => {
+                    setFreeStart(val);
+                    setRatePlanData('FREEMIUM_START', val);
+                    const error = validateDate(val);
                     setValidationErrors(prev => ({ ...prev, freemiumStartDate: error }));
                     // Validate date range if trial duration is set
-                    if (e.target.value && freeEnd && freeTrialDuration && Number(freeTrialDuration) > 0) {
-                      const rangeError = validateFreemiumDateRange(e.target.value, freeEnd, Number(freeTrialDuration));
+                    if (val && freeEnd && freeTrialDuration && Number(freeTrialDuration) > 0) {
+                      const rangeError = validateFreemiumDateRange(val, freeEnd, Number(freeTrialDuration));
                       setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
                     }
                   }}
@@ -712,17 +713,17 @@ export default function EditExtras({
               </div>
               <div className="date-input">
                 <label>End Date</label>
-                <input
+                <InputField
                   type="date"
                   value={freeEnd}
-                  onChange={e => {
-                    setFreeEnd(e.target.value);
-                    setRatePlanData('FREEMIUM_END', e.target.value);
-                    const error = validateDate(e.target.value);
+                  onChange={(val) => {
+                    setFreeEnd(val);
+                    setRatePlanData('FREEMIUM_END', val);
+                    const error = validateDate(val);
                     setValidationErrors(prev => ({ ...prev, freemiumEndDate: error }));
                     // Validate date range if trial duration is set
-                    if (freeStart && e.target.value && freeTrialDuration && Number(freeTrialDuration) > 0) {
-                      const rangeError = validateFreemiumDateRange(freeStart, e.target.value, Number(freeTrialDuration));
+                    if (freeStart && val && freeTrialDuration && Number(freeTrialDuration) > 0) {
+                      const rangeError = validateFreemiumDateRange(freeStart, val, Number(freeTrialDuration));
                       setValidationErrors(prev => ({ ...prev, freemiumDateRange: rangeError }));
                     }
                   }}

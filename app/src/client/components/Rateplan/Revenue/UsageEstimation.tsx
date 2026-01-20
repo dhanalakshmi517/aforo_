@@ -23,11 +23,21 @@ const UsageEstimation: React.FC = () => {
 
 
   const usageNum = Number(usage) || 0;
-  const usageTotal = usageNum * perUsageRate;
+  
+  // ✅ FIXED: Apply minimum usage commitment - use higher of actual or minimum
+  const effectiveUsage = includeCommitment && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+  
+  // ✅ FIXED: Apply freemium - reduce billable units
+  const billableUnits = includeFreemium && freemiumUnits > 0 ? Math.max(0, effectiveUsage - freemiumUnits) : effectiveUsage;
+  const freemiumReduction = includeFreemium && freemiumUnits > 0 ? Math.min(freemiumUnits, effectiveUsage) * perUsageRate : 0;
+  
+  const usageTotal = billableUnits * perUsageRate;
   const setupComponent = includeSetup ? setupFee : 0;
   const subtotal = usageTotal + setupComponent;
   const discountAmount = includeDiscount ? (discountPercent > 0 ? (discountPercent / 100) * subtotal : discountFlat) : 0;
   let totalEstimation = subtotal - discountAmount;
+  
+  // ✅ FIXED: Apply minimum charge as floor
   if (includeCommitment && minimumCharge > 0) {
     totalEstimation = Math.max(totalEstimation, minimumCharge);
   }
@@ -126,10 +136,15 @@ const UsageEstimation: React.FC = () => {
                   />
                   <span className="slider"></span>
                 </label>
-                &nbsp;Freemium Setup
+                &nbsp;Freemium
               </td>
               <td>{freemiumUnits > 0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
-              {showCalculation && <><td>-</td><td>-</td></>}
+              {showCalculation && (
+                <>
+                  <td>{includeFreemium && freemiumUnits > 0 ? `${Math.min(freemiumUnits, effectiveUsage)} × $${perUsageRate}` : '-'}</td>
+                  <td>{includeFreemium && freemiumUnits > 0 ? `-$${freemiumReduction.toFixed(2)}` : '-'}</td>
+                </>
+              )}
             </tr>
             <tr>
               <td>
@@ -143,8 +158,13 @@ const UsageEstimation: React.FC = () => {
                 </label>
                 &nbsp;Minimum Commitment
               </td>
-              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : '-'}</td>
-              {showCalculation && <><td>-</td><td>-</td></>}
+              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : (minimumUsage > 0 ? `${minimumUsage} units` : '-')}</td>
+              {showCalculation && (
+                <>
+                  <td>{includeCommitment ? (minimumUsage > 0 && usageNum < minimumUsage ? `Using ${minimumUsage} units (minimum)` : minimumCharge > 0 ? `Max($${(subtotal - discountAmount).toFixed(2)}, $${minimumCharge})` : '-') : '-'}</td>
+                  <td>{includeCommitment ? `$${totalEstimation.toFixed(2)}` : '-'}</td>
+                </>
+              )}
             </tr>
             {showCalculation && (
               <tr className="total-row">

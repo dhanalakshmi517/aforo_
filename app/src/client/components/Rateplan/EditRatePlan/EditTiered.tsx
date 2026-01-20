@@ -236,9 +236,6 @@ const EditTiered: React.FC<EditTieredProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-tiered-input-small ${!tier.isUnlimited && tierTouched[index]?.to && tierErrors[index]?.to ? 'error-input' : ''}`}
-                type="number"
-                step="1"
-                min="0"
                 value={tier.isUnlimited ? 'Unlimited' : tier.to}
                 placeholder="To"
                 disabled={tier.isUnlimited}
