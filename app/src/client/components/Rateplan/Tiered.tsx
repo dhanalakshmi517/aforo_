@@ -293,9 +293,6 @@ const Tiered = forwardRef<TieredHandle, TieredProps>(({
               <div className="field-col small-field">
                 <input
                   className={`tiered-input-small ${(!tier.isUnlimited && touched.to && error.to) ? 'error-input' : ''}`}
-                  type="number"
-                  step="1"
-                  min="0"
                   value={tier.isUnlimited ? 'Unlimited' : tier.to}
                   placeholder="To"
                   disabled={!!tier.isUnlimited || locked}

@@ -32,19 +32,40 @@ const StairEstimation: React.FC = () => {
     : [];
 
   const usageNum = Number(usage) || 0;
-  const highestStair = stairs[stairs.length - 1];
-  const isOverage = usageNum > highestStair.max;
-  const overageUnits = isOverage ? usageNum - highestStair.max : 0;
+
+  // ✅ FIXED: Apply minimum usage commitment - use higher of actual or minimum
+  let effectiveUsage = includeCommitment && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+  
+  // ✅ FIXED: Apply freemium - reduce effective usage to find correct tier
+  const freemiumApplied = includeFreemium && freemiumUnits > 0 ? Math.min(freemiumUnits, effectiveUsage) : 0;
+  const billableUsage = effectiveUsage - freemiumApplied;
+
+  // ✅ FIXED: Find the stair tier where BILLABLE usage falls within range
+  const matchedStair = stairs.find((stair: Stair) => {
+    const from = Number(stair.range.split('–')[0]);
+    const to = stair.max;
+    return billableUsage >= from && (to === Number.MAX_SAFE_INTEGER || billableUsage <= to);
+  });
+
+  // ✅ FIXED: Overage only if billable usage exceeds all tiers
+  const highestStair = stairs.length > 0 ? stairs[stairs.length - 1] : null;
+  const isOverage = highestStair && billableUsage > highestStair.max;
+  const overageUnits = isOverage ? billableUsage - highestStair.max : 0;
   const overageAmount = overageUnits * overageRate;
 
-  const matchedStair = stairs.slice().reverse().find((stair: Stair) => usageNum >= stair.max);
-  const stairCharge = matchedStair ? matchedStair.amount : 0;
+  // ✅ CRITICAL FIX: In overage, still charge highest stair's flat cost + overage
+  const stairCharge = isOverage && highestStair 
+    ? highestStair.amount  // Charge highest stair even in overage
+    : matchedStair 
+      ? matchedStair.amount 
+      : 0;
 
   const setupAmount = includeSetup ? setupFee : 0;
-  const perUnitRate = overageRate; // assume same
-  const freemiumAmount = includeFreemium ? freemiumUnits * perUnitRate : 0;
+  
+  // ✅ FIXED: Freemium shows as reduction of units, not monetary value
+  const freemiumAmount = 0; // Freemium already applied to reduce billable usage
 
-  const subtotal = stairCharge + overageAmount + setupAmount - freemiumAmount;
+  const subtotal = stairCharge + overageAmount + setupAmount;
   const discountAmount = includeDiscount ? (discountPercent > 0 ? (discountPercent / 100) * subtotal : discountFlat) : 0;
   let totalEstimation = subtotal - discountAmount;
   if (includeCommitment && minimumCharge > 0) {
@@ -99,8 +120,8 @@ const StairEstimation: React.FC = () => {
                 <td>${stair.amount}</td>
                 {showCalculation && (
                   <>
-                    <td>{matchedStair?.label === stair.label ? `$${stair.amount}` : '-'}</td>
-                    <td>{matchedStair?.label === stair.label ? `$${stair.amount}` : '-'}</td>
+                    <td>{matchedStair?.label === stair.label || (isOverage && index === stairs.length - 1) ? `Flat cost for range` : '-'}</td>
+                    <td>{matchedStair?.label === stair.label || (isOverage && index === stairs.length - 1) ? `$${stair.amount.toFixed(2)}` : '-'}</td>
                   </>
                 )}
               </tr>
@@ -108,11 +129,11 @@ const StairEstimation: React.FC = () => {
 
             <tr>
               <td>Overage Charges</td>
-              <td>${overageRate}</td>
+              <td>${overageRate}/unit</td>
               {showCalculation && (
                 <>
-                  <td>{isOverage ? `${overageUnits} * ${overageRate}` : '-'}</td>
-                  <td>{isOverage ? `$${overageAmount}` : '-'}</td>
+                  <td>{isOverage ? `${overageUnits.toFixed(0)} × $${overageRate}` : '-'}</td>
+                  <td>{isOverage ? `$${overageAmount.toFixed(2)}` : '-'}</td>
                 </>
               )}
             </tr>
@@ -164,10 +185,10 @@ const StairEstimation: React.FC = () => {
                   />
                   <span className="slider"></span>
                 </label>
-                &nbsp;Freemium Setup
+                &nbsp;Freemium
               </td>
               <td>Free Units - {freemiumUnits}</td>
-              {showCalculation && <><td>{includeFreemium ? `${freemiumUnits} * $0.1` : '-'}</td><td>{includeFreemium ? `-$${freemiumAmount.toFixed(0)}` : '-'}</td></>}
+              {showCalculation && <><td>{includeFreemium && freemiumApplied > 0 ? `Reduced usage: ${effectiveUsage} - ${freemiumApplied} = ${billableUsage}` : '-'}</td><td>{includeFreemium && freemiumApplied > 0 ? `Applied to tier` : '-'}</td></>}
             </tr>
 
             <tr>
@@ -182,14 +203,14 @@ const StairEstimation: React.FC = () => {
                 </label>
                 &nbsp;Minimum Commitment
               </td>
-              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : '-'}</td>
-              {showCalculation && <><td>{includeCommitment ? `Floor to $${minimumCharge}` : '-'}</td><td>{includeCommitment ? `$${totalEstimation.toFixed(2)}` : '-'}</td></>}
+              <td>{minimumCharge > 0 ? `${minimumUsage} units / $${minimumCharge}` : (minimumUsage > 0 ? `${minimumUsage} units` : '-')}</td>
+              {showCalculation && <><td>{includeCommitment ? (minimumUsage > 0 && usageNum < minimumUsage ? `Using ${minimumUsage} units (minimum)` : minimumCharge > 0 ? `Max($${(subtotal - discountAmount).toFixed(2)}, $${minimumCharge})` : '-') : '-'}</td><td>{includeCommitment ? `$${totalEstimation.toFixed(2)}` : '-'}</td></>}
             </tr>
 
             {showCalculation && (
               <tr className="total-row">
-                <td colSpan={showCalculation ? 3 : 2}>Total Estimation</td>
-                <td>${totalEstimation.toFixed(0)}</td>
+                <td colSpan={3}>Total Estimation</td>
+                <td>${totalEstimation.toFixed(2)}</td>
               </tr>
             )}
           </tbody>

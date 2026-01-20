@@ -287,9 +287,6 @@ const StairStep = forwardRef<StairStepHandle, StairStepProps>(
                 <div className="field-col small-field">
                   <input
                     className={`input-small ${t.to && e.to ? 'error-input' : ''}`}
-                    type="number"
-                    step="1"
-                    min="0"
                     value={row.isUnlimited ? 'Unlimited' : row.to}
                     placeholder="To"
                     disabled={row.isUnlimited || locked}

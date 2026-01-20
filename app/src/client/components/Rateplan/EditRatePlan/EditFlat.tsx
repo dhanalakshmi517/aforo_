@@ -86,10 +86,16 @@ const EditFlat: React.FC<EditFlatProps> = ({ validationErrors = {}, onClearError
           <input
             id="flat-fee-api"
             type="number"
-            step="any"
+            step="1"
+            min="0"
             placeholder="Enter limit"
             value={apiCalls}
             onChange={handleChange(setApiCalls, 'FLAT_FEE_API_CALLS', 'flatFeeApiCalls', 'apiCalls')}
+            onKeyDown={(e) => {
+              if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '-' || e.key === '+') {
+                e.preventDefault();
+              }
+            }}
           />
           {validationErrors.apiCalls && (
             <div className="inline-error" style={{ display: 'flex', alignItems: 'center', marginTop: '5px', color: '#ED5142', fontSize: '12px' }}>

@@ -231,9 +231,6 @@ const EditStair: React.FC<EditStairProps> = ({
             <div className="field-col small-field">
               <input
                 className={`edit-input-small ${!stair.isUnlimited && touched[index]?.to && rowErrors[index]?.to ? 'error-input' : ''}`}
-                type="number"
-                step="1"
-                min="0"
                 value={stair.isUnlimited ? 'Unlimited' : stair.to}
                 placeholder="To"
                 disabled={stair.isUnlimited}

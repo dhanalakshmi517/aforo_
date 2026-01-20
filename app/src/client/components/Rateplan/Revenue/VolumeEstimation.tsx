@@ -52,16 +52,20 @@ const VolumeEstimation: React.FC = () => {
   const usageNum = Number(usage) || 0;
 
   // ✅ FIXED: Apply minimum usage commitment - use higher of actual or minimum
-  const effectiveUsage = incCommit && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+  let effectiveUsage = incCommit && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
+  
+  // ✅ FIXED: Apply freemium - reduce billable units to find correct tier
+  const freemiumApplied = incFree && freemiumUnits > 0 ? Math.min(freemiumUnits, effectiveUsage) : 0;
+  const billableUsage = effectiveUsage - freemiumApplied;
 
-  // select tier where total usage falls
+  // select tier where BILLABLE usage falls
   const matchedTier = tiers.find(
-    (t) => effectiveUsage >= t.usageStart && (t.usageEnd === null || effectiveUsage <= t.usageEnd)
+    (t) => billableUsage >= t.usageStart && (t.usageEnd === null || billableUsage <= t.usageEnd)
   );
 
   // ✅ FIXED: Volume-based pricing - when exceeding all tiers, use highest tier rate for all units within tiers
   const lastTierEnd = tiers.length > 0 ? tiers[tiers.length - 1].usageEnd : null;
-  const isOver = !matchedTier && lastTierEnd !== null && effectiveUsage > lastTierEnd;
+  const isOver = !matchedTier && lastTierEnd !== null && billableUsage > lastTierEnd;
 
   let tierCharge = 0;
   let overCharge = 0;
@@ -69,25 +73,23 @@ const VolumeEstimation: React.FC = () => {
   let overUnits = 0;
 
   if (matchedTier) {
-    // Normal case: usage falls within a tier, charge ALL units at that tier's rate
+    // Volume pricing: ALL billable units at matched tier rate
     tierRate = matchedTier.pricePerUnit;
-    tierCharge = effectiveUsage * tierRate;
+    tierCharge = billableUsage * tierRate;
   } else if (isOver && tiers.length > 0) {
-    // Overage case: charge units up to last tier at highest tier rate, then overage for excess
+    // Overage: Charge units UP TO lastTierEnd at highest tier rate, ONLY excess at overage
     const highestTier = tiers[tiers.length - 1];
     tierRate = highestTier.pricePerUnit;
-    tierCharge = (lastTierEnd ?? 0) * tierRate;
-    overUnits = effectiveUsage - (lastTierEnd ?? 0);
-    overCharge = overUnits * overageRate;
+    tierCharge = (lastTierEnd ?? 0) * tierRate; // Units within tiers at tier rate
+    overUnits = billableUsage - (lastTierEnd ?? 0); // Excess units
+    overCharge = overUnits * overageRate; // Only excess at overage rate
   } else {
-    // Fallback if tiers empty or other issue
     tierRate = overageRate;
   }
 
-  const freemiumReduction = incFree ? freemiumUnits * tierRate : 0;
   const setupCharge = incSetup ? setupFee : 0;
 
-  let subtotal = tierCharge + overCharge + setupCharge - freemiumReduction;
+  let subtotal = tierCharge + overCharge + setupCharge;
 
   const discountVal = incDiscount
     ? discountPercent > 0
@@ -151,21 +153,21 @@ const VolumeEstimation: React.FC = () => {
                     {t.usageStart} – {t.usageEnd === null ? '∞' : t.usageEnd}
                   </small>
                 </td>
-                <td>${t.pricePerUnit}</td>
+                <td>${t.pricePerUnit}/unit</td>
                 {showCalc && (
                   <>
-                    <td>{matchedTier === t ? `${usageNum} * ${t.pricePerUnit}` : '-'}</td>
-                    <td>{matchedTier === t ? `$${tierCharge.toFixed(2)}` : '-'}</td>
+                    <td>{matchedTier === t ? `${effectiveUsage} × $${t.pricePerUnit}` : isOver && i === tiers.length - 1 ? `${lastTierEnd} × $${t.pricePerUnit}` : '-'}</td>
+                    <td>{matchedTier === t ? `$${tierCharge.toFixed(2)}` : isOver && i === tiers.length - 1 ? `$${tierCharge.toFixed(2)}` : '-'}</td>
                   </>
                 )}
               </tr>
             ))}
             <tr>
               <td>Overage Rate</td>
-              <td>{overageRate}</td>
+              <td>${overageRate}/unit</td>
               {showCalc && (
                 <>
-                  <td>{isOver ? `${overUnits} * ${overageRate}` : '-'}</td>
+                  <td>{isOver ? `${overUnits.toFixed(0)} × $${overageRate}` : '-'}</td>
                   <td>{isOver ? `$${overCharge.toFixed(2)}` : '-'}</td>
                 </>
               )}
@@ -193,8 +195,8 @@ const VolumeEstimation: React.FC = () => {
               <td>
                 <label className="switch"><input type="checkbox" checked={incFree} onChange={(e) => setIncFree(e.target.checked)} /><span className="slider"></span></label>&nbsp;Freemium
               </td>
-              <td>{freemiumUnits}</td>
-              {showCalc && <><td>{incFree ? `${freemiumUnits} * ${tierRate}` : '-'}</td><td>{incFree ? `-$${freemiumReduction.toFixed(2)}` : '-'}</td></>}
+              <td>Free Units - {freemiumUnits}</td>
+              {showCalc && <><td>{incFree && freemiumApplied > 0 ? `Reduced usage: ${effectiveUsage} - ${freemiumApplied} = ${billableUsage}` : '-'}</td><td>{incFree && freemiumApplied > 0 ? `Applied to tier` : '-'}</td></>}
             </tr>
             <tr>
               <td>
@@ -204,7 +206,7 @@ const VolumeEstimation: React.FC = () => {
               {showCalc && <><td>{incCommit ? (minimumUsage > 0 && usageNum < minimumUsage ? `Using ${minimumUsage} units (minimum)` : minimumCharge > 0 ? `Max($${(subtotal - discountVal).toFixed(2)}, $${minimumCharge})` : '-') : '-'}</td><td>{incCommit ? `$${total.toFixed(2)}` : '-'}</td></>}
             </tr>
             {showCalc && (
-              <tr className="total-row"><td colSpan={3}>Total</td><td>${total.toFixed(2)}</td></tr>
+              <tr className="total-row"><td colSpan={3}>Total Estimation</td><td>${total.toFixed(2)}</td></tr>
             )}
           </tbody>
         </table>

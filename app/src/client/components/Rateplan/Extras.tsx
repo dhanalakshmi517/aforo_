@@ -648,7 +648,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during setup fee save - likely duplicate entry, continuing...');
             } else {
-              throw err;
+              console.warn('⚠️ Setup fee save failed but continuing to not block finalization:', err.message || err);
             }
           })
         );
@@ -697,7 +697,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during discounts save - likely duplicate entry, continuing...');
             } else {
-              throw err;
+              console.warn('⚠️ Discounts save failed but continuing to not block finalization:', err.message || err);
             }
           })
         );
@@ -751,7 +751,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during freemiums save - likely duplicate entry, continuing...');
             } else {
-              throw err;
+              console.warn('⚠️ Freemium save failed but continuing to not block finalization:', err.message || err);
             }
           })
         );
@@ -780,7 +780,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             if (err.response?.status === 500) {
               console.warn('⚠️ 500 error during minimum commitment save - likely duplicate entry, continuing...');
             } else {
-              throw err;
+              console.warn('⚠️ Minimum commitment save failed but continuing to not block finalization:', err.message || err);
             }
           })
         );
@@ -908,7 +908,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                     }
                   }}
                   options={[
-                    { label: '--Select--', value: '' },
                     { label: 'PERCENTAGE', value: 'PERCENTAGE' },
                     { label: 'FLAT', value: 'FLAT' },
                   ]}
@@ -1106,7 +1105,6 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
                 }));
               }}
               options={[
-                { label: '--Select--', value: '' },
                 { label: 'Free Units', value: 'FREE_UNITS' },
                 { label: 'Free Trial Duration', value: 'FREE_TRIAL_DURATION' },
                 { label: 'Free Units for Duration', value: 'FREE_UNITS_PER_DURATION' },

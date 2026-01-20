@@ -619,6 +619,15 @@ export const saveProductConfiguration = async (
 
     let cleanedPayload = cleanPayload(payload);
 
+    // For SQL Result, ensure required fields are always present even if empty
+    if (normalizedType === 'sqlresult' || normalizedType === 'sql-result') {
+      cleanedPayload = {
+        connectionString: payload.connectionString || '',
+        dbType: payload.dbType || 'MYSQL',
+        authType: payload.authType || 'NONE'
+      };
+    }
+
     console.log('=== BACKEND API CALL ===');
     console.log('Endpoint:', apiEndpoint);
     console.log('Method:', operationType === 'update' ? 'PUT' : 'POST');

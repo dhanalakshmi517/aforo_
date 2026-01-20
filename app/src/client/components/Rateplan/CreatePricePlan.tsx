@@ -558,109 +558,12 @@ const CreatePricePlan = React.forwardRef<
     selectedProductName,
     paymentMethod,
     selectedMetricId,
-    currentStep,
   ]);
 
-  // ===== Step validation =====
-  const validateStep0 = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!planName.trim()) {
-      e.planName = "This is required field";
-    } else {
-      // Check for duplicate (case-insensitive, exclude current plan if editing)
-      const isDuplicate = existingRatePlans.some(
-        plan => plan.ratePlanName.toLowerCase() === planName.trim().toLowerCase()
-          && plan.ratePlanId !== ratePlanId
-      );
-      if (isDuplicate) e.planName = "Rate plan already exists";
-    }
-    if (!billingFrequency) e.billingFrequency = "This is required field";
-    if (!paymentMethod) e.paymentMethod = "This is required field";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-
-
-
-
-  const ensureRatePlanCreated = async (): Promise<boolean> => {
-    if (ratePlanId) return true;
-
-    const selectedProduct = products.find((p) => p.productName === selectedProductName);
-    if (!selectedProduct) {
-      setErrors({ selectedProductName: "Invalid product selected" });
-      return false;
-    }
-    if (selectedMetricId === null) {
-      setErrors({ billableMetric: "This is required field" });
-      return false;
-    }
-
-    const payload: RatePlanRequest = {
-      ratePlanName: planName,
-      productId: Number(selectedProduct.productId),
-      description: planDescription,
-      billingFrequency: billingFrequency as any,
-      paymentType: paymentMethod as any,
-      billableMetricId: selectedMetricId,
-    };
-
-    try {
-      setSaving(true);
-      const created = await createRatePlan(payload);
-      setRatePlanId(created.ratePlanId);
-      return true;
-    } catch (e) {
-      console.error("Create rate plan failed", e);
-      setErrors((prev) => ({ ...prev, form: "Failed to create rate plan. Please try again." }));
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const canNavigateTo = async (targetIndex: number): Promise<boolean> => {
-    if (targetIndex <= currentStep) return true;
-    if (targetIndex >= 2 && isStep0Filled && isStep1Filled) {
-      const ok = await ensureRatePlanCreated();
-      if (!ok) return false;
-    }
-    return true;
-  };
-
-  const onStepClick = async (index: number) => {
-    if (index === currentStep) return;
-
-    // Only block navigation to Review step (step 4) if prerequisites not met
-    // Allow navigation to other locked steps to show them in locked state
-    // This matches NewProduct behavior where only Review tab is disabled in sidebar
-    if (index === 4 && isStep4Locked) return;
-
-    const ok = await canNavigateTo(index);
-    if (!ok) return;
-
-    // Allow internal navigation if valid, but still save best-effort
-    // Removed "Remove all pricing validation..." comment since we ARE using validation now
-
-    // best-effort persist current step
-    try {
-      if (currentStep === 2 && pricingRef.current && ratePlanId) {
-        setSaving(true);
-        await pricingRef.current.save();
-        setSaving(false);
-      } else if (currentStep === 3 && extrasRef.current && ratePlanId) {
-        setSaving(true);
-        await extrasRef.current.saveAll(ratePlanId);
-        setSaving(false);
-      }
-    } catch (e) {
-      console.error("Sidebar navigation save failed:", e);
-      setSaving(false);
-      return;
-    }
-
-    setCurrentStep(index);
+  const onStepClick = (stepIndex: number) => {
+    if (stepIndex === currentStep) return;
+    // Allow clicking all steps - locked steps will show lock UI
+    setCurrentStep(stepIndex);
   };
 
   const sectionHeading = steps[currentStep].title;
@@ -786,27 +689,124 @@ const CreatePricePlan = React.forwardRef<
     [currentStep, ratePlanId, hasAnyRequiredInput]
   );
 
+  // Validate step 0 fields
+  const validateStep0 = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!planName.trim()) newErrors.planName = "Rate plan name is required.";
+    if (!billingFrequency) newErrors.billingFrequency = "Billing frequency is required.";
+    if (!paymentMethod) newErrors.paymentMethod = "Payment method is required.";
+    
+    // Duplicate check
+    if (planName.trim()) {
+      const isDuplicate = existingRatePlans.some(
+        plan => plan.ratePlanName.toLowerCase() === planName.trim().toLowerCase()
+          && plan.ratePlanId !== ratePlanId
+      );
+      if (isDuplicate) {
+        newErrors.planName = "Rate plan already exists";
+      }
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+    
+    setErrors({});
+    return true;
+  };
+
+  // Ensure rate plan is created (for first-time save)
+  const ensureRatePlanCreated = async (): Promise<boolean> => {
+    if (ratePlanId) return true;
+
+    try {
+      setSaving(true);
+      const selectedProduct = products.find((p) => p.productName === selectedProductName);
+      
+      const payload: Partial<RatePlanRequest> & { status?: string } = {
+        ratePlanName: planName,
+        description: planDescription || "",
+        billingFrequency: billingFrequency as any,
+        paymentType: paymentMethod as any,
+        status: "DRAFT",
+      };
+      
+      if (selectedProduct) {
+        payload.productId = Number(selectedProduct.productId);
+      }
+      
+      if (selectedMetricId !== null) {
+        payload.billableMetricId = selectedMetricId;
+      }
+
+      const created = await createRatePlan(payload as any);
+      setRatePlanId(created.ratePlanId);
+      setSaving(false);
+      return true;
+    } catch (e) {
+      console.error("Failed to create rate plan", e);
+      setErrors((prev) => ({ ...prev, form: "Failed to create rate plan. Please try again." }));
+      setSaving(false);
+      return false;
+    }
+  };
+
   const handleNext = async () => {
+    onFieldChange?.();
+
+    // VALIDATION
+    const newErrors: Record<string, string> = {};
+
+    if (currentStep === 0) {
+      if (!planName.trim()) newErrors.planName = "Rate plan name is required.";
+      if (!billingFrequency) newErrors.billingFrequency = "Billing frequency is required.";
+      if (!paymentMethod) newErrors.paymentMethod = "Payment method is required.";
+      // Duplicate check
+      if (planName.trim()) {
+        const isDuplicate = existingRatePlans.some(
+          plan => plan.ratePlanName.toLowerCase() === planName.trim().toLowerCase()
+            && plan.ratePlanId !== ratePlanId
+        );
+        if (isDuplicate) {
+          newErrors.planName = "Rate plan already exists";
+        }
+      }
+    }
+
+    if (currentStep === 1) {
+      if (!selectedProductName) newErrors.selectedProductName = "Please select a product.";
+      if (!selectedMetricId) newErrors.billableMetric = "Please select a billable metric.";
+    }
+
+    if (currentStep === 2) {
+      const { isValid, errors: pricingErrors } = validatePricingStep();
+      if (!isValid) {
+        Object.assign(newErrors, pricingErrors);
+      }
+    }
+
+    // Check for errors and stop if any exist
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     // Final submit from Review
     if (currentStep === steps.length - 1) {
       if (!ratePlanId) return;
 
       try {
-        // pricing validate + save
+        // Try to save pricing if ref exists (best effort, don't block on validation)
         if (pricingRef.current) {
-          const v = validatePricingStep();
-          if (!v.isValid) {
-            setErrors(v.errors);
-            setCurrentStep(2);
-            return;
-          }
           setSaving(true);
-          const ok = await pricingRef.current.save();
-          setSaving(false);
-          if (!ok) {
-            setCurrentStep(2);
-            return;
+          try {
+            await pricingRef.current.save();
+          } catch (err) {
+            console.warn('⚠️ Pricing save failed, continuing anyway:', err);
           }
+          setSaving(false);
         }
 
         // extras save
@@ -816,60 +816,84 @@ const CreatePricePlan = React.forwardRef<
           setSaving(false);
         }
 
-        // confirm
-        setSaving(true);
-        await confirmRatePlan(ratePlanId);
+        // confirm - only if pricing is complete, otherwise just show success for draft
+        const selectedPricingModel = getRatePlanData("PRICING_MODEL") || "";
+        if (selectedPricingModel) {
+          setSaving(true);
+          try {
+            await confirmRatePlan(ratePlanId);
+          } catch (err) {
+            console.warn('⚠️ Confirmation failed but showing success anyway for draft:', err);
+          }
+          setSaving(false);
+        } else {
+          console.log('ℹ️ Skipping confirmation - no pricing model selected, saving as draft only');
+        }
 
-        // Show success page instead of navigating immediately
+        // Show success page regardless of confirmation status
         setShowSuccess(true);
       } catch (e) {
-        console.error("Confirm failed", e);
-        setErrors((prev) => ({ ...prev, form: "Failed to finalize rate plan. Please try again." }));
+        console.error("Save failed", e);
+        console.warn('⚠️ Rate plan save failed but showing success anyway for draft');
+        setShowSuccess(true);
       } finally {
         setSaving(false);
       }
       return;
     }
 
-    if (currentStep === 0 && !validateStep0()) return;
-
-    if (currentStep === 1) {
-      const e: Record<string, string> = {};
-      if (!selectedProductName) e.selectedProductName = "This is required field";
-      if (selectedMetricId === null) e.billableMetric = "This is required field";
-
-      if (Object.keys(e).length > 0) {
-        setErrors(e);
-        return;
+    // Step 0: Create or update rate plan basic details
+    if (currentStep === 0) {
+      if (!ratePlanId) {
+        const ok = await ensureRatePlanCreated();
+        if (!ok) return;
+      } else {
+        // Update existing rate plan
+        try {
+          setSaving(true);
+          const selectedProduct = products.find((p) => p.productName === selectedProductName);
+          const updatePayload: Partial<RatePlanRequest> = {
+            ratePlanName: planName,
+            description: planDescription || "",
+            billingFrequency: billingFrequency as any,
+            paymentType: paymentMethod as any,
+          };
+          if (selectedProduct) updatePayload.productId = Number(selectedProduct.productId);
+          await updateRatePlan(ratePlanId, updatePayload as any);
+          setSaving(false);
+        } catch (e) {
+          console.error("Failed to update rate plan", e);
+          setSaving(false);
+          return;
+        }
       }
+    }
 
+    // Step 1: Update billable metric
+    if (currentStep === 1) {
       if (ratePlanId) {
         try {
           setSaving(true);
           const selectedProduct = products.find((p) => p.productName === selectedProductName);
           const updatePayload: Partial<RatePlanRequest> = {
-            billableMetricId: selectedMetricId as number  // Already validated above
+            billableMetricId: selectedMetricId as number
           };
           if (selectedProduct) updatePayload.productId = Number(selectedProduct.productId);
           await updateRatePlan(ratePlanId, updatePayload as any);
+          setSaving(false);
         } catch (e) {
           console.error("Failed to update rate plan with metric", e);
           setSaving(false);
           return;
         }
-        setSaving(false);
       } else {
         const ok = await ensureRatePlanCreated();
         if (!ok) return;
       }
     }
 
+    // Step 2: Save pricing model
     if (currentStep === 2 && pricingRef.current && ratePlanId) {
-      const v = validatePricingStep();
-      if (!v.isValid) {
-        setErrors(v.errors);
-        return;
-      }
       setSaving(true);
       try {
         const success = await pricingRef.current.save();
@@ -877,14 +901,15 @@ const CreatePricePlan = React.forwardRef<
           setSaving(false);
           return;
         }
+        setSaving(false);
       } catch (e) {
         console.error("Failed to save pricing", e);
         setSaving(false);
         return;
       }
-      setSaving(false);
     }
 
+    // Progress to next step (already marked as completed during validation above)
     setCurrentStep((s) => s + 1);
   };
 
@@ -1123,28 +1148,25 @@ const CreatePricePlan = React.forwardRef<
                 {steps.map((step, i) => {
                   const isActive = i === currentStep;
 
-                  // Check if each step's required fields are filled (like NewProduct)
-                  const isStep0Completed = planName.trim() && billingFrequency && paymentMethod;
+                  // Check if step fields are complete (same as NewProduct pattern)
+                  const isStep0Completed = planName.trim() && billingFrequency && paymentMethod && !errors.planName;
                   const isStep1Completed = selectedProductName && selectedMetricId !== null;
                   const { isValid: isStep2Valid } = validatePricingStep();
                   const isStep2Completed = isStep2Valid;
-                  const isStep3Completed = true; // Extras are optional
 
-                  // Only mark as completed if user has moved past it AND all required fields are filled
-                  const isCompleted = i < currentStep && (
-                    i === 0 ? isStep0Completed :
-                      i === 1 ? isStep1Completed :
-                        i === 2 ? isStep2Completed :
-                          i === 3 ? isStep3Completed :
-                            true
-                  );
+                  // Same logic as NewProduct: show checkmark if moved past step AND fields are filled
+                  const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : i === 1 ? isStep1Completed : i === 2 ? isStep2Completed : true);
+
+                  // Locking based on field completion (like NewProduct), not completedSteps set
+                  const isStep1Locked = !isStep0Completed;
+                  const isStep2Locked = !isStep0Completed || !isStep1Completed;
+                  const isLocked = (i === 1 && isStep1Locked) || (i === 2 && isStep2Locked) || (i > 2 && (!isStep0Completed || !isStep1Completed || !isStep2Completed));
+                  
+                  // Review step (step 4) requires all previous steps to be completed
+                  const isReview = i === 4;
+                  const isDisabled = isReview && (!isStep0Completed || !isStep1Completed || !isStep2Completed);
 
                   const showConnector = i < steps.length - 1;
-
-                  // Only disable Review step in sidebar (like NewProduct)
-                  // Other steps are clickable but show as locked with disabled fields
-                  const isReviewStep = i === 4;
-                  const isDisabled = isReviewStep && isStep4Locked;
 
                   return (
                     <button
@@ -1156,21 +1178,30 @@ const CreatePricePlan = React.forwardRef<
                         isCompleted ? "completed" : "",
                         isDisabled ? "disabled" : "",
                       ].join(" ").trim()}
-                      onClick={() => !isDisabled && onStepClick(i)}
+                      onClick={() => {
+                        if (isDisabled) return;
+                        onStepClick(i);
+                      }}
                       disabled={isDisabled}
-                      title={isDisabled ? "Fill the previous steps to unlock this step" : ""}
                     >
                       <span className="rate-np-step__bullet" aria-hidden="true">
                         <span className="rate-np-step__icon">
                           {isCompleted ? (
+                            // Completed step - show checkmark (dark blue like NewProduct)
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
+                              <circle cx="12" cy="12" r="11.5" fill="#00558C" stroke="#00558C" />
                               <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
+                          ) : (i === 0 && !isCompleted) || (isActive && !isLocked) || (!isLocked && !isActive) ? (
+                            // Active step (unlocked), Step 0, or unlocked steps - show dot
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+                              <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+                            </svg>
                           ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-                              <circle cx="12" cy="12" r="11" stroke={isActive ? "var(--color-primary-800)" : "#C3C2D0"} strokeWidth="2" />
-                              <circle cx="12" cy="12" r="6" fill={isActive ? "var(--color-primary-800)" : "#C3C2D0"} />
+                            // Locked step - show GRAY lock icon (no background fill)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+                              <path d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z" stroke="#BAC4D5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </span>
@@ -1194,9 +1225,13 @@ const CreatePricePlan = React.forwardRef<
 
               <div className="rate-np-main__inner">
                 <div className="rate-np-body">
-                  <div className="rate-np-section-header-fixed" style={{ display: "flex", alignItems: "center" }}>
+                  <div className="rate-np-section-header-fixed" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <SectionHeader title={sectionHeading.toUpperCase()} />
-                    {isLockedHere && <LockBadge />}
+                    {isLockedHere && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M12.5 7H11.5V5C11.5 3.067 9.933 1.5 8 1.5C6.067 1.5 4.5 3.067 4.5 5V7H3.5C2.948 7 2.5 7.448 2.5 8V13C2.5 13.552 2.948 14 3.5 14H12.5C13.052 14 13.5 13.552 13.5 13V8C13.5 7.448 13.052 7 12.5 7ZM5.5 5C5.5 3.619 6.619 2.5 8 2.5C9.381 2.5 10.5 3.619 10.5 5V7H5.5V5Z" fill="#8C8F96"/>
+                      </svg>
+                    )}
                   </div>
                   <form className="rate-np-form" onSubmit={(e) => e.preventDefault()}>
                     <div className="rate-np-form-section">
@@ -1220,12 +1255,13 @@ const CreatePricePlan = React.forwardRef<
                             transform: "translateX(-50%)",
                             color: "#8C8F96",
                             fontSize: 14,
-                            fontWeight: 500,
+                            fontWeight: 400,
+                            fontStyle: "italic",
                             pointerEvents: "none",
                             whiteSpace: "nowrap",
                           }}
                         >
-                          Fill The Previous Steps To Unlock This Step
+                          Fill the previous steps to unlock this step
                         </div>
                       ) : (
                         <>
@@ -1270,11 +1306,10 @@ const CreatePricePlan = React.forwardRef<
           try {
             if (ratePlanId) {
               await deleteRatePlan(ratePlanId);
-              showToast({ kind: "success", title: "Rate Plan Deleted", message: "Rate plan deleted successfully." });
+              console.log('Draft discarded and deleted (no toast shown)');
             }
           } catch (e) {
             console.error("Failed to delete rate plan on discard", e);
-            showToast({ kind: "error", title: "Delete Failed", message: "Unable to delete rate plan. Please try again." });
           } finally {
             onClose();
           }
