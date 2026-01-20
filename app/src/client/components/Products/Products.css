@@ -1024,7 +1024,7 @@ line-height: var(--line-height-body-sm);
   z-index: 101 !important; /* Higher z-index for proper layering */
   color: var(--color-neutral-1000);
   border: none; /* remove all borders */
-  border-bottom: 1px solid var(--color-neutral-300) !important;
+  border-bottom: 1px solid var(--color-neutral-200) !important;
 
 /* body/md/reg */
 font-family: var(--font-family-primary);
@@ -1078,6 +1078,7 @@ line-height: var(--line-height-body-md);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 14px;
 }
 
 /* Created On sort popover */

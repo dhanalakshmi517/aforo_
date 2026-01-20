@@ -18,6 +18,7 @@ import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
 import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
+import { useToast } from '../../componenetsss/ToastProvider';
 
 import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
 
@@ -71,6 +72,7 @@ type ActiveTab = 'details' | 'account' | 'review';
 const EditCustomer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [loading, setLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -272,13 +274,11 @@ const EditCustomer: React.FC = () => {
 
     [
       'billingAddressLine1',
-      'billingAddressLine2',
       'billingCity',
       'billingState',
       'billingPostalCode',
       'billingCountry',
       'customerAddressLine1',
-      'customerAddressLine2',
       'customerCity',
       'customerState',
       'customerPostalCode',
@@ -304,13 +304,11 @@ const EditCustomer: React.FC = () => {
 
     const requiredKeys: (keyof AccountDetailsData)[] = [
       'billingAddressLine1',
-      'billingAddressLine2',
       'billingCity',
       'billingState',
       'billingPostalCode',
       'billingCountry',
       'customerAddressLine1',
-      'customerAddressLine2',
       'customerCity',
       'customerState',
       'customerPostalCode',
@@ -432,7 +430,10 @@ const EditCustomer: React.FC = () => {
     const ok = await savePatch();
     setSavingLeave(false);
     setShowLeavePopup(false);
-    if (ok) navigate(-1);
+    if (ok) {
+      showToast({ kind: 'success', title: 'Changes Saved', message: 'Customer updated successfully.' });
+      navigate(-1);
+    }
   };
 
   // ------- Logo handlers -------

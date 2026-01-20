@@ -567,13 +567,18 @@ line-height: var(--line-height-body-md);
 }
 
 .editcust-np--label {
-  color: var(--color-neutral-1700);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md);
+  color: var(--color-neutral-1700) !important;
+font-family: var(--font-family-primary) !important;
+font-size: var(--font-size-md) !important;
+font-style: normal !important;
+font-weight: 420 !important;
+line-height: var(--line-height-body-md) !important;
+user-select: none;
+display: flex;
+gap: 4px;
+align-items: center;
 }
+
 .np-icon-field-wrapper {
   display: flex;
   align-items: center;

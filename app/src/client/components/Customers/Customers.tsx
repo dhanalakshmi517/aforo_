@@ -452,7 +452,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const searchDisabled = customers.length === 0 && !loading && !errorMsg;
 
   return (
-    <div className="customers-container">
+    <div className="check-container">
       {!showNewCustomerForm ? (
         <>
           <PageHeader
