@@ -566,17 +566,14 @@ font-weight: 500;
 line-height: var(--line-height-body-md);
 }
 
-.editcustomer-np-label {
-  color: var(--color-neutral-1700) !important;
-  font-family: var(--font-family-primary) !important;
-  font-size: var(--font-size-md) !important;
-  font-style: normal !important;
-  font-weight: 420 !important;
-  line-height: var(--line-height-body-md) !important;
-  display: block !important;
-  margin-bottom: 6px !important;
+.editcust-np--label {
+  color: var(--color-neutral-1700);
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md);
 }
-
 .np-icon-field-wrapper {
   display: flex;
   align-items: center;
@@ -695,24 +692,4 @@ color: var(--color-primary-800);
 
 .np-icon-action-btn svg {
   flex-shrink: 0;
-}
-
-/* Form group spacing */
-.editcust-np-form-group {
-  margin-bottom: 24px;
-}
-
-.edit-np-form-group {
-  margin-bottom: 24px;
-}
-
-.edit-np-form-row {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.edit-np-form-row .edit-np-form-group {
-  flex: 1;
-  margin-bottom: 0;
 }

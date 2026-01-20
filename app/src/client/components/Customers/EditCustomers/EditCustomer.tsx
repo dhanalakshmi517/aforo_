@@ -18,7 +18,6 @@ import { getAuthHeaders } from '../../../utils/auth';
 import EditPopup from '../../componenetsss/EditPopUp';
 import ConfigurationStepShell from '../../componenetsss/ConfigurationStepShell';
 import UnsavedChangesModal from '../../componenetsss/UnsavedChangesModal';
-import { useToast } from '../../componenetsss/ToastProvider';
 
 import './EditCustomer.css'; // reuse the same layout shell (np-style classes)
 
@@ -72,7 +71,6 @@ type ActiveTab = 'details' | 'account' | 'review';
 const EditCustomer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   const [loading, setLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -274,11 +272,13 @@ const EditCustomer: React.FC = () => {
 
     [
       'billingAddressLine1',
+      'billingAddressLine2',
       'billingCity',
       'billingState',
       'billingPostalCode',
       'billingCountry',
       'customerAddressLine1',
+      'customerAddressLine2',
       'customerCity',
       'customerState',
       'customerPostalCode',
@@ -304,11 +304,13 @@ const EditCustomer: React.FC = () => {
 
     const requiredKeys: (keyof AccountDetailsData)[] = [
       'billingAddressLine1',
+      'billingAddressLine2',
       'billingCity',
       'billingState',
       'billingPostalCode',
       'billingCountry',
       'customerAddressLine1',
+      'customerAddressLine2',
       'customerCity',
       'customerState',
       'customerPostalCode',
@@ -348,11 +350,9 @@ const EditCustomer: React.FC = () => {
         }
       }
 
-      showToast({ kind: 'success', title: 'Changes Saved', message: 'Customer updated successfully.' });
       return true;
     } catch (err) {
       console.error('Failed to save draft/update with JSON', err);
-      showToast?.({ kind: 'error', title: 'Failed to Save', message: 'Please try again.' });
       return false;
     }
   };
@@ -483,7 +483,7 @@ const EditCustomer: React.FC = () => {
         return (
           <div className="edit-np-section">
             <div className="edit-np-form-row">
-               <div className="edit-np-form-group">
+              <div className="edit-np-form-group">
                 <InputField
                   label="Company Name"
                   value={companyName}
@@ -575,8 +575,6 @@ const EditCustomer: React.FC = () => {
             </div>
           </div>
         );
-
-
 
       case 'account':
         return (
