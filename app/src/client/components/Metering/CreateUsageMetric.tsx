@@ -185,6 +185,16 @@ export default function CreateUsageMetric({
     isDraftSaved,
   ]);
 
+  // Track usageConditions state changes
+  useEffect(() => {
+    console.log("📊 USAGE CONDITIONS STATE CHANGED:", {
+      usageConditions,
+      billingCriteria,
+      activeTab,
+      currentStep,
+    });
+  }, [usageConditions, billingCriteria, activeTab, currentStep]);
+
   // used for topbar "enable" logic
   const hasAnyRequiredInput = useMemo(() => {
     const first = usageConditions[0] || { dimension: "", operator: "", value: "" };
@@ -369,7 +379,26 @@ export default function CreateUsageMetric({
   const buildPayload = (isDraft: boolean) => {
     const shouldIncludeUsageConditions = billingCriteria !== "BILL_EXCLUDING_USAGE_CONDITIONS";
 
-    const validConditions = usageConditions.filter((c) => c.dimension?.trim() && c.operator?.trim() && c.value?.trim());
+    console.log("🔍 BUILDING PAYLOAD - RAW CONDITIONS:", {
+      selectedProductType,
+      billingCriteria,
+      shouldIncludeUsageConditions,
+      usageConditions,
+    });
+
+    const validConditions = usageConditions.filter((c) => {
+      const isValid = c.dimension?.trim() && c.operator?.trim() && c.value?.trim();
+      console.log("🔍 CONDITION VALIDATION:", {
+        condition: c,
+        dimension: c.dimension,
+        operator: c.operator,
+        value: c.value,
+        isValid,
+      });
+      return isValid;
+    });
+
+    console.log("🔍 VALID CONDITIONS AFTER FILTER:", validConditions);
 
     if (metricId) {
       const payload: any = {
@@ -382,14 +411,16 @@ export default function CreateUsageMetric({
         billingCriteria: billingCriteria || undefined,
         version: version?.trim() || undefined,
         description: description?.trim() ? description.trim() : undefined,
-        usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : [],
+        usageConditions: shouldIncludeUsageConditions ? validConditions : [],
       };
-      return clean(payload);
+      const cleaned = clean(payload);
+      cleaned.usageConditions = payload.usageConditions;
+      return cleaned;
     }
 
     if (isDraft) {
       const payload: any = {
-        usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : [],
+        usageConditions: shouldIncludeUsageConditions ? validConditions : [],
       };
       if (metricName.trim()) payload.metricName = metricName.trim();
       if (selectedProductId) payload.productId = Number(selectedProductId);
@@ -399,14 +430,16 @@ export default function CreateUsageMetric({
       if (aggregationFunction) payload.aggregationFunction = aggregationFunction;
       if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
       if (billingCriteria) payload.billingCriteria = billingCriteria;
-      return clean(payload);
+      const cleaned = clean(payload);
+      cleaned.usageConditions = payload.usageConditions;
+      return cleaned;
     }
 
     const payload: any = {
       metricName: metricName.trim(),
       productId: Number(selectedProductId),
       unitOfMeasure: unitOfMeasure.trim(),
-      usageConditions: shouldIncludeUsageConditions && validConditions?.length ? validConditions : [],
+      usageConditions: shouldIncludeUsageConditions ? validConditions : [],
     };
 
     if (version?.trim()) payload.version = version.trim();
@@ -415,17 +448,28 @@ export default function CreateUsageMetric({
     if (aggregationWindow) payload.aggregationWindow = aggregationWindow;
     if (billingCriteria) payload.billingCriteria = billingCriteria;
 
-    return clean(payload);
+    const cleaned = clean(payload);
+    cleaned.usageConditions = payload.usageConditions;
+    return cleaned;
   };
 
   const saveOrUpdateMetric = async (isDraft = false, skipFinalize = false) => {
     if (!isDraft && !validateCurrentStep(currentStep)) return false;
 
     const payload = buildPayload(isDraft);
+    console.log("📤 PAYLOAD BEING SENT TO BACKEND:", {
+      isDraft,
+      skipFinalize,
+      billingCriteria,
+      usageConditions,
+      payload,
+    });
 
     try {
       if (metricId) {
+        console.log("🔄 UPDATING METRIC:", metricId, "with payload:", payload);
         const success = await updateBillableMetric(metricId, payload);
+        console.log("✅ UPDATE RESPONSE:", success);
         if (!success) throw new Error("Failed to update metric");
 
         if (!isDraft && !skipFinalize) {
@@ -435,7 +479,9 @@ export default function CreateUsageMetric({
         }
         return true;
       } else {
+        console.log("➕ CREATING NEW METRIC with payload:", payload);
         const res = await createBillableMetric(payload);
+        console.log("✅ CREATE RESPONSE:", res);
         if (!res.ok || !res.id) throw new Error("Failed to create metric");
         setMetricId(res.id);
 
@@ -525,6 +571,13 @@ export default function CreateUsageMetric({
     if (activeTab === "metric") {
       if (!validateCurrentStep(0)) return;
 
+      console.log("📍 STEP 0 (METRIC) - BEFORE SAVE:", {
+        metricName,
+        selectedProductId,
+        unitOfMeasure,
+        usageConditions,
+      });
+
       setSaving(true);
       const ok = await saveOrUpdateMetric(true); // draft save on step 1
       setSaving(false);
@@ -538,13 +591,18 @@ export default function CreateUsageMetric({
       if (isConditionsLocked) return;
       if (!validateCurrentStep(1)) return;
 
-      // Only save if we don't have a metricId yet (avoid duplicate save)
-      if (!metricId) {
-        setSaving(true);
-        const ok = await saveOrUpdateMetric(false, true); // save but don't finalize
-        setSaving(false);
-        if (!ok) return;
-      }
+      console.log("📍 STEP 1 (CONDITIONS) - BEFORE SAVE:", {
+        billingCriteria,
+        usageConditions,
+        metricId,
+      });
+
+      // Always save conditions when moving to review step
+      console.log("💾 SAVING CONDITIONS TO BACKEND");
+      setSaving(true);
+      const ok = await saveOrUpdateMetric(false, true); // save but don't finalize
+      setSaving(false);
+      if (!ok) return;
 
       setStep(2);
       return;
