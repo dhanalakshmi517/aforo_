@@ -1219,7 +1219,7 @@ const RatePlans: React.FC<RatePlansProps> = ({
             />
           </div>
         ) : (
-          <div className="customers-container">
+          <div className="check-containers">
             <PageHeader
               title="Rate Plans"
               searchTerm={searchTerm}
@@ -1703,12 +1703,12 @@ const RatePlans: React.FC<RatePlansProps> = ({
                               {plan.status?.toLowerCase() === 'draft' ? (
                                 <RetryIconButton
                                   onClick={() => handleDraft(plan.ratePlanId)}
-                                  title="Continue editing draft"
+                                  title="Resume Draft"
                                 />
                               ) : (
                                 <EditIconButton
                                   onClick={() => handleEdit(plan.ratePlanId)}
-                                  title="Edit rate plan"
+                                  title="Edit"
                                 />
                               )}
                               <DeleteIconButton
