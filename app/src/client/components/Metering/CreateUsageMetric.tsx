@@ -611,7 +611,6 @@ export default function CreateUsageMetric({
     if (activeTab === "review") {
       if (isReviewLocked || !metricId) return;
 
-      // Only finalize when clicking "Create Metric" button
       setSaving(true);
       const finalized = await finalizeBillableMetric(metricId);
       setSaving(false);
