@@ -731,13 +731,24 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
         rail={
           <nav className="met-np-steps">
             {steps.map((step, i) => {
-              const isActive = (i === 0 && !isStep0Completed) || (i === currentStep && isStep0Completed) || (i === 1 && isStep0Completed && currentStep <= 1);
+              // Icon logic: Ring icon until step is completed AND user has moved past it
+              const showRingIcon =
+                (i === 0 && (currentStep === 0 || !isStep0Completed)) ||
+                (i === 1 && currentStep >= 1 && Boolean(isStep0Completed) && !isBillingComplete) ||
+                (i === 2 && currentStep === 2);
 
+              // Title styling: Only current step shows active color
+              const isActiveStep = i === currentStep;
+
+              // Step 0 completed (checkmark) only after moving past it
+              // Step 1 completed only after moving past it
               const isCompleted =
-                i === 0 ? Boolean(isStep0Completed) : i < currentStep && isStep0Completed;
+                (i === 0 && Boolean(isStep0Completed) && currentStep > 0) ||
+                (i === 1 && isBillingComplete && currentStep > 1);
 
+              // Step 1 locked until Step 0 completed OR still on Step 0, Step 2 locked until both completed
               const isLocked =
-                (i === 1 && isBillingLocked) || (i === 2 && isReviewLocked);
+                (i === 1 && currentStep === 0) || (i === 2 && isReviewLocked);
 
               const showConnector = i < steps.length - 1;
 
@@ -747,7 +758,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                   type="button"
                   className={[
                     "met-np-step",
-                    isActive ? "active" : "",
+                    isActiveStep ? "active" : "",
                     isCompleted ? "completed" : "",
                     isLocked ? "locked" : "",
                   ]
@@ -758,7 +769,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                 >
                   <span className="met-np-step__bullet" aria-hidden="true">
                     <span className="met-np-step__icon">
-                      {isActive ? (
+                      {showRingIcon ? (
                         <ActiveRingIcon />
                       ) : isCompleted ? (
                         <CompletedIcon />
@@ -940,7 +951,7 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
                     </div>
 
                     {/* FOOTER */}
-                    <div className="met-np-form-footer" style={{ position: "relative" }}>
+                    <div className="metform-footer" style={{ position: "relative" }}>
                       {errors.form && (
                         <div className="met-met-np-error-message">{errors.form}</div>
                       )}
