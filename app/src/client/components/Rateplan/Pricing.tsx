@@ -629,12 +629,34 @@ const Pricing = forwardRef<PricingHandle, PricingProps>(
                 return;
               }
 
+              // Clear previous model data when switching to a new model
+              if (selected && selected !== value) {
+                console.log('🧹 Pricing: Clearing previous model data, switching from', selected, 'to', value);
+                setTiers([]);
+                setNoUpperLimit(false);
+                setFlatFee({ flatFeeAmount: 0, numberOfApiCalls: 0, overageUnitRate: 0, graceBuffer: 0 });
+                setUsage({ perUnitAmount: 0 });
+                setOverageUnitRate(0);
+                setGraceBuffer(0);
+              }
+
               setSelected(value);
-              if (value === 'Tiered Pricing' && tiers.length === 0) {
+              
+              // Initialize fresh tiers for tier-based models
+              if (value === 'Tiered Pricing') {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
               }
-              if (value === 'Volume-Based' && tiers.length === 0) {
+              if (value === 'Volume-Based') {
                 setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
+              }
+              if (value === 'Stairstep') {
+                setTiers([{ from: null, to: null, price: null, isUnlimited: false }]);
+              }
+              
+              setRatePlanData('PRICING_MODEL', value);
+              // Clear validation error when pricing model is selected
+              if (value && onClearError) {
+                onClearError('pricingModel');
               }
             }}
             options={[

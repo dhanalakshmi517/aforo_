@@ -294,14 +294,14 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
 
         {/* Hide overage/grace entirely when unlimited */}
         {!noUpperLimit && (
-          <div className="tiered-extra-fields">
+          <div className="volume-extra-fields">
             <label>
               Overage Charge
               <input
                 type="number"
                 step="0.01"
                 min="0"
-                className={`volume-input-extra ${!noUpperLimit && overageTouched && overageError ? 'error-input' : ''}`}
+                className={`${!noUpperLimit && overageTouched && overageError ? 'error-input' : ''}`}
                 placeholder="Enter overage charge"
                 value={overageUnitRate}
                 onChange={(e) => {
@@ -329,7 +329,6 @@ const Volume = forwardRef<VolumeHandle, VolumeProps>(({
                 type="number"
                 step="1"
                 min="0"
-                className="volume-input-extra"
                 placeholder="Enter grace buffer"
                 value={graceBuffer}
                 onChange={(e) => setGraceBuffer(parseFloat(e.target.value) || 0)}

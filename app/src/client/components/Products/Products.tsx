@@ -1514,13 +1514,13 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                         <td className="actions-cell">
                           <div className="product-action-buttons">
                             {product.status.toLowerCase() === 'draft' ? (
-                              <RetryIconButton
+                              <EditIconButton
                                 onClick={() => {
                                   navigate('/get-started/products/new', {
                                     state: { draftProduct: product }
                                   });
                                 }}
-                                title="Continue editing draft"
+                                title="Resume Draft"
                               />
                             ) : (
                               <EditIconButton

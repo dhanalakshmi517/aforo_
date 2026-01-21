@@ -15,7 +15,10 @@ interface UsageBasedProps {
   locked?: boolean;
 }
 
-const numToStr = (n: number | undefined): string => (n && n !== 0 ? n.toString() : '');
+const numToStr = (n: number | undefined): string => {
+  if (n === undefined || n === null || Number.isNaN(n) || n === 0) return '';
+  return n.toString();
+};
 
 const UsageBased = forwardRef<UsageBasedHandle, UsageBasedProps>(({ data, onChange, validationErrors = {}, onClearError, locked = false }, ref) => {
   const [unitAmount, setUnitAmount] = useState<string>(numToStr(data.perUnitAmount));
