@@ -698,17 +698,23 @@ export default function CreateSubscription({
           disabled: topActionsDisabled,
         }}
       />
-
       <CreateFormShell
         rail={
           <nav className="met-np-steps">
             {steps.map((step, i) => {
-              const isLocked = i === 1 && isReviewLocked;
-              const isCompleted = i === 0 ? Boolean(isStep0Completed) : i < currentStep;
-              const isActive =
-                (i === 0 && !isStep0Completed) ||
-                (i === currentStep && isStep0Completed) ||
-                (i === 1 && isStep0Completed && currentStep <= 1);
+              // Icon logic: Ring icon until step is completed AND user has moved past it
+              const showRingIcon =
+                (i === 0 && (currentStep === 0 || !isStep0Completed)) ||
+                (i === 1 && currentStep === 1);
+
+              // Title styling: Only current step shows active color
+              const isActiveStep = i === currentStep;
+
+              // Step 0 completed (checkmark) only after moving past it
+              const isCompleted = i === 0 && Boolean(isStep0Completed) && currentStep > 0;
+
+              // Step 1 locked until on Step 1
+              const isLocked = i === 1 && currentStep === 0;
 
               const showConnector = i < steps.length - 1;
 
@@ -718,7 +724,7 @@ export default function CreateSubscription({
                   type="button"
                   className={[
                     "met-np-step",
-                    isActive ? "active" : "",
+                    isActiveStep ? "active" : "",
                     isCompleted ? "completed" : "",
                     isLocked ? "locked" : "",
                   ].join(" ").trim()}
@@ -727,7 +733,7 @@ export default function CreateSubscription({
                 >
                   <span className="met-np-step__bullet" aria-hidden="true">
                     <span className="met-np-step__icon">
-                      {isActive ? (
+                      {showRingIcon ? (
                         <ActiveRingIcon />
                       ) : isCompleted ? (
                         <CompletedIcon />

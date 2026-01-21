@@ -316,7 +316,9 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
     const idx = options.findIndex((o) => o.value === value);
     return idx >= 0 ? idx : -1;
   });
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0, width: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   const selected = options.find((o) => o.value === value);
   
@@ -327,6 +329,17 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       opt.label.toLowerCase().includes(query) || opt.value.toLowerCase().includes(query)
     );
   }, [options, searchQuery]);
+
+  React.useEffect(() => {
+    if (open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({
+        top: rect.bottom + 2,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [open]);
 
   React.useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
@@ -410,6 +423,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       )}
 
       <button
+        ref={buttonRef}
         id={controlId}
         name={name}
         type="button"
@@ -458,7 +472,18 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
 
       {/* Menu */}
       {open && (
-        <div id={listboxId} role="listbox" className="dd-menu" aria-labelledby={controlId} tabIndex={-1}>
+        <div 
+          id={listboxId} 
+          role="listbox" 
+          className="dd-menu" 
+          aria-labelledby={controlId} 
+          tabIndex={-1}
+          style={{
+            top: `${menuPos.top}px`,
+            left: `${menuPos.left}px`,
+            width: `${menuPos.width}px`,
+          }}
+        >
           {filteredOptions.map((opt, i) => {
             const isSel = opt.value === value;
             const isDis = !!opt.disabled;

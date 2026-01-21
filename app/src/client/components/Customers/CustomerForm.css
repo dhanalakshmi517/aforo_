@@ -1118,16 +1118,6 @@ margin-top: -10px;
   height:1px;
 }
 
-/* Footer actions on a full-bleed line */
-.met-np-form-footer {
-  margin: 0 -24px;
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between; /* Space between back and next buttons */
-  align-items: center;
-  margin-top: auto;
-  margin-bottom: 24px;
-}
 
 .met-np-btn-group { 
   display: flex;
