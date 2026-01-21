@@ -332,12 +332,22 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
 
   React.useEffect(() => {
     if (open && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setMenuPos({
-        top: rect.bottom + 2,
-        left: rect.left,
-        width: rect.width,
-      });
+      const updateMenuPos = () => {
+        const rect = buttonRef.current?.getBoundingClientRect();
+        if (rect) {
+          setMenuPos({
+            top: rect.bottom + 2,
+            left: rect.left,
+            width: rect.width,
+          });
+        }
+      };
+      
+      updateMenuPos();
+      
+      // Update position on scroll
+      window.addEventListener("scroll", updateMenuPos, true);
+      return () => window.removeEventListener("scroll", updateMenuPos, true);
     }
   }, [open]);
 
