@@ -25,11 +25,20 @@ const SqlDimensionSelect: React.FC<Props> = ({ unitOfMeasure, value, onChange, e
     value: d,
   }));
 
+  const handleChange = (val: string) => {
+    console.log('🔍 SQL DIMENSION SELECTED:', {
+      unitOfMeasure,
+      selectedValue: val,
+      availableDimensions: dims,
+    });
+    onChange(val);
+  };
+
   return (
     <DropdownField
       label="Dimension"
       value={value}
-      onChange={onChange}
+      onChange={handleChange}
       options={options}
             required
 

@@ -126,12 +126,26 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
     setFilters((prev) => prev.filter((f) => f.id !== id));
   };
 
+  const upperType = (productType || '').toUpperCase();
+  const upperUom = (unitOfMeasure || '').toUpperCase();
+
+  const isApi = upperType === 'API' && ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'].includes(upperUom);
+  const isFlat = upperType === 'FLATFILE' && ['FILE', 'DELIVERY', 'MB', 'RECORD', 'ROW'].includes(upperUom);
+  const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION', 'CELL', 'ROW', 'MB'].includes(upperUom);
+  const isLlm = upperType === 'LLMTOKEN' && ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'].includes(upperUom);
+
   // Sync local filters to parent whenever they change
   useEffect(() => {
     const mapped = filters.map(f => ({ dimension: f.usageCondition, operator: f.operator, value: f.value }));
-    console.log('Syncing filters to parent conditions:', mapped);
+    console.log('🔄 SYNCING FILTERS TO PARENT:', {
+      productType: upperType,
+      unitOfMeasure: upperUom,
+      isFlat,
+      filters,
+      mapped
+    });
     setConditions(mapped);
-  }, [filters, setConditions]);
+  }, [filters, setConditions, upperType, upperUom, isFlat]);
 
   // Clear billing criteria error when billing criteria is selected
   useEffect(() => {
@@ -160,14 +174,6 @@ const UsageConditionForm: React.FC<UsageConditionFormProps> = ({
       }
     }
   }, [filters, billingCriteria, billingError, onFieldEdited]);
-
-  const upperType = (productType || '').toUpperCase();
-  const upperUom = (unitOfMeasure || '').toUpperCase();
-
-  const isApi = upperType === 'API' && ['API_CALL', 'REQUEST', 'TRANSACTION', 'HIT'].includes(upperUom);
-  const isFlat = upperType === 'FLATFILE' && ['FILE', 'DELIVERY', 'MB', 'RECORD', 'ROW'].includes(upperUom);
-  const isSql = upperType === 'SQLRESULT' && ['QUERY_EXECUTION', 'CELL', 'ROW', 'MB'].includes(upperUom);
-  const isLlm = upperType === 'LLMTOKEN' && ['TOKEN', 'PROMPT_TOKEN', 'COMPLETION_TOKEN'].includes(upperUom);
 
   return (
     <div

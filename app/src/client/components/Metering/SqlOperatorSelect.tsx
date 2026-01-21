@@ -44,11 +44,20 @@ const SqlOperatorSelect: React.FC<Props> = ({ dimension, value, onChange, error,
     value: o,
   }));
 
+  const handleChange = (val: string) => {
+    console.log('🔍 SQL OPERATOR SELECTED:', {
+      dimension,
+      selectedValue: val,
+      availableOperators: ops,
+    });
+    onChange(val);
+  };
+
   return (
     <DropdownField
       label="Operator"
       value={value}
-      onChange={onChange}
+      onChange={handleChange}
       options={options}
             required
 
