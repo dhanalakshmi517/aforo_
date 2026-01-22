@@ -479,30 +479,45 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     // prevent interactions while icon picker open
     if (isIconPickerOpen) return;
 
+    // Track the effective product ID (may be created during this navigation)
+    let effectiveProductId = createdProductId;
+
     // forward navigation guards - validate when moving to next step
-    // Skip validation when navigating via sidebar (skipValidation = true)
-    if (index > currentStep && !skipValidation) {
-      // leaving general -> if going to configuration, validate and save general step
-      if (currentStep === 0 && index === 1) {
-        // Only validate and save if user has filled at least one field
-        if (hasAnyRequiredInput) {
+    if (index > currentStep) {
+      // When navigating to Configuration or Review, ensure product exists if required fields are filled
+      if (index >= 1 && !effectiveProductId && formData.productName.trim()) {
+        // Product Name is filled but product not created yet - create it
+        const newProductId = await saveProduct(true);
+        if (!newProductId) return;
+        effectiveProductId = newProductId; // Use the returned ID immediately
+      }
+
+      // Skip detailed validation when navigating via sidebar (skipValidation = true)
+      if (!skipValidation) {
+        // leaving general -> if going to configuration, validate general step
+        if (currentStep === 0 && index === 1) {
           // Product Name is required to proceed
           if (!formData.productName.trim()) {
             setErrors((prev) => ({ ...prev, productName: "This field is required" }));
             return;
           }
-          // Save the product when navigating from General to Configuration
-          const ok = await saveProduct(true);
-          if (!ok) return;
+        }
+
+        // leaving config -> if going to review, validate AND save config to server
+        if (currentStep === 1 && index === 2) {
+          if (!effectiveProductId || !configuration.productType) return;
+
+          if (configRef.current) {
+            const ok = await configRef.current.submit(false, true, effectiveProductId); // validate and save to server
+            if (!ok) return;
+          }
         }
       }
 
-      // leaving config -> if going to review, validate config only (no API)
-      if (currentStep === 1 && index === 2) {
-        if (!createdProductId || !configuration.productType) return;
-
+      // When navigating to Review via sidebar, still need to save config if not already saved
+      if (skipValidation && index === 2 && effectiveProductId && configuration.productType) {
         if (configRef.current) {
-          const ok = await configRef.current.submit(false, false); // client validation only
+          const ok = await configRef.current.submit(false, true, effectiveProductId); // save config to server
           if (!ok) return;
         }
       }
@@ -533,11 +548,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       if (isConfigurationLocked) return;
 
       if (configRef.current) {
-        const ok = await configRef.current.submit(false, false); // client-only validation
+        const ok = await configRef.current.submit(false, true); // validate and save to server
         if (!ok) return;
       }
 
-      await gotoStep(2);
+      await gotoStep(2, true); // skipValidation=true since we already validated and saved above
       return;
     }
   };
@@ -547,13 +562,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
     setIsSaving(true);
     try {
-      // 1) save configuration (real API call)
-      if (configRef.current) {
-        const ok = await configRef.current.submit();
-        if (!ok) return;
-      }
-
-      // 2) finalize product
+      // Configuration was already saved when navigating to Review step
+      // Just finalize the product
       const resp = await finalizeProduct(createdProductId);
       if (resp?.success) {
         setShowSuccess(true);
