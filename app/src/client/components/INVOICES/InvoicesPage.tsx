@@ -5,8 +5,10 @@ import PageHeader from "../PageHeader/PageHeader";
 import DataTable, { DataTableColumn } from "../componenetsss/DataTable";
 import PrimaryButton from "../componenetsss/PrimaryButton";
 import IntegrationButton from "../componenetsss/IntegrationButton";
+import StatusBadge from "../componenetsss/StatusBadge";
 import invoicesImage from "./invoices.svg";
-import { getAuthHeaders } from "../../utils/auth";
+import noSearchImage from "./nosearch.svg";
+import { getAuthHeaders, getOrganizationId } from "../../utils/auth";
 
 type QuickBooksInvoice = {
   Id: string;
@@ -42,7 +44,6 @@ type Invoice = {
   invoiceNumber: string;
   customer: string;
   amount: number;
-  balance: number;
   generatedOn: string;
   dueDate: string;
   status: string;
@@ -59,14 +60,30 @@ type Props = {
 const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const isEmpty = invoices.length === 0;
+  const hasNoInvoices = allInvoices.length === 0;
 
   useEffect(() => {
     fetchInvoices();
   }, []);
+
+  useEffect(() => {
+    // Filter invoices based on search term
+    if (!searchTerm.trim()) {
+      setInvoices(allInvoices);
+    } else {
+      const filtered = allInvoices.filter(invoice => 
+        invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.currency.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setInvoices(filtered);
+    }
+  }, [searchTerm, allInvoices]);
 
   const fetchInvoices = async () => {
     try {
@@ -103,10 +120,9 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
         invoiceNumber: invoice.DocNumber,
         customer: invoice.CustomerRef?.name || 'Unknown',
         amount: invoice.TotalAmt,
-        balance: invoice.Balance,
         generatedOn: new Date(invoice.syncedAt).toLocaleDateString(),
         dueDate: new Date(invoice.DueDate).toLocaleDateString(),
-        status: invoice.Balance === 0 ? 'Paid' : 'Pending',
+        status: invoice.Balance === 0 ? 'Paid' : 'Due',
         currency: invoice.CurrencyRef?.name || 'USD',
         pdfUrl: invoice.pdfUrl,
         pdfDownloadUrl: invoice.pdfDownloadUrl,
@@ -115,6 +131,7 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
       
       console.log('Formatted invoices:', formattedInvoices);
       console.log('Setting invoices state with', formattedInvoices.length, 'invoices');
+      setAllInvoices(formattedInvoices);
       setInvoices(formattedInvoices);
       console.log('Invoices state updated');
     } catch (err) {
@@ -133,8 +150,14 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
     navigate('/get-started/invoices/quickbooks-preview');
   };
 
+  const handleFilterClick = () => {
+    // Handle filter click - can open a filter modal or show filter options
+    console.log('Filter clicked');
+  };
+
   const handleRowClick = (invoice: Invoice) => {
-    navigate(`/get-started/invoices/${invoice.id}`, { state: { invoice } });
+    const pdfUrl = `http://44.204.127.27:8095${invoice.pdfUrl}`;
+    window.open(pdfUrl, '_blank');
   };
 
   // Define table columns
@@ -154,57 +177,61 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
       title: "Amount",
       render: (row) => `${row.currency} ${row.amount.toFixed(2)}`,
     },
-    {
-      key: "balance",
-      title: "Balance",
-      render: (row) => `${row.currency} ${row.balance.toFixed(2)}`,
-    },
+    // {
+    //   key: "balance",
+    //   title: "Balance",
+    //   render: (row) => `${row.currency} ${row.balance.toFixed(2)}`,
+    // },
     {
       key: "generatedOn",
       title: "Generated On",
       render: (row) => row.generatedOn,
     },
+   
     {
+      key: "status",
+      title: "Status",
+      render: (row) => (
+        <StatusBadge
+          label={row.status}
+          variant={row.status === 'Paid' ? 'active' : 'draft'}
+          size="sm"
+        />
+      ),
+    },
+     {
       key: "dueDate",
       title: "Due Date",
       render: (row) => row.dueDate,
     },
     {
-      key: "status",
-      title: "Status",
-      render: (row) => (
-        <span
-          style={{
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: '500',
-            backgroundColor: row.status === 'Paid' ? '#d1fae5' : '#fef3c7',
-            color: row.status === 'Paid' ? '#065f46' : '#92400e',
-          }}
-        >
-          {row.status}
-        </span>
-      ),
-    },
-    {
       key: "actions",
       title: "Actions",
-      render: (row) => (
-        <button
-          onClick={() => window.open(row.pdfDownloadUrl, '_blank')}
-          style={{
-            padding: '4px 8px',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            background: 'white',
-            cursor: 'pointer',
-            fontSize: '12px',
-          }}
-        >
-          Download
-        </button>
-      ),
+      render: (row) => {
+        const downloadUrl = `http://44.204.127.27:8095${row.pdfDownloadUrl}`;
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(downloadUrl, '_blank');
+            }}
+            style={{
+              padding: '8px',
+              borderRadius: '8px',
+              background: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#F5F9FF',
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M6.62988 8.62988V0.629883M6.62988 8.62988L3.29655 5.29655M6.62988 8.62988L9.96322 5.29655M12.6299 8.62988V11.2965C12.6299 11.6502 12.4894 11.9893 12.2394 12.2394C11.9893 12.4894 11.6502 12.6299 11.2965 12.6299H1.96322C1.60959 12.6299 1.27046 12.4894 1.02041 12.2394C0.770359 11.9893 0.629883 11.6502 0.629883 11.2965V8.62988" stroke="#1D7AFC" stroke-width="1.26" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        );
+      },
     },
   ];
 
@@ -215,12 +242,13 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
         title="Invoices"
         searchTerm={searchTerm}
         onSearchTermChange={setSearchTerm}
-        searchDisabled={isEmpty}
+        searchDisabled={hasNoInvoices}
         showPrimary={true}
         showIntegrations={false}
         useIntegrationButton={true}
         onPrimaryClick={handlePrimaryClick}
         onSettingsClick={handleExploreIntegrations}
+        onFilterClick={handleFilterClick}
       />
 
       {/* Table */}
@@ -229,16 +257,22 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
         rows={invoices}
         rowKey={(row) => row.id}
         onRowClick={handleRowClick}
-        emptyIcon={<img src={invoicesImage} alt="No invoices" width={169} height={169} />}
+        emptyIcon={
+          searchTerm.trim() ? (
+            <img src={noSearchImage} alt="No search results" width={169} height={169} />
+          ) : (
+            <img src={invoicesImage} alt="No invoices" width={169} height={169} />
+          )
+        }
         emptyText={
-          error && !error.toLowerCase().includes('cors')
-            ? `Unable to fetch invoices: ${error}. Please try again later.`
+          searchTerm.trim()
+            ? `No invoices found matching "${searchTerm}". Try adjusting your search terms.`
             : invoices.length === 0 && !isLoading
-              ? "No invoices found. Connect an integration to start generating invoices automatically and keep your billing in sync."
+              ? "You don’t have any invoices right now. Connect an integration to start generating invoices automatically and keep your billing in sync."
               : "Loading invoices..."
         }
         emptyAction={
-          (!error || error.toLowerCase().includes('cors')) && !isLoading && invoices.length === 0 && (
+          !isLoading && invoices.length === 0 && !searchTerm.trim() && (
             <PrimaryButton onClick={handleExploreIntegrations}>
               Explore Integrations
             </PrimaryButton>
