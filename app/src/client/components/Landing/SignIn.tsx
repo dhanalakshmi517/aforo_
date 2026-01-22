@@ -72,7 +72,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess }) => {
         throw new Error((loginResponse as any).message || 'Login failed');
       }
       setAuthData(loginResponse, email.trim());
-      const redirectTo = '/get-started';
+      const redirectTo = '/get-started/dashboards';
       navigate(redirectTo);
       onSuccess?.();
     } catch (err: any) {

@@ -476,6 +476,7 @@ select.if-select:focus-visible,
   max-height: 240px;
   overflow-y: auto;
   box-sizing: border-box;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 /* Menu items (soft rounded "pills") */

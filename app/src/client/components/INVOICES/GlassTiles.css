@@ -1,0 +1,45 @@
+.glass-tiles {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+/* BASE GLASS TILE */
+.glass-tile {
+  position: absolute;
+  border-radius: 34.696px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 8px 24px rgba(16, 24, 40, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* BACK TILE */
+.glass-tile.back {
+  width: 124px;
+  height: 136px;
+  top: 0;
+  left: 36px;
+  opacity: 0.9;
+}
+
+/* FRONT TILE */
+.glass-tile.front {
+  width: 112px;
+  height: 112px;
+  top: 48px;
+  left: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.32);
+}
+
+/* SVG FIT */
+.glass-tile svg {
+  display: block;
+}

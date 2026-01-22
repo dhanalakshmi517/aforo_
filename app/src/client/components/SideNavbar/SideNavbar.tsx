@@ -210,21 +210,21 @@ function SideNavbar({ activeTab, onTabClick, hidden, collapsible = false }: Side
       ),
     },
     
-    // {
-    //   name: 'Invoices',
-    //   icon: (
-    //     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
-    //       <g clipPath="url(#clip0_2599_1489)">
-    //         <path d="M10.5 6.97681H6M12 9.97681H6M9.75 12.9768H6M3 2.47681V17.4768L4.5 16.7268L6 17.4768L7.5 16.7268L9 17.4768L10.5 16.7268L12 17.4768L13.5 16.7268L15 17.4768V2.47681L13.5 3.22681L12 2.47681L10.5 3.22681L9 2.47681L7.5 3.22681L6 2.47681L4.5 3.22681L3 2.47681Z" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
-    //       </g>
-    //       <defs>
-    //         <clipPath id="clip0_2599_1489">
-    //           <rect width="18" height="18" fill="white" transform="translate(0 0.976807)"/>
-    //         </clipPath>
-    //       </defs>
-    //     </svg>
-    //   ),
-    // },
+    {
+      name: 'Invoices',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
+          <g clipPath="url(#clip0_2599_1489)">
+            <path d="M10.5 6.97681H6M12 9.97681H6M9.75 12.9768H6M3 2.47681V17.4768L4.5 16.7268L6 17.4768L7.5 16.7268L9 17.4768L10.5 16.7268L12 17.4768L13.5 16.7268L15 17.4768V2.47681L13.5 3.22681L12 2.47681L10.5 3.22681L9 2.47681L7.5 3.22681L6 2.47681L4.5 3.22681L3 2.47681Z" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_2599_1489">
+              <rect width="18" height="18" fill="white" transform="translate(0 0.976807)"/>
+            </clipPath>
+          </defs>
+        </svg>
+      ),
+    },
     
     {
       name: 'Integrations',
