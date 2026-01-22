@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import NewButton from "../componenetsss/NewButton";
+import IntegrationButton from "../componenetsss/IntegrationButton";
 import Filter from "../componenetsss/Filter";
 import Spark from "../componenetsss/Spark";
 import Bell from "../componenetsss/Bell";
@@ -23,6 +24,7 @@ export interface PageHeaderProps {
   showSearch?: boolean;
   showDivider?: boolean;
   filterButtonRef?: React.RefObject<HTMLButtonElement>;
+  useIntegrationButton?: boolean;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -41,7 +43,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   showIntegrations = true,
   showSearch = true,
   showDivider = true,
-  filterButtonRef
+  filterButtonRef,
+  useIntegrationButton = false
 }) => {
   const [isFilterSelected, setIsFilterSelected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -106,10 +109,17 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {/* New primary action */}
         {showPrimary && (
           <div className="ph-primary-action">
-            <NewButton 
-              onClick={onPrimaryClick} 
-              ariaLabel={primaryLabel || `Create ${title}`} 
-            />
+            {useIntegrationButton ? (
+              <IntegrationButton 
+                onClick={onPrimaryClick} 
+                title={primaryLabel || "Integration"}
+              />
+            ) : (
+              <NewButton 
+                onClick={onPrimaryClick} 
+                ariaLabel={primaryLabel || `Create ${title}`} 
+              />
+            )}
           </div>
         )}
         {/* {showIntegrations && (
