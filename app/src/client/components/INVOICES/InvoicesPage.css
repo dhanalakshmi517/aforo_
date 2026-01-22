@@ -1,3 +1,4 @@
+@import "../Variables/Variables.css";
 :root {
   --header-h: 56px;
   --table-head-h: 44px;
@@ -8,8 +9,9 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: var(--color-neutral-50);
   overflow: hidden; /* 🔑 no page scroll */
+  padding: 16px;
 }
 
 /* Header */
@@ -146,4 +148,27 @@
   .inv-row div:nth-child(6) {
     display: none;
   }
+}
+
+/* DataTable Empty State Overrides */
+.dt-empty {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 16px !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+}
+
+.dt-empty img {
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.dt-empty p {
+  max-width: 420px !important;
+  margin: 0 auto !important;
+  line-height: 1.5 !important;
 }

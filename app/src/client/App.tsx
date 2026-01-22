@@ -76,6 +76,12 @@ const DataIngestionPage = React.lazy(dataIngestionLoader) as React.ComponentType
 const integrationsLoader = () => import('./components/Integrations/Integrations');
 const Integrations = React.lazy(integrationsLoader) as React.ComponentType<any>;
 
+const invoicesLoader = () => import('./components/INVOICES/InvoicesPage');
+const InvoicesPage = React.lazy(invoicesLoader) as React.ComponentType<any>;
+
+const quickbooksPreviewLoader = () => import('./components/INVOICES/QuickbooksPreview');
+const QuickbooksPreview = React.lazy(quickbooksPreviewLoader) as React.ComponentType<any>;
+
 import EstimateRevenue from './components/Rateplan/Revenue/EstimateRevenue';
 import UsageEstimation from './components/Rateplan/Revenue/UsageEstimation';
 import VolumeEstimation from './components/Rateplan/Revenue/VolumeEstimation';
@@ -270,9 +276,9 @@ export default function App() {
     if (path.startsWith('/get-started/data-ingestion')) return 'Data Ingestion';
     if (path.startsWith('/get-started/subscriptions')) return 'Purchases';
     if (path.startsWith('/get-started/dashboards')) return 'Dashboards';
+    if (path.startsWith('/get-started/invoices')) return 'Invoices';
     if (path.startsWith('/get-started/integrations')) return 'Integrations';
     if (path.startsWith('/get-started/settings')) return 'Settings';
-    if (path.startsWith('/get-started/invoices')) return 'Invoices';
     if (path.startsWith('/get-started/sales-site-builder')) return 'Sales Site Builder';
     return 'Get Started';
   })();
@@ -323,6 +329,8 @@ export default function App() {
     editCustomerLoader();
     dataIngestionLoader();
     integrationsLoader();
+    invoicesLoader();
+    quickbooksPreviewLoader();
   }, []);
 
   // Small reusable spinner for route-level Suspense
@@ -380,7 +388,7 @@ export default function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route
                 path="/signin"
-                element={user ? <Navigate to="/get-started" replace /> : <SignIn />}
+                element={user ? <Navigate to="/get-started/dashboards" replace /> : <SignIn />}
               />
               <Route
                 path="/forgot-password"
@@ -412,7 +420,7 @@ export default function App() {
                 path="*"
                 element={
                   user ? (
-                    <Navigate to="/get-started" replace />
+                    <Navigate to="/get-started/dashboards" replace />
                   ) : (
                     <div className="min-h-screen">
                       <Landing />
@@ -440,7 +448,7 @@ export default function App() {
                 }
               />
 
-              {/* Invoices -> Coming soon */}
+              {/* Invoices */}
               <Route
                 path="/get-started/invoices"
                 element={
@@ -452,8 +460,30 @@ export default function App() {
                         hidden={!showSidebar}
                       />
                       <main className="flex-1 px-6 py-6 bg-white" style={{ marginLeft: showSidebar ? '15rem' : '0' }}>
-                        <SalesSite />
+                        <Suspense fallback={RouteSpinner}>
+                          <InvoicesPage 
+                            invoices={[]}
+                            onExploreIntegrations={() => navigate('/get-started/integrations')}
+                          />
+                        </Suspense>
                       </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Quickbooks Preview */}
+              <Route
+                path="/get-started/invoices/quickbooks-preview"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen bg-white">
+                      <Suspense fallback={RouteSpinner}>
+                        <QuickbooksPreview 
+                          onBack={() => navigate('/get-started/invoices')}
+                          onConnect={() => navigate('/get-started/integrations')}
+                        />
+                      </Suspense>
                     </div>
                   </ProtectedRoute>
                 }
@@ -1219,6 +1249,20 @@ export default function App() {
                           <Integrations />
                         </Suspense>
                       </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* QuickBooks Integration */}
+              <Route
+                path="/get-started/integrations/quickbooks"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen bg-white">
+                      <Suspense fallback={RouteSpinner}>
+                        <QBIntegration />
+                      </Suspense>
                     </div>
                   </ProtectedRoute>
                 }

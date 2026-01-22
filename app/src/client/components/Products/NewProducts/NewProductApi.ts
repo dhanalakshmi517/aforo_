@@ -66,11 +66,10 @@ export const saveConfiguration = async (
 
   // On failure, attempt the opposite method in scenarios where the first
   // method might be rejected because the resource does/doesn't exist yet.
+  // Always try the alternate method on failure, not just for specific status codes
   const alternateMethod: 'POST' | 'PUT' = method === 'POST' ? 'PUT' : 'POST';
-  if ([404, 405, 409, 500].includes(res.status)) {
-    res = await fetch(url, { method: alternateMethod, headers, body: JSON.stringify(payload) });
-    if (res.ok) return;
-  }
+  res = await fetch(url, { method: alternateMethod, headers, body: JSON.stringify(payload) });
+  if (res.ok) return;
 
   throw new Error('Failed to save configuration');
 };
