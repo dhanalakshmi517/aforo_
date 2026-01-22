@@ -24,6 +24,7 @@ type Props<T> = {
   emptyIcon?: React.ReactNode;
   emptyText?: string;
   emptyAction?: React.ReactNode;
+  onRowClick?: (row: T) => void;
 };
 
 export default function DataTable<T>({
@@ -34,6 +35,7 @@ export default function DataTable<T>({
   emptyIcon,
   emptyText,
   emptyAction,
+  onRowClick,
 }: Props<T>) {
   const gridTemplate = columns
     .map((c) => (c.width ? `${c.width}px` : `minmax(${c.minWidth ?? 120}px, 1fr)`))
@@ -97,7 +99,8 @@ export default function DataTable<T>({
             <div
               key={rowKey(row, idx)}
               className="dt-row"
-              style={{ gridTemplateColumns: gridTemplate }}
+              style={{ gridTemplateColumns: gridTemplate, cursor: onRowClick ? 'pointer' : 'default' }}
+              onClick={() => onRowClick?.(row)}
             >
               {columns.map((col) => (
                 <div key={col.key} className="dt-cell">
