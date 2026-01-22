@@ -39,7 +39,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Auth Type',
       type: 'select',
-      required: true,
+      required: false,
       placeholder: 'Auth Type',
       options: [
         { label: 'None', value: 'NONE' },
@@ -84,14 +84,14 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Connection String',
       type: 'text',
-      placeholder: 'eg. https://api.example.com/v1/{endpoint}',
+      placeholder: 'e.g., jdbc:mysql://hostname:port/database',
       required: true,
     },
     {
       label: 'Auth Type',
       type: 'select',
       placeholder: 'Auth Type',
-      required: true,
+      required: false,
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },
@@ -107,9 +107,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'Auth Type',
       type: 'select',
       placeholder: 'Auth Type',
-            required: true,
-
-
+      required: false,
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },
