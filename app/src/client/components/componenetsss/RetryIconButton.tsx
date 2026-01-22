@@ -31,7 +31,7 @@ const RetryIconButton: React.FC<RetryIconButtonProps> = ({
   title = "Retry",
   className,
 }) => (
-  <Tooltip content="Edit" position="bottom">
+  <Tooltip content={title} position="bottom">
     <button
       type="button"
       className={`af-retry-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}

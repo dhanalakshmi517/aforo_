@@ -1697,11 +1697,10 @@ const RatePlans: React.FC<RatePlansProps> = ({
                               />
                             </Tooltip>
                           </td>
-
                           <td className="actions-cell">
                             <div className="product-action-buttons">
                               {plan.status?.toLowerCase() === 'draft' ? (
-                                <RetryIconButton
+                                <EditIconButton
                                   onClick={() => handleDraft(plan.ratePlanId)}
                                   title="Resume Draft"
                                 />

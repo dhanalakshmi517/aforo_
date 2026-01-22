@@ -31,13 +31,13 @@ const EditIconButton: React.FC<EditIconButtonProps> = ({
   title = "Edit",
   className
 }) => (
-  <Tooltip content="Edit" position="bottom">
+  <Tooltip content={title} position="bottom">
     <button
       type="button"
       className={`af-edit-icon ${disabled ? "is-disabled" : ""}${className ? ` ${className}` : ""}`}
       onClick={onClick}
       disabled={disabled}
-      aria-label="Edit"
+      aria-label={title}
     >
       <PenIcon />
     </button>
