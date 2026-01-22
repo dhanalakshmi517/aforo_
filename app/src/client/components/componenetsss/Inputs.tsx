@@ -332,7 +332,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
 
   React.useEffect(() => {
     if (open && buttonRef.current) {
-      let rafId: number;
+      let rafId: number = 0;
       
       const updateMenuPos = () => {
         const rect = buttonRef.current?.getBoundingClientRect();
@@ -354,7 +354,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
       
       return () => {
         window.removeEventListener("scroll", handleScroll, true);
-        cancelAnimationFrame(rafId);
+        if (rafId) cancelAnimationFrame(rafId);
       };
     }
   }, [open]);
