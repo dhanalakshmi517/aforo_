@@ -133,6 +133,10 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
     navigate('/get-started/invoices/quickbooks-preview');
   };
 
+  const handleRowClick = (invoice: Invoice) => {
+    navigate(`/get-started/invoices/${invoice.id}`, { state: { invoice } });
+  };
+
   // Define table columns
   const columns: DataTableColumn<Invoice>[] = [
     {
@@ -187,34 +191,19 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
       key: "actions",
       title: "Actions",
       render: (row) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => window.open(row.pdfUrl, '_blank')}
-            style={{
-              padding: '4px 8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              background: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
-            }}
-          >
-            View PDF
-          </button>
-          <button
-            onClick={() => window.open(row.pdfDownloadUrl, '_blank')}
-            style={{
-              padding: '4px 8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              background: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
-            }}
-          >
-            Download
-          </button>
-        </div>
+        <button
+          onClick={() => window.open(row.pdfDownloadUrl, '_blank')}
+          style={{
+            padding: '4px 8px',
+            border: '1px solid #d1d5db',
+            borderRadius: '4px',
+            background: 'white',
+            cursor: 'pointer',
+            fontSize: '12px',
+          }}
+        >
+          Download
+        </button>
       ),
     },
   ];
@@ -239,6 +228,7 @@ const InvoicesPage: React.FC<Props> = ({ onExploreIntegrations }) => {
         columns={columns}
         rows={invoices}
         rowKey={(row) => row.id}
+        onRowClick={handleRowClick}
         emptyIcon={<img src={invoicesImage} alt="No invoices" width={169} height={169} />}
         emptyText={
           error && !error.toLowerCase().includes('cors')
