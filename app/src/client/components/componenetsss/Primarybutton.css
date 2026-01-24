@@ -1,82 +1,112 @@
 @import "../Variables/Variables.css";
 
-  /* Base */
+/* =========================
+   Base Button
+========================= */
+.af-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 134px;
+  height: 40px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
+
+  background: linear-gradient(
+      76deg,
+      rgba(255, 255, 255, 0.00) 25.61%,
+      rgba(255, 255, 255, 0.20) 101.49%
+    ),
+    var(--surface-primary-button-active, #025A94);
+
+  color: var(--color-neutral-white);
+  border: 1px solid transparent;
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Full width */
+.af-primary-btn.is-full {
+  width: 100%;
+}
+
+/* =========================
+   Icon + Label
+========================= */
+.af-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.af-btn-icon--left {
+  margin-right: 8px; /* ✅ GAP BETWEEN ICON & TEXT */
+}
+
+.af-btn-icon--right {
+  margin-left: 8px;
+}
+
+.af-btn-label {
+  display: inline-block;
+  color: var(--color-neutral-white);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+}
+
+/* =========================
+   States
+========================= */
+.af-primary-btn:hover:not(:disabled) {
+  background: linear-gradient(
+      76deg,
+      rgba(255, 255, 255, 0.00) 25.61%,
+      rgba(255, 255, 255, 0.20) 101.49%
+    ),
+    var(--surface-primary-button-hover, #026BB0);
+}
+
+.af-primary-btn:active:not(:disabled) {
+  background: linear-gradient(
+      76deg,
+      rgba(255, 255, 255, 0.00) 25.61%,
+      rgba(255, 255, 255, 0.20) 101.49%
+    ),
+    var(--surface-primary-button-pressed, #034A7D);
+
+  transform: translateY(0.5px);
+}
+
+.af-primary-btn:focus-visible {
+  outline: none;
+  border: 2px solid var(--color-primary-600);
+}
+
+.af-primary-btn:disabled {
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-500);
+  cursor: not-allowed;
+}
+
+/* High contrast fallback */
+@media (forced-colors: active) {
   .af-primary-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center; min-width: 134px;
-    width: auto;  
-    height: 40px;
-    padding: 8px 20px;
-    border-radius: var(--border-radius-sm);
-  
-background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-active, #025A94);
-
-
-    color: var(--color-neutral-white);
-    border: 1px solid transparent;
-  
-    /* body/md/med */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-md); /* 142.857% */  
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    white-space: nowrap;
-      transition: background-color 0.2s ease, color 0.2s ease;
-
-  }
-  
-  /* Full width option */
-  .af-primary-btn.is-full { width: 100%; }
-  
-  /* Label wrapper just in case you style text separately */
-  .af-primary-btn .af-btn-label { 
-    display: inline-block;
-    color: var(--color-neutral-white);
-    border: 1px solid transparent;
-  
-
-    /* body/md/med */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-md); /* 142.857% */   
-  }
-  
-  /* States */
-  .af-primary-btn:hover:not(:disabled) {
-background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-hover, #026BB0);
-
-
-  }
-  .af-primary-btn:active:not(:disabled) {
-background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-pressed, #034A7D);
-
-
-    transform: translateY(0.5px);
+    border-color: ButtonText;
   }
   .af-primary-btn:focus-visible {
-    outline: none;
-    border:2px solid var(--color-primary-600);
-background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-active, #025A94);
-
-
+    outline: 2px solid Highlight;
   }
-  .af-primary-btn:disabled {
-    background: var(--color-neutral-200);
-    color: var(--color-neutral-500);
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  
-  /* High contrast fallback */
-  @media (forced-colors: active) {
-    .af-primary-btn { border-color: ButtonText; }
-    .af-primary-btn:focus-visible { outline: 2px solid Highlight; box-shadow: none; }
-  }
-  
+}

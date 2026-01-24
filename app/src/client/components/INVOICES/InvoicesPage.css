@@ -10,8 +10,8 @@
   display: flex;
   flex-direction: column;
   background: var(--color-neutral-50);
-  overflow: hidden; /* 🔑 no page scroll */
-  padding: 16px;
+  overflow: hidden; 
+  padding:0px 16px 16px 16px;
 }
 
 /* Header */

@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./SimpleFilterDropdown.css";
-import Checkbox from "./Checkbox";
+import FilterCheckbox from "./FilterCheckbox";
 import Portal from "./Portal";
 
 export type SimpleFilterOption = {
@@ -56,25 +56,20 @@ const SimpleFilterDropdown: React.FC<Props> = ({
                 if (disabled) return;
                 onChange(toggle(value, opt.id));
               }}
-              style={{ cursor: disabled ? "not-allowed" : "pointer" }}
             >
-              <div
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
+              <FilterCheckbox
+                checked={checked}
+                disabled={disabled}
+                onChange={() => {
+                  if (disabled) return;
+                  onChange(toggle(value, opt.id));
                 }}
-              >
-                <Checkbox
-                  checked={checked}
-                  disabled={disabled}
-                  onChange={(next) => {
-                    if (disabled) return;
-                    onChange(toggle(value, opt.id));
-                  }}
-                  className="sfd-checkbox"
-                />
-              </div>
+                className="sfd-checkbox"
+              />
 
-              <span className="sfd-label">{opt.label}</span>
+              <span className="sfd-rowText">
+                <span className="sfd-label">{opt.label}</span>
+              </span>
             </div>
           );
         })}

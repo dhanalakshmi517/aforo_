@@ -37,7 +37,7 @@ background: linear-gradient(82deg, rgba(193, 198, 203, 0.20) 3.76%, rgba(255, 25
     display: inline-flex;
     align-items: center;
     gap: 6px;
-  
+    color:var(--color-primary-900);
     /* body/md/med */
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);

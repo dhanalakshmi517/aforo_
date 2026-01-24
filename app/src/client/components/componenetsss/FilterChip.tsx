@@ -14,7 +14,7 @@ const CloseIcon: React.FC = () => (
     <path
       d="M14 6L6 14M6 6L14 14"
       stroke="#19222D"
-      strokeWidth="1.2"
+      strokeWidth="1.1"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
