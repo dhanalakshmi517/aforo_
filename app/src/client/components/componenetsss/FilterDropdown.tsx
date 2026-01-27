@@ -1,8 +1,8 @@
 import * as React from "react";
 import "./FilterDropdown.css";
 import SearchInput from "./SearchInput";
-import Checkbox from "./Checkbox";
-import VerticalScrollbar from "./VerticalScrollbar";
+import FilterCheckbox from "./FilterCheckbox";
+import MiniScrollbar from "./MiniScrollbar";
 import Portal from "./Portal";
 
 export type FilterOption = {
@@ -45,6 +45,7 @@ const FilterDropdown: React.FC<Props> = ({
   anchorLeft = 0,
 }) => {
   const [query, setQuery] = React.useState("");
+  const listRef = React.useRef<HTMLDivElement>(null);
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -77,7 +78,7 @@ const FilterDropdown: React.FC<Props> = ({
         </div>
 
       {/* Scroll Area */}
-      <div className="fd-list" role="presentation">
+      <div className="fd-list" ref={listRef} role="presentation">
         {filtered.map((opt) => {
           const checked = includesId(value, opt.id);
           const disabled = !!opt.disabled;
@@ -99,7 +100,7 @@ const FilterDropdown: React.FC<Props> = ({
                   e.stopPropagation();
                 }}
               >
-                <Checkbox
+                <FilterCheckbox
                   checked={checked}
                   disabled={disabled}
                   onChange={(next) => {
@@ -126,8 +127,11 @@ const FilterDropdown: React.FC<Props> = ({
           <div className="fd-empty">No matches</div>
         ) : null}
       </div>
-      <VerticalScrollbar
-        className="fd-vscroll"
+      <MiniScrollbar
+        containerRef={listRef}
+        side="right"
+        inset={0}
+        autoHide={true}
       />
       </div>
     </Portal>

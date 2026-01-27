@@ -1,95 +1,116 @@
 @import "../Variables/Variables.css";
-.si{
+
+/* ROOT */
+.sif {
   width: 203px;
   height: 36px;
   display: flex;
-  padding: 8px 12px;
   align-items: center;
+  padding: 8px 12px;
   gap: 8px;
-  flex: 1 0 0;
-  align-self: stretch;
 
   border-radius: 10px;
   border: 1px solid var(--color-neutral-300);
   background: var(--color-neutral-50);
   box-sizing: border-box;
-  overflow: hidden;
+}
+
+/* SEARCH ICON */
+.sif-icon {
+  flex-shrink: 0;
+}
+
+.sif-icon path {
+  stroke: var(--color-neutral-500);
+}
+
+.sif-icon--dark path {
+  stroke: var(--color-neutral-1000);
+}
+
+.sif-icon--disabled path {
+  stroke: var(--color-neutral-300);
+}
+
+/* INPUT WRAPPER */
+.sif-input-wrap {
   position: relative;
-}
-
-.si-input{
   flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* INPUT */
+.sif-input {
+  width: 100%;
   border: none;
-  outline: none !important;
-  box-shadow: none !important;
+  outline: none;
   background: transparent;
-  overflow: hidden;
-color: var(--color-neutral-1700);
-text-overflow: ellipsis;
+  padding-right: 20px; /* space for clear icon */
 
-/* body/md/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  color: var(--color-neutral-1700);
+  text-overflow: ellipsis;
 
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-md, 14px);
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
 }
 
-.si-input:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none;
+.sif-input::placeholder {
+  color: var(--color-neutral-500);
 }
 
-.si-input::placeholder{
-color: var(--color-neutral-500);
-text-overflow: ellipsis;
-
-/* body/md/reg */
-font-family: var(--font-family-primary, "IBM Plex Sans");
-font-size: var(--font-size-md, 14px);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px);}
-
-/* icons */
-.si-icon{
-  flex-shrink: 0; /* keep the icon visible when space is tight / when clear button shows */
+/* CLEAR (✕) ICON */
+.sif-clear {
+  all: unset;
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-neutral-600);
 }
-.si-icon path{ stroke:var(--color-neutral-600); }
-.si-icon--dark path{ stroke: var(--color-neutral-1000); }
-.si-icon--disabled path{ stroke: var(--color-neutral-300); }
+
 
 /* STATES */
-.si--default{
-  border-color: var(--color-neutral-300);
+.sif--default {
   background: var(--color-neutral-50);
 }
 
-.si--hover{
-  border-color: var(--color-neutral-300);
-  background: var(--color-neutral-100);
+.sif--hover {
+  background: var(--color-neutral-200);
+  border:1px solid var(--color-neutral-500)
 }
 
-.si--focus,
-.si--typing,
-.si--filled{
-  border-color: var(--color-primary-200);
-  box-shadow: 0 0 0 1px var(--color-primary-300);
+.sif--focus,
+.sif--typing
+ {
+  border-color: var(--color-primary-700);
+  box-shadow: 0 0 0 2px rgba(29, 122, 252, 0.1);
   background: var(--color-neutral-white);
 }
 
-.sif--disabled{
+.sif--filled {
+  border-color: var(--color-neutral-500);
+}
+
+/* DISABLED */
+.sif--disabled {
   background: var(--color-neutral-150);
   border: none;
 }
 
-.sif--disabled .sif-input{
+.sif--disabled .si-input {
   color: var(--color-neutral-500);
   cursor: not-allowed;
 }
 
-.sif--disabled .si-input::placeholder{
+.sif--disabled .si-input::placeholder {
   color: var(--color-neutral-300);
+}
+
+.sif--disabled .si-clear {
+  display: none;
 }

@@ -515,9 +515,7 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
                   "dd-item",
                   isSel ? "is-selected" : "",
                   isDis ? "is-disabled" : "",
-                  i === activeIndex ? "is-active" : "",
                 ].join(" ").trim()}
-                onMouseEnter={() => !isDis && setActiveIndex(i)}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => !isDis && selectAt(i)}
               >
@@ -708,9 +706,7 @@ export const FixedDropdownField: React.FC<FixedDropdownFieldProps> = ({
                   "dd-item",
                   isSel ? "is-selected" : "",
                   isDis ? "is-disabled" : "",
-                  i === activeIndex ? "is-active" : "",
                 ].join(" ").trim()}
-                onMouseEnter={() => !isDis && setActiveIndex(i)}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => !isDis && selectAt(i)}
               >

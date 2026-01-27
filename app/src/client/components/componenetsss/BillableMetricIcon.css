@@ -6,27 +6,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px;
+  gap: 2px;
+  padding: 4px;
   color: var(--bm-accent);
   font-family: inherit;
-  line-height: 1;
+  line-height: 1.1;
   user-select: none;
+  font-size: 10px;
 }
 
 .bmIcon-top {
   font-weight: 800;
-  font-size: 28px;
+  font-size: 1.4em;
   letter-spacing: 0.2px;
 }
 
 .bmIcon-bottom {
   font-weight: 500;
-  font-size: 22px;
+  font-size: 0.9em;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   opacity: 0.95;
 }

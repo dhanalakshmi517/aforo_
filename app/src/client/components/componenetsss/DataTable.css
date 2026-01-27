@@ -1,13 +1,26 @@
 @import "../Variables/Variables.css";
 .dt-surface {
-  background:var(--color-neutral-white);
+  background: var(--color-neutral-white);
   border-radius: var(--border-radius-sm);
-  padding: 8px;
+  padding: 8px 8px 0px 8px;
   width: 100%;
-  height: 100%;
-  box-shadow: 0 6px 24px rgba(16, 24, 40, 0.04);
+box-shadow: 0 5px 20px 0 var(--shadow-shadow-1, #EEF1F6);
+
+
+
+
   display: flex;
   flex-direction: column;
+
+  flex: 1 1 auto;
+
+  /* Important for nested scroll */
+  min-height: 0;
+}
+
+
+.dt-surface--empty {
+  min-height: calc(100vh - 200px);
 }
 
 /* FILTER CHIPS AREA */
@@ -15,15 +28,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 4px 8px;
-  border-bottom: 1px solid #eef2f6;
+  padding: 0px 0px 8px 0px;
+  /* border-bottom: 1px solid #eef2f6; */
 }
 
 /* HEADER */
 .dt-header {
   display: grid;
   align-items: center;
-  padding: 8px 4px;
+  padding: 0px 4px 0px 16px;
 color: var(--color-neutral-800);
 
 /* body/md/reg */
@@ -51,8 +64,8 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .dt-row {
   display: grid;
   align-items: center;
-  padding: 12px 4px;
-  border-bottom: 0.2px solid var(--color-neutral-200);
+  padding: 8px 4px;
+  border-bottom: 0.4px solid #EEF1F6;
 }
 
 .dt-row:last-child {
@@ -62,83 +75,89 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .dt-cell {
 overflow: hidden;
 color: var(--color-neutral-1400);
-text-overflow: ellipsis;
-
-/* body/md/reg */
+text-overflow: ellipsis;  
 font-family: var(--font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-md, 14px);
 font-style: normal;
 font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+line-height: var(--line-height-body-md, 20px); 
   display: flex;
   align-items: center;
 }
 
-/* EMPTY */
 .dt-empty {
   padding: 64px 16px;
   text-align: center;
 color: var(--color-neutral-1000);
 text-align: center;
 
-/* body/md/reg */
 font-family: var(--font-family-primary, "IBM Plex Sans");
 font-size: var(--font-size-md, 14px);
 font-style: normal;
 font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */}
+line-height: var(--line-height-body-md, 20px); 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  flex: 1;
+}
 
 .dt-empty p {
   margin-top: 12px;
   margin-bottom: 16px;
 }
 
-/* HEADER CELL */
 .dt-header-cell {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 4px 6px;
   border-radius: 8px;
   cursor: default;
-  transition: background-color 0.15s ease;
   height: 100%;
   width: 100%;
+  position: relative;
+  box-sizing: border-box; /* 🔑 important */
 }
 
 .dt-header-cell--filterable {
   cursor: pointer;
-  position: relative;
 }
 
 .dt-header-cell--filterable:hover {
   background-color: var(--color-neutral-200);
+  border-radius: 0;
 }
+
 
 /* FILTER TRIGGER BUTTON */
 .dt-filter-trigger {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
   border: none;
   background: transparent;
   padding: 0;
   margin: 0;
   cursor: pointer;
   color: var(--color-neutral-800);
-  transition: color 0.15s ease;
+  transition: opacity 0.15s ease;
   flex-shrink: 0;
-}
-
-.dt-header-cell--filterable:hover .dt-filter-trigger {
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.dt-header-cell--filterable:hover .dt-filter-trigger:hover {
-  color: var(--color-primary-900);
+.dt-header-cell--filterable:hover .dt-filter-trigger {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* FILTER DROPDOWN */
+
+
 .dt-filter-dropdown {
   position: absolute;
   top: calc(100% + 6px);
@@ -148,4 +167,16 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */}
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius-sm);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dt-filter-trigger {
+  outline: none;
+  box-shadow: none;
+}
+
+.dt-filter-trigger:focus,
+.dt-filter-trigger:focus-visible,
+.dt-filter-trigger:active {
+  outline: none;
+  box-shadow: none;
 }

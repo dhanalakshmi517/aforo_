@@ -1,5 +1,6 @@
 // CreateCustomer.tsx
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import TopBar from "../componenetsss/TopBar";
 import SaveDraft from "../componenetsss/SaveDraft";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
@@ -55,9 +56,13 @@ const steps = [
 
 const CreateCustomer: React.FC<CreateCustomerProps> = ({
   onClose,
-  draftCustomer,
+  draftCustomer: propDraftCustomer,
   initialLogoUrl = null,
 }) => {
+  const location = useLocation();
+  // Extract draft customer from navigation state or use prop
+  const draftCustomer = (location.state as any)?.draftCustomer || propDraftCustomer;
+  
   const [currentStep, setCurrentStep] = useState(0);
   const activeTab: StepKey = steps[currentStep].key;
 

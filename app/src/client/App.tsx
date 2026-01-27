@@ -1013,7 +1013,7 @@ export default function App() {
                         hidden={!showSidebar}
                       />
                       <main
-                        className="flex-1 py-6"
+                        className="flex-1"
                         style={{ marginLeft: showSidebar ? '15rem' : '0',backgroundColor: "#FBFDFF", }}
                       >
                         <Products

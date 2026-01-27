@@ -1,0 +1,208 @@
+
+.product-new-check-container {
+  /* Full height layout like InvoicesPage */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #FBFDFF; /* Page background */
+  overflow: hidden; /* Prevent page scroll */
+  padding: 16px;
+  box-sizing: border-box; /* Include padding in height calculation */
+}
+
+.product-new-check-container.has-customers {
+  /* Keep full height even with customers */
+  height: 100vh;
+}
+
+@media (max-width: 991px) { 
+  .product-new-check-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}
+
+@media (max-width: 768px) {
+  .product-new-check-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
+}
+
+
+
+@media (max-width: 991px) { 
+  .product-new-check-container { 
+    margin-left: 0; 
+    width: 100%; 
+  } 
+}@media (max-width: 768px) {
+  .product-new-check-container { 
+    width: 100%; 
+    margin-left: 0; 
+  }
+}/* DataTable cell styling for responsive behavior */
+.product-new-check-container .dt-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 4px;
+}
+
+/* Specific styling for date column to prevent wrapping */
+.product-new-check-container .dt-cell:has([data-date]) {
+  white-space: nowrap;
+  padding: 8px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 155px;
+}
+
+
+
+/* DataTable Empty State Overrides for Customers */
+.product-new-check-container .dt-empty {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 16px !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  height: 100% !important;
+}
+.product-new-check-container .dt-empty img {
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.product-new-check-container .dt-empty p {
+  max-width: 420px !important;
+  margin: 0 auto !important;
+  line-height: 1.5 !important;
+}
+
+/* Search no results message styling */
+.product-new-check-container .dt-empty .search-no-results {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  max-width: 400px !important;
+}
+
+/* Second line of search no results message */
+.product-new-check-container .dt-empty .search-no-results::after {
+  content: "Try searching with different keywords";
+  display: block;
+  color: var(--color-neutral-700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  text-align: center !important;
+  margin: 8px auto 0 auto !important;
+  max-width: 400px !important;
+}
+/* Filter no results message styling */
+.product-new-check-container .dt-empty .filter-no-results {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  max-width: 400px !important;
+}
+
+/* Second line of filter no results message */
+.product-new-check-container .dt-empty .filter-no-results::after {
+  content: "Try adjusting your search or filters";
+  display: block;
+  color: var(--color-neutral-700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  text-align: center !important;
+  margin: 8px auto 0 auto !important;
+  max-width: 400px !important;
+}
+/* Filter no results message styling */
+.product-new-check-container .dt-empty .filter-no-results {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  max-width: 400px !important;
+}
+
+/* Second line of filter no results message */
+.product-new-check-container .dt-empty .filter-no-results::after {
+  content: "Try adjusting your search or filters";
+  display: block;
+  color: var(--color-neutral-700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  text-align: center !important;
+  margin: 8px auto 0 auto !important;
+  max-width: 400px !important;
+}
+/* DataTable header cell alignment fix */
+.product-new-check-container .dt-header-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  padding: 4px 4px !important;
+  height: 28px !important;
+  vertical-align: middle !important;
+}
+
+/* Customer column header specific alignment (2nd column) */
+.product-new-check-container .dt-header-cell:nth-child(2) {
+  justify-content: flex-start !important;
+  padding: 8px 4px !important;
+}
+
+/* DataTable header cell styling */
+.product-new-check-container .dt-header-cell span {
+  vertical-align: middle !important;
+/* ... */
+  line-height: 1 !important;
+}/* DataTable customer name and email styling */
+.product-new-check-container .dt-cell .person-name {
+  color: var(--color-neutral-1700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+}
+
+.product-new-check-container .dt-cell .person-email {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}

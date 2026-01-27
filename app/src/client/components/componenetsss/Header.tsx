@@ -23,6 +23,7 @@ export interface HeaderProps {
   showSearch?: boolean;
   showDivider?: boolean;
   filterButtonRef?: React.Ref<HTMLButtonElement>;
+  primaryButton?: React.ReactNode;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -41,7 +42,8 @@ const Header: React.FC<HeaderProps> = ({
   showIntegrations = true,
   showSearch = true,
   showDivider = true,
-  filterButtonRef
+  filterButtonRef,
+  primaryButton
 }) => {
   const [isFilterSelected, setIsFilterSelected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -90,26 +92,30 @@ const Header: React.FC<HeaderProps> = ({
 
         {showDivider && onFilterClick && showPrimary && (
           <div className="header-divider" aria-hidden="true">
-            <svg width="1" height="8" viewBox="0 0 1 8">
-              <path d="M0.5 0.5V12.5" stroke="#D9DFE8" strokeLinecap="round" />
-            </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
+  <path d="M0.5 0.5V12.5" stroke="#D9DFE8" stroke-linecap="round"/>
+</svg>
           </div>
         )}
 
         {showPrimary && (
           <div className="ph-primary-action">
-            <NewProductButton
-              disabled={false}
-              onCreate={onPrimaryClick}
-            />
+            {primaryButton ? (
+              primaryButton
+            ) : (
+              <NewProductButton
+                disabled={false}
+                onCreate={onPrimaryClick}
+              />
+            )}
           </div>
         )}
 
         {showDivider && (
           <div className="header-divider" aria-hidden="true">
-            <svg width="1" height="8" viewBox="0 0 1 8">
-              <path d="M0.5 0.5V12.5" stroke="#D9DFE8" strokeLinecap="round" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
+  <path d="M0.5 0.5V12.5" stroke="#D9DFE8" stroke-linecap="round"/>
+</svg>
           </div>
         )}
 

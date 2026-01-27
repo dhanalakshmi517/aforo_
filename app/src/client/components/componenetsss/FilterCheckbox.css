@@ -1,0 +1,26 @@
+.filter-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-checkbox input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox-icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+}
+
+
+
+.filter-checkbox.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

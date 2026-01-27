@@ -6,6 +6,7 @@
 
 
 
+
 .customers-container {
   /* Outer gap: top 15px, left/right 10px, bottom 10px */
   padding: 15px 10px 10px 10px;
@@ -64,16 +65,19 @@ width: calc(100% - 256px);
 
 
 .check-container {
-  /* Outer gap: top 15px, left/right 10px, bottom 10px */
-  padding: 8px 9px 2px 9px;
-  width: 100%;
+  /* Full height layout like InvoicesPage */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #FBFDFF; /* Page background */
+  overflow: hidden; /* Prevent page scroll */
+  padding: 16px;
+  box-sizing: border-box; /* Include padding in height calculation */
+}
 
-  max-width: none;
-  box-sizing: border-box;
-  margin-left: 0;
-  background:#FBFDFF; /* Page background */
-  box-shadow: none;
-  min-height: 100vh; /* Ensure full height */
+.check-container.has-customers {
+  /* Keep full height even with customers */
+  height: 100vh;
 }
 
 @media (max-width: 991px) { 
@@ -108,7 +112,150 @@ width: calc(100% - 256px);
 
 
 
-/* ---------------------- Company (column 1) ---------------------- */
+/* DataTable cell styling for responsive behavior */
+.check-container .dt-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 4px;
+}
+
+/* Specific styling for date column to prevent wrapping */
+.check-container .dt-cell:has([data-date]) {
+  white-space: nowrap;
+  padding: 8px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 155px;
+}
+
+
+
+/* DataTable Empty State Overrides for Customers */
+.check-container .dt-empty {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 16px !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  height: 100% !important;
+}
+
+.check-container .dt-empty img {
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.check-container .dt-empty p {
+  max-width: 420px !important;
+  margin: 0 auto !important;
+  line-height: 1.5 !important;
+}
+
+/* Search no results message styling */
+.check-container .dt-empty .search-no-results {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  max-width: 400px !important;
+}
+
+/* Second line of search no results message */
+.check-container .dt-empty .search-no-results::after {
+  content: "Try searching with different keywords";
+  display: block;
+  color: var(--color-neutral-700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  text-align: center !important;
+  margin: 8px auto 0 auto !important;
+  max-width: 400px !important;
+}
+
+/* Filter no results message styling */
+.check-container .dt-empty .filter-no-results {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  max-width: 400px !important;
+}
+
+/* Second line of filter no results message */
+.check-container .dt-empty .filter-no-results::after {
+  content: "Try adjusting your search or filters";
+  display: block;
+  color: var(--color-neutral-700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  text-align: center !important;
+  margin: 8px auto 0 auto !important;
+  max-width: 400px !important;
+}
+
+/* DataTable header cell alignment fix */
+.check-container .dt-header-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  padding: 4px 4px !important;
+  height: 28px !important;
+  vertical-align: middle !important;
+}
+
+/* Customer column header specific alignment (2nd column) */
+.check-container .dt-header-cell:nth-child(2) {
+  justify-content: flex-start !important;
+  padding: 8px 4px !important;
+}
+
+/* DataTable header cell styling */
+.check-container .dt-header-cell span {
+  vertical-align: middle !important;
+/* ... */
+  line-height: 1 !important;
+}
+
+/* DataTable customer name and email styling */
+.check-container .dt-cell .person-name {
+  color: var(--color-neutral-1700) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-md) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: var(--line-height-body-md, 20px) !important;
+}
+
+.check-container .dt-cell .person-email {
+  color: var(--color-neutral-1000) !important;
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: var(--line-height-body-sm, 18px) !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}
+
 .cell-flex { display: flex; align-items: center; }
 
 .customer-logo {
@@ -121,7 +268,7 @@ width: calc(100% - 256px);
   border-radius: 50%; 
   overflow: hidden;
   position: relative;
-  background-color: #C7CBD1;
+  background-color: var(--color-primary-100) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,15 +283,15 @@ width: calc(100% - 256px);
 
 .company-block { display: flex; flex-direction: column; align-self: stretch; }
 .company-name {
-  color: var(--text-text-darkest, #1A2126);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--fontsize-body-md, 14px);
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
   font-style: normal; font-weight: 500; line-height: var(--line-height-body-md, 20px);
 }
 .company-type {
-  color: var(--text-text-dark, #75797E);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--fontsize-body-sm, 12px);
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
   font-style: normal; font-weight: 400; line-height: var(--line-height-body-sm, 18px);
 }
 
@@ -152,22 +299,26 @@ width: calc(100% - 256px);
 .cell-stack { display: flex; flex-direction: column; align-self: stretch; }
 
 .person-name {
-  color: var(--text-text-darkest, #1A2126);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--fontsize-body-md, 14px);
-  font-style: normal; font-weight: 500; line-height: var(--line-height-body-md, 20px);
+ color: var(--color-neutral-1700);
+
+/* body/md/med */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-md);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 .person-email {
-  color: var(--text-text-dark, #75797E);
-  font-family: var(--type-font-family-primary, "IBM Plex Sans");
-  font-size: var(--fontsize-body-sm, 12px);
+  color: var(--color-neutral-1000);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
   font-style: normal; font-weight: 400; line-height: var(--line-height-body-sm, 18px);
   white-space: normal; word-break: break-all;
 }
 
 /* ---------------------- Actions ---------------------- */
 .action-buttons { display: flex; gap: 8px; justify-content: center; }
-.action-buttons button { background: transparent; border: none; padding: 0; cursor: pointer; }
+.action-buttons button { border: none; padding: 0; cursor: pointer; }
 
 /* ---------------------- Table wrapper panel ---------------------- */
 
@@ -222,6 +373,7 @@ width: calc(100% - 256px);
 .customers-table th:first-child {
   border-top-left-radius: var(--border-radius-sm);
   border-bottom-left-radius: var(--border-radius-sm);
+  padding-left: 16px;
 }
 
 .customers-table th:last-child {
@@ -527,22 +679,25 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   align-items: flex-start;
 }
 
-.products-active-filters-row {
+.customers-active-filters-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: 12px;
-  padding: 4px 16px 0 16px;
-  margin-bottom: 4px;
+  padding: 2px 8px 4px 8px;
+  margin-bottom: 0px;
+  width: 100%;
+  border-bottom: 0.4px solid var(--color-neutral-200);
 }
 
-.products-active-filters-chips {
+.customers-active-filters-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  flex: 1;
 }
 
-.products-filters-reset {
+.customers-filters-reset {
   border: none;
   background: transparent;
   color: var(--color-primary-700);
@@ -550,4 +705,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: 500;
+  flex-shrink: 0;
+  margin-left: auto !important;
+  display: inline-flex !important;
 }

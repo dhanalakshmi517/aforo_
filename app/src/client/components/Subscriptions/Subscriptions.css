@@ -222,6 +222,18 @@
   line-height: 1.2;
 }
 
+/* --------- Rate Plan column ---------- */
+.subscriptions-table td:nth-child(3) {
+  padding: 18px 16px 18px 0;
+  overflow: visible;
+}
+
+/* --------- Rate Plan column ---------- */
+.subscriptions-table td:nth-child(1) {
+  padding: 18px 16px 18px 0;
+  overflow: visible;
+}
+
 /* --------- Status column ---------- */
 .subscriptions-table td:nth-child(5) {
   padding: 18px 8px 18px 24px;
@@ -320,35 +332,36 @@
 }
 
 /* --------- Rate Plan Chip ---------- */
-.rp-name-chip {
+.rate-plan-chip {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface-layer-3, #F8F7FA);
-  border: 0.4px solid var(--border-border-2, #D5D4DF);
-  border-radius: var(--border-radius-md, 12px);
   height: 44px;
   min-height: 44px;
   padding: 6px 12px;
+  background: transparent;
+  border: none;
 }
 
-.rp-name-initials {
+.rate-plan-chip__badge {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   flex-shrink: 0;
-  border-radius: 8px;
-  background: var(--color-neutral-200, #DCDDE1);
-  color: var(--text-text-darkest, #19222D);
   font-family: var(--type-font-family-primary, "IBM Plex Sans");
   font-size: 16px;
   font-weight: 600;
   line-height: 1;
+  background: #F0F0F0;
+  border: none;
+  border-radius: 50%;
+  box-shadow: none;
+  color: #19222D;
 }
 
-.rp-name-texts {
+.rate-plan-chip__content {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -357,7 +370,7 @@
   min-width: 0;
 }
 
-.rp-name-title {
+.rate-plan-chip__name {
   overflow: hidden;
   color: var(--text-text-darkest, #19222D);
   text-overflow: ellipsis;
@@ -373,7 +386,7 @@
   align-self: stretch;
 }
 
-.rp-name-subtitle {
+.rate-plan-chip__label {
   color: var(--text-text-dark, #6B6F76);
   font-family: var(--type-font-family-primary, "IBM Plex Sans");
   font-size: 10px;
