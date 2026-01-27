@@ -45,7 +45,7 @@ const FilterDropdown: React.FC<Props> = ({
   anchorLeft = 0,
 }) => {
   const [query, setQuery] = React.useState("");
-  const listRef = React.useRef<HTMLDivElement>(null);
+  const listRef = React.useRef<HTMLDivElement>(null!);
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();

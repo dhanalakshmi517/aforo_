@@ -96,7 +96,7 @@ const Metering: React.FC<MeteringProps> = ({
   const [showEditMetricForm, setShowEditMetricForm] = useState(false);
 
   /* ---- filter menu state (same skeleton as Customers) ---- */
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(
     null
@@ -112,12 +112,12 @@ const Metering: React.FC<MeteringProps> = ({
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
 
   /* ---- status column filter dropdown state ---- */
-  const statusFilterRef = useRef<HTMLDivElement>(null);
+  const statusFilterRef = useRef<HTMLDivElement>(null!);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [isStatusFilterHovered, setIsStatusFilterHovered] = useState(false);
 
   /* ---- date column filter dropdown state ---- */
-  const dateFilterRef = useRef<HTMLDivElement>(null);
+  const dateFilterRef = useRef<HTMLDivElement>(null!);
   const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
   const [isDateFilterHovered, setIsDateFilterHovered] = useState(false);
 

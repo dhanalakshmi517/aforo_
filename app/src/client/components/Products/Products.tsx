@@ -208,7 +208,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [showKongIntegration, setShowKongIntegration] = useState(false);
 
   /* ---- main filter menu state ---- */
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(null);
   const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
@@ -216,19 +216,19 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
 
   /* ---- column filter dropdown state (hover + open) ---- */
-  const productTypeFilterRef = useRef<HTMLDivElement>(null);
+  const productTypeFilterRef = useRef<HTMLDivElement>(null!);
   const [isProductTypeFilterOpen, setIsProductTypeFilterOpen] = useState(false);
   const [isProductTypeFilterHovered, setIsProductTypeFilterHovered] = useState(false);
 
-  const sourceFilterRef = useRef<HTMLDivElement>(null);
+  const sourceFilterRef = useRef<HTMLDivElement>(null!);
   const [isSourceFilterOpen, setIsSourceFilterOpen] = useState(false);
   const [isSourceFilterHovered, setIsSourceFilterHovered] = useState(false);
 
-  const statusFilterRef = useRef<HTMLDivElement>(null);
+  const statusFilterRef = useRef<HTMLDivElement>(null!);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [isStatusFilterHovered, setIsStatusFilterHovered] = useState(false);
 
-  const dateFilterRef = useRef<HTMLDivElement>(null);
+  const dateFilterRef = useRef<HTMLDivElement>(null!);
   const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
   const [isDateFilterHovered, setIsDateFilterHovered] = useState(false);
 

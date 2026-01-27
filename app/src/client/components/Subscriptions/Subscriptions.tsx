@@ -169,7 +169,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({
   const [subToDelete, setSubToDelete] = useState<SubscriptionType | null>(null);
 
   /* ---- main filter menu state (same as Customers) ---- */
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(null);
   const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
@@ -177,10 +177,10 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
 
   /* ---- column dropdown state (same pattern as Customers) ---- */
-  const ratePlanFilterRef = useRef<HTMLDivElement>(null);
-  const paymentTypeFilterRef = useRef<HTMLDivElement>(null);
-  const statusFilterRef = useRef<HTMLDivElement>(null);
-  const dateFilterRef = useRef<HTMLDivElement>(null);
+  const ratePlanFilterRef = useRef<HTMLDivElement>(null!);
+  const paymentTypeFilterRef = useRef<HTMLDivElement>(null!);
+  const statusFilterRef = useRef<HTMLDivElement>(null!);
+  const dateFilterRef = useRef<HTMLDivElement>(null!);
 
   const [isRatePlanFilterOpen, setIsRatePlanFilterOpen] = useState(false);
   const [isPaymentTypeFilterOpen, setIsPaymentTypeFilterOpen] = useState(false);
