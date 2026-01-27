@@ -125,7 +125,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [resumeDraft, setResumeDraft] = useState<Customer | null>(null);
 
   /* ---- filter menu state ---- */
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null!);
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
   const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(null);
   const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
@@ -133,17 +133,17 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
 
   /* ---- customer column filter dropdown state ---- */
-  const customerFilterRef = useRef<HTMLDivElement>(null);
+  const customerFilterRef = useRef<HTMLDivElement>(null!);
   const [isCustomerFilterOpen, setIsCustomerFilterOpen] = useState(false);
   const [isCustomerFilterHovered, setIsCustomerFilterHovered] = useState(false);
 
   /* ---- status column filter dropdown state ---- */
-  const statusFilterRef = useRef<HTMLDivElement>(null);
+  const statusFilterRef = useRef<HTMLDivElement>(null!);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [isStatusFilterHovered, setIsStatusFilterHovered] = useState(false);
 
   /* ---- date column filter dropdown state ---- */
-  const dateFilterRef = useRef<HTMLDivElement>(null);
+  const dateFilterRef = useRef<HTMLDivElement>(null!);
   const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
   const [isDateFilterHovered, setIsDateFilterHovered] = useState(false);
 
