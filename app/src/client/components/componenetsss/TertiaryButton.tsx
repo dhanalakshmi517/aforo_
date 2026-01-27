@@ -21,11 +21,11 @@ export default function TertiaryButton({
   return (
     <button
       type={type}
-      className={["af-tertiary-btn", fullWidth ? "is-full" : "", className].join(" ").trim()}
+      className={["aft-tertiary-btn", fullWidth ? "is-full" : "", className].join(" ").trim()}
       onClick={onClick}
       disabled={disabled}
     >
-      <span className="af-btn-label">{children}</span>
+      <span className="aft-btn-label">{children}</span>
     </button>
   );
 }

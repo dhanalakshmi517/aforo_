@@ -1,10 +1,7 @@
 import * as React from "react";
 import "./GlassStackTile.css";
 
-const DEFAULT_COLORS = [
-  "#E4677C", "#E06CA5", "#D06CE0", "#AE76E5", "#CF7B40", "#B495EC",
-  "#9799EC", "#2EB961", "#7FB52D", "#C29E30", "#CF7B40", "#2C9BAE"
-];
+const DEFAULT_COLORS = ["#BBBBBB"];
 
 type Props = {
   frontIcon: React.ReactNode;

@@ -35,9 +35,21 @@
 
   /* 🔑 Base text color */
   color: #25303D;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.mfm-item:hover:not(.is-disabled) {
+  background: var(--color-primary-700);
+  color: var(--color-neutral-white);
+}
 
+.mfm-item:hover:not(.is-disabled) .mfm-label {
+  color: var(--color-neutral-white);
+}
+
+.mfm-item:hover:not(.is-disabled) .mfm-chevron path {
+  stroke: var(--color-neutral-white);
+}
 
 /* =====================
    Active State

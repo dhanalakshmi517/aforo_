@@ -52,13 +52,29 @@ box-shadow:
   cursor: pointer;
   user-select: none;
   margin-bottom: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .fd-row:last-child {
   margin-bottom: 0;
 }
 
+.fd-row:hover:not(.is-disabled) {
+  background: var(--color-primary-700);
+  color: var(--color-neutral-white);
+}
 
+.fd-row:hover:not(.is-disabled) .fd-rowText {
+  color: var(--color-neutral-white);
+}
+
+.fd-row:hover:not(.is-disabled) .fd-label {
+  color: var(--color-neutral-white);
+}
+
+.fd-row:hover:not(.is-disabled) .fd-subLabel {
+  color: rgba(255, 255, 255, 0.8);
+}
 
 /* CLICKED / SELECTED state */
 .fd-row.is-checked{

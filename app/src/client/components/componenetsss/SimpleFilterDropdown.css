@@ -34,9 +34,17 @@
   user-select: none;
 
   color: var(--color-neutral-1700);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.sfd-row:hover:not(.is-disabled) {
+  background: var(--color-primary-700);
+  color: var(--color-neutral-white);
+}
 
+.sfd-row:hover:not(.is-disabled) .sfd-label {
+  color: var(--color-neutral-white);
+}
 
 /* =====================
    Checked State

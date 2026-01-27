@@ -373,6 +373,7 @@ line-height: var(--line-height-body-md, 20px); /* 142.857% */
 .customers-table th:first-child {
   border-top-left-radius: var(--border-radius-sm);
   border-bottom-left-radius: var(--border-radius-sm);
+  padding-left: 16px;
 }
 
 .customers-table th:last-child {

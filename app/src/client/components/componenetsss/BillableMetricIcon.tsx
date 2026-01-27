@@ -29,7 +29,7 @@ function hashToHue(input: string) {
 
 function truncateTo3(text: string) {
   const t = (text ?? "").trim();
-  return t.length > 3 ? `${t.slice(0, 3)}…` : t;
+  return t.slice(0, 3);
 }
 
 export default function BillableMetricIcon({
@@ -61,7 +61,7 @@ export default function BillableMetricIcon({
       }
       title={bottomText}
     >
-      <div className="bmIcon-top">{topText}</div>
+      <div className="bmIcon-top">{truncateTo3(topText)}</div>
       <div className="bmIcon-bottom">{truncateTo3(bottomText)}</div>
     </div>
   );

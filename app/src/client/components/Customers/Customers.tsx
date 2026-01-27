@@ -108,6 +108,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   const navigate = useNavigate();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -300,27 +301,32 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
   }, []);
 
   const fetchCustomers = async () => {
-    const data = await getCustomers();
-    
-    // Show customers immediately without waiting for logos
-    const customersWithoutLogos: Customer[] = (data || []).map((c: Customer) => ({
-      ...c,
-      __resolvedLogoSrc: null, // Will be populated async
-    }));
-    setCustomers(customersWithoutLogos);
+    setIsLoading(true);
+    try {
+      const data = await getCustomers();
+      
+      // Show customers immediately without waiting for logos
+      const customersWithoutLogos: Customer[] = (data || []).map((c: Customer) => ({
+        ...c,
+        __resolvedLogoSrc: null, // Will be populated async
+      }));
+      setCustomers(customersWithoutLogos);
 
-    // Load logos asynchronously in the background (don't block UI)
-    customersWithoutLogos.forEach(async (c, index) => {
-      if (c.companyLogoUrl) {
-        const resolved = await resolveLogoSrc(c.companyLogoUrl);
-        if (resolved) {
-          // Update just this customer's logo without re-fetching all
-          setCustomers(prev => prev.map((cust, i) =>
-            i === index ? { ...cust, __resolvedLogoSrc: resolved } : cust
-          ));
+      // Load logos asynchronously in the background (don't block UI)
+      customersWithoutLogos.forEach(async (c, index) => {
+        if (c.companyLogoUrl) {
+          const resolved = await resolveLogoSrc(c.companyLogoUrl);
+          if (resolved) {
+            // Update just this customer's logo without re-fetching all
+            setCustomers(prev => prev.map((cust, i) =>
+              i === index ? { ...cust, __resolvedLogoSrc: resolved } : cust
+            ));
+          }
         }
-      }
-    });
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /* ---------------- filters ---------------- */
@@ -499,7 +505,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
     {
       key: "createdOn",
       title: "Created On",
-      width: 260,
+      width: 300,
       render: (c) => (
         <span data-date>{formatDateStr(c.createdOn)}</span>
       ),
@@ -510,7 +516,6 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
       filterable: true,
       ref: statusFilterRef,
       onFilterClick: () => setIsStatusFilterOpen(true),
-      width: 160,
       render: (c) => (
         <div className="status-cell-padded">
           <StatusBadge
@@ -724,25 +729,32 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
           ) : null
         }
         emptyIcon={
-          searchTerm.trim() || selectedStatuses.length || selectedCompanyIds.length ? (
+          isLoading ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+              <div className="spinner" />
+              <span style={{ color: "#666", fontSize: "14px" }}>Loading customers...</span>
+            </div>
+          ) : searchTerm.trim() || selectedStatuses.length || selectedCompanyIds.length ? (
             <img src={NoFileSvg} width={170} height={170} />
           ) : (
             <img src={CustomersPlat} width={190} height={190} />
           )
         }
         emptyText={
-          searchTerm.trim() ? (
+          isLoading ? (
+            undefined
+          ) : searchTerm.trim() ? (
             "No customers found for \"" + searchTerm + "\"\nTry searching with different keywords"
           ) : selectedStatuses.length || selectedCompanyIds.length ? (
             "Oops! No matches found with these filters.\nTry adjusting your search or filters"
           ) : (
-            "No Customer created yet. Click ‘New Customer’ \nto create your First Customer."
+            "No Customer created yet. Click 'New Customer' \nto create your First Customer."
           )
         }
         emptyAction={
           customers.length === 0 ? (
-            <PrimaryButton 
-              onClick={() => setShowNewCustomerForm(true)} 
+            <PrimaryButton
+              onClick={() => navigate("/get-started/customers/new")}
               icon={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
