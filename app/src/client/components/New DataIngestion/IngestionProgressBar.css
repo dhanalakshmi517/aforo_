@@ -1,0 +1,72 @@
+@import "../Variables/Variables.css";
+.afIngestProg {
+  /* Figma-like: W ~348, H ~84 */
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: 16px;
+
+  background: #F5F9FF;            /* light blue card */
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  font-family: var(--font-family-primary);            /* uses your app font */
+}
+
+.afIngestProgTitle {
+ color: var(--color-neutral-800);
+
+/* body/md/med */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 500;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+/* Progress bar */
+.afIngestProgTrack {
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--color-primary-200);  /* light track */
+  overflow: hidden;
+}
+
+.afIngestProgFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-primary-700);             /* solid blue fill */
+  width: 0%;
+  transition: width 180ms ease;
+}
+
+.afIngestProgMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.afIngestProgLeft,
+.afIngestProgRight {
+  color: var(--color-neutral-800);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+.afIngestProgRight {
+ color: var(--color-neutral-800);
+
+/* body/sm/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */}
