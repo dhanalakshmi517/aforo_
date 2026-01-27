@@ -507,7 +507,6 @@ select.if-select:focus-visible,
   margin-top: 2px;
 }
 
-.dd-item:hover:not(.is-disabled),
 .dd-item.is-active:not(.is-disabled) {
   background: var(--color-primary-100);
   border-color: none;
@@ -517,7 +516,7 @@ select.if-select:focus-visible,
 .dd-item.is-selected {
   background: var(--color-primary-600);
   border-color: none;
-  color: var(--color-neutral-1700);
+  color: var(--color-neutral-white);
 }
 
 .dd-item.is-selected :hover {

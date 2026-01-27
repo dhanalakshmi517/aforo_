@@ -1,35 +1,41 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CreateUsageMetric from "./CreateUsageMetric";
-import EditMetrics from "./EditMetering/EditMetrics";
-import "../Rateplan/RatePlan.css";
 import "./Metering.css";
 import "../Products/Products.css";
-import PageHeader from "../PageHeader/PageHeader";
-import ConfirmDeleteModal from '../componenetsss/ConfirmDeleteModal';
-import { useToast } from '../componenetsss/ToastProvider';
-import EditIconButton from '../componenetsss/EditIconButton';
-import DeleteIconButton from '../componenetsss/DeleteIconButton';
-import RetryIconButton from '../componenetsss/RetryIconButton';
-import UsageEmptyImg from "./usage.svg";
-import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
-import { logout } from "../../utils/auth";
-import PrimaryButton from '../componenetsss/PrimaryButton';
-import StatusBadge, { Variant } from '../componenetsss/StatusBadge';
-import Tooltip from '../componenetsss/Tooltip';
-import { Checkbox } from '../componenetsss/Checkbox';
-import FilterChip from '../componenetsss/FilterChip';
-import SimpleFilterDropdown from '../componenetsss/SimpleFilterDropdown';
-import DateSortDropdown from '../componenetsss/DateSortDropdown';
-import MainFilterMenu, { MainFilterKey } from '../componenetsss/MainFilterMenu';
+import "../Rateplan/RatePlan.css";
 
-// Props for Metering component
+import PageHeader from "../PageHeader/PageHeader";
+import DataTable, { DataTableColumn } from "../componenetsss/DataTable";
+import PrimaryButton from "../componenetsss/PrimaryButton";
+import EditIconButton from "../componenetsss/EditIconButton";
+import DeleteIconButton from "../componenetsss/DeleteIconButton";
+import RetryIconButton from "../componenetsss/RetryIconButton";
+import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
+import StatusBadge, { Variant } from "../componenetsss/StatusBadge";
+import BillableMetricIcon from "../componenetsss/BillableMetricIcon";
+
+import FilterChip from "../componenetsss/FilterChip";
+import SimpleFilterDropdown from "../componenetsss/SimpleFilterDropdown";
+import DateSortDropdown from "../componenetsss/DateSortDropdown";
+import MainFilterMenu, { MainFilterKey } from "../componenetsss/MainFilterMenu";
+import ResetButton from "../componenetsss/ResetButton";
+
+import UsageEmptyImg from "./usage.svg";
+import NoFileSvg from "../Customers/nofile.svg"; // reuse the same empty-search icon if you want (or replace with your local nofile.svg)
+import CreateUsageMetric from "./CreateUsageMetric";
+import EditMetrics from "./EditMetering/EditMetrics";
+
+import { getUsageMetrics, deleteUsageMetric, UsageMetricDTO } from "./api";
+import { isAuthenticated, logout } from "../../utils/auth";
+import { useToast } from "../componenetsss/ToastProvider";
+
+/* ---------------- types ---------------- */
+
 interface MeteringProps {
   showNewUsageMetricForm: boolean;
   setShowNewUsageMetricForm: (show: boolean) => void;
   setHideSidebarOnEditMetric: (hide: boolean) => void;
 }
-
 
 interface Metric {
   id: number;
@@ -42,154 +48,233 @@ interface Metric {
   iconData?: any;
 }
 
-interface NotificationState {
-  message: string;
-  type: 'success' | 'error';
-  productName: string;
-}
+/* ---------------- utils ---------------- */
 
-const SuccessIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path d="M20 6L9 17L4 12" stroke="#23A36D" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+const formatStatus = (s: string) =>
+  s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "-";
 
-const ErrorIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path d="M12 8V12M12 16H12.01M7.9 20C9.8 21 12 21.2 14.1 20.75C16.2 20.3 18 19.05 19.3 17.3C20.6 15.55 21.15 13.4 20.98 11.3C20.81 9.15 19.89 7.15 18.37 5.63C16.85 4.11 14.85 3.18 12.71 3.02C10.57 2.85 8.44 3.45 6.71 4.72C4.97 5.98 3.75 7.82 3.25 9.91C2.76 12 3.02 14.19 4 16.1L2 22L7.9 20Z" stroke="#E34935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+const display = (v: any) =>
+  v === undefined || v === null || String(v).trim() === "" ? "-" : v;
 
-const ToastNotification: React.FC<NotificationState> = ({ message, type, productName }) => {
-  const Icon = type === 'success' ? SuccessIcon : ErrorIcon;
-  return (
-    <div className={`notification ${type === 'error' ? 'error' : ''}`}>
-      <div className="notification-icon">
-        <Icon />
-      </div>
-      <div className="notification-text">
-        <h5>{type === 'success' ? 'Metric Deleted' : 'Failed to Delete Metric'}</h5>
-        <p className="notification-details">
-          {type === 'success'
-            ? `The metric “${productName}” was successfully deleted.`
-            : `Failed to delete the metric “${productName}”. Please try again.`}
-        </p>
-      </div>
-    </div>
-  );
+const truncateText = (text: string, maxLength = 10) => {
+  if (!text) return "-";
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 };
 
-const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewUsageMetricForm, setHideSidebarOnEditMetric }) => {
+const formatDateStr = (dateValue?: string) => {
+  if (!dateValue) return "-";
+  // Backend already returns formatted date string like "21 Jan, 2026 13:06 IST"
+  return dateValue;
+};
+
+/* ---------------- component ---------------- */
+
+const Metering: React.FC<MeteringProps> = ({
+  showNewUsageMetricForm,
+  setShowNewUsageMetricForm,
+  setHideSidebarOnEditMetric,
+}) => {
   const navigate = useNavigate();
-  const formatStatus = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '-';
-  const display = (v: any) => (v === undefined || v === null || String(v).trim() === '' ? '-' : v);
-  const truncateProductName = (name: string) => {
-    if (!name) return '-';
-    return name.length > 10 ? `${name.substring(0, 10)}...` : name;
-  };
-  const truncateMetricName = (name: string) => {
-    if (!name) return '-';
-    return name.length > 10 ? `${name.substring(0, 10)}...` : name;
-  };
+  const { showToast } = useToast();
+
   const [metrics, setMetrics] = useState<Metric[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [createdSortOrder, setCreatedSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [createdSortOrder, setCreatedSortOrder] = useState<"newest" | "oldest">(
+    "newest"
+  );
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteMetricId, setDeleteMetricId] = useState<number | null>(null);
-  const [deleteMetricName, setDeleteMetricName] = useState<string>('');
-  const [isDeleting, setIsDeleting] = useState(false);
+  const pendingName = useRef("");
+
   const [isLoading, setIsLoading] = useState(true);
-  // toast handled via context
-  const { showToast } = useToast();
+
+  /* ---- edit/draft navigation state ---- */
   const [selectedMetricId, setSelectedMetricId] = useState<number | null>(null);
   const [showEditMetricForm, setShowEditMetricForm] = useState(false);
 
-  // Column filter / sort popover state
-  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
-  const [isCreatedSortOpen, setIsCreatedSortOpen] = useState(false);
-  const statusFilterRef = useRef<HTMLDivElement | null>(null);
-  const createdSortRef = useRef<HTMLDivElement | null>(null);
-  const [statusFilterPosition, setStatusFilterPosition] = useState({ top: 0, left: 0 });
-  const [createdSortPosition, setCreatedSortPosition] = useState({ top: 0, left: 0 });
-
-  // Header filter menu (two-panel)
+  /* ---- filter menu state (same skeleton as Customers) ---- */
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
   const [isMainFilterMenuOpen, setIsMainFilterMenuOpen] = useState(false);
-  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
-  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>('status');
+  const [activeFilterKey, setActiveFilterKey] = useState<MainFilterKey | null>(
+    null
+  );
+  const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({
+    top: 0,
+    left: 0,
+  });
+  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({
+    top: 0,
+    left: 0,
+  });
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
-  const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
-  const filterButtonRef = useRef<HTMLButtonElement>(null!);
+
+  /* ---- status column filter dropdown state ---- */
+  const statusFilterRef = useRef<HTMLDivElement>(null);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+  const [isStatusFilterHovered, setIsStatusFilterHovered] = useState(false);
+
+  /* ---- date column filter dropdown state ---- */
+  const dateFilterRef = useRef<HTMLDivElement>(null);
+  const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
+  const [isDateFilterHovered, setIsDateFilterHovered] = useState(false);
+
+  /* ---------------- effects ---------------- */
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/signin");
+      return;
+    }
+    fetchMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // manage sidebar visibility
   useEffect(() => {
     setHideSidebarOnEditMetric(showEditMetricForm);
   }, [showEditMetricForm, setHideSidebarOnEditMetric]);
 
-  // Prevent browser window scroll on Metering page
+  // Close filter dropdowns when clicking outside (Customers-style)
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+
+      // Don't close if clicking inside portal (dropdowns render in portal)
+      const portalRoot = document.getElementById("portal-root");
+      if (portalRoot && target && portalRoot.contains(target)) return;
+
+      // Don't close if clicking inside dropdown popovers
+      if (target.closest(".products-column-filter-popover")) return;
+
+      // Don't close if clicking on filter headers/buttons
+      if (target.closest(".products-th-label-with-filter")) return;
+      if (target.closest(".dt-header-cell")) return;
+
+      // Don't close if clicking inside filter header refs
+      if (statusFilterRef.current && statusFilterRef.current.contains(target))
+        return;
+      if (dateFilterRef.current && dateFilterRef.current.contains(target))
+        return;
+
+      // Don't close if clicking on main filter menu
+      if (target.closest('[role="menu"]')) return;
+
+      // Don't close if clicking inside DataTable body rows
+      if (target.closest("tbody")) return;
+
+      // Close everything
+      if (
+        isMainFilterMenuOpen ||
+        isMainFilterPanelOpen ||
+        isStatusFilterOpen ||
+        isDateFilterOpen
+      ) {
+        setIsMainFilterMenuOpen(false);
+        setIsMainFilterPanelOpen(false);
+        setIsStatusFilterOpen(false);
+        setIsDateFilterOpen(false);
+      }
+
+      if (isStatusFilterHovered || isDateFilterHovered) {
+        setIsStatusFilterHovered(false);
+        setIsDateFilterHovered(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [
+    isMainFilterMenuOpen,
+    isMainFilterPanelOpen,
+    isStatusFilterOpen,
+    isDateFilterOpen,
+    isStatusFilterHovered,
+    isDateFilterHovered,
+  ]);
+
+  // Attach hover listeners to filterable header cells (Customers-style)
+  useEffect(() => {
+    const attachHoverListeners = () => {
+      const statusHeader = statusFilterRef.current;
+      const dateHeader = dateFilterRef.current;
+
+      if (statusHeader) {
+        statusHeader.addEventListener("mouseenter", () =>
+          setIsStatusFilterHovered(true)
+        );
+        statusHeader.addEventListener("mouseleave", (e: any) => {
+          const relatedTarget = e.relatedTarget as HTMLElement;
+          const dropdown = document.querySelector('[data-dropdown="status"]');
+          if (dropdown && dropdown.contains(relatedTarget)) return;
+          setIsStatusFilterHovered(false);
+        });
+      }
+
+      if (dateHeader) {
+        dateHeader.addEventListener("mouseenter", () =>
+          setIsDateFilterHovered(true)
+        );
+        dateHeader.addEventListener("mouseleave", (e: any) => {
+          const relatedTarget = e.relatedTarget as HTMLElement;
+          const dropdown = document.querySelector('[data-dropdown="date"]');
+          if (dropdown && dropdown.contains(relatedTarget)) return;
+          setIsDateFilterHovered(false);
+        });
+      }
+    };
+
+    const timeoutId = setTimeout(attachHoverListeners, 100);
+
     return () => {
-      document.body.style.overflow = '';
+      clearTimeout(timeoutId);
+      const statusHeader = statusFilterRef.current;
+      const dateHeader = dateFilterRef.current;
+
+      if (statusHeader) {
+        statusHeader.removeEventListener("mouseenter", () =>
+          setIsStatusFilterHovered(true)
+        );
+        statusHeader.removeEventListener("mouseleave", () => {});
+      }
+
+      if (dateHeader) {
+        dateHeader.removeEventListener("mouseenter", () =>
+          setIsDateFilterHovered(true)
+        );
+        dateHeader.removeEventListener("mouseleave", () => {});
+      }
     };
   }, []);
-
-  // open confirmation modal
-  const handleDeleteClick = (metric: Metric) => {
-    setDeleteMetricId(metric.id);
-    setDeleteMetricName(metric.usageMetric);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    if (deleteMetricId == null) return;
-    setIsDeleting(true);
-    try {
-      await deleteUsageMetric(deleteMetricId);
-      setMetrics(prev => prev.filter(m => m.id !== deleteMetricId));
-      showToast({
-        kind: 'success',
-        title: 'Metric Deleted',
-        message: `The metric “${deleteMetricName}” was successfully deleted.`
-      });
-    } catch (err) {
-      console.error(err);
-      showToast({
-        kind: 'error',
-        title: 'Failed to Delete',
-        message: `Failed to delete the metric “${deleteMetricName}”. Please try again.`
-      });
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteModal(false);
-      setDeleteMetricId(null);
-    }
-  };
 
   const fetchMetrics = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const data: UsageMetricDTO[] = await getUsageMetrics();
-      const mapped: Metric[] = data.map((m) => {
+      const mapped: Metric[] = (data || []).map((m) => {
         let iconData = null;
         try {
           if ((m as any).iconData) {
-            iconData = typeof (m as any).iconData === 'string'
-              ? JSON.parse((m as any).iconData)
-              : (m as any).iconData;
+            iconData =
+              typeof (m as any).iconData === "string"
+                ? JSON.parse((m as any).iconData)
+                : (m as any).iconData;
           }
         } catch (e) {
-          console.error('Error parsing iconData:', e);
+          console.error("Error parsing iconData:", e);
         }
+
         return {
           id: (m as any).metricId ?? (m as any).billableMetricId,
-          usageMetric: m.metricName,
-          productName: m.productName,
-          unit: m.unitOfMeasure,
+          usageMetric: (m as any).metricName ?? (m as any).usageMetric ?? "",
+          productName: (m as any).productName ?? "",
+          unit: (m as any).unitOfMeasure ?? (m as any).unit ?? "",
           status: (m as any).status ?? (m as any).metricStatus ?? "Active",
           createdOn: (m as any).createdOn,
-          productId: m.productId,
-          iconData: iconData
+          productId: (m as any).productId,
+          iconData,
         };
       });
       setMetrics(mapped);
@@ -201,54 +286,43 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
     }
   }, []);
 
-  useEffect(() => {
-    fetchMetrics();
-  }, [fetchMetrics]);
+  /* ---------------- routing: keep your existing forms ---------------- */
 
   if (showNewUsageMetricForm) {
-    return <CreateUsageMetric draftMetricId={selectedMetricId ?? undefined} onClose={() => { setShowNewUsageMetricForm(false); fetchMetrics(); }} />;
+    return (
+      <CreateUsageMetric
+        draftMetricId={selectedMetricId ?? undefined}
+        onClose={() => {
+          setShowNewUsageMetricForm(false);
+          fetchMetrics();
+        }}
+      />
+    );
   }
 
   if (showEditMetricForm && selectedMetricId !== null) {
-    return <EditMetrics metricId={selectedMetricId.toString()} onClose={() => { setShowEditMetricForm(false); fetchMetrics(); }} />;
+    return (
+      <EditMetrics
+        metricId={selectedMetricId.toString()}
+        onClose={() => {
+          setShowEditMetricForm(false);
+          fetchMetrics();
+        }}
+      />
+    );
   }
 
-  // Helper function to convert hex to RGB
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '15, 109, 218';
-  };
-
-  // Define metric color palette with bg and text colors
-  const metricColorPalette = [
-    { bg: '#EAD4AE', text: '#81632E' }, // lilac
-    { bg: '#E2B6BE', text: '#AA3C4E' }, // pink
-    { bg: '#E2B6CC', text: '#AC3C73' }, // blue
-    { bg: '#DCB6E2', text: '#90449C' }, // teal
-    { bg: '#CCB7E1', text: '#693E92' }, // orange
-    { bg: '#C4B7E1', text: '#6547A8' }, // green
-    { bg: '#B7B8E1', text: '#4749AF' }, // red
-    { bg: '#B6C7E2', text: '#2A559C' }, // indigo
-    { bg: '#AED7EA', text: '#1C5F7D' }, // warm orange
-    { bg: '#AEE1EA', text: '#206D79' }, // teal
-    { bg: '#AEEAD6', text: '#1C6C51' }, // mint
-    { bg: '#AEEAC4', text: '#2AA055' }, // green
-    { bg: '#AFE9E3', text: '#177167' }  // cyan
-  ];
-
-  // Helper function to get metric color by index
-  const getMetricColor = (idx: number) => metricColorPalette[idx % metricColorPalette.length];
+  /* ---------------- filters ---------------- */
 
   const filteredMetrics = metrics
-    // Global text search across key fields (metric, product, unit, status), excluding date
     .filter((m) => {
-      const q = searchQuery.trim().toLowerCase();
+      const q = searchTerm.trim().toLowerCase();
       if (!q) return true;
 
-      const metricName = (m.usageMetric || '').toLowerCase();
-      const productName = (m.productName || '').toLowerCase();
-      const unit = (m.unit || '').toLowerCase();
-      const status = (m.status || '').toLowerCase();
+      const metricName = (m.usageMetric || "").toLowerCase();
+      const productName = (m.productName || "").toLowerCase();
+      const unit = (m.unit || "").toLowerCase();
+      const status = (m.status || "").toLowerCase();
 
       return (
         metricName.includes(q) ||
@@ -257,19 +331,17 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         status.includes(q)
       );
     })
-    // Status filter
     .filter((m) => {
-      if (selectedStatuses.length === 0) return true;
-      const statusKey = (m.status || '').toLowerCase();
+      if (!selectedStatuses.length) return true;
+      const statusKey = (m.status || "").toLowerCase();
       return selectedStatuses.includes(statusKey);
     })
-    // Sort: drafts first, then by createdOn according to createdSortOrder
     .sort((a, b) => {
-      const aStatus = (a.status || '').toLowerCase();
-      const bStatus = (b.status || '').toLowerCase();
+      const aStatus = (a.status || "").toLowerCase();
+      const bStatus = (b.status || "").toLowerCase();
 
-      const aDraft = aStatus === 'draft';
-      const bDraft = bStatus === 'draft';
+      const aDraft = aStatus === "draft";
+      const bDraft = bStatus === "draft";
       if (aDraft && !bDraft) return -1;
       if (!aDraft && bDraft) return 1;
 
@@ -283,124 +355,177 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
       const bDate = parseDate(b.createdOn);
 
       if (aDate === bDate) return 0;
-      if (createdSortOrder === 'oldest') {
-        return aDate - bDate;
-      }
+      if (createdSortOrder === "oldest") return aDate - bDate;
       return bDate - aDate;
     });
 
-  // Close popovers when clicking outside (ignore portal-root)
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-      if (!target) return;
+  /* ---------------- delete ---------------- */
 
-      // Ignore clicks inside portal-root
-      const portalRoot = document.getElementById('portal-root');
-      if (portalRoot && portalRoot.contains(target)) return;
+  const handleDeleteClick = (metric: Metric) => {
+    pendingName.current = metric.usageMetric || "";
+    setDeleteMetricId(metric.id);
+    setShowDeleteModal(true);
+  };
 
-      if (statusFilterRef.current && !statusFilterRef.current.contains(target)) {
-        setIsStatusFilterOpen(false);
-      }
+  const confirmDelete = async () => {
+    if (!deleteMetricId) return;
+    try {
+      await deleteUsageMetric(deleteMetricId);
+      setMetrics((prev) => prev.filter((m) => m.id !== deleteMetricId));
+      showToast({
+        kind: "success",
+        title: "Metric Deleted",
+        message: `The metric “${pendingName.current}” was successfully deleted.`,
+      });
+    } catch (err) {
+      console.error(err);
+      showToast({
+        kind: "error",
+        title: "Failed to Delete",
+        message: `Failed to delete the metric “${pendingName.current}”. Please try again.`,
+      });
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteMetricId(null);
+    }
+  };
 
-      if (createdSortRef.current && !createdSortRef.current.contains(target)) {
-        setIsCreatedSortOpen(false);
-      }
+  /* ---------------- columns (DataTable like Customers) ---------------- */
 
-      if (filterButtonRef.current && !filterButtonRef.current.contains(target)) {
-        setIsMainFilterMenuOpen(false);
-        setIsMainFilterPanelOpen(false);
-      }
-    };
+  const columns: DataTableColumn<Metric>[] = useMemo(
+    () => [
+      {
+        key: "usageMetric",
+        title: "Usage Metric",
+        render: (m) => (
+          <div className="cell-flex" style={{ paddingLeft: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
+            <BillableMetricIcon
+              topText={display(
+                m.unit && m.unit.length > 3 ? m.unit.substring(0, 3) : m.unit
+              )}
+              bottomText={display(
+                m.usageMetric && m.usageMetric.length > 3
+                  ? `${m.usageMetric.substring(0, 3)}...`
+                  : m.usageMetric
+              )}
+              size={40}
+            />
+            <span className="metric-label" title={m.usageMetric}>
+              {truncateText(m.usageMetric, 10)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: "productName",
+        title: "Product Name",
+        render: (m) => (
+          <div className="cell-stack">
+            <div className="metering-product-name" title={m.productName}>
+              {truncateText(m.productName, 10)}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "unit",
+        title: "Unit Of Measure",
+        render: (m) => <span>{display(m.unit)}</span>,
+      },
+      {
+        key: "status",
+        title: "Status",
+        filterable: true,
+        ref: statusFilterRef,
+        onFilterClick: () => setIsStatusFilterOpen(true),
+        render: (m) => (
+          <div className="status-cell-padded">
+            <StatusBadge
+              label={formatStatus(m.status)}
+              variant={(m.status || "").toLowerCase() as Variant}
+              size="sm"
+            />
+          </div>
+        ),
+      },
+      {
+        key: "createdOn",
+        title: "Created On",
+        filterable: true,
+        ref: dateFilterRef,
+        onFilterClick: () => setIsDateFilterOpen(true),
+        width: 210,
+        render: (m) => <span data-date>{formatDateStr(m.createdOn)}</span>,
+      },
+      {
+        key: "actions",
+        title: "Actions",
+        width: 80,
+        render: (m) => (
+          <div className="action-buttons" onClick={(e) => e.stopPropagation()}>
+            {(m.status || "").toLowerCase() === "draft" ? (
+              <RetryIconButton
+                onClick={() =>
+                  navigate("/get-started/metering/new", {
+                    state: { draftMetricId: m.id },
+                  })
+                }
+                title="Continue editing draft"
+              />
+            ) : (
+              <EditIconButton
+                onClick={() => navigate(`/get-started/metering/${m.id}/edit`)}
+                title="Edit metric"
+              />
+            )}
+            <DeleteIconButton
+              onClick={() => handleDeleteClick(m)}
+              title="Delete metric"
+            />
+          </div>
+        ),
+      },
+    ],
+    [navigate]
+  );
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  /* ---------------- render ---------------- */
 
   return (
-    <div className="check-container">
+    <div className={`check-container ${metrics.length > 0 ? "has-customers" : ""}`}>
       <PageHeader
         title="Billable Metrics"
-        searchTerm={searchQuery}
-        onSearchTermChange={setSearchQuery}
-        primaryLabel=""
-        onPrimaryClick={() => navigate('/get-started/metering/new')}
-        onFilterClick={() => {
-          // close table-header popovers so only one UI is active
-          setIsStatusFilterOpen(false);
-          setIsCreatedSortOpen(false);
-
-          if (filterButtonRef.current) {
-            const rect = filterButtonRef.current.getBoundingClientRect();
-            const menuWidth = 240;
-            const panelWidth = 264;
-            const gap = 12;
-            const margin = 8;
-
-            let left = rect.left;
-            const minLeft = panelWidth + gap + margin;
-            if (left < minLeft) {
-              left = minLeft;
-            }
-
-            if (left + menuWidth + margin > window.innerWidth) {
-              left = Math.max(margin, window.innerWidth - menuWidth - margin);
-              if (left < minLeft) {
-                left = minLeft;
-              }
-            }
-
-            setMainFilterMenuPosition({
-              top: rect.bottom + 8,
-              left,
-            });
-          }
-
-          const nextOpen = !isMainFilterMenuOpen;
-          setIsMainFilterMenuOpen(nextOpen);
-          if (!nextOpen) {
-            setIsMainFilterPanelOpen(false);
-          }
-        }}
-        filterButtonRef={filterButtonRef}
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
         searchDisabled={metrics.length === 0}
-        filterDisabled={metrics.length === 0}
         showPrimary={metrics.length > 0}
-        showIntegrations={metrics.length > 0}
+        primaryLabel="+ New Billable Metric"
+        onPrimaryClick={() => navigate("/get-started/metering/new")}
+        filterButtonRef={filterButtonRef}
+        filterActive={isMainFilterMenuOpen || isMainFilterPanelOpen}
+        onFilterClick={() => {
+          if (!filterButtonRef.current) return;
+          const rect = filterButtonRef.current.getBoundingClientRect();
+          setMainFilterMenuPosition({ top: rect.bottom + 8, left: rect.left });
+          setIsMainFilterMenuOpen((v) => !v);
+          setIsMainFilterPanelOpen(false);
+        }}
       />
 
+      {/* ===== FILTER MENUS (same skeleton as Customers) ===== */}
       {isMainFilterMenuOpen && (
         <MainFilterMenu
           items={[
-            { key: 'status', label: 'Status' },
-            { key: 'date', label: 'Date' },
+            { key: "status", label: "Status" },
+            { key: "date", label: "Date" },
           ]}
           activeKey={activeFilterKey}
-          onSelect={(key) => {
-            setActiveFilterKey(key);
-          }}
+          onSelect={(key) => setActiveFilterKey(key)}
           onSelectWithRect={(key, rect) => {
             setActiveFilterKey(key);
-            const panelWidth = 264;
-            const gap = 12;
-            const margin = 8;
-
-            // Prefer opening panel to the left of the clicked row
-            let left = rect.left - gap - panelWidth;
-            if (left < margin) {
-              const tryRight = rect.right + gap;
-              if (tryRight + panelWidth + margin <= window.innerWidth) {
-                left = tryRight;
-              } else {
-                left = Math.max(margin, window.innerWidth - panelWidth - margin);
-              }
-            }
-
             setMainFilterPanelPosition({
               top: rect.top,
-              left,
+              left: rect.left - 280,
             });
             setIsMainFilterPanelOpen(true);
           }}
@@ -409,317 +534,163 @@ const Metering: React.FC<MeteringProps> = ({ showNewUsageMetricForm, setShowNewU
         />
       )}
 
-      {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'status' && (
+      {isMainFilterPanelOpen && activeFilterKey === "status" && (
         <SimpleFilterDropdown
-          options={['active', 'draft'].map((statusKey) => ({
-            id: statusKey,
-            label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
-          }))}
+          options={[
+            { id: "active", label: "Active" },
+            { id: "draft", label: "Draft" },
+          ]}
           value={selectedStatuses}
-          onChange={(next) => setSelectedStatuses(next.map((x) => String(x).toLowerCase()))}
+          onChange={(v) => setSelectedStatuses(v.map(String))}
           anchorTop={mainFilterPanelPosition.top}
           anchorLeft={mainFilterPanelPosition.left}
         />
       )}
 
-      {isMainFilterMenuOpen && isMainFilterPanelOpen && activeFilterKey === 'date' && (
+      {isMainFilterPanelOpen && activeFilterKey === "date" && (
         <DateSortDropdown
           value={createdSortOrder}
-          onChange={(next) => setCreatedSortOrder(next)}
+          onChange={setCreatedSortOrder}
           anchorTop={mainFilterPanelPosition.top}
           anchorLeft={mainFilterPanelPosition.left}
         />
       )}
-      <div className="customers-table-wrapper">
-        {selectedStatuses.length > 0 && (
-          <div className="products-active-filters-row">
-            <div className="products-active-filters-chips">
-              {selectedStatuses.map((s) => (
-                <FilterChip
-                  key={s}
-                  label={s.charAt(0).toUpperCase() + s.slice(1)}
-                  onRemove={() =>
-                    setSelectedStatuses((prev) => prev.filter((x) => x !== s))
-                  }
-                />
-              ))}
-            </div>
-            <button
-              type="button"
-              className="products-filters-reset"
-              onClick={() => {
-                setSelectedStatuses([]);
-              }}
-            >
-              Reset
-            </button>
-          </div>
-        )}
-        <table className="customers-table">
-          <thead>
-            <tr>
-              <th>Usage Metric</th>
-              <th>Product Name</th>
-              <th>Unit Of Measure</th>
-              <th className="products-th-with-filter">
-                <div
-                  ref={statusFilterRef}
-                  className="products-th-label-with-filter"
-                  onMouseEnter={() => {
-                    // close others
-                    setIsCreatedSortOpen(false);
 
-                    if (statusFilterRef.current) {
-                      const rect = statusFilterRef.current.getBoundingClientRect();
-                      setStatusFilterPosition({
-                        top: rect.bottom + 4,
-                        left: rect.left,
-                      });
-                    }
-                    setIsStatusFilterOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    setIsStatusFilterOpen(false);
-                  }}
-                >
-                  <span>Status </span>
-                  <button
-                    type="button"
-                    className={`products-column-filter-trigger ${
-                      isStatusFilterOpen ? 'is-open' : ''
-                    }`}
-                    aria-label="Filter by status"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="11"
-                      height="8"
-                      viewBox="0 0 11 8"
-                      fill="none"
-                    >
-                      <path
-                        d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
-                        stroke="#19222D"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {isStatusFilterOpen && (
-                    <div
-                      className="products-column-filter-popover"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <SimpleFilterDropdown
-                        options={['active', 'draft'].map((statusKey) => ({
-                          id: statusKey,
-                          label:
-                            statusKey.charAt(0).toUpperCase() + statusKey.slice(1),
-                        }))}
-                        value={selectedStatuses}
-                        onChange={(next) =>
-                          setSelectedStatuses(next.map((x) => String(x).toLowerCase()))
-                        }
-                        anchorTop={statusFilterPosition.top}
-                        anchorLeft={statusFilterPosition.left}
-                      />
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th className="products-th-with-filter">
-                <div
-                  ref={createdSortRef}
-                  className="products-th-label-with-filter"
-                  onMouseEnter={() => {
-                    // close others
-                    setIsStatusFilterOpen(false);
-
-                    if (createdSortRef.current) {
-                      const rect = createdSortRef.current.getBoundingClientRect();
-                      setCreatedSortPosition({
-                        top: rect.bottom + 4,
-                        left: rect.left,
-                      });
-                    }
-                    setIsCreatedSortOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    setIsCreatedSortOpen(false);
-                  }}
-                >
-                  <span>Created On </span>
-                  <button
-                    type="button"
-                    className={`products-column-filter-trigger ${
-                      isCreatedSortOpen ? 'is-open' : ''
-                    }`}
-                    aria-label="Sort by created date"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                    >
-                      <path
-                        d="M10.5 8L8.5 10M8.5 10L6.5 8M8.5 10L8.5 2M1.5 4L3.5 2M3.5 2L5.5 4M3.5 2V10"
-                        stroke="#25303D"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {isCreatedSortOpen && (
-                    <div
-                      className="products-column-filter-popover products-createdon-popover"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <DateSortDropdown
-                        value={createdSortOrder}
-                        onChange={(next) => {
-                          setCreatedSortOrder(next);
-                          setIsCreatedSortOpen(false);
-                        }}
-                        anchorTop={createdSortPosition.top}
-                        anchorLeft={createdSortPosition.left}
-                      />
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th className="actions-cell">Actions</th>
-
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && metrics.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                  <div className="metrics-loading-state">
-                    <div className="spinner"></div>
-                    <p style={{ marginTop: '16px', color: '#666', fontSize: '14px' }}>Loading billable metrics...</p>
-                  </div>
-                </td>
-              </tr>
-            ) : metrics.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '60px 0', borderBottom: 'none' }}>
-                  <div className="metrics-empty-state">
-                    <img src={UsageEmptyImg} alt="No metrics" style={{ width: 190, height: 190 }} />
-                    <p className="metrics-empty-state-text" style={{ marginTop: 8 }}>No Billable Metrics created yet. Click "New Billable Metric" <br /> to create your first metric.</p>
-                    <div className="new-metric-button-wrapper">
-                      <PrimaryButton
-                        onClick={() => navigate('/get-started/metering/new')}
-                      >
-                        + New Billable Metric
-                      </PrimaryButton>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ) : filteredMetrics.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '48px 0', borderBottom: 'none', color: '#5C5F62', fontSize: '14px' }}>
-                  No results found. Try adjusting your search or filters.
-                </td>
-              </tr>
-            ) : (
-              filteredMetrics.map((metric, idx) => (
-                <tr key={metric.id}>
-                  <td className="metrics-cell">
-                    <div className="metrics-wrapper">
-                      <div 
-                        className="metric-item" 
-                        style={{ 
-                          backgroundColor: getMetricColor(idx).bg, 
-                          color: getMetricColor(idx).text 
-                        }}
-                      >
-                        <div className="metric-content">
-                          <div className="metric-uom" title={metric.unit}>
-                            {display(metric.unit && metric.unit.length > 3
-                              ? metric.unit.substring(0, 3)   // only first 3 letters, no dots
-                              : metric.unit
-                            )}
-                          </div>
-                          <div className="metric-name" title={metric.usageMetric}>
-                            {display(metric.usageMetric && metric.usageMetric.length > 3
-                              ? `${metric.usageMetric.substring(0, 3)}...`  // first 3 letters + dots
-                              : metric.usageMetric
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="metric-label" title={metric.usageMetric}>{truncateMetricName(metric.usageMetric)}</span>
-                    </div>
-                  </td>
-                  <td title={metric.productName}>{truncateProductName(metric.productName)}</td>
-                  <td>{display(metric.unit)}</td>
-                  <td>
-                    <Tooltip
-                      position="right"
-                      content={
-                        metric.status?.toLowerCase() === 'active'
-                          ? 'Metric is active and in use.'
-                          : metric.status?.toLowerCase() === 'draft'
-                            ? 'Metric is in draft. Continue setting it up.'
-                            : formatStatus(metric.status)
-                      }
-                    >
-                      <StatusBadge
-                        label={formatStatus(metric.status)}
-                        variant={metric.status?.toLowerCase() === "active" ? "active" : metric.status?.toLowerCase() === "draft" ? "draft" : "archived" as Variant}
-                        size="sm"
-                      />
-                    </Tooltip>
-                  </td>
-                  <td>{display(metric.createdOn)}</td>
-
-                  <td className="actions-cell"><div className="product-action-buttons">
-                    {metric.status?.toLowerCase() === 'draft' ? (
-                      <RetryIconButton
-                        onClick={() => navigate('/get-started/metering/new', { state: { draftMetricId: metric.id } })}
-                        title="Continue editing draft"
-                      />
-                    ) : (
-                      <EditIconButton
-                        onClick={() => navigate(`/get-started/metering/${metric.id}/edit`)}
-                        title="Edit metric"
-                      />
-                    )}
-                    <DeleteIconButton
-                      onClick={() => handleDeleteClick(metric)}
-                      title="Delete metric"
-                    />
-                  </div></td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Delete confirmation modal */}
-      {showDeleteModal && (
-        <ConfirmDeleteModal
-          isOpen={showDeleteModal}
-          productName={deleteMetricName}
-          onConfirm={confirmDelete}
-          onCancel={() => { setShowDeleteModal(false); setDeleteMetricId(null); }}
-        />
+      {/* ===== STATUS COLUMN FILTER DROPDOWN ===== */}
+      {(isStatusFilterOpen || isStatusFilterHovered) && statusFilterRef.current && (
+        <div data-dropdown="status">
+          <SimpleFilterDropdown
+            options={[
+              { id: "active", label: "Active" },
+              { id: "draft", label: "Draft" },
+            ]}
+            value={selectedStatuses}
+            onChange={(v) => setSelectedStatuses(v.map(String))}
+            anchorTop={statusFilterRef.current.getBoundingClientRect().bottom + 8}
+            anchorLeft={statusFilterRef.current.getBoundingClientRect().left}
+          />
+        </div>
       )}
 
+      {/* ===== DATE COLUMN FILTER DROPDOWN ===== */}
+      {(isDateFilterOpen || isDateFilterHovered) && dateFilterRef.current && (
+        <div data-dropdown="date">
+          <DateSortDropdown
+            value={createdSortOrder}
+            onChange={setCreatedSortOrder}
+            anchorTop={dateFilterRef.current.getBoundingClientRect().bottom + 8}
+            anchorLeft={dateFilterRef.current.getBoundingClientRect().left}
+          />
+        </div>
+      )}
 
+      {/* ===== FORCE HOVER STATE WHEN DROPDOWN IS OPEN (optional but matches Customers behavior) ===== */}
+      {isStatusFilterOpen && (
+        <style>{`
+          .dt-header-cell:nth-child(4) { background-color: var(--color-neutral-200) !important; border-radius: 0 !important; }
+          .dt-header-cell:nth-child(4) .dt-filter-trigger { opacity: 1 !important; pointer-events: auto !important; }
+        `}</style>
+      )}
+      {isDateFilterOpen && (
+        <style>{`
+          .dt-header-cell:nth-child(5) { background-color: var(--color-neutral-200) !important; border-radius: 0 !important; }
+          .dt-header-cell:nth-child(5) .dt-filter-trigger { opacity: 1 !important; pointer-events: auto !important; }
+        `}</style>
+      )}
+
+      {/* ===== DATA TABLE (Customers skeleton) ===== */}
+      <DataTable
+        columns={columns}
+        rows={filteredMetrics}
+        rowKey={(m, i) => String(m.id ?? i)}
+        topContent={
+          selectedStatuses.length ? (
+            <div className="customers-active-filters-row">
+              <div className="customers-active-filters-chips">
+                {selectedStatuses.map((s) => (
+                  <FilterChip
+                    key={s}
+                    label={s}
+                    onRemove={() =>
+                      setSelectedStatuses((prev) => prev.filter((x) => x !== s))
+                    }
+                  />
+                ))}
+              </div>
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
+                <ResetButton
+                  label="Reset"
+                  onClick={() => {
+                    setSelectedStatuses([]);
+                    setCreatedSortOrder("newest");
+                  }}
+                />
+              </div>
+            </div>
+          ) : null
+        }
+        emptyIcon={
+          isLoading ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+              <div className="spinner" />
+              <span style={{ color: "#666", fontSize: "14px" }}>Loading billable metrics...</span>
+            </div>
+          ) : searchTerm.trim() || selectedStatuses.length ? (
+            <img src={NoFileSvg} width={170} height={170} />
+          ) : (
+            <img src={UsageEmptyImg} width={190} height={190} />
+          )
+        }
+        emptyText={
+          isLoading ? (
+            undefined
+          ) : searchTerm.trim() ? (
+            `No billable metrics found for "${searchTerm}"\nTry searching with different keywords`
+          ) : selectedStatuses.length ? (
+            "Oops! No matches found with these filters.\nTry adjusting your search or filters"
+          ) : (
+            'No Billable Metrics created yet. Click “New Billable Metric”\nto create your first metric.'
+          )
+        }
+        emptyAction={
+          !isLoading && metrics.length === 0 ? (
+            <PrimaryButton
+              onClick={() => navigate("/get-started/metering/new")}
+              icon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              }
+              iconPosition="left"
+            >
+              New Billable Metric
+            </PrimaryButton>
+          ) : undefined
+        }
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        productName={pendingName.current}
+        entityType="metric"
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 };
 
 export default Metering;
-
-

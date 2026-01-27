@@ -1,0 +1,70 @@
+.pti {
+  width: var(--pti-size);
+  height: var(--pti-size);
+  padding: var(--pti-pad);
+  box-sizing: border-box;
+
+  border-radius: 12px; /* matches the rounded square look */
+  background: var(--pti-bg);
+  border: 1px solid var(--pti-border);
+
+  display: grid;
+  place-items: center;
+}
+
+.ptiStack {
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  display: grid;
+  place-items: center;
+}
+
+.ptiBackPlate {
+  position: absolute;
+  width: var(--pti-back-size);
+  height: var(--pti-back-size);
+
+  border-radius:8px; /* exactly what you gave (effectively a circle) */
+  background: var(--pti-accent);
+
+  /* back plate sits behind and slightly up-left like your screenshot */
+  transform: translate(var(--pti-back-x), var(--pti-back-y));
+  filter: saturate(1.02);
+}
+
+.ptiFrontPlate {
+  position: relative;
+
+  display: flex;
+  width: var(--pti-front-w);
+  height: var(--pti-front-h);
+  padding: var(--pti-front-py) var(--pti-front-px);
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 8px;
+  border: 0.1px solid rgba(255, 255, 255, 1);
+
+  background: var(--pti-glass-bg);
+  backdrop-filter: blur(var(--pti-blur));
+  -webkit-backdrop-filter: blur(var(--pti-blur));
+
+  transform: translate(var(--pti-front-x), var(--pti-front-y));
+
+  /* soft depth like your image */
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.ptiIcon {
+  display: grid;
+  place-items: center;
+  color: var(--pti-icon);
+  line-height: 0;
+}
+
+.ptiIcon svg {
+  display: block;
+}

@@ -1,0 +1,41 @@
+/* PaymentTypePill.css */
+@import "../Variables/Variables.css";
+
+.ptPill {
+  display: inline-flex;
+  align-items: center;
+
+  /* matches your figma overlay: 8 padding, 4 gap */
+  padding: 8px;
+  gap: 4px;
+
+  height: 24px;
+  border-radius: 999px;
+  background: var(--color-neutral-white);
+  border: 0.6px solid var(--color-neutral-500); /* soft lavender border like screenshot */
+
+  /* optional: keep it clean; remove if you want totally flat */
+
+  user-select: none;
+}
+
+.ptPillIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.ptPillText {
+color: var(--color-neutral-1700);
+
+/* body/sm/reg */
+font-family: var(--type-font-family-primary, "IBM Plex Sans");
+font-size: var(--fontsize-body-sm, 12px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+  white-space: nowrap;
+}

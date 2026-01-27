@@ -4,8 +4,8 @@
   width: 15rem;
   height: 100vh;
   /* surface color defined in global variables */
-  background-color: var(--color-primary-1000);
-  border-right: 0.4px solid var(--color-neutral-200);
+  background-color: var(--color-primary-1300);
+  border-right: 0.4px solid var(--color-neutral-500);
 
   position: fixed;
   left: 0;
@@ -117,7 +117,7 @@
 }
 
 .nav-item:hover {
-  background-color:var(--color-primary-800);
+  background-color:var(--color-primary-1200);
   border-radius: var(--border-radius-sm);
   color: var(--color-neutral-1000);
   font-weight: 500;
@@ -131,7 +131,7 @@
   padding: 12px 16px;
   color: var(--color-neutral-100);
   font-weight: 410;
-  background-color: var(--color-primary-800);
+  background-color: var(--color-primary-1000);
 }
 
 .nav-item.active .icon-wrapper { color: var(--color-neutral-100 )!important; }

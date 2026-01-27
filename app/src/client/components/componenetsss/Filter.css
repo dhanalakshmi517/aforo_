@@ -22,12 +22,18 @@
 .filter-btn:hover{
   background:var(--color-neutral-white);
   box-shadow: 0 0 14.4px 0 rgba(2, 98, 161, 0.10) inset;
+
 }
 
 /* active state */
 .filter-btn.is-active{
   background:var(--color-neutral-white);
- border:0.4px var(--color-neutral-400)
+ border:0.4px var(--color-neutral-400);
+ box-shadow:
+  0 4px 48px rgba(217, 223, 232, 0.45),
+  0 1.5px 12px rgba(238, 241, 246, 0.6),
+  0 0.5px 3px rgba(238, 241, 246, 0.5);
+
 }
 
 /* disabled state */

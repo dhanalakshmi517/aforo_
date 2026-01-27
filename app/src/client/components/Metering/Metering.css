@@ -985,6 +985,19 @@ font-weight: 400;
 line-height: var(--line-height-body-md, 20px); /* 142.857% */
 }
 
+/* Product Name in Metering table - reduced font weight */
+.metering-product-name {
+  color: var(--color-neutral-1700);
+  font-family: var(--font-family-primary, "IBM Plex Sans");
+  font-size: var(--font-size-md, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Show column filter icons only on hover (Metering table) */
 .products-th-label-with-filter .products-column-filter-trigger {
   opacity: 0;

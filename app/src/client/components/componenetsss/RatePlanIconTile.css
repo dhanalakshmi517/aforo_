@@ -1,0 +1,71 @@
+/* RatePlanIconTile.css */
+
+.rpTile {
+  width: var(--rp-size);
+  height: var(--rp-size);
+  border-radius: 12px;
+padding: 6px 8px 4px 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+
+  background: rgba(var(--rp-accent-rgb), 0.06);
+
+  border: 1px solid rgba(var(--rp-accent-rgb), 0.12);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 18px rgba(10, 40, 90, 0.06);
+
+  box-sizing: border-box;
+}
+
+.rpIconWrap {
+  width: 100%;
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.rpTopIcon {
+  display: block;
+  /* keeps icon crisp */
+  shape-rendering: geometricPrecision;
+}
+
+.rpPill {
+  height: 26px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+
+
+}
+
+.rpPillText {
+  font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+
+.rpPillTagIcon {
+  display: block;
+}
+
+/* optional rail like your first image */
+.rpRail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px;
+  border-radius: 20px;
+}

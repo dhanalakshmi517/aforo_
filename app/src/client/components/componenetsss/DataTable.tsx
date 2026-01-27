@@ -42,7 +42,7 @@ export default function DataTable<T>({
     .join(" ");
 
   return (
-    <div className="dt-surface">
+    <div className={`dt-surface ${rows.length === 0 ? 'dt-surface--empty' : ''}`}>
       {topContent && <div className="dt-top">{topContent}</div>}
 
       {/* HEADER */}
@@ -64,21 +64,9 @@ export default function DataTable<T>({
                 }}
                 aria-label={`Filter by ${col.title}`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="11"
-                  height="8"
-                  viewBox="0 0 11 8"
-                  fill="none"
-                >
-                  <path
-                    d="M0.600098 0.599609H9.6001M2.6001 3.59961H7.6001M4.1001 6.59961H6.1001"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+  <path d="M1.5 3H10.5M3.5 6H8.5M5 9H7" stroke="#7B97AE" stroke-width="1.12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
               </button>
             )}
             {col.filterDropdown}

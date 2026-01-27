@@ -14,7 +14,7 @@
     clip-path: inset(0 round 8px);
 
 
-  background: var(--color-primary-750); /* default */
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-active, #025A94);
   color:var(--color-neutral-white);
 
   cursor: pointer;
@@ -23,11 +23,11 @@
 }
 
 .newbtn:hover:not(:disabled) {
-  background: var(--color-primary-750); /* hover */
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-hover, #026BB0);
 }
 
 .newbtn:active:not(:disabled) {
-  background: var(--color-primary-600); /* active */
+background: linear-gradient(76deg, rgba(255, 255, 255, 0.00) 25.61%, rgba(255, 255, 255, 0.20) 101.49%), var(--surface-primary-button-pressed, #034A7D);
 }
 
 .newbtn:focus-visible {

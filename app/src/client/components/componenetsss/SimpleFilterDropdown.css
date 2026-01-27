@@ -1,65 +1,105 @@
 @import "../Variables/Variables.css";
-.sfd-root{
+
+/* =====================
+   Root
+===================== */
+
+.sfd-root {
   width: 264px;
+  padding: 16px;
+  box-sizing: border-box;
+
   border-radius: var(--border-radius-lg);
   background: var(--color-neutral-white);
-box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6), 0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8), 0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
 
-
-
-  border: none;
-  padding: 12px;
-  box-sizing: border-box;
+  box-shadow:
+    0 8px 32px rgba(15, 23, 42, 0.04),
+    0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
-.sfd-row{
-  height: 36px;
+/* =====================
+   Row
+===================== */
+
+.sfd-row {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 8px 10px;
+  gap: 8px;
+
+  padding: 8px;
+  margin-bottom: 4px;
+
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   user-select: none;
+
+  color: var(--color-neutral-1700);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.sfd-row:hover{
-  background: var(--color-neutral-150);
+.sfd-row:hover:not(.is-disabled) {
+  background: var(--color-primary-700);
+  color: var(--color-neutral-white);
 }
 
-.sfd-row.is-checked{
-  background: var(--color-neutral-200);
+.sfd-row:hover:not(.is-disabled) .sfd-label {
+  color: var(--color-neutral-white);
 }
 
-.sfd-row.is-checked:hover{
-  background: var(--color-neutral-150);
+/* =====================
+   Checked State
+===================== */
+
+.sfd-row.is-checked {
+  background: var(--color-primary-700);
+  color: var(--color-neutral-white);
 }
 
-.sfd-row.is-disabled{
+.sfd-row.is-checked .sfd-label {
+  color: var(--color-neutral-white);
+}
+
+/* =====================
+   Disabled State
+===================== */
+
+.sfd-row.is-disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.sfd-checkbox{
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: #4F46E5;
+/* =====================
+   Checkbox
+===================== */
+
+.sfd-checkbox {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
-.sfd-label{
-overflow: hidden;
-color: var(--color-neutral-1700);
-text-overflow: ellipsis;
+/* =====================
+   Text
+===================== */
 
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-md, 20px); /* 142.857% */
+.sfd-rowText {
+  display: flex;
+  min-width: 0;
+}
+
+.sfd-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+
+  color: inherit;
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-body-md, 20px);
 }

@@ -25,6 +25,7 @@ export interface PageHeaderProps {
   showDivider?: boolean;
   filterButtonRef?: React.RefObject<HTMLButtonElement>;
   useIntegrationButton?: boolean;
+  filterActive?: boolean;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -44,9 +45,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   showSearch = true,
   showDivider = true,
   filterButtonRef,
-  useIntegrationButton = false
+  useIntegrationButton = false,
+  filterActive = false
 }) => {
-  const [isFilterSelected, setIsFilterSelected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClear = () => {
@@ -56,12 +57,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   };
 
   let filterBtnCls = 'rp-filter-btn';
-  if (isFilterSelected) filterBtnCls += ' is-selected';
+  if (filterActive) filterBtnCls += ' is-selected';
   if (filterDisabled) filterBtnCls += ' is-disabled';
 
   const handleFilterClick = () => {
     if (filterDisabled) return;
-    setIsFilterSelected(v => !v);
     onFilterClick?.();
   };
 
@@ -90,7 +90,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {/* Filter */}
         {onFilterClick && (
           <Filter
-            state={filterDisabled ? 'disabled' : isFilterSelected ? 'active' : 'default'}
+            state={filterDisabled ? 'disabled' : filterActive ? 'active' : 'default'}
             onClick={handleFilterClick}
             ariaLabel="Open filters"
             buttonRef={filterButtonRef}
@@ -100,7 +100,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {/* Divider AFTER Filter (left side) */}
         {showDivider && onFilterClick && showPrimary && (
           <div className="header-divider" aria-hidden="true">
-           <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
   <path d="M0.5 0.5V12.5" stroke="#D9DFE8" stroke-linecap="round"/>
 </svg>
           </div>
@@ -139,7 +139,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {/* Divider AFTER the New button (right side) */}
         {showDivider && (
           <div className="header-divider" aria-hidden="true">
-           <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1" height="13" viewBox="0 0 1 13" fill="none">
   <path d="M0.5 0.5V12.5" stroke="#D9DFE8" stroke-linecap="round"/>
 </svg>
           </div>
