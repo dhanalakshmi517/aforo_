@@ -6,7 +6,7 @@ border: 1px solid  #EEF4FB;
 background: var(--color-neutral-white);
 
 box-shadow: 0 0 8px 2px var(--shadow-shadow-1, #EEF1F6);
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;

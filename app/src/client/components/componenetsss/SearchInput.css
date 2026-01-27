@@ -1,116 +1,95 @@
 @import "../Variables/Variables.css";
-
-/* ROOT */
-.sif {
+.si{
   width: 203px;
   height: 36px;
   display: flex;
-  align-items: center;
   padding: 8px 12px;
+  align-items: center;
   gap: 8px;
+  flex: 1 0 0;
+  align-self: stretch;
 
   border-radius: 10px;
   border: 1px solid var(--color-neutral-300);
   background: var(--color-neutral-50);
   box-sizing: border-box;
-}
-
-/* SEARCH ICON */
-.sif-icon {
-  flex-shrink: 0;
-}
-
-.sif-icon path {
-  stroke: var(--color-neutral-500);
-}
-
-.sif-icon--dark path {
-  stroke: var(--color-neutral-1000);
-}
-
-.sif-icon--disabled path {
-  stroke: var(--color-neutral-300);
-}
-
-/* INPUT WRAPPER */
-.sif-input-wrap {
+  overflow: hidden;
   position: relative;
+}
+
+.si-input{
   flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-/* INPUT */
-.sif-input {
-  width: 100%;
   border: none;
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
   background: transparent;
-  padding-right: 20px; /* space for clear icon */
+  overflow: hidden;
+color: var(--color-neutral-1700);
+text-overflow: ellipsis;
 
-  color: var(--color-neutral-1700);
-  text-overflow: ellipsis;
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
 
-  font-family: var(--font-family-primary, "IBM Plex Sans");
-  font-size: var(--font-size-md, 14px);
-  font-weight: 400;
-  line-height: var(--line-height-body-md, 20px);
 }
 
-.sif-input::placeholder {
-  color: var(--color-neutral-500);
+.si-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none;
 }
 
-/* CLEAR (✕) ICON */
-.sif-clear {
-  all: unset;
-  position: absolute;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-neutral-600);
-}
+.si-input::placeholder{
+color: var(--color-neutral-500);
+text-overflow: ellipsis;
 
+/* body/md/reg */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--line-height-body-md, 20px);}
+
+/* icons */
+.si-icon{
+  flex-shrink: 0; /* keep the icon visible when space is tight / when clear button shows */
+}
+.si-icon path{ stroke:var(--color-neutral-600); }
+.si-icon--dark path{ stroke: var(--color-neutral-1000); }
+.si-icon--disabled path{ stroke: var(--color-neutral-300); }
 
 /* STATES */
-.sif--default {
+.si--default{
+  border-color: var(--color-neutral-300);
   background: var(--color-neutral-50);
 }
 
-.sif--hover {
-  background: var(--color-neutral-200);
-  border:1px solid var(--color-neutral-500)
+.si--hover{
+  border-color: var(--color-neutral-300);
+  background: var(--color-neutral-100);
 }
 
-.sif--focus,
-.sif--typing
- {
-  border-color: var(--color-primary-700);
-  box-shadow: 0 0 0 2px rgba(29, 122, 252, 0.1);
+.si--focus,
+.si--typing,
+.si--filled{
+  border-color: var(--color-primary-200);
+  box-shadow: 0 0 0 1px var(--color-primary-300);
   background: var(--color-neutral-white);
 }
 
-.sif--filled {
-  border-color: var(--color-neutral-500);
-}
-
-/* DISABLED */
-.sif--disabled {
+.sif--disabled{
   background: var(--color-neutral-150);
   border: none;
 }
 
-.sif--disabled .si-input {
+.sif--disabled .sif-input{
   color: var(--color-neutral-500);
   cursor: not-allowed;
 }
 
-.sif--disabled .si-input::placeholder {
+.sif--disabled .si-input::placeholder{
   color: var(--color-neutral-300);
-}
-
-.sif--disabled .si-clear {
-  display: none;
 }

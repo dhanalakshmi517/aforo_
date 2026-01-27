@@ -1,0 +1,59 @@
+@import "../Variables/Variables.css";
+.afInfoBox {
+  box-sizing: border-box;
+  width: 489px;            /* matches Figma */
+  padding: 16px;
+  border-radius: 12px;
+border: 1px solid  #EEF4FB;
+background: var(--color-neutral-white);
+
+/* uniform-shadow (5) */
+box-shadow: 0 0 8px 2px var(--shadow-shadow-1, #EEF1F6);
+  font-family: var(--font-family-primary);
+}
+
+.afInfoBoxTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.afInfoBoxTitle {
+color: #026BB0;
+
+/* body/md/bold */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-md, 14px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-md, 20px); /* 142.857% */
+}
+
+.afInfoBoxClose {
+  border: none;
+  background: transparent;
+  padding: 6px;
+  margin: -6px;            /* keeps hit area but aligns like Figma */
+  border-radius: 10px;
+  cursor: pointer;
+  color: rgba(11, 15, 26, 0.60);
+}
+
+
+.afInfoBoxMsg {
+  margin-top: 6px;
+color: #000;
+
+/* body/sm/thin */
+font-family: var(--font-family-primary, "IBM Plex Sans");
+font-size: var(--font-size-sm, 12px);
+font-style: normal;
+font-weight: 300;
+line-height: var(--line-height-body-sm, 18px); /* 150% */
+}
+
+/* Checkbox row */
+.afInfoBoxCheck {
+  margin-top: 12px;
+}

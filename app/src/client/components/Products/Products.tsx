@@ -797,29 +797,23 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
               {p.iconData ? (
                 <TableProductIcon iconData={p.iconData} />
               ) : p.iconUrl ? (
-                <div
-                  className="product-avatar product-avatar--image"
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    src={p.iconUrl}
-                    alt={`${p.productName} icon`}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                    onError={(e) => {
-                      const wrapper = e.currentTarget.parentElement as HTMLElement;
-                      if (wrapper) wrapper.classList.remove("product-avatar--image");
-                      e.currentTarget.remove();
-                    }}
-                  />
-                </div>
+                <ProductIconTile
+                  icon={
+                    <img
+                      src={p.iconUrl}
+                      alt={`${p.productName} icon`}
+                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                      onError={(e) => {
+                        e.currentTarget.remove();
+                      }}
+                    />
+                  }
+                  accent={["#D06CE0", "#2A559C", "#CC9434", "#0F6DDA", "#6B5B95"][parseInt(p.productId) % 5]}
+                  iconColor="#FFFFFF"
+                  size={48}
+                  padding={6}
+                  bgOpacity={0.08}
+                />
               ) : (
                 <ProductIconTile
                   icon={
