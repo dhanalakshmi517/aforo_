@@ -117,12 +117,13 @@ width: calc(100% - 256px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 8px 4px;
+  padding: 8px 8px;
 }
 
 /* Specific styling for date column to prevent wrapping */
 .check-container .dt-cell:has([data-date]) {
   white-space: nowrap;
+  padding: 8px 8px;
   padding: 8px 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -217,15 +218,21 @@ width: calc(100% - 256px);
   align-items: center !important;
   justify-content: flex-start !important;
   gap: 6px !important;
-  padding: 4px 4px !important;
+  padding: 8px 8px !important;
   height: 28px !important;
   vertical-align: middle !important;
+}
+
+/* Company Name column header specific alignment (1st column) */
+.check-container .dt-header-cell:nth-child(1) {
+  justify-content: flex-start !important;
+  padding: 8px 8px 8px 16px !important;
 }
 
 /* Customer column header specific alignment (2nd column) */
 .check-container .dt-header-cell:nth-child(2) {
   justify-content: flex-start !important;
-  padding: 8px 4px !important;
+  padding: 8px 8px !important;
 }
 
 /* DataTable header cell styling */
