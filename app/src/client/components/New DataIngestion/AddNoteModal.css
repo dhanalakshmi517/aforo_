@@ -1,4 +1,5 @@
 /* ===== Overlay / Blur ===== */
+@import "../Variables/Variables.css";
 .afNoteOverlay {
   position: fixed;
   inset: 0;
@@ -20,14 +21,12 @@
   z-index: 1;
 
   width: 720px;               /* matches your screenshot scale */
-  max-width: calc(100vw - 48px);
+  max-width: calc(100vw - 50px);
   height: 420px;
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 90px);
 
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid rgba(11, 15, 26, 0.10);
-  box-shadow: 0 24px 60px rgba(11, 15, 26, 0.18);
+  background:var(--color-neutral-white);
+  border-radius: 20px;
 
   /* Figma spacing: top 16, sides 20, bottom 20 */
   padding: 16px 20px 20px 20px;
@@ -45,11 +44,14 @@
 }
 
 .afNoteTitle {
-  font-size: 16px;
-  line-height: 20px;
-  font-weight: 700;
-  color: rgba(11, 15, 26, 0.45); /* light grey like screenshot */
-  letter-spacing: -0.15px;
+ color: var(--color-neutral-600);
+
+/* body/lg/bold */
+font-family: var(--font-family-primary);
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 700;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
 }
 
 .afNoteClose {
@@ -62,18 +64,18 @@
   color: rgba(11, 15, 26, 0.60);
 }
 
-.afNoteClose:hover {
-  background: rgba(11, 15, 26, 0.06);
-  color: rgba(11, 15, 26, 0.80);
-}
 
 /* filename */
 .afNoteFileName {
   margin-top: 6px;            /* like screenshot */
-  font-size: 18px;
-  line-height: 22px;
-  font-weight: 800;
-  color: rgba(11, 15, 26, 0.92);
+color: var(--color-neutral-1400);
+
+/* body/lg/med */
+font-family: var(--type-font-family-primary, "SF Pro");
+font-size: var(--font-size-lg, 16px);
+font-style: normal;
+font-weight: 510;
+line-height: var(--line-height-body-lg, 24px); /* 150% */
 }
 
 /* Figma gap: 12 between filename and textarea */
@@ -85,22 +87,18 @@
   resize: none;
 
   border-radius: 10px;
-  border: 1px solid rgba(217, 223, 232, 0.75);
-  background: #f9fbff;
+  border: 1px solid var(--color-neutral-200);
+  background: var(--color-primary-100);
 
-  padding: 14px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 500;
-  color: rgba(11, 15, 26, 0.86);
+  padding: 8px 12px;
+  font-size: var(--font-size-md, 14px);
+  line-height: var(--line-height-body-md, 20px); /* 142.857% */
+  font-weight: 400;
+  color: var(--color-neutral-1700);
   outline: none;
   box-sizing: border-box;
 }
 
-.afNoteTextarea:focus {
-  border-color: rgba(11, 94, 215, 0.45);
-  box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.14);
-}
 
 /* footer: bottom padding already in modal (20) */
 .afNoteFooter {
@@ -110,6 +108,9 @@
   align-items: center;
   gap: 12px;
 }
+
+.af-NoteBtnPrimary
+{height:30px!important;}
 
 /* buttons */
 .afNoteBtn {

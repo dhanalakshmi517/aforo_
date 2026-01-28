@@ -26,8 +26,6 @@ import {
   finalizeProduct,
   deleteProduct,
   ProductPayload,
-  listAllProducts,
-  getProducts,
 } from "../api";
 
 import "./NewProduct.css";
@@ -128,57 +126,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   const configRef = React.useRef<any>(null);
 
-  // existing products for uniqueness check
-  const [existingProducts, setExistingProducts] = useState<Array<{ productName: string; skuCode: string }>>([]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        let data: any[] = [];
-        try {
-          data = await listAllProducts();
-        } catch {
-          try {
-            data = await getProducts();
-          } catch {
-            data = [];
-          }
-        }
-        const mapped = data.map((p) => ({
-          productName: p.productName,
-          skuCode: (((p as any).internalSkuCode ?? (p as any).skuCode ?? "") as string) || "",
-        }));
-        setExistingProducts(mapped);
-      } catch (e) {
-        console.error("Failed to fetch existing products", e);
-      }
-    })();
-  }, []);
-
-  const refreshExistingProducts = async () => {
-    try {
-      let data: any[] = [];
-      try {
-        data = await listAllProducts();
-      } catch {
-        try {
-          data = await getProducts();
-        } catch {
-          data = [];
-        }
-      }
-      const mapped = data.map((p) => ({
-        productName: p.productName,
-        skuCode: (((p as any).internalSkuCode ?? (p as any).skuCode ?? "") as string) || "",
-      }));
-      setExistingProducts(mapped);
-      return mapped;
-    } catch (e) {
-      console.error("Failed to refresh existing products", e);
-      return existingProducts;
-    }
-  };
-
   // Load icon from draft/cache
   useEffect(() => {
     let iconLoaded = false;
@@ -269,7 +216,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     return fields.every((field: any) => {
       if (!field.required) return true;
       const value = configuration[field.label];
-      return value && String(value).trim() !== '';
+      return value && String(value).trim() !== "";
     });
   }, [configuration]);
 
@@ -277,12 +224,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const hasAnyRequiredInput = React.useMemo(() => {
     return Boolean(
       formData.productName.trim() ||
-      formData.version.trim() ||
-      formData.description.trim() ||
-      selectedIcon
+        formData.version.trim() ||
+        formData.description.trim() ||
+        selectedIcon
     );
   }, [formData.productName, formData.version, formData.description, selectedIcon]);
-
 
   const hasUnsavedChanges = React.useMemo(() => {
     if (!lastSavedData) return hasAnyRequiredInput;
@@ -293,10 +239,10 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       lastSavedData.description !== formData.description;
 
     const iconChanged =
-      (lastSavedIcon?.id !== selectedIcon?.id) ||
-      (lastSavedIcon?.svgPath !== selectedIcon?.svgPath) ||
-      (JSON.stringify(lastSavedIcon?.outerBg) !== JSON.stringify(selectedIcon?.outerBg)) ||
-      (lastSavedIcon?.tileColor !== selectedIcon?.tileColor);
+      lastSavedIcon?.id !== selectedIcon?.id ||
+      lastSavedIcon?.svgPath !== selectedIcon?.svgPath ||
+      JSON.stringify(lastSavedIcon?.outerBg) !== JSON.stringify(selectedIcon?.outerBg) ||
+      lastSavedIcon?.tileColor !== selectedIcon?.tileColor;
 
     return formChanged || iconChanged;
   }, [formData, selectedIcon, lastSavedData, lastSavedIcon, hasAnyRequiredInput]);
@@ -335,10 +281,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     </span>
   );
 
-  const lower = (s: string) => s.trim().toLowerCase();
-
   const handleFieldChange = (field: keyof typeof formData) => (v: string) => {
-    const trimmed = v.trim();
     setFormData((p) => ({ ...p, [field]: v }));
 
     if (field === "productName") {
@@ -430,12 +373,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       else if (error?.response?.data?.error) errorMessage = error.response.data.error;
       else if (error instanceof Error) errorMessage = error.message;
 
-      // Check if the error is about product name already existing
-      if (errorMessage.toLowerCase().includes("product") && errorMessage.toLowerCase().includes("already exist")) {
-        setErrors((prev) => ({ ...prev, productName: errorMessage }));
-      } else {
-        setErrors((prev) => ({ ...prev, form: errorMessage }));
-      }
+      // ✅ removed "product already exists" special-case validation
+      setErrors((prev) => ({ ...prev, form: errorMessage }));
       return false;
     } finally {
       setIsSaving(false);
@@ -631,7 +570,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                   // Only mark as completed if user has moved past it AND all required fields are filled
                   const isStep0Completed = formData.productName.trim();
                   const isStep1Completed = isConfigurationComplete;
-                  const isCompleted = i < currentStep && (i === 0 ? isStep0Completed : i === 1 ? isStep1Completed : true);
+                  const isCompleted =
+                    i < currentStep && (i === 0 ? isStep0Completed : i === 1 ? isStep1Completed : true);
                   const showConnector = i < steps.length - 1;
 
                   const isReview = i === 2;
@@ -656,11 +596,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                       }}
                       disabled={isDisabled || modalLock}
                       title={
-                        modalLock
-                          ? "Close the icon picker first"
-                          : isDisabled
-                            ? "Please complete configuration first"
-                            : ""
+                        modalLock ? "Close the icon picker first" : isDisabled ? "Please complete configuration first" : ""
                       }
                     >
                       <span className="prod-np-step__bullet" aria-hidden="true">
@@ -671,22 +607,36 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
                               <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                          ) : (i === 0 && !isCompleted) || (isActive && !isConfigurationLocked) || (i === 1 && !isConfigurationLocked && !isActive) ? (
+                          ) : (i === 0 && !isCompleted) ||
+                            (isActive && !isConfigurationLocked) ||
+                            (i === 1 && !isConfigurationLocked && !isActive) ? (
                             // Active step (unlocked), General Details, or unlocked Configuration (not active) - show dot
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                               <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
                               <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
                             </svg>
-                          ) : (i === 1 && isConfigurationLocked && isActive) ? (
+                          ) : i === 1 && isConfigurationLocked && isActive ? (
                             // Configuration is locked AND active - show BLUE-FILLED lock icon
                             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
                               <circle cx="13" cy="13" r="13" fill="var(--color-primary-800)" />
-                              <path d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path
+                                d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
+                                stroke="#FFFFFF"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                           ) : (
                             // Locked step (not active) - show GRAY lock icon
                             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
-                              <path d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z" stroke="#BAC4D5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path
+                                d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
+                                stroke="#BAC4D5"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                           )}
                         </span>
@@ -709,9 +659,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
               <div className="prod-np-main__inner">
                 <div className="prod-np-body">
-                  {activeTab === "general" && (
-                    <SectionHeader title="GENERAL DETAILS" className="prod-np-section-header-fixed" />
-                  )}
+                  {activeTab === "general" && <SectionHeader title="GENERAL DETAILS" className="prod-np-section-header-fixed" />}
 
                   {activeTab === "configuration" && (
                     <div className="prod-np-section-header-fixed" style={{ display: "flex", alignItems: "center" }}>
@@ -720,9 +668,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                     </div>
                   )}
 
-                  {activeTab === "review" && (
-                    <SectionHeader title="REVIEW & CONFIRM" className="prod-np-section-header-fixed" />
-                  )}
+                  {activeTab === "review" && <SectionHeader title="REVIEW & CONFIRM" className="prod-np-section-header-fixed" />}
 
                   <form className="prod-np-form" onSubmit={(e) => e.preventDefault()}>
                     <div className="prod-np-form-section">
@@ -745,6 +691,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               onChange={handleFieldChange("version")}
                               placeholder="eg., 2.3-VOS"
                             />
+
                             {/* Product Icon Field - Add */}
                             {!selectedIcon && (
                               <div className="prod-np-form-group">
@@ -754,16 +701,20 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
                                       <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA" />
                                       <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05" />
-                                      <path d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z" stroke="#909599" strokeWidth="2.1" />
-                                      <path d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z" stroke="#909599" strokeWidth="2.1" />
+                                      <path
+                                        d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z"
+                                        stroke="#909599"
+                                        strokeWidth="2.1"
+                                      />
+                                      <path
+                                        d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z"
+                                        stroke="#909599"
+                                        strokeWidth="2.1"
+                                      />
                                     </svg>
                                   </div>
                                   <span className="prod-np-icon-placeholder-text">Add product icon</span>
-                                  <button
-                                    type="button"
-                                    className="prod-np-icon-add-btn"
-                                    onClick={() => setIsIconPickerOpen(true)}
-                                  >
+                                  <button type="button" className="prod-np-icon-add-btn" onClick={() => setIsIconPickerOpen(true)}>
                                     <span>+ Add</span>
                                   </button>
                                 </div>
@@ -771,121 +722,110 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                             )}
 
                             {/* Product Icon Field - Selected */}
-                            {selectedIcon && (() => {
-                              // Helper function to extract color from CSS var() or return as-is
-                              const extractDisplayColor = (colorStr: string): string => {
-                                if (!colorStr) {
-                                  console.log('⚠️ extractDisplayColor: Empty color string, using default #CC9434');
-                                  return '#CC9434';
-                                }
-                                console.log('🔍 extractDisplayColor input:', colorStr);
-                                const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
-                                const result = match ? match[1].trim() : colorStr;
-                                console.log('🔍 extractDisplayColor result:', result);
-                                return result;
-                              };
+                            {selectedIcon &&
+                              (() => {
+                                // Helper function to extract color from CSS var() or return as-is
+                                const extractDisplayColor = (colorStr: string): string => {
+                                  if (!colorStr) return "#CC9434";
+                                  const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+                                  return match ? match[1].trim() : colorStr;
+                                };
 
-                              const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || '#F8F7FA');
-                              const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || '#E4EEF9');
-                              const tileColor = extractDisplayColor(selectedIcon.tileColor || '#CC9434');
+                                const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || "#F8F7FA");
+                                const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || "#E4EEF9");
+                                const tileColor = extractDisplayColor(selectedIcon.tileColor || "#CC9434");
 
-                              console.log('🎨 Display colors - outerBg1:', outerBg1, 'outerBg2:', outerBg2, 'tileColor:', tileColor);
-
-                              return (
-                                <div className="prod-np-form-group">
-                                  <label className="if-label">Product Icon</label>
-                                  <div className="prod-np-icon-field-wrapper">
-                                    <div className="prod-np-icon-preview">
-                                      <div
-                                        style={{
-                                          width: 50.6537,
-                                          height: 46.3351,
-                                          borderRadius: 12,
-                                          border: '0.6px solid var(--border-border-2, #D5D4DF)',
-                                          background: `
-                                          linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-                                          linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
-                                          radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
-                                        `,
-                                          display: 'flex',
-                                          padding: 8,
-                                          justifyContent: 'center',
-                                          alignItems: 'center',
-                                          position: 'relative',
-                                          overflow: 'hidden',
-                                        }}
-                                      >
+                                return (
+                                  <div className="prod-np-form-group">
+                                    <label className="if-label">Product Icon</label>
+                                    <div className="prod-np-icon-field-wrapper">
+                                      <div className="prod-np-icon-preview">
                                         <div
                                           style={{
-                                            position: 'absolute',
-                                            left: 10.5,
-                                            top: 8.2,
-                                            width: 29.45,
-                                            height: 25.243,
-                                            borderRadius: 5.7,
-                                            background: tileColor,
-                                          }}
-                                        />
-                                        <div
-                                          style={{
-                                            width: 29.339,
-                                            height: 26.571,
-                                            padding: '1.661px 3.321px',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            gap: 2.214,
-                                            flexShrink: 0,
-                                            borderRadius: 6,
-                                            border: '0.6px solid #FFF',
-                                            background: 'rgba(202, 171, 213, 0.10)',
-                                            backdropFilter: 'blur(3.875px)',
-                                            transform: 'translate(3px, 2px)',
-                                            boxShadow: 'inset 0 1px 8px rgba(255,255,255,0.35)',
+                                            width: 50.6537,
+                                            height: 46.3351,
+                                            borderRadius: 12,
+                                            border: "0.6px solid var(--border-border-2, #D5D4DF)",
+                                            background: `
+                                              linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
+                                              linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
+                                              radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
+                                            `,
+                                            display: "flex",
+                                            padding: 8,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            position: "relative",
+                                            overflow: "hidden",
                                           }}
                                         >
-                                          <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="18"
-                                            height="18"
-                                            viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
-                                            fill="none"
-                                            style={{ flexShrink: 0, aspectRatio: '1 / 1', display: 'block' }}
+                                          <div
+                                            style={{
+                                              position: "absolute",
+                                              left: 10.5,
+                                              top: 8.2,
+                                              width: 29.45,
+                                              height: 25.243,
+                                              borderRadius: 5.7,
+                                              background: tileColor,
+                                            }}
+                                          />
+                                          <div
+                                            style={{
+                                              width: 29.339,
+                                              height: 26.571,
+                                              padding: "1.661px 3.321px",
+                                              display: "flex",
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              gap: 2.214,
+                                              flexShrink: 0,
+                                              borderRadius: 6,
+                                              border: "0.6px solid #FFF",
+                                              background: "rgba(202, 171, 213, 0.10)",
+                                              backdropFilter: "blur(3.875px)",
+                                              transform: "translate(3px, 2px)",
+                                              boxShadow: "inset 0 1px 8px rgba(255,255,255,0.35)",
+                                            }}
                                           >
-                                            <path d={selectedIcon.svgPath} fill="#FFFFFF" />
-                                          </svg>
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="18"
+                                              height="18"
+                                              viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
+                                              fill="none"
+                                              style={{ flexShrink: 0, aspectRatio: "1 / 1", display: "block" }}
+                                            >
+                                              <path d={selectedIcon.svgPath} fill="#FFFFFF" />
+                                            </svg>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                    <div className="prod-np-icon-actions">
-                                      <EditButton
-                                        onClick={() => setIsIconPickerOpen(true)}
-                                        label="Edit"
-                                      />
-                                      <DeleteButton
-                                        onClick={() => {
-                                          setSelectedIcon(null);
-                                          // Clear cache immediately to prevent icon from reappearing
-                                          if (createdProductId || activeDraft?.productId) {
-                                            const productId = createdProductId || activeDraft?.productId;
-                                            try {
-                                              const iconCache = JSON.parse(localStorage.getItem("iconDataCache") || "{}");
-                                              delete iconCache[productId];
-                                              localStorage.setItem("iconDataCache", JSON.stringify(iconCache));
-                                              console.log('🗑️ Cleared icon cache for product', productId);
-                                            } catch (e) {
-                                              console.warn('Failed to clear icon cache:', e);
+                                      <div className="prod-np-icon-actions">
+                                        <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
+                                        <DeleteButton
+                                          onClick={() => {
+                                            setSelectedIcon(null);
+                                            // Clear cache immediately to prevent icon from reappearing
+                                            if (createdProductId || activeDraft?.productId) {
+                                              const productId = createdProductId || activeDraft?.productId;
+                                              try {
+                                                const iconCache = JSON.parse(localStorage.getItem("iconDataCache") || "{}");
+                                                delete iconCache[productId as any];
+                                                localStorage.setItem("iconDataCache", JSON.stringify(iconCache));
+                                              } catch {
+                                                /* ignore */
+                                              }
                                             }
-                                          }
-                                        }}
-                                        label="Remove"
-                                        variant="soft"
-                                      />
+                                          }}
+                                          label="Remove"
+                                          variant="soft"
+                                        />
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            })()}
+                                );
+                              })()}
 
                             <div style={{ gridColumn: "1 / -1" }}>
                               <TextareaField
@@ -936,8 +876,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
                               ref={configRef}
                               productId={createdProductId || undefined}
                               initialProductType={configuration.productType}
-                              onConfigChange={() => { }}
-                              onProductTypeChange={() => { }}
+                              onConfigChange={() => {}}
+                              onProductTypeChange={() => {}}
                               isSavingDraft={false}
                               readOnly={true}
                               locked={false}

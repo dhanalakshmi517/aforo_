@@ -7,7 +7,7 @@
  min-width: 134px;
     width: auto;    padding: 8px 20px;
   border: none; /* Blue border */
-  background-color:var(--color-neutral-white);
+  background-color:#F5F9FF;
 
   border-radius: var(--border-radius-sm);
   color: var(--color-primary-800);

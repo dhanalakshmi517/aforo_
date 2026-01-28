@@ -1,6 +1,9 @@
 import * as React from "react";
 import "./AddNoteModal.css";
 
+import SecondaryButton from "../componenetsss/SecondaryButton";
+import PrimaryButton from "../componenetsss/PrimaryButton";
+
 type Props = {
   open: boolean;
   fileName: string;
@@ -72,23 +75,24 @@ export default function AddNoteModal({
         />
 
         <div className="afNoteFooter">
-          <button
+          <SecondaryButton
             type="button"
-            className="afNoteBtn afNoteBtnSecondary"
             onClick={onApplyToAllFiles}
             disabled={isApplyDisabled}
+                        className="af-NoteBtnPrimary"
+
           >
             Apply Note to All Files
-          </button>
+          </SecondaryButton>
 
-          <button
+          <PrimaryButton
             type="button"
-            className="afNoteBtn afNoteBtnPrimary"
+            className="af-NoteBtnPrimary"
             onClick={onAddNote}
             disabled={isAddDisabled}
           >
             Add Note
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </div>
