@@ -14,7 +14,7 @@ export type Product = {
 };
 
 // Use the remote backend for all environments (dev + prod) to avoid localhost:3001
-export const BASE_URL = 'http://3.208.93.68:8080/api';
+export const BASE_URL = 'http://product.dev.aforo.space:8080/api';
 // Billable metrics service runs on a different port
 export const BILLABLE_METRICS_BASE_URL = 'http://54.146.189.144:8081/api';
 // Useful if you ever need to build absolute URLs without doubling "/api"

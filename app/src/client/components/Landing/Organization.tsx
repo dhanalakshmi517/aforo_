@@ -630,19 +630,23 @@ const Organization: React.FC = () => {
                         const input = e.target.value;
                         const dialCode = selected.dialCode;
 
-                        // If input is empty, just set the dial code with space
+                        // If input is empty, clear the phone number completely
                         if (input === '') {
-                          setPhoneNumber(dialCode + ' ');
+                          setPhoneNumber('');
+                          if (errors.phone) {
+                            setErrors(prev => ({
+                              ...prev,
+                              phone: undefined
+                            }));
+                          }
                           return;
                         }
 
                         // Remove all non-digits from user input
                         const userNumber = input.replace(/\D/g, '');
 
-                        // Only add the dial code if it's not already there
-                        const newPhoneNumber = phoneNumber.startsWith(dialCode)
-                          ? dialCode + (userNumber ? ' ' + userNumber : '')
-                          : userNumber;
+                        // Build the new phone number with dial code
+                        const newPhoneNumber = userNumber ? dialCode + ' ' + userNumber : '';
 
                         setPhoneNumber(newPhoneNumber);
 
@@ -656,14 +660,20 @@ const Organization: React.FC = () => {
                       }}
                       onKeyDown={(e) => {
                         /*
-                          Protect the dial code displayed to the left of the input (rendered in a separate
-                          element) by preventing Backspace when the caret is at the very start (index 0).
-                          The input value itself does NOT include the dial code, so we should not compare
-                          against dialCode length here—doing so was blocking deletion of the first few
-                          user-typed digits.  
+                          Allow Delete key to clear the field when all text is selected.
+                          Only prevent Backspace at the very start to protect the dial code display.
                         */
-                        const selectionStart = (e.target as HTMLInputElement).selectionStart ?? 0;
-                        if (e.key === 'Backspace' && selectionStart === 0) {
+                        const input = e.target as HTMLInputElement;
+                        const selectionStart = input.selectionStart ?? 0;
+                        const selectionEnd = input.selectionEnd ?? 0;
+                        
+                        // If all text is selected and Delete is pressed, allow it
+                        if (e.key === 'Delete' && selectionStart === 0 && selectionEnd === input.value.length) {
+                          return;
+                        }
+                        
+                        // Prevent Backspace only when caret is at the very start with no selection
+                        if (e.key === 'Backspace' && selectionStart === 0 && selectionStart === selectionEnd) {
                           e.preventDefault();
                         }
                       }}
