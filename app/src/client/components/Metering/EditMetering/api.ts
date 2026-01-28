@@ -28,7 +28,7 @@ export interface BillableMetricDetails {
 // Allow override via Vite env (keeps consistent with other API helpers)
 // Use same default as other metering APIs
 const METRICS_BASE_URL = (import.meta as any).env?.VITE_METRICS_API_URL ||
-  'http://metering.dev.aforo.space:8092/api';
+  'http://usage.dev.aforo.space:8081/api';
 const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://product.dev.aforo.space:8080/api';
 
 export async function getBillableMetricById(

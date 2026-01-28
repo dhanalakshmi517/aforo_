@@ -424,7 +424,8 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     // forward navigation guards - validate when moving to next step
     if (index > currentStep) {
       // When navigating to Configuration or Review, ensure product exists if required fields are filled
-      if (index >= 1 && !effectiveProductId && formData.productName.trim()) {
+      // BUT: skip if skipValidation=true (means handleSaveAndNext already saved)
+      if (index >= 1 && !effectiveProductId && formData.productName.trim() && !skipValidation) {
         // Product Name is filled but product not created yet - create it
         const newProductId = await saveProduct(true);
         if (!newProductId) return;

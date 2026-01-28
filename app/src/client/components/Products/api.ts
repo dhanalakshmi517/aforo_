@@ -271,14 +271,15 @@ export const createProduct = async (
         const errorDetails = responseData.details || responseData.error || '';
         const isNameExistsError = errorDetails.toLowerCase().includes('productname already exists');
 
-        // If we got a productId back, the product was actually created
+        // If we got a productId back, the product was actually created successfully
         if (responseData.productId || responseData.id) {
           if (isNameExistsError) {
-            console.warn('⚠️ Backend says "productName already exists" but returned product data. This might be the same product being updated.');
+            console.warn('⚠️ Backend says "productName already exists" but returned product data. Product was created/updated successfully.');
           } else {
             console.warn('⚠️ Backend returned 500 but product was created. Using response data.');
           }
 
+          // Return the product data - the creation was successful
           return {
             productId: (responseData.productId || responseData.id).toString(),
             productName: responseData.productName || '',
@@ -292,8 +293,9 @@ export const createProduct = async (
           } as Product;
         }
 
-        // If no productId but it's a "name exists" error, throw a clearer error
+        // If no productId but it's a "name exists" error, this is a genuine conflict
         if (isNameExistsError) {
+          console.error('❌ Product name conflict - no product data returned');
           throw new Error('A product with this name already exists. Please use a different name.');
         }
       }
