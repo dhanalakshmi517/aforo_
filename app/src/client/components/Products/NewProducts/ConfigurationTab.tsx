@@ -39,7 +39,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
     {
       label: 'Auth Type',
       type: 'select',
-      required: false,
+      required: true,
       placeholder: 'Auth Type',
       options: [
         { label: 'None', value: 'NONE' },
@@ -91,7 +91,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'Auth Type',
       type: 'select',
       placeholder: 'Auth Type',
-      required: false,
+      required: true,
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },
@@ -107,7 +107,7 @@ export const configurationFields: Record<string, FieldProps[]> = {
       label: 'Auth Type',
       type: 'select',
       placeholder: 'Auth Type',
-      required: false,
+      required: true,
       options: [
         { label: 'None', value: 'NONE' },
         { label: 'API Key', value: 'API_KEY' },

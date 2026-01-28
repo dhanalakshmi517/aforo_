@@ -222,17 +222,6 @@
   line-height: 1.2;
 }
 
-/* --------- Rate Plan column ---------- */
-.subscriptions-table td:nth-child(3) {
-  padding: 18px 16px 18px 0;
-  overflow: visible;
-}
-
-/* --------- Rate Plan column ---------- */
-.subscriptions-table td:nth-child(1) {
-  padding: 18px 16px 18px 0;
-  overflow: visible;
-}
 
 /* --------- Status column ---------- */
 .subscriptions-table td:nth-child(5) {

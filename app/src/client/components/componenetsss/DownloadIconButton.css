@@ -1,0 +1,45 @@
+@import "../Variables/Variables.css";
+
+/* Base 28×28 rounded square */
+.af-download-icon {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  color: #1D7AFC;
+  border: 0;
+  border-radius: 8px;
+  background: #F5F9FF;
+  cursor: pointer;
+}
+
+.af-download-icon svg {
+  display: block;
+}
+
+/* States */
+.af-download-icon:hover:not(.is-disabled) {
+  background: #F2F7FD;
+}
+
+.af-download-icon:active:not(.is-disabled) {
+  background: #EEF4FB;
+}
+
+.af-download-icon:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, .85),
+    0 0 0 5px var(--af-blue-ring);
+}
+
+/* Disabled */
+.af-download-icon.is-disabled,
+.af-download-icon:disabled {
+  background: #F5F9FF;
+  cursor: not-allowed;
+}
