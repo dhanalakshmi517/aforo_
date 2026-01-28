@@ -1,7 +1,7 @@
 import type { Customer } from "./Customers";
 import { getAuthHeaders, getAuthHeadersJSON, isAuthenticated, logout } from "../../utils/auth";
 
-const BASE_URL = "http://44.201.19.187:8081/v1/api";
+const BASE_URL = "http://org.dev.aforo.space:8081/v1/api";
 
 /**
  * Handle API response errors and authentication
@@ -65,9 +65,9 @@ export async function updateCustomer(customerId: number | string, payload: Recor
   console.log('updateCustomer payload type:', typeof payload);
   console.log('updateCustomer payload instanceof FormData:', isFormData);
   console.log('updateCustomer payload:', payload);
-  
+
   let sanitized: FormData | Record<string, unknown>;
-  
+
   if (isFormData) {
     // For FormData, use as-is
     sanitized = payload;
@@ -78,7 +78,7 @@ export async function updateCustomer(customerId: number | string, payload: Recor
         ([, v]) => v !== '' && v !== null && v !== undefined,
       ),
     ) as Record<string, unknown>;
-    
+
     // Apply customerCountry/phoneNumber logic only for JSON payloads
     if (!(sanitized as any).customerCountry) {
       delete (sanitized as Record<string, unknown>).phoneNumber;

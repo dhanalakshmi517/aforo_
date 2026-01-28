@@ -9,8 +9,10 @@
 }
 
 /* Ensure full page height */
-html, body, #root{ 
-  height: 100%; 
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
   padding: 0;
 }
@@ -27,20 +29,26 @@ html, body, #root{
   --np-gap-top: 10px;
   --np-gap-bottom: 15px;
 
- 
+
 }
+
 /* Ensure full page height */
 
 /* Spacing between custom met-np-field groups */
-.met-np-grid-2 .if-field{margin-bottom:8px;}
-.met-np-grid-2 .if-field:last-child{margin-bottom:0;}
+.met-np-grid-2 .if-field {
+  margin-bottom: 8px;
+}
+
+.met-np-grid-2 .if-field:last-child {
+  margin-bottom: 0;
+}
 
 /* Form group styling */
 .met-np-grid-2 .form-group {
   margin-bottom: 8px;
   position: relative;
   width: 100%;
-    margin-top: 10px;
+  margin-top: 10px;
 
 }
 
@@ -102,14 +110,17 @@ html, body, #root{
 }
 
 /* Ensure full page height */
-html, body, #root{ 
-  height: 100%; 
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
   padding: 0;
-  overflow: visible; 
+  overflow: visible;
 }
-.create-product-page { 
-  min-height: 100vh; 
+
+.create-product-page {
+  min-height: 100vh;
   background: #f7f8fb;
   overflow-y: hidden;
   /* padding-bottom: 40px;  */
@@ -131,12 +142,15 @@ html, body, #root{
 
 /* Card */
 .prod-np-card {
-  margin-bottom: 40px;          /* gap beneath card */
-  padding-bottom: 32px; /* space below footer */
+  margin-bottom: 40px;
+  /* gap beneath card */
+  padding-bottom: 32px;
+  /* space below footer */
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02);
+  ;
   width: 100%;
   position: relative;
   border-radius: var(--border-radius-lg);
@@ -147,7 +161,7 @@ html, body, #root{
 }
 
 /* Grid fills height */
-.prod-np-grid{
+.prod-np-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
   flex: 1;
@@ -155,13 +169,13 @@ html, body, #root{
 }
 
 /* Add margin above the product name field */
-.prod-np-grid > div:first-child {
+.prod-np-grid>div:first-child {
   margin-top: 20px;
 }
 
 
 /* ===== Rail with vertical connector line ===== */
-.prod-np-rail{
+.prod-np-rail {
   background: var(--color-neutral-100);
   height: auto;
   align-self: stretch;
@@ -170,7 +184,7 @@ html, body, #root{
   border-right: 1px solid var(--color-neutral-300);
   display: flex;
   flex-direction: column;
-  height:100vh;
+  height: 100vh;
 }
 
 /* Steps container */
@@ -186,7 +200,8 @@ html, body, #root{
 .prod-np-steps {
   display: flex;
   flex-direction: column;
-  gap: 0; /* Remove gap between steps */
+  gap: 0;
+  /* Remove gap between steps */
   padding: 8px 8px 8px 0;
   background-color: #f8f9fb;
   position: relative;
@@ -203,7 +218,8 @@ html, body, #root{
   width: 100%;
   text-align: left;
   position: relative;
-  min-height: 70px; /* Reduced height for better alignment */
+  min-height: 70px;
+  /* Reduced height for better alignment */
 }
 
 /* Bullet container */
@@ -226,39 +242,50 @@ html, body, #root{
   height: 24px;
   position: relative;
   z-index: 2;
-  background: #f8f9fb; /* Match the rail background */
+  background: #f8f9fb;
+  /* Match the rail background */
 }
 
 /* Connector line container */
 .prod-np-step__connector {
   position: absolute;
-  top: 22px; /* Start from the bottom of the circle */
+  top: 22px;
+  /* Start from the bottom of the circle */
   left: 11px;
   z-index: 1;
   width: 2px;
-  background-color: #C3C2D0; /* Match the circle stroke color */
+  background-color: #C3C2D0;
+  /* Match the circle stroke color */
   content: '';
   display: block;
 }
 
 /* Different heights for each connector */
 .prod-np-step:nth-child(1) .prod-np-step__connector {
-  height: 88px; /* Height for first connector */
+  height: 88px;
+  /* Height for first connector */
 }
 
 .prod-np-step:nth-child(2) .prod-np-step__connector {
-  height: 98px; /* Height for second connector */
+  height: 98px;
+  /* Height for second connector */
 }
 
 /* Vertical tweaks for steps after the first */
-.prod-np-step:not(:first-child) .prod-np-step__bullet { margin-top: -10px; }
-.prod-np-step:not(:first-child) .prod-np-step__text { margin-top: -10px; }
+.prod-np-step:not(:first-child) .prod-np-step__bullet {
+  margin-top: -10px;
+}
+
+.prod-np-step:not(:first-child) .prod-np-step__text {
+  margin-top: -10px;
+}
 
 /* Step container */
 .prod-np-step {
   position: relative;
   padding: 0 0 12px 0;
-  min-height: 100px; /* Increased to accommodate the tallest connector */
+  min-height: 100px;
+  /* Increased to accommodate the tallest connector */
   display: flex;
   align-items: flex-start;
 }
@@ -279,7 +306,8 @@ html, body, #root{
   flex-direction: column;
   gap: 2px;
   margin-left: 4px;
-  padding-top: 2px; /* Align text with circle */
+  padding-top: 2px;
+  /* Align text with circle */
 }
 
 .prod-np-step__connector svg {
@@ -287,28 +315,37 @@ html, body, #root{
   height: 100%;
 }
 
-.prod-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
-.prod-np-step__title{
-   color: var(--color-neutral-800);
-
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg); /* 150% */
-text-align: left;
-margin-bottom: 2px;
+.prod-np-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 4px;
 }
 
-.prod-np-step__desc{ color: var(--color-neutral-1400);
+.prod-np-step__title {
+  color: var(--color-neutral-800);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+  /* 150% */
+  text-align: left;
+  margin-bottom: 2px;
+}
+
+.prod-np-step__desc {
+  color: var(--color-neutral-1400);
 
   /* body/md/reg */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md); /* 142.857% */
+  line-height: var(--line-height-body-md);
+  /* 142.857% */
 }
 
 /* States */
@@ -316,45 +353,99 @@ margin-bottom: 2px;
    border:1px solid var(--color-neutral-300); 
    border-radius: var(--border-radius-sm);
     } */
-.prod-np-step.completed .prod-np-step__connector{ background-color: var(--color-primary-800); }
+.prod-np-step.completed .prod-np-step__connector {
+  background-color: var(--color-primary-800);
+}
 
-.prod-np-rail .prod-np-step.completed .prod-np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
-.prod-np-rail .prod-np-step.completed .prod-np-step__icon svg{ visibility:hidden; }
-.prod-np-rail .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
-.prod-np-rail .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
+.prod-np-rail .prod-np-step.completed .prod-np-step__icon {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat;
+}
 
-.prod-np-rail .prod-np-step.active .prod-np-step__connector{ background-color: #C3C2D0; }
+.prod-np-rail .prod-np-step.completed .prod-np-step__icon svg {
+  visibility: hidden;
+}
 
-.prod-np-rail .prod-np-step.active .prod-np-step__title{ color: var(--color-neutral-1700);
+.prod-np-rail .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(2) {
+  fill: var(--color-primary-800);
+}
+
+.prod-np-rail .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(1) {
+  stroke: var(--color-primary-800);
+}
+
+.prod-np-rail .prod-np-step.active .prod-np-step__connector {
+  background-color: #C3C2D0;
+}
+
+.prod-np-rail .prod-np-step.active .prod-np-step__title {
+  color: var(--color-neutral-1700);
 
   /* body/md/med */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
   font-weight: 500;
-  line-height: var(--line-height-body-lg); /* 150% */
+  line-height: var(--line-height-body-lg);
+  /* 150% */
 }
 
 /* Override active state when disabled */
-.prod-np-step.disabled .prod-np-step__icon svg circle:nth-of-type(2){ fill:#C3C2D0 !important; }
-.prod-np-step.disabled .prod-np-step__icon svg circle:nth-of-type(1){ stroke:#C3C2D0 !important; }
-.prod-np-step.disabled .prod-np-step__title{ color: var(--color-neutral-1400) !important; font-weight: 400 !important; }
-.prod-np-step.disabled.active .prod-np-step__icon svg circle:nth-of-type(2){ fill:#C3C2D0 !important; }
-.prod-np-step.disabled.active .prod-np-step__icon svg circle:nth-of-type(1){ stroke:#C3C2D0 !important; }
-.prod-np-step.disabled.active .prod-np-step__title{ color: var(--color-neutral-1400) !important; font-weight: 400 !important; }
-.prod-np-step.disabled:hover .prod-np-step__title{ color: var(--color-neutral-1400) !important; }
+.prod-np-step.disabled .prod-np-step__icon svg circle:nth-of-type(2) {
+  fill: #C3C2D0 !important;
+}
+
+.prod-np-step.disabled .prod-np-step__icon svg circle:nth-of-type(1) {
+  stroke: #C3C2D0 !important;
+}
+
+.prod-np-step.disabled .prod-np-step__title {
+  color: var(--color-neutral-1400) !important;
+  font-weight: 400 !important;
+}
+
+.prod-np-step.disabled.active .prod-np-step__icon svg circle:nth-of-type(2) {
+  fill: #C3C2D0 !important;
+}
+
+.prod-np-step.disabled.active .prod-np-step__icon svg circle:nth-of-type(1) {
+  stroke: #C3C2D0 !important;
+}
+
+.prod-np-step.disabled.active .prod-np-step__title {
+  color: var(--color-neutral-1400) !important;
+  font-weight: 400 !important;
+}
+
+.prod-np-step.disabled:hover .prod-np-step__title {
+  color: var(--color-neutral-1400) !important;
+}
 
 /* Force step circles to gray when modal is open */
-.prod-np-rail[data-modal-open="true"] .prod-np-step .prod-np-step__icon svg circle:nth-of-type(1) { stroke: #C3C2D0 !important; }
-.prod-np-rail[data-modal-open="true"] .prod-np-step .prod-np-step__icon svg circle:nth-of-type(2) { fill: #C3C2D0 !important; }
-.prod-np-rail[data-modal-open="true"] .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(1) { stroke: #C3C2D0 !important; }
-.prod-np-rail[data-modal-open="true"] .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(2) { fill: #C3C2D0 !important; }
-.prod-np-rail[data-modal-open="true"] .prod-np-step .prod-np-step__title { color: var(--color-neutral-1400) !important; font-weight: 400 !important; }
+.prod-np-rail[data-modal-open="true"] .prod-np-step .prod-np-step__icon svg circle:nth-of-type(1) {
+  stroke: #C3C2D0 !important;
+}
+
+.prod-np-rail[data-modal-open="true"] .prod-np-step .prod-np-step__icon svg circle:nth-of-type(2) {
+  fill: #C3C2D0 !important;
+}
+
+.prod-np-rail[data-modal-open="true"] .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(1) {
+  stroke: #C3C2D0 !important;
+}
+
+.prod-np-rail[data-modal-open="true"] .prod-np-step.active .prod-np-step__icon svg circle:nth-of-type(2) {
+  fill: #C3C2D0 !important;
+}
+
+.prod-np-rail[data-modal-open="true"] .prod-np-step .prod-np-step__title {
+  color: var(--color-neutral-1400) !important;
+  font-weight: 400 !important;
+}
 
 /* ===== Main area ===== */
-.prod-np-main { 
-  border-radius: var(--border-radius-sm); 
-  position: relative; 
+.prod-np-main {
+  border-radius: var(--border-radius-sm);
+  position: relative;
   background: #fff;
   display: flex;
   flex-direction: column;
@@ -380,12 +471,14 @@ margin-bottom: 2px;
   max-width: 100%;
   overflow-x: hidden;
 }
+
 .prod-np-body {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
+
 .prod-np-form {
   display: flex;
   flex-direction: column;
@@ -394,7 +487,8 @@ margin-bottom: 2px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 10px;
-  gap: 2px; /* Reduced from 4px to 2px */
+  gap: 2px;
+  /* Reduced from 4px to 2px */
   flex: 1;
   width: 100%;
   max-width: 100%;
@@ -404,11 +498,14 @@ margin-bottom: 2px;
 .prod-np-form::-webkit-scrollbar {
   width: 6px;
 }
+
 .prod-np-form::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .prod-np-form::-webkit-scrollbar-thumb {
-  background-color: #C3C2D0; /* fallback solid line */
+  background-color: #C3C2D0;
+  /* fallback solid line */
   border-radius: 2px;
 }
 
@@ -416,9 +513,11 @@ margin-bottom: 2px;
 .prod-np-form::-webkit-scrollbar-thumb:hover {
   background-color: #A9A8B5;
 }
+
 .prod-np-form::-webkit-scrollbar-thumb:active {
   background-color: #878694;
 }
+
 /* Firefox */
 .prod-np-form {
   scrollbar-width: thin;
@@ -434,50 +533,78 @@ margin-bottom: 2px;
   max-width: 100%;
   padding-bottom: 15px;
 }
+
 /* custom scrollbar */
-.prod-np-form-section::-webkit-scrollbar      { width: 6px; }
-.prod-np-form-section::-webkit-scrollbar-track{ background: transparent; }
-.prod-np-form-section::-webkit-scrollbar-thumb{
-  background-color:transparent;
-  border-radius:2px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:repeat-y;
-  background-position:center;
-  background-size:4px 49px;
+.prod-np-form-section::-webkit-scrollbar {
+  width: 6px;
 }
-.prod-np-form-section::-webkit-scrollbar-thumb:hover{ background-color:transparent; }
-.prod-np-form-section::-webkit-scrollbar-thumb:active{ background-color:transparent; }
-.prod-np-form-section{ scrollbar-width: thin; scrollbar-color:transparent transparent; }
+
+.prod-np-form-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prod-np-form-section::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-position: center;
+  background-size: 4px 49px;
+}
+
+.prod-np-form-section::-webkit-scrollbar-thumb:hover {
+  background-color: transparent;
+}
+
+.prod-np-form-section::-webkit-scrollbar-thumb:active {
+  background-color: transparent;
+}
+
+.prod-np-form-section {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
 
 /* Section title above a full-bleed faint line */
-.prod-np-section-header{
-  position:sticky;
-  top:0;
-  background:#fff;
-  z-index:5;
-  margin:4px -24px 18px -24px; /* extend full width of card (card padding is 24) */
-  padding:0 24px;   
- 
+.prod-np-section-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 5;
+  margin: 4px -24px 18px -24px;
+  /* extend full width of card (card padding is 24) */
+  padding: 0 24px;
+
 }
-.prod-np-section-title{
+
+.prod-np-section-title {
   color: var(--color-neutral-800);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h6);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-heading-h6);
-text-transform: uppercase;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-h6);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-heading-h6);
+  text-transform: uppercase;
 }
-.prod-np-section-header::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-5px;
-  height:1px;
+
+.prod-np-section-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
 }
 
 /* Adjust skeleton faint rules just for New Product main area */
-.prod-np-main .af-skel-rule--top { top: 60px; }
-.prod-np-card .af-skel-rule--bottom { bottom: 70px; left: 300px; }
+.prod-np-main .af-skel-rule--top {
+  top: 60px;
+}
+
+.prod-np-card .af-skel-rule--bottom {
+  bottom: 70px;
+  left: 300px;
+}
 
 .prod-np-form-footer .af-skel-rule {
   position: absolute;
@@ -494,13 +621,14 @@ text-transform: uppercase;
   margin: 0 -24px;
   padding: 16px 24px;
   display: flex;
-  justify-content: space-between; /* Space between back and next buttons */
+  justify-content: space-between;
+  /* Space between back and next buttons */
   align-items: center;
- margin-top: auto;
+  margin-top: auto;
   margin-bottom: 24px;
 }
 
-.prod-np-btn-group { 
+.prod-np-btn-group {
   display: flex;
   gap: 12px;
 }
@@ -516,9 +644,10 @@ text-transform: uppercase;
 }
 
 /* Ensure the next button is on the right */
-.prod-np-form-footer > .prod-np-btn-group:last-child {
+.prod-np-form-footer>.prod-np-btn-group:last-child {
   margin-left: auto;
 }
+
 /* Base Button Styles */
 /* Base button styles with no flash */
 .prod-np-btn {
@@ -551,7 +680,7 @@ text-transform: uppercase;
 }
 
 /* Primary Button */
-.prod-np-btn--primary { 
+.prod-np-btn--primary {
   background-color: var(--color-primary-700);
   color: white;
 }
@@ -570,7 +699,7 @@ text-transform: uppercase;
 }
 
 /* Ghost Button */
-.prod-np-btn--ghost { 
+.prod-np-btn--ghost {
   background-color: var(--color-primary-000);
   border: 1px solid var(--color-neutral-400);
   color: var(--color-primary-800);
@@ -594,39 +723,60 @@ text-transform: uppercase;
 }
 
 /* responsive */
-@media (max-width: 1200px){
-  :root{ --np-gap-left:72px; --np-gap-right:72px; }
+@media (max-width: 1200px) {
+  :root {
+    --np-gap-left: 72px;
+    --np-gap-right: 72px;
+  }
 }
-@media (max-width: 900px){
-  :root{ --np-gap-left:48px; --np-gap-right:48px; }
+
+@media (max-width: 900px) {
+  :root {
+    --np-gap-left: 48px;
+    --np-gap-right: 48px;
+  }
 }
+
 /* Override grid inside form sections to stack fields vertically */
 .prod-np-form .prod-np-grid {
   display: flex;
   flex-direction: column;
-  gap: 2px; /* Reduced from 4px to 2px */
+  gap: 2px;
+  /* Reduced from 4px to 2px */
 }
 
-@media (max-width: 640px){
-  :root{
-    --np-gap-top:24px; --np-gap-bottom:15px;
-    --np-gap-left:16px; --np-gap-right:16px;
-    --np-rail-w:100%;
+@media (max-width: 640px) {
+  :root {
+    --np-gap-top: 24px;
+    --np-gap-bottom: 15px;
+    --np-gap-left: 16px;
+    --np-gap-right: 16px;
+    --np-rail-w: 100%;
   }
-  .prod-np-grid{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-  .prod-np-form{ gap:2px; }
+
+  .prod-np-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .prod-np-form {
+    gap: 2px;
+  }
 }
 
 
 /* --- tuneable sizes so math stays correct --- */
-:root{
-  --np-step-icon: 24px;      /* circle size */
-  --np-steps-pl: 16px;       /* left padding on .np-steps */
-  --np-conn-w: 2px;          /* SVG line width */
+:root {
+  --np-step-icon: 24px;
+  /* circle size */
+  --np-steps-pl: 16px;
+  /* left padding on .np-steps */
+  --np-conn-w: 2px;
+  /* SVG line width */
 }
 
 /* Steps container (keep your existing look) */
-.prod-np-steps{
+.prod-np-steps {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -637,12 +787,14 @@ text-transform: uppercase;
 
 /* Remove any old line rules if present */
 .prod-np-steps::before,
-.prod-np-step:not(:last-child)::after { background: none; }
+.prod-np-step:not(:last-child)::after {
+  background: none;
+}
 
 /* Vertical line is now handled by individual step connectors in JSX */
 
 /* Step row (keep your existing styles—just ensure the icon uses the same size) */
-.prod-np-step{
+.prod-np-step {
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -663,11 +815,11 @@ text-transform: uppercase;
 
 .prod-np-form-label {
   color: var(--color-neutral-1700);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-md);
-font-style: normal;
-font-weight: 500;
-line-height: var(--line-height-body-md);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
 }
 
 .prod-np-icon-field-wrapper {
@@ -675,7 +827,7 @@ line-height: var(--line-height-body-md);
   align-items: center;
   gap: 12px;
   border: 1px solid var(--color-neutral-300);
-  width:456px;
+  width: 456px;
   border-radius: 6px;
   padding: 12px;
   cursor: pointer;
@@ -706,8 +858,8 @@ line-height: var(--line-height-body-md);
   width: auto;
   height: 30px;
   padding: 4px 16px;
-  background:var(--color-primary-000);
-color: var(--color-primary-800);
+  background: var(--color-primary-000);
+  color: var(--color-primary-800);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -785,6 +937,7 @@ color: var(--color-primary-800);
 .prod-np-icon-action-btn svg {
   flex-shrink: 0;
 }
+
 /* Hovered option */
 .select-product .if-select__option--is-focused {
   background-color: var(--color-neutral-100);
@@ -805,17 +958,28 @@ color: var(--color-primary-800);
 }
 
 /* Spacing between custom met-np-field groups */
-.met-np-field{margin-bottom:8px;display:flex;flex-direction:column;}
-.met-np-field:last-child{margin-bottom:0;}
-html, body, #root{
- 
-  height: 100%; 
+.met-np-field {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.met-np-field:last-child {
+  margin-bottom: 0;
+}
+
+html,
+body,
+#root {
+
+  height: 100%;
   margin: 0;
   padding: 0;
-  overflow: visible; 
+  overflow: visible;
 }
-.create-product-page { 
-  min-height: 100vh; 
+
+.create-product-page {
+  min-height: 100vh;
   background: #f7f8fb;
   /* padding-bottom: 40px;  */
 }
@@ -835,12 +999,15 @@ html, body, #root{
 
 /* Card */
 .met-np-card {
-  margin-bottom: 40px;          /* gap beneath card */
-  padding-bottom: 32px; /* space below footer */
+  margin-bottom: 40px;
+  /* gap beneath card */
+  padding-bottom: 32px;
+  /* space below footer */
   background: var(--color-neutral-white);
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius-sm);
-  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02); ;
+  box-shadow: 0 18px 54px 0 rgba(0, 0, 0, 0.10), 0 2.254px 43.336px 0 rgba(0, 0, 0, 0.02);
+  ;
   width: 100%;
   position: relative;
   border-radius: var(--border-radius-lg);
@@ -850,7 +1017,7 @@ html, body, #root{
 }
 
 /* Grid fills height */
-.met-np-grid{
+.met-np-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
   flex: 1;
@@ -858,7 +1025,7 @@ html, body, #root{
 }
 
 /* ===== Rail with vertical connector line ===== */
-.met-np-rail{
+.met-np-rail {
   background: var(--color-neutral-100);
   height: auto;
   align-self: stretch;
@@ -867,7 +1034,7 @@ html, body, #root{
   border-right: 1px solid var(--color-neutral-300);
   display: flex;
   flex-direction: column;
-  height:100vh;
+  height: 100vh;
 }
 
 /* Steps container */
@@ -890,7 +1057,8 @@ html, body, #root{
   width: 100%;
   text-align: left;
   position: relative;
-  min-height: 70px; /* Reduced height for better alignment */
+  min-height: 70px;
+  /* Reduced height for better alignment */
 }
 
 /* Bullet container */
@@ -913,40 +1081,51 @@ html, body, #root{
   height: 24px;
   position: relative;
   z-index: 2;
-  background: #f8f9fb; /* Match the rail background */
+  background: #f8f9fb;
+  /* Match the rail background */
 }
 
 /* Connector line container */
 .met-np-step__connector {
   position: absolute;
-  top: 22px; /* Start from the bottom of the circle */
+  top: 22px;
+  /* Start from the bottom of the circle */
   left: 11px;
   z-index: 1;
   width: 2px;
-  background-color: #C3C2D0; /* Match the circle stroke color */
+  background-color: #C3C2D0;
+  /* Match the circle stroke color */
   content: '';
   display: block;
 }
 
 /* Different heights for each connector */
 .met-np-step:nth-child(1) .met-np-step__connector {
-  height: 130px; /* Height for first connector */
+  height: 130px;
+  /* Height for first connector */
 }
 
 .met-np-step:nth-child(2) .met-np-step__connector {
-  height: 109px; /* Height for second connector */
+  height: 109px;
+  /* Height for second connector */
 }
 
 
 /* Vertical tweaks for steps after the first */
-.met-np-step:not(:first-child) .met-np-step__bullet { margin-top: -20px; }
-.met-np-step:not(:first-child) .met-np-step__text { margin-top: -20px; }
+.met-np-step:not(:first-child) .met-np-step__bullet {
+  margin-top: -20px;
+}
+
+.met-np-step:not(:first-child) .met-np-step__text {
+  margin-top: -20px;
+}
 
 /* Step container */
 .met-np-step {
   position: relative;
   padding: 0 0 12px 0;
-  min-height: 100px; /* Increased to accommodate the tallest connector */
+  min-height: 100px;
+  /* Increased to accommodate the tallest connector */
   display: flex;
   align-items: flex-start;
 }
@@ -967,7 +1146,8 @@ html, body, #root{
   flex-direction: column;
   gap: 2px;
   margin-left: 4px;
-  padding-top: 2px; /* Align text with circle */
+  padding-top: 2px;
+  /* Align text with circle */
 }
 
 .met-np-step__connector svg {
@@ -975,28 +1155,38 @@ html, body, #root{
   height: 100%;
 }
 
-.met-np-step__text{ display:flex; flex-direction:column; gap:2px; margin-left:4px; }
-.met-np-step__title{
-   color: var(--color-neutral-800);
-
-/* body/md/reg */
-font-family: var(--font-family-primary);
-font-size: var(--font-size-lg);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-body-lg); /* 150% */
-text-align: left;
-margin-bottom: 2px;
-margin-top: -2px
+.met-np-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 4px;
 }
-.met-np-step__desc{ color: var(--color-neutral-1400);
+
+.met-np-step__title {
+  color: var(--color-neutral-800);
+
+  /* body/md/reg */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-body-lg);
+  /* 150% */
+  text-align: left;
+  margin-bottom: 2px;
+  margin-top: -2px
+}
+
+.met-np-step__desc {
+  color: var(--color-neutral-1400);
 
   /* body/md/reg */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-body-md); /* 142.857% */
+  line-height: var(--line-height-body-md);
+  /* 142.857% */
 }
 
 /* States */
@@ -1004,32 +1194,55 @@ margin-top: -2px
    border:1px solid var(--color-neutral-300); 
    border-radius: var(--border-radius-sm);
     } */
-.met-np-step.completed .met-np-step__connector{ background-color: var(--color-primary-800); }
+.met-np-step.completed .met-np-step__connector {
+  background-color: var(--color-primary-800);
+}
 
-.met-np-step.completed .met-np-step__icon{ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat; }
-.met-np-step.completed .met-np-step__icon svg{ visibility:hidden; }
-.met-np-step.active .met-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
-.met-np-step.active .met-np-step__connector{ background-color: #C3C2D0; }
-.met-np-step.active .met-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
+.met-np-step.completed .met-np-step__icon {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z' fill='%23004B80'/%3E%3C/svg%3E") center/20px 20px no-repeat;
+}
 
-.met-np-step.active .met-np-step__title{ color: var(--color-neutral-1700);
+.met-np-step.completed .met-np-step__icon svg {
+  visibility: hidden;
+}
+
+.met-np-step.active .met-np-step__icon svg circle:nth-of-type(2) {
+  fill: var(--color-primary-800);
+}
+
+.met-np-step.active .met-np-step__connector {
+  background-color: #C3C2D0;
+}
+
+.met-np-step.active .met-np-step__icon svg circle:nth-of-type(1) {
+  stroke: var(--color-primary-800);
+}
+
+.met-np-step.active .met-np-step__title {
+  color: var(--color-neutral-1700);
 
   /* body/md/med */
   font-family: var(--font-family-primary);
   font-size: var(--font-size-lg);
   font-style: normal;
   font-weight: 500;
-  line-height: var(--line-height-body-lg); /* 150% */
+  line-height: var(--line-height-body-lg);
+  /* 150% */
 }
 
 /* First step icon always shows primary color when not completed */
-.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(2){ fill:var(--color-primary-800); }
-.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(1){ stroke:var(--color-primary-800); }
+.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(2) {
+  fill: var(--color-primary-800);
+}
+
+.met-np-step:nth-child(1):not(.completed) .met-np-step__icon svg circle:nth-of-type(1) {
+  stroke: var(--color-primary-800);
+}
 
 /* ===== Main area ===== */
-.met-np-main { 
-  border-radius: var(--border-radius-sm); 
-  position: relative; 
+.met-np-main {
+  border-radius: var(--border-radius-sm);
+  position: relative;
   background: #fff;
   display: flex;
   flex-direction: column;
@@ -1055,12 +1268,14 @@ margin-top: -2px
   max-width: 100%;
   overflow-x: hidden;
 }
+
 .met-np-body {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
+
 .met-np-form {
   display: flex;
   flex-direction: column;
@@ -1074,6 +1289,7 @@ margin-top: -2px
   width: 100%;
   max-width: 100%;
 }
+
 .met-np-form-section {
   flex: 1;
   min-height: 0;
@@ -1109,31 +1325,51 @@ margin-top: -2px
   position: static;
 }
 
+/* Override SectionHeader styles when used in Products (NewProduct) */
+.prod-np-section-header-fixed .sh-root {
+  border: none;
+  border-radius: 0;
+  padding: 12px 0;
+  background: transparent;
+  width: 100%;
+  margin: 0;
+  position: static;
+}
+
+.prod-np-section-header-fixed .sh-title {
+  margin-left: 0;
+}
+
 /* Section title above a full-bleed faint line */
-.met-np-section-header{
-  position:sticky;
-  top:0;
-  background:#fff;
-  z-index:5;
-  margin:4px -24px 18px -24px; /* match NewProduct spacing */
-  padding:0 24px 12px 24px;   
- 
+.met-np-section-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 5;
+  margin: 4px -24px 18px -24px;
+  /* match NewProduct spacing */
+  padding: 0 24px 12px 24px;
+
 }
-.met-np-section-title{
+
+.met-np-section-title {
   color: var(--color-neutral-800);
-font-family: var(--font-family-primary);
-font-size: var(--font-size-h6);
-font-style: normal;
-font-weight: 400;
-line-height: var(--line-height-heading-h6);
-text-transform: uppercase;
-margin-top: -10px;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-h6);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-heading-h6);
+  text-transform: uppercase;
+  margin-top: -10px;
 }
-.met-np-section-header::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-5px;
-  height:1px;
+
+.met-np-section-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
 }
 
 /* Footer actions on a full-bleed line */
@@ -1141,13 +1377,14 @@ margin-top: -10px;
   margin: 0 -24px;
   padding: 16px 24px;
   display: flex;
-  justify-content: space-between; /* Space between back and next buttons */
+  justify-content: space-between;
+  /* Space between back and next buttons */
   align-items: center;
   margin-top: auto;
   margin-bottom: 24px;
 }
 
-.met-np-btn-group { 
+.met-np-btn-group {
   display: flex;
   gap: 12px;
 }
@@ -1163,9 +1400,10 @@ margin-top: -10px;
 }
 
 /* Ensure the next button is on the right */
-.met-np-form-footer > .met-np-btn-group:last-child {
+.met-np-form-footer>.met-np-btn-group:last-child {
   margin-left: auto;
 }
+
 /* Base Button Styles */
 /* Base button styles with no flash */
 .met-np-btn {
@@ -1200,7 +1438,7 @@ margin-top: -10px;
 }
 
 /* Primary Button */
-.met-np-btn--primary { 
+.met-np-btn--primary {
   background-color: var(--color-primary-700);
   color: white;
 }
@@ -1219,7 +1457,7 @@ margin-top: -10px;
 }
 
 /* Ghost Button */
-.met-np-btn--ghost { 
+.met-np-btn--ghost {
   width: 144px;
   background-color: var(--color-primary-000);
   border: 1px solid var(--color-neutral-400);
@@ -1242,32 +1480,52 @@ margin-top: -10px;
 }
 
 /* responsive */
-@media (max-width: 1200px){
-  :root{ --np-gap-left:72px; --np-gap-right:72px; }
-}
-@media (max-width: 900px){
-  :root{ --np-gap-left:48px; --np-gap-right:48px; }
-}
-@media (max-width: 640px){
-  :root{
-    --np-gap-top:24px; --np-gap-bottom:15px;
-    --np-gap-left:16px; --np-gap-right:16px;
-    --np-rail-w:100%;
+@media (max-width: 1200px) {
+  :root {
+    --np-gap-left: 72px;
+    --np-gap-right: 72px;
   }
-  .met-np-grid{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-  .met-np-form{ gap: 8px; }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --np-gap-left: 48px;
+    --np-gap-right: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --np-gap-top: 24px;
+    --np-gap-bottom: 15px;
+    --np-gap-left: 16px;
+    --np-gap-right: 16px;
+    --np-rail-w: 100%;
+  }
+
+  .met-np-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .met-np-form {
+    gap: 8px;
+  }
 }
 
 
 /* --- tuneable sizes so math stays correct --- */
-:root{
-  --np-step-icon: 24px;      /* circle size */
-  --np-steps-pl: 16px;       /* left padding on .np-steps */
-  --np-conn-w: 2px;          /* SVG line width */
+:root {
+  --np-step-icon: 24px;
+  /* circle size */
+  --np-steps-pl: 16px;
+  /* left padding on .np-steps */
+  --np-conn-w: 2px;
+  /* SVG line width */
 }
 
 /* Steps container (keep your existing look) */
-.met-np-steps{
+.met-np-steps {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1278,12 +1536,14 @@ margin-top: -10px;
 
 /* Remove any old line rules if present */
 .met-np-steps::before,
-.met-np-step:not(:last-child)::after { background: none; }
+.met-np-step:not(:last-child)::after {
+  background: none;
+}
 
 /* Vertical line is now handled by individual step connectors in JSX */
 
 /* Step row (keep your existing styles—just ensure the icon uses the same size) */
-.met-np-step{
+.met-np-step {
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -1296,7 +1556,7 @@ margin-top: -10px;
   z-index: 1;
 }
 
-.met-np-step__icon{
+.met-np-step__icon {
   width: var(--np-step-icon);
   height: var(--np-step-icon);
   border-radius: 50%;
@@ -1304,21 +1564,69 @@ margin-top: -10px;
 }
 
 /* --- Custom scrollbars for CreateUsageMetric (match NewProduct) --- */
-.met-np-form::-webkit-scrollbar{width:6px;}
-.met-np-form::-webkit-scrollbar-track{background:transparent;}
-.met-np-form::-webkit-scrollbar-thumb{background-color:#C3C2D0;border-radius:2px;}
-.met-np-form::-webkit-scrollbar-thumb:hover{background-color:#A9A8B5;}
-.met-np-form::-webkit-scrollbar-thumb:active{background-color:#878694;}
-.met-np-form{scrollbar-width:thin;scrollbar-color:var(--color-neutral-400) transparent;}
+.met-np-form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.met-np-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.met-np-form::-webkit-scrollbar-thumb {
+  background-color: #C3C2D0;
+  border-radius: 2px;
+}
+
+.met-np-form::-webkit-scrollbar-thumb:hover {
+  background-color: #A9A8B5;
+}
+
+.met-np-form::-webkit-scrollbar-thumb:active {
+  background-color: #878694;
+}
+
+.met-np-form {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-400) transparent;
+}
 
 /* dotted thumb for inner sections */
-.met-np-form-section::-webkit-scrollbar{width:6px;}
-.met-np-form-section::-webkit-scrollbar-track{background:transparent;}
-.met-np-form-section::-webkit-scrollbar-thumb{background-color:transparent;border-radius:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-y;background-position:center;background-size:4px 49px;}
-.met-np-form-section::-webkit-scrollbar-thumb:hover{background-color:transparent;}
-.met-np-form-section::-webkit-scrollbar-thumb:active{background-color:transparent;}
-.met-np-form-section{scrollbar-width:thin;scrollbar-color:transparent transparent;}
+.met-np-form-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.met-np-form-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.met-np-form-section::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='49' viewBox='0 0 4 49' fill='none'%3E%3Cpath d='M2 2V47' stroke='%23C3C2D0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-position: center;
+  background-size: 4px 49px;
+}
+
+.met-np-form-section::-webkit-scrollbar-thumb:hover {
+  background-color: transparent;
+}
+
+.met-np-form-section::-webkit-scrollbar-thumb:active {
+  background-color: transparent;
+}
+
+.met-np-form-section {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
 
 /* Adjust skeleton faint rules just for Create Usage Metric main area */
-.met-np-main .af-skel-rule--top { top: 60px; }
-.met-np-card .af-skel-rule--bottom { bottom: 70px; left: 300px; }
+.met-np-main .af-skel-rule--top {
+  top: 60px;
+}
+
+.met-np-card .af-skel-rule--bottom {
+  bottom: 70px;
+  left: 300px;
+}

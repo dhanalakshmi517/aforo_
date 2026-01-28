@@ -9,7 +9,7 @@ import { getAuthHeaders, logout } from '../../utils/auth';
 //   POST   /api/integrations/apigee/connections?org=...&envs=...&analyticsMode=...
 //   GET    /api/integrations/apigee/products/imported
 //   DELETE /api/integrations/apigee/products/imported/{id}
-export const APIGEE_BASE_URL = 'http://44.203.209.2:8086/api/integrations/apigee';
+export const APIGEE_BASE_URL = 'http://kong.dev.aforo.space:8086/api/integrations/apigee';
 
 export interface ConnectionResponse {
   connected: boolean;

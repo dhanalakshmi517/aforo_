@@ -1,7 +1,7 @@
 import type { AccountDetailsData } from './components/Customers/AccountDetailsForm';
 import { getAuthHeaders, isAuthenticated, logout } from './utils/auth';
 
-const BASE_URL = 'http://44.201.19.187:8081/v1/api';
+const BASE_URL = 'http://org.dev.aforo.space:8081/v1/api';
 
 export interface LoginPayload {
   businessEmail: string;
@@ -20,10 +20,10 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
   try {
     console.log('Sending login request to:', `${BASE_URL}/login`);
     console.log('Request payload:', JSON.stringify(payload));
-    
+
     const res = await fetch(`${BASE_URL}/login`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -85,7 +85,7 @@ async function handleApiResponse(res: Response): Promise<any> {
     logout();
     throw new Error('Session expired. Please login again.');
   }
-  
+
   if (!res.ok) {
     let errorMessage = `API error ${res.status}`;
     try {
@@ -99,7 +99,7 @@ async function handleApiResponse(res: Response): Promise<any> {
     }
     throw new Error(errorMessage);
   }
-  
+
   return res.json();
 }
 
@@ -107,21 +107,21 @@ export async function createCustomer(payload: CreateCustomerPayload | FormData) 
   if (!isAuthenticated()) {
     throw new Error('Not authenticated');
   }
-  
+
   const isFormData = payload instanceof FormData;
   const headers = isFormData ? getAuthHeaders() : { ...getAuthHeaders() };
-  
+
   // Remove Content-Type for FormData to let browser set it with boundary
   if (isFormData && headers['Content-Type']) {
     delete headers['Content-Type'];
   }
-  
+
   const res = await fetch(`${BASE_URL}/customers`, {
     method: 'POST',
     headers,
     body: isFormData ? payload : JSON.stringify(payload),
   });
-  
+
   return handleApiResponse(res);
 }
 
@@ -130,11 +130,11 @@ export async function confirmCustomer(customerId: number | string) {
   if (!isAuthenticated()) {
     throw new Error('Not authenticated');
   }
-  
+
   const res = await fetch(`${BASE_URL}/customers/${encodeURIComponent(customerId)}/confirm`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
-  
+
   return handleApiResponse(res);
 }

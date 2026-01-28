@@ -280,20 +280,26 @@ const EstimateRevenue: React.FC = () => {
             </tr>
 
             {isUsageBased ? (
-              <tr>
-                <td>Per Usage Amount</td>
-                <td>{`$${usagePerUnit}`}</td>
-                {showCalculation && (
-                  <>
-                    <td>
-                      {includeFreemium && freemiumUnits > 0
-                        ? `${effectiveUsage} * $${usagePerUnit} (after ${Math.min(usageNum, freemiumUnits)} free units)`
-                        : `${usageNum} * $${usagePerUnit}`}
-                    </td>
-                    <td>{`$${baseAmount.toFixed(2)}`}</td>
-                  </>
+              <>
+                <tr>
+                  <td>Per Usage Amount</td>
+                  <td>{`$${usagePerUnit}`}</td>
+                  {showCalculation && (
+                    <>
+                      <td>{`${usageNum} × $${usagePerUnit}`}</td>
+                      <td>{`$${fullUsageAmount.toFixed(2)}`}</td>
+                    </>
+                  )}
+                </tr>
+                {showCalculation && includeFreemium && freemiumUnits > 0 && (
+                  <tr>
+                    <td style={{ paddingLeft: '40px' }}>└ Freemium Deduction</td>
+                    <td>{`${freemiumUnits} free units`}</td>
+                    <td>{`${Math.min(usageNum, freemiumUnits)} × $${usagePerUnit}`}</td>
+                    <td>{`-$${freemiumSavings.toFixed(2)}`}</td>
+                  </tr>
                 )}
-              </tr>
+              </>
             ) : (
               <>
                 <tr>
@@ -311,15 +317,19 @@ const EstimateRevenue: React.FC = () => {
                   <td>{`$${overageCharge} per call`}</td>
                   {showCalculation && (
                     <>
-                      <td>
-                        {includeFreemium && freemiumUnits > 0
-                          ? `${Math.max(0, usageNum - numberUnits)} * $${overageCharge} minus ${Math.min(Math.max(0, usageNum - numberUnits), freemiumUnits)} free`
-                          : `${Math.max(0, usageNum - numberUnits)} * $${overageCharge}`}
-                      </td>
-                      <td>{`$${(baseAmount - flatFee).toFixed(2)}`}</td>
+                      <td>{`${Math.max(0, usageNum - numberUnits)} × $${overageCharge}`}</td>
+                      <td>{`$${(Math.max(0, usageNum - numberUnits) * overageCharge).toFixed(2)}`}</td>
                     </>
                   )}
                 </tr>
+                {showCalculation && includeFreemium && freemiumUnits > 0 && Math.max(0, usageNum - numberUnits) > 0 && (
+                  <tr>
+                    <td style={{ paddingLeft: '40px' }}>└ Freemium Deduction</td>
+                    <td>{`${freemiumUnits} free units`}</td>
+                    <td>{`${Math.min(Math.max(0, usageNum - numberUnits), freemiumUnits)} × $${overageCharge}`}</td>
+                    <td>{`-$${freemiumSavings.toFixed(2)}`}</td>
+                  </tr>
+                )}
               </>
             )}
 
@@ -361,21 +371,11 @@ const EstimateRevenue: React.FC = () => {
                 &nbsp;Freemium Setup
               </td>
               <td>{freemiumUnits > 0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
-              {showCalculation && (
-                includeFreemium ? (
-                  <>
-                    <td>
-                      {freemiumUnits > 0
-                        ? (isUsageBased
-                          ? `${Math.min(usageNum, freemiumUnits)} free units * $${usagePerUnit}`
-                          : `${Math.min(Math.max(0, usageNum - numberUnits), freemiumUnits)} * $${overageCharge}`)
-                        : 'No free units'}
-                    </td>
-                    <td>{freemiumUnits > 0 ? `-$${freemiumSavings.toFixed(2)}` : '$0'}</td>
-                  </>
-                ) : (
-                  <><td>-</td><td>-</td></>
-                )
+              {showCalculation && !includeFreemium && (
+                <>
+                  <td>-</td>
+                  <td>-</td>
+                </>
               )}
             </tr>
 

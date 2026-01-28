@@ -25,7 +25,7 @@ export const createConfiguration = async (
   payload: Record<string, any>,
 ): Promise<void> => {
   const res = await fetch(
-    `http://54.238.204.246:8080/api/products/${productId}/${mapType(productType)}`,
+    `http://product.dev.aforo.space:8080/api/products/${productId}/${mapType(productType)}`,
     { method: 'POST', headers: buildHeaders(), body: JSON.stringify(payload) },
   );
   if (!res.ok) throw new Error('Failed to create configuration');
@@ -37,7 +37,7 @@ export const updateConfiguration = async (
   payload: Record<string, any>,
 ): Promise<void> => {
   const res = await fetch(
-    `http://54.238.204.246:8080/api/products/${productId}/${mapType(productType)}`,
+    `http://product.dev.aforo.space:8080/api/products/${productId}/${mapType(productType)}`,
     { method: 'PUT', headers: buildHeaders(), body: JSON.stringify(payload) },
   );
   if (!res.ok) throw new Error('Failed to update configuration');
@@ -53,7 +53,7 @@ export const saveConfiguration = async (
   productType: string,
   payload: Record<string, any>,
 ): Promise<void> => {
-  const url = `http://54.238.204.246:8080/api/products/${productId}/${mapType(productType)}`;
+  const url = `http://product.dev.aforo.space:8080/api/products/${productId}/${mapType(productType)}`;
   const headers = buildHeaders();
 
   // Decide the HTTP method: POST when payload is empty (no values selected),
@@ -76,7 +76,7 @@ export const saveConfiguration = async (
 
 export const finalizeDraft = async (productId: string): Promise<void> => {
   const res = await fetch(
-    `http://54.238.204.246:8080/api/products/${productId}/finalize`,
+    `http://product.dev.aforo.space:8080/api/products/${productId}/finalize`,
     { method: 'POST', headers: buildHeaders() },
   );
   if (!res.ok) throw new Error('Failed to finalize product');
