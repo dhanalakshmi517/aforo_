@@ -12,7 +12,7 @@ export interface KongConnectResponse {
   [key: string]: any;
 }
 
-const KONG_API_ENDPOINT = "http://44.203.209.2:8086/api/client-api-details";
+const KONG_API_ENDPOINT = "http://kong.dev.aforo.space:8086/api/client-api-details";
 
 const regionMap: Record<string, string> = {
   us: "https://us.api.konghq.com",
@@ -128,7 +128,7 @@ export async function connectToKong(
 export async function fetchKongProducts(
   connectionId: string
 ): Promise<any[]> {
-  const GET_ENDPOINT = `http://44.203.209.2:8086/api/kong/fetch/from-db/${connectionId}`;
+  const GET_ENDPOINT = `http://kong.dev.aforo.space:8086/api/kong/fetch/from-db/${connectionId}`;
 
   try {
     const api = createKongApiClient();
@@ -179,7 +179,7 @@ export async function fetchKongProducts(
 export async function importKongProducts(
   selectedIds: string[]
 ): Promise<any> {
-  const IMPORT_ENDPOINT = "http://44.203.209.2:8086/api/kong/import-selected";
+  const IMPORT_ENDPOINT = "http://kong.dev.aforo.space:8086/api/kong/import-selected";
 
   try {
     const api = createKongApiClient();
@@ -227,7 +227,7 @@ export async function importKongProducts(
 export async function disconnectFromKong(
   connectionId: string
 ): Promise<void> {
-  const DELETE_ENDPOINT = `http://44.203.209.2:8086/api/kong/${connectionId}`;
+  const DELETE_ENDPOINT = `http://kong.dev.aforo.space:8086/api/kong/${connectionId}`;
 
   try {
     const api = createKongApiClient();

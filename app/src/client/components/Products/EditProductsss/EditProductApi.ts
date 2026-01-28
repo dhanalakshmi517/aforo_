@@ -1,6 +1,6 @@
 import { getAuthData } from '../../../utils/auth';
 
-export const BASE_URL = 'http://3.208.93.68:8080/api';
+export const BASE_URL = 'http://product.dev.aforo.space:8080/api';
 
 export const buildAuthHeaders = () => {
   const auth = getAuthData();
@@ -30,13 +30,13 @@ export const updateGeneralDetails = async (productId: string, payload: any) => {
 
 // --- Configuration API (edit/create) ---
 const typeToPath = (t: string) => {
-  const m: Record<string,string> = {
+  const m: Record<string, string> = {
     API: 'api',
     FlatFile: 'flatfile',
     SQLResult: 'sql-result',
     LLMToken: 'llm-token',
   };
-  return m[t] || t.replace(/_/g,'-').toLowerCase();
+  return m[t] || t.replace(/_/g, '-').toLowerCase();
 };
 
 // Map UI labels to backend keys per type

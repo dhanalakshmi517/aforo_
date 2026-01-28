@@ -14,9 +14,9 @@ export type Product = {
 };
 
 // Use the remote backend for all environments (dev + prod) to avoid localhost:3001
-export const BASE_URL = 'http://3.208.93.68:8080/api';
+export const BASE_URL = 'http://product.dev.aforo.space:8080/api';
 // Billable metrics service runs on a different port
-export const BILLABLE_METRICS_BASE_URL = 'http://54.146.189.144:8081/api';
+export const BILLABLE_METRICS_BASE_URL = 'http://metering.dev.aforo.space:8092/api';
 // Useful if you ever need to build absolute URLs without doubling "/api"
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 
@@ -473,13 +473,11 @@ export const getProductConfiguration = async (
 export const saveProductConfiguration = async (
   productId: string,
   productType: string,
-  configData: Record<string, any>,
-  isUpdate: boolean = false
+  configData: Record<string, any>
 ): Promise<any> => {
   try {
     const api = createApiClient();
     const normalizedType = (productType || '').toLowerCase();
-    const operationType = isUpdate ? 'update' : 'create';
 
     const createPayload = (data: Record<string, any>): Record<string, any> => {
       if (!data || typeof data !== 'object') return data;
@@ -628,12 +626,6 @@ export const saveProductConfiguration = async (
       };
     }
 
-    console.log('=== BACKEND API CALL ===');
-    console.log('Endpoint:', apiEndpoint);
-    console.log('Method:', operationType === 'update' ? 'PUT' : 'POST');
-    console.log('Payload sent to backend:', JSON.stringify(cleanedPayload, null, 2));
-    console.log('========================');
-
     // Validate payload before sending
     if (!cleanedPayload || Object.keys(cleanedPayload).length === 0) {
       console.warn('Empty payload detected, adding default values');
@@ -645,40 +637,70 @@ export const saveProductConfiguration = async (
       }
     }
 
-    let response: AxiosResponse<Product>;
-    try {
-      if (operationType === 'update') {
-        response = await api.put(apiEndpoint, cleanedPayload, {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      } else {
-        response = await api.post(apiEndpoint, cleanedPayload, {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-    } catch (apiError: any) {
-      // Log detailed error information for debugging
-      console.error('API Error Details:', {
-        status: apiError.response?.status,
-        statusText: apiError.response?.statusText,
-        data: apiError.response?.data,
-        endpoint: apiEndpoint,
-        method: operationType === 'update' ? 'PUT' : 'POST',
-        payload: cleanedPayload
-      });
+    console.log('=== BACKEND API CALL (POST-first strategy) ===');
+    console.log('Endpoint:', apiEndpoint);
+    console.log('Payload sent to backend:', JSON.stringify(cleanedPayload, null, 2));
+    console.log('==============================================');
 
-      // Provide more specific error messages
-      if (apiError.response?.status === 500) {
-        throw new Error(`Server error when saving ${normalizedType} configuration. Please check the data and try again.`);
-      } else if (apiError.response?.status === 400) {
-        const errorMsg = apiError.response?.data?.message || 'Invalid configuration data';
-        throw new Error(`Configuration validation failed: ${errorMsg}`);
+    let response: AxiosResponse<Product>;
+
+    // Try POST first
+    try {
+      console.log('🔵 Attempting POST request...');
+      response = await api.post(apiEndpoint, cleanedPayload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log('✅ POST request succeeded');
+      return response.data;
+    } catch (postError: any) {
+      // If POST fails with 500 error, try PUT (configuration might already exist)
+      if (postError.response?.status === 500) {
+        console.log('⚠️ POST failed with 500, retrying with PUT...');
+
+        try {
+          response = await api.put(apiEndpoint, cleanedPayload, {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          console.log('✅ PUT request succeeded');
+          return response.data;
+        } catch (putError: any) {
+          // Log detailed error information for debugging
+          console.error('❌ Both POST and PUT failed. PUT Error Details:', {
+            status: putError.response?.status,
+            statusText: putError.response?.statusText,
+            data: putError.response?.data,
+            endpoint: apiEndpoint,
+            payload: cleanedPayload
+          });
+
+          // Provide more specific error messages
+          if (putError.response?.status === 500) {
+            throw new Error(`Server error when saving ${normalizedType} configuration. Please check the data and try again.`);
+          } else if (putError.response?.status === 400) {
+            const errorMsg = putError.response?.data?.message || 'Invalid configuration data';
+            throw new Error(`Configuration validation failed: ${errorMsg}`);
+          } else {
+            throw putError;
+          }
+        }
       } else {
-        throw apiError;
+        // For non-500 errors from POST, throw immediately
+        console.error('❌ POST failed with non-500 error:', {
+          status: postError.response?.status,
+          statusText: postError.response?.statusText,
+          data: postError.response?.data,
+          endpoint: apiEndpoint,
+          payload: cleanedPayload
+        });
+
+        if (postError.response?.status === 400) {
+          const errorMsg = postError.response?.data?.message || 'Invalid configuration data';
+          throw new Error(`Configuration validation failed: ${errorMsg}`);
+        } else {
+          throw postError;
+        }
       }
     }
-
-    return response.data;
   } catch (error: any) {
     console.error('Error saving product configuration:', error);
     throw error;
@@ -722,7 +744,7 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
       console.log('🗑️ Removing product icon...');
 
       const api = createApiClient();
-      
+
       // STEP 1: Delete the icon file via DELETE endpoint
       try {
         console.log('📤 Step 1: Deleting icon file via DELETE /products/{id}/icon...');
@@ -735,7 +757,7 @@ export const updateProductIcon = async (productId: string, iconData: any): Promi
       } catch (deleteErr: any) {
         console.warn('⚠️ Icon file delete failed:', deleteErr?.message);
       }
-      
+
       // STEP 2: Clear productIcon JSON field via PATCH
       try {
         console.log('📤 Step 2: Clearing productIcon JSON field...');

@@ -28,7 +28,7 @@ export interface OrganizationPayload {
   marketingOptIn: boolean;
 }
 
-const BASE_URL = "http://44.201.19.187:8081";
+const BASE_URL = "http://org.dev.aforo.space:8081";
 
 /**
  * Create a new organization contact from Landing form.
@@ -50,14 +50,14 @@ export async function createOrganization(payload: OrganizationPayload) {
       let errorData;
       const errorText = await res.text();
       console.error("API Error Response:", errorText);
-      
+
       try {
         errorData = JSON.parse(errorText);
       } catch (e) {
         // If we can't parse the error as JSON, use the raw text
         errorData = { message: errorText };
       }
-      
+
       const error: ApiError = new Error(errorData.message || "Failed to create organization");
       error.response = { data: errorData, status: res.status };
       throw error;
@@ -102,7 +102,7 @@ export async function fetchCountries(): Promise<Country[]> {
   } catch (error) {
     console.error("Error fetching countries, using fallback list:", error);
     return [
-    
+
       { code: 'AF', name: 'Afghanistan', dialCode: '+93' },
       { code: 'AL', name: 'Albania', dialCode: '+355' },
       { code: 'DZ', name: 'Algeria', dialCode: '+213' },

@@ -560,8 +560,20 @@ const CreatePricePlan = React.forwardRef<
     selectedMetricId,
   ]);
 
-  const onStepClick = (stepIndex: number) => {
+  const onStepClick = async (stepIndex: number) => {
     if (stepIndex === currentStep) return;
+
+    // If navigating to any step beyond step 0 and rate plan doesn't exist yet, create it first
+    if (stepIndex >= 1 && !ratePlanId && isStep0Filled) {
+      console.log(`🔧 Creating rate plan before navigating to step ${stepIndex} via sidebar...`);
+      const created = await ensureRatePlanCreated();
+      if (!created) {
+        console.error(`❌ Failed to create rate plan, cannot navigate to step ${stepIndex}`);
+        return;
+      }
+      console.log(`✅ Rate plan created, navigating to step ${stepIndex}`);
+    }
+
     // Allow clicking all steps - locked steps will show lock UI
     setCurrentStep(stepIndex);
   };
@@ -692,11 +704,11 @@ const CreatePricePlan = React.forwardRef<
   // Validate step 0 fields
   const validateStep0 = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!planName.trim()) newErrors.planName = "Rate plan name is required.";
     if (!billingFrequency) newErrors.billingFrequency = "Billing frequency is required.";
     if (!paymentMethod) newErrors.paymentMethod = "Payment method is required.";
-    
+
     // Duplicate check
     if (planName.trim()) {
       const isDuplicate = existingRatePlans.some(
@@ -707,12 +719,12 @@ const CreatePricePlan = React.forwardRef<
         newErrors.planName = "Rate plan already exists";
       }
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return false;
     }
-    
+
     setErrors({});
     return true;
   };
@@ -724,7 +736,7 @@ const CreatePricePlan = React.forwardRef<
     try {
       setSaving(true);
       const selectedProduct = products.find((p) => p.productName === selectedProductName);
-      
+
       const payload: Partial<RatePlanRequest> & { status?: string } = {
         ratePlanName: planName,
         description: planDescription || "",
@@ -732,11 +744,11 @@ const CreatePricePlan = React.forwardRef<
         paymentType: paymentMethod as any,
         status: "DRAFT",
       };
-      
+
       if (selectedProduct) {
         payload.productId = Number(selectedProduct.productId);
       }
-      
+
       if (selectedMetricId !== null) {
         payload.billableMetricId = selectedMetricId;
       }
@@ -1161,7 +1173,7 @@ const CreatePricePlan = React.forwardRef<
                   const isStep1Locked = !isStep0Completed;
                   const isStep2Locked = !isStep0Completed || !isStep1Completed;
                   const isLocked = (i === 1 && isStep1Locked) || (i === 2 && isStep2Locked) || (i > 2 && (!isStep0Completed || !isStep1Completed || !isStep2Completed));
-                  
+
                   // Review step (step 4) requires all previous steps to be completed
                   const isReview = i === 4;
                   const isDisabled = isReview && (!isStep0Completed || !isStep1Completed || !isStep2Completed);
@@ -1229,7 +1241,7 @@ const CreatePricePlan = React.forwardRef<
                     <SectionHeader title={sectionHeading.toUpperCase()} />
                     {isLockedHere && (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M12.5 7H11.5V5C11.5 3.067 9.933 1.5 8 1.5C6.067 1.5 4.5 3.067 4.5 5V7H3.5C2.948 7 2.5 7.448 2.5 8V13C2.5 13.552 2.948 14 3.5 14H12.5C13.052 14 13.5 13.552 13.5 13V8C13.5 7.448 13.052 7 12.5 7ZM5.5 5C5.5 3.619 6.619 2.5 8 2.5C9.381 2.5 10.5 3.619 10.5 5V7H5.5V5Z" fill="#8C8F96"/>
+                        <path d="M12.5 7H11.5V5C11.5 3.067 9.933 1.5 8 1.5C6.067 1.5 4.5 3.067 4.5 5V7H3.5C2.948 7 2.5 7.448 2.5 8V13C2.5 13.552 2.948 14 3.5 14H12.5C13.052 14 13.5 13.552 13.5 13V8C13.5 7.448 13.052 7 12.5 7ZM5.5 5C5.5 3.619 6.619 2.5 8 2.5C9.381 2.5 10.5 3.619 10.5 5V7H5.5V5Z" fill="#8C8F96" />
                       </svg>
                     )}
                   </div>

@@ -23,21 +23,22 @@ const UsageEstimation: React.FC = () => {
 
 
   const usageNum = Number(usage) || 0;
-  
-  // ✅ FIXED: Apply minimum usage commitment - use higher of actual or minimum
-  const effectiveUsage = includeCommitment && minimumUsage > 0 ? Math.max(usageNum, minimumUsage) : usageNum;
-  
-  // ✅ FIXED: Apply freemium - reduce billable units
-  const billableUnits = includeFreemium && freemiumUnits > 0 ? Math.max(0, effectiveUsage - freemiumUnits) : effectiveUsage;
-  const freemiumReduction = includeFreemium && freemiumUnits > 0 ? Math.min(freemiumUnits, effectiveUsage) * perUsageRate : 0;
-  
-  const usageTotal = billableUnits * perUsageRate;
+
+  // Calculate full usage amount (before any deductions)
+  const fullUsageAmount = usageNum * perUsageRate;
+
+  // Calculate freemium reduction
+  const freemiumReduction = includeFreemium && freemiumUnits > 0 ? Math.min(freemiumUnits, usageNum) * perUsageRate : 0;
+
+  // Calculate billable amount after freemium
+  const usageTotal = fullUsageAmount - freemiumReduction;
+
   const setupComponent = includeSetup ? setupFee : 0;
   const subtotal = usageTotal + setupComponent;
   const discountAmount = includeDiscount ? (discountPercent > 0 ? (discountPercent / 100) * subtotal : discountFlat) : 0;
   let totalEstimation = subtotal - discountAmount;
-  
-  // ✅ FIXED: Apply minimum charge as floor
+
+  // Apply minimum charge as floor
   if (includeCommitment && minimumCharge > 0) {
     totalEstimation = Math.max(totalEstimation, minimumCharge);
   }
@@ -89,7 +90,35 @@ const UsageEstimation: React.FC = () => {
             <tr>
               <td>Per Usage Amount</td>
               <td>{`$${perUsageRate}`}</td>
-              {showCalculation && <><td>{`$${perUsageRate} * ${usage}`}</td><td>{`$${usageTotal.toFixed(2)}`}</td></>}
+              {showCalculation && <><td>{`${usageNum} × $${perUsageRate}`}</td><td>{`$${fullUsageAmount.toFixed(2)}`}</td></>}
+            </tr>
+            {showCalculation && includeFreemium && freemiumUnits > 0 && (
+              <tr>
+                <td style={{ paddingLeft: '40px' }}>└ Freemium Deduction</td>
+                <td>{`Free Units - ${freemiumUnits}`}</td>
+                <td>{`${Math.min(freemiumUnits, usageNum)} × $${perUsageRate}`}</td>
+                <td>{`-$${freemiumReduction.toFixed(2)}`}</td>
+              </tr>
+            )}
+            <tr>
+              <td>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={includeFreemium}
+                    onChange={(e) => setIncludeFreemium(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+                &nbsp;Freemium
+              </td>
+              <td>{freemiumUnits > 0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
+              {showCalculation && !includeFreemium && (
+                <>
+                  <td>-</td>
+                  <td>-</td>
+                </>
+              )}
             </tr>
             <tr>
               <td>
@@ -123,26 +152,6 @@ const UsageEstimation: React.FC = () => {
                 <>
                   <td>{discountPercent > 0 ? `${discountPercent}% of $${subtotal.toFixed(2)} = $${discountAmount.toFixed(2)}` : `$${discountFlat}`}</td>
                   <td>{`-$${discountAmount.toFixed(2)}`}</td>
-                </>
-              )}
-            </tr>
-            <tr>
-              <td>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={includeFreemium}
-                    onChange={(e) => setIncludeFreemium(e.target.checked)}
-                  />
-                  <span className="slider"></span>
-                </label>
-                &nbsp;Freemium
-              </td>
-              <td>{freemiumUnits > 0 ? `Free Units - ${freemiumUnits}` : '-'}</td>
-              {showCalculation && (
-                <>
-                  <td>{includeFreemium && freemiumUnits > 0 ? `${Math.min(freemiumUnits, effectiveUsage)} × $${perUsageRate}` : '-'}</td>
-                  <td>{includeFreemium && freemiumUnits > 0 ? `-$${freemiumReduction.toFixed(2)}` : '-'}</td>
                 </>
               )}
             </tr>

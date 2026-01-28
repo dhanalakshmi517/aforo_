@@ -851,7 +851,13 @@ const EditProduct: React.FC<EditProductProps> = ({
       <TopBar
         title={productId ? `Edit ${formData.productName || 'Product'}` : 'Create New Product'}
         onBack={() => {
-          // Check for unsaved changes (ignore empty required fields)
+          // Check required fields FIRST - show UnsavedChangesModal if missing
+          if (hasEmptyRequiredFields()) {
+            setShowUnsavedChangesModal(true);
+            return;
+          }
+
+          // Then check for unsaved changes
           const hasChanges = hasPendingChanges() || hasIconChanged() || isDraft;
           if (hasChanges) {
             setShowSaveDraftModal(true);

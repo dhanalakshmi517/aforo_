@@ -33,7 +33,7 @@ export interface BulkSyncResponse {
 
 export async function connectQuickBooks(): Promise<QuickBooksConnectResponse> {
   try {
-    const response = await fetch('http://44.204.127.27:8095/api/quickbooks/connect', {
+    const response = await fetch('http://quickbooks.dev.aforo.space:8095/api/quickbooks/connect', {
       method: 'GET',
       headers: getAuthHeadersJSON(),
     });
@@ -56,7 +56,7 @@ export async function connectQuickBooks(): Promise<QuickBooksConnectResponse> {
  */
 export async function checkQuickBooksStatus(): Promise<QuickBooksStatusResponse> {
   try {
-    const response = await fetch('http://44.204.127.27:8095/api/quickbooks/status', {
+    const response = await fetch('http://quickbooks.dev.aforo.space:8095/api/quickbooks/status', {
       method: 'GET',
       headers: getAuthHeadersJSON(),
     });
@@ -79,7 +79,7 @@ export async function checkQuickBooksStatus(): Promise<QuickBooksStatusResponse>
  */
 export async function getCustomerOverview(): Promise<CustomerOverviewResponse> {
   try {
-    const response = await fetch('http://44.204.127.27:8095/api/quickbooks/admin/customer-overview', {
+    const response = await fetch('http://quickbooks.dev.aforo.space:8095/api/quickbooks/admin/customer-overview', {
       method: 'GET',
       headers: getAuthHeadersJSON(),
     });
@@ -102,7 +102,7 @@ export async function getCustomerOverview(): Promise<CustomerOverviewResponse> {
  */
 export const disconnectQuickBooks = async (): Promise<QuickBooksDisconnectResponse> => {
   try {
-    const response = await fetch('http://44.204.127.27:8095/api/quickbooks/disconnect', {
+    const response = await fetch('http://quickbooks.dev.aforo.space:8095/api/quickbooks/disconnect', {
       method: 'POST',
       headers: getAuthHeadersJSON(),
     });
@@ -122,21 +122,21 @@ export const disconnectQuickBooks = async (): Promise<QuickBooksDisconnectRespon
 export const getCustomerOverviewForDisplay = async () => {
   try {
     console.log('Calling getCustomerOverview API...');
-    const response = await fetch('http://44.204.127.27:8095/api/quickbooks/admin/customer-overview', {
+    const response = await fetch('http://quickbooks.dev.aforo.space:8095/api/quickbooks/admin/customer-overview', {
       method: 'GET',
       headers: getAuthHeadersJSON(),
     });
     const data = await response.json();
     console.log('Customer overview API response:', data);
-    
+
     // Store customer data in localStorage for QuickbooksIntegration to use
     const customerData = {
       synced_customers: data.syncedToQuickBooks || 0,
       non_synced_customers: data.notSyncedToQuickBooks || 0
     };
-    
+
     localStorage.setItem('customerData', JSON.stringify(customerData));
-    
+
     return customerData;
   } catch (error) {
     console.error('Failed to get customer overview:', error);
@@ -151,7 +151,7 @@ export const getCustomerOverviewForDisplay = async () => {
 export const bulkSyncCustomers = async (): Promise<BulkSyncResponse> => {
   try {
     console.log('Calling bulk sync customers API...');
-    const response = await fetch('http://44.204.127.27:8095/api/quickbooks/admin/bulk-sync-customers', {
+    const response = await fetch('http://quickbooks.dev.aforo.space:8095/api/quickbooks/admin/bulk-sync-customers', {
       method: 'POST',
       headers: getAuthHeadersJSON(),
     });

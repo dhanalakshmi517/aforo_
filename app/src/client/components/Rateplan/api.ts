@@ -22,9 +22,9 @@ export interface Product {
 /* =========================
  * Constants
  * ========================= */
-export const BASE_URL = 'http://3.208.93.68:8080/api';
+export const BASE_URL = 'http://product.dev.aforo.space:8080/api';
 export const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
-const BM_BASE = 'http://54.146.189.144:8081/api/billable-metrics';
+const BM_BASE = 'http://metering.dev.aforo.space:8092/api/billable-metrics';
 
 /* =========================
  * Helpers
