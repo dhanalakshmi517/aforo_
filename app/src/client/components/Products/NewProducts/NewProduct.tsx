@@ -1,20 +1,22 @@
-// NewProduct.tsx  ✅ now follows CreateUsageMetric structure + SAME classnames pattern (met-np-*)
+// NewProduct.tsx
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../../componenetsss/TopBar";
+import CreateFormShell from "../../componenetsss/CreateFormShell";
 import { useToast } from "../../componenetsss/ToastProvider";
 import { InputField, TextareaField } from "../../componenetsss/Inputs";
 import ConfirmDeleteModal from "../../componenetsss/ConfirmDeleteModal";
-import { ConfigurationTab, configurationFields } from "./ConfigurationTab";
-import ProductReview from "./ProductReview";
 import SaveDraft from "../../componenetsss/SaveDraft";
 import PrimaryButton from "../../componenetsss/PrimaryButton";
 import SecondaryButton from "../../componenetsss/SecondaryButton";
+
+import { ConfigurationTab, configurationFields } from "./ConfigurationTab";
+import ProductReview from "./ProductReview";
+
 import EditButton from "../../componenetsss/EditButton";
 import DeleteButton from "../../componenetsss/DeleteButton";
-import SectionHeader from "../../componenetsss/SectionHeader";
 import ProductIconPickerModal from "../ProductIconPickerModal";
 import { ProductIconData } from "../ProductIcon";
 import ProductCreatedSuccess from "../../componenetsss/ProductCreatedSuccess";
@@ -31,12 +33,28 @@ import {
 import "./NewProduct.css";
 import "../../componenetsss/SkeletonForm.css";
 
-type ActiveTab = "general" | "configuration" | "review";
+type StepKey = "general" | "configuration" | "review";
+type ActiveTab = StepKey;
 
 const steps = [
-  { id: 1, title: "General Details", desc: "Start with the basics of your product." },
-  { id: 2, title: "Configuration", desc: "Define configuration and parameters." },
-  { id: 3, title: "Review & Confirm", desc: "Validate all details before finalizing." },
+  {
+    id: 1,
+    key: "general" as StepKey,
+    title: "General Details",
+    desc: "Start with the basics of your product.",
+  },
+  {
+    id: 2,
+    key: "configuration" as StepKey,
+    title: "Configuration",
+    desc: "Define configuration and parameters.",
+  },
+  {
+    id: 3,
+    key: "review" as StepKey,
+    title: "Review & Confirm",
+    desc: "Validate all details before finalizing.",
+  },
 ];
 
 export interface DraftProduct {
@@ -56,7 +74,10 @@ interface NewProductProps {
   draftProduct?: DraftProduct;
 }
 
-export default function NewProduct({ onClose, draftProduct }: NewProductProps): React.JSX.Element {
+export default function NewProduct({
+  onClose,
+  draftProduct,
+}: NewProductProps): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
@@ -104,7 +125,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [hasEverBeenEnabled, setHasEverBeenEnabled] = useState(false);
-  const [initialFormState, setInitialFormState] = useState<any>(null);
 
   // form
   const [formData, setFormData] = useState({
@@ -136,7 +156,9 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         const iconCache = JSON.parse(localStorage.getItem("iconDataCache") || "{}");
         const cachedIconJson = iconCache[activeDraft.productId];
         if (cachedIconJson) {
-          const parsedCache = typeof cachedIconJson === "string" ? JSON.parse(cachedIconJson) : cachedIconJson;
+          const parsedCache =
+            typeof cachedIconJson === "string" ? JSON.parse(cachedIconJson) : cachedIconJson;
+
           if (parsedCache?.iconData) {
             setSelectedIcon(parsedCache.iconData as ProductIconData);
             iconLoaded = true;
@@ -199,7 +221,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
   }, [activeDraft, lastSavedIcon, selectedIcon]);
 
   // lock logic - Configuration is locked until required fields in General are filled
-  // Only Product Name is required, so we check only that field
   const hasRequiredFieldsFilled = React.useMemo(() => {
     return Boolean(formData.productName.trim());
   }, [formData.productName]);
@@ -219,6 +240,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       return value && String(value).trim() !== "";
     });
   }, [configuration]);
+
+  // Review lock
+  const isReviewLocked = React.useMemo(() => {
+    return !createdProductId || !isConfigurationComplete;
+  }, [createdProductId, isConfigurationComplete]);
 
   // For "Save as Draft" button - check if ANY field is filled
   const hasAnyRequiredInput = React.useMemo(() => {
@@ -255,48 +281,23 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   const topActionsDisabled = !hasEverBeenEnabled || !hasAnyRequiredInput;
 
-  const LockBadge = () => (
-    <span
-      style={{
-        borderRadius: "8px",
-        background: "#E9E9EE",
-        display: "flex",
-        padding: "6px",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "5px",
-        marginLeft: "8px",
-      }}
-      aria-label="Locked"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path
-          d="M4.66667 7.33334V4.66668C4.66667 3.78262 5.01786 2.93478 5.64298 2.30965C6.2681 1.68453 7.11595 1.33334 8 1.33334C8.88406 1.33334 9.7319 1.68453 10.357 2.30965C10.9821 2.93478 11.3333 3.78262 11.3333 4.66668V7.33334M3.33333 7.33334H12.6667C13.403 7.33334 14 7.9303 14 8.66668V13.3333C14 14.0697 13.403 14.6667 12.6667 14.6667H3.33333C2.59695 14.6667 2 14.0697 2 13.3333V8.66668C2 7.9303 2.59695 7.33334 3.33333 7.33334Z"
-          stroke="#75797E"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  );
+  const handleFieldChange =
+    (field: keyof typeof formData) =>
+    (v: string) => {
+      setFormData((p) => ({ ...p, [field]: v }));
 
-  const handleFieldChange = (field: keyof typeof formData) => (v: string) => {
-    setFormData((p) => ({ ...p, [field]: v }));
+      if (field === "productName") {
+        if (errors.productName) {
+          const { productName, ...rest } = errors;
+          setErrors(rest);
+        }
+      }
 
-    if (field === "productName") {
-      // Clear any product name errors when typing
-      if (errors.productName) {
-        const { productName, ...rest } = errors;
+      if (errors[field] && field !== "productName") {
+        const { [field]: _, ...rest } = errors;
         setErrors(rest);
       }
-    }
-
-    if (errors[field] && field !== "productName") {
-      const { [field]: _, ...rest } = errors;
-      setErrors(rest);
-    }
-  };
+    };
 
   const saveProduct = async (isDraft: boolean = false) => {
     if (isSaving) return false;
@@ -373,7 +374,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       else if (error?.response?.data?.error) errorMessage = error.response.data.error;
       else if (error instanceof Error) errorMessage = error.message;
 
-      // ✅ removed "product already exists" special-case validation
       setErrors((prev) => ({ ...prev, form: errorMessage }));
       return false;
     } finally {
@@ -412,31 +412,28 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     }
   };
 
-  const gotoStep = async (index: number, skipValidation: boolean = false) => {
+  const gotoStep = async (index: number, skipValidation: boolean = false, productIdOverride?: string | number | null) => {
     if (index < 0 || index > 2) return;
 
     // prevent interactions while icon picker open
     if (isIconPickerOpen) return;
 
     // Track the effective product ID (may be created during this navigation)
-    let effectiveProductId = createdProductId;
+    let effectiveProductId = productIdOverride !== undefined ? productIdOverride : createdProductId;
 
     // forward navigation guards - validate when moving to next step
     if (index > currentStep) {
       // When navigating to Configuration or Review, ensure product exists if required fields are filled
-      // BUT: skip if skipValidation=true (means handleSaveAndNext already saved)
-      if (index >= 1 && !effectiveProductId && formData.productName.trim() && !skipValidation) {
-        // Product Name is filled but product not created yet - create it
+      if (index >= 1 && !effectiveProductId && formData.productName.trim()) {
         const newProductId = await saveProduct(true);
         if (!newProductId) return;
-        effectiveProductId = newProductId; // Use the returned ID immediately
+        effectiveProductId = newProductId;
       }
 
       // Skip detailed validation when navigating via sidebar (skipValidation = true)
       if (!skipValidation) {
         // leaving general -> if going to configuration, validate general step
         if (currentStep === 0 && index === 1) {
-          // Product Name is required to proceed
           if (!formData.productName.trim()) {
             setErrors((prev) => ({ ...prev, productName: "This field is required" }));
             return;
@@ -448,7 +445,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
           if (!effectiveProductId || !configuration.productType) return;
 
           if (configRef.current) {
-            const ok = await configRef.current.submit(false, true, effectiveProductId); // validate and save to server
+            const ok = await configRef.current.submit(false, true, effectiveProductId);
             if (!ok) return;
           }
         }
@@ -457,7 +454,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       // When navigating to Review via sidebar, still need to save config if not already saved
       if (skipValidation && index === 2 && effectiveProductId && configuration.productType) {
         if (configRef.current) {
-          const ok = await configRef.current.submit(false, true, effectiveProductId); // save config to server
+          const ok = await configRef.current.submit(false, true, effectiveProductId);
           if (!ok) return;
         }
       }
@@ -472,15 +469,13 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   const handleSaveAndNext = async () => {
     if (activeTab === "general") {
-      // Validate required fields on Save & Next click
       if (!formData.productName.trim()) {
         setErrors((prev) => ({ ...prev, productName: "This field is required" }));
         return;
       }
 
-      const ok = await saveProduct(true);
-      if (!ok) return;
-      await gotoStep(1, true); // skipValidation=true since we already validated above
+      // Just navigate without saving - API will be called when clicking sidebar
+      await gotoStep(1, true, createdProductId);
       return;
     }
 
@@ -488,11 +483,11 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
       if (isConfigurationLocked) return;
 
       if (configRef.current) {
-        const ok = await configRef.current.submit(false, true); // validate and save to server
+        const ok = await configRef.current.submit(false, true);
         if (!ok) return;
       }
 
-      await gotoStep(2, true); // skipValidation=true since we already validated and saved above
+      await gotoStep(2, true);
       return;
     }
   };
@@ -502,8 +497,6 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
     setIsSaving(true);
     try {
-      // Configuration was already saved when navigating to Review step
-      // Just finalize the product
       const resp = await finalizeProduct(createdProductId);
       if (resp?.success) {
         setShowSuccess(true);
@@ -526,11 +519,14 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
     try {
       if (createdProductId) {
         await deleteProduct(createdProductId);
-        // Don't show toast here - only show when deleting from Products.tsx
       }
     } catch (e) {
       console.error("Failed to delete product", e);
-      showToast({ kind: "error", title: "Delete Failed", message: "Unable to delete product. Please try again." });
+      showToast({
+        kind: "error",
+        title: "Delete Failed",
+        message: "Unable to delete product. Please try again.",
+      });
     } finally {
       onClose();
     }
@@ -538,8 +534,162 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
   // ✅ SUCCESS SCREEN
   if (showSuccess) {
-    return <ProductCreatedSuccess productName={formData.productName} onGoAllProducts={handleGoToAllProducts} />;
+    return (
+      <ProductCreatedSuccess
+        productName={formData.productName}
+        onGoAllProducts={handleGoToAllProducts}
+      />
+    );
   }
+
+  // ---------- Icons (same style as your CreateCustomer rail) ----------
+  const StepLockIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <path
+        d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
+        stroke="#BAC4D5"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  const CompletedIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M9.50024 16.6662C9.89077 17.0567 10.5239 17.0567 10.9145 16.6662L18.0341 9.54661C18.4017 9.17902 18.4017 8.58304 18.0341 8.21546C17.6665 7.84787 17.0705 7.84787 16.7029 8.21546L10.9145 14.0039C10.5239 14.3944 9.89077 14.3944 9.50024 14.0039L7.27291 11.7766C6.90533 11.409 6.30935 11.409 5.94176 11.7766C5.57418 12.1442 5.57418 12.7402 5.94176 13.1077L9.50024 16.6662ZM12.0022 24.0001C10.3425 24.0001 8.78242 23.6851 7.32204 23.0552C5.86163 22.4253 4.59129 21.5705 3.51102 20.4907C2.43072 19.4109 1.57549 18.1411 0.945316 16.6813C0.315145 15.2216 6.02322e-05 13.6619 6.02322e-05 12.0022C6.02322e-05 10.3425 0.315009 8.78242 0.944905 7.32204C1.5748 5.86163 2.42965 4.5913 3.50944 3.51102C4.58925 2.43072 5.85903 1.57549 7.31878 0.945317C8.77851 0.315147 10.3382 6.02322e-05 11.9979 6.02322e-05C13.6577 6.02322e-05 15.2177 0.31501 16.6781 0.944906C18.1385 1.5748 19.4088 2.42965 20.4891 3.50944C21.5694 4.58925 22.4246 5.85903 23.0548 7.31879C23.685 8.77852 24.0001 10.3382 24.0001 11.9979C24.0001 13.6577 23.6851 15.2177 23.0552 16.6781C22.4253 18.1385 21.5705 19.4088 20.4907 20.4891C19.4109 21.5694 18.1411 22.4246 16.6813 23.0548C15.2216 23.685 13.6619 24.0001 12.0022 24.0001Z"
+        fill="#034A7D"
+      />
+    </svg>
+  );
+
+  const ActiveRingIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
+      <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
+    </svg>
+  );
+
+  const UnlockedIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <path d="M19 13C19 16.3137 16.3137 19 13 19C9.68629 19 7 16.3137 7 13C7 9.68629 9.68629 7 13 7C16.3137 7 19 9.68629 19 13Z" fill="#BAC4D5" />
+      <path
+        d="M13 1C19.6274 1 25 6.37258 25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1ZM18 13C18 15.7614 15.7614 18 13 18C10.2386 18 8 15.7614 8 13C8 10.2386 10.2386 8 13 8C15.7614 8 18 10.2386 18 13ZM20 13C20 9.13401 16.866 6 13 6C9.13401 6 6 9.13401 6 13C6 16.866 9.13401 20 13 20C16.866 20 20 16.866 20 13Z"
+        stroke="#BAC4D5"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+
+  // ---------- CreateFormShell rail ----------
+  const rail = (
+    <nav className="met-np-steps">
+      {steps.map((step, i) => {
+        // Completion rules (same logic, just displayed in shell rail)
+        const step0Done = Boolean(formData.productName.trim());
+        const step1Done = Boolean(isConfigurationComplete);
+
+        const showRingIcon =
+          (i === 0 && (currentStep === 0 || !step0Done)) ||
+          (i === 1 && currentStep === 1 && step0Done) ||
+          (i === 2 && (currentStep === 2 || (currentStep === 1 && step1Done)));
+
+        const isActiveStep = i === currentStep;
+
+        const isCompleted =
+          (i === 0 && step0Done && currentStep > 0) ||
+          (i === 1 && step1Done && currentStep > 1);
+
+        const isLocked = (i === 1 && isConfigurationLocked) || (i === 2 && isReviewLocked);
+
+        const isUnlocked = !isLocked && !isCompleted && !showRingIcon;
+
+        const showConnector = i < steps.length - 1;
+
+        const modalLock = isIconPickerOpen;
+        const disabled = (i === 2 && isReviewLocked) || modalLock;
+
+        return (
+          <button
+            key={step.id}
+            type="button"
+            className={[
+              "met-np-step",
+              isActiveStep ? "active" : "",
+              isCompleted ? "completed" : "",
+              isLocked ? "locked" : "",
+              disabled ? "disabled" : "",
+            ]
+              .join(" ")
+              .trim()}
+            onClick={() => {
+              if (disabled) return;
+              void gotoStep(i, true); // keep same sidebar navigation behavior
+            }}
+            disabled={disabled}
+            title={modalLock ? "Close the icon picker first" : isReviewLocked && i === 2 ? "Please complete configuration first" : ""}
+          >
+            <span className="met-np-step__bullet" aria-hidden="true">
+              <span className="met-np-step__icon">
+                {showRingIcon ? (
+                  <ActiveRingIcon />
+                ) : isCompleted ? (
+                  <CompletedIcon />
+                ) : isUnlocked ? (
+                  <UnlockedIcon />
+                ) : (
+                  <StepLockIcon />
+                )}
+              </span>
+
+              {showConnector && <span className="met-np-step__connector" />}
+            </span>
+
+            <span className="met-np-step__text">
+              <span className="met-np-step__title">{step.title}</span>
+              <span className="met-np-step__desc">{step.desc}</span>
+            </span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+
+  // Footer buttons (SAME actions, just rendered via CreateFormShell)
+  const footerHint =
+    (activeTab === "configuration" && isConfigurationLocked) ||
+    (activeTab === "review" && isReviewLocked)
+      ? "Complete the previous steps to unlock this step"
+      : undefined;
+
+  const footerLeft =
+    activeTab === "general" ? null : activeTab === "configuration" ? (
+      <SecondaryButton type="button" onClick={() => void gotoStep(0)}>
+        Back
+      </SecondaryButton>
+    ) : (
+      <SecondaryButton type="button" onClick={() => void gotoStep(1)}>
+        Back
+      </SecondaryButton>
+    );
+
+  const footerRight =
+    activeTab === "general" ? (
+      <PrimaryButton type="button" onClick={handleSaveAndNext} disabled={isSaving}>
+        Save & Next
+      </PrimaryButton>
+    ) : activeTab === "configuration" ? (
+      isConfigurationLocked ? null : (
+        <PrimaryButton type="button" onClick={handleSaveAndNext} disabled={isSaving}>
+          Save & Next
+        </PrimaryButton>
+      )
+    ) : (
+      <PrimaryButton type="button" onClick={handleFinalCreate} disabled={isSaving || isReviewLocked}>
+        {isSaving ? "Submitting..." : "Create Product"}
+      </PrimaryButton>
+    );
 
   return (
     <>
@@ -560,426 +710,282 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         }}
       />
 
-      <div className="prod-np-viewport">
-        <div className="prod-np-card">
-          <div className="prod-np-grid">
-            {/* LEFT rail */}
-            <aside className="prod-np-rail">
-              <nav className="prod-np-steps">
-                {steps.map((step, i) => {
-                  const isActive = i === currentStep;
-                  // Only mark as completed if user has moved past it AND all required fields are filled
-                  const isStep0Completed = formData.productName.trim();
-                  const isStep1Completed = isConfigurationComplete;
-                  const isCompleted =
-                    i < currentStep && (i === 0 ? isStep0Completed : i === 1 ? isStep1Completed : true);
-                  const showConnector = i < steps.length - 1;
+      <CreateFormShell
+        rail={rail}
+        title={
+          activeTab === "general"
+            ? "GENERAL DETAILS"
+            : activeTab === "configuration"
+            ? "CONFIGURATION"
+            : "REVIEW & CONFIRM"
+        }
+        locked={
+          activeTab === "configuration"
+            ? isConfigurationLocked
+            : activeTab === "review"
+            ? isReviewLocked
+            : false
+        }
+        footerLeft={footerLeft}
+        footerRight={footerRight}
+        footerHint={footerHint}
+      >
+        <form className="met-np-form" onSubmit={(e) => e.preventDefault()}>
+          <div className="met-np-form-section">
+            {/* STEP 1: GENERAL */}
+            {activeTab === "general" && (
+              <section>
+                <div className="prod-np-grid-2">
+                  <InputField
+                    label="Product Name"
+                    value={formData.productName}
+                    onChange={handleFieldChange("productName")}
+                    error={errors.productName}
+                    placeholder="eg. Google Maps API"
+                    required
+                  />
 
-                  const isReview = i === 2;
-                  const isDisabled = isReview && (!createdProductId || !isConfigurationComplete);
-                  const modalLock = isIconPickerOpen;
+                  <InputField
+                    label="Version"
+                    value={formData.version}
+                    onChange={handleFieldChange("version")}
+                    placeholder="eg., 2.3-VOS"
+                  />
 
-                  return (
-                    <button
-                      key={step.id}
-                      type="button"
-                      className={[
-                        "prod-np-step",
-                        isActive ? "active" : "",
-                        isCompleted ? "completed" : "",
-                        isDisabled || modalLock ? "disabled" : "",
-                      ]
-                        .join(" ")
-                        .trim()}
-                      onClick={() => {
-                        if (isDisabled || modalLock) return;
-                        void gotoStep(i, true); // skipValidation=true for sidebar navigation
-                      }}
-                      disabled={isDisabled || modalLock}
-                      title={
-                        modalLock ? "Close the icon picker first" : isDisabled ? "Please complete configuration first" : ""
-                      }
-                    >
-                      <span className="prod-np-step__bullet" aria-hidden="true">
-                        <span className="prod-np-step__icon">
-                          {isCompleted ? (
-                            // Completed step - show checkmark
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="11.5" fill="var(--color-primary-800)" stroke="var(--color-primary-800)" />
-                              <path d="M7 12l3 3 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          ) : (i === 0 && !isCompleted) ||
-                            (isActive && !isConfigurationLocked) ||
-                            (i === 1 && !isConfigurationLocked && !isActive) ? (
-                            // Active step (unlocked), General Details, or unlocked Configuration (not active) - show dot
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="11" stroke="#C3C2D0" strokeWidth="2" />
-                              <circle cx="12" cy="12" r="6" fill="#C3C2D0" />
-                            </svg>
-                          ) : i === 1 && isConfigurationLocked && isActive ? (
-                            // Configuration is locked AND active - show BLUE-FILLED lock icon
-                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
-                              <circle cx="13" cy="13" r="13" fill="var(--color-primary-800)" />
-                              <path
-                                d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
-                                stroke="#FFFFFF"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          ) : (
-                            // Locked step (not active) - show GRAY lock icon
-                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
-                              <path
-                                d="M10.03 11.895V9.67503C10.03 8.93905 10.3224 8.23322 10.8428 7.71281C11.3632 7.1924 12.069 6.90004 12.805 6.90004C13.541 6.90004 14.2468 7.1924 14.7672 7.71281C15.2876 8.23322 15.58 8.93905 15.58 9.67503V11.895M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C19.6274 1 25 6.37258 25 13ZM8.92003 11.895H16.69C17.303 11.895 17.8 12.392 17.8 13.005V16.89C17.8 17.503 17.303 18 16.69 18H8.92003C8.307 18 7.81003 17.503 7.81003 16.89V13.005C7.81003 12.392 8.307 11.895 8.92003 11.895Z"
-                                stroke="#BAC4D5"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
-                        </span>
-                        {showConnector && <span className="prod-np-step__connector" />}
-                      </span>
-
-                      <span className="prod-np-step__text">
-                        <span className="prod-np-step__title">{step.title}</span>
-                        <span className="prod-np-step__desc">{step.desc}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </aside>
-
-            {/* MAIN */}
-            <main className="prod-np-main">
-              <div className="af-skel-rule af-skel-rule--top" />
-
-              <div className="prod-np-main__inner">
-                <div className="prod-np-body">
-                  {activeTab === "general" && <SectionHeader title="GENERAL DETAILS" className="prod-np-section-header-fixed" />}
-
-                  {activeTab === "configuration" && (
-                    <div className="prod-np-section-header-fixed" style={{ display: "flex", alignItems: "center" }}>
-                      <SectionHeader title="CONFIGURATION" />
-                      {isConfigurationLocked && <LockBadge />}
+                  {/* Product Icon Field - Add (DO NOT CHANGE CLASSNAMES) */}
+                  {!selectedIcon && (
+                    <div className="prod-np-form-group">
+                      <label className="if-label">Product Icon</label>
+                      <div className="prod-np-icon-field-wrapper">
+                        <div className="prod-np-icon-placeholder">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+                            <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA" />
+                            <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05" />
+                            <path
+                              d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z"
+                              stroke="#909599"
+                              strokeWidth="2.1"
+                            />
+                            <path
+                              d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z"
+                              stroke="#909599"
+                              strokeWidth="2.1"
+                            />
+                          </svg>
+                        </div>
+                        <span className="prod-np-icon-placeholder-text">Add product icon</span>
+                        <button
+                          type="button"
+                          className="prod-np-icon-add-btn"
+                          onClick={() => setIsIconPickerOpen(true)}
+                        >
+                          <span>+ Add</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 
-                  {activeTab === "review" && <SectionHeader title="REVIEW & CONFIRM" className="prod-np-section-header-fixed" />}
+                  {/* Product Icon Field - Selected (DO NOT CHANGE CLASSNAMES) */}
+                  {selectedIcon &&
+                    (() => {
+                      const extractDisplayColor = (colorStr: string): string => {
+                        if (!colorStr) return "#CC9434";
+                        const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
+                        return match ? match[1].trim() : colorStr;
+                      };
 
-                  <form className="prod-np-form" onSubmit={(e) => e.preventDefault()}>
-                    <div className="prod-np-form-section">
-                      {/* STEP 1: GENERAL */}
-                      {activeTab === "general" && (
-                        <section>
-                          <div className="prod-np-grid-2">
-                            <InputField
-                              label="Product Name"
-                              value={formData.productName}
-                              onChange={handleFieldChange("productName")}
-                              error={errors.productName}
-                              placeholder="eg. Google Maps API"
-                              required
-                            />
+                      const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || "#F8F7FA");
+                      const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || "#E4EEF9");
+                      const tileColor = extractDisplayColor(selectedIcon.tileColor || "#CC9434");
 
-                            <InputField
-                              label="Version"
-                              value={formData.version}
-                              onChange={handleFieldChange("version")}
-                              placeholder="eg., 2.3-VOS"
-                            />
-
-                            {/* Product Icon Field - Add */}
-                            {!selectedIcon && (
-                              <div className="prod-np-form-group">
-                                <label className="if-label">Product Icon</label>
-                                <div className="prod-np-icon-field-wrapper">
-                                  <div className="prod-np-icon-placeholder">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
-                                      <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" fill="#F8F7FA" />
-                                      <rect x="0.525" y="0.525" width="54.95" height="54.95" rx="7.475" stroke="#BFBECE" strokeWidth="1.05" />
-                                      <path
-                                        d="M28 25.1996C31.866 25.1996 35 22.379 35 18.8996C35 15.4202 31.866 12.5996 28 12.5996C24.134 12.5996 21 15.4202 21 18.8996C21 22.379 24.134 25.1996 28 25.1996Z"
-                                        stroke="#909599"
-                                        strokeWidth="2.1"
-                                      />
-                                      <path
-                                        d="M28.0008 43.4008C34.1864 43.4008 39.2008 40.5802 39.2008 37.1008C39.2008 33.6214 34.1864 30.8008 28.0008 30.8008C21.8152 30.8008 16.8008 33.6214 16.8008 37.1008C16.8008 40.5802 21.8152 43.4008 28.0008 43.4008Z"
-                                        stroke="#909599"
-                                        strokeWidth="2.1"
-                                      />
-                                    </svg>
-                                  </div>
-                                  <span className="prod-np-icon-placeholder-text">Add product icon</span>
-                                  <button type="button" className="prod-np-icon-add-btn" onClick={() => setIsIconPickerOpen(true)}>
-                                    <span>+ Add</span>
-                                  </button>
+                      return (
+                        <div className="prod-np-form-group">
+                          <label className="if-label">Product Icon</label>
+                          <div className="prod-np-icon-field-wrapper">
+                            <div className="prod-np-icon-preview">
+                              <div
+                                style={{
+                                  width: 50.6537,
+                                  height: 46.3351,
+                                  borderRadius: 12,
+                                  border: "0.6px solid var(--border-border-2, #D5D4DF)",
+                                  background: `
+                                    linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
+                                    linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
+                                    radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
+                                  `,
+                                  display: "flex",
+                                  padding: 8,
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  position: "relative",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    left: 10.5,
+                                    top: 8.2,
+                                    width: 29.45,
+                                    height: 25.243,
+                                    borderRadius: 5.7,
+                                    background: tileColor,
+                                  }}
+                                />
+                                <div
+                                  style={{
+                                    width: 29.339,
+                                    height: 26.571,
+                                    padding: "1.661px 3.321px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    gap: 2.214,
+                                    flexShrink: 0,
+                                    borderRadius: 6,
+                                    border: "0.6px solid #FFF",
+                                    background: "rgba(202, 171, 213, 0.10)",
+                                    backdropFilter: "blur(3.875px)",
+                                    transform: "translate(3px, 2px)",
+                                    boxShadow: "inset 0 1px 8px rgba(255,255,255,0.35)",
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
+                                    fill="none"
+                                    style={{ flexShrink: 0, aspectRatio: "1 / 1", display: "block" }}
+                                  >
+                                    <path d={selectedIcon.svgPath} fill="#FFFFFF" />
+                                  </svg>
                                 </div>
                               </div>
-                            )}
+                            </div>
+                            <div className="prod-np-icon-actions">
+                              <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
+                              <DeleteButton
+                                onClick={() => {
+                                  setSelectedIcon(null);
 
-                            {/* Product Icon Field - Selected */}
-                            {selectedIcon &&
-                              (() => {
-                                // Helper function to extract color from CSS var() or return as-is
-                                const extractDisplayColor = (colorStr: string): string => {
-                                  if (!colorStr) return "#CC9434";
-                                  const match = colorStr.match(/var\([^,]+,\s*([^)]+)\)/);
-                                  return match ? match[1].trim() : colorStr;
-                                };
-
-                                const outerBg1 = extractDisplayColor(selectedIcon.outerBg?.[0] || "#F8F7FA");
-                                const outerBg2 = extractDisplayColor(selectedIcon.outerBg?.[1] || "#E4EEF9");
-                                const tileColor = extractDisplayColor(selectedIcon.tileColor || "#CC9434");
-
-                                return (
-                                  <div className="prod-np-form-group">
-                                    <label className="if-label">Product Icon</label>
-                                    <div className="prod-np-icon-field-wrapper">
-                                      <div className="prod-np-icon-preview">
-                                        <div
-                                          style={{
-                                            width: 50.6537,
-                                            height: 46.3351,
-                                            borderRadius: 12,
-                                            border: "0.6px solid var(--border-border-2, #D5D4DF)",
-                                            background: `
-                                              linear-gradient(0deg, rgba(1,69,118,0.10) 0%, rgba(1,69,118,0.10) 100%),
-                                              linear-gradient(135deg, ${outerBg1}, ${outerBg2}),
-                                              radial-gradient(110% 110% at 85% 85%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 60%)
-                                            `,
-                                            display: "flex",
-                                            padding: 8,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            position: "relative",
-                                            overflow: "hidden",
-                                          }}
-                                        >
-                                          <div
-                                            style={{
-                                              position: "absolute",
-                                              left: 10.5,
-                                              top: 8.2,
-                                              width: 29.45,
-                                              height: 25.243,
-                                              borderRadius: 5.7,
-                                              background: tileColor,
-                                            }}
-                                          />
-                                          <div
-                                            style={{
-                                              width: 29.339,
-                                              height: 26.571,
-                                              padding: "1.661px 3.321px",
-                                              display: "flex",
-                                              justifyContent: "center",
-                                              alignItems: "center",
-                                              gap: 2.214,
-                                              flexShrink: 0,
-                                              borderRadius: 6,
-                                              border: "0.6px solid #FFF",
-                                              background: "rgba(202, 171, 213, 0.10)",
-                                              backdropFilter: "blur(3.875px)",
-                                              transform: "translate(3px, 2px)",
-                                              boxShadow: "inset 0 1px 8px rgba(255,255,255,0.35)",
-                                            }}
-                                          >
-                                            <svg
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              width="18"
-                                              height="18"
-                                              viewBox={selectedIcon.viewBox ?? "0 0 18 18"}
-                                              fill="none"
-                                              style={{ flexShrink: 0, aspectRatio: "1 / 1", display: "block" }}
-                                            >
-                                              <path d={selectedIcon.svgPath} fill="#FFFFFF" />
-                                            </svg>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="prod-np-icon-actions">
-                                        <EditButton onClick={() => setIsIconPickerOpen(true)} label="Edit" />
-                                        <DeleteButton
-                                          onClick={() => {
-                                            setSelectedIcon(null);
-                                            // Clear cache immediately to prevent icon from reappearing
-                                            if (createdProductId || activeDraft?.productId) {
-                                              const productId = createdProductId || activeDraft?.productId;
-                                              try {
-                                                const iconCache = JSON.parse(localStorage.getItem("iconDataCache") || "{}");
-                                                delete iconCache[productId as any];
-                                                localStorage.setItem("iconDataCache", JSON.stringify(iconCache));
-                                              } catch {
-                                                /* ignore */
-                                              }
-                                            }
-                                          }}
-                                          label="Remove"
-                                          variant="soft"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })()}
-
-                            <div style={{ gridColumn: "1 / -1" }}>
-                              <TextareaField
-                                label="Description"
-                                value={formData.description}
-                                onChange={handleFieldChange("description")}
-                                placeholder="eg. Mapping service API for location-based apps..."
+                                  // Clear cache immediately to prevent icon from reappearing
+                                  if (createdProductId || activeDraft?.productId) {
+                                    const productId = createdProductId || activeDraft?.productId;
+                                    try {
+                                      const iconCache = JSON.parse(localStorage.getItem("iconDataCache") || "{}");
+                                      delete iconCache[productId as any];
+                                      localStorage.setItem("iconDataCache", JSON.stringify(iconCache));
+                                    } catch {
+                                      /* ignore */
+                                    }
+                                  }
+                                }}
+                                label="Remove"
+                                variant="soft"
                               />
                             </div>
                           </div>
-
-                          <ProductIconPickerModal
-                            isOpen={isIconPickerOpen}
-                            onClose={() => setIsIconPickerOpen(false)}
-                            onSelect={(icon) => {
-                              setSelectedIcon(icon);
-                              setIsIconPickerOpen(false);
-                              document.activeElement instanceof HTMLElement && document.activeElement.blur();
-                            }}
-                          />
-                        </section>
-                      )}
-
-                      {/* STEP 2: CONFIGURATION */}
-                      {activeTab === "configuration" && (
-                        <section>
-                          <ConfigurationTab
-                            onConfigChange={(c) => setConfiguration((prev) => ({ ...prev, ...c }))}
-                            onProductTypeChange={(t) => setConfiguration((prev) => ({ ...prev, productType: t }))}
-                            ref={configRef}
-                            productId={createdProductId || undefined}
-                            onSubmit={async () => true}
-                            initialProductType={configuration.productType}
-                            isSavingDraft={isSaving}
-                            readOnly={false}
-                            locked={isConfigurationLocked}
-                          />
-                        </section>
-                      )}
-
-                      {/* STEP 3: REVIEW */}
-                      {activeTab === "review" && (
-                        <section>
-                          <ProductReview generalDetails={formData} configuration={configuration} />
-                          {/* keep ref alive */}
-                          <div style={{ display: "none" }}>
-                            <ConfigurationTab
-                              ref={configRef}
-                              productId={createdProductId || undefined}
-                              initialProductType={configuration.productType}
-                              onConfigChange={() => {}}
-                              onProductTypeChange={() => {}}
-                              isSavingDraft={false}
-                              readOnly={true}
-                              locked={false}
-                            />
-                          </div>
-                        </section>
-                      )}
-                    </div>
-
-                    {/* FOOTER ✅ same pattern as CreateUsageMetric */}
-                    <div className="prod-np-form-footer" style={{ position: "relative" }}>
-                      {errors.form && <div className="prod-np-error-message">{errors.form}</div>}
-
-                      {activeTab === "general" && (
-                        <div className="prod-np-btn-group prod-np-btn-group--next">
-                          <PrimaryButton type="button" onClick={handleSaveAndNext}>
-                            Save & Next
-                          </PrimaryButton>
                         </div>
-                      )}
+                      );
+                    })()}
 
-                      {activeTab === "configuration" && (
-                        <>
-                          {isConfigurationLocked ? (
-                            <div
-                              className="prod-np-footer-hint"
-                              style={{
-                                position: "absolute",
-                                left: "50%",
-                                bottom: "20px",
-                                transform: "translateX(-50%)",
-                                color: "#8C8F96",
-                                fontSize: 14,
-                                pointerEvents: "none",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              Fill the previous steps to unlock this step
-                            </div>
-                          ) : (
-                            <>
-                              <div className="prod-np-btn-group prod-np-btn-group--back">
-                                <SecondaryButton type="button" onClick={() => void gotoStep(0)}>
-                                  Back
-                                </SecondaryButton>
-                              </div>
-                              <div className="prod-np-btn-group prod-np-btn-group--next">
-                                <PrimaryButton type="button" onClick={handleSaveAndNext} disabled={isSaving}>
-                                  Save & Next
-                                </PrimaryButton>
-                              </div>
-                            </>
-                          )}
-                        </>
-                      )}
-
-                      {activeTab === "review" && (
-                        <>
-                          <div className="prod-np-btn-group prod-np-btn-group--back">
-                            <SecondaryButton type="button" onClick={() => void gotoStep(1)}>
-                              Back
-                            </SecondaryButton>
-                          </div>
-                          <div className="prod-np-btn-group prod-np-btn-group--next">
-                            <PrimaryButton type="button" onClick={handleFinalCreate} disabled={isSaving}>
-                              {isSaving ? "Submitting..." : "Create Product"}
-                            </PrimaryButton>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </form>
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <TextareaField
+                      label="Description"
+                      value={formData.description}
+                      onChange={handleFieldChange("description")}
+                      placeholder="eg. Mapping service API for location-based apps..."
+                    />
+                  </div>
                 </div>
-              </div>
-            </main>
+
+                <ProductIconPickerModal
+                  isOpen={isIconPickerOpen}
+                  onClose={() => setIsIconPickerOpen(false)}
+                  onSelect={(icon) => {
+                    setSelectedIcon(icon);
+                    setIsIconPickerOpen(false);
+                    document.activeElement instanceof HTMLElement && document.activeElement.blur();
+                  }}
+                />
+              </section>
+            )}
+
+            {/* STEP 2: CONFIGURATION */}
+            {activeTab === "configuration" && (
+              <section>
+                <ConfigurationTab
+                  onConfigChange={(c) => setConfiguration((prev) => ({ ...prev, ...c }))}
+                  onProductTypeChange={(t) => setConfiguration((prev) => ({ ...prev, productType: t }))}
+                  ref={configRef}
+                  productId={createdProductId || undefined}
+                  onSubmit={async () => true}
+                  initialProductType={configuration.productType}
+                  isSavingDraft={isSaving}
+                  readOnly={false}
+                  locked={isConfigurationLocked}
+                />
+              </section>
+            )}
+
+            {/* STEP 3: REVIEW */}
+            {activeTab === "review" && (
+              <section>
+                <ProductReview generalDetails={formData} configuration={configuration} />
+                {/* keep ref alive */}
+                <div style={{ display: "none" }}>
+                  <ConfigurationTab
+                    ref={configRef}
+                    productId={createdProductId || undefined}
+                    initialProductType={configuration.productType}
+                    onConfigChange={() => {}}
+                    onProductTypeChange={() => {}}
+                    isSavingDraft={false}
+                    readOnly={true}
+                    locked={false}
+                  />
+                </div>
+              </section>
+            )}
           </div>
 
-          <div className="af-skel-rule af-skel-rule--bottom" />
+          {/* same “footer message area” pattern as CreateCustomer */}
+          <div className="metform-footer" style={{ position: "relative" }}>
+            {errors.form && <div className="prod-np-error-message">{errors.form}</div>}
+          </div>
+        </form>
+      </CreateFormShell>
 
-          {/* Save Draft prompt ✅ same position/style */}
-          <SaveDraft
-            isOpen={showSavePrompt}
-            onClose={async () => {
-              setShowSavePrompt(false);
-              await deleteAndClose();
-            }}
-            onSave={async () => {
-              const ok = await handleSaveDraft();
-              const hasData = formData.productName || formData.version || formData.description;
+      {/* Save Draft prompt (same behavior) */}
+      <SaveDraft
+        isOpen={showSavePrompt}
+        onClose={async () => {
+          setShowSavePrompt(false);
+          await deleteAndClose();
+        }}
+        onSave={async () => {
+          const ok = await handleSaveDraft();
+          const hasData = formData.productName || formData.version || formData.description;
 
-              if (ok && hasData) {
-                showToast({ kind: "success", title: "Product Draft Saved", message: "Product draft saved successfully." });
-              } else if (!ok) {
-                showToast({ kind: "error", title: "Failed to Save Draft", message: "Unable to save draft. Please try again." });
-              }
-              onClose();
-            }}
-            onDismiss={() => setShowSavePrompt(false)}
-          />
-        </div>
-      </div>
+          if (ok && hasData) {
+            showToast({
+              kind: "success",
+              title: "Product Draft Saved",
+              message: "Product draft saved successfully.",
+            });
+          } else if (!ok) {
+            showToast({
+              kind: "error",
+              title: "Failed to Save Draft",
+              message: "Unable to save draft. Please try again.",
+            });
+          }
+          onClose();
+        }}
+        onDismiss={() => setShowSavePrompt(false)}
+      />
 
       <ConfirmDeleteModal
         isOpen={showDeleteConfirm}
