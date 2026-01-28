@@ -11,6 +11,7 @@ import StatusBadge, { Variant } from "../componenetsss/StatusBadge";
 import EditIconButton from "../componenetsss/EditIconButton";
 import DeleteIconButton from "../componenetsss/DeleteIconButton";
 import RetryIconButton from "../componenetsss/RetryIconButton";
+import DownloadIconButton from "../componenetsss/DownloadIconButton";
 import ConfirmDeleteModal from "../componenetsss/ConfirmDeleteModal";
 import PaymentTypePill from "../componenetsss/PayementTypePill";
 
@@ -175,6 +176,34 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({
   const [mainFilterMenuPosition, setMainFilterMenuPosition] = useState({ top: 0, left: 0 });
   const [mainFilterPanelPosition, setMainFilterPanelPosition] = useState({ top: 0, left: 0 });
   const [isMainFilterPanelOpen, setIsMainFilterPanelOpen] = useState(false);
+
+  /* ---- download handler ---- */
+  const handleDownload = (sub: SubscriptionType) => {
+    try {
+      const data = JSON.stringify(sub, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `subscription_${sub.subscriptionId || 'export'}_${new Date().getTime()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast({
+        kind: "success",
+        title: "Download Successful",
+        message: "Subscription downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      showToast({
+        kind: "error",
+        title: "Download Failed",
+        message: "Failed to download subscription. Please try again.",
+      });
+    }
+  };
 
   /* ---- column dropdown state (same pattern as Customers) ---- */
   const ratePlanFilterRef = useRef<HTMLDivElement>(null!);
@@ -483,7 +512,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({
       ref: dateFilterRef,
       onFilterClick: () => setIsDateFilterOpen(true),
       width: 230,
-      render: (sub) => <span data-date>{formatPurchased(sub)}</span>,
+      render: (sub) => <span data-date>{formatPurchased(sub)}</span>
     },
     {
       key: "status",
@@ -514,6 +543,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({
               <EditIconButton onClick={() => setEditingSub(sub)} title="Edit purchase" />
             )}
 
+            <DownloadIconButton onClick={() => handleDownload(sub)} title="Download subscription" />
             <DeleteIconButton onClick={() => handleDeleteClick(sub)} title="Delete purchase" />
           </div>
         );

@@ -15,6 +15,7 @@ import DeleteIconButton from "../componenetsss/DeleteIconButton";
 import RetryIconButton from "../componenetsss/RetryIconButton";
 import StatusBadge, { Variant } from "../componenetsss/StatusBadge";
 import PrimaryButton from "../componenetsss/PrimaryButton";
+import PaymentTypePill from "../componenetsss/PayementTypePill";
 
 import FilterChip from "../componenetsss/FilterChip";
 import FilterDropdown from "../componenetsss/FilterDropdown";
@@ -823,49 +824,15 @@ const RatePlansInner: React.FC<RatePlansProps> = ({
   const renderPaymentType = (p: RatePlan) => {
     const raw = String(p.paymentType || p.ratePlanType || "")
       .trim()
-      .toUpperCase()
+      .toLowerCase()
       .replace(/[_-]/g, "");
 
-    if (raw === "PREPAID") {
-      return (
-        <span className="pill pill--prepaid">
-          <span className="pill-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <g clipPath="url(#clip0_14251_15772)">
-                <path
-                  d="M12.0597 6.9135C12.6899 7.14845 13.2507 7.53852 13.6902 8.04763C14.1297 8.55674 14.4337 9.16846 14.5742 9.82621C14.7146 10.484 14.6869 11.1665 14.4937 11.8107C14.3005 12.4549 13.9479 13.04 13.4686 13.5119C12.9893 13.9838 12.3988 14.3272 11.7517 14.5103C11.1045 14.6935 10.4216 14.7105 9.76613 14.5598C9.11065 14.4091 8.50375 14.0956 8.00156 13.6482C7.49937 13.2008 7.1181 12.634 6.89301 12.0002M4.66634 4.00016H5.33301V6.66683M11.1397 9.2535L11.6063 9.72683L9.72634 11.6068M9.33301 5.3335C9.33301 7.54264 7.54215 9.3335 5.33301 9.3335C3.12387 9.3335 1.33301 7.54264 1.33301 5.3335C1.33301 3.12436 3.12387 1.3335 5.33301 1.3335C7.54215 1.3335 9.33301 3.12436 9.33301 5.3335Z"
-                  stroke="#19222D"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_14251_15772">
-                  <rect width="16" height="16" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
-          </span>
-          Pre-paid
-        </span>
-      );
+    if (raw === "prepaid") {
+      return <PaymentTypePill type="prepaid" />;
     }
 
-    if (raw === "POSTPAID") {
-      return (
-        <span className="pill pill--postpaid">
-          <span className="pill-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path
-                d="M4.0124 13.6C2.89133 13.6 1.94233 13.2115 1.1654 12.4346C0.388467 11.6577 0 10.7087 0 9.5876C0 9.11693 0.0802666 8.65953 0.2408 8.2154C0.401333 7.77127 0.631333 7.36873 0.9308 7.0078L3.33813 4.11263C3.5917 3.80767 3.64109 3.38169 3.46402 3.02681L2.67551 1.44646C2.34378 0.781608 2.8273 0 3.57031 0H10.0297C10.7727 0 11.2562 0.781609 10.9245 1.44646L10.136 3.02681C9.95891 3.38169 10.0083 3.80767 10.2619 4.11263L12.6692 7.0078C12.9687 7.36873 13.1987 7.77127 13.3592 8.2154C13.5197 8.65953 13.6 9.11693 13.6 9.5876C13.6 10.7087 13.2095 11.6577 12.4284 12.4346C11.6475 13.2115 10.7005 13.6 9.5876 13.6H4.0124ZM6.8 9.7922C6.40107 9.7922 6.06033 9.65093 5.7778 9.3684C5.49513 9.08587 5.3538 8.74513 5.3538 8.3462C5.3538 7.94713 5.49513 7.60633 5.7778 7.3238C6.06033 7.04127 6.40107 6.9 6.8 6.9C7.19893 6.9 7.53967 7.04127 7.8222 7.3238C8.10487 7.60633 8.2462 7.94713 8.2462 8.3462C8.2462 8.74513 8.10487 9.08587 7.8222 9.3684C7.53967 9.65093 7.19893 9.7922 6.8 9.7922Z"
-                fill="#19222D"
-              />
-            </svg>
-          </span>
-          Post-paid
-        </span>
-      );
+    if (raw === "postpaid") {
+      return <PaymentTypePill type="postpaid" />;
     }
 
     return <span className="pill pill--unknown">—</span>;

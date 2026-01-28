@@ -303,6 +303,13 @@ export default function CreateUsageMetric({
     </svg>
   );
 
+  const UnlockedIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <path d="M19 13C19 16.3137 16.3137 19 13 19C9.68629 19 7 16.3137 7 13C7 9.68629 9.68629 7 13 7C16.3137 7 19 9.68629 19 13Z" fill="#BAC4D5"/>
+      <path d="M13 1C19.6274 1 25 6.37258 25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1ZM18 13C18 15.7614 15.7614 18 13 18C10.2386 18 8 15.7614 8 13C8 10.2386 10.2386 8 13 8C15.7614 8 18 10.2386 18 13ZM20 13C20 9.13401 16.866 6 13 6C9.13401 6 6 9.13401 6 13C6 16.866 9.13401 20 13 20C16.866 20 20 16.866 20 13Z" stroke="#BAC4D5" strokeWidth="2"/>
+    </svg>
+  );
+
   const productOptions = products.map((p) => ({ label: p.productName, value: String(p.productId) }));
 
   const deleteAndClose = async () => {
@@ -729,6 +736,8 @@ export default function CreateUsageMetric({
                   const isLocked =
                     (i === 1 && isConditionsLocked) || (i === 2 && isReviewLocked);
 
+                  const isUnlocked = !isLocked && !isCompleted && !isActive;
+
                   const showConnector = i < steps.length - 1;
 
                   return (
@@ -745,7 +754,7 @@ export default function CreateUsageMetric({
                     >
                       <span className="met-np-step__bullet" aria-hidden="true">
                         <span className="met-np-step__icon">
-                          {isLocked ? <StepLockIcon /> : isActive ? <ActiveRingIcon /> : isCompleted ? <CompletedIcon /> : <StepLockIcon />}
+                          {isActive ? <ActiveRingIcon /> : isCompleted ? <CompletedIcon /> : isUnlocked ? <UnlockedIcon /> : <StepLockIcon />}
                         </span>
                         {showConnector && <span className="met-np-step__connector" />}
                       </span>

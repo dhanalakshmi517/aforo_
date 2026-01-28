@@ -757,6 +757,7 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                   error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.value`] : undefined}
                 />
               ) : (
+                <>
                 <InputField
                   label="Value"
                   type="text"
@@ -789,16 +790,20 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                       const validNumber = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : numericWithDecimal;
                       handleChange(filter.id, 'value', validNumber);
                     }
-                    // For UPLOAD_TIME dimension, only allow ISO date format
+                    // For UPLOAD_TIME dimension, format as MM/DD/YYYY
                     else if (filter.usageCondition === 'UPLOAD_TIME') {
-                      handleChange(filter.id, 'value', val);
+                      const numericOnly = val.replace(/\D/g, '');
+                      let formatted = numericOnly;
+                      if (numericOnly.length >= 2) {
+                        formatted = numericOnly.slice(0, 2) + '/' + numericOnly.slice(2);
+                      }
+                      if (numericOnly.length >= 4) {
+                        formatted = numericOnly.slice(0, 2) + '/' + numericOnly.slice(2, 4) + '/' + numericOnly.slice(4, 8);
+                      }
+                      handleChange(filter.id, 'value', formatted);
                     }
                     // For FILE_NAME dimension, only allow non-empty strings (no spaces only)
                     else if (filter.usageCondition === 'FILE_NAME') {
-                      handleChange(filter.id, 'value', val);
-                    }
-                    // For UPLOAD_TIME dimension, validate ISO date format
-                    else if (filter.usageCondition === 'UPLOAD_TIME') {
                       handleChange(filter.id, 'value', val);
                     }
                     // For EXECUTION_TIME dimension, only allow numbers (including decimals)
@@ -959,10 +964,17 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                     else if (filter.usageCondition === 'DELIVERY_REGION') {
                       handleChange(filter.id, 'value', val);
                     }
-                    // For DELIVERY_TIME dimension, only allow numbers (integers)
+                    // For DELIVERY_TIME dimension, format as MM/DD/YYYY
                     else if (filter.usageCondition === 'DELIVERY_TIME') {
                       const numericOnly = val.replace(/\D/g, '');
-                      handleChange(filter.id, 'value', numericOnly);
+                      let formatted = numericOnly;
+                      if (numericOnly.length >= 2) {
+                        formatted = numericOnly.slice(0, 2) + '/' + numericOnly.slice(2);
+                      }
+                      if (numericOnly.length >= 4) {
+                        formatted = numericOnly.slice(0, 2) + '/' + numericOnly.slice(2, 4) + '/' + numericOnly.slice(4, 8);
+                      }
+                      handleChange(filter.id, 'value', formatted);
                     }
                     // For FILE_SIZE_MB dimension, only allow numbers (integers)
                     else if (filter.usageCondition === 'FILE_SIZE_MB') {
@@ -1053,6 +1065,19 @@ const EditUsage: React.FC<EditUsageProps> = ({ productType, unitOfMeasure, condi
                   }}
                   error={billingCriteria === 'BILL_BASED_ON_USAGE_CONDITIONS' ? errors[`${index}.value`] : undefined}
                 />
+                {/* Inline validation message for number fields - show hint for these dimensions */}
+                {['STATUS_CODE', 'REQUEST_ID', 'TRANSACTION_ID', 'AMOUNT', 'PAGE_URL', 'DELIVERY_ID', 'DELIVERY_TIME', 'FILE_SIZE_MB', 'ROW_COUNT_ROW', 'EXECUTION_TIME_CELL', 'ROW_COUNT_QUERY_CELL', 'FILE_SIZE', 'EXECUTION_TIME', 'ROW_COUNT_QUERY', 'TOKEN_COUNT', 'TOKEN_COUNT_PROMPT_TOKEN', 'TOKEN_COUNT_COMPLETION_TOKEN', 'RESPONSE_TIME', 'UPLOAD_TIME', 'TIMESTAMP', 'TIME_SPENT'].includes(filter.usageCondition) && (
+                  <div style={{ fontSize: '10px', color: '#FFA500', marginTop: '-8px' }}>
+                    Numbers only
+                  </div>
+                )}
+                {/* Inline validation message for string fields that shouldn't have numbers */}
+                {['METHOD', 'ENDPOINT', 'FILE_NAME', 'USER_AGENT', 'IP_ADDRESS', 'REGION_REQUEST', 'MODEL_NAME', 'USER_ID', 'MODEL_NAME_PROMPT_TOKEN', 'USER_ID_PROMPT_TOKEN', 'MODEL_NAME_COMPLETION_TOKEN', 'USER_ID_COMPLETION_TOKEN', 'COMPRESSED', 'SOURCE_SYSTEM_ROW', 'SCHEMA_VERSION_ROW', 'IS_VALID_ROW', 'USER_ID_QUERY'].includes(filter.usageCondition) && filter.value && /\d/.test(filter.value) && (
+                  <div style={{ fontSize: '10px', color: '#FFA500', marginTop: '-8px' }}>
+                    Text only
+                  </div>
+                )}
+                </>
               )}
             </div>
           </div>
