@@ -1,61 +1,96 @@
 @import "../Variables/Variables.css";
 
-  /* Base */
-  .aft-tertiary-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width:132px auto;
-  
-    height: 40px;
-    padding: 8px 20px;
-    border-radius: var(--border-radius-sm);
-  
-    background: var(--color-neutral-white);
-    color: var(--color-primary-800);
-    
-    border: 1px solid var(--color-primary-800);
-  
+:root {
+  --aft-btn-icon-gap: 8px;
+}
 
-    /* body/md/med */
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-md);
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--line-height-body-md); /* 142.857% */  
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    white-space: nowrap;
-   
-  }
-  
-  .aft-tertiary-btn.is-full { width: 100%; }
-  
-  /* States */
-  .aft-tertiary-btn:hover:not(:disabled) { background: var(--color-neutral-white); }
-  .aft-tertiary-btn:active:not(:disabled) {
-    background: var(--color-neutral-100);
-    border:1px solid var(--color-primary-800);
-    transform: translateY(0.5px);
-    color: var(--color-primary-800);
+/* Base */
+.aft-tertiary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* ✅ FIX: your old "width:132px auto;" is invalid */
+  min-width: 132px;
+
+  height: 40px;
+  padding: 8px 20px;
+  border-radius: var(--border-radius-sm);
+
+  background: var(--color-neutral-white);
+  color: var(--color-primary-800);
+
+  border: 1px solid var(--color-primary-800);
+
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-body-md);
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.aft-tertiary-btn.is-full {
+  width: 100%;
+}
+
+/* Icon + Label */
+.aft-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.aft-btn-icon--left {
+  margin-right: var(--aft-btn-icon-gap);
+}
+
+.aft-btn-icon--right {
+  margin-left: var(--aft-btn-icon-gap);
+}
+
+.aft-btn-label {
+  display: inline-block;
+}
+
+/* States */
+.aft-tertiary-btn:hover:not(:disabled) {
+  background: var(--color-neutral-white);
+}
+
+.aft-tertiary-btn:active:not(:disabled) {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-primary-800);
+  transform: translateY(0.5px);
+  color: var(--color-primary-800);
+}
+
+.aft-tertiary-btn:focus-visible {
+  outline: none;
+  border: 2px solid var(--color-primary-600);
+  background: var(--color-neutral-white);
+}
+
+.aft-tertiary-btn:disabled {
+  color: var(--color-neutral-500);
+  border-color: var(--color-neutral-200);
+  background: var(--color-neutral-white);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* High-contrast support */
+@media (forced-colors: active) {
+  .aft-tertiary-btn {
+    border-color: ButtonText;
   }
   .aft-tertiary-btn:focus-visible {
-    outline: none;
-    border:2px solid var(--color-primary-600);
-    background: var(--color-neutral-white);
-  }
-  .aft-tertiary-btn:disabled {
-    color: var(--color-neutral-500);
-    border-color: var(--color-neutral-200);
-    background: var(--color-neutral-white);
-    cursor: not-allowed;
+    outline: 2px solid Highlight;
     box-shadow: none;
   }
-  
-  /* High-contrast support */
-  @media (forced-colors: active) {
-    .aft-tertiary-btn { border-color: ButtonText; }
-    .aft-tertiary-btn:focus-visible { outline: 2px solid Highlight; box-shadow: none; }
-  }
-  
+}

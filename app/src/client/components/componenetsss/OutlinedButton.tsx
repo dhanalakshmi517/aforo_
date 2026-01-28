@@ -7,6 +7,7 @@ interface OutlinedButtonProps {
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
   disabled?: boolean;
+  className?: string;
 }
 
 const OutlinedButton: React.FC<OutlinedButtonProps> = ({
@@ -15,10 +16,11 @@ const OutlinedButton: React.FC<OutlinedButtonProps> = ({
   iconLeft,
   iconRight,
   disabled = false,
+  className = "",
 }) => {
   return (
     <button
-      className={`outlined-btn ${disabled ? "disabled" : ""}`}
+      className={`outlined-btn ${disabled ? "disabled" : ""} ${className}`}
       onClick={onClick}
       disabled={disabled}
     >

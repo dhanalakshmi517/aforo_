@@ -345,8 +345,11 @@ export const DropdownField: React.FC<DropdownFieldProps> = ({
         }
       };
       
-      const handleScroll = () => {
-        setOpen(false);
+      const handleScroll = (e: Event) => {
+        const target = e.target as Element;
+        if (wrapperRef.current && !wrapperRef.current.contains(target)) {
+          setOpen(false);
+        }
       };
       
       updateMenuPos();
