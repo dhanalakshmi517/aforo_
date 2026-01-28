@@ -3,7 +3,7 @@ import { FormData, ProductType, ConfigurationData } from './types';
 import { authFetch } from '../../../utils/authFetch';
 import { normalizeProductType } from './utils';
 
-const API_BASE_URL = 'http://3.208.93.68:8080/api/products';
+const API_BASE_URL = 'http://product.dev.aforo.space:8080/api/products';
 
 export const fetchProductData = async (
   productId: string,
@@ -64,7 +64,7 @@ export const fetchProductData = async (
           currency: configData.currency,
           ...cleanConfig(configData)
         };
-        
+
         // Add product type specific fields based on the product type
 
         // Type-specific configurations
@@ -82,7 +82,7 @@ export const fetchProductData = async (
               cachingFlag: configData.cachingFlag,
               method: configData.method
             });
-          
+
           case ProductType.FLATFILE:
             return cleanConfig({
               ...baseConfig,
@@ -94,7 +94,7 @@ export const fetchProductData = async (
               fileNamingConvention: configData.fileNamingConvention,
               retentionPolicy: configData.retentionPolicy
             });
-          
+
           case ProductType.SQLRESULT:
             return cleanConfig({
               ...baseConfig,
@@ -107,7 +107,7 @@ export const fetchProductData = async (
               resultSize: configData.resultSize,
               cached: configData.cached
             });
-          
+
           case ProductType.LLMTOKEN:
             return cleanConfig({
               ...baseConfig,
@@ -120,7 +120,7 @@ export const fetchProductData = async (
               computeTier: configData.computeTier,
               promptTemplate: configData.promptTemplate
             });
-          
+
           default:
             return baseConfig;
         }

@@ -417,7 +417,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
 
           localStorage.setItem("productUpdated", Date.now().toString());
         }
-        
+
         setLastSavedData({ ...formData });
         setLastSavedIcon(selectedIcon);
         return newProductId || null;
@@ -537,7 +537,7 @@ export default function NewProduct({ onClose, draftProduct }: NewProductProps): 
         setErrors((prev) => ({ ...prev, productName: "This field is required" }));
         return;
       }
-      
+
       const ok = await saveProduct(true);
       if (!ok) return;
       await gotoStep(1, true); // skipValidation=true since we already validated above

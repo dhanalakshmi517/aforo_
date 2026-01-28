@@ -70,6 +70,17 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
     }
   }, [ratePlanId]);
 
+  // Debug: Log ratePlanId changes
+  React.useEffect(() => {
+    console.log('🆔 Extras component - ratePlanId changed:', {
+      ratePlanId,
+      type: typeof ratePlanId,
+      isNull: ratePlanId === null,
+      isUndefined: ratePlanId === undefined,
+      isFalsy: !ratePlanId
+    });
+  }, [ratePlanId]);
+
   // -------------------------------------------------------
   // Hydrate from sessionStorage (runs alongside backend data loading)
   // -------------------------------------------------------
@@ -853,8 +864,9 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <button
               type="button"
               className={btnClass(saveState.setupFee)}
-              disabled={locked || !ratePlanId || saveState.setupFee === 'saving'}
+              disabled={!ratePlanId || ratePlanId <= 0 || saveState.setupFee === 'saving'}
               onClick={async () => {
+                console.log('🔍 Setup Fee Save clicked - ratePlanId:', ratePlanId);
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, setupFee: 'saving' }));
                 try {
@@ -1006,7 +1018,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <button
               type="button"
               className={btnClass(saveState.discounts)}
-              disabled={locked || !ratePlanId || saveState.discounts === 'saving'}
+              disabled={!ratePlanId || saveState.discounts === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
 
@@ -1211,7 +1223,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <button
               type="button"
               className={btnClass(saveState.freemium)}
-              disabled={locked || !ratePlanId || saveState.freemium === 'saving'}
+              disabled={!ratePlanId || saveState.freemium === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
 
@@ -1332,7 +1344,7 @@ const Extras = forwardRef<ExtrasHandle, ExtrasProps>(({ ratePlanId, draftData, l
             <button
               type="button"
               className={btnClass(saveState.commitment)}
-              disabled={locked || !ratePlanId || saveState.commitment === 'saving'}
+              disabled={!ratePlanId || saveState.commitment === 'saving'}
               onClick={async () => {
                 if (!ratePlanId) return;
                 setSaveState(s => ({ ...s, commitment: 'saving' }));

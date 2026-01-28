@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthHeaders } from '../../utils/auth';
 
-const INGESTION_BASE_URL = 'http://35.173.186.55:8088/api/ingestion';
+const INGESTION_BASE_URL = 'http://ingestion.dev.aforo.space:8088/api/ingestion';
 
 export interface FileIngestResponse {
   success: boolean;

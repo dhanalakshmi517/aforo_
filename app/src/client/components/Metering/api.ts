@@ -59,10 +59,10 @@ export interface CreateMetricResult {
 import { getAuthHeaders, isAuthenticated, logout } from '../../utils/auth';
 
 const METRICS_BASE_URL =
-  (import.meta as any).env?.VITE_METRICS_API_URL || 'http://54.146.189.144:8081/api';
+  (import.meta as any).env?.VITE_METRICS_API_URL || 'http://metering.dev.aforo.space:8092/api';
 
 const PRODUCTS_BASE_URL =
-  (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://3.208.93.68:8080/api';
+  (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://product.dev.aforo.space:8080/api';
 
 /**
  * Handle API response errors and authentication
@@ -181,7 +181,7 @@ export async function createBillableMetric(
     console.log('Create response status:', response.status);
     const data = await handleApiResponse(response);
     console.log('Create success response:', data);
-    
+
     if (data) {
       const id = (data?.metricId ?? data?.id ?? data?.billableMetricId) as
         | number

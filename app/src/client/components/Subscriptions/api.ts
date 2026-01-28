@@ -53,10 +53,10 @@ export interface Subscription {
   [key: string]: any;
 }
 
-const SUBSCRIPTIONS_BASE_URL = 'http://34.228.66.74:8084/api/subscriptions';
-const CUSTOMERS_BASE_URL = 'http://44.201.19.187:8081/v1/api/customers';
-const PRODUCTS_BASE_URL = 'http://3.208.93.68:8080/api/products';
-const RATE_PLANS_URL = 'http://3.208.93.68:8080/api/rateplans';
+const SUBSCRIPTIONS_BASE_URL = 'http://subscription.dev.aforo.space:8084/api/subscriptions';
+const CUSTOMERS_BASE_URL = 'http://org.dev.aforo.space:8081/v1/api/customers';
+const PRODUCTS_BASE_URL = 'http://product.dev.aforo.space:8080/api/products';
+const RATE_PLANS_URL = 'http://product.dev.aforo.space:8080/api/rateplans';
 
 export const getProducts = async (): Promise<Product[]> => {
   try {
@@ -88,16 +88,16 @@ export const createSubscription = async (payload: {
 }): Promise<Subscription> => {
   try {
     console.log('Creating subscription with payload:', JSON.stringify(payload, null, 2));
-    
+
     // Skip validations for drafts
     const isDraft = payload.isDraft !== false; // Default to true if not specified
-    
+
     const requestPayload: any = {
       status: payload.status || 'DRAFT',
       organizationId: localStorage.getItem('organizationId'),
       isDraft
     };
-    
+
     // Only include fields that have values
     if (payload.customerId) requestPayload.customerId = Number(payload.customerId);
     if (payload.productId) requestPayload.productId = Number(payload.productId);
@@ -107,11 +107,11 @@ export const createSubscription = async (payload: {
 
     console.log('Sending request to:', SUBSCRIPTIONS_BASE_URL);
     console.log('Request payload:', JSON.stringify(requestPayload, null, 2));
-    
+
     const response = await axios.post(
       SUBSCRIPTIONS_BASE_URL,
       requestPayload,
-      { 
+      {
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'application/json'
@@ -218,21 +218,21 @@ const log = (...args: any[]) => {
   try {
     // Standard console.log
     console.log(...args);
-    
+
     // Also log to window.console if available (for some browser environments)
     if (typeof window !== 'undefined' && window.console) {
       window.console.log(...args);
     }
-    
+
     // For environments that might override console methods
     const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] ${args.map(arg => 
+    const logMessage = `[${timestamp}] ${args.map(arg =>
       typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
     ).join(' ')}`;
-    
+
     // Log with timestamps
     console.log(logMessage);
-    
+
     // Also log to a global array for debugging
     if (typeof window !== 'undefined') {
       if (!window.__subscriptionLogs) {
@@ -260,7 +260,7 @@ export const createAndConfirmSubscription = async (
   payload: Omit<Parameters<typeof createSubscription>[0], 'isDraft'>
 ): Promise<Subscription> => {
   log('🚀 Starting subscription creation with payload:', JSON.stringify(payload, null, 2));
-  
+
   try {
     // First create the subscription
     log('Step 1/2: Creating subscription...');
@@ -268,7 +268,7 @@ export const createAndConfirmSubscription = async (
       ...payload,
       isDraft: false
     });
-    
+
     log('✅ Step 1/2: Subscription created successfully');
     log('📄 Subscription details:', JSON.stringify({
       id: newSubscription.subscriptionId,
@@ -276,28 +276,28 @@ export const createAndConfirmSubscription = async (
       customerId: newSubscription.customerId,
       productId: newSubscription.productId
     }, null, 2));
-    
+
     if (!newSubscription || !newSubscription.subscriptionId) {
       throw new Error('Invalid subscription response: missing subscriptionId');
     }
-    
+
     // Add a small delay to ensure the subscription is fully processed
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     log('\nStep 2/2: Attempting to confirm subscription...');
     log(`📞 Calling confirm API: POST ${SUBSCRIPTIONS_BASE_URL}/${newSubscription.subscriptionId}/confirm`);
-    
+
     try {
       // Call confirmSubscription with the new subscription ID
       const confirmedSubscription = await confirmSubscription(newSubscription.subscriptionId);
-      
+
       log('✅ Step 2/2: Subscription confirmed successfully!');
       log('📋 Confirmed subscription details:', JSON.stringify({
         id: confirmedSubscription.subscriptionId,
         status: confirmedSubscription.status,
         confirmedAt: new Date().toISOString()
       }, null, 2));
-      
+
       return confirmedSubscription;
     } catch (confirmError: any) {
       log('❌ Confirmation failed:', confirmError);
@@ -314,7 +314,7 @@ export const createAndConfirmSubscription = async (
     // Log the error using our reliable logging function
     log('❌ Error in createAndConfirmSubscription:', error);
     log('❌ Failed payload:', JSON.stringify(payload, null, 2));
-    
+
     // Log detailed error information
     if (error?.response) {
       // The request was made and the server responded with a status code
@@ -331,17 +331,17 @@ export const createAndConfirmSubscription = async (
     } else {
       log('❌ Unknown error occurred:', error);
     }
-    
+
     // Also log the full error stack for debugging
     if (error?.stack) {
       log('🔍 Error stack:', error.stack);
     }
-    
+
     // Check if we can access the logs array
     if (typeof window !== 'undefined' && window.__subscriptionLogs) {
       log('📜 Full log history:', window.__subscriptionLogs);
     }
-    
+
     return handleApiError(error);
   }
 };
@@ -361,6 +361,6 @@ export const Api = {
   deleteSubscription,
   confirmSubscription,
   // draft helpers
-  createSubscriptionDraft: (p: Omit<Subscription,'subscriptionId'>&{isDraft?:boolean})=>createSubscription({ ...p, isDraft:true } as any),
-  updateSubscriptionDraft: (id:number,p:Partial<Subscription>)=>updateSubscription(id,{...p,isDraft:true}),
+  createSubscriptionDraft: (p: Omit<Subscription, 'subscriptionId'> & { isDraft?: boolean }) => createSubscription({ ...p, isDraft: true } as any),
+  updateSubscriptionDraft: (id: number, p: Partial<Subscription>) => updateSubscription(id, { ...p, isDraft: true }),
 };

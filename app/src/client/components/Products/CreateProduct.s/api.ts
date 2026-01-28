@@ -1,6 +1,6 @@
 import { authFetch } from '../../../utils/authFetch';
 
-const BASE_URL = 'http://54.238.204.246:8080/api';
+const BASE_URL = 'http://product.dev.aforo.space:8080/api';
 
 export interface Product {
   id: string;
@@ -15,17 +15,17 @@ export async function checkProductNameExists(productName: string, currentProduct
   if (!productName.trim()) {
     return { exists: false, message: '' };
   }
-  
+
   try {
     const response = await authFetch(`${BASE_URL}/products?productName=${encodeURIComponent(productName)}`);
     const products: Product[] = await response.json();
-    
+
     // Check if any product (other than current one being edited) has this name
     const existingProduct = products.find(
-      product => product.productName.toLowerCase() === productName.toLowerCase() && 
-                product.id !== currentProductId
+      product => product.productName.toLowerCase() === productName.toLowerCase() &&
+        product.id !== currentProductId
     );
-    
+
     return {
       exists: !!existingProduct,
       message: existingProduct ? 'A product with this name already exists' : ''
@@ -71,7 +71,7 @@ export async function createProduct(productData: ProductData): Promise<ProductDa
     if (productData.internalSkuCode) cleanedData.internalSkuCode = productData.internalSkuCode.trim();
     if (productData.productDescription) cleanedData.description = productData.productDescription.trim();
     if ((productData as any).description) cleanedData.description = (productData as any).description.trim();
-    
+
     // Remove empty strings, null or undefined to satisfy backend validation
     Object.keys(cleanedData).forEach(key => {
       const value = cleanedData[key];
@@ -81,7 +81,7 @@ export async function createProduct(productData: ProductData): Promise<ProductDa
     });
 
     console.log('Sending product data:', cleanedData);
-    
+
     const response = await authFetch(`${BASE_URL}/products`, {
       method: 'POST',
       headers: {
@@ -98,7 +98,7 @@ export async function createProduct(productData: ProductData): Promise<ProductDa
       console.error('Failed to parse JSON response:', e);
       throw new Error('Invalid response from server');
     }
-    
+
     if (!response.ok) {
       const errorDetails = {
         status: response.status,
@@ -107,19 +107,19 @@ export async function createProduct(productData: ProductData): Promise<ProductDa
         response: responseData,
         requestData: cleanedData
       };
-      
+
       console.error('API Error Details:', errorDetails);
-      
+
       if (response.status === 400) {
         const errorMessage = responseData.message || 'Invalid product data';
         const validationErrors = responseData.errors || {};
         throw new Error(`Validation Error: ${errorMessage} ${JSON.stringify(validationErrors)}`);
       }
-      
+
       if (response.status === 409) {
         throw new Error('A product with this name already exists.');
       }
-      
+
       throw new Error(responseData.message || `Request failed with status ${response.status}`);
     }
 
@@ -128,7 +128,7 @@ export async function createProduct(productData: ProductData): Promise<ProductDa
       console.error('Unexpected response format - missing id or productId:', responseData);
       throw new Error('Invalid response format from server - missing product identifier');
     }
-    
+
     // Normalize the response to always have an id field
     if (responseData.productId && !responseData.id) {
       responseData.id = responseData.productId;
@@ -141,7 +141,7 @@ export async function createProduct(productData: ProductData): Promise<ProductDa
       stack: error.stack,
       data: productData
     });
-    throw error;             
+    throw error;
   }
 }
 
@@ -167,7 +167,7 @@ export async function updateDraft(productId: string, productData: Partial<Produc
     if (productData.productDescription !== undefined && productData.productDescription !== '') {
       cleanedData.productDescription = productData.productDescription.trim();
     }
-    
+
     // If no fields were provided, no need to make the request
     if (Object.keys(cleanedData).length === 0) {
       console.log('No fields to update');
@@ -175,7 +175,7 @@ export async function updateDraft(productId: string, productData: Partial<Produc
     }
 
     console.log('Updating draft with ID:', productId, 'Data:', cleanedData);
-    
+
     const response = await authFetch(`${BASE_URL}/products/${productId}`, {
       method: 'PATCH',
       headers: {
@@ -193,7 +193,7 @@ export async function updateDraft(productId: string, productData: Partial<Produc
       console.error('Failed to parse JSON response:', e);
       throw new Error('Invalid response from server');
     }
-    
+
     if (!response.ok) {
       const errorDetails = {
         status: response.status,
@@ -202,19 +202,19 @@ export async function updateDraft(productId: string, productData: Partial<Produc
         response: responseData,
         requestData: cleanedData
       };
-      
+
       console.error('API Update Error Details:', errorDetails);
-      
+
       if (response.status === 400) {
         const errorMessage = responseData.message || 'Invalid update data';
         const validationErrors = responseData.errors || {};
         throw new Error(`Update Validation Error: ${errorMessage} ${JSON.stringify(validationErrors)}`);
       }
-      
+
       if (response.status === 404) {
         throw new Error('The product you are trying to update was not found. It may have been deleted.');
       }
-      
+
       throw new Error(responseData.message || `Failed to update product: ${response.status}`);
     }
 
@@ -223,7 +223,7 @@ export async function updateDraft(productId: string, productData: Partial<Produc
       console.error('Unexpected response format - missing id or productId:', responseData);
       throw new Error('Invalid response format from server - missing product identifier');
     }
-    
+
     // Normalize the response to always have an id field
     if (responseData.productId && !responseData.id) {
       responseData.id = responseData.productId;
@@ -249,7 +249,7 @@ export async function saveAsDraft(productData: ProductData, productId?: string):
     if (productData.version) cleanData.version = productData.version.trim();
     if (productData.internalSkuCode) cleanData.internalSkuCode = productData.internalSkuCode.trim();
     if (productData.productDescription) cleanData.productDescription = productData.productDescription.trim();
-    
+
     if (productId) {
       console.log('Updating existing draft with ID:', productId);
       const updatedProduct = await updateDraft(productId, cleanData);

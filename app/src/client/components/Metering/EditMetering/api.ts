@@ -28,8 +28,8 @@ export interface BillableMetricDetails {
 // Allow override via Vite env (keeps consistent with other API helpers)
 // Use same default as other metering APIs
 const METRICS_BASE_URL = (import.meta as any).env?.VITE_METRICS_API_URL ||
-  'http://54.146.189.144:8081/api';
-const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://3.208.93.68:8080/api';
+  'http://metering.dev.aforo.space:8092/api';
+const PRODUCTS_BASE_URL = (import.meta as any).env?.VITE_PRODUCTS_API_URL || 'http://product.dev.aforo.space:8080/api';
 
 export async function getBillableMetricById(
   metricId: string | number,
@@ -78,17 +78,17 @@ export async function updateBillableMetric(
     const startTime = performance.now();
     const res = await fetch(url, requestOptions);
     const responseTime = Math.round(performance.now() - startTime);
-    
+
     const responseText = await res.text();
     let responseData;
-    
+
     try {
       responseData = responseText ? JSON.parse(responseText) : {};
     } catch (e) {
       console.warn('Failed to parse JSON response:', { responseText, error: e });
       responseData = { message: responseText };
     }
-    
+
     if (!res.ok) {
       const errorDetails = {
         status: res.status,
@@ -102,9 +102,9 @@ export async function updateBillableMetric(
           headers: requestOptions.headers
         }
       };
-      
+
       console.error('Update failed with details:', JSON.stringify(errorDetails, null, 2));
-      
+
       // Try to extract a meaningful error message
       let errorMessage = `HTTP ${res.status} ${res.statusText}`;
       if (responseData.message) {
@@ -114,15 +114,15 @@ export async function updateBillableMetric(
       } else if (typeof responseData === 'string') {
         errorMessage += `: ${responseData}`;
       }
-      
+
       throw new Error(errorMessage);
     }
-    
+
     console.log(`Update successful (${responseTime}ms)`, {
       status: res.status,
       response: responseData
     });
-    
+
     return true;
   } catch (error) {
     const errorInfo = {
@@ -139,9 +139,9 @@ export async function updateBillableMetric(
       },
       timestamp: new Date().toISOString()
     };
-    
+
     console.error('Failed to update billable metric:', JSON.stringify(errorInfo, null, 2));
-    
+
     // Re-throw with more context if needed
     if (error instanceof Error) {
       throw error;
@@ -161,10 +161,10 @@ export async function getProducts(): Promise<Product[]> {
     const data = Array.isArray(payload)
       ? payload
       : Array.isArray((payload as any)?.data)
-      ? (payload as any).data
-      : Array.isArray((payload as any)?.content)
-      ? (payload as any).content
-      : [];
+        ? (payload as any).data
+        : Array.isArray((payload as any)?.content)
+          ? (payload as any).content
+          : [];
     return data;
   } catch (error) {
     console.error('Error fetching products:', error);
