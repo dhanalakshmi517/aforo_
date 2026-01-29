@@ -41,7 +41,7 @@ line-height: var(--line-height-body-md);
   color: var(--color-primary-800);
   border:0.2px var(--color-neutral-300);
   font-weight: 500;
-  box-shadow: 0 9px 76px 0 var(--shadow-shadow-1, #EEF1F6), 0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8), 0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
+  box-shadow: 0 9px 70px 0 var(--shadow-shadow-1, #EEF1F6), 0 2.01px 16.976px 0 var(--shadow-shadow-2, #D9DFE8), 0 0.599px 5.054px 0 var(--shadow-shadow-2, #D9DFE8);
 }
 
 .it-seg:focus {

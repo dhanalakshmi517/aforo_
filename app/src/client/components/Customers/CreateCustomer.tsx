@@ -505,6 +505,9 @@ const CreateCustomer: React.FC<CreateCustomerProps> = ({
           return;
         }
       }
+      
+      // Call API when navigating via sidebar to Review & Confirm
+      await handleSaveDraft();
     }
 
     if (index === 1) setAccountErrors({});

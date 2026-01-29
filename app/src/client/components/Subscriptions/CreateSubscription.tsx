@@ -375,13 +375,17 @@ export default function CreateSubscription({
     // prevent clicking locked review
     if (index === 1 && isReviewLocked) return;
 
-    // when going to review, validate details
+    // when going to review, validate details and save (call API)
     if (index === 1) {
       const ok = validateStep(0);
       if (!ok) {
         gotoStep(0);
         return;
       }
+      
+      // Call API when navigating via sidebar
+      const saved = await saveBeforeNext();
+      if (!saved) return;
     }
 
     gotoStep(index);
