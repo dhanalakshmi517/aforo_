@@ -65,14 +65,17 @@ const CreateUsageMetric = React.lazy(createUsageMetricLoader) as React.Component
 
 const editMetricsLoader = () => import('./components/Metering/EditMetering/EditMetrics');
 const EditMetrics = React.lazy(editMetricsLoader) as React.ComponentType<any>;
+
 const subscriptionsLoader = () => import('./components/Subscriptions/Subscriptions');
 const Subscriptions = React.lazy(subscriptionsLoader) as React.ComponentType<any>;
 const createSubscriptionLoader = () => import('./components/Subscriptions/CreateSubscription');
 const CreateSubscription = React.lazy(createSubscriptionLoader) as React.ComponentType<any>;
 const editSubscriptionLoader = () => import('./components/Subscriptions/EditSubscriptions/EditSubscription');
 const EditSubscription = React.lazy(editSubscriptionLoader) as React.ComponentType<any>;
-const dataIngestionLoader = () => import('./components/DataIngestion/DataIngestionPage');
-const DataIngestionPage = React.lazy(dataIngestionLoader) as React.ComponentType<any>;
+
+const dataIngestionLoader = () => import('./components/New DataIngestion/DataIngestion');
+const DataIngestion = React.lazy(dataIngestionLoader) as React.ComponentType<any>;
+
 const integrationsLoader = () => import('./components/Integrations/Integrations');
 const Integrations = React.lazy(integrationsLoader) as React.ComponentType<any>;
 
@@ -1225,7 +1228,7 @@ export default function App() {
                       />
                       <main className="flex-1 px-6 py-6 " style={{ marginLeft: showSidebar ? '15rem' : '0',backgroundColor: "#FBFDFF", }}>
                         <Suspense fallback={RouteSpinner}>
-                          <DataIngestionPage />
+                          <DataIngestion />
                         </Suspense>
                       </main>
                     </div>

@@ -496,7 +496,7 @@ const Customers: React.FC<CustomersProps> = ({ showNewCustomerForm, setShowNewCu
       key: "customerName",
       title: "Customer",
       render: (c) => (
-        <div className="cell-stack">
+        <div className="cell-stack" style={{ paddingLeft: '16px' }}>
           <div className="person-name" title={c.customerName || "-"}>{c.customerName || "-"}</div>
           <div className="person-email">{c.primaryEmail || "-"}</div>
         </div>

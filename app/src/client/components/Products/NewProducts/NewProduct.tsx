@@ -220,10 +220,10 @@ export default function NewProduct({
     if (activeDraft && !lastSavedIcon && selectedIcon) setLastSavedIcon(selectedIcon);
   }, [activeDraft, lastSavedIcon, selectedIcon]);
 
-  // lock logic - Configuration is locked until required fields in General are filled
+  // lock logic - Configuration is locked until required fields in General are filled and valid
   const hasRequiredFieldsFilled = React.useMemo(() => {
-    return Boolean(formData.productName.trim());
-  }, [formData.productName]);
+    return Boolean(formData.productName.trim() && !errors.productName);
+  }, [formData.productName, errors.productName]);
 
   const isConfigurationLocked = !hasRequiredFieldsFilled;
 
@@ -374,7 +374,12 @@ export default function NewProduct({
       else if (error?.response?.data?.error) errorMessage = error.response.data.error;
       else if (error instanceof Error) errorMessage = error.message;
 
-      setErrors((prev) => ({ ...prev, form: errorMessage }));
+      // Check if this is a duplicate product error and set it as productName field error
+      if (errorMessage.toLowerCase().includes("already exists") || errorMessage.toLowerCase().includes("duplicate")) {
+        setErrors((prev) => ({ ...prev, productName: errorMessage }));
+      } else {
+        setErrors((prev) => ({ ...prev, form: errorMessage }));
+      }
       return false;
     } finally {
       setIsSaving(false);

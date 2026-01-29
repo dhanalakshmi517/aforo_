@@ -813,6 +813,7 @@ export default function Products({ showNewProductForm, setShowNewProductForm }: 
                   size={48}
                   padding={6}
                   bgOpacity={0.08}
+                  borderOpacity={0.16}
                 />
               ) : (
                 <ProductIconTile
